@@ -82,11 +82,11 @@ const ConversionGauge = memo(({
       </div>
       <div className="text-center space-y-0.5">
         <div className="flex items-center justify-center gap-1.5">
-          <Icon className="h-3.5 w-3.5 text-white/60" />
+          <Icon className="h-3.5 w-3.5 text-white" />
           <span className="text-xs font-medium text-white">{label}</span>
         </div>
-        <p className="text-[10px] text-white/40 leading-tight max-w-[120px]">{subtitle}</p>
-        <p className="text-[11px] text-white/50 tabular-nums">{value} av {total}</p>
+        <p className="text-[10px] text-white leading-tight max-w-[120px]">{subtitle}</p>
+        <p className="text-[11px] text-white tabular-nums">{value} av {total}</p>
       </div>
     </div>
   );
@@ -180,7 +180,7 @@ const EmployerAnalytics = memo(() => {
         </div>
         <div>
           <h2 className="text-xl font-semibold text-white tracking-tight">Rekryteringsanalys</h2>
-          <p className="text-sm text-white/60">Insikter för alla dina annonser</p>
+          <p className="text-sm text-white">Insikter för alla dina annonser</p>
         </div>
       </div>
 
@@ -188,10 +188,10 @@ const EmployerAnalytics = memo(() => {
       <div className="grid grid-cols-3 gap-2">
         {statCards.map((stat) => (
           <Card key={stat.label} className="bg-white/5 border-white/10">
-            <CardContent className="p-3">
+            <CardContent className="p-3 flex flex-col items-center justify-center text-center">
               <div className="flex items-center gap-1.5 mb-1">
-                <stat.icon className="h-3.5 w-3.5 text-white/60" />
-                <span className="text-[11px] text-white/60">{stat.label}</span>
+                <stat.icon className="h-3.5 w-3.5 text-white" />
+                <span className="text-[11px] text-white">{stat.label}</span>
               </div>
               <span className="text-2xl font-bold text-white tracking-tight tabular-nums">
                 {stat.value.toLocaleString('sv-SE')}
@@ -242,14 +242,14 @@ const EmployerAnalytics = memo(() => {
                 </colgroup>
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th className="text-left text-white/60 font-medium text-[11px] py-2 pr-2">Annons</th>
-                    <th className="text-right text-white/60 font-medium text-[11px] py-2 px-1">Visn.</th>
-                    <th className="text-right text-white/60 font-medium text-[11px] py-2 px-1">Ansök.</th>
-                    <th className="text-right text-white/60 font-medium text-[11px] py-2 px-1 hidden sm:table-cell">Interv.</th>
-                    <th className="text-right text-white/60 font-medium text-[11px] py-2 px-1 whitespace-nowrap">
+                    <th className="text-left text-white font-medium text-[11px] py-2 pr-2">Annons</th>
+                    <th className="text-right text-white font-medium text-[11px] py-2 px-1">Visn.</th>
+                    <th className="text-right text-white font-medium text-[11px] py-2 px-1">Ansök.</th>
+                    <th className="text-right text-white font-medium text-[11px] py-2 px-1 hidden sm:table-cell">Interv.</th>
+                    <th className="text-right text-white font-medium text-[11px] py-2 px-1 whitespace-nowrap">
                       <span className="hidden sm:inline">Annons</span>konv.
                     </th>
-                    <th className="text-right text-white/60 font-medium text-[11px] py-2 pl-1 whitespace-nowrap">Urval</th>
+                    <th className="text-right text-white font-medium text-[11px] py-2 pl-1 whitespace-nowrap">Urval</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -268,11 +268,11 @@ const EmployerAnalytics = memo(() => {
                             <span className="text-white truncate text-[13px]">{job.title}</span>
                           </div>
                         </td>
-                        <td className="text-right text-white/50 py-2.5 px-1 tabular-nums text-[13px]">{v}</td>
-                        <td className="text-right text-white/50 py-2.5 px-1 tabular-nums text-[13px]">{a}</td>
-                        <td className="text-right text-white/50 py-2.5 px-1 tabular-nums text-[13px] hidden sm:table-cell">{i}</td>
-                        <td className="text-right text-white/50 py-2.5 px-1 tabular-nums text-[13px]">{adConv}</td>
-                        <td className="text-right text-white/50 py-2.5 pl-1 tabular-nums text-[13px]">{selConv}</td>
+                        <td className="text-right text-white py-2.5 px-1 tabular-nums text-[13px]">{v}</td>
+                        <td className="text-right text-white py-2.5 px-1 tabular-nums text-[13px]">{a}</td>
+                        <td className="text-right text-white py-2.5 px-1 tabular-nums text-[13px] hidden sm:table-cell">{i}</td>
+                        <td className="text-right text-white py-2.5 px-1 tabular-nums text-[13px]">{adConv}</td>
+                        <td className="text-right text-white py-2.5 pl-1 tabular-nums text-[13px]">{selConv}</td>
                       </tr>
                     );
                   })}
