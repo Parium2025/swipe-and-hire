@@ -527,17 +527,17 @@ const EmployerAnalytics = memo(() => {
 
       {/* ─── NEW: Best day + Time to first application ─── */}
       {(bestDay || avgTtfa !== null) && (
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {bestDay && (
-            <Card className="flex-1 bg-white/5 border-white/10 overflow-hidden">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="h-4 w-4 text-white" />
-                  <span className="text-xs font-medium text-white">Bästa publiceringsdag</span>
+            <Card className="bg-white/5 border-white/10 overflow-hidden">
+              <CardContent className="p-4 flex flex-col h-full">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Calendar className="h-3.5 w-3.5 text-white shrink-0" />
+                  <span className="text-[11px] font-medium text-white truncate">Bästa publiceringsdag</span>
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Info className="h-3.5 w-3.5 text-white cursor-help" />
+                        <Info className="h-3.5 w-3.5 text-white cursor-help shrink-0" />
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-[220px] text-xs">
                         Veckodagen med flest annonsvisningar under vald tidsperiod. Hjälper dig tajma publiceringen av nya annonser.
@@ -551,15 +551,15 @@ const EmployerAnalytics = memo(() => {
             </Card>
           )}
           {avgTtfa !== null && (
-            <Card className="flex-1 bg-white/5 border-white/10 overflow-hidden">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="h-4 w-4 text-white" />
-                  <span className="text-xs font-medium text-white">Tid till första ansökan</span>
+            <Card className="bg-white/5 border-white/10 overflow-hidden">
+              <CardContent className="p-4 flex flex-col h-full">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Clock className="h-3.5 w-3.5 text-white shrink-0" />
+                  <span className="text-[11px] font-medium text-white truncate">Tid till första ansökan</span>
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Info className="h-3.5 w-3.5 text-white cursor-help" />
+                        <Info className="h-3.5 w-3.5 text-white cursor-help shrink-0" />
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-[220px] text-xs">
                         Genomsnittlig tid från att en annons publiceras tills den får sin första ansökan. Baserat på annonser med minst en ansökan.
