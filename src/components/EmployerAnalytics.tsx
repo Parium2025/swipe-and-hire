@@ -78,11 +78,12 @@ const DAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag'
 const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
   current: number; previous: number; label: string; icon: React.ElementType; daysLabel: string;
 }) => {
-  const isNewData = previous === 0 && current > 0;
-  const diff = previous > 0 ? Math.round(((current - previous) / previous) * 100) : 0;
-  const isUp = !isNewData && diff > 0;
+  const diff = previous > 0
+    ? Math.round(((current - previous) / previous) * 100)
+    : (current > 0 ? current * 100 : 0);
+  const isUp = diff > 0;
   const isDown = diff < 0;
-  const isFlat = !isNewData && diff === 0;
+  const isFlat = diff === 0;
 
   return (
     <div className="flex-1 min-w-0 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3 text-center">
