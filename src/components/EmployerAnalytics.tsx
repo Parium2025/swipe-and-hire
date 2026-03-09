@@ -269,6 +269,56 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
 });
 DailySparkline.displayName = 'DailySparkline';
 
+/* ─── TTFA expandable list ─── */
+const TtfaList = memo(({ ttfa, initialCount, step }: { ttfa: TimeToFirstApp[]; initialCount: number; step: number }) => {
+  const [visibleCount, setVisibleCount] = useState(initialCount);
+  const maxSec = Math.max(...ttfa.map(x => x.seconds_to_first), 1);
+  const visible = ttfa.slice(0, visibleCount);
+  const hasMore = visibleCount < ttfa.length;
+
+  return (
+    <Card className="bg-white/5 border-white/10 overflow-hidden">
+      <CardContent className="p-5">
+        <h3 className="text-sm font-medium text-white mb-3">Tid till första ansökan per annons</h3>
+        <div className="space-y-2">
+          {visible.map((t, i) => {
+            const barPct = Math.min((t.seconds_to_first / maxSec) * 100, 100);
+            return (
+              <motion.div
+                key={t.job_id}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: Math.min(i, 5) * 0.05 }}
+                className="space-y-1"
+              >
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-[12px] text-white truncate flex-1">{t.title}</span>
+                  <span className="text-[12px] font-semibold text-white tabular-nums shrink-0">{formatDuration(t.seconds_to_first)}</span>
+                </div>
+                <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-secondary/80 to-secondary/40 rounded-full transition-all duration-700"
+                    style={{ width: `${barPct}%` }}
+                  />
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+        {hasMore && (
+          <button
+            onClick={() => setVisibleCount(prev => Math.min(prev + step, ttfa.length))}
+            className="mt-3 w-full py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+          >
+            Visa fler ({ttfa.length - visibleCount} kvar)
+          </button>
+        )}
+      </CardContent>
+    </Card>
+  );
+});
+TtfaList.displayName = 'TtfaList';
+
 /* ─── Format time duration ─── */
 const formatDuration = (seconds: number): string => {
   if (seconds < 60) return `${seconds}s`;
@@ -575,39 +625,9 @@ const EmployerAnalytics = memo(() => {
         </div>
       )}
 
-      {/* ─── NEW: Per-job time to first application ─── */}
+      {/* ─── Per-job time to first application ─── */}
       {ttfa.length > 0 && (
-        <Card className="bg-white/5 border-white/10 overflow-hidden">
-          <CardContent className="p-5">
-            <h3 className="text-sm font-medium text-white mb-3">Tid till första ansökan per annons</h3>
-            <div className="space-y-2">
-              {ttfa.slice(0, 5).map((t, i) => {
-                const maxSec = Math.max(...ttfa.map(x => x.seconds_to_first), 1);
-                const barPct = Math.min((t.seconds_to_first / maxSec) * 100, 100);
-                return (
-                  <motion.div
-                    key={t.job_id}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="space-y-1"
-                  >
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-[12px] text-white truncate flex-1">{t.title}</span>
-                      <span className="text-[12px] font-semibold text-white tabular-nums shrink-0">{formatDuration(t.seconds_to_first)}</span>
-                    </div>
-                    <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-secondary/80 to-secondary/40 rounded-full transition-all duration-700"
-                        style={{ width: `${barPct}%` }}
-                      />
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        <TtfaList ttfa={ttfa} initialCount={5} step={10} />
       )}
 
       {/* Conversion gauges */}
