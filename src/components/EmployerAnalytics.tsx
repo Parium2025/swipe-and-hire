@@ -390,7 +390,7 @@ const EmployerAnalytics = memo(() => {
     gcTime: 15 * 60 * 1000,
   });
 
-  const analytics = rawData?.jobs?.map((job: any, index: number) => {
+  const analytics = useMemo(() => rawData?.jobs?.map((job: any, index: number) => {
     const views = Number(job.views_count);
     const applications = Number(job.applications_count);
     const interviews = Number(job.interviews_count);
@@ -404,7 +404,7 @@ const EmployerAnalytics = memo(() => {
       created_at: typeof job.created_at === 'string' ? job.created_at : new Date(0).toISOString(),
       is_active: Boolean(job.is_active),
     } as JobAnalytics;
-  }) || [];
+  }) || [], [rawData]);
 
   const deviceBreakdown = (rawData?.device_breakdown || []) as DeviceBreakdown[];
   const dailyViews = (rawData?.daily_views || []) as DailyView[];
