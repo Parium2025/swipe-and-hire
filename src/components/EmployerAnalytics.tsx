@@ -75,8 +75,8 @@ const DEVICE_CONFIG: Record<string, { icon: typeof Smartphone; label: string; co
 const DAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
 
 /* ─── Trend pill ─── */
-const TrendPill = memo(({ current, previous, label, icon: Icon }: {
-  current: number; previous: number; label: string; icon: React.ElementType;
+const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
+  current: number; previous: number; label: string; icon: React.ElementType; daysLabel: string;
 }) => {
   const diff = previous > 0 ? Math.round(((current - previous) / previous) * 100) : (current > 0 ? 100 : 0);
   const isUp = diff > 0;
@@ -84,17 +84,19 @@ const TrendPill = memo(({ current, previous, label, icon: Icon }: {
   const isFlat = diff === 0;
 
   return (
-    <div className="flex-1 min-w-0 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3">
-      <div className="flex items-center gap-1.5 mb-1.5">
+    <div className="flex-1 min-w-0 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3 text-center">
+      <div className="flex items-center justify-center gap-1.5 mb-1.5">
         <Icon className="h-3.5 w-3.5 text-white shrink-0" />
         <span className="text-[11px] font-medium text-white truncate">{label}</span>
       </div>
-      <div className="flex items-baseline gap-1.5 flex-nowrap min-w-0">
-        <span className="text-lg font-bold text-white tabular-nums shrink-0">{current}</span>
-        <span className="text-[9px] text-white truncate shrink min-w-0">vs förra: {previous}</span>
+      <div className="flex items-baseline justify-center gap-1 flex-nowrap min-w-0">
+        <span className="text-lg font-bold text-white tabular-nums">{current}</span>
+        <span className="text-[9px] text-white">vs</span>
+        <span className="text-lg font-bold text-white tabular-nums">{previous}</span>
       </div>
+      <p className="text-[9px] text-white mt-0.5">{daysLabel}</p>
       {(previous > 0 || current > 0) && (
-        <span className={`text-[10px] font-medium flex items-center gap-0.5 mt-1 ${
+        <span className={`text-[10px] font-medium inline-flex items-center gap-0.5 mt-1 ${
           isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
         }`}>
           {isUp ? <TrendingUp className="h-2.5 w-2.5" /> : isDown ? <TrendingDown className="h-2.5 w-2.5" /> : <Minus className="h-2.5 w-2.5" />}
@@ -503,9 +505,16 @@ const EmployerAnalytics = memo(() => {
       {/* ─── NEW: Trend comparison ─── */}
       {trends && selectedDays !== null && (
         <div className="flex gap-2">
-          <TrendPill icon={Eye} label="Visningar" current={trends.current_views} previous={trends.prev_views} />
-          <TrendPill icon={Users} label="Ansökningar" current={trends.current_applications} previous={trends.prev_applications} />
-          <TrendPill icon={CalendarCheck} label="Intervjuer" current={trends.current_interviews} previous={trends.prev_interviews} />
+          {(() => {
+            const dl = `${selectedDays} dagar sedan`;
+            return (
+              <>
+                <TrendPill icon={Eye} label="Visningar" current={trends.current_views} previous={trends.prev_views} daysLabel={dl} />
+                <TrendPill icon={Users} label="Ansökningar" current={trends.current_applications} previous={trends.prev_applications} daysLabel={dl} />
+                <TrendPill icon={CalendarCheck} label="Intervjuer" current={trends.current_interviews} previous={trends.prev_interviews} daysLabel={dl} />
+              </>
+            );
+          })()}
         </div>
       )}
 
