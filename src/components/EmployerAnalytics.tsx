@@ -575,39 +575,14 @@ const EmployerAnalytics = memo(() => {
         </div>
       )}
 
-      {/* ─── NEW: Per-job time to first application ─── */}
-      {ttfa.length > 0 && (
-        <Card className="bg-white/5 border-white/10 overflow-hidden">
-          <CardContent className="p-5">
-            <h3 className="text-sm font-medium text-white mb-3">Tid till första ansökan per annons</h3>
-            <div className="space-y-2">
-              {ttfa.slice(0, 5).map((t, i) => {
-                const maxSec = Math.max(...ttfa.map(x => x.seconds_to_first), 1);
-                const barPct = Math.min((t.seconds_to_first / maxSec) * 100, 100);
-                return (
-                  <motion.div
-                    key={t.job_id}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="space-y-1"
-                  >
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-[12px] text-white truncate flex-1">{t.title}</span>
-                      <span className="text-[12px] font-semibold text-white tabular-nums shrink-0">{formatDuration(t.seconds_to_first)}</span>
-                    </div>
-                    <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-secondary/80 to-secondary/40 rounded-full transition-all duration-700"
-                        style={{ width: `${barPct}%` }}
-                      />
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+      {/* ─── Per-job time to first application ─── */}
+      {ttfa.length > 0 && (() => {
+        const INITIAL_COUNT = 5;
+        const STEP = 10;
+        return (
+          <TtfaList ttfa={ttfa} initialCount={INITIAL_COUNT} step={STEP} />
+        );
+      })()}
       )}
 
       {/* Conversion gauges */}
