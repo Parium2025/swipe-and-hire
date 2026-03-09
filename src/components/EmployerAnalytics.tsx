@@ -2,7 +2,8 @@ import { memo, useMemo, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
-import { BarChart3, Target, Filter, Smartphone, Monitor, Tablet, HelpCircle, TrendingUp, TrendingDown, Minus, Eye, Users, CalendarCheck, Clock, Calendar } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { BarChart3, Target, Filter, Smartphone, Monitor, Tablet, HelpCircle, TrendingUp, TrendingDown, Minus, Eye, Users, CalendarCheck, Clock, Calendar, Info } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -533,6 +534,16 @@ const EmployerAnalytics = memo(() => {
                 <div className="flex items-center gap-2 mb-2">
                   <Calendar className="h-4 w-4 text-white" />
                   <span className="text-xs font-medium text-white">Bästa publiceringsdag</span>
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-3 w-3 text-white/40 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[220px] text-xs">
+                        Veckodagen med flest annonsvisningar under vald tidsperiod. Hjälper dig tajma publiceringen av nya annonser.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <p className="text-xl font-bold text-white">{DAY_NAMES[bestDay.day_of_week] || 'Okänd'}</p>
                 <p className="text-[11px] text-white mt-0.5">{bestDay.views} visningar på den dagen</p>
@@ -545,6 +556,16 @@ const EmployerAnalytics = memo(() => {
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="h-4 w-4 text-white" />
                   <span className="text-xs font-medium text-white">Tid till första ansökan</span>
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-3 w-3 text-white/40 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[220px] text-xs">
+                        Genomsnittlig tid från att en annons publiceras tills den får sin första ansökan. Baserat på annonser med minst en ansökan.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <p className="text-xl font-bold text-white">{formatDuration(avgTtfa)}</p>
                 <p className="text-[11px] text-white mt-0.5">genomsnitt ({ttfa.length} annonser)</p>
