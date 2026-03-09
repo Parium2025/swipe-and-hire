@@ -2,7 +2,7 @@ import { memo, useMemo, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
-import { BarChart3, Target, Filter, Smartphone, Monitor, Tablet, HelpCircle, TrendingUp, TrendingDown, Minus, Eye, Users, CalendarCheck } from 'lucide-react';
+import { BarChart3, Target, Filter, Smartphone, Monitor, Tablet, HelpCircle, TrendingUp, TrendingDown, Minus, Eye, Users, CalendarCheck, Clock, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -26,10 +26,35 @@ interface DailyView {
   count: number;
 }
 
+interface TrendData {
+  current_views: number;
+  prev_views: number;
+  current_applications: number;
+  prev_applications: number;
+  current_interviews: number;
+  prev_interviews: number;
+}
+
+interface BestDay {
+  day_of_week: number;
+  views: number;
+}
+
+interface TimeToFirstApp {
+  job_id: string;
+  title: string;
+  published_at: string;
+  first_application_at: string;
+  seconds_to_first: number;
+}
+
 interface AnalyticsData {
   jobs: JobAnalytics[];
   device_breakdown: DeviceBreakdown[];
   daily_views: DailyView[];
+  trends: TrendData | null;
+  best_day: BestDay | null;
+  time_to_first_application: TimeToFirstApp[];
 }
 
 const TIME_FILTERS = [
@@ -46,6 +71,40 @@ const DEVICE_CONFIG: Record<string, { icon: typeof Smartphone; label: string; co
   tablet: { icon: Tablet, label: 'Surfplatta', color: 'hsl(150 60% 50%)' },
   unknown: { icon: HelpCircle, label: 'Okänd', color: 'hsl(0 0% 50%)' },
 };
+
+const DAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
+
+/* ─── Trend pill ─── */
+const TrendPill = memo(({ current, previous, label, icon: Icon }: {
+  current: number; previous: number; label: string; icon: React.ElementType;
+}) => {
+  const diff = previous > 0 ? Math.round(((current - previous) / previous) * 100) : (current > 0 ? 100 : 0);
+  const isUp = diff > 0;
+  const isDown = diff < 0;
+  const isFlat = diff === 0;
+
+  return (
+    <div className="flex-1 rounded-xl bg-white/[0.04] border border-white/[0.06] p-4">
+      <div className="flex items-center gap-2 mb-2">
+        <Icon className="h-4 w-4 text-white" />
+        <span className="text-xs font-medium text-white">{label}</span>
+      </div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-2xl font-bold text-white tabular-nums">{current}</span>
+        {previous > 0 || current > 0 ? (
+          <span className={`text-xs font-medium flex items-center gap-0.5 ${
+            isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
+          }`}>
+            {isUp ? <TrendingUp className="h-3 w-3" /> : isDown ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+            {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
+          </span>
+        ) : null}
+      </div>
+      <p className="text-[10px] text-white mt-1">vs förra perioden: {previous}</p>
+    </div>
+  );
+});
+TrendPill.displayName = 'TrendPill';
 
 /* ─── Circular gauge ─── */
 const ConversionGauge = memo(({ label, subtitle, value, total, icon: Icon }: {
@@ -148,7 +207,7 @@ const DeviceDonut = memo(({ data }: { data: DeviceBreakdown[] }) => {
               <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: seg.config.color }} />
               <Icon className="h-3.5 w-3.5 text-white" />
               <span className="text-[12px] text-white font-medium">{Math.round(seg.pct * 100)}% {seg.config.label}</span>
-              <span className="text-[11px] text-white/70 tabular-nums">({seg.count})</span>
+              <span className="text-[11px] text-white tabular-nums">({seg.count})</span>
             </div>
           );
         })}
@@ -205,6 +264,20 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
 });
 DailySparkline.displayName = 'DailySparkline';
 
+/* ─── Format time duration ─── */
+const formatDuration = (seconds: number): string => {
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${Math.round(seconds / 60)}min`;
+  if (seconds < 86400) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.round((seconds % 3600) / 60);
+    return m > 0 ? `${h}h ${m}min` : `${h}h`;
+  }
+  const d = Math.floor(seconds / 86400);
+  const h = Math.round((seconds % 86400) / 3600);
+  return h > 0 ? `${d}d ${h}h` : `${d}d`;
+};
+
 /* ─── Per-job card ─── */
 const JobAnalyticsCard = memo(({ job, rank }: { job: JobAnalytics; rank: number }) => {
   const v = job.views_count;
@@ -214,7 +287,7 @@ const JobAnalyticsCard = memo(({ job, rank }: { job: JobAnalytics; rank: number 
   const selConv = a > 0 ? Math.round((iv / a) * 100) : null;
 
   const getPerformance = () => {
-    if (v === 0 && a === 0) return { label: 'Ingen data', icon: Minus, color: 'text-white/50' };
+    if (v === 0 && a === 0) return { label: 'Ingen data', icon: Minus, color: 'text-white' };
     if (v >= 3 && a === 0) return { label: 'Behöver justeras', icon: TrendingDown, color: 'text-amber-400' };
     if (a > 0 && adConv !== null && adConv >= 30) return { label: 'Stark konvertering', icon: TrendingUp, color: 'text-emerald-400' };
     if (a > 0) return { label: 'Aktiv', icon: TrendingUp, color: 'text-white' };
@@ -231,7 +304,6 @@ const JobAnalyticsCard = memo(({ job, rank }: { job: JobAnalytics; rank: number 
       transition={{ delay: rank * 0.04, duration: 0.3 }}
       className="rounded-xl bg-white/[0.04] border border-white/[0.06] p-4 hover:bg-white/[0.07] transition-colors"
     >
-      {/* Title row */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-0.5">
@@ -251,7 +323,6 @@ const JobAnalyticsCard = memo(({ job, rank }: { job: JobAnalytics; rank: number 
         )}
       </div>
 
-      {/* Stats row */}
       <div className="flex gap-1">
         <div className="flex-1 rounded-lg bg-white/[0.04] px-3 py-2 text-center">
           <div className="flex items-center justify-center gap-1 mb-0.5">
@@ -276,7 +347,6 @@ const JobAnalyticsCard = memo(({ job, rank }: { job: JobAnalytics; rank: number 
         </div>
       </div>
 
-      {/* Conversion bar */}
       {v > 0 && (
         <div className="mt-3 space-y-1">
           <div className="flex justify-between text-[10px]">
@@ -334,6 +404,9 @@ const EmployerAnalytics = memo(() => {
 
   const deviceBreakdown = (rawData?.device_breakdown || []) as DeviceBreakdown[];
   const dailyViews = (rawData?.daily_views || []) as DailyView[];
+  const trends = rawData?.trends as TrendData | null;
+  const bestDay = rawData?.best_day as BestDay | null;
+  const ttfa = (rawData?.time_to_first_application || []) as TimeToFirstApp[];
 
   const totals = useMemo(() => {
     if (!analytics.length) return { views: 0, applications: 0, interviews: 0 };
@@ -365,6 +438,13 @@ const EmployerAnalytics = memo(() => {
     }
     return tips.slice(0, 2);
   }, [sortedJobs]);
+
+  // Average time to first application
+  const avgTtfa = useMemo(() => {
+    if (!ttfa.length) return null;
+    const total = ttfa.reduce((s, t) => s + t.seconds_to_first, 0);
+    return Math.round(total / ttfa.length);
+  }, [ttfa]);
 
   const [show, setShow] = useState(false);
   useEffect(() => {
@@ -419,6 +499,80 @@ const EmployerAnalytics = memo(() => {
           </button>
         ))}
       </div>
+
+      {/* ─── NEW: Trend comparison ─── */}
+      {trends && selectedDays !== null && (
+        <div className="flex gap-2">
+          <TrendPill icon={Eye} label="Visningar" current={trends.current_views} previous={trends.prev_views} />
+          <TrendPill icon={Users} label="Ansökningar" current={trends.current_applications} previous={trends.prev_applications} />
+          <TrendPill icon={CalendarCheck} label="Intervjuer" current={trends.current_interviews} previous={trends.prev_interviews} />
+        </div>
+      )}
+
+      {/* ─── NEW: Best day + Time to first application ─── */}
+      {(bestDay || avgTtfa !== null) && (
+        <div className="flex gap-2">
+          {bestDay && (
+            <Card className="flex-1 bg-white/5 border-white/10 overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Calendar className="h-4 w-4 text-white" />
+                  <span className="text-xs font-medium text-white">Bästa publiceringsdag</span>
+                </div>
+                <p className="text-xl font-bold text-white">{DAY_NAMES[bestDay.day_of_week] || 'Okänd'}</p>
+                <p className="text-[11px] text-white mt-0.5">{bestDay.views} visningar på den dagen</p>
+              </CardContent>
+            </Card>
+          )}
+          {avgTtfa !== null && (
+            <Card className="flex-1 bg-white/5 border-white/10 overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="h-4 w-4 text-white" />
+                  <span className="text-xs font-medium text-white">Tid till första ansökan</span>
+                </div>
+                <p className="text-xl font-bold text-white">{formatDuration(avgTtfa)}</p>
+                <p className="text-[11px] text-white mt-0.5">genomsnitt ({ttfa.length} annonser)</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* ─── NEW: Per-job time to first application ─── */}
+      {ttfa.length > 0 && (
+        <Card className="bg-white/5 border-white/10 overflow-hidden">
+          <CardContent className="p-5">
+            <h3 className="text-sm font-medium text-white mb-3">Tid till första ansökan per annons</h3>
+            <div className="space-y-2">
+              {ttfa.slice(0, 5).map((t, i) => {
+                const maxSec = Math.max(...ttfa.map(x => x.seconds_to_first), 1);
+                const barPct = Math.min((t.seconds_to_first / maxSec) * 100, 100);
+                return (
+                  <motion.div
+                    key={t.job_id}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="space-y-1"
+                  >
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-[12px] text-white truncate flex-1">{t.title}</span>
+                      <span className="text-[12px] font-semibold text-white tabular-nums shrink-0">{formatDuration(t.seconds_to_first)}</span>
+                    </div>
+                    <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-secondary/80 to-secondary/40 rounded-full transition-all duration-700"
+                        style={{ width: `${barPct}%` }}
+                      />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Conversion gauges */}
       <Card className="bg-white/5 border-white/10 overflow-hidden">
