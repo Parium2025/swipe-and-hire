@@ -126,11 +126,11 @@ const ConversionGauge = memo(({ label, subtitle, value, total, icon: Icon }: {
       <div className="relative w-24 h-24">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 96 96">
           <circle cx="48" cy="48" r="40" fill="none" stroke="white" strokeOpacity="0.08" strokeWidth="6" />
-          <circle cx="48" cy="48" r="40" fill="none" stroke="url(#gaugeGrad)" strokeWidth="6"
+          <circle cx="48" cy="48" r="40" fill="none" stroke={`url(#gaugeGrad-${label.replace(/\s/g, '')})`} strokeWidth="6"
             strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset}
             className="transition-all duration-1000 ease-out" />
           <defs>
-            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id={`gaugeGrad-${label.replace(/\s/g, '')}`} x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="hsl(var(--secondary))" stopOpacity="0.9" />
               <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.4" />
             </linearGradient>
