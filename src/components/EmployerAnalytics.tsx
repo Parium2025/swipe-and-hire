@@ -98,10 +98,16 @@ const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
       <p className="text-[9px] text-white mt-0.5">{daysLabel}</p>
       {(previous > 0 || current > 0) && (
         <span className={`text-[10px] font-medium inline-flex items-center gap-0.5 mt-1 ${
-          isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
+          isNewData ? 'text-emerald-400' : isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
         }`}>
-          {isUp ? <TrendingUp className="h-2.5 w-2.5" /> : isDown ? <TrendingDown className="h-2.5 w-2.5" /> : <Minus className="h-2.5 w-2.5" />}
-          {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
+          {isNewData ? (
+            <><TrendingUp className="h-2.5 w-2.5" /> Ny</>
+          ) : (
+            <>
+              {isUp ? <TrendingUp className="h-2.5 w-2.5" /> : isDown ? <TrendingDown className="h-2.5 w-2.5" /> : <Minus className="h-2.5 w-2.5" />}
+              {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
+            </>
+          )}
         </span>
       )}
     </div>
