@@ -626,13 +626,8 @@ const EmployerAnalytics = memo(() => {
       )}
 
       {/* ─── Per-job time to first application ─── */}
-      {ttfa.length > 0 && (() => {
-        const INITIAL_COUNT = 5;
-        const STEP = 10;
-        return (
-          <TtfaList ttfa={ttfa} initialCount={INITIAL_COUNT} step={STEP} />
-        );
-      })()}
+      {ttfa.length > 0 && (
+        <TtfaList ttfa={ttfa} initialCount={5} step={10} />
       )}
 
       {/* Conversion gauges */}
