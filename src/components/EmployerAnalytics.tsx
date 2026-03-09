@@ -84,23 +84,23 @@ const TrendPill = memo(({ current, previous, label, icon: Icon }: {
   const isFlat = diff === 0;
 
   return (
-    <div className="flex-1 rounded-xl bg-white/[0.04] border border-white/[0.06] p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <Icon className="h-4 w-4 text-white" />
-        <span className="text-xs font-medium text-white">{label}</span>
+    <div className="flex-1 min-w-0 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Icon className="h-3.5 w-3.5 text-white shrink-0" />
+        <span className="text-[11px] font-medium text-white truncate">{label}</span>
       </div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-white tabular-nums">{current}</span>
+      <div className="flex items-baseline gap-1.5 flex-nowrap min-w-0">
+        <span className="text-lg font-bold text-white tabular-nums shrink-0">{current}</span>
+        <span className="text-[9px] text-white truncate shrink min-w-0">vs förra: {previous}</span>
+        {(previous > 0 || current > 0) && (
+          <span className={`text-[10px] font-medium flex items-center gap-0.5 shrink-0 ${
+            isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
+          }`}>
+            {isUp ? <TrendingUp className="h-2.5 w-2.5" /> : isDown ? <TrendingDown className="h-2.5 w-2.5" /> : <Minus className="h-2.5 w-2.5" />}
+            {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
+          </span>
+        )}
       </div>
-      <p className="text-[10px] text-white mt-1">vs förra perioden: {previous}</p>
-      {previous > 0 || current > 0 ? (
-        <span className={`text-xs font-medium flex items-center gap-0.5 mt-1.5 ${
-          isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
-        }`}>
-          {isUp ? <TrendingUp className="h-3 w-3" /> : isDown ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
-          {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
-        </span>
-      ) : null}
     </div>
   );
 });
