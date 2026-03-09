@@ -271,11 +271,54 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
 DailySparkline.displayName = 'DailySparkline';
 
 /* ─── TTFA expandable list ─── */
+const DEMO_JOB_TITLES = [
+  'Försäljare B2B', 'Ekonomiassistent', 'Projektledare IT', 'Kundtjänstmedarbetare',
+  'Lagerarbetare', 'Redovisningskonsult', 'UX Designer', 'Fullstack-utvecklare',
+  'HR-specialist', 'Produktionstekniker', 'Marknadsförare', 'Inköpare',
+  'Servicetekniker', 'Teamledare Logistik', 'Receptionist', 'Controller',
+  'Säljare Detaljhandel', 'Verkstadsmekaniker', 'Fastighetsskötare', 'DevOps-ingenjör',
+  'Kvalitetsingenjör', 'CNC-operatör', 'Montör', 'Restaurangbiträde',
+  'Administratör', 'Systemutvecklare', 'Processingenjör', 'Butikschef',
+  'Kundansvarig', 'Transportledare', 'Platschef', 'Lönespecialist',
+  'Data Analyst', 'Affärsutvecklare', 'Konstruktör',
+];
+
+const generateDemoTtfa = (): TimeToFirstApp[] => {
+  const now = new Date();
+  return DEMO_JOB_TITLES.map((title, i) => {
+    const daysAgo = Math.floor(Math.random() * 60) + 1;
+    const published = new Date(now.getTime() - daysAgo * 86400000);
+    const secondsToFirst = Math.floor(Math.random() * 259200) + 300; // 5min – 3 days
+    return {
+      job_id: `demo-${i}`,
+      title,
+      published_at: published.toISOString(),
+      first_application_at: new Date(published.getTime() + secondsToFirst * 1000).toISOString(),
+      seconds_to_first: secondsToFirst,
+    };
+  });
+};
+
+const isExpiredJob = (publishedAt: string): boolean => {
+  try {
+    return differenceInDays(new Date(), new Date(publishedAt)) >= 14;
+  } catch { return false; }
+};
+
 const TtfaList = memo(({ ttfa, initialCount, step }: { ttfa: TimeToFirstApp[]; initialCount: number; step: number }) => {
   const [visibleCount, setVisibleCount] = useState(initialCount);
-  const maxSec = Math.max(...ttfa.map(x => x.seconds_to_first), 1);
-  const visible = ttfa.slice(0, visibleCount);
-  const hasMore = visibleCount < ttfa.length;
+
+  // Merge real data with demo data for testing (remove demo block in production)
+  const enrichedTtfa = useMemo(() => {
+    const demo = generateDemoTtfa();
+    const realIds = new Set(ttfa.map(t => t.job_id));
+    const extras = demo.filter(d => !realIds.has(d.job_id));
+    return [...ttfa, ...extras].sort((a, b) => a.seconds_to_first - b.seconds_to_first);
+  }, [ttfa]);
+
+  const maxSec = Math.max(...enrichedTtfa.map(x => x.seconds_to_first), 1);
+  const visible = enrichedTtfa.slice(0, visibleCount);
+  const hasMore = visibleCount < enrichedTtfa.length;
 
   return (
     <Card className="bg-white/5 border-white/10 overflow-hidden">
@@ -284,21 +327,33 @@ const TtfaList = memo(({ ttfa, initialCount, step }: { ttfa: TimeToFirstApp[]; i
         <div className="space-y-2">
           {visible.map((t, i) => {
             const barPct = Math.min((t.seconds_to_first / maxSec) * 100, 100);
+            const expired = isExpiredJob(t.published_at);
             return (
               <motion.div
                 key={t.job_id}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: Math.min(i, 5) * 0.05 }}
-                className="space-y-1"
+                className={`space-y-1 ${expired ? 'opacity-50' : ''}`}
               >
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-[12px] text-white truncate flex-1">{t.title}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <span className="text-[12px] text-white truncate">{t.title}</span>
+                    {expired && (
+                      <span className="shrink-0 text-[9px] font-medium px-1.5 py-0.5 rounded bg-white/10 text-white/70">
+                        Utgången
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[12px] font-semibold text-white tabular-nums shrink-0">{formatDuration(t.seconds_to_first)}</span>
                 </div>
                 <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-secondary/80 to-secondary/40 rounded-full transition-all duration-700"
+                    className={`h-full rounded-full transition-all duration-700 ${
+                      expired
+                        ? 'bg-white/20'
+                        : 'bg-gradient-to-r from-secondary/80 to-secondary/40'
+                    }`}
                     style={{ width: `${barPct}%` }}
                   />
                 </div>
@@ -308,10 +363,10 @@ const TtfaList = memo(({ ttfa, initialCount, step }: { ttfa: TimeToFirstApp[]; i
         </div>
         {hasMore && (
           <button
-            onClick={() => setVisibleCount(prev => Math.min(prev + step, ttfa.length))}
+            onClick={() => setVisibleCount(prev => Math.min(prev + step, enrichedTtfa.length))}
             className="mt-3 w-full py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
           >
-            Visa fler ({ttfa.length - visibleCount} kvar)
+            Visa fler ({enrichedTtfa.length - visibleCount} kvar)
           </button>
         )}
       </CardContent>
