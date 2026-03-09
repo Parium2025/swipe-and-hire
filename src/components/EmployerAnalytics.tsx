@@ -505,10 +505,14 @@ const EmployerAnalytics = memo(() => {
       </div>
 
       {/* ─── NEW: Trend comparison ─── */}
-      {trends && selectedDays !== null && (
+      {trends && (
         <div className="flex gap-2">
           {(() => {
-            const dl = `${selectedDays} dagar sedan`;
+            const dl = selectedDays === null
+              ? 'hela perioden'
+              : selectedDays === 1
+                ? '1 dag sedan'
+                : `${selectedDays} dagar sedan`;
             return (
               <>
                 <TrendPill icon={Eye} label="Visningar" current={trends.current_views} previous={trends.prev_views} daysLabel={dl} />
