@@ -126,11 +126,11 @@ const ConversionGauge = memo(({ label, subtitle, value, total, icon: Icon }: {
       <div className="relative w-24 h-24">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 96 96">
           <circle cx="48" cy="48" r="40" fill="none" stroke="white" strokeOpacity="0.08" strokeWidth="6" />
-          <circle cx="48" cy="48" r="40" fill="none" stroke="url(#gaugeGrad)" strokeWidth="6"
+          <circle cx="48" cy="48" r="40" fill="none" stroke={`url(#gaugeGrad-${label.replace(/\s/g, '')})`} strokeWidth="6"
             strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset}
             className="transition-all duration-1000 ease-out" />
           <defs>
-            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id={`gaugeGrad-${label.replace(/\s/g, '')}`} x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="hsl(var(--secondary))" stopOpacity="0.9" />
               <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.4" />
             </linearGradient>
@@ -390,7 +390,7 @@ const EmployerAnalytics = memo(() => {
     gcTime: 15 * 60 * 1000,
   });
 
-  const analytics = rawData?.jobs?.map((job: any, index: number) => {
+  const analytics = useMemo(() => rawData?.jobs?.map((job: any, index: number) => {
     const views = Number(job.views_count);
     const applications = Number(job.applications_count);
     const interviews = Number(job.interviews_count);
@@ -404,7 +404,7 @@ const EmployerAnalytics = memo(() => {
       created_at: typeof job.created_at === 'string' ? job.created_at : new Date(0).toISOString(),
       is_active: Boolean(job.is_active),
     } as JobAnalytics;
-  }) || [];
+  }) || [], [rawData]);
 
   const deviceBreakdown = (rawData?.device_breakdown || []) as DeviceBreakdown[];
   const dailyViews = (rawData?.daily_views || []) as DailyView[];
@@ -505,10 +505,14 @@ const EmployerAnalytics = memo(() => {
       </div>
 
       {/* ─── NEW: Trend comparison ─── */}
-      {trends && selectedDays !== null && (
+      {trends && (
         <div className="flex gap-2">
           {(() => {
-            const dl = `${selectedDays} dagar sedan`;
+            const dl = selectedDays === null
+              ? 'hela perioden'
+              : selectedDays === 1
+                ? '1 dag sedan'
+                : `${selectedDays} dagar sedan`;
             return (
               <>
                 <TrendPill icon={Eye} label="Visningar" current={trends.current_views} previous={trends.prev_views} daysLabel={dl} />
