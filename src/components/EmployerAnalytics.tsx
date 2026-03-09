@@ -537,7 +537,7 @@ const EmployerAnalytics = memo(() => {
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Info className="h-3.5 w-3.5 text-white cursor-help shrink-0" />
+                        <Info className="h-3.5 w-3.5 text-white cursor-default shrink-0" />
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-[220px] text-xs">
                         Veckodagen med flest annonsvisningar under vald tidsperiod. Hjälper dig tajma publiceringen av nya annonser.
