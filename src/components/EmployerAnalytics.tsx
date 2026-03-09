@@ -92,15 +92,15 @@ const TrendPill = memo(({ current, previous, label, icon: Icon }: {
       <div className="flex items-baseline gap-1.5 flex-nowrap min-w-0">
         <span className="text-lg font-bold text-white tabular-nums shrink-0">{current}</span>
         <span className="text-[9px] text-white truncate shrink min-w-0">vs förra: {previous}</span>
-        {(previous > 0 || current > 0) && (
-          <span className={`text-[10px] font-medium flex items-center gap-0.5 shrink-0 ${
-            isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
-          }`}>
-            {isUp ? <TrendingUp className="h-2.5 w-2.5" /> : isDown ? <TrendingDown className="h-2.5 w-2.5" /> : <Minus className="h-2.5 w-2.5" />}
-            {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
-          </span>
-        )}
       </div>
+      {(previous > 0 || current > 0) && (
+        <span className={`text-[10px] font-medium flex items-center gap-0.5 mt-1 ${
+          isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
+        }`}>
+          {isUp ? <TrendingUp className="h-2.5 w-2.5" /> : isDown ? <TrendingDown className="h-2.5 w-2.5" /> : <Minus className="h-2.5 w-2.5" />}
+          {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
+        </span>
+      )}
     </div>
   );
 });
