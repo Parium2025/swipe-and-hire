@@ -339,9 +339,13 @@ const TtfaList = memo(({ ttfa, initialCount, step }: { ttfa: TimeToFirstApp[]; i
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
                     <span className="text-[12px] text-white truncate">{t.title}</span>
-                    {expired && (
-                      <span className="shrink-0 text-[9px] font-medium px-1.5 py-0.5 rounded bg-white/10 text-white/70">
+                    {expired ? (
+                      <span className="shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
                         Utgången
+                      </span>
+                    ) : (
+                      <span className="shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        Aktiv
                       </span>
                     )}
                   </div>
