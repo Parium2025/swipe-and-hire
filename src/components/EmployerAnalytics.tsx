@@ -78,11 +78,12 @@ const DAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag'
 const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
   current: number; previous: number; label: string; icon: React.ElementType; daysLabel: string;
 }) => {
-  const isNewData = previous === 0 && current > 0;
-  const diff = previous > 0 ? Math.round(((current - previous) / previous) * 100) : 0;
-  const isUp = !isNewData && diff > 0;
+  const diff = previous > 0
+    ? Math.round(((current - previous) / previous) * 100)
+    : (current > 0 ? current * 100 : 0);
+  const isUp = diff > 0;
   const isDown = diff < 0;
-  const isFlat = !isNewData && diff === 0;
+  const isFlat = diff === 0;
 
   return (
     <div className="flex-1 min-w-0 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3 text-center">
@@ -98,16 +99,10 @@ const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
       <p className="text-[9px] text-white mt-0.5">{daysLabel}</p>
       {(previous > 0 || current > 0) && (
         <span className={`text-[10px] font-medium inline-flex items-center gap-0.5 mt-1 ${
-          isNewData ? 'text-emerald-400' : isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
+          isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
         }`}>
-          {isNewData ? (
-            <><TrendingUp className="h-2.5 w-2.5" /> Ny</>
-          ) : (
-            <>
-              {isUp ? <TrendingUp className="h-2.5 w-2.5" /> : isDown ? <TrendingDown className="h-2.5 w-2.5" /> : <Minus className="h-2.5 w-2.5" />}
-              {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
-            </>
-          )}
+          {isUp ? <TrendingUp className="h-2.5 w-2.5" /> : isDown ? <TrendingDown className="h-2.5 w-2.5" /> : <Minus className="h-2.5 w-2.5" />}
+          {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
         </span>
       )}
     </div>
