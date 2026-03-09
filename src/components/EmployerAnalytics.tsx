@@ -537,7 +537,7 @@ const EmployerAnalytics = memo(() => {
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Info className="h-3 w-3 text-white/40 cursor-help" />
+                        <Info className="h-3.5 w-3.5 text-white cursor-help" />
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-[220px] text-xs">
                         Veckodagen med flest annonsvisningar under vald tidsperiod. Hjälper dig tajma publiceringen av nya annonser.
@@ -559,7 +559,7 @@ const EmployerAnalytics = memo(() => {
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Info className="h-3 w-3 text-white/40 cursor-help" />
+                        <Info className="h-3.5 w-3.5 text-white cursor-help" />
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-[220px] text-xs">
                         Genomsnittlig tid från att en annons publiceras tills den får sin första ansökan. Baserat på annonser med minst en ansökan.
