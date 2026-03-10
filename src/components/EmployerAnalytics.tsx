@@ -283,7 +283,7 @@ const DEMO_JOB_TITLES = [
   'Data Analyst', 'Affärsutvecklare', 'Konstruktör',
 ];
 
-const generateDemoTtfa = (): TimeToFirstApp[] => {
+const generateDemoTtfa = (): (TimeToFirstApp & { applications_count: number })[] => {
   const now = new Date();
   return DEMO_JOB_TITLES.map((title, i) => {
     const daysAgo = Math.floor(Math.random() * 60) + 1;
@@ -295,6 +295,7 @@ const generateDemoTtfa = (): TimeToFirstApp[] => {
       published_at: published.toISOString(),
       first_application_at: new Date(published.getTime() + secondsToFirst * 1000).toISOString(),
       seconds_to_first: secondsToFirst,
+      applications_count: Math.floor(Math.random() * 40) + 1,
     };
   });
 };
@@ -305,7 +306,12 @@ const isExpiredJob = (publishedAt: string): boolean => {
   } catch { return false; }
 };
 
-const TtfaList = memo(({ ttfa, initialCount, step }: { ttfa: TimeToFirstApp[]; initialCount: number; step: number }) => {
+const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
+  ttfa: TimeToFirstApp[];
+  appCountMap: Record<string, number>;
+  initialCount: number;
+  step: number;
+}) => {
   const [visibleCount, setVisibleCount] = useState(initialCount);
 
   // Merge real data with demo data for testing (remove demo block in production)
@@ -313,20 +319,42 @@ const TtfaList = memo(({ ttfa, initialCount, step }: { ttfa: TimeToFirstApp[]; i
     const demo = generateDemoTtfa();
     const realIds = new Set(ttfa.map(t => t.job_id));
     const extras = demo.filter(d => !realIds.has(d.job_id));
-    return [...ttfa, ...extras].sort((a, b) => a.seconds_to_first - b.seconds_to_first);
-  }, [ttfa]);
+    const merged = [
+      ...ttfa.map(t => ({ ...t, applications_count: appCountMap[t.job_id] ?? 0 })),
+      ...extras,
+    ];
+    return merged.sort((a, b) => a.seconds_to_first - b.seconds_to_first);
+  }, [ttfa, appCountMap]);
 
-  const maxSec = Math.max(...enrichedTtfa.map(x => x.seconds_to_first), 1);
+  const maxApps = Math.max(...enrichedTtfa.map(x => x.applications_count), 1);
   const visible = enrichedTtfa.slice(0, visibleCount);
   const hasMore = visibleCount < enrichedTtfa.length;
 
   return (
     <Card className="bg-white/5 border-white/10 overflow-hidden">
       <CardContent className="p-5">
-        <h3 className="text-sm font-medium text-white mb-3">Tid till första ansökan per annons</h3>
+        <div className="flex items-center gap-1.5 mb-3">
+          <h3 className="text-sm font-medium text-white">Tid till första ansökan per annons</h3>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button type="button" className="shrink-0 text-white/40 hover:text-white/70 transition-colors">
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[260px]">
+                <p className="text-xs leading-relaxed">
+                  Visar hur snabbt varje annons fick sin första ansökan. Baren representerar antal ansökningar — längre bar = fler ansökningar.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         <div className="space-y-2">
           {visible.map((t, i) => {
-            const barPct = Math.min((t.seconds_to_first / maxSec) * 100, 100);
+            const barPct = maxApps > 0
+              ? Math.max(Math.min((t.applications_count / maxApps) * 100, 100), 2)
+              : 2;
             const expired = isExpiredJob(t.published_at);
             return (
               <motion.div
@@ -687,7 +715,12 @@ const EmployerAnalytics = memo(() => {
 
       {/* ─── Per-job time to first application ─── */}
       {ttfa.length > 0 && (
-        <TtfaList ttfa={ttfa} initialCount={5} step={10} />
+        <TtfaList
+          ttfa={ttfa}
+          appCountMap={Object.fromEntries(analytics.map((j: JobAnalytics) => [j.id, j.applications_count]))}
+          initialCount={5}
+          step={10}
+        />
       )}
 
       {/* Conversion gauges */}
