@@ -393,32 +393,34 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
             );
           })}
         </div>
-        <div className="flex gap-2 mt-3">
-          {hasMore && (
-            <button
-              onClick={() => setVisibleCount(prev => Math.min(prev + step, enrichedTtfa.length))}
-              className="flex-1 py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
-            >
-              Visa fler ({enrichedTtfa.length - visibleCount} kvar)
-            </button>
-          )}
-          {visibleCount > initialCount && (
-            <button
-              onClick={() => setVisibleCount(prev => Math.max(prev - step, initialCount))}
-              className="flex-1 py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
-            >
-              Visa färre
-            </button>
-          )}
-          {visibleCount > initialCount && (
-            <button
-              onClick={() => setVisibleCount(initialCount)}
-              className="py-2 px-3 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
-            >
-              Stäng alla
-            </button>
-          )}
-        </div>
+        {(hasMore || visibleCount > initialCount) && (
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            {hasMore ? (
+              <button
+                onClick={() => setVisibleCount(prev => Math.min(prev + step, enrichedTtfa.length))}
+                className="py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+              >
+                Visa fler ({enrichedTtfa.length - visibleCount} kvar)
+              </button>
+            ) : <span />}
+            {visibleCount > initialCount ? (
+              <button
+                onClick={() => setVisibleCount(prev => Math.max(prev - step, initialCount))}
+                className="py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+              >
+                Visa färre
+              </button>
+            ) : <span />}
+            {visibleCount > initialCount ? (
+              <button
+                onClick={() => setVisibleCount(initialCount)}
+                className="py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+              >
+                Stäng alla
+              </button>
+            ) : <span />}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
