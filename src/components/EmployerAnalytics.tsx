@@ -46,6 +46,7 @@ interface TimeToFirstApp {
   job_id: string;
   title: string;
   published_at: string;
+  expires_at: string | null;
   first_application_at: string;
   seconds_to_first: number;
 }
@@ -271,9 +272,11 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
 DailySparkline.displayName = 'DailySparkline';
 
 /* ─── TTFA expandable list ─── */
-const isExpiredJob = (publishedAt: string): boolean => {
+const isExpiredJob = (expiresAt: string | null, publishedAt: string): boolean => {
   try {
-    return differenceInDays(new Date(), new Date(publishedAt)) >= 14;
+    if (expiresAt) return new Date(expiresAt) < new Date();
+    // Fallback: 30 days from creation
+    return differenceInDays(new Date(), new Date(publishedAt)) >= 30;
   } catch { return false; }
 };
 
@@ -320,7 +323,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
             const barPct = maxApps > 0
               ? Math.max(Math.min((t.applications_count / maxApps) * 100, 100), 2)
               : 2;
-            const expired = isExpiredJob(t.published_at);
+            const expired = isExpiredJob(t.expires_at, t.published_at);
             return (
               <motion.div
                 key={t.job_id}
@@ -632,12 +635,10 @@ const EmployerAnalytics = memo(() => {
       </div>
 
       {/* ─── NEW: Trend comparison ─── */}
-      {trends && (
+      {trends && selectedDays !== null && (
         <div className="flex gap-2">
           {(() => {
-            const dl = selectedDays === null
-              ? 'hela perioden'
-              : selectedDays === 1
+            const dl = selectedDays === 1
                 ? '1 dag sedan'
                 : `${selectedDays} dagar sedan`;
             return (
