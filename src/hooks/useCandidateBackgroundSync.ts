@@ -21,7 +21,7 @@ const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
 export const useCandidateBackgroundSync = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRunningRef = useRef(false);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 

@@ -11,7 +11,7 @@ export function useTypingIndicator(conversationId: string | null) {
   const { user } = useAuth();
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Set up presence channel for typing indicators
   useEffect(() => {

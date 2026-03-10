@@ -10,7 +10,7 @@ import { prefetchJobDetails } from '@/hooks/useJobDetailsData';
 export function useJobPrefetch() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefetchedRef = useRef<Set<string>>(new Set());
 
   const handleMouseEnter = useCallback((jobId: string) => {

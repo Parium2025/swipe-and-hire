@@ -285,7 +285,7 @@ export const useEmployerBackgroundSync = () => {
     // Lyssna på tab-focus - SMART: bara refetch om tabben var dold tillräckligt länge
     // Korta frånvaror (<30s) hanteras av Realtime-subscriptions automatiskt
     let hiddenAt = 0;
-    let visibilityTimeout: NodeJS.Timeout | null = null;
+    let visibilityTimeout: ReturnType<typeof setTimeout> | null = null;
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         hiddenAt = Date.now();

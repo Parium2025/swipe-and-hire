@@ -156,7 +156,7 @@ export const useEagerRatingsPreload = () => {
   const queryClient = useQueryClient();
   const hasPreloadedRef = useRef(false);
   const isPreloadingRef = useRef(false);
-  const periodicRefreshRef = useRef<NodeJS.Timeout | null>(null);
+  const periodicRefreshRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Preload väder - ALLTID om cache är gammal eller saknas
   const preloadWeatherIfStale = useCallback(async () => {
