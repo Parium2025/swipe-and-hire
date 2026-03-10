@@ -271,35 +271,6 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
 DailySparkline.displayName = 'DailySparkline';
 
 /* ─── TTFA expandable list ─── */
-const DEMO_JOB_TITLES = [
-  'Försäljare B2B', 'Ekonomiassistent', 'Projektledare IT', 'Kundtjänstmedarbetare',
-  'Lagerarbetare', 'Redovisningskonsult', 'UX Designer', 'Fullstack-utvecklare',
-  'HR-specialist', 'Produktionstekniker', 'Marknadsförare', 'Inköpare',
-  'Servicetekniker', 'Teamledare Logistik', 'Receptionist', 'Controller',
-  'Säljare Detaljhandel', 'Verkstadsmekaniker', 'Fastighetsskötare', 'DevOps-ingenjör',
-  'Kvalitetsingenjör', 'CNC-operatör', 'Montör', 'Restaurangbiträde',
-  'Administratör', 'Systemutvecklare', 'Processingenjör', 'Butikschef',
-  'Kundansvarig', 'Transportledare', 'Platschef', 'Lönespecialist',
-  'Data Analyst', 'Affärsutvecklare', 'Konstruktör',
-];
-
-const generateDemoTtfa = (): (TimeToFirstApp & { applications_count: number })[] => {
-  const now = new Date();
-  return DEMO_JOB_TITLES.map((title, i) => {
-    const daysAgo = Math.floor(Math.random() * 60) + 1;
-    const published = new Date(now.getTime() - daysAgo * 86400000);
-    const secondsToFirst = Math.floor(Math.random() * 259200) + 300; // 5min – 3 days
-    return {
-      job_id: `demo-${i}`,
-      title,
-      published_at: published.toISOString(),
-      first_application_at: new Date(published.getTime() + secondsToFirst * 1000).toISOString(),
-      seconds_to_first: secondsToFirst,
-      applications_count: Math.floor(Math.random() * 40) + 1,
-    };
-  });
-};
-
 const isExpiredJob = (publishedAt: string): boolean => {
   try {
     return differenceInDays(new Date(), new Date(publishedAt)) >= 14;
@@ -314,16 +285,10 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
 }) => {
   const [visibleCount, setVisibleCount] = useState(initialCount);
 
-  // Merge real data with demo data for testing (remove demo block in production)
   const enrichedTtfa = useMemo(() => {
-    const demo = generateDemoTtfa();
-    const realIds = new Set(ttfa.map(t => t.job_id));
-    const extras = demo.filter(d => !realIds.has(d.job_id));
-    const merged = [
-      ...ttfa.map(t => ({ ...t, applications_count: appCountMap[t.job_id] ?? 0 })),
-      ...extras,
-    ];
-    return merged.sort((a, b) => a.seconds_to_first - b.seconds_to_first);
+    return ttfa
+      .map(t => ({ ...t, applications_count: appCountMap[t.job_id] ?? 0 }))
+      .sort((a, b) => a.seconds_to_first - b.seconds_to_first);
   }, [ttfa, appCountMap]);
 
   const maxApps = Math.max(...enrichedTtfa.map(x => x.applications_count), 1);
