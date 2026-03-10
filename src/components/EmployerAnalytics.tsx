@@ -46,6 +46,7 @@ interface TimeToFirstApp {
   job_id: string;
   title: string;
   published_at: string;
+  expires_at: string | null;
   first_application_at: string;
   seconds_to_first: number;
 }
