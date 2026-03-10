@@ -283,7 +283,7 @@ const DEMO_JOB_TITLES = [
   'Data Analyst', 'Affärsutvecklare', 'Konstruktör',
 ];
 
-const generateDemoTtfa = (): TimeToFirstApp[] => {
+const generateDemoTtfa = (): (TimeToFirstApp & { applications_count: number })[] => {
   const now = new Date();
   return DEMO_JOB_TITLES.map((title, i) => {
     const daysAgo = Math.floor(Math.random() * 60) + 1;
@@ -295,6 +295,7 @@ const generateDemoTtfa = (): TimeToFirstApp[] => {
       published_at: published.toISOString(),
       first_application_at: new Date(published.getTime() + secondsToFirst * 1000).toISOString(),
       seconds_to_first: secondsToFirst,
+      applications_count: Math.floor(Math.random() * 40) + 1,
     };
   });
 };
