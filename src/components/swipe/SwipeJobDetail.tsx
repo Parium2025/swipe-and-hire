@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { recordJobView } from '@/lib/recordJobView';
+import { useAuth } from '@/hooks/useAuth';
 import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
