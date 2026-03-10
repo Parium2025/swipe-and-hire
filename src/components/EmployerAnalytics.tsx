@@ -23,6 +23,11 @@ interface DeviceBreakdown {
   count: number;
 }
 
+interface OsBreakdown {
+  os: string;
+  count: number;
+}
+
 interface DailyView {
   date: string;
   count: number;
@@ -54,6 +59,7 @@ interface TimeToFirstApp {
 interface AnalyticsData {
   jobs: JobAnalytics[];
   device_breakdown: DeviceBreakdown[];
+  os_breakdown: OsBreakdown[];
   daily_views: DailyView[];
   trends: TrendData | null;
   best_day: BestDay | null;
@@ -73,6 +79,15 @@ const DEVICE_CONFIG: Record<string, { icon: typeof Smartphone; label: string; co
   desktop: { icon: Monitor, label: 'Dator', color: 'hsl(210 80% 60%)' },
   tablet: { icon: Tablet, label: 'Surfplatta', color: 'hsl(150 60% 50%)' },
   unknown: { icon: HelpCircle, label: 'Okänd', color: 'hsl(0 0% 50%)' },
+};
+const OS_CONFIG: Record<string, { label: string; color: string }> = {
+  ios: { label: 'iOS', color: 'hsl(210 80% 65%)' },
+  android: { label: 'Android', color: 'hsl(140 60% 50%)' },
+  windows: { label: 'Windows', color: 'hsl(200 70% 55%)' },
+  macos: { label: 'macOS', color: 'hsl(270 60% 60%)' },
+  linux: { label: 'Linux', color: 'hsl(30 70% 55%)' },
+  chromeos: { label: 'ChromeOS', color: 'hsl(50 70% 55%)' },
+  unknown: { label: 'Okänt', color: 'hsl(0 0% 50%)' },
 };
 
 const DAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
@@ -537,6 +552,7 @@ const EmployerAnalytics = memo(() => {
   }) || [], [rawData]);
 
   const deviceBreakdown = (rawData?.device_breakdown || []) as DeviceBreakdown[];
+  const osBreakdown = ((rawData as any)?.os_breakdown || []) as OsBreakdown[];
   const dailyViews = (rawData?.daily_views || []) as DailyView[];
   const trends = rawData?.trends as TrendData | null;
   const bestDay = rawData?.best_day as BestDay | null;
@@ -742,6 +758,47 @@ const EmployerAnalytics = memo(() => {
           <CardContent className="p-5">
             <h3 className="text-sm font-medium text-white mb-4">Enheter</h3>
             <DeviceDonut data={deviceBreakdown} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* OS breakdown */}
+      {osBreakdown.length > 0 && osBreakdown.some(d => d.count > 0) && (
+        <Card className="bg-white/5 border-white/10 overflow-hidden">
+          <CardContent className="p-5">
+            <h3 className="text-sm font-medium text-white mb-4">Operativsystem</h3>
+            {(() => {
+              const total = osBreakdown.reduce((s, d) => s + d.count, 0);
+              const sorted = [...osBreakdown].filter(d => d.count > 0).sort((a, b) => b.count - a.count);
+              return (
+                <div className="space-y-2.5">
+                  {sorted.map((item) => {
+                    const cfg = OS_CONFIG[item.os] || OS_CONFIG.unknown;
+                    const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
+                    return (
+                      <div key={item.os} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
+                            <span className="text-[12px] text-white font-medium">{cfg.label}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[12px] text-white font-semibold tabular-nums">{pct}%</span>
+                            <span className="text-[11px] text-white tabular-nums">({item.count})</span>
+                          </div>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: cfg.color }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
       )}
