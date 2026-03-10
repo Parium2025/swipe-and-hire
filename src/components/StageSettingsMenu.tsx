@@ -77,7 +77,7 @@ export function StageSettingsMenu({
   const [isDeleting, setIsDeleting] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   const [liveColor, setLiveColor] = useState<string | null>(null);
-  const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const colorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);

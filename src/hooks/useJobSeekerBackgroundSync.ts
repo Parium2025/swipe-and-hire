@@ -49,7 +49,7 @@ export const useJobSeekerBackgroundSync = () => {
   const queryClient = useQueryClient();
   const hasPreloadedRef = useRef(false);
   const isPreloadingRef = useRef(false);
-  const periodicRefreshRef = useRef<NodeJS.Timeout | null>(null);
+  const periodicRefreshRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Endast för jobbsökare
   const isJobSeeker = userRole?.role === 'job_seeker';

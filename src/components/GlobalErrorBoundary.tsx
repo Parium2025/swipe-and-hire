@@ -9,7 +9,7 @@ interface State {
 
 export default class GlobalErrorBoundary extends React.Component<React.PropsWithChildren, State> {
   state: State = { hasError: false, isStuck: false };
-  private stuckTimer?: NodeJS.Timeout;
+  private stuckTimer?: ReturnType<typeof setTimeout>;
 
   componentDidMount() {
     // Detect if app is stuck (e.g., redirect loop in preview)

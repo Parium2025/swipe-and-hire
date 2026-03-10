@@ -73,7 +73,7 @@ export function JobStageSettingsMenu({
   const [newLabel, setNewLabel] = useState(settings?.label || '');
   const [liveColor, setLiveColor] = useState<string | null>(null);
   
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Use liveColor while dragging, fall back to saved color
   const displayColor = liveColor ?? settings?.color ?? '#0EA5E9';
