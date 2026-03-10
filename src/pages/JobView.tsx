@@ -141,13 +141,13 @@ const JobView = () => {
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
   const contentRef = useRef<HTMLDivElement>(null);
   
-  // Track job view when user reads content
+  // Track job view when user reads content (lowered thresholds for accuracy)
   useJobViewTracker({
     jobId,
     userId: user?.id,
     contentRef,
-    scrollThreshold: 0.7,
-    minTimeOnPage: 3000,
+    scrollThreshold: 0.5,
+    minTimeOnPage: 2000,
   });
   
   useImagePreloader(imageUrl ? [imageUrl] : [], { priority: 'high' });
