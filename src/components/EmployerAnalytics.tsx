@@ -762,6 +762,44 @@ const EmployerAnalytics = memo(() => {
         </Card>
       )}
 
+      {/* OS breakdown */}
+      {osBreakdown.length > 0 && osBreakdown.some(d => d.count > 0) && (
+        <Card className="bg-white/5 border-white/10 overflow-hidden">
+          <CardContent className="p-5">
+            <h3 className="text-sm font-medium text-white mb-4">Operativsystem</h3>
+            {(() => {
+              const total = osBreakdown.reduce((s, d) => s + d.count, 0);
+              const sorted = [...osBreakdown].filter(d => d.count > 0).sort((a, b) => b.count - a.count);
+              return (
+                <div className="space-y-2.5">
+                  {sorted.map((item) => {
+                    const cfg = OS_CONFIG[item.os] || OS_CONFIG.unknown;
+                    const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
+                    return (
+                      <div key={item.os} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
+                            <span className="text-[12px] text-white font-medium">{cfg.label}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[12px] text-white font-semibold tabular-nums">{pct}%</span>
+                            <span className="text-[11px] text-white tabular-nums">({item.count})</span>
+                          </div>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: cfg.color }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
       {/* Smart insights */}
       {insights.length > 0 && (
         <div className="space-y-2">
