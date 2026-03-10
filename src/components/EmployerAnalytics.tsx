@@ -272,9 +272,11 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
 DailySparkline.displayName = 'DailySparkline';
 
 /* ─── TTFA expandable list ─── */
-const isExpiredJob = (publishedAt: string): boolean => {
+const isExpiredJob = (expiresAt: string | null, publishedAt: string): boolean => {
   try {
-    return differenceInDays(new Date(), new Date(publishedAt)) >= 14;
+    if (expiresAt) return new Date(expiresAt) < new Date();
+    // Fallback: 30 days from creation
+    return differenceInDays(new Date(), new Date(publishedAt)) >= 30;
   } catch { return false; }
 };
 
