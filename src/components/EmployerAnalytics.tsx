@@ -799,6 +799,9 @@ const EmployerAnalytics = memo(() => {
                 </div>
               );
             })()}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Smart insights */}
       {insights.length > 0 && (
