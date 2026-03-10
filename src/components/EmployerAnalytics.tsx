@@ -323,7 +323,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
             const barPct = maxApps > 0
               ? Math.max(Math.min((t.applications_count / maxApps) * 100, 100), 2)
               : 2;
-            const expired = isExpiredJob(t.published_at);
+            const expired = isExpiredJob(t.expires_at, t.published_at);
             return (
               <motion.div
                 key={t.job_id}
