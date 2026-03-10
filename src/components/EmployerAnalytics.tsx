@@ -59,6 +59,7 @@ interface TimeToFirstApp {
 interface AnalyticsData {
   jobs: JobAnalytics[];
   device_breakdown: DeviceBreakdown[];
+  os_breakdown: OsBreakdown[];
   daily_views: DailyView[];
   trends: TrendData | null;
   best_day: BestDay | null;
