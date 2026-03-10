@@ -1387,6 +1387,7 @@ export type Database = {
           device_type: string | null
           id: string
           job_id: string
+          os_type: string | null
           user_id: string
           viewed_at: string
         }
@@ -1395,6 +1396,7 @@ export type Database = {
           device_type?: string | null
           id?: string
           job_id: string
+          os_type?: string | null
           user_id: string
           viewed_at?: string
         }
@@ -1403,6 +1405,7 @@ export type Database = {
           device_type?: string | null
           id?: string
           job_id?: string
+          os_type?: string | null
           user_id?: string
           viewed_at?: string
         }
@@ -2412,10 +2415,24 @@ export type Database = {
         }
         Returns: string
       }
-      record_job_view: {
-        Args: { p_device_type?: string; p_job_id: string; p_user_id: string }
-        Returns: boolean
-      }
+      record_job_view:
+        | {
+            Args: {
+              p_device_type?: string
+              p_job_id: string
+              p_user_id: string
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              p_device_type?: string
+              p_job_id: string
+              p_os_type?: string
+              p_user_id: string
+            }
+            Returns: boolean
+          }
       register_session: {
         Args: {
           p_device_label: string
