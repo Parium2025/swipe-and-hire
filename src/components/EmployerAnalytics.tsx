@@ -657,8 +657,8 @@ const EmployerAnalytics = memo(() => {
             onClick={() => setSelectedDays(f.days)}
             className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all active:scale-[0.97] ${
               selectedDays === f.days
-                ? 'bg-white text-black shadow-lg shadow-white/10'
-                : 'bg-white/10 text-white hover:bg-white/15'
+                ? 'bg-parium-navy text-white shadow-lg shadow-parium-navy/20 border border-white/20'
+                : 'bg-white/[0.06] text-white border border-white/10 hover:bg-white/[0.10]'
             }`}
           >
             {f.label}
