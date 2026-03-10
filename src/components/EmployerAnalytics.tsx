@@ -80,6 +80,15 @@ const DEVICE_CONFIG: Record<string, { icon: typeof Smartphone; label: string; co
   tablet: { icon: Tablet, label: 'Surfplatta', color: 'hsl(150 60% 50%)' },
   unknown: { icon: HelpCircle, label: 'Okänd', color: 'hsl(0 0% 50%)' },
 };
+const OS_CONFIG: Record<string, { label: string; color: string }> = {
+  ios: { label: 'iOS', color: 'hsl(210 80% 65%)' },
+  android: { label: 'Android', color: 'hsl(140 60% 50%)' },
+  windows: { label: 'Windows', color: 'hsl(200 70% 55%)' },
+  macos: { label: 'macOS', color: 'hsl(270 60% 60%)' },
+  linux: { label: 'Linux', color: 'hsl(30 70% 55%)' },
+  chromeos: { label: 'ChromeOS', color: 'hsl(50 70% 55%)' },
+  unknown: { label: 'Okänt', color: 'hsl(0 0% 50%)' },
+};
 
 const DAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
 
