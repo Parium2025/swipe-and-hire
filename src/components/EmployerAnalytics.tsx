@@ -378,7 +378,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] text-white/50 tabular-nums">{t.applications_count} ans.</span>
+                    <span className="text-[10px] text-white tabular-nums">{t.applications_count} ans.</span>
                     <span className="text-[12px] font-semibold text-white tabular-nums">{formatDuration(t.seconds_to_first)}</span>
                   </div>
                 </div>
