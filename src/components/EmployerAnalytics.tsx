@@ -715,7 +715,12 @@ const EmployerAnalytics = memo(() => {
 
       {/* ─── Per-job time to first application ─── */}
       {ttfa.length > 0 && (
-        <TtfaList ttfa={ttfa} initialCount={5} step={10} />
+        <TtfaList
+          ttfa={ttfa}
+          appCountMap={Object.fromEntries(analytics.map((j: JobAnalytics) => [j.id, j.applications_count]))}
+          initialCount={5}
+          step={10}
+        />
       )}
 
       {/* Conversion gauges */}
