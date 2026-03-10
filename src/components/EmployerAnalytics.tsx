@@ -338,7 +338,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button type="button" className="shrink-0 text-white/40 hover:text-white/70 transition-colors">
+                <button type="button" className="shrink-0 text-white hover:text-white/80 transition-colors">
                   <Info className="h-3.5 w-3.5" />
                 </button>
               </TooltipTrigger>
@@ -393,14 +393,32 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
             );
           })}
         </div>
-        {hasMore && (
-          <button
-            onClick={() => setVisibleCount(prev => Math.min(prev + step, enrichedTtfa.length))}
-            className="mt-3 w-full py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
-          >
-            Visa fler ({enrichedTtfa.length - visibleCount} kvar)
-          </button>
-        )}
+        <div className="flex gap-2 mt-3">
+          {hasMore && (
+            <button
+              onClick={() => setVisibleCount(prev => Math.min(prev + step, enrichedTtfa.length))}
+              className="flex-1 py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+            >
+              Visa fler ({enrichedTtfa.length - visibleCount} kvar)
+            </button>
+          )}
+          {visibleCount > initialCount && (
+            <button
+              onClick={() => setVisibleCount(prev => Math.max(prev - step, initialCount))}
+              className="flex-1 py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+            >
+              Visa färre
+            </button>
+          )}
+          {visibleCount > initialCount && (
+            <button
+              onClick={() => setVisibleCount(initialCount)}
+              className="py-2 px-3 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+            >
+              Stäng alla
+            </button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
