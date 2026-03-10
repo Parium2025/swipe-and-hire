@@ -552,6 +552,7 @@ const EmployerAnalytics = memo(() => {
   }) || [], [rawData]);
 
   const deviceBreakdown = (rawData?.device_breakdown || []) as DeviceBreakdown[];
+  const osBreakdown = ((rawData as any)?.os_breakdown || []) as OsBreakdown[];
   const dailyViews = (rawData?.daily_views || []) as DailyView[];
   const trends = rawData?.trends as TrendData | null;
   const bestDay = rawData?.best_day as BestDay | null;
