@@ -23,6 +23,11 @@ interface DeviceBreakdown {
   count: number;
 }
 
+interface OsBreakdown {
+  os: string;
+  count: number;
+}
+
 interface DailyView {
   date: string;
   count: number;
