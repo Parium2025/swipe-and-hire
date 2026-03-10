@@ -65,7 +65,15 @@ const JobApplication = () => {
   const { toast } = useToast();
   const { setHasUnsavedChanges } = useUnsavedChanges();
   const { enqueueApplication } = useOfflineApplicationQueue(user?.id);
+  const viewRecorded = useRef(false);
   
+  // Record a job view when user opens the application page (implies they saw the job)
+  useEffect(() => {
+    if (jobId && user?.id && !viewRecorded.current) {
+      viewRecorded.current = true;
+      recordJobView(jobId, user.id);
+    }
+  }, [jobId, user?.id]);
   const [job, setJob] = useState<JobPosting | null>(null);
   const [questions, setQuestions] = useState<JobQuestion[]>([]);
   const [loading, setLoading] = useState(true);
