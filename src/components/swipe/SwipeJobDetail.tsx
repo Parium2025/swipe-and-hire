@@ -53,8 +53,18 @@ interface SwipeJobDetailProps {
 }
 
 export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: SwipeJobDetailProps) {
+  const { user } = useAuth();
   const [detail, setDetail] = useState<FullJobData | null>(null);
   const [loading, setLoading] = useState(false);
+  const viewRecorded = useRef<string | null>(null);
+
+  // Track view when swipe detail is opened
+  useEffect(() => {
+    if (open && job.id && user?.id && viewRecorded.current !== job.id) {
+      viewRecorded.current = job.id;
+      recordJobView(job.id, user.id);
+    }
+  }, [open, job.id, user?.id]);
 
   useEffect(() => {
     if (open && !detail) {

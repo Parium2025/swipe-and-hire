@@ -635,12 +635,10 @@ const EmployerAnalytics = memo(() => {
       </div>
 
       {/* ─── NEW: Trend comparison ─── */}
-      {trends && (
+      {trends && selectedDays !== null && (
         <div className="flex gap-2">
           {(() => {
-            const dl = selectedDays === null
-              ? 'hela perioden'
-              : selectedDays === 1
+            const dl = selectedDays === 1
                 ? '1 dag sedan'
                 : `${selectedDays} dagar sedan`;
             return (
