@@ -49,11 +49,13 @@ function detectOS(): string {
 export async function recordJobView(jobId: string, userId: string): Promise<void> {
   try {
     const deviceType = detectDeviceType();
+    const osType = detectOS();
     const { error } = await supabase.rpc('record_job_view', {
       p_job_id: jobId,
       p_user_id: userId,
       p_device_type: deviceType,
-    });
+      p_os_type: osType,
+    } as any);
     if (error) console.error('recordJobView error:', error.message);
   } catch (err) {
     console.error('recordJobView failed:', err);
