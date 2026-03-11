@@ -111,16 +111,16 @@ const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
         <span className="text-[11px] font-medium text-white truncate">{label}</span>
       </div>
       <div className="flex items-baseline justify-center gap-1 flex-nowrap min-w-0">
-        <span className="text-lg font-bold text-white tabular-nums">{current}</span>
-        <span className="text-[9px] text-white">vs</span>
-        <span className="text-lg font-bold text-white tabular-nums">{previous}</span>
+        <span className="text-xl font-bold text-white tabular-nums">{current}</span>
+        <span className="text-[10px] md:text-xs text-white">vs</span>
+        <span className="text-xl font-bold text-white tabular-nums">{previous}</span>
       </div>
-      <p className="text-[9px] text-white mt-0.5">{daysLabel}</p>
+      <p className="text-[10px] md:text-xs text-white mt-0.5">{daysLabel}</p>
       {(previous > 0 || current > 0) && (
-        <span className={`text-[10px] font-medium inline-flex items-center gap-0.5 mt-1 ${
+        <span className={`text-[11px] md:text-xs font-medium inline-flex items-center gap-0.5 mt-1 ${
           isUp ? 'text-emerald-400' : isDown ? 'text-red-400' : 'text-white'
         }`}>
-          {isUp ? <TrendingUp className="h-2.5 w-2.5" /> : isDown ? <TrendingDown className="h-2.5 w-2.5" /> : <Minus className="h-2.5 w-2.5" />}
+          {isUp ? <TrendingUp className="h-3 w-3" /> : isDown ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
           {isFlat ? '0%' : `${isUp ? '+' : ''}${diff}%`}
         </span>
       )}
