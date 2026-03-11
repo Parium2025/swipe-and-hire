@@ -1472,14 +1472,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setPreloadedSavedJobs(newSavedJobs);
         try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
 
-        // Hämta antal olästa meddelanden för jobbsökare
-        const { count: jobSeekerUnread } = await supabase
-          .from('messages')
-          .select('id', { count: 'exact', head: true })
-          .eq('recipient_id', user.id)
-          .eq('is_read', false);
-        
-        const jsUnread = jobSeekerUnread || 0;
+        // Hämta antal olästa meddelanden för jobbsökare (via konversationssystemet)
+        const { data: jsMemberData } = await supabase
+          .from('conversation_members')
+          .select('conversation_id, last_read_at')
+          .eq('user_id', user.id);
+
+        let jsUnread = 0;
+        if (jsMemberData && jsMemberData.length > 0) {
+          for (const member of jsMemberData) {
+            let query = supabase
+              .from('conversation_messages')
+              .select('id', { count: 'exact', head: true })
+              .eq('conversation_id', member.conversation_id)
+              .neq('sender_id', user.id);
+
+            if (member.last_read_at) {
+              query = query.gt('created_at', member.last_read_at);
+            }
+
+            const { count } = await query;
+            jsUnread += count || 0;
+          }
+        }
         setPreloadedJobSeekerUnreadMessages(jsUnread);
         try { sessionStorage.setItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY, String(jsUnread)); } catch {}
 

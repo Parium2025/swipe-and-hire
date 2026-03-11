@@ -2,13 +2,19 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import {
+  findExistingConversationId,
+  createConversationForCandidate,
+  ensureConversationMemberships,
+} from '@/lib/conversationService';
 
 interface QueuedMessage {
   id: string;
   sender_id: string;
-  recipient_id: string;
+  recipient_id: string; // candidate user_id
   content: string;
   job_id: string | null;
+  application_id?: string | null;
   created_at: string;
   attempts: number;
 }
@@ -16,10 +22,6 @@ interface QueuedMessage {
 const QUEUE_KEY = 'parium_offline_message_queue';
 const MAX_ATTEMPTS = 3;
 
-/**
- * Validates that a parsed object has the required QueuedMessage shape.
- * Protects against corrupt localStorage data causing runtime crashes.
- */
 function isValidQueuedMessage(item: unknown): item is QueuedMessage {
   if (!item || typeof item !== 'object') return false;
   const obj = item as Record<string, unknown>;
@@ -39,10 +41,8 @@ function getQueuedMessages(): QueuedMessage[] {
     if (!data) return [];
     const parsed = JSON.parse(data);
     if (!Array.isArray(parsed)) return [];
-    // Filter out any corrupt entries
     return parsed.filter(isValidQueuedMessage);
   } catch {
-    // Corrupt data — wipe and start fresh
     try { localStorage.removeItem(QUEUE_KEY); } catch { /* ignore */ }
     return [];
   }
@@ -61,7 +61,6 @@ export function useOfflineMessageQueue(userId: string | undefined) {
   const [syncing, setSyncing] = useState(false);
   const syncInProgress = useRef(false);
 
-  // Load queue on mount
   useEffect(() => {
     if (userId) {
       const stored = getQueuedMessages().filter(m => m.sender_id === userId);
@@ -69,11 +68,11 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     }
   }, [userId]);
 
-  // Add message to queue
   const queueMessage = useCallback((message: {
     recipient_id: string;
     content: string;
     job_id: string | null;
+    application_id?: string | null;
   }) => {
     if (!userId) return null;
 
@@ -83,6 +82,7 @@ export function useOfflineMessageQueue(userId: string | undefined) {
       recipient_id: message.recipient_id,
       content: message.content,
       job_id: message.job_id,
+      application_id: message.application_id || null,
       created_at: new Date().toISOString(),
       attempts: 0,
     };
@@ -90,25 +90,42 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     const newQueue = [...getQueuedMessages(), queuedMessage];
     saveQueuedMessages(newQueue);
     setQueue(prev => [...prev, queuedMessage]);
-
     return queuedMessage;
   }, [userId]);
 
-  // Sync a single message
+  /** Sync a single queued message using the conversation system. */
   const syncMessage = async (message: QueuedMessage): Promise<boolean> => {
     try {
+      // Find or create conversation with the recipient
+      let conversationId = await findExistingConversationId(
+        message.sender_id,
+        message.recipient_id
+      );
+
+      if (!conversationId) {
+        conversationId = await createConversationForCandidate(
+          message.sender_id,
+          message.recipient_id,
+          message.job_id,
+          message.application_id
+        );
+        await ensureConversationMemberships(
+          conversationId,
+          message.sender_id,
+          message.recipient_id
+        );
+      }
+
       const { error } = await supabase
-        .from('messages')
+        .from('conversation_messages')
         .insert({
+          conversation_id: conversationId,
           sender_id: message.sender_id,
-          recipient_id: message.recipient_id,
           content: message.content,
-          job_id: message.job_id,
         });
 
       if (error) {
-        // Duplicate = already sent (treat as success)
-        if (error.code === '23505') return true;
+        if (error.code === '23505') return true; // Duplicate — already sent
         throw error;
       }
       return true;
@@ -118,10 +135,9 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     }
   };
 
-  // Sync all queued messages
   const syncQueue = useCallback(async () => {
     if (!userId || syncInProgress.current) return;
-    
+
     const currentQueue = getQueuedMessages().filter(m => m.sender_id === userId);
     if (currentQueue.length === 0) return;
 
@@ -133,7 +149,6 @@ export function useOfflineMessageQueue(userId: string | undefined) {
 
     for (const message of currentQueue) {
       const success = await syncMessage(message);
-      
       if (success) {
         syncedCount++;
       } else {
@@ -160,7 +175,6 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     }
   }, [userId]);
 
-  // Auto-sync using ConnectivityManager (ping-based, not navigator.onLine)
   useEffect(() => {
     const unsub = onConnectivityChange((online) => {
       if (online) {
@@ -169,7 +183,6 @@ export function useOfflineMessageQueue(userId: string | undefined) {
       }
     });
 
-    // Also sync on mount if online and queue has items
     if (getIsOnline() && queue.length > 0) {
       syncQueue();
     }
@@ -177,7 +190,6 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     return unsub;
   }, [syncQueue, queue.length]);
 
-  // Remove message from queue (e.g., when user cancels)
   const removeFromQueue = useCallback((messageId: string) => {
     const currentQueue = getQueuedMessages();
     const newQueue = currentQueue.filter(m => m.id !== messageId);
@@ -185,7 +197,6 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     setQueue(prev => prev.filter(m => m.id !== messageId));
   }, []);
 
-  // Check if a message is queued (for optimistic display)
   const isQueued = useCallback((messageId: string) => {
     return queue.some(m => m.id === messageId);
   }, [queue]);

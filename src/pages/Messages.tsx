@@ -276,7 +276,7 @@ export default function Messages() {
 
             {/* Search */}
             <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -463,18 +463,18 @@ function ConversationItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-0.5">
           <span className={cn(
-            "font-medium truncate",
-            conversation.unread_count > 0 ? "text-white" : "text-white/90"
+            "font-medium truncate text-white",
+            conversation.unread_count > 0 && "font-semibold"
           )}>
             {getDisplayName()}
           </span>
-          <span className="text-white/40 text-xs flex-shrink-0">
+          <span className="text-white/60 text-xs flex-shrink-0">
             {formatTime(conversation.last_message_at)}
           </span>
         </div>
         
         {conversation.job && (
-          <div className="flex items-center gap-1 text-white/50 text-xs mb-0.5">
+          <div className="flex items-center gap-1 text-white/70 text-xs mb-0.5">
             <Briefcase className="h-3 w-3" />
             <span className="truncate">{conversation.job.title}</span>
           </div>
@@ -482,9 +482,9 @@ function ConversationItem({
         
         <p className={cn(
           "text-sm truncate",
-          conversation.unread_count > 0 ? "text-white/80 font-medium" : "text-white/50"
+          conversation.unread_count > 0 ? "text-white font-medium" : "text-white/70"
         )}>
-          {isOwnMessage && <span className="text-white/40">Du: </span>}
+          {isOwnMessage && <span className="text-white/60">Du: </span>}
           {lastMessagePreview}
         </p>
       </div>
@@ -642,18 +642,18 @@ function ChatView({
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-white truncate">{getDisplayName()}</h2>
           {conversation.is_group && (
-            <p className="text-white/50 text-xs">
+            <p className="text-white/70 text-xs">
               {conversation.members.length} medlemmar
             </p>
           )}
           {/* Show current job context from application snapshot */}
           {snapshot?.job_title ? (
-            <p className="text-blue-300/70 text-xs flex items-center gap-1">
+            <p className="text-blue-300 text-xs flex items-center gap-1">
               <Briefcase className="h-3 w-3" />
               <span className="truncate">{snapshot.job_title}</span>
             </p>
           ) : conversation.job && (
-            <p className="text-white/50 text-xs flex items-center gap-1">
+            <p className="text-white/70 text-xs flex items-center gap-1">
               <Briefcase className="h-3 w-3" />
               {conversation.job.title}
             </p>
@@ -678,10 +678,10 @@ function ChatView({
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
-              <MessageSquare className="h-6 w-6 text-white/40" />
+              <MessageSquare className="h-6 w-6 text-white/60" />
             </div>
-            <p className="text-white/50 text-sm">Inga meddelanden ännu</p>
-            <p className="text-white/30 text-xs">Skriv ett meddelande för att starta konversationen</p>
+            <p className="text-white/70 text-sm">Inga meddelanden ännu</p>
+            <p className="text-white/50 text-xs">Skriv ett meddelande för att starta konversationen</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -690,7 +690,7 @@ function ChatView({
                 {/* Date header */}
                 <div className="flex items-center gap-3 my-4">
                   <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-white/40 text-xs font-medium px-2">
+                  <span className="text-white/60 text-xs font-medium px-2">
                     {formatDateHeader(date)}
                   </span>
                   <div className="flex-1 h-px bg-white/10" />
@@ -846,7 +846,7 @@ function MessageBubble({
       )}>
         {/* Sender name for group chats */}
         {isGroup && showAvatar && !isOwn && (
-          <span className="text-white/50 text-xs mb-1 ml-1">
+          <span className="text-white/70 text-xs mb-1 ml-1">
             {getDisplayName()}
           </span>
         )}
@@ -862,7 +862,7 @@ function MessageBubble({
           </p>
         </div>
 
-        <span className="text-white/30 text-[10px] mt-1 px-1">
+        <span className="text-white/50 text-[10px] mt-1 px-1">
           {format(new Date(message.created_at), 'HH:mm')}
         </span>
       </div>
@@ -891,7 +891,7 @@ function EmptyConversationList({
       <h3 className="text-base font-medium text-white mb-0.5">
         {hasSearch ? 'Inga resultat' : 'Inga konversationer'}
       </h3>
-      <p className="text-white text-sm">
+      <p className="text-white/80 text-sm">
         {hasSearch
           ? 'Prova ett annat sökord'
           : 'Starta en konversation med en kandidat eller kollega'}
@@ -922,7 +922,7 @@ function EmptyChatState({
           <MessageSquare className="h-6 w-6 text-white" />
         </div>
         <h3 className="text-base font-medium text-white mb-0.5">Välj en konversation</h3>
-        <p className="text-white text-sm">Välj en konversation från listan</p>
+        <p className="text-white/80 text-sm">Välj en konversation från listan</p>
       </div>
     </div>
   );

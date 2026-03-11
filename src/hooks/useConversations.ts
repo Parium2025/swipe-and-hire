@@ -70,7 +70,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 4; // v4: unified per-candidate conversations with candidate_id
+const CACHE_VERSION = 5; // v5: cleaned up old messages system, unified conversations only
 
 interface CachedConversations {
   userId: string;
