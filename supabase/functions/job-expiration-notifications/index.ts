@@ -318,7 +318,7 @@ const handler = async (req: Request): Promise<Response> => {
           .update({ auto_close_notified_at: now.toISOString() })
           .eq("id", job.id);
 
-        console.log(`Auto-close messages sent for "${job.title}" to ${applicants.length} candidates`);
+        console.log(`Auto-close messages sent for "${job.title}" to ${uniqueApplicants.length} candidates`);
       }
     }
 
