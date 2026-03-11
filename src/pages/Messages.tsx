@@ -678,10 +678,10 @@ function ChatView({
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
-              <MessageSquare className="h-6 w-6 text-white/40" />
+              <MessageSquare className="h-6 w-6 text-white/60" />
             </div>
-            <p className="text-white/50 text-sm">Inga meddelanden ännu</p>
-            <p className="text-white/30 text-xs">Skriv ett meddelande för att starta konversationen</p>
+            <p className="text-white/70 text-sm">Inga meddelanden ännu</p>
+            <p className="text-white/50 text-xs">Skriv ett meddelande för att starta konversationen</p>
           </div>
         ) : (
           <div className="space-y-4">
