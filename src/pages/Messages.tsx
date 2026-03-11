@@ -750,7 +750,7 @@ function ChatView({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Skriv ett meddelande..."
-            className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+            className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-white placeholder:text-white/70 rounded-xl"
             rows={1}
           />
           <Button
