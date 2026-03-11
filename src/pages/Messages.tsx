@@ -642,7 +642,7 @@ function ChatView({
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-white truncate">{getDisplayName()}</h2>
           {conversation.is_group && (
-            <p className="text-white/50 text-xs">
+            <p className="text-white/70 text-xs">
               {conversation.members.length} medlemmar
             </p>
           )}
