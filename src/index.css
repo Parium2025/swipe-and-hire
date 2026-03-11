@@ -43,6 +43,22 @@ body {
   min-height: 100dvh;
 }
 
+/* ============================================
+   GLOBAL TOUCH IMPROVEMENTS
+   Ensures all interactive elements work well on touch devices
+   ============================================ */
+button,
+a,
+[role="button"],
+.cursor-pointer,
+[onclick] {
+  /* Prevent 300ms delay on mobile */
+  touch-action: manipulation;
+  /* Ensure elements are tapable */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* Sidebar-specific: disable tap highlight and focus outlines to prevent white flash */
 [data-sidebar="sidebar"],
 [data-sidebar="sidebar"] * {
