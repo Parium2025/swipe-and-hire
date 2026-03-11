@@ -449,6 +449,21 @@ const EmployerAnalytics = memo(() => {
     gcTime: 15 * 60 * 1000,
   });
 
+  const { data: advancedData } = useQuery({
+    queryKey: ['employer-advanced-analytics', user?.id, selectedDays],
+    queryFn: async () => {
+      if (!user) return null;
+      const params: any = { p_user_id: user.id };
+      if (selectedDays !== null) params.p_days_back = selectedDays;
+      const { data, error } = await supabase.rpc('get_employer_advanced_analytics', params);
+      if (error) throw error;
+      return data as unknown as AdvancedAnalyticsData;
+    },
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+  });
+
   const analytics = useMemo(() => rawData?.jobs?.map((job: any, index: number) => {
     const views = Number(job.views_count);
     const applications = Number(job.applications_count);
