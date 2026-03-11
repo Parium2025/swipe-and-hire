@@ -33,7 +33,7 @@ import { MessagesTabs } from '@/components/MessagesTabs';
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
 
 export default function Messages() {
-  const { user, profile } = useAuth();
+  const { user, userRole } = useAuth();
   const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
   const { hasTeam } = useTeamMembers();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
