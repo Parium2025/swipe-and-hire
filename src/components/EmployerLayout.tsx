@@ -30,9 +30,9 @@ interface EmployerLayoutProps {
 
 // Inner component that uses the KanbanLayout context
 const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: EmployerLayoutProps) => {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { invalidateJobs } = useJobsData();
-  const queryClient = useQueryClient();
+  const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const { shouldCollapseSidebar, stageCount } = useKanbanLayout();
