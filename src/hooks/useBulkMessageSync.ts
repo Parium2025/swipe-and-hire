@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import {
   findExistingConversationId,
   createConversationForCandidate,
@@ -10,6 +11,7 @@ import {
 } from '@/lib/conversationService';
 
 const BULK_QUEUE_KEY = 'parium_bulk_message_queue';
+const MAX_ATTEMPTS = 3;
 
 interface QueuedMessage {
   id: string;
@@ -22,10 +24,42 @@ interface QueuedMessage {
   attempts: number;
 }
 
+function isValidQueuedMessage(item: unknown): item is QueuedMessage {
+  if (!item || typeof item !== 'object') return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.id === 'string' &&
+    typeof obj.sender_id === 'string' &&
+    typeof obj.applicant_id === 'string' &&
+    typeof obj.content === 'string' &&
+    typeof obj.created_at === 'string' &&
+    typeof obj.attempts === 'number'
+  );
+}
+
+function getBulkQueue(): QueuedMessage[] {
+  try {
+    const raw = localStorage.getItem(BULK_QUEUE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidQueuedMessage);
+  } catch {
+    try { localStorage.removeItem(BULK_QUEUE_KEY); } catch { /* ignore */ }
+    return [];
+  }
+}
+
+function saveBulkQueue(items: QueuedMessage[]) {
+  try {
+    localStorage.setItem(BULK_QUEUE_KEY, JSON.stringify(items));
+  } catch {
+    console.error('Failed to save bulk message queue');
+  }
+}
+
 /**
- * Syncs queued bulk messages when the browser comes back online.
- * Previously inlined (~80 lines) inside CandidatesTable — now a
- * reusable hook that can be mounted anywhere in the component tree.
+ * Syncs queued bulk messages when connectivity is restored.
  */
 export function useBulkMessageSync() {
   const { user } = useAuth();
@@ -34,60 +68,75 @@ export function useBulkMessageSync() {
   useEffect(() => {
     if (!user) return;
 
-    const syncBulkQueue = async () => {
-      const raw = localStorage.getItem(BULK_QUEUE_KEY);
-      if (!raw) return;
+    let syncInProgress = false;
 
-      const items: QueuedMessage[] = JSON.parse(raw);
+    const syncBulkQueue = async () => {
+      if (syncInProgress) return;
+
+      const items = getBulkQueue();
+      if (items.length === 0) return;
+
       const myItems = items.filter((i) => i.sender_id === user.id);
       if (myItems.length === 0) return;
 
-      let sent = 0;
-      const remaining = items.filter((i) => i.sender_id !== user.id);
+      syncInProgress = true;
+      try {
+        let sent = 0;
+        const remaining = items.filter((i) => i.sender_id !== user.id);
 
-      for (const item of myItems) {
-        try {
-          let convId = await findExistingConversationId(user.id, item.applicant_id);
+        for (const item of myItems) {
+          try {
+            let convId = await findExistingConversationId(user.id, item.applicant_id);
 
-          if (!convId) {
-            convId = await createConversationForCandidate(
-              user.id,
-              item.applicant_id,
-              item.job_id || null,
-              item.application_id || null
-            );
-          }
+            if (!convId) {
+              convId = await createConversationForCandidate(
+                user.id,
+                item.applicant_id,
+                item.job_id || null,
+                item.application_id || null
+              );
+            }
 
-          await ensureConversationMemberships(convId, user.id, item.applicant_id);
+            await ensureConversationMemberships(convId, user.id, item.applicant_id);
 
-          await supabase
-            .from('conversation_messages')
-            .insert({ conversation_id: convId, sender_id: user.id, content: item.content });
+            const { error } = await supabase
+              .from('conversation_messages')
+              .insert({ conversation_id: convId, sender_id: user.id, content: item.content });
 
-          sent++;
-        } catch (e) {
-          console.error('Failed to sync bulk queued message:', e);
-          if (item.attempts < 3) {
-            remaining.push({ ...item, attempts: item.attempts + 1 });
+            if (error) throw error;
+            sent++;
+          } catch (e) {
+            console.error('Failed to sync bulk queued message:', e);
+            const nextAttempts = item.attempts + 1;
+            if (nextAttempts < MAX_ATTEMPTS) {
+              remaining.push({ ...item, attempts: nextAttempts });
+            }
           }
         }
-      }
 
-      localStorage.setItem(BULK_QUEUE_KEY, JSON.stringify(remaining));
-      if (sent > 0) {
-        toast.success(`${sent} köat meddelande${sent !== 1 ? 'n' : ''} skickat`);
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        saveBulkQueue(remaining);
+
+        if (sent > 0) {
+          toast.success(`${sent} köat meddelande${sent !== 1 ? 'n' : ''} skickat`);
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        }
+      } finally {
+        syncInProgress = false;
       }
     };
 
-    const handleOnline = () => {
-      if (navigator.onLine) syncBulkQueue();
-    };
+    const unsubscribe = onConnectivityChange((online) => {
+      if (online) {
+        void syncBulkQueue();
+      }
+    });
 
-    window.addEventListener('online', handleOnline);
     // Also try on mount
-    if (navigator.onLine) syncBulkQueue();
+    if (getIsOnline()) {
+      void syncBulkQueue();
+    }
 
-    return () => window.removeEventListener('online', handleOnline);
+    return unsubscribe;
   }, [user, queryClient]);
 }
+
