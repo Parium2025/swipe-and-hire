@@ -132,7 +132,7 @@ const ApplicationPatterns = memo(({ patterns }: { patterns: AppPattern[] }) => {
         </div>
 
         {/* Per-day bars */}
-        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-2">Per veckodag</p>
+        <p className="text-[10px] text-white uppercase tracking-wider mb-2">Per veckodag</p>
         <div className="space-y-1.5 mb-5">
           {dayData.map((day, i) => (
             <motion.div
