@@ -463,7 +463,7 @@ const Index = () => {
         case '/my-applications':
           return <MyApplications />;
         case '/messages':
-          return <JobSeekerMessages />;
+          return <Messages />;
         case '/subscription':
           return <Subscription />;
         case '/billing':
