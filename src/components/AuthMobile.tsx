@@ -1050,7 +1050,7 @@ const AuthMobile = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent 
-                                    className={`w-80 bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                    className={`w-80 glass-panel z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                     side="bottom"
                                     align="center"
                                     alignOffset={0}
