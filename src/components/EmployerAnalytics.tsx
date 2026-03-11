@@ -826,19 +826,6 @@ const EmployerAnalytics = memo(() => {
         </div>
       )}
 
-      {/* Per-job cards */}
-      {sortedJobs.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-white mb-3">Per annons</h3>
-          <div className="space-y-2.5">
-            <AnimatePresence mode="popLayout">
-              {sortedJobs.map((job, i) => (
-                <JobAnalyticsCard key={job.id} job={job} rank={i} />
-              ))}
-            </AnimatePresence>
-          </div>
-        </div>
-      )}
 
       {/* Empty state */}
       {analytics.length === 0 && !isLoading && (
