@@ -862,7 +862,7 @@ function MessageBubble({
           </p>
         </div>
 
-        <span className="text-white/50 text-[10px] mt-1 px-1">
+        <span className="text-white/70 text-[10px] mt-1 px-1">
           {format(new Date(message.created_at), 'HH:mm')}
         </span>
       </div>
