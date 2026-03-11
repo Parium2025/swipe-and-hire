@@ -254,7 +254,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
   const hasFilters = value.length > 0;
 
   // Dropdown styling matching nav dropdowns - left aligned
-  const dropdownContentClass = "min-w-[280px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-0";
+  const dropdownContentClass = "min-w-[280px] glass-panel shadow-xl z-[10000] rounded-lg p-0";
   const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/15 active:bg-white/15 focus-visible:bg-white/15 focus:outline-none rounded-md px-2.5 py-2 text-sm transition-colors";
 
   // chipsOnly mode: only render the filter chips

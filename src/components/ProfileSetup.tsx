@@ -294,7 +294,7 @@ const ProfileSetup = () => {
                       <SelectTrigger className="bg-background/50 border-white/10 focus:border-primary/50">
                         <SelectValue placeholder="Välj antal anställda" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-900/85 backdrop-blur-xl border border-white/20">
+                      <SelectContent className="glass-panel">
                         {EMPLOYEE_COUNT_OPTIONS.map((count) => (
                           <SelectItem key={count} value={count} className="hover:bg-primary/10">
                             {count}
