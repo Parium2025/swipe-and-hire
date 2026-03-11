@@ -357,7 +357,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                       <TooltipTrigger asChild>
                         <span className="text-white font-medium text-sm truncate max-w-[140px] cursor-default">{getUserDisplayName()}</span>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom" className="bg-popover text-popover-foreground border-border">{getUserDisplayName()}</TooltipContent>
+                      <TooltipContent side="bottom" className="bg-popover text-popover-foreground border-border">
                         {getUserDisplayName()}
                       </TooltipContent>
                     </Tooltip>
