@@ -648,7 +648,7 @@ function ChatView({
           )}
           {/* Show current job context from application snapshot */}
           {snapshot?.job_title ? (
-            <p className="text-blue-300/70 text-xs flex items-center gap-1">
+            <p className="text-blue-300 text-xs flex items-center gap-1">
               <Briefcase className="h-3 w-3" />
               <span className="truncate">{snapshot.job_title}</span>
             </p>
