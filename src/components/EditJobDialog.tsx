@@ -1750,7 +1750,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                           
                           {showSalaryTypeDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
                               {filteredSalaryTypes.map((type) => (
                                 <button
                                   key={type.value}
