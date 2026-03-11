@@ -398,6 +398,9 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
 
           {/* System Health Button (admin only) - after profile */}
           <SystemHealthButton onClick={() => setHealthPanelOpen(!healthPanelOpen)} />
+
+          {/* Extra right-side content (e.g. Create Job button) */}
+          {extraRight}
         </div>
       </div>
       </div>
