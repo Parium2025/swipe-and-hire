@@ -891,7 +891,7 @@ function EmptyConversationList({
       <h3 className="text-base font-medium text-white mb-0.5">
         {hasSearch ? 'Inga resultat' : 'Inga konversationer'}
       </h3>
-      <p className="text-white text-sm">
+      <p className="text-white/80 text-sm">
         {hasSearch
           ? 'Prova ett annat sökord'
           : 'Starta en konversation med en kandidat eller kollega'}
