@@ -468,7 +468,7 @@ function ConversationItem({
           )}>
             {getDisplayName()}
           </span>
-          <span className="text-white/60 text-xs flex-shrink-0">
+          <span className="text-white/80 text-xs flex-shrink-0">
             {formatTime(conversation.last_message_at)}
           </span>
         </div>
@@ -484,7 +484,7 @@ function ConversationItem({
           "text-sm truncate",
           conversation.unread_count > 0 ? "text-white font-medium" : "text-white/70"
         )}>
-          {isOwnMessage && <span className="text-white/60">Du: </span>}
+          {isOwnMessage && <span className="text-white/80">Du: </span>}
           {lastMessagePreview}
         </p>
       </div>
@@ -678,10 +678,10 @@ function ChatView({
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
-              <MessageSquare className="h-6 w-6 text-white/60" />
+              <MessageSquare className="h-6 w-6 text-white" />
             </div>
             <p className="text-white/70 text-sm">Inga meddelanden ännu</p>
-            <p className="text-white/50 text-xs">Skriv ett meddelande för att starta konversationen</p>
+            <p className="text-white/70 text-xs">Skriv ett meddelande för att starta konversationen</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -690,7 +690,7 @@ function ChatView({
                 {/* Date header */}
                 <div className="flex items-center gap-3 my-4">
                   <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-white/60 text-xs font-medium px-2">
+                  <span className="text-white/80 text-xs font-medium px-2">
                     {formatDateHeader(date)}
                   </span>
                   <div className="flex-1 h-px bg-white/10" />
@@ -725,11 +725,11 @@ function ChatView({
             exit={{ opacity: 0, height: 0 }}
             className="px-4 py-2 border-t border-white/5"
           >
-            <div className="flex items-center gap-2 text-white/60 text-sm">
+            <div className="flex items-center gap-2 text-white/80 text-sm">
               <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
               <span>
                 {typingUsers.length === 1 
@@ -750,7 +750,7 @@ function ChatView({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Skriv ett meddelande..."
-            className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+            className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-white placeholder:text-white/70 rounded-xl"
             rows={1}
           />
           <Button
@@ -815,7 +815,7 @@ function MessageBubble({
           {isJobContextMarker && <Briefcase className="h-3.5 w-3.5 text-blue-400" />}
           <span className={cn(
             "text-xs font-medium",
-            isJobContextMarker ? "text-blue-300" : "text-white/40 italic"
+            isJobContextMarker ? "text-blue-300" : "text-white/70 italic"
           )}>
             {message.content}
           </span>
@@ -862,7 +862,7 @@ function MessageBubble({
           </p>
         </div>
 
-        <span className="text-white/50 text-[10px] mt-1 px-1">
+        <span className="text-white/70 text-[10px] mt-1 px-1">
           {format(new Date(message.created_at), 'HH:mm')}
         </span>
       </div>
