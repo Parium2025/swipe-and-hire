@@ -468,13 +468,13 @@ function ConversationItem({
           )}>
             {getDisplayName()}
           </span>
-          <span className="text-white/80 text-xs flex-shrink-0">
+          <span className="text-pure-white text-xs flex-shrink-0">
             {formatTime(conversation.last_message_at)}
           </span>
         </div>
         
         {conversation.job && (
-          <div className="flex items-center gap-1 text-white/70 text-xs mb-0.5">
+          <div className="flex items-center gap-1 text-pure-white text-xs mb-0.5">
             <Briefcase className="h-3 w-3" />
             <span className="truncate">{conversation.job.title}</span>
           </div>
@@ -482,9 +482,9 @@ function ConversationItem({
         
         <p className={cn(
           "text-sm truncate",
-          conversation.unread_count > 0 ? "text-white font-medium" : "text-white/70"
+          conversation.unread_count > 0 ? "text-pure-white font-medium" : "text-pure-white"
         )}>
-          {isOwnMessage && <span className="text-white/80">Du: </span>}
+          {isOwnMessage && <span className="text-pure-white">Du: </span>}
           {lastMessagePreview}
         </p>
       </div>
