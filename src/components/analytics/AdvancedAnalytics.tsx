@@ -163,7 +163,7 @@ const ApplicationPatterns = memo(({ patterns }: { patterns: AppPattern[] }) => {
         </div>
 
         {/* Per-time-block bars */}
-        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-2">Per tidsblock</p>
+        <p className="text-[10px] text-white uppercase tracking-wider mb-2">Per tidsblock</p>
         <div className="space-y-1.5">
           {hourData.map((block, i) => (
             <motion.div
