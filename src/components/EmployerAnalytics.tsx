@@ -480,27 +480,6 @@ const EmployerAnalytics = memo(() => {
     };
   }, [analytics]);
 
-  const sortedJobs = useMemo(() => {
-    return [...analytics]
-      .filter((j: JobAnalytics) => j.is_active || j.views_count > 0 || j.applications_count > 0 || j.interviews_count > 0)
-      .sort((a: JobAnalytics, b: JobAnalytics) => {
-        if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
-        const scoreA = a.applications_count * 10 + a.views_count + a.interviews_count * 20;
-        const scoreB = b.applications_count * 10 + b.views_count + b.interviews_count * 20;
-        return scoreB - scoreA;
-      });
-  }, [analytics]);
-
-  const insights = useMemo(() => {
-    const tips: { jobTitle: string; message: string; type: 'warning' | 'success' }[] = [];
-    for (const job of sortedJobs) {
-      if (job.views_count >= 5 && job.applications_count === 0)
-        tips.push({ jobTitle: job.title, message: 'Många visningar men inga ansökningar — annonsen kanske behöver justeras', type: 'warning' });
-      if (job.views_count >= 3 && job.applications_count > 0 && (job.applications_count / job.views_count) >= 0.5)
-        tips.push({ jobTitle: job.title, message: 'Stark annonskonvertering — bra skriven annons!', type: 'success' });
-    }
-    return tips.slice(0, 2);
-  }, [sortedJobs]);
 
   // Average time to first application
   const avgTtfa = useMemo(() => {
