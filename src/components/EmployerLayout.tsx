@@ -33,7 +33,6 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
   const { user } = useAuth();
   const { invalidateJobs } = useJobsData();
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
-  const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const { shouldCollapseSidebar, stageCount } = useKanbanLayout();
   const device = useDevice();
