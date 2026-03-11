@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Activity, TrendingDown, Info, Hourglass } from 'lucide-react';
@@ -24,6 +24,7 @@ interface DropoffJob {
   views: number;
   applications: number;
   is_active: boolean;
+  expires_at?: string | null;
 }
 
 export interface AdvancedAnalyticsData {
@@ -250,18 +251,26 @@ const RecruitmentTimeCard = memo(({ data }: { data: RecruitmentTime }) => {
 });
 RecruitmentTimeCard.displayName = 'RecruitmentTimeCard';
 
-/* ─── Drop-off Analysis ─── */
+const isExpiredDropoffJob = (job: DropoffJob & { conversion_pct: number; dropoff_pct: number }) => {
+  if (!job.is_active) return true;
+  if (job.expires_at && new Date(job.expires_at) < new Date()) return true;
+  return false;
+};
+
 const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
+  const initialCount = 5;
+  const step = 5;
+  const [visibleCount, setVisibleCount] = useState(initialCount);
+
   const sortedJobs = useMemo(() => {
     return [...jobs]
       .map(j => {
-        // Clamp conversion to 0-100 range to handle edge cases
         const rawConversion = j.views > 0 ? (j.applications / j.views) * 100 : 0;
         const conversion_pct = Math.min(Math.round(rawConversion), 100);
         const dropoff_pct = Math.max(100 - conversion_pct, 0);
         return { ...j, dropoff_pct, conversion_pct };
       })
-      .sort((a, b) => a.conversion_pct - b.conversion_pct); // worst conversion first
+      .sort((a, b) => a.conversion_pct - b.conversion_pct);
   }, [jobs]);
 
   const avgConversion = useMemo(() => {
@@ -270,6 +279,8 @@ const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
   }, [sortedJobs]);
 
   if (!sortedJobs.length) return null;
+
+  const hasMore = visibleCount < sortedJobs.length;
 
   return (
     <Card className="bg-white/5 border-white/10 overflow-hidden">
@@ -302,35 +313,83 @@ const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
 
         {/* Per-job bars */}
         <div className="space-y-2">
-          {sortedJobs.slice(0, 8).map((job, i) => (
-            <motion.div
-              key={job.job_id}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: Math.min(i, 5) * 0.04 }}
-              className={`space-y-1 ${!job.is_active ? 'opacity-50' : ''}`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[12px] text-white truncate flex-1 min-w-0">{job.title}</span>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[10px] text-white tabular-nums">{job.views} vis.</span>
-                  <span className="text-[10px] text-white tabular-nums">{job.applications} ans.</span>
-                  <span className={`text-[11px] font-semibold tabular-nums ${
-                    job.conversion_pct < 10 ? 'text-red-400' : job.conversion_pct < 25 ? 'text-amber-400' : 'text-emerald-400'
-                  }`}>
-                    {job.conversion_pct}%
-                  </span>
+          {sortedJobs.slice(0, visibleCount).map((job, i) => {
+            const expired = isExpiredDropoffJob(job);
+            return (
+              <motion.div
+                key={job.job_id}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: Math.min(i, 5) * 0.04 }}
+                className={`space-y-1 ${expired ? 'opacity-50' : ''}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <span className="text-[12px] text-white truncate">{job.title}</span>
+                    {expired ? (
+                      <span className="shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-red-500/20 text-white border border-red-500/30">
+                        Utgången
+                      </span>
+                    ) : (
+                      <span className="shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 border border-green-500/30">
+                        Aktiv
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] text-white tabular-nums">{job.views} vis.</span>
+                    <span className="text-[10px] text-white tabular-nums">{job.applications} ans.</span>
+                    <span className={`text-[11px] font-semibold tabular-nums ${
+                      job.conversion_pct < 10 ? 'text-red-400' : job.conversion_pct < 25 ? 'text-amber-400' : 'text-emerald-400'
+                    }`}>
+                      {job.conversion_pct}%
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden flex">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-secondary/80 to-secondary/40 transition-all duration-700"
-                  style={{ width: `${Math.max(job.conversion_pct, 1)}%` }}
-                />
-              </div>
-            </motion.div>
-          ))}
+                <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden flex">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${
+                      expired
+                        ? 'bg-white/20'
+                        : 'bg-gradient-to-r from-secondary/80 to-secondary/40'
+                    }`}
+                    style={{ width: `${Math.max(job.conversion_pct, 1)}%` }}
+                  />
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
+
+        {/* Expandable controls */}
+        {(hasMore || visibleCount > initialCount) && (
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            {hasMore ? (
+              <button
+                onClick={() => setVisibleCount(prev => Math.min(prev + step, sortedJobs.length))}
+                className="py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+              >
+                Visa fler ({sortedJobs.length - visibleCount} kvar)
+              </button>
+            ) : <span />}
+            {visibleCount > initialCount ? (
+              <button
+                onClick={() => setVisibleCount(prev => Math.max(prev - step, initialCount))}
+                className="py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+              >
+                Visa färre
+              </button>
+            ) : <span />}
+            {visibleCount > initialCount ? (
+              <button
+                onClick={() => setVisibleCount(initialCount)}
+                className="py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+              >
+                Stäng alla
+              </button>
+            ) : <span />}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
