@@ -1291,7 +1291,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                        </Button>
                      </DropdownMenuTrigger>
                      <DropdownMenuContent 
-                       className="w-72 bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-50 rounded-md text-white overflow-visible"
+                       className="w-72 glass-panel z-50 rounded-md text-white overflow-visible"
                        side="top"
                        align="center"
                        alignOffset={0}
@@ -1348,7 +1348,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
-                        className="w-72 max-h-80 overflow-y-auto bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-50 rounded-md text-white"
+                        className="w-72 max-h-80 overflow-y-auto glass-panel z-50 rounded-md text-white"
                        side="top"
                        align="center"
                        alignOffset={0}
@@ -1394,7 +1394,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
-                        className="w-72 bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-50 rounded-md text-white overflow-visible"
+                        className="w-72 glass-panel z-50 rounded-md text-white overflow-visible"
                        side="top"
                        align="center"
                        alignOffset={0}

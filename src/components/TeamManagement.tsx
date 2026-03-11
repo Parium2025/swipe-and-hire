@@ -260,7 +260,7 @@ const TeamManagement = () => {
             <SelectTrigger className="w-full sm:w-40 bg-white/5 border-white/10 text-white h-9 text-sm">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-900/85 backdrop-blur-xl border border-white/20">
+            <SelectContent className="glass-panel">
               <SelectItem value="admin" className="text-white hover:bg-white/20">Admin</SelectItem>
               <SelectItem value="recruiter" className="text-white hover:bg-white/20">Rekryterare</SelectItem>
               <SelectItem value="viewer" className="text-white hover:bg-white/20">Läsare</SelectItem>
@@ -335,7 +335,7 @@ const TeamManagement = () => {
                       <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white h-8 text-sm">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-900/85 backdrop-blur-xl border border-white/20">
+                      <SelectContent className="glass-panel">
                         <SelectItem value="admin" className="text-white hover:bg-white/20">Admin</SelectItem>
                         <SelectItem value="recruiter" className="text-white hover:bg-white/20">Rekryterare</SelectItem>
                         <SelectItem value="viewer" className="text-white hover:bg-white/20">Läsare</SelectItem>

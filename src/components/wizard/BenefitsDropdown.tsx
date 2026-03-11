@@ -88,7 +88,7 @@ export const BenefitsDropdown = ({
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 mt-1 w-full bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg max-h-72 overflow-hidden">
+          <div className="absolute z-50 mt-1 w-full glass-panel rounded-md max-h-72 overflow-hidden">
             {/* Predefined benefits */}
             <div className="max-h-48 overflow-y-auto">
               {BENEFITS_OPTIONS.map((option) => (

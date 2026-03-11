@@ -1421,5 +1421,10 @@ All colors MUST be HSL.
    Standardises the bg-slate-900/85 + backdrop-blur pattern.
    ============================================ */
 .glass-panel {
-  @apply bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl;
+  @apply bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg;
+}
+
+/* Glass dropdown: positioned absolute dropdown variant */
+.glass-dropdown {
+  @apply absolute z-50 glass-panel rounded-md mt-1;
 }

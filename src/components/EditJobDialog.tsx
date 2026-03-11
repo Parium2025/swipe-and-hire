@@ -1564,7 +1564,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
                           
                           {showOccupationDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
                               {filteredOccupations.map((occupation, index) => (
                                 <button
                                   key={`${occupation}-${index}`}
@@ -1625,7 +1625,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           </div>
                           
                           {showBenefitsDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
                               {benefitOptions.map((benefit) => (
                                 <button
                                   key={benefit.value}
@@ -1720,7 +1720,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                           
                           {showEmploymentTypeDropdown && (
-                             <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg">
+                             <div className="absolute top-full left-0 right-0 glass-dropdown">
                               {filteredEmploymentTypes.map((type) => (
                                 <button
                                   key={type.value}
@@ -1750,7 +1750,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                           
                           {showSalaryTypeDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
                               {filteredSalaryTypes.map((type) => (
                                 <button
                                   key={type.value}
@@ -1780,7 +1780,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                           
                           {showSalaryTransparencyDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
                               {filteredSalaryTransparencyOptions.map((option) => (
                                 <button
                                   key={option.value}
@@ -1920,7 +1920,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                           
                           {showWorkLocationDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
                               {filteredWorkLocationTypes.map((type) => (
                                 <button
                                   key={type.value}
@@ -1950,7 +1950,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                           
                           {showRemoteWorkDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
                               {filteredRemoteWorkOptions.map((type) => (
                                 <button
                                   key={type.value}
@@ -2261,7 +2261,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                                 
                                 {showQuestionTypeDropdown && (
-                                  <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-48 overflow-y-auto">
+                                  <div className="absolute top-full left-0 right-0 glass-dropdown max-h-48 overflow-y-auto">
                                     {filteredQuestionTypes.map((type) => (
                                       <button
                                         key={type.value}
