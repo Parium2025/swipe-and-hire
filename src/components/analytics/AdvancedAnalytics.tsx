@@ -75,17 +75,30 @@ const ApplicationPatterns = memo(({ patterns }: { patterns: AppPattern[] }) => {
     
     // Group hours into 3-hour blocks for cleaner display
     const hourBlocks: { label: string; count: number; isPeak: boolean }[] = [];
+    let maxBlockCount = 0;
+    let peakBlockIndex = 0;
     for (let h = 0; h < 24; h += 3) {
       const blockCount = hours[h] + hours[h + 1] + hours[h + 2];
       const end = h + 3 > 23 ? '00' : String(h + 3).padStart(2, '0');
+      const idx = h / 3;
+      if (blockCount > maxBlockCount) {
+        maxBlockCount = blockCount;
+        peakBlockIndex = idx;
+      }
       hourBlocks.push({
         label: `${String(h).padStart(2, '0')}–${end}`,
         count: blockCount,
-        isPeak: h <= pHour && pHour < h + 3,
+        isPeak: false, // set below
       });
     }
+    if (hourBlocks.length > 0) {
+      hourBlocks[peakBlockIndex].isPeak = true;
+    }
     
-    return { dayData: orderedDays, hourData: hourBlocks, peakDay: pDay, peakHour: pHour, totalApps: total };
+    // Update peakHour to reflect the start of the peak block for the pill display
+    const actualPeakHour = peakBlockIndex * 3;
+    
+    return { dayData: orderedDays, hourData: hourBlocks, peakDay: pDay, peakHour: actualPeakHour, totalApps: total };
   }, [patterns]);
 
   if (totalApps === 0) return null;
