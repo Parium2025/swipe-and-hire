@@ -468,7 +468,7 @@ function ConversationItem({
           )}>
             {getDisplayName()}
           </span>
-          <span className="text-white/60 text-xs flex-shrink-0">
+          <span className="text-white/80 text-xs flex-shrink-0">
             {formatTime(conversation.last_message_at)}
           </span>
         </div>
