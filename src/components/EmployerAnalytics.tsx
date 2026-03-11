@@ -695,28 +695,6 @@ const EmployerAnalytics = memo(() => {
         </Card>
       )}
 
-      {/* Smart insights */}
-      {insights.length > 0 && (
-        <div className="space-y-2">
-          {insights.map((tip, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className={`flex items-start gap-3 rounded-xl px-4 py-3 ${
-                tip.type === 'warning' ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-emerald-500/10 border border-emerald-500/20'
-              }`}
-            >
-              <span className="text-sm mt-0.5">{tip.type === 'warning' ? '⚠️' : '✨'}</span>
-              <div className="min-w-0">
-                <p className="text-[13px] text-white font-medium truncate">{tip.jobTitle}</p>
-                <p className="text-[12px] text-white">{tip.message}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
 
 
       {/* Empty state */}
