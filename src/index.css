@@ -1414,3 +1414,12 @@ All colors MUST be HSL.
   }
 }
 
+/* ============================================
+   GLASS PANEL
+   Reusable glass-morphism panel used for dropdowns,
+   popovers, notification centers etc.
+   Standardises the bg-slate-900/85 + backdrop-blur pattern.
+   ============================================ */
+.glass-panel {
+  @apply bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl;
+}

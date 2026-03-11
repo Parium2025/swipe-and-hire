@@ -8,8 +8,6 @@ import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import { useJobsData } from '@/hooks/useJobsData';
-import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useDevice } from '@/hooks/use-device';
@@ -17,6 +15,7 @@ import { useEmployerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCandidateBackgroundSync } from '@/hooks/useCandidateBackgroundSync';
 import { useEagerRatingsPreload } from '@/hooks/useEagerRatingsPreload';
 import { useEmployerBackgroundSync } from '@/hooks/useEmployerBackgroundSync';
+import { useEmployerPrefetch } from '@/hooks/useEmployerPrefetch';
 import { DevOfflineToggle } from '@/components/DevOfflineToggle';
 import { FloatingBubbles } from '@/components/FloatingBubbles';
 import { Plus } from 'lucide-react';
@@ -31,9 +30,8 @@ interface EmployerLayoutProps {
 
 // Inner component that uses the KanbanLayout context
 const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: EmployerLayoutProps) => {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { invalidateJobs } = useJobsData();
-  const queryClient = useQueryClient();
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const { shouldCollapseSidebar, stageCount } = useKanbanLayout();
@@ -101,96 +99,8 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // Applications prefetch is handled by usePrefetchApplications (used in sidebar/topnav on hover)
-  // and useEmployerBackgroundSync (on mount/tab-focus). No need to duplicate here.
-
-  // Prefetch job templates for instant "Skapa ny annons" dialog load
-  useEffect(() => {
-    if (!user) return;
-
-    const prefetchTemplates = async () => {
-      try {
-        const { data } = await supabase
-          .from('job_templates')
-          .select('*')
-          .eq('employer_id', user.id)
-          .order('is_default', { ascending: false })
-          .order('created_at', { ascending: false });
-        
-        // Cache in queryClient for instant access
-        if (data) {
-          queryClient.setQueryData(['job-templates', user.id], data);
-        }
-      } catch (error) {
-        console.error('Failed to prefetch templates:', error);
-      }
-    };
-
-    prefetchTemplates();
-  }, [user, queryClient]);
-
-  // Prefetch company profile for instant /reviews load
-  useEffect(() => {
-    if (!user) return;
-
-    queryClient.prefetchQuery({
-      queryKey: ['company-profile', user.id],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (error) throw error;
-        return data;
-      },
-    });
-  }, [user, queryClient]);
-
-  // Prefetch company reviews for instant /reviews load
-  useEffect(() => {
-    if (!user) return;
-
-    queryClient.prefetchQuery({
-      queryKey: ['company-reviews', user.id],
-      queryFn: async () => {
-        // Fetch reviews first
-        const { data: reviews, error } = await supabase
-          .from('company_reviews')
-          .select('*')
-          .eq('company_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (!reviews || reviews.length === 0) return [];
-
-        // Fetch profiles for non-anonymous reviews
-        const userIds = reviews
-          .filter(r => !r.is_anonymous)
-          .map(r => r.user_id);
-
-        if (userIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('user_id, first_name, last_name')
-            .in('user_id', userIds);
-
-          if (profiles) {
-            const profileMap = new Map(profiles.map(p => [p.user_id, p]));
-            return reviews.map(r => ({
-              ...r,
-              profiles: profileMap.get(r.user_id) || undefined,
-            }));
-          }
-        }
-
-        return reviews;
-      },
-    });
-  }, [user, queryClient]);
-
-  // Conversations prefetch is handled by useEmployerBackgroundSync (preloadConversations)
+  // Prefetch templates, company profile, reviews
+  useEmployerPrefetch();
 
   // Desktop layout with top navigation
   if (isDesktop) {

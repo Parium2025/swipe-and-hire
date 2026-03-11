@@ -62,7 +62,7 @@ const profileItems = [
 ];
 
 // Dropdown styling matching the sort dropdown - compact and centered
-const dropdownContentClass = "min-w-[160px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-1";
+const dropdownContentClass = "min-w-[160px] glass-panel z-[10000] rounded-lg p-1";
 const dropdownItemClass = "flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors";
 const dropdownItemActiveClass = "bg-white/15 text-white";
 
