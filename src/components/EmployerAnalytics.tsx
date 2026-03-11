@@ -199,7 +199,7 @@ const DeviceDonut = memo(({ data }: { data: DeviceBreakdown[] }) => {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
 
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex flex-col items-center gap-5 sm:flex-row sm:justify-center">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {segments.map((seg, i) => {
           const largeArc = seg.angle > 180 ? 1 : 0;
