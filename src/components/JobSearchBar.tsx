@@ -177,7 +177,7 @@ export const JobSearchBar = memo(({
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 align="end" 
-                className="w-[200px] z-[10000] bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg"
+                className="w-[200px] z-[10000] glass-panel rounded-md"
               >
                 <DropdownMenuItem onClick={() => onSortChange('newest')} className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer">{sortLabels.newest}</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onSortChange('oldest')} className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer">{sortLabels.oldest}</DropdownMenuItem>
