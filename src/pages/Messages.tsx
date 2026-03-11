@@ -33,7 +33,7 @@ import { MessagesTabs } from '@/components/MessagesTabs';
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
 
 export default function Messages() {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
   const { hasTeam } = useTeamMembers();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -329,7 +329,7 @@ export default function Messages() {
               conversation={selectedConversation} 
               currentUserId={user?.id || ''}
               onBack={handleBackToList}
-              currentUserRole={(user?.role as 'job_seeker' | 'employer') || null}
+              currentUserRole={(userRole?.role as 'job_seeker' | 'employer') || null}
             />
           ) : (
             <EmptyChatState
