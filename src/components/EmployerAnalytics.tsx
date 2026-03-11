@@ -531,7 +531,7 @@ const EmployerAnalytics = memo(() => {
   return (
     <div className={`space-y-5 transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0'}`}>
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col items-center gap-2 text-center">
         <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center">
           <BarChart3 className="h-5 w-5 text-white" />
         </div>
@@ -542,7 +542,7 @@ const EmployerAnalytics = memo(() => {
       </div>
 
       {/* Time filter pills */}
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5 justify-center">
         {TIME_FILTERS.map((f) => (
           <button
             key={f.label}
