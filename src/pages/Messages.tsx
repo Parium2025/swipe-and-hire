@@ -484,7 +484,7 @@ function ConversationItem({
           "text-sm truncate",
           conversation.unread_count > 0 ? "text-white font-medium" : "text-white/70"
         )}>
-          {isOwnMessage && <span className="text-white/60">Du: </span>}
+          {isOwnMessage && <span className="text-white/80">Du: </span>}
           {lastMessagePreview}
         </p>
       </div>
