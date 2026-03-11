@@ -376,31 +376,31 @@ const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
 
         {/* Expandable controls */}
         {(hasMore || visibleCount > initialCount) && (
-          <div className="grid grid-cols-3 gap-2 mt-3">
-            {hasMore ? (
+          <div className="flex flex-wrap gap-2 mt-3 justify-center">
+            {hasMore && (
               <button
                 onClick={() => setVisibleCount(prev => Math.min(prev + step, sortedJobs.length))}
-                className="py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+                className="py-2 px-4 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
               >
                 Visa fler ({sortedJobs.length - visibleCount} kvar)
               </button>
-            ) : <span />}
-            {visibleCount > initialCount ? (
+            )}
+            {visibleCount > initialCount && (
               <button
                 onClick={() => setVisibleCount(prev => Math.max(prev - step, initialCount))}
-                className="py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+                className="py-2 px-4 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
               >
                 Visa färre
               </button>
-            ) : <span />}
-            {visibleCount > initialCount ? (
+            )}
+            {visibleCount > initialCount && (
               <button
                 onClick={() => setVisibleCount(initialCount)}
-                className="py-2 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
+                className="py-2 px-4 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
               >
                 Stäng alla
               </button>
-            ) : <span />}
+            )}
           </div>
         )}
       </CardContent>
