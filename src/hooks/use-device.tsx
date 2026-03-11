@@ -1,7 +1,7 @@
 import { useRef, useSyncExternalStore } from 'react';
 
-// Mobile breakpoint - below this we use mobile layout with sidebar
-const MOBILE_BREAKPOINT = 768;
+// Desktop breakpoint - below this we use mobile/tablet layout with sidebar
+const MOBILE_BREAKPOINT = 1024;
 
 export type DeviceType = 'mobile' | 'desktop';
 
