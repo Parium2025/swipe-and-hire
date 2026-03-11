@@ -1092,7 +1092,7 @@ const CompanyProfile = () => {
                     </div>
                     
                     {platformMenuOpen && (
-                      <div className="absolute bottom-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mb-1 shadow-lg">
+                      <div className="absolute bottom-full left-0 right-0 z-50 glass-panel rounded-md mb-1">
                         {SOCIAL_PLATFORMS.map((platform) => {
                           const Icon = platform.icon;
                           return (
