@@ -627,33 +627,25 @@ function ChatView({
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className="md:hidden text-white/70 hover:text-white"
+          className="md:hidden text-pure-white hover:text-pure-white"
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
-
-        <ConversationAvatar
-          profile={avatarProfile}
-          isGroup={conversation.is_group}
-          groupName={conversation.name}
-          size="md"
-        />
-
-        <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-white truncate">{getDisplayName()}</h2>
+...
+          <h2 className="font-semibold text-pure-white truncate">{getDisplayName()}</h2>
           {conversation.is_group && (
-            <p className="text-white/70 text-xs">
+            <p className="text-pure-white text-xs">
               {conversation.members.length} medlemmar
             </p>
           )}
           {/* Show current job context from application snapshot */}
           {snapshot?.job_title ? (
-            <p className="text-blue-300 text-xs flex items-center gap-1">
+            <p className="text-pure-white text-xs flex items-center gap-1">
               <Briefcase className="h-3 w-3" />
               <span className="truncate">{snapshot.job_title}</span>
             </p>
           ) : conversation.job && (
-            <p className="text-white/70 text-xs flex items-center gap-1">
+            <p className="text-pure-white text-xs flex items-center gap-1">
               <Briefcase className="h-3 w-3" />
               {conversation.job.title}
             </p>
