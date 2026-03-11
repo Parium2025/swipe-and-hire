@@ -69,10 +69,14 @@ export const StageColumn = ({
     checkScroll();
   }, [candidates.length, checkScroll]);
 
+  // Dynamic gap: (totalStageCount - 1) * 0.75rem
+  const gapTotal = `${(totalStageCount - 1) * 0.75}rem`;
+
   return (
     <div
       ref={setNodeRef}
-      className="flex-none w-[calc((100%-3rem)/5)] flex flex-col transition-colors h-full min-w-0"
+      className="flex-none flex flex-col transition-colors h-full min-w-0"
+      style={{ width: `calc((100% - ${gapTotal}) / ${totalStageCount})` }}
     >
       <div
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${
