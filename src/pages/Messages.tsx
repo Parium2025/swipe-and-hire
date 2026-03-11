@@ -329,7 +329,7 @@ export default function Messages() {
               conversation={selectedConversation} 
               currentUserId={user?.id || ''}
               onBack={handleBackToList}
-              currentUserRole={(profile?.role as 'job_seeker' | 'employer') || null}
+              currentUserRole={(userRole?.role as 'job_seeker' | 'employer') || null}
             />
           ) : (
             <EmptyChatState
