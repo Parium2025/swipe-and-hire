@@ -804,10 +804,10 @@ function MessageBubble({
             ? "bg-blue-500/10 border border-blue-500/20" 
             : "bg-white/5"
         )}>
-          {isJobContextMarker && <Briefcase className="h-3.5 w-3.5 text-blue-400" />}
+          {isJobContextMarker && <Briefcase className="h-3.5 w-3.5 text-pure-white" />}
           <span className={cn(
             "text-xs font-medium",
-            isJobContextMarker ? "text-blue-300" : "text-white/70 italic"
+            isJobContextMarker ? "text-pure-white" : "text-pure-white italic"
           )}>
             {message.content}
           </span>
