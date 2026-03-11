@@ -834,7 +834,7 @@ const EmployerProfile = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
-                      className="w-80 bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-50 rounded-md text-white overflow-hidden"
+                      className="w-80 glass-panel z-50 rounded-md text-white overflow-hidden"
                       side="top"
                       align="center"
                       alignOffset={0}
