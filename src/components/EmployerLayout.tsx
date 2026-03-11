@@ -263,24 +263,26 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
          <div className="h-screen flex flex-col w-full overflow-hidden relative">
           <AnimatedBackground showBubbles={false} />
           
-          {/* Top Navigation for Desktop */}
+           {/* Top Navigation for Desktop */}
           <header className="sticky top-0 z-40">
-            <EmployerTopNav />
-            {/* Developer controls and Create Job button */}
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
-              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && (
-                <DeveloperControls 
-                  onViewChange={onViewChange}
-                  currentView={developerView}
-                />
-              )}
-              <CreateJobSimpleDialog
-                onJobCreated={() => {
-                  invalidateJobs();
-                }}
-                triggerRef={createJobButtonRef}
-              />
-            </div>
+            <EmployerTopNav
+              extraRight={
+                <div className="flex items-center gap-3">
+                  {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && (
+                    <DeveloperControls 
+                      onViewChange={onViewChange}
+                      currentView={developerView}
+                    />
+                  )}
+                  <CreateJobSimpleDialog
+                    onJobCreated={() => {
+                      invalidateJobs();
+                    }}
+                    triggerRef={createJobButtonRef}
+                  />
+                </div>
+              }
+            />
           </header>
           
           {/* Bubbles - positioned below header */}

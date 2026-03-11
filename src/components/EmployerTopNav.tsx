@@ -66,7 +66,7 @@ const dropdownContentClass = "min-w-[160px] bg-slate-900/85 backdrop-blur-xl bor
 const dropdownItemClass = "flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors";
 const dropdownItemActiveClass = "bg-white/15 text-white";
 
-function EmployerTopNav() {
+function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   const { profile, signOut, user, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedMyCandidates, preloadedCompanyLogoUrl } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -398,6 +398,9 @@ function EmployerTopNav() {
 
           {/* System Health Button (admin only) - after profile */}
           <SystemHealthButton onClick={() => setHealthPanelOpen(!healthPanelOpen)} />
+
+          {/* Extra right-side content (e.g. Create Job button) */}
+          {extraRight}
         </div>
       </div>
       </div>
