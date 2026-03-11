@@ -874,7 +874,7 @@ const CompanyProfile = () => {
                   </div>
                   
                   {industryMenuOpen && (
-                    <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg max-h-80 overflow-hidden">
+                    <div className="absolute top-full left-0 right-0 z-50 glass-panel rounded-md mt-1 max-h-80 overflow-hidden">
                       {/* Search input */}
                       <div className="p-2 border-b border-white/10 sticky top-0 bg-slate-900/95">
                         <div className="relative">
