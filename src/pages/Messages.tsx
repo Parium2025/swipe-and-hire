@@ -276,12 +276,12 @@ export default function Messages() {
 
             {/* Search */}
             <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-pure-white" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Sök konversationer..."
-                className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/70"
+                className="pl-9 bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white"
               />
             </div>
           </div>
