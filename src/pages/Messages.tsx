@@ -653,7 +653,7 @@ function ChatView({
               <span className="truncate">{snapshot.job_title}</span>
             </p>
           ) : conversation.job && (
-            <p className="text-white/50 text-xs flex items-center gap-1">
+            <p className="text-white/70 text-xs flex items-center gap-1">
               <Briefcase className="h-3 w-3" />
               {conversation.job.title}
             </p>
