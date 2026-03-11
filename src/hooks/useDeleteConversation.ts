@@ -4,39 +4,30 @@ import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 
 /**
- * Hook for deleting a conversation (all messages between user and another party)
+ * Hook for deleting a conversation (leaves the conversation by removing membership).
+ * Uses the new conversations system (conversation_messages + conversation_members).
  */
 export function useDeleteConversation() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
-    mutationFn: async (otherUserId: string) => {
+    mutationFn: async (conversationId: string) => {
       if (!user) throw new Error('Not authenticated');
       if (!navigator.onLine) throw new Error('Du är offline');
 
-      // Delete all messages in both directions between these two users
-      const { error: sentError } = await supabase
-        .from('messages')
+      // Remove own membership from conversation (effectively "deleting" it for this user)
+      const { error } = await supabase
+        .from('conversation_members')
         .delete()
-        .eq('sender_id', user.id)
-        .eq('recipient_id', otherUserId);
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
 
-      if (sentError) throw sentError;
-
-      const { error: receivedError } = await supabase
-        .from('messages')
-        .delete()
-        .eq('sender_id', otherUserId)
-        .eq('recipient_id', user.id);
-
-      if (receivedError) throw receivedError;
-
-      return otherUserId;
+      if (error) throw error;
+      return conversationId;
     },
     onSuccess: () => {
-      // Invalidate all message queries
-      queryClient.invalidateQueries({ queryKey: ['messages'] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
       toast.success('Konversation raderad');
     },
     onError: (error: Error) => {
