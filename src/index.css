@@ -1379,7 +1379,7 @@ All colors MUST be HSL.
 /* Standard container: reading-focused views (profile, messages, settings) */
 .responsive-container {
   width: 100%;
-  max-width: clamp(20rem, 75vw, 56rem); /* 320px → 75% viewport → 896px max */
+  max-width: 56rem; /* 896px max */
   margin-inline: auto;
   padding-inline: clamp(0.75rem, 3vw, 2rem);
 }
@@ -1387,7 +1387,7 @@ All colors MUST be HSL.
 /* Wide container: data-heavy views (kanban, tables, dashboards) */
 .responsive-container-wide {
   width: 100%;
-  max-width: clamp(20rem, 82vw, 76rem); /* 320px → 82% viewport → 1216px max */
+  max-width: 76rem; /* 1216px max */
   margin-inline: auto;
   padding-inline: clamp(0.75rem, 2.5vw, 2rem);
 }
