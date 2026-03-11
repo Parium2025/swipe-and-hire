@@ -2671,7 +2671,7 @@ const MobileJobWizard = ({
                     
                     {/* Employment Type Dropdown */}
                     {showEmploymentTypeDropdown && (
-                       <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg">
+                       <div className="absolute top-full left-0 right-0 glass-dropdown">
                         {filteredEmploymentTypes.map((type) => (
                           <button
                             key={type.value}
