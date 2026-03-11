@@ -2541,7 +2541,7 @@ const MobileJobWizard = ({
                     </div>
                     
                     {showBenefitsDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
                         {[
                           { value: 'friskvard', label: 'Friskvårdsbidrag' },
                           { value: 'tjanstepension', label: 'Tjänstepension' },
