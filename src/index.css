@@ -1421,5 +1421,5 @@ All colors MUST be HSL.
    Standardises the bg-slate-900/85 + backdrop-blur pattern.
    ============================================ */
 .glass-panel {
-  @apply bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl;
+  @apply bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg;
 }
