@@ -194,7 +194,7 @@ const handler = async (req: Request): Promise<Response> => {
         // Find all candidates who applied and haven't been hired or rejected
         const { data: applicants, error: appError } = await supabase
           .from("job_applications")
-          .select("applicant_id")
+          .select("id, applicant_id")
           .eq("job_id", job.id)
           .not("status", "in", '("hired","rejected")');
 
@@ -203,7 +203,11 @@ const handler = async (req: Request): Promise<Response> => {
           continue;
         }
 
-        if (!applicants || applicants.length === 0) {
+        const uniqueApplicants = Array.from(
+          new Map((applicants || []).map((app) => [app.applicant_id, app])).values()
+        );
+
+        if (uniqueApplicants.length === 0) {
           // No candidates to notify, mark as done
           await supabase
             .from("job_postings")
@@ -212,7 +216,7 @@ const handler = async (req: Request): Promise<Response> => {
           continue;
         }
 
-        console.log(`Sending auto-close messages to ${applicants.length} candidates for "${job.title}"`);
+        console.log(`Sending auto-close messages to ${uniqueApplicants.length} candidates for "${job.title}"`);
 
         // Check if employer has a default message template
         let messageContent = `Hej! Tjänsten "${job.title}" hos ${companyName} har nu avslutats. Vi ser över alla kandidater som sökt och kontaktar dig om du blir aktuell för att gå vidare. Tack för ditt intresse och lycka till! 🙏`;
@@ -230,25 +234,83 @@ const handler = async (req: Request): Promise<Response> => {
           messageContent = defaultTemplate.content.replace(/\{job_title\}/g, job.title);
         }
 
-        // Send message to each candidate via the messages table
-        const messagesToInsert = applicants.map(app => ({
-          sender_id: job.employer_id,
-          recipient_id: app.applicant_id,
-          content: messageContent,
-          job_id: job.id,
-          is_read: false,
-        }));
+        for (const applicant of uniqueApplicants) {
+          let conversationId: string | null = null;
 
-        const { error: msgError } = await supabase
-          .from("messages")
-          .insert(messagesToInsert);
+          const { data: existingConversation, error: existingConversationError } = await supabase
+            .from("conversations")
+            .select("id")
+            .eq("candidate_id", applicant.applicant_id)
+            .not("candidate_id", "is", null)
+            .maybeSingle();
 
-        if (msgError) {
-          console.error(`Error sending auto-close messages for job ${job.id}:`, msgError);
-          continue;
+          if (existingConversationError) {
+            console.error(`Error finding conversation for candidate ${applicant.applicant_id}:`, existingConversationError);
+            continue;
+          }
+
+          if (existingConversation?.id) {
+            conversationId = existingConversation.id;
+          } else {
+            const { data: createdConversation, error: createConversationError } = await supabase
+              .from("conversations")
+              .insert({
+                name: null,
+                is_group: false,
+                job_id: job.id,
+                application_id: applicant.id,
+                candidate_id: applicant.applicant_id,
+                created_by: job.employer_id,
+              })
+              .select("id")
+              .single();
+
+            if (createConversationError || !createdConversation?.id) {
+              console.error(`Error creating conversation for candidate ${applicant.applicant_id}:`, createConversationError);
+              continue;
+            }
+
+            conversationId = createdConversation.id;
+          }
+
+          const { error: membersError } = await supabase
+            .from("conversation_members")
+            .upsert(
+              [
+                {
+                  conversation_id: conversationId,
+                  user_id: job.employer_id,
+                  is_admin: true,
+                },
+                {
+                  conversation_id: conversationId,
+                  user_id: applicant.applicant_id,
+                  is_admin: false,
+                },
+              ],
+              { onConflict: "conversation_id,user_id" }
+            );
+
+          if (membersError) {
+            console.error(`Error ensuring conversation members for ${conversationId}:`, membersError);
+            continue;
+          }
+
+          const { error: msgError } = await supabase
+            .from("conversation_messages")
+            .insert({
+              conversation_id: conversationId,
+              sender_id: job.employer_id,
+              content: messageContent,
+            });
+
+          if (msgError) {
+            console.error(`Error sending auto-close message for conversation ${conversationId}:`, msgError);
+            continue;
+          }
+
+          autoCloseMessagesSent += 1;
         }
-
-        autoCloseMessagesSent += applicants.length;
 
         // Mark job as notified
         await supabase

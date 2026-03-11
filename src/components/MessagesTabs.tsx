@@ -69,7 +69,7 @@ export function MessagesTabs({
         ref={allRef}
         type="button"
         onClick={() => onTabChange('all')}
-        className="relative z-10 flex-1 py-1.5 px-3 rounded-md text-xs font-medium text-white transition-colors whitespace-nowrap"
+        className="relative z-10 flex-1 py-1.5 px-3 rounded-md text-xs font-medium text-pure-white transition-colors whitespace-nowrap"
       >
         Alla
         {totalUnreadCount > 0 && (
@@ -82,7 +82,7 @@ export function MessagesTabs({
         ref={candidatesRef}
         type="button"
         onClick={() => onTabChange('candidates')}
-        className="relative z-10 flex-1 py-1.5 px-3 rounded-md text-xs font-medium text-white transition-colors whitespace-nowrap flex items-center justify-center gap-1.5"
+        className="relative z-10 flex-1 py-1.5 px-3 rounded-md text-xs font-medium text-pure-white transition-colors whitespace-nowrap flex items-center justify-center gap-1.5"
       >
         <User className="h-3 w-3" />
         Kandidater
@@ -96,7 +96,7 @@ export function MessagesTabs({
         ref={colleaguesRef}
         type="button"
         onClick={() => onTabChange('colleagues')}
-        className="relative z-10 flex-1 py-1.5 px-3 rounded-md text-xs font-medium text-white transition-colors whitespace-nowrap flex items-center justify-center gap-1.5"
+        className="relative z-10 flex-1 py-1.5 px-3 rounded-md text-xs font-medium text-pure-white transition-colors whitespace-nowrap flex items-center justify-center gap-1.5"
       >
         <Users className="h-3 w-3" />
         Kollegor
