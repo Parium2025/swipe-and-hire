@@ -846,7 +846,7 @@ function MessageBubble({
       )}>
         {/* Sender name for group chats */}
         {isGroup && showAvatar && !isOwn && (
-          <span className="text-white/50 text-xs mb-1 ml-1">
+          <span className="text-white/70 text-xs mb-1 ml-1">
             {getDisplayName()}
           </span>
         )}
