@@ -48,7 +48,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TruncatedText } from '@/components/TruncatedText';
 import MyCandidates from '@/pages/MyCandidates';
 import Messages from '@/pages/Messages';
-import JobSeekerMessages from '@/pages/JobSeekerMessages';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
 
 const CandidatesContent = () => {
