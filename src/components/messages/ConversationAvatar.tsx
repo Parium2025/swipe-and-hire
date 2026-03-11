@@ -63,7 +63,7 @@ export function ConversationAvatar({
         className
       )}>
         <Users className={cn(
-          "text-white/80",
+          "text-pure-white",
           size === 'sm' && "h-4 w-4",
           size === 'md' && "h-5 w-5",
           size === 'lg' && "h-6 w-6"
@@ -76,7 +76,7 @@ export function ConversationAvatar({
     <Avatar className={cn(sizeClasses[size], 'border border-white/10', className)}>
       <AvatarImage src={resolvedUrl || ''} />
       <AvatarFallback 
-        className={cn("bg-white/10 text-white", fallbackClassName)} 
+        className={cn("bg-white/10 text-pure-white", fallbackClassName)} 
         delayMs={150}
       >
         {getInitials()}

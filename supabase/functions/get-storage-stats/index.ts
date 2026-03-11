@@ -121,24 +121,27 @@ Deno.serve(async (req) => {
     }
 
     // Also get database size estimate from table counts
-    const [profilesRes, jobsRes, applicationsRes, messagesRes] = await Promise.all([
+    const [profilesRes, jobsRes, applicationsRes, conversationsRes, conversationMessagesRes] = await Promise.all([
       adminClient.from('profiles').select('id', { count: 'exact', head: true }),
       adminClient.from('job_postings').select('id', { count: 'exact', head: true }),
       adminClient.from('job_applications').select('id', { count: 'exact', head: true }),
-      adminClient.from('messages').select('id', { count: 'exact', head: true }),
+      adminClient.from('conversations').select('id', { count: 'exact', head: true }),
+      adminClient.from('conversation_messages').select('id', { count: 'exact', head: true }),
     ]);
 
     const dbStats = {
       profiles: profilesRes.count || 0,
       jobs: jobsRes.count || 0,
       applications: applicationsRes.count || 0,
-      messages: messagesRes.count || 0,
+      conversations: conversationsRes.count || 0,
+      messages: conversationMessagesRes.count || 0,
       // Rough estimate: avg row size * count
       estimatedMB: Math.round((
         (profilesRes.count || 0) * 2 + // profiles are larger
         (jobsRes.count || 0) * 5 + // jobs have descriptions
         (applicationsRes.count || 0) * 3 + // applications have answers
-        (messagesRes.count || 0) * 0.5
+        (conversationsRes.count || 0) * 0.6 +
+        (conversationMessagesRes.count || 0) * 0.5
       ) / 1024 * 100) / 100,
     };
 
