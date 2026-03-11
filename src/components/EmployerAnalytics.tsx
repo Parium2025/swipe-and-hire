@@ -514,7 +514,7 @@ const EmployerAnalytics = memo(() => {
 
   if (isLoading && !show) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 responsive-container-wide">
         <div className="h-10 w-48 bg-white/10 rounded-xl animate-pulse" />
         <div className="grid grid-cols-2 gap-3">
           {[...Array(2)].map((_, i) => (
@@ -529,7 +529,7 @@ const EmployerAnalytics = memo(() => {
   }
 
   return (
-    <div className={`space-y-5 transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`space-y-5 responsive-container-wide transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0'}`}>
       {/* Header */}
       <div className="flex items-center gap-3 justify-center">
         <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
