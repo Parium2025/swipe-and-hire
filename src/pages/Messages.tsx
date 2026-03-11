@@ -690,7 +690,7 @@ function ChatView({
                 {/* Date header */}
                 <div className="flex items-center gap-3 my-4">
                   <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-white/40 text-xs font-medium px-2">
+                  <span className="text-white/60 text-xs font-medium px-2">
                     {formatDateHeader(date)}
                   </span>
                   <div className="flex-1 h-px bg-white/10" />
