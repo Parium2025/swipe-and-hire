@@ -922,7 +922,7 @@ function EmptyChatState({
           <MessageSquare className="h-6 w-6 text-white" />
         </div>
         <h3 className="text-base font-medium text-white mb-0.5">Välj en konversation</h3>
-        <p className="text-white text-sm">Välj en konversation från listan</p>
+        <p className="text-white/80 text-sm">Välj en konversation från listan</p>
       </div>
     </div>
   );
