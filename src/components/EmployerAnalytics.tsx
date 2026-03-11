@@ -542,7 +542,7 @@ const EmployerAnalytics = memo(() => {
       </div>
 
       {/* Time filter pills */}
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5 justify-center">
         {TIME_FILTERS.map((f) => (
           <button
             key={f.label}
