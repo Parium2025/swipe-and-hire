@@ -838,23 +838,12 @@ function MessageBubble({
       )}>
         {/* Sender name for group chats */}
         {isGroup && showAvatar && !isOwn && (
-          <span className="text-white/70 text-xs mb-1 ml-1">
+          <span className="text-pure-white text-xs mb-1 ml-1">
             {getDisplayName()}
           </span>
         )}
-
-        <div className={cn(
-          "px-4 py-2 rounded-2xl",
-          isOwn 
-            ? "bg-blue-500/30 border border-blue-500/40 rounded-br-md" 
-            : "bg-white/10 border border-white/10 rounded-bl-md"
-        )}>
-          <p className="text-white text-sm whitespace-pre-wrap break-words">
-            {message.content}
-          </p>
-        </div>
-
-        <span className="text-white/70 text-[10px] mt-1 px-1">
+...
+        <span className="text-pure-white text-[10px] mt-1 px-1">
           {format(new Date(message.created_at), 'HH:mm')}
         </span>
       </div>
