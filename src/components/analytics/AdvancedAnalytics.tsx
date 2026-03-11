@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Clock, Activity, TrendingDown, Info, Hourglass } from 'lucide-react';
+import { Activity, TrendingDown, Info, Hourglass } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 /* ─── Types ─── */
@@ -32,8 +32,8 @@ export interface AdvancedAnalyticsData {
   dropoff_jobs: DropoffJob[];
 }
 
-const DAY_LABELS_SHORT = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
-const HOUR_LABELS = ['00', '03', '06', '09', '12', '15', '18', '21'];
+const DAY_LABELS = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
+const DAY_LABELS_FULL = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
 
 const formatDuration = (seconds: number): string => {
   if (seconds <= 0) return '—';
@@ -49,38 +49,48 @@ const formatDuration = (seconds: number): string => {
   return h > 0 ? `${d}d ${h}h` : `${d}d`;
 };
 
-/* ─── Application Heatmap ─── */
-const ApplicationHeatmap = memo(({ patterns }: { patterns: AppPattern[] }) => {
-  const { grid, maxCount } = useMemo(() => {
-    // Build 7 days × 24 hours grid
-    const g: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
-    let max = 0;
+/* ─── Application Patterns (two bar charts) ─── */
+const ApplicationPatterns = memo(({ patterns }: { patterns: AppPattern[] }) => {
+  const { dayData, hourData, peakDay, peakHour, totalApps } = useMemo(() => {
+    const days = Array(7).fill(0);
+    const hours = Array(24).fill(0);
+    
     for (const p of patterns) {
-      g[p.day_of_week][p.hour_of_day] = p.count;
-      if (p.count > max) max = p.count;
+      days[p.day_of_week] += p.count;
+      hours[p.hour_of_day] += p.count;
     }
-    return { grid: g, maxCount: max };
+    
+    const total = days.reduce((s, v) => s + v, 0);
+    const pDay = days.indexOf(Math.max(...days));
+    const pHour = hours.indexOf(Math.max(...hours));
+    
+    // Reorder to Mon-Sun
+    const orderedDays = [1, 2, 3, 4, 5, 6, 0].map(i => ({
+      label: DAY_LABELS[i],
+      fullLabel: DAY_LABELS_FULL[i],
+      count: days[i],
+      isPeak: i === pDay,
+    }));
+    
+    // Group hours into 3-hour blocks for cleaner display
+    const hourBlocks: { label: string; count: number; isPeak: boolean }[] = [];
+    for (let h = 0; h < 24; h += 3) {
+      const blockCount = hours[h] + hours[h + 1] + hours[h + 2];
+      const end = h + 3 > 23 ? '00' : String(h + 3).padStart(2, '0');
+      hourBlocks.push({
+        label: `${String(h).padStart(2, '0')}–${end}`,
+        count: blockCount,
+        isPeak: h <= pHour && pHour < h + 3,
+      });
+    }
+    
+    return { dayData: orderedDays, hourData: hourBlocks, peakDay: pDay, peakHour: pHour, totalApps: total };
   }, [patterns]);
-
-  // Aggregate totals for insights
-  const { peakDay, peakHour, totalApps } = useMemo(() => {
-    const dayTotals = grid.map(row => row.reduce((s, v) => s + v, 0));
-    const hourTotals = Array(24).fill(0);
-    grid.forEach(row => row.forEach((v, h) => { hourTotals[h] += v; }));
-    
-    const pDay = dayTotals.indexOf(Math.max(...dayTotals));
-    const pHour = hourTotals.indexOf(Math.max(...hourTotals));
-    const total = dayTotals.reduce((s, v) => s + v, 0);
-    
-    return { peakDay: pDay, peakHour: pHour, totalApps: total };
-  }, [grid]);
 
   if (totalApps === 0) return null;
 
-  const getOpacity = (count: number) => {
-    if (count === 0 || maxCount === 0) return 0.04;
-    return 0.15 + (count / maxCount) * 0.85;
-  };
+  const maxDay = Math.max(...dayData.map(d => d.count));
+  const maxHour = Math.max(...hourData.map(h => h.count));
 
   return (
     <Card className="bg-white/5 border-white/10 overflow-hidden">
@@ -97,8 +107,8 @@ const ApplicationHeatmap = memo(({ patterns }: { patterns: AppPattern[] }) => {
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-[260px]">
                 <p className="text-xs leading-relaxed">
-                  Visar vilka veckodagar och klockslag som flest ansökningar kommer in. 
-                  Starkare färg = fler ansökningar. Hjälper dig förstå när kandidater är mest aktiva.
+                  Visar vilka veckodagar och tider som flest ansökningar kommer in. 
+                  Hjälper dig tajma publicering för maximal räckvidd.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -106,10 +116,10 @@ const ApplicationHeatmap = memo(({ patterns }: { patterns: AppPattern[] }) => {
         </div>
 
         {/* Insight pills */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-5">
           <div className="flex-1 rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-2 text-center">
             <p className="text-[10px] text-white mb-0.5">Bästa dag</p>
-            <p className="text-sm font-bold text-white">{DAY_LABELS_SHORT[peakDay]}</p>
+            <p className="text-sm font-bold text-white">{DAY_LABELS[peakDay]}</p>
           </div>
           <div className="flex-1 rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-2 text-center">
             <p className="text-[10px] text-white mb-0.5">Bästa tid</p>
@@ -121,67 +131,72 @@ const ApplicationHeatmap = memo(({ patterns }: { patterns: AppPattern[] }) => {
           </div>
         </div>
 
-        {/* Heatmap grid */}
-        <div className="overflow-x-auto -mx-1 px-1">
-          <div className="min-w-[300px]">
-            {/* Hour labels */}
-            <div className="flex ml-8 mb-1">
-              {HOUR_LABELS.map(h => (
-                <span key={h} className="text-[9px] text-white tabular-nums" style={{ width: `${100 / 8}%` }}>
-                  {h}
-                </span>
-              ))}
-            </div>
-            
-            {/* Grid rows — reorder to Mon-Sun */}
-            {[1, 2, 3, 4, 5, 6, 0].map((dayIdx) => (
-              <div key={dayIdx} className="flex items-center gap-1 mb-[2px]">
-                <span className="text-[10px] text-white w-7 text-right shrink-0 tabular-nums">
-                  {DAY_LABELS_SHORT[dayIdx]}
-                </span>
-                <div className="flex flex-1 gap-[1px]">
-                  {grid[dayIdx].map((count, hourIdx) => (
-                    <TooltipProvider key={hourIdx} delayDuration={100}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div
-                            className="flex-1 h-[14px] rounded-[2px] transition-colors duration-200"
-                            style={{
-                              backgroundColor: count > 0
-                                ? `hsla(var(--secondary), ${getOpacity(count)})`
-                                : 'rgba(255,255,255,0.04)',
-                            }}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="text-xs py-1 px-2">
-                          {DAY_LABELS_SHORT[dayIdx]} kl {hourIdx}:00 — {count} ansökning{count !== 1 ? 'ar' : ''}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ))}
-                </div>
-              </div>
-            ))}
-
-            {/* Legend */}
-            <div className="flex items-center justify-end gap-1.5 mt-2">
-              <span className="text-[9px] text-white">Färre</span>
-              {[0.04, 0.25, 0.5, 0.75, 1].map((op, i) => (
-                <div
-                  key={i}
-                  className="h-2.5 w-2.5 rounded-[2px]"
-                  style={{ backgroundColor: `hsla(var(--secondary), ${op})` }}
+        {/* Per-day bars */}
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-2">Per veckodag</p>
+        <div className="space-y-1.5 mb-5">
+          {dayData.map((day, i) => (
+            <motion.div
+              key={day.label}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.03 }}
+              className="flex items-center gap-2"
+            >
+              <span className={`text-[11px] w-7 text-right shrink-0 tabular-nums ${day.isPeak ? 'text-white font-semibold' : 'text-white/70'}`}>
+                {day.label}
+              </span>
+              <div className="flex-1 h-5 rounded bg-white/[0.04] overflow-hidden relative">
+                <motion.div
+                  className={`h-full rounded ${day.isPeak ? 'bg-secondary' : 'bg-secondary/60'}`}
+                  initial={{ width: 0 }}
+                  animate={{ width: maxDay > 0 ? `${Math.max((day.count / maxDay) * 100, day.count > 0 ? 4 : 0)}%` : '0%' }}
+                  transition={{ duration: 0.5, delay: i * 0.04 }}
                 />
-              ))}
-              <span className="text-[9px] text-white">Fler</span>
-            </div>
-          </div>
+                {day.count > 0 && (
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white font-medium tabular-nums">
+                    {day.count}
+                  </span>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Per-time-block bars */}
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-2">Per tidsblock</p>
+        <div className="space-y-1.5">
+          {hourData.map((block, i) => (
+            <motion.div
+              key={block.label}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.03 }}
+              className="flex items-center gap-2"
+            >
+              <span className={`text-[10px] w-10 text-right shrink-0 tabular-nums ${block.isPeak ? 'text-white font-semibold' : 'text-white/70'}`}>
+                {block.label}
+              </span>
+              <div className="flex-1 h-5 rounded bg-white/[0.04] overflow-hidden relative">
+                <motion.div
+                  className={`h-full rounded ${block.isPeak ? 'bg-secondary' : 'bg-secondary/60'}`}
+                  initial={{ width: 0 }}
+                  animate={{ width: maxHour > 0 ? `${Math.max((block.count / maxHour) * 100, block.count > 0 ? 4 : 0)}%` : '0%' }}
+                  transition={{ duration: 0.5, delay: i * 0.04 }}
+                />
+                {block.count > 0 && (
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white font-medium tabular-nums">
+                    {block.count}
+                  </span>
+                )}
+              </div>
+            </motion.div>
+          ))}
         </div>
       </CardContent>
     </Card>
   );
 });
-ApplicationHeatmap.displayName = 'ApplicationHeatmap';
+ApplicationPatterns.displayName = 'ApplicationPatterns';
 
 /* ─── Recruitment Time Card ─── */
 const RecruitmentTimeCard = memo(({ data }: { data: RecruitmentTime }) => {
@@ -210,13 +225,11 @@ const RecruitmentTimeCard = memo(({ data }: { data: RecruitmentTime }) => {
           </TooltipProvider>
         </div>
 
-        {/* Main metric */}
         <div className="text-center mb-4">
           <p className="text-3xl font-bold text-white tracking-tight">{formatDuration(data.avg_seconds)}</p>
           <p className="text-[11px] text-white mt-1">genomsnitt från ansökan till intervjubokning</p>
         </div>
 
-        {/* Min/Max range */}
         <div className="flex gap-2">
           <div className="flex-1 rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-2 text-center">
             <p className="text-[10px] text-white mb-0.5">Snabbast</p>
@@ -241,17 +254,19 @@ RecruitmentTimeCard.displayName = 'RecruitmentTimeCard';
 const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
   const sortedJobs = useMemo(() => {
     return [...jobs]
-      .map(j => ({
-        ...j,
-        dropoff_pct: j.views > 0 ? Math.round(((j.views - j.applications) / j.views) * 100) : 0,
-        conversion_pct: j.views > 0 ? Math.round((j.applications / j.views) * 100) : 0,
-      }))
-      .sort((a, b) => b.dropoff_pct - a.dropoff_pct);
+      .map(j => {
+        // Clamp conversion to 0-100 range to handle edge cases
+        const rawConversion = j.views > 0 ? (j.applications / j.views) * 100 : 0;
+        const conversion_pct = Math.min(Math.round(rawConversion), 100);
+        const dropoff_pct = Math.max(100 - conversion_pct, 0);
+        return { ...j, dropoff_pct, conversion_pct };
+      })
+      .sort((a, b) => a.conversion_pct - b.conversion_pct); // worst conversion first
   }, [jobs]);
 
-  const avgDropoff = useMemo(() => {
+  const avgConversion = useMemo(() => {
     if (!sortedJobs.length) return 0;
-    return Math.round(sortedJobs.reduce((s, j) => s + j.dropoff_pct, 0) / sortedJobs.length);
+    return Math.round(sortedJobs.reduce((s, j) => s + j.conversion_pct, 0) / sortedJobs.length);
   }, [sortedJobs]);
 
   if (!sortedJobs.length) return null;
@@ -271,8 +286,8 @@ const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-[260px]">
                 <p className="text-xs leading-relaxed">
-                  Visar hur stor andel besökare som lämnar annonsen utan att söka. 
-                  Högt avhopp kan tyda på att annonsen behöver förbättras.
+                  Visar hur stor andel besökare som söker vs lämnar utan att söka.
+                  Högre konvertering = bättre annons.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -281,8 +296,8 @@ const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
 
         {/* Summary */}
         <div className="text-center mb-4">
-          <p className="text-3xl font-bold text-white tracking-tight">{avgDropoff}%</p>
-          <p className="text-[11px] text-white mt-1">genomsnittligt avhopp — {100 - avgDropoff}% söker</p>
+          <p className="text-3xl font-bold text-white tracking-tight">{avgConversion}%</p>
+          <p className="text-[11px] text-white mt-1">genomsnittlig konvertering — {100 - avgConversion}% hoppar av</p>
         </div>
 
         {/* Per-job bars */}
@@ -301,13 +316,12 @@ const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
                   <span className="text-[10px] text-white tabular-nums">{job.views} vis.</span>
                   <span className="text-[10px] text-white tabular-nums">{job.applications} ans.</span>
                   <span className={`text-[11px] font-semibold tabular-nums ${
-                    job.dropoff_pct > 90 ? 'text-red-400' : job.dropoff_pct > 75 ? 'text-amber-400' : 'text-emerald-400'
+                    job.conversion_pct < 10 ? 'text-red-400' : job.conversion_pct < 25 ? 'text-amber-400' : 'text-emerald-400'
                   }`}>
                     {job.conversion_pct}%
                   </span>
                 </div>
               </div>
-              {/* Stacked bar: applications (green) + dropoff (subtle) */}
               <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden flex">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-secondary/80 to-secondary/40 transition-all duration-700"
@@ -330,7 +344,7 @@ export const AdvancedAnalyticsSections = memo(({ data }: { data: AdvancedAnalyti
   return (
     <>
       {data.application_patterns?.length > 0 && (
-        <ApplicationHeatmap patterns={data.application_patterns} />
+        <ApplicationPatterns patterns={data.application_patterns} />
       )}
       {data.recruitment_time?.sample_count > 0 && (
         <RecruitmentTimeCard data={data.recruitment_time} />
