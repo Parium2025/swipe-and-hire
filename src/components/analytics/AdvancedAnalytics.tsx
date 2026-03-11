@@ -147,7 +147,7 @@ const ApplicationPatterns = memo(({ patterns }: { patterns: AppPattern[] }) => {
               </span>
               <div className="flex-1 h-5 rounded bg-white/[0.04] overflow-hidden relative">
                 <motion.div
-                  className={`h-full rounded ${day.isPeak ? 'bg-white' : 'bg-white/60'}`}
+                  className={`h-full rounded ${day.isPeak ? 'bg-secondary' : 'bg-secondary/60'}`}
                   initial={{ width: 0 }}
                   animate={{ width: maxDay > 0 ? `${Math.max((day.count / maxDay) * 100, day.count > 0 ? 4 : 0)}%` : '0%' }}
                   transition={{ duration: 0.5, delay: i * 0.04 }}
@@ -178,7 +178,7 @@ const ApplicationPatterns = memo(({ patterns }: { patterns: AppPattern[] }) => {
               </span>
               <div className="flex-1 h-5 rounded bg-white/[0.04] overflow-hidden relative">
                 <motion.div
-                  className={`h-full rounded ${block.isPeak ? 'bg-white' : 'bg-white/60'}`}
+                  className={`h-full rounded ${block.isPeak ? 'bg-secondary' : 'bg-secondary/60'}`}
                   initial={{ width: 0 }}
                   animate={{ width: maxHour > 0 ? `${Math.max((block.count / maxHour) * 100, block.count > 0 ? 4 : 0)}%` : '0%' }}
                   transition={{ duration: 0.5, delay: i * 0.04 }}
