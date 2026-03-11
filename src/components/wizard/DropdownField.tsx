@@ -74,7 +74,7 @@ export const DropdownField = ({
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 mt-1 w-full bg-slate-900 border border-white/20 rounded-md shadow-lg max-h-60 overflow-hidden">
+          <div className="absolute z-50 mt-1 w-full glass-panel rounded-md max-h-60 overflow-hidden">
             {showSearch && (
               <div className="p-2 border-b border-white/10">
                 <div className="relative">
