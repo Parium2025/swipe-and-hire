@@ -24,6 +24,7 @@ interface DropoffJob {
   views: number;
   applications: number;
   is_active: boolean;
+  expires_at?: string | null;
 }
 
 export interface AdvancedAnalyticsData {
