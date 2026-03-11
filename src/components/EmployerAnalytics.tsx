@@ -711,7 +711,8 @@ const EmployerAnalytics = memo(() => {
         </Card>
       )}
 
-
+      {/* ─── Advanced analytics sections ─── */}
+      <AdvancedAnalyticsSections data={advancedData ?? null} />
 
       {/* Empty state */}
       {analytics.length === 0 && !isLoading && (
