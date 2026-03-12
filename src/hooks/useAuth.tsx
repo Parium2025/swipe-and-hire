@@ -1869,10 +1869,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Real-time för meddelanden (uppdaterar oläst-badge för både employer och jobbsökare)
     const messagesChannel = supabase
-      .channel(`auth-messages-${user.id}`)
+      .channel(`auth-conv-messages-${user.id}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
+        { event: 'INSERT', schema: 'public', table: 'conversation_messages' },
         () => {
           refreshEmployerStats();
           refreshSidebarCounts();
