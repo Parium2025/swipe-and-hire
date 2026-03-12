@@ -77,7 +77,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       .on('postgres_changes', { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
         invalidateStats
       )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversation_messages' },
         invalidateStats
       )
       .subscribe();

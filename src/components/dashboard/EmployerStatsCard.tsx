@@ -74,8 +74,8 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
     };
     const msgChannel = supabase
-      .channel(`employer-messages-${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
+      .channel(`employer-conv-messages-${user.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversation_messages' },
         invalidateStats
       )
       .subscribe();
