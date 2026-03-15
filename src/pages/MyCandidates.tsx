@@ -76,6 +76,7 @@ import { CandidateCardContent } from '@/components/candidates/KanbanCandidateCar
 import { StageColumn } from '@/components/candidates/StageColumn';
 import { MobileMyCandidatesView } from '@/components/candidates/MobileMyCandidatesView';
 import { useDevice } from '@/hooks/use-device';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 
 const MyCandidates = () => {
   const { user } = useAuth();
