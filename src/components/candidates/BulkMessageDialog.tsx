@@ -27,6 +27,9 @@ export function BulkMessageDialog({ open, onOpenChange, count, onSend, progress 
       await onSend(message.trim());
       setSentSuccess(true);
       setMessage('');
+    } catch (error) {
+      console.error('Bulk message send failed:', error);
+      // Error toast is typically handled by the caller, but ensure we surface something
     } finally {
       setSending(false);
     }

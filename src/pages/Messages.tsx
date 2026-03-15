@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, type Ref } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useConversations, useConversationMessages, Conversation, ConversationMessage, useCreateConversation } from '@/hooks/useConversations';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
@@ -35,11 +36,28 @@ export default function Messages() {
   const { user, userRole } = useAuth();
   const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
   const { hasTeam } = useTeamMembers();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [activeTab, setActiveTab] = useState<ConversationTab>(hasTeam ? 'all' : 'candidates');
+  const deepLinkHandled = useRef(false);
+
+  // Handle deep-link: /messages?conversation=<id> (e.g. from SendMessageDialog)
+  useEffect(() => {
+    const conversationParam = searchParams.get('conversation');
+    if (conversationParam && conversations.length > 0 && !deepLinkHandled.current) {
+      const exists = conversations.some(c => c.id === conversationParam);
+      if (exists) {
+        setSelectedConversationId(conversationParam);
+        setShowMobileChat(true);
+        deepLinkHandled.current = true;
+        // Clean up URL param
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, conversations, setSearchParams]);
 
   // Pixel-perfect alignment: keep icon + text on the exact same row between the two empty states.
   const leftEmptyIconRef = useRef<HTMLDivElement | null>(null);
@@ -486,6 +504,9 @@ function ChatView({
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const isNearBottomRef = useRef(true);
+  const prevMessageCountRef = useRef(0);
 
   const otherMembers = (conversation.members || []).filter(m => m.user_id !== currentUserId);
   const displayMember = otherMembers[0];
@@ -511,10 +532,33 @@ function ChatView({
     }
   }, [conversation.id, conversation.unread_count, markAsRead]);
 
-  // Scroll to bottom when messages change or typing indicator appears
+  // Track if user is near bottom of scroll area
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const threshold = 100; // px from bottom
+    isNearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+  }, []);
+
+  // Smart scroll: auto-scroll only if user is near bottom or it's their own new message
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, typingUsers]);
+    const isInitialLoad = prevMessageCountRef.current === 0 && messages.length > 0;
+    const isNewMessage = messages.length > prevMessageCountRef.current;
+    const lastMessage = messages[messages.length - 1];
+    const isOwnNewMessage = isNewMessage && lastMessage?.sender_id === currentUserId;
+    
+    if (isInitialLoad || isOwnNewMessage || isNearBottomRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: isInitialLoad ? 'instant' : 'smooth' });
+    }
+    
+    prevMessageCountRef.current = messages.length;
+  }, [messages, currentUserId]);
+
+  // Scroll to bottom when typing indicator appears (only if near bottom)
+  useEffect(() => {
+    if (typingUsers.length > 0 && isNearBottomRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [typingUsers]);
 
   // Handle input change with typing indicator
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -616,7 +660,7 @@ function ChatView({
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4" onScrollCapture={handleScroll}>
         {isLoading ? (
           <div className="space-y-4 p-4">
             {Array.from({ length: 6 }).map((_, i) => (
