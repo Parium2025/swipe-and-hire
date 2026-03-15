@@ -742,12 +742,7 @@ function MessageBubble({
   isGroup: boolean;
   currentUserRole: 'job_seeker' | 'employer' | null;
 }) {
-  const getDisplayName = () => {
-    const p = message.sender_profile;
-    if (!p) return 'Okänd';
-    if (p.role === 'employer' && p.company_name) return p.company_name;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd';
-  };
+  const senderName = getMessageSenderName(message.sender_profile);
 
   // Avatar URL resolution is now handled by ConversationAvatar component
 
