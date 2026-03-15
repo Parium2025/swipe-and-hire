@@ -72,12 +72,15 @@ export function ConversationAvatar({
     );
   }
 
+  // Only delay fallback if there's an actual image URL to wait for
+  const hasImageUrl = !!resolvedUrl;
+
   return (
     <Avatar className={cn(sizeClasses[size], 'border border-white/10', className)}>
       <AvatarImage src={resolvedUrl || ''} />
       <AvatarFallback 
         className={cn("bg-white/10 text-pure-white", fallbackClassName)} 
-        delayMs={150}
+        delayMs={hasImageUrl ? 150 : 0}
       >
         {getInitials()}
       </AvatarFallback>
