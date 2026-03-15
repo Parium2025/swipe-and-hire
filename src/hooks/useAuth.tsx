@@ -9,6 +9,7 @@ import { getMediaUrl } from '@/lib/mediaManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
+import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
@@ -386,6 +387,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           !isSessionKickRef.current &&
           event !== 'INITIAL_SESSION'
         ) {
+          // Distinguish inactivity timeout from cross-tab logout
+          if (isInactivityLogout()) {
+            console.log('⏰ Inactivity timeout logout detected in onAuthStateChange');
+            clearInactivityLogoutFlag();
+            clearAllAppCaches();
+            clearSessionToken();
+            window.location.href = '/auth';
+            return;
+          }
+          
           console.log('🔄 Session ended in another tab - user was logged out');
           toast({
             title: 'Du har loggats ut',
