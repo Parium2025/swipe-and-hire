@@ -506,13 +506,17 @@ function ChatView({
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesTopRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
   const prevMessageCountRef = useRef(0);
   const prevFirstMessageIdRef = useRef<string | null>(null);
+  const prevScrollHeightRef = useRef(0);
+
+  const getViewportEl = useCallback((): HTMLDivElement | null => {
+    if (!scrollAreaRef.current) return null;
+    return scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLDivElement | null;
+  }, []);
 
   const otherMembers = (conversation.members || []).filter(m => m.user_id !== currentUserId);
   const displayMember = otherMembers[0];
@@ -538,46 +542,63 @@ function ChatView({
     }
   }, [conversation.id, conversation.unread_count, markAsRead]);
 
+  // Reset scroll tracking when switching conversation
+  useEffect(() => {
+    isNearBottomRef.current = true;
+    prevMessageCountRef.current = 0;
+    prevFirstMessageIdRef.current = null;
+    prevScrollHeightRef.current = 0;
+  }, [conversation.id]);
+
   // Track if user is near bottom of scroll area
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
+    const target = e.target as HTMLDivElement | null;
+    if (!target) return;
     const threshold = 100; // px from bottom
-    isNearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    isNearBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < threshold;
   }, []);
 
-  // Smart scroll: auto-scroll only if user is near bottom or it's their own new message
-  // When loading older messages (prepend), preserve scroll position
+  // Smart scroll: keep all scrolling inside message viewport (never page scroll)
   useEffect(() => {
+    const viewport = getViewportEl();
+    if (!viewport) return;
+
     const isInitialLoad = prevMessageCountRef.current === 0 && messages.length > 0;
     const firstMessageId = messages[0]?.id || null;
-    const wasOlderMessagesPrepended = prevFirstMessageIdRef.current !== null 
+    const wasOlderMessagesPrepended = prevFirstMessageIdRef.current !== null
       && firstMessageId !== prevFirstMessageIdRef.current
       && messages.length > prevMessageCountRef.current;
-    
+
     if (wasOlderMessagesPrepended) {
-      // Older messages were prepended — keep scroll position by scrolling to the old first message
-      const oldFirstEl = document.getElementById(`msg-${prevFirstMessageIdRef.current}`);
-      oldFirstEl?.scrollIntoView({ behavior: 'instant', block: 'start' });
+      // Preserve visual position when older messages are prepended
+      const delta = viewport.scrollHeight - prevScrollHeightRef.current;
+      if (delta > 0) viewport.scrollTop += delta;
     } else {
       const isNewMessage = messages.length > prevMessageCountRef.current;
       const lastMessage = messages[messages.length - 1];
       const isOwnNewMessage = isNewMessage && lastMessage?.sender_id === currentUserId;
-      
+
       if (isInitialLoad || isOwnNewMessage || isNearBottomRef.current) {
-        messagesEndRef.current?.scrollIntoView({ behavior: isInitialLoad ? 'instant' : 'smooth' });
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: isInitialLoad ? 'auto' : 'smooth',
+        });
       }
     }
-    
+
     prevMessageCountRef.current = messages.length;
     prevFirstMessageIdRef.current = firstMessageId;
-  }, [messages, currentUserId]);
+    prevScrollHeightRef.current = viewport.scrollHeight;
+  }, [messages, currentUserId, getViewportEl]);
 
   // Scroll to bottom when typing indicator appears (only if near bottom)
   useEffect(() => {
+    const viewport = getViewportEl();
+    if (!viewport) return;
     if (typingUsers.length > 0 && isNearBottomRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
     }
-  }, [typingUsers]);
+  }, [typingUsers, getViewportEl]);
 
   // Handle input change with typing indicator
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -679,7 +700,7 @@ function ChatView({
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4" onScrollCapture={handleScroll}>
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4" onScrollCapture={handleScroll}>
         {isLoading ? (
           <div className="space-y-4 p-4">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -750,7 +771,7 @@ function ChatView({
                 </div>
               </div>
             ))}
-            <div ref={messagesEndRef} />
+            
           </div>
         )}
       </ScrollArea>
