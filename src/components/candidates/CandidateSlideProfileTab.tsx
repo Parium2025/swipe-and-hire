@@ -43,6 +43,8 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
 }: CandidateSlideProfileTabProps) {
   const [bioExpanded, setBioExpanded] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
+  const [bookInterviewOpen, setBookInterviewOpen] = useState(false);
+  const [sendMessageOpen, setSendMessageOpen] = useState(false);
 
   const handleOpenCv = useCallback(() => {
     if (!application.cv_url || !signedCvUrl) {
