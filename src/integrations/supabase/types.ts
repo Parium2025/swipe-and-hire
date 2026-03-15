@@ -2361,6 +2361,17 @@ export type Database = {
           video_url: string
         }[]
       }
+      get_conversation_summaries: {
+        Args: { p_user_id: string }
+        Returns: {
+          conversation_id: string
+          last_message_content: string
+          last_message_created_at: string
+          last_message_is_system: boolean
+          last_message_sender_id: string
+          unread_count: number
+        }[]
+      }
       get_cv_queue_batch: {
         Args: { p_batch_size?: number }
         Returns: {
