@@ -330,6 +330,7 @@ export function useConversations() {
   }, [conversationsQuery.data, user]);
 
   // Subscribe to realtime updates for new messages
+  // Debounced to prevent refetch storms at scale (1M+ users)
   useEffect(() => {
     if (!user) return;
 
@@ -343,13 +344,17 @@ export function useConversations() {
           table: 'conversation_messages',
         },
         () => {
-          // Refresh conversations when new message arrives
-          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+          // Debounce: if many messages arrive quickly, only refetch once
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          debounceRef.current = setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+          }, 300);
         }
       )
       .subscribe();
 
     return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
       supabase.removeChannel(channel);
     };
   }, [user, queryClient]);
