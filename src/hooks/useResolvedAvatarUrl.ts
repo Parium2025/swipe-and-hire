@@ -1,10 +1,5 @@
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-
-interface ProfileLike {
-  role?: 'job_seeker' | 'employer';
-  profile_image_url?: string | null;
-  company_logo_url?: string | null;
-}
+import type { ConversationProfileData as ProfileLike } from '@/types/conversation';
 
 /**
  * Hook that automatically resolves the correct avatar URL for any profile.

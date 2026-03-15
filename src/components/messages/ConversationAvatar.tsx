@@ -2,15 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
 import { cn } from '@/lib/utils';
 import { Users } from 'lucide-react';
-
-interface ProfileData {
-  role?: 'job_seeker' | 'employer';
-  first_name?: string | null;
-  last_name?: string | null;
-  company_name?: string | null;
-  profile_image_url?: string | null;
-  company_logo_url?: string | null;
-}
+import type { ConversationProfileData as ProfileData } from '@/types/conversation';
 
 interface ConversationAvatarProps {
   profile: ProfileData | null | undefined;
