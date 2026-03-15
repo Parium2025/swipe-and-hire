@@ -479,34 +479,57 @@ const MyCandidates = () => {
     setTimeout(() => setSelectedCandidate(null), 300);
   };
 
+  /** Map MyCandidateData → ApplicationData for CandidateSwipeViewer / Dialog */
+  const mapCandidateToAppData = useCallback((c: MyCandidateData): ApplicationData => ({
+    id: c.application_id,
+    job_id: c.job_id || '',
+    applicant_id: c.applicant_id,
+    first_name: c.first_name,
+    last_name: c.last_name,
+    email: c.email,
+    phone: c.phone,
+    location: c.location,
+    bio: c.bio,
+    cv_url: c.cv_url,
+    age: c.age,
+    employment_status: c.employment_status,
+    work_schedule: c.work_schedule,
+    availability: c.availability,
+    custom_answers: c.custom_answers,
+    status: c.status,
+    applied_at: c.applied_at || c.created_at,
+    updated_at: c.updated_at,
+    job_title: c.job_title || 'Okänt jobb',
+    profile_image_url: c.profile_image_url,
+    video_url: c.video_url,
+    is_profile_video: c.is_profile_video,
+    viewed_at: c.viewed_at,
+    last_active_at: c.last_active_at,
+    rating: c.rating,
+  }), []);
+
+  // Applications for the swipe viewer
+  const swipeApplicationsData = useMemo(() => {
+    return swipeStageCandidates.map(mapCandidateToAppData);
+  }, [swipeStageCandidates, mapCandidateToAppData]);
+
+  // When user taps "open full profile" from swipe viewer → open dialog
+  const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
+    setSwipeViewerOpen(false);
+    const original = displayedCandidates.find(c => c.application_id === application.id);
+    if (original) {
+      setSelectedCandidate(original);
+      setDialogOpen(true);
+    }
+  }, [displayedCandidates]);
+
+  const getDisplayRating = useCallback((app: ApplicationData) => app.rating || 0, []);
+
   // Convert MyCandidateData to ApplicationData format for dialog
   const selectedApplicationData = useMemo(() => {
     if (!selectedCandidate) return null;
-    return {
-      id: selectedCandidate.application_id,
-      job_id: selectedCandidate.job_id || '',
-      applicant_id: selectedCandidate.applicant_id,
-      first_name: selectedCandidate.first_name,
-      last_name: selectedCandidate.last_name,
-      email: selectedCandidate.email,
-      phone: selectedCandidate.phone,
-      location: selectedCandidate.location,
-      bio: selectedCandidate.bio,
-      cv_url: selectedCandidate.cv_url,
-      age: selectedCandidate.age,
-      employment_status: selectedCandidate.employment_status,
-      work_schedule: selectedCandidate.work_schedule,
-      availability: selectedCandidate.availability,
-      custom_answers: selectedCandidate.custom_answers,
-      status: selectedCandidate.status,
-      applied_at: selectedCandidate.applied_at,
-      updated_at: selectedCandidate.updated_at,
-      job_title: selectedCandidate.job_title || 'Okänt jobb',
-      profile_image_url: selectedCandidate.profile_image_url,
-      video_url: selectedCandidate.video_url,
-      is_profile_video: selectedCandidate.is_profile_video,
-    };
-  }, [selectedCandidate]);
+    return mapCandidateToAppData(selectedCandidate);
+  }, [selectedCandidate, mapCandidateToAppData]);
 
   if (isLoading || !showContent) {
     return (
