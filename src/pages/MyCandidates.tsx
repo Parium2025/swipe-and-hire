@@ -82,6 +82,7 @@ const MyCandidates = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const device = useDevice();
+  const isTouchDevice = useTouchCapable();
   const useMobileView = device === 'mobile';
   const { stageConfig, stageOrder, deleteStage } = useStageSettings();
   const { setStageCount } = useKanbanLayout();
