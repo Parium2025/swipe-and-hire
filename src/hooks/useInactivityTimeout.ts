@@ -43,6 +43,9 @@ export const useInactivityTimeout = (isAuthenticated: boolean) => {
       
       if (hasSessionExpiredDueToInactivity()) {
         console.log('⏰ Session expired due to 24h inactivity - logging out');
+        
+        // Set flag BEFORE signOut so onAuthStateChange shows correct message
+        _inactivityLogoutInProgress = true;
         clearActivityTracking();
         
         // Clean up session tracking BEFORE signing out to prevent
