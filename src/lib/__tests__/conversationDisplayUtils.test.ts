@@ -229,13 +229,20 @@ describe('getConversationAvatarProfile', () => {
     });
   });
 
-  it('returns undefined when snapshot has no names and no image and no member', () => {
+  it('still returns snapshot profile when snapshot has no names/image (strict snapshot precedence)', () => {
     const snapshot = makeSnapshot({
       first_name: null,
       last_name: null,
       profile_image_snapshot_url: null,
     });
-    expect(getConversationAvatarProfile(snapshot, undefined)).toBeUndefined();
+    expect(getConversationAvatarProfile(snapshot, undefined)).toEqual({
+      role: 'job_seeker',
+      first_name: null,
+      last_name: null,
+      company_name: null,
+      profile_image_url: null,
+      company_logo_url: null,
+    });
   });
 });
 
