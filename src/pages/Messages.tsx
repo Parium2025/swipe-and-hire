@@ -418,7 +418,7 @@ function ConversationItem({
         "w-full flex items-start gap-3 p-3 rounded-lg text-left transition-all focus:outline-none focus-visible:outline-none",
         isSelected 
           ? "bg-white/15 border border-white/20" 
-          : "hover:bg-white/10 border border-transparent"
+          : "md:hover:bg-white/10 border border-transparent"
       )}
       tabIndex={-1}
     >
