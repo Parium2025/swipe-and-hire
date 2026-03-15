@@ -444,7 +444,7 @@ function ConversationItem({
             "font-medium truncate text-white",
             conversation.unread_count > 0 && "font-semibold"
           )}>
-            {getDisplayName()}
+            {displayName}
           </span>
           <span className="text-pure-white text-xs flex-shrink-0">
             {formatTime(conversation.last_message_at)}
