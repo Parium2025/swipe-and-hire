@@ -107,15 +107,9 @@ function readConversationsCache(userId: string): Conversation[] | null {
       return null;
     }
 
-    // Validate that cached conversations have profile data
-    // If any member is missing profile info, invalidate cache
-    const hasMissingProfiles = cached.conversations.some(conv => 
-      (conv.members || []).some(m => !m.profile?.first_name && !m.profile?.company_name)
-    );
-    if (hasMissingProfiles) {
-      localStorage.removeItem(CONVERSATIONS_CACHE_KEY);
-      return null;
-    }
+    // Don't invalidate for missing profiles — use cached data as-is.
+    // The background refetch will update with fresh profile data.
+    // Previously this invalidated the cache, causing "Okänd användare" flash.
     return cached.conversations;
   } catch {
     return null;
