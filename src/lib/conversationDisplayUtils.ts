@@ -69,8 +69,8 @@ export function getConversationAvatarProfile(
   displayMember: ConversationMember | undefined,
 ): ProfileLike | undefined {
   // Snapshot takes FULL priority — frozen identity from application time.
-  // Even if snapshot has no image, we use it (shows initials from snapshot name).
-  if (snapshot && (hasText(snapshot.first_name) || hasText(snapshot.last_name))) {
+  // Even if snapshot has no names/image, do NOT fall back to live profile.
+  if (snapshot) {
     return {
       role: 'job_seeker' as const,
       first_name: snapshot.first_name,
