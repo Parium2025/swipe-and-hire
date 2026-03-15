@@ -623,25 +623,26 @@ export function useCreateConversation() {
         if (convError) throw convError;
         conversationId = conversation.id;
 
-        // Add creator as admin member
+        // Add creator as admin member (upsert to handle race conditions)
         await supabase
           .from('conversation_members')
-          .insert({
-            conversation_id: conversationId,
-            user_id: user.id,
-            is_admin: true,
-          });
+          .upsert(
+            { conversation_id: conversationId, user_id: user.id, is_admin: true },
+            { onConflict: 'conversation_id,user_id' }
+          );
 
-        // Add other members
+        // Add other members (ignore duplicates)
         for (const memberId of memberIds) {
           if (memberId !== user.id) {
-            await supabase
+            const { error: addErr } = await supabase
               .from('conversation_members')
               .insert({
                 conversation_id: conversationId,
                 user_id: memberId,
                 is_admin: false,
               });
+            // Ignore duplicate key - member already exists
+            if (addErr && addErr.code !== '23505') throw addErr;
           }
         }
       }
