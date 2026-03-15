@@ -402,6 +402,8 @@ export function useConversations() {
     refetchOnMount: 'always',
     refetchOnReconnect: true,
     retry: 2,
+    // Keep showing previous successful data during refetches — prevents flash-to-empty
+    placeholderData: (previousData: Conversation[] | undefined) => previousData,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (!user) return undefined;
