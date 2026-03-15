@@ -28,6 +28,8 @@ interface BookInterviewDialogProps {
   jobId: string;
   jobTitle: string;
   onSuccess?: () => void;
+  /** Render above z-[100] overlays (e.g. SwipeViewer) */
+  elevated?: boolean;
 }
 
 const FALLBACK_MESSAGE = `Hej!

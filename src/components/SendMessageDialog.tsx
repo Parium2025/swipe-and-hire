@@ -31,6 +31,8 @@ interface SendMessageDialogProps {
   applicationId?: string | null;
   /** If true, navigate to messages page after sending */
   navigateToMessages?: boolean;
+  /** Render above z-[100] overlays (e.g. SwipeViewer) */
+  elevated?: boolean;
 }
 
 export function SendMessageDialog({
