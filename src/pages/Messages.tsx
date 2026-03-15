@@ -327,7 +327,7 @@ export default function Messages() {
                     <ConversationItem
                       key={conv.id}
                       conversation={conv}
-                      isSelected={selectedConversationId === conv.id}
+                      isSelected={selectedConversationId === conv.id && (!isMobile || showMobileChat)}
                       currentUserId={user?.id || ''}
                       onClick={() => handleSelectConversation(conv.id)}
                       category={categorizeConversation(conv)}
