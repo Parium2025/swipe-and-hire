@@ -10,6 +10,7 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
+import { isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
@@ -388,9 +389,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           event !== 'INITIAL_SESSION'
         ) {
           // Distinguish inactivity timeout from cross-tab logout
-          if (isInactivityLogout()) {
+          // Check BOTH flags: useInactivityTimeout sets one, authStorage sets the other
+          if (isInactivityLogout() || isInactivityLogoutFromStorage()) {
             console.log('⏰ Inactivity timeout logout detected in onAuthStateChange');
             clearInactivityLogoutFlag();
+            clearInactivityLogoutFromStorage();
             clearAllAppCaches();
             clearSessionToken();
             window.location.href = '/auth';
