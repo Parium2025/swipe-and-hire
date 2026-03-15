@@ -242,7 +242,7 @@ export default function Messages() {
   }
 
   return (
-     <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in responsive-container-wide overflow-x-hidden">
+     <div className="h-[calc(100dvh-100px)] md:h-[calc(100dvh-80px)] flex flex-col animate-fade-in responsive-container-wide overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">
