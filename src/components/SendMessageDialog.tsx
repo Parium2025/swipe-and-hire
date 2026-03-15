@@ -43,6 +43,7 @@ export function SendMessageDialog({
   jobId,
   applicationId,
   navigateToMessages = false,
+  elevated,
 }: SendMessageDialogProps) {
   const { user } = useAuth();
   const navigate = useNavigate();

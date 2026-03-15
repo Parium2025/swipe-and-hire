@@ -47,6 +47,7 @@ export const BookInterviewDialog = ({
   jobId,
   jobTitle,
   onSuccess,
+  elevated,
 }: BookInterviewDialogProps) => {
   const { user, profile } = useAuth();
   const { isOnline, showOfflineToast } = useOnline();
