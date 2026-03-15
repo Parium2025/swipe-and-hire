@@ -71,7 +71,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 8; // v8: resilient cache - filter instead of wipe, never cache empty results
+const CACHE_VERSION = 9; // v9: profiles critical again + placeholderData prevents flash-to-empty
 
 interface CachedConversations {
   userId: string;
@@ -302,20 +302,16 @@ export function useConversations() {
       // Get unique user IDs to fetch profiles
       const allUserIds = [...new Set((allMembers || []).map((m) => m.user_id))];
 
-      // Profiles are best-effort — if this fails, conversations still render with snapshot/cached names
-      let profileMap = new Map<string, any>();
-      try {
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-          .in('user_id', allUserIds);
+      // Profiles are CRITICAL for identity — if this fails, React Query will retry (retry: 2).
+      // Never silently swallow profile errors — that causes "Okänd användare".
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
+        .in('user_id', allUserIds);
 
-        if (!profilesError && profiles) {
-          profileMap = new Map(profiles.map((p) => [p.user_id, p]));
-        }
-      } catch {
-        // Non-fatal: identity recovery will fill in from cache/snapshot
-      }
+      if (profilesError) throw profilesError;
+
+      const profileMap = new Map((profiles || []).map((p) => [p.user_id, p]));
 
       // 🔥 Use efficient DB function instead of fetching ALL messages
       // This scales to millions of messages - only returns latest + unread count per conversation
@@ -406,6 +402,8 @@ export function useConversations() {
     refetchOnMount: 'always',
     refetchOnReconnect: true,
     retry: 2,
+    // Keep showing previous successful data during refetches — prevents flash-to-empty
+    placeholderData: (previousData: Conversation[] | undefined) => previousData,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (!user) return undefined;
