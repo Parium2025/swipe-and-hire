@@ -309,25 +309,7 @@ export function useConversations() {
     },
   });
 
-  // 🔥 Prefetch avatars when conversations are loaded (from cache or fresh)
-  useEffect(() => {
-    const conversations = conversationsQuery.data;
-    if (!conversations || !user) return;
-
-    conversations.forEach(conv => {
-      (conv.members || []).forEach(member => {
-        if (member.user_id !== user.id && member.profile) {
-          const isEmployer = member.profile.role === 'employer';
-          const storagePath = isEmployer && member.profile.company_logo_url 
-            ? member.profile.company_logo_url 
-            : member.profile.profile_image_url;
-          if (storagePath) {
-            prefetchMediaUrl(storagePath, isEmployer ? 'company-logo' : 'profile-image');
-          }
-        }
-      });
-    });
-  }, [conversationsQuery.data, user]);
+  // Avatar prefetch is handled inside queryFn — no duplicate useEffect needed
 
   // Subscribe to realtime updates for new messages
   // Debounced to prevent refetch storms at scale (1M+ users)
