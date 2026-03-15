@@ -239,8 +239,8 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
       <BookInterviewDialog
         open={bookInterviewOpen}
         onOpenChange={setBookInterviewOpen}
-        applicantId={application.applicant_id}
-        applicantName={`${application.first_name || ''} ${application.last_name || ''}`.trim()}
+        candidateId={application.applicant_id}
+        candidateName={`${application.first_name || ''} ${application.last_name || ''}`.trim()}
         jobId={application.job_id}
         jobTitle={application.job_title || ''}
         applicationId={application.id}
@@ -251,6 +251,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
         recipientId={application.applicant_id}
         recipientName={`${application.first_name || ''} ${application.last_name || ''}`.trim()}
         jobId={application.job_id}
+        applicationId={application.id}
       />
     </>
   );
