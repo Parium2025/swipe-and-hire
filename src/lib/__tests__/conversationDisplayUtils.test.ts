@@ -183,13 +183,14 @@ describe('getConversationAvatarProfile', () => {
     });
   });
 
-  it('prefers live profile when snapshot has no image (live may have one)', () => {
+  it('uses snapshot identity even when snapshot has no image (frozen state)', () => {
     const snapshot = makeSnapshot({ profile_image_snapshot_url: null });
     const member = makeMember({ profile_image_url: 'live/img.jpg' });
     const result = getConversationAvatarProfile(snapshot, member);
 
-    // Should use the live profile since it has an actual image
-    expect(result).toBe(member.profile);
+    // Should use snapshot (frozen at application time) — NOT live profile
+    expect(result?.first_name).toBe('Frozen');
+    expect(result?.profile_image_url).toBeNull();
   });
 
   it('falls back to live profile when no snapshot at all', () => {
