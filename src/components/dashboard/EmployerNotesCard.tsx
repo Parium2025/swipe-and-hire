@@ -62,13 +62,26 @@ export const EmployerNotesCard = memo(() => {
           </div>
 
           <div className="flex-1 min-h-0 relative">
-            <RichNotesEditor
-              value={content}
-              onChange={handleChange}
-              placeholder="Skriv påminnelser och anteckningar..."
-              hideToolbar
-              onEditorReady={handleEditorReady}
-            />
+            {!notesEditor && content && (
+              <div
+                className="absolute inset-0 bg-white/10 rounded-lg p-2 pr-4 text-sm leading-relaxed text-pure-white overflow-hidden pointer-events-none"
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
+            )}
+            {!notesEditor && !content && (
+              <div className="absolute inset-0 bg-white/10 rounded-lg p-2 pr-4 text-sm leading-relaxed text-pure-white/40 pointer-events-none">
+                Skriv påminnelser och anteckningar...
+              </div>
+            )}
+            <div className={notesEditor ? 'visible' : 'invisible'}>
+              <RichNotesEditor
+                value={content}
+                onChange={handleChange}
+                placeholder="Skriv påminnelser och anteckningar..."
+                hideToolbar
+                onEditorReady={handleEditorReady}
+              />
+            </div>
             <div
               className="absolute bottom-0 left-0 right-0 h-6 pointer-events-none rounded-b-lg"
               style={{ background: 'linear-gradient(to top, rgba(124, 58, 237, 0.7), transparent)' }}
