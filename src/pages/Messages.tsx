@@ -114,10 +114,19 @@ export default function Messages() {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     
-    // Search in conversation name
+    // Search in conversation name (group chats)
     if (conv.name?.toLowerCase().includes(query)) return true;
     
-    // Search in member names
+    // Search in frozen snapshot name (per-application identity — always preferred)
+    const snapshot = conv.applicationSnapshot;
+    if (snapshot) {
+      const snapshotName = `${snapshot.first_name || ''} ${snapshot.last_name || ''}`.trim().toLowerCase();
+      if (snapshotName.includes(query)) return true;
+      // Search in job title from snapshot
+      if (snapshot.job_title?.toLowerCase().includes(query)) return true;
+    }
+    
+    // Search in live member names (for non-snapshot conversations like colleague chats)
     const memberNames = conv.members
       .filter(m => m.user_id !== user?.id)
       .map(m => {
@@ -130,6 +139,9 @@ export default function Messages() {
       .toLowerCase();
     
     if (memberNames.includes(query)) return true;
+    
+    // Search in job title from conversation
+    if (conv.job?.title?.toLowerCase().includes(query)) return true;
     
     // Search in last message
     if (conv.last_message?.content.toLowerCase().includes(query)) return true;
