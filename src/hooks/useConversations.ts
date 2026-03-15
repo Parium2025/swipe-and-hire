@@ -278,8 +278,12 @@ export function useConversations() {
       // 🔥 Cache for instant-load on next visit
       writeConversationsCache(user.id, result);
 
-      // 🔥 Prefetch avatars for all conversation members (eliminates flicker)
+      // 🔥 Prefetch avatars for all conversation members AND snapshots (eliminates flicker)
       result.forEach(conv => {
+        // Prefetch snapshot image if available (frozen candidate profile photo)
+        if (conv.applicationSnapshot?.profile_image_snapshot_url) {
+          prefetchMediaUrl(conv.applicationSnapshot.profile_image_snapshot_url, 'profile-image');
+        }
         (conv.members || []).forEach(member => {
           if (member.user_id !== user.id && member.profile) {
             const isEmployer = member.profile.role === 'employer';
