@@ -701,7 +701,7 @@ function ChatView({
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4" onScrollCapture={handleScroll}>
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4" onScrollCapture={handleScroll}>
         {isLoading ? (
           <div className="space-y-4 p-4">
             {Array.from({ length: 6 }).map((_, i) => (
