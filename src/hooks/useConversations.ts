@@ -388,14 +388,14 @@ export function useConversationMessages(conversationId: string | null) {
         .order('created_at', { ascending: false })
         .limit(200);
 
-      // Reverse to get chronological order (we fetched newest-first for the LIMIT to work correctly)
-      if (messages) messages.reverse();
-
       if (error) throw error;
+      if (!messages || messages.length === 0) return [];
+
+      // Reverse to get chronological order (we fetched newest-first for the LIMIT to work correctly)
+      messages.reverse();
 
       // Fetch sender profiles
-      const senderIds = [...new Set(messages?.map(m => m.sender_id) || [])];
-      if (senderIds.length === 0) return [];
+      const senderIds = [...new Set(messages.map(m => m.sender_id))];
 
       const { data: profiles } = await supabase
         .from('profiles')
@@ -404,12 +404,14 @@ export function useConversationMessages(conversationId: string | null) {
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-      return (messages || []).map(msg => ({
+      return messages.map(msg => ({
         ...msg,
         sender_profile: profileMap.get(msg.sender_id),
       })) as ConversationMessage[];
     },
     enabled: !!conversationId,
+    // Keep messages in cache for 30 min so switching between conversations is instant
+    gcTime: 30 * 60 * 1000,
   });
 
   // Subscribe to realtime messages for this conversation - instant cache update
