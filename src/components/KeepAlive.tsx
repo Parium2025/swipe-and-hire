@@ -57,9 +57,9 @@ export function KeepAlive({ activeKey, render, keepKeys }: KeepAliveProps) {
   const keysToRender = new Set([activeKey, ...keepKeys.filter(k => cacheRef.current.has(k))]);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full flex flex-col min-h-0">
       {[...keysToRender].map((key) => (
-        <div key={key} className={key === activeKey ? 'block' : 'hidden'}>
+        <div key={key} className={key === activeKey ? 'flex-1 min-h-0 flex flex-col' : 'hidden'}>
           {key === activeKey ? activeNode : cacheRef.current.get(key)}
         </div>
       ))}
