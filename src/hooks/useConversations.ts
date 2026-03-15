@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { prefetchMediaUrl } from './useMediaUrl';
@@ -138,9 +138,7 @@ function writeConversationsCache(userId: string, conversations: Conversation[]):
 export function useConversations() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-
-  // Check for cached data BEFORE query runs
-  const hasCachedData = user ? readConversationsCache(user.id) !== null : false;
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch all conversations for current user
   const conversationsQuery = useQuery({
@@ -161,7 +159,6 @@ export function useConversations() {
       }
 
       const conversationIds = memberships.map(m => m.conversation_id);
-      const lastReadMap = new Map(memberships.map(m => [m.conversation_id, m.last_read_at]));
 
       // Fetch conversations with job info
       const { data: conversations, error: convError } = await supabase
@@ -333,6 +330,7 @@ export function useConversations() {
   }, [conversationsQuery.data, user]);
 
   // Subscribe to realtime updates for new messages
+  // Debounced to prevent refetch storms at scale (1M+ users)
   useEffect(() => {
     if (!user) return;
 
@@ -346,13 +344,17 @@ export function useConversations() {
           table: 'conversation_messages',
         },
         () => {
-          // Refresh conversations when new message arrives
-          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+          // Debounce: if many messages arrive quickly, only refetch once
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          debounceRef.current = setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+          }, 300);
         }
       )
       .subscribe();
 
     return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
       supabase.removeChannel(channel);
     };
   }, [user, queryClient]);
@@ -386,14 +388,14 @@ export function useConversationMessages(conversationId: string | null) {
         .order('created_at', { ascending: false })
         .limit(200);
 
-      // Reverse to get chronological order (we fetched newest-first for the LIMIT to work correctly)
-      if (messages) messages.reverse();
-
       if (error) throw error;
+      if (!messages || messages.length === 0) return [];
+
+      // Reverse to get chronological order (we fetched newest-first for the LIMIT to work correctly)
+      messages.reverse();
 
       // Fetch sender profiles
-      const senderIds = [...new Set(messages?.map(m => m.sender_id) || [])];
-      if (senderIds.length === 0) return [];
+      const senderIds = [...new Set(messages.map(m => m.sender_id))];
 
       const { data: profiles } = await supabase
         .from('profiles')
@@ -402,12 +404,14 @@ export function useConversationMessages(conversationId: string | null) {
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-      return (messages || []).map(msg => ({
+      return messages.map(msg => ({
         ...msg,
         sender_profile: profileMap.get(msg.sender_id),
       })) as ConversationMessage[];
     },
     enabled: !!conversationId,
+    // Keep messages in cache for 30 min so switching between conversations is instant
+    gcTime: 30 * 60 * 1000,
   });
 
   // Subscribe to realtime messages for this conversation - instant cache update
