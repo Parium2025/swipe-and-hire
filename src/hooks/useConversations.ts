@@ -71,7 +71,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 6; // v6: invalidate stale identity cache to prevent "Okänd användare" persistence
+const CACHE_VERSION = 7; // v7: strict identity recovery + partial-response guard for conversations
 
 interface CachedConversations {
   userId: string;
@@ -80,24 +80,42 @@ interface CachedConversations {
   version?: number;
 }
 
+function hasText(value: string | null | undefined): boolean {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function hasUnknownIdentityForConversation(conv: Conversation, userId: string): boolean {
+  if (conv.is_group) return false;
+
+  const hasSnapshotName = hasText(conv.applicationSnapshot?.first_name) || hasText(conv.applicationSnapshot?.last_name);
+
+  const otherMember = (conv.members || []).find((m) => m.user_id !== userId);
+  if (!otherMember) return true;
+
+  const profile = otherMember.profile;
+  const hasProfileName =
+    hasText(profile?.company_name) ||
+    hasText(profile?.first_name) ||
+    hasText(profile?.last_name);
+
+  return !hasSnapshotName && !hasProfileName;
+}
+
 function hasUnknownConversationIdentity(conversations: Conversation[], userId: string): boolean {
-  return conversations.some((conv) => {
-    if (conv.is_group) return false;
+  return conversations.some((conv) => hasUnknownIdentityForConversation(conv, userId));
+}
 
-    const hasSnapshotName = !!(
-      conv.applicationSnapshot?.first_name || conv.applicationSnapshot?.last_name
-    );
-
-    const otherMember = (conv.members || []).find((m) => m.user_id !== userId);
-    if (!otherMember) return true;
-
-    const profile = otherMember.profile;
-    const hasProfileName = !!(
-      profile?.company_name || profile?.first_name || profile?.last_name
-    );
-
-    return !hasSnapshotName && !hasProfileName;
-  });
+function readConversationsCacheForRecovery(userId: string): Conversation[] {
+  try {
+    const raw = localStorage.getItem(CONVERSATIONS_CACHE_KEY);
+    if (!raw) return [];
+    const cached: CachedConversations = JSON.parse(raw);
+    if (cached.userId !== userId) return [];
+    if (!cached.version || cached.version < CACHE_VERSION) return [];
+    return Array.isArray(cached.conversations) ? cached.conversations : [];
+  } catch {
+    return [];
+  }
 }
 
 function readConversationsCache(userId: string): Conversation[] | null {
@@ -142,6 +160,51 @@ function writeConversationsCache(userId: string, conversations: Conversation[]):
   }
 }
 
+function mergeConversationsWithLastKnownIdentity(
+  conversations: Conversation[],
+  previousConversations: Conversation[],
+  userId: string,
+): Conversation[] {
+  if (previousConversations.length === 0) return conversations;
+
+  const previousById = new Map(previousConversations.map((conv) => [conv.id, conv]));
+
+  return conversations.map((conv) => {
+    const previous = previousById.get(conv.id);
+    if (!previous) return conv;
+
+    let merged = conv;
+
+    if (hasUnknownIdentityForConversation(merged, userId) && !hasUnknownIdentityForConversation(previous, userId)) {
+      const previousMembersById = new Map((previous.members || []).map((member) => [member.user_id, member]));
+      const mergedMembers = (merged.members || []).map((member) => {
+        if (member.profile) return member;
+        const previousProfile = previousMembersById.get(member.user_id)?.profile;
+        return previousProfile ? { ...member, profile: previousProfile } : member;
+      });
+
+      const hasOtherMember = mergedMembers.some((member) => member.user_id !== userId);
+      const previousHasOtherMember = (previous.members || []).some((member) => member.user_id !== userId);
+
+      merged = {
+        ...merged,
+        members: !hasOtherMember && previousHasOtherMember ? previous.members : mergedMembers,
+        applicationSnapshot: merged.applicationSnapshot ?? previous.applicationSnapshot,
+      };
+    }
+
+    if (!merged.last_message && previous.last_message) {
+      merged = {
+        ...merged,
+        last_message: previous.last_message,
+        last_message_at: merged.last_message_at ?? previous.last_message_at,
+      };
+    }
+
+    return merged;
+  });
+}
+
 export function useConversations() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -181,15 +244,20 @@ export function useConversations() {
       if (convError) throw convError;
       if (!conversations) return [];
 
+      const previousConversations = [
+        ...readConversationsCacheForRecovery(user.id),
+        ...(queryClient.getQueryData<Conversation[]>(['conversations', user.id]) || []),
+      ];
+
       // Get application_ids for conversations that have them
       const applicationIds = conversations
-        .map(c => c.application_id)
+        .map((c) => c.application_id)
         .filter((id): id is string => id !== null);
 
       // Fetch application snapshots for frozen profile data
-      let applicationSnapshotMap = new Map<string, ApplicationSnapshot>();
+      const applicationSnapshotMap = new Map<string, ApplicationSnapshot>();
       if (applicationIds.length > 0) {
-        const { data: applications } = await supabase
+        const { data: applications, error: applicationsError } = await supabase
           .from('job_applications')
           .select(`
             id,
@@ -202,19 +270,19 @@ export function useConversations() {
           `)
           .in('id', applicationIds);
 
-        if (applications) {
-          applications.forEach(app => {
-            applicationSnapshotMap.set(app.id, {
-              application_id: app.id,
-              first_name: app.first_name,
-              last_name: app.last_name,
-              profile_image_snapshot_url: app.profile_image_snapshot_url,
-              video_snapshot_url: app.video_snapshot_url,
-              cv_url: app.cv_url,
-              job_title: (app.job as any)?.title || null,
-            });
+        if (applicationsError) throw applicationsError;
+
+        (applications || []).forEach((app) => {
+          applicationSnapshotMap.set(app.id, {
+            application_id: app.id,
+            first_name: app.first_name,
+            last_name: app.last_name,
+            profile_image_snapshot_url: app.profile_image_snapshot_url,
+            video_snapshot_url: app.video_snapshot_url,
+            cv_url: app.cv_url,
+            job_title: (app.job as any)?.title || null,
           });
-        }
+        });
       }
 
       // Fetch all members for these conversations
@@ -226,27 +294,31 @@ export function useConversations() {
       if (membersError) throw membersError;
 
       // Get unique user IDs to fetch profiles
-      const allUserIds = [...new Set(allMembers?.map(m => m.user_id) || [])];
-      
-      const { data: profiles } = await supabase
+      const allUserIds = [...new Set((allMembers || []).map((m) => m.user_id))];
+
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
         .in('user_id', allUserIds);
 
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      if (profilesError) throw profilesError;
+
+      const profileMap = new Map((profiles || []).map((p) => [p.user_id, p]));
 
       // 🔥 Use efficient DB function instead of fetching ALL messages
       // This scales to millions of messages - only returns latest + unread count per conversation
-      const { data: summaries } = await supabase
+      const { data: summaries, error: summariesError } = await supabase
         .rpc('get_conversation_summaries', { p_user_id: user.id });
+
+      if (summariesError) throw summariesError;
 
       const lastMessageMap = new Map<string, ConversationMessage>();
       const unreadCounts = new Map<string, number>();
-      
+
       // Initialize unread counts
-      conversationIds.forEach(id => unreadCounts.set(id, 0));
-      
-      summaries?.forEach((s: any) => {
+      conversationIds.forEach((id) => unreadCounts.set(id, 0));
+
+      (summaries || []).forEach((s: any) => {
         if (s.last_message_content) {
           lastMessageMap.set(s.conversation_id, {
             id: `summary-${s.conversation_id}`,
@@ -262,10 +334,10 @@ export function useConversations() {
       });
 
       // Build final conversation objects
-      const result = conversations.map(conv => {
+      const result = conversations.map((conv) => {
         const members = (allMembers || [])
-          .filter(m => m.conversation_id === conv.id)
-          .map(m => ({
+          .filter((m) => m.conversation_id === conv.id)
+          .map((m) => ({
             ...m,
             profile: profileMap.get(m.user_id),
           }));
@@ -276,26 +348,30 @@ export function useConversations() {
           last_message: lastMessageMap.get(conv.id),
           unread_count: unreadCounts.get(conv.id) || 0,
           // Include frozen profile snapshot from application if available
-          applicationSnapshot: conv.application_id 
-            ? applicationSnapshotMap.get(conv.application_id) 
+          applicationSnapshot: conv.application_id
+            ? applicationSnapshotMap.get(conv.application_id)
             : undefined,
         } as Conversation;
       });
 
-      // 🔥 Cache for instant-load on next visit
-      writeConversationsCache(user.id, result);
+      const repairedResult = mergeConversationsWithLastKnownIdentity(result, previousConversations, user.id);
+
+      // Never persist a payload that would render "Okänd användare"
+      if (!hasUnknownConversationIdentity(repairedResult, user.id)) {
+        writeConversationsCache(user.id, repairedResult);
+      }
 
       // 🔥 Prefetch avatars for all conversation members AND snapshots (eliminates flicker)
-      result.forEach(conv => {
+      repairedResult.forEach((conv) => {
         // Prefetch snapshot image if available (frozen candidate profile photo)
         if (conv.applicationSnapshot?.profile_image_snapshot_url) {
           prefetchMediaUrl(conv.applicationSnapshot.profile_image_snapshot_url, 'profile-image');
         }
-        (conv.members || []).forEach(member => {
+        (conv.members || []).forEach((member) => {
           if (member.user_id !== user.id && member.profile) {
             const isEmployer = member.profile.role === 'employer';
-            const storagePath = isEmployer && member.profile.company_logo_url 
-              ? member.profile.company_logo_url 
+            const storagePath = isEmployer && member.profile.company_logo_url
+              ? member.profile.company_logo_url
               : member.profile.profile_image_url;
             if (storagePath) {
               prefetchMediaUrl(storagePath, isEmployer ? 'company-logo' : 'profile-image');
@@ -304,12 +380,13 @@ export function useConversations() {
         });
       });
 
-      return result;
+      return repairedResult;
     },
     enabled: !!user,
     staleTime: 30 * 1000,
     refetchOnMount: 'always',
     refetchOnReconnect: true,
+    retry: 2,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (!user) return undefined;
