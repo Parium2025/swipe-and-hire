@@ -394,6 +394,7 @@ export function useConversationMessages(conversationId: string | null) {
     enabled: !!conversationId,
     // Keep messages in cache for 30 min so switching between conversations is instant
     gcTime: 30 * 60 * 1000,
+    staleTime: 60 * 1000, // 1 min — realtime handles live updates
   });
 
   // Subscribe to realtime messages for this conversation - instant cache update
