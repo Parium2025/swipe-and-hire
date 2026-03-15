@@ -145,7 +145,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`)}
     >
       {/* Visual header — image or gradient placeholder */}
-      <div className="relative w-full h-40 overflow-hidden">
+      <div className="relative w-full h-32 overflow-hidden">
         {displayUrl ? (
           <>
             <img
