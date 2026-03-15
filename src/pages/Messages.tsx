@@ -29,6 +29,7 @@ import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { MessagesTabs } from '@/components/MessagesTabs';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
 
