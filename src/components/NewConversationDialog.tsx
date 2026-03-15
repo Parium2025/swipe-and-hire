@@ -161,8 +161,11 @@ export function NewConversationDialog({
         ? selectedContact.jobId
         : undefined;
       
+      // Resolve actual user IDs (candidates store userId separately from their unique key)
+      const memberUserIds = selectedContactObjects.map(c => c.userId || c.id);
+      
       const result = await createConversation.mutateAsync({
-        memberIds: selectedContacts,
+        memberIds: memberUserIds,
         name: isGroup ? groupName.trim() || undefined : undefined,
         isGroup,
         initialMessage: initialMessage.trim() || undefined,
