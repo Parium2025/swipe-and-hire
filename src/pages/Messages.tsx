@@ -44,6 +44,7 @@ export default function Messages() {
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [activeTab, setActiveTab] = useState<ConversationTab>(hasTeam ? 'all' : 'candidates');
   const deepLinkHandled = useRef(false);
+  const isMobile = useIsMobile();
 
   // Handle deep-link: /messages?conversation=<id> (e.g. from SendMessageDialog)
   useEffect(() => {
