@@ -268,7 +268,6 @@ const JobDetails = () => {
     return containingStage || directStage;
   }, [applicationsByStatus, activeStages]);
 
-  const isTouchDevice = useTouchCapable();
 
   const handleOpenProfile = useCallback((app: JobApplication) => {
     const stage = resolveStageForApplication(app);
