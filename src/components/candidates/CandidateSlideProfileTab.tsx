@@ -219,33 +219,33 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
         </SectionCard>
       )}
 
-      {/* Action buttons */}
-      <div className="w-full min-w-0 flex flex-col gap-3">
-        <div className="flex items-center gap-3">
+      {/* Action buttons — identical to desktop ProfileActions my-candidates variant */}
+      <div className="w-full min-w-0">
+        <div className="flex justify-center gap-1">
           <button
             onClick={() => setSendMessageOpen(true)}
-            className="min-w-0 flex-1 py-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center gap-2"
+            className="min-w-0 flex-1 h-9 px-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center"
           >
-            <MessageSquare className="h-4 w-4 shrink-0" />
+            <MessageSquare className="h-4 w-4 mr-1 shrink-0" />
             <span className="truncate">Meddelande</span>
           </button>
           <button
             onClick={() => setBookInterviewOpen(true)}
-            className="min-w-0 flex-1 py-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center gap-2"
+            className="min-w-0 flex-1 h-9 px-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center"
           >
-            <CalendarPlus className="h-4 w-4 shrink-0" />
+            <CalendarPlus className="h-4 w-4 mr-1 shrink-0" />
             <span className="truncate">Boka möte</span>
           </button>
+          {onRemoveFromList && (
+            <button
+              onClick={onRemoveFromList}
+              className="min-w-0 flex-1 h-9 px-3 rounded-full bg-red-500/20 backdrop-blur-sm border border-red-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-red-500/40 transition-all flex items-center justify-center"
+            >
+              <Trash2 className="h-4 w-4 mr-1 shrink-0" />
+              <span className="truncate">Ta bort</span>
+            </button>
+          )}
         </div>
-        {onRemoveFromList && (
-          <button
-            onClick={onRemoveFromList}
-            className="w-full py-2.5 rounded-full bg-red-500 backdrop-blur-sm text-white text-sm font-medium active:scale-[0.97] active:bg-red-600 transition-all flex items-center justify-center gap-2"
-          >
-            <Trash2 className="h-4 w-4 shrink-0" />
-            <span>Ta bort</span>
-          </button>
-        )}
       </div>
 
       {/* Direct dialogs — elevated z-index to render above SwipeViewer */}
