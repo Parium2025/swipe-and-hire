@@ -1028,6 +1028,10 @@ const MyCandidates = () => {
             }, 100);
           }
         }}
+        onNavigatePrev={handleNavigatePrev}
+        onNavigateNext={handleNavigateNext}
+        candidateIndex={candidateNavIndex}
+        candidateTotal={candidateNavTotal}
       />
 
       {/* Remove Confirmation Dialog */}
