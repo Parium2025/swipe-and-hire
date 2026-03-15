@@ -28,6 +28,7 @@ interface CandidateSlideProfileTabProps {
     generatingSummary: boolean;
   };
   onOpenFullProfile: () => void;
+  onRemoveFromList?: () => void;
 }
 
 export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
@@ -40,6 +41,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
   initials,
   summaryHook,
   onOpenFullProfile,
+  onRemoveFromList,
 }: CandidateSlideProfileTabProps) {
   const [bioExpanded, setBioExpanded] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
