@@ -267,6 +267,7 @@ export const BookInterviewDialog = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContentNoFocus 
         hideClose
+        elevated={elevated}
         className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden flex flex-col"
       >
         <DialogHeader className="sr-only">

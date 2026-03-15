@@ -119,6 +119,7 @@ export function SendMessageDialog({
       }}>
         <DialogContentNoFocus 
           hideClose
+          elevated={elevated}
           className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-x-hidden overflow-y-auto"
         >
           <DialogHeader className="sr-only">
