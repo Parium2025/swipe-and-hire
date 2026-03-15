@@ -240,7 +240,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
         {onRemoveFromList && (
           <button
             onClick={onRemoveFromList}
-            className="w-full py-2.5 rounded-full bg-red-500/10 backdrop-blur-sm border border-red-500/30 text-red-400 text-sm font-medium active:scale-[0.97] active:bg-red-500/20 transition-all flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-full bg-red-500 backdrop-blur-sm text-white text-sm font-medium active:scale-[0.97] active:bg-red-600 transition-all flex items-center justify-center gap-2"
           >
             <Trash2 className="h-4 w-4 shrink-0" />
             <span>Ta bort</span>
