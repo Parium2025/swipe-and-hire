@@ -498,15 +498,17 @@ function ChatView({
   onBack: () => void;
   currentUserRole: 'job_seeker' | 'employer' | null;
 }) {
-  const { messages, isLoading, sendMessage, markAsRead } = useConversationMessages(conversation.id);
+  const { messages, isLoading, sendMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesTopRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
   const prevMessageCountRef = useRef(0);
+  const prevFirstMessageIdRef = useRef<string | null>(null);
 
   const otherMembers = (conversation.members || []).filter(m => m.user_id !== currentUserId);
   const displayMember = otherMembers[0];
@@ -540,17 +542,30 @@ function ChatView({
   }, []);
 
   // Smart scroll: auto-scroll only if user is near bottom or it's their own new message
+  // When loading older messages (prepend), preserve scroll position
   useEffect(() => {
     const isInitialLoad = prevMessageCountRef.current === 0 && messages.length > 0;
-    const isNewMessage = messages.length > prevMessageCountRef.current;
-    const lastMessage = messages[messages.length - 1];
-    const isOwnNewMessage = isNewMessage && lastMessage?.sender_id === currentUserId;
+    const firstMessageId = messages[0]?.id || null;
+    const wasOlderMessagesPrepended = prevFirstMessageIdRef.current !== null 
+      && firstMessageId !== prevFirstMessageIdRef.current
+      && messages.length > prevMessageCountRef.current;
     
-    if (isInitialLoad || isOwnNewMessage || isNearBottomRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: isInitialLoad ? 'instant' : 'smooth' });
+    if (wasOlderMessagesPrepended) {
+      // Older messages were prepended — keep scroll position by scrolling to the old first message
+      const oldFirstEl = document.getElementById(`msg-${prevFirstMessageIdRef.current}`);
+      oldFirstEl?.scrollIntoView({ behavior: 'instant', block: 'start' });
+    } else {
+      const isNewMessage = messages.length > prevMessageCountRef.current;
+      const lastMessage = messages[messages.length - 1];
+      const isOwnNewMessage = isNewMessage && lastMessage?.sender_id === currentUserId;
+      
+      if (isInitialLoad || isOwnNewMessage || isNearBottomRef.current) {
+        messagesEndRef.current?.scrollIntoView({ behavior: isInitialLoad ? 'instant' : 'smooth' });
+      }
     }
     
     prevMessageCountRef.current = messages.length;
+    prevFirstMessageIdRef.current = firstMessageId;
   }, [messages, currentUserId]);
 
   // Scroll to bottom when typing indicator appears (only if near bottom)
@@ -683,6 +698,27 @@ function ChatView({
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Load older messages button */}
+            {hasMore && messages.length >= 200 && (
+              <div className="flex justify-center py-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={fetchOlderMessages}
+                  disabled={loadingOlder}
+                  className="text-pure-white hover:bg-white/10 text-xs gap-2"
+                >
+                  {loadingOlder ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Laddar äldre meddelanden...
+                    </>
+                  ) : (
+                    'Visa äldre meddelanden'
+                  )}
+                </Button>
+              </div>
+            )}
             {Object.entries(groupedMessages).map(([date, msgs]) => (
               <div key={date}>
                 {/* Date header */}
@@ -697,14 +733,15 @@ function ChatView({
                 {/* Messages for this date */}
                 <div className="space-y-3">
                   {msgs.map((msg, idx) => (
-                    <MessageBubble
-                      key={msg.id}
-                      message={msg}
-                      isOwn={msg.sender_id === currentUserId}
-                      showAvatar={idx === 0 || msgs[idx - 1]?.sender_id !== msg.sender_id}
-                      isGroup={conversation.is_group}
-                      currentUserRole={currentUserRole}
-                    />
+                    <div key={msg.id} id={`msg-${msg.id}`}>
+                      <MessageBubble
+                        message={msg}
+                        isOwn={msg.sender_id === currentUserId}
+                        showAvatar={idx === 0 || msgs[idx - 1]?.sender_id !== msg.sender_id}
+                        isGroup={conversation.is_group}
+                        currentUserRole={currentUserRole}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
