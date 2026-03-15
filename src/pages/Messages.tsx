@@ -506,7 +506,7 @@ function ChatView({
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
