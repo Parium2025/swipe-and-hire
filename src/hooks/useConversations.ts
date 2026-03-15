@@ -130,14 +130,9 @@ function readConversationsCache(userId: string): Conversation[] | null {
     }
     if (cached.conversations.length === 0) return null;
 
-    // Filter out individual conversations with unknown identity instead of
-    // throwing away the ENTIRE cache. This prevents one bad conversation
-    // from causing all other conversations to disappear.
-    const validConversations = cached.conversations.filter(
-      (conv) => !hasUnknownIdentityForConversation(conv, userId)
-    );
-
-    return validConversations.length > 0 ? validConversations : null;
+    // Non-aggressive cache policy: return all cached conversations.
+    // Unknown identity should be solved by recovery/refetch, not by hiding rows.
+    return cached.conversations;
   } catch {
     return null;
   }
