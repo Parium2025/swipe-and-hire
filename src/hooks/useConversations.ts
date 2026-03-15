@@ -159,7 +159,6 @@ export function useConversations() {
       }
 
       const conversationIds = memberships.map(m => m.conversation_id);
-      const lastReadMap = new Map(memberships.map(m => [m.conversation_id, m.last_read_at]));
 
       // Fetch conversations with job info
       const { data: conversations, error: convError } = await supabase
