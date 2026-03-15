@@ -45,7 +45,9 @@ export function getConversationAvatarProfile(
   snapshot: ApplicationSnapshot | undefined,
   displayMember: ConversationMember | undefined,
 ): ProfileLike | undefined {
-  if (snapshot && snapshot.profile_image_snapshot_url) {
+  // Always prefer snapshot data (names + image) for candidate conversations.
+  // This ensures frozen application data is shown even if live profile is unavailable.
+  if (snapshot && (snapshot.first_name || snapshot.last_name || snapshot.profile_image_snapshot_url)) {
     return {
       role: 'job_seeker' as const,
       first_name: snapshot.first_name,

@@ -40,13 +40,13 @@ export function ConversationAvatar({
     if (isGroup && groupName) {
       return groupName.substring(0, 2).toUpperCase();
     }
-    if (!profile) return '?';
+    if (!profile) return '··';
     if (profile.role === 'employer' && profile.company_name) {
       return profile.company_name.substring(0, 2).toUpperCase();
     }
     const first = profile.first_name?.[0] || '';
     const last = profile.last_name?.[0] || '';
-    return (first + last).toUpperCase() || '?';
+    return (first + last).toUpperCase() || '··';
   };
 
   const sizeClasses = {
