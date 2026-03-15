@@ -4,6 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { clearSessionToken } from '@/hooks/useSessionManager';
 
 /**
+ * Module-level flag so onAuthStateChange in useAuth can distinguish
+ * an inactivity-timeout logout from a cross-tab logout.
+ */
+let _inactivityLogoutInProgress = false;
+export const isInactivityLogout = () => _inactivityLogoutInProgress;
+export const clearInactivityLogoutFlag = () => { _inactivityLogoutInProgress = false; };
+
+/**
  * Hook that tracks user activity and handles 24-hour inactivity timeout
  * Also refreshes the session sentinel so the tab is recognized as alive
  */
