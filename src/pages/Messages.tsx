@@ -536,6 +536,18 @@ function ChatView({
   // Use frozen application snapshot if available
   const snapshot = conversation.applicationSnapshot;
 
+  // Build a frozen sender profile for the candidate based on snapshot.
+  // This ensures message bubbles show the SAME identity as the conversation list.
+  const candidateUserId = conversation.candidate_id;
+  const snapshotSenderProfile = snapshot && candidateUserId ? {
+    first_name: snapshot.first_name,
+    last_name: snapshot.last_name,
+    company_name: null,
+    profile_image_url: snapshot.profile_image_snapshot_url,
+    company_logo_url: null,
+    role: 'job_seeker' as const,
+  } : null;
+
   // Get current user's display name for typing indicator
   const getCurrentUserName = () => {
     const currentMember = (conversation.members || []).find(m => m.user_id === currentUserId);
@@ -769,17 +781,23 @@ function ChatView({
 
                 {/* Messages for this date */}
                 <div className="space-y-3">
-                  {msgs.map((msg, idx) => (
+                  {msgs.map((msg, idx) => {
+                    // Use frozen snapshot profile for candidate messages (per-application identity)
+                    const resolvedMessage = snapshotSenderProfile && candidateUserId && msg.sender_id === candidateUserId
+                      ? { ...msg, sender_profile: snapshotSenderProfile }
+                      : msg;
+                    return (
                     <div key={msg.id} id={`msg-${msg.id}`}>
                       <MessageBubble
-                        message={msg}
+                        message={resolvedMessage}
                         isOwn={msg.sender_id === currentUserId}
                         showAvatar={idx === 0 || msgs[idx - 1]?.sender_id !== msg.sender_id}
                         isGroup={conversation.is_group}
                         currentUserRole={currentUserRole}
                       />
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
