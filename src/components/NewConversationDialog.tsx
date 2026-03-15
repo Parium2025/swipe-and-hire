@@ -42,15 +42,16 @@ interface NewConversationDialogProps {
 type ContactType = 'colleague' | 'candidate';
 
 interface Contact {
-  id: string;
+  id: string; // Unique key (applicationId for candidates, userId for colleagues)
   type: ContactType;
   firstName: string | null;
   lastName: string | null;
   companyName?: string | null;
   profileImageUrl: string | null;
-  jobTitle?: string; // For candidates - which job they applied to
-  applicationId?: string; // For candidates - link to frozen profile
-  jobId?: string; // For candidates - the job they applied to
+  jobTitle?: string;
+  applicationId?: string;
+  jobId?: string;
+  userId?: string; // Actual user_id for conversation creation (candidates)
 }
 
 export function NewConversationDialog({
