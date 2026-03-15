@@ -542,17 +542,30 @@ function ChatView({
   }, []);
 
   // Smart scroll: auto-scroll only if user is near bottom or it's their own new message
+  // When loading older messages (prepend), preserve scroll position
   useEffect(() => {
     const isInitialLoad = prevMessageCountRef.current === 0 && messages.length > 0;
-    const isNewMessage = messages.length > prevMessageCountRef.current;
-    const lastMessage = messages[messages.length - 1];
-    const isOwnNewMessage = isNewMessage && lastMessage?.sender_id === currentUserId;
+    const firstMessageId = messages[0]?.id || null;
+    const wasOlderMessagesPrepended = prevFirstMessageIdRef.current !== null 
+      && firstMessageId !== prevFirstMessageIdRef.current
+      && messages.length > prevMessageCountRef.current;
     
-    if (isInitialLoad || isOwnNewMessage || isNearBottomRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: isInitialLoad ? 'instant' : 'smooth' });
+    if (wasOlderMessagesPrepended) {
+      // Older messages were prepended — keep scroll position by scrolling to the old first message
+      const oldFirstEl = document.getElementById(`msg-${prevFirstMessageIdRef.current}`);
+      oldFirstEl?.scrollIntoView({ behavior: 'instant', block: 'start' });
+    } else {
+      const isNewMessage = messages.length > prevMessageCountRef.current;
+      const lastMessage = messages[messages.length - 1];
+      const isOwnNewMessage = isNewMessage && lastMessage?.sender_id === currentUserId;
+      
+      if (isInitialLoad || isOwnNewMessage || isNearBottomRef.current) {
+        messagesEndRef.current?.scrollIntoView({ behavior: isInitialLoad ? 'instant' : 'smooth' });
+      }
     }
     
     prevMessageCountRef.current = messages.length;
+    prevFirstMessageIdRef.current = firstMessageId;
   }, [messages, currentUserId]);
 
   // Scroll to bottom when typing indicator appears (only if near bottom)
