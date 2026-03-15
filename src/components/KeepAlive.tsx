@@ -42,8 +42,8 @@ export function KeepAlive({ activeKey, render, keepKeys }: KeepAliveProps) {
   // If no keepKeys specified, just render the active view directly (no caching)
   if (!keepKeys || keepKeys.length === 0) {
     return (
-      <div className="relative w-full h-full">
-        <div className="block">
+      <div className="relative w-full h-full flex flex-col min-h-0">
+        <div className="flex-1 min-h-0 flex flex-col">
           {activeNode}
         </div>
       </div>
@@ -57,9 +57,9 @@ export function KeepAlive({ activeKey, render, keepKeys }: KeepAliveProps) {
   const keysToRender = new Set([activeKey, ...keepKeys.filter(k => cacheRef.current.has(k))]);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full flex flex-col min-h-0">
       {[...keysToRender].map((key) => (
-        <div key={key} className={key === activeKey ? 'block' : 'hidden'}>
+        <div key={key} className={key === activeKey ? 'flex-1 min-h-0 flex flex-col' : 'hidden'}>
           {key === activeKey ? activeNode : cacheRef.current.get(key)}
         </div>
       ))}

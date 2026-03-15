@@ -238,14 +238,14 @@ export default function Messages() {
   
   if (isLoading && !hasData) {
     return (
-     <div className="h-full min-h-0 flex flex-col opacity-0 responsive-container-wide">
+     <div className="flex-1 min-h-0 flex flex-col opacity-0 responsive-container-wide">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
   }
 
   return (
-     <div className="h-full min-h-0 flex flex-col animate-fade-in responsive-container-wide overflow-x-hidden">
+     <div className="flex-1 min-h-0 flex flex-col animate-fade-in responsive-container-wide overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">

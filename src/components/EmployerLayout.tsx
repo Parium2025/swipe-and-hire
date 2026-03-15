@@ -139,7 +139,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
             <FloatingBubbles />
           </div>
           
-           <main ref={mainScrollRef} className="flex-1 min-h-0 overflow-y-auto p-3 relative z-10" style={{ willChange: 'scroll-position', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+           <main ref={mainScrollRef} className="flex-1 min-h-0 overflow-y-auto p-3 relative z-10 flex flex-col" style={{ willChange: 'scroll-position', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
             {children}
           </main>
           
@@ -204,7 +204,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
             <FloatingBubbles />
           </div>
           
-          <main ref={mainScrollRef} className="flex-1 overflow-x-hidden overflow-y-auto p-3 pb-8" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+          <main ref={mainScrollRef} className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 pb-8 flex flex-col" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
             {children}
           </main>
           
