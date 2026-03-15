@@ -319,10 +319,17 @@ export function useConversations() {
 
       // 🔥 Use efficient DB function instead of fetching ALL messages
       // This scales to millions of messages - only returns latest + unread count per conversation
-      const { data: summaries, error: summariesError } = await supabase
-        .rpc('get_conversation_summaries', { p_user_id: user.id });
-
-      if (summariesError) throw summariesError;
+      // Summaries are best-effort — conversations still show without last message preview
+      let summaries: any[] = [];
+      try {
+        const { data: summariesData, error: summariesError } = await supabase
+          .rpc('get_conversation_summaries', { p_user_id: user.id });
+        if (!summariesError && summariesData) {
+          summaries = summariesData;
+        }
+      } catch {
+        // Non-fatal
+      }
 
       const lastMessageMap = new Map<string, ConversationMessage>();
       const unreadCounts = new Map<string, number>();
