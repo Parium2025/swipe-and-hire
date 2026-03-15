@@ -98,13 +98,24 @@ describe('getConversationDisplayName', () => {
     ).toBe('Okänd användare');
   });
 
-  it('returns "Okänd användare" when profile names are empty', () => {
+  it('returns "Okänd användare" when profile names are empty strings', () => {
     expect(
       getConversationDisplayName({
         isGroup: false,
         groupName: null,
         snapshot: undefined,
         displayMember: makeMember({ first_name: '', last_name: '' }),
+      }),
+    ).toBe('Okänd användare');
+  });
+
+  it('returns "Okänd användare" when profile names are whitespace-only', () => {
+    expect(
+      getConversationDisplayName({
+        isGroup: false,
+        groupName: null,
+        snapshot: undefined,
+        displayMember: makeMember({ first_name: '  ', last_name: '  ' }),
       }),
     ).toBe('Okänd användare');
   });
@@ -141,16 +152,27 @@ describe('getConversationDisplayName', () => {
       }),
     ).toBe('Fallback User');
   });
+
+  it('skips snapshot when names are empty strings and falls back to profile', () => {
+    expect(
+      getConversationDisplayName({
+        isGroup: false,
+        groupName: null,
+        snapshot: makeSnapshot({ first_name: '', last_name: '' }),
+        displayMember: makeMember({ first_name: 'Real', last_name: 'Person' }),
+      }),
+    ).toBe('Real Person');
+  });
 });
 
 // ═══════════════════════════════════════════════
 // getConversationAvatarProfile
 // ═══════════════════════════════════════════════
 describe('getConversationAvatarProfile', () => {
-  it('uses snapshot image when available', () => {
+  it('uses snapshot when it has an image', () => {
     const snapshot = makeSnapshot({ profile_image_snapshot_url: 'snap/img.jpg' });
     const result = getConversationAvatarProfile(snapshot, makeMember());
-    
+
     expect(result).toEqual({
       role: 'job_seeker',
       first_name: snapshot.first_name,
@@ -161,18 +183,19 @@ describe('getConversationAvatarProfile', () => {
     });
   });
 
-  it('falls back to live profile when snapshot has no image', () => {
+  it('prefers live profile when snapshot has no image (live may have one)', () => {
     const snapshot = makeSnapshot({ profile_image_snapshot_url: null });
     const member = makeMember({ profile_image_url: 'live/img.jpg' });
     const result = getConversationAvatarProfile(snapshot, member);
-    
+
+    // Should use the live profile since it has an actual image
     expect(result).toBe(member.profile);
   });
 
   it('falls back to live profile when no snapshot at all', () => {
     const member = makeMember();
     const result = getConversationAvatarProfile(undefined, member);
-    
+
     expect(result).toBe(member.profile);
   });
 
@@ -180,11 +203,38 @@ describe('getConversationAvatarProfile', () => {
     expect(getConversationAvatarProfile(undefined, undefined)).toBeUndefined();
   });
 
-  it('returns snapshot profile even if member also has an image (snapshot wins)', () => {
+  it('returns snapshot profile when it has image, even if member also has one (snapshot wins)', () => {
     const snapshot = makeSnapshot({ profile_image_snapshot_url: 'snap.jpg' });
     const member = makeMember({ profile_image_url: 'live.jpg' });
-    
+
     expect(getConversationAvatarProfile(snapshot, member)?.profile_image_url).toBe('snap.jpg');
+  });
+
+  it('builds profile from snapshot names when no image and no live profile', () => {
+    const snapshot = makeSnapshot({
+      first_name: 'Ghost',
+      last_name: 'User',
+      profile_image_snapshot_url: null,
+    });
+    const result = getConversationAvatarProfile(snapshot, undefined);
+
+    expect(result).toEqual({
+      role: 'job_seeker',
+      first_name: 'Ghost',
+      last_name: 'User',
+      company_name: null,
+      profile_image_url: null,
+      company_logo_url: null,
+    });
+  });
+
+  it('returns undefined when snapshot has no names and no image and no member', () => {
+    const snapshot = makeSnapshot({
+      first_name: null,
+      last_name: null,
+      profile_image_snapshot_url: null,
+    });
+    expect(getConversationAvatarProfile(snapshot, undefined)).toBeUndefined();
   });
 });
 
@@ -230,11 +280,28 @@ describe('getMessageSenderName', () => {
     })).toBe('Okänd');
   });
 
+  it('returns "Okänd" for whitespace-only name fields', () => {
+    expect(getMessageSenderName({
+      role: 'job_seeker',
+      first_name: '  ',
+      last_name: '  ',
+    })).toBe('Okänd');
+  });
+
   it('handles first_name only', () => {
     expect(getMessageSenderName({
       role: 'job_seeker',
       first_name: 'Anna',
       last_name: null,
     })).toBe('Anna');
+  });
+
+  it('does not use whitespace-only company_name for employers', () => {
+    expect(getMessageSenderName({
+      role: 'employer',
+      first_name: 'John',
+      last_name: 'Doe',
+      company_name: '   ',
+    })).toBe('John Doe');
   });
 });

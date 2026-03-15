@@ -244,10 +244,18 @@ export function useConversations() {
       if (convError) throw convError;
       if (!conversations) return [];
 
-      const previousConversations = [
-        ...readConversationsCacheForRecovery(user.id),
-        ...(queryClient.getQueryData<Conversation[]>(['conversations', user.id]) || []),
-      ];
+      // Gather last-known-good identities from cache + current query data for merge/recovery.
+      // Deduplicate by conversation ID (prefer query data over stale cache).
+      const cacheConvs = readConversationsCacheForRecovery(user.id);
+      const queryConvs = queryClient.getQueryData<Conversation[]>(['conversations', user.id]) || [];
+      const seenIds = new Set<string>();
+      const previousConversations: Conversation[] = [];
+      for (const conv of [...queryConvs, ...cacheConvs]) {
+        if (!seenIds.has(conv.id)) {
+          seenIds.add(conv.id);
+          previousConversations.push(conv);
+        }
+      }
 
       // Get application_ids for conversations that have them
       const applicationIds = conversations
