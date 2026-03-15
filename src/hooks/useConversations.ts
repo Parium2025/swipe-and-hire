@@ -71,13 +71,33 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 5; // v5: cleaned up old messages system, unified conversations only
+const CACHE_VERSION = 6; // v6: invalidate stale identity cache to prevent "Okänd användare" persistence
 
 interface CachedConversations {
   userId: string;
   conversations: Conversation[];
   timestamp: number;
   version?: number;
+}
+
+function hasUnknownConversationIdentity(conversations: Conversation[], userId: string): boolean {
+  return conversations.some((conv) => {
+    if (conv.is_group) return false;
+
+    const hasSnapshotName = !!(
+      conv.applicationSnapshot?.first_name || conv.applicationSnapshot?.last_name
+    );
+
+    const otherMember = (conv.members || []).find((m) => m.user_id !== userId);
+    if (!otherMember) return true;
+
+    const profile = otherMember.profile;
+    const hasProfileName = !!(
+      profile?.company_name || profile?.first_name || profile?.last_name
+    );
+
+    return !hasSnapshotName && !hasProfileName;
+  });
 }
 
 function readConversationsCache(userId: string): Conversation[] | null {
@@ -95,21 +115,13 @@ function readConversationsCache(userId: string): Conversation[] | null {
     // Don't use empty cache as valid data - force refetch
     if (cached.conversations.length === 0) return null;
 
-    // If we somehow cached a 1:1 conversation with only our own membership row,
-    // the UI will show “Okänd användare”. Invalidate that cache.
-    const hasMissingOtherMember = cached.conversations.some((conv) => {
-      if (conv.is_group) return false;
-      const otherMembers = (conv.members || []).filter((m) => m.user_id !== userId);
-      return otherMembers.length === 0;
-    });
-    if (hasMissingOtherMember) {
+    // Invalidate cache if any 1:1 conversation would render as "Okänd användare".
+    // We still keep instant-load UX, but never let unknown identity get stuck.
+    if (hasUnknownConversationIdentity(cached.conversations, userId)) {
       localStorage.removeItem(CONVERSATIONS_CACHE_KEY);
       return null;
     }
 
-    // Don't invalidate for missing profiles — use cached data as-is.
-    // The background refetch will update with fresh profile data.
-    // Previously this invalidated the cache, causing "Okänd användare" flash.
     return cached.conversations;
   } catch {
     return null;
@@ -134,6 +146,7 @@ export function useConversations() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const identityRecoveryTriggeredRef = useRef(false);
 
   // Fetch all conversations for current user
   const conversationsQuery = useQuery({
@@ -294,7 +307,9 @@ export function useConversations() {
       return result;
     },
     enabled: !!user,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    staleTime: 30 * 1000,
+    refetchOnMount: 'always',
+    refetchOnReconnect: true,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (!user) return undefined;
@@ -304,9 +319,26 @@ export function useConversations() {
     initialDataUpdatedAt: () => {
       if (!user) return undefined;
       const cached = readConversationsCache(user.id);
-      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+      return cached ? Date.now() - 60000 : undefined;
     },
   });
+
+  // Recovery path: if a stale in-memory state still resolves to unknown identity, force one refetch.
+  useEffect(() => {
+    if (!user || !conversationsQuery.data || conversationsQuery.isFetching) return;
+
+    const hasUnknownIdentity = hasUnknownConversationIdentity(conversationsQuery.data, user.id);
+
+    if (hasUnknownIdentity && !identityRecoveryTriggeredRef.current) {
+      identityRecoveryTriggeredRef.current = true;
+      conversationsQuery.refetch();
+      return;
+    }
+
+    if (!hasUnknownIdentity) {
+      identityRecoveryTriggeredRef.current = false;
+    }
+  }, [user, conversationsQuery.data, conversationsQuery.isFetching, conversationsQuery.refetch]);
 
   // Avatar prefetch is handled inside queryFn — no duplicate useEffect needed
 
