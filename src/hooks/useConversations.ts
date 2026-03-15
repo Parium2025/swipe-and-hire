@@ -386,6 +386,7 @@ export function useConversations() {
     staleTime: 30 * 1000,
     refetchOnMount: 'always',
     refetchOnReconnect: true,
+    retry: 2,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (!user) return undefined;
