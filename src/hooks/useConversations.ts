@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { prefetchMediaUrl } from './useMediaUrl';
+import { toast } from 'sonner';
 
 export interface ConversationMember {
   user_id: string;
