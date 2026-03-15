@@ -138,9 +138,7 @@ function writeConversationsCache(userId: string, conversations: Conversation[]):
 export function useConversations() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-
-  // Check for cached data BEFORE query runs
-  const hasCachedData = user ? readConversationsCache(user.id) !== null : false;
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch all conversations for current user
   const conversationsQuery = useQuery({
