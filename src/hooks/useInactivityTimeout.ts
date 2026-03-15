@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { updateLastActivity, hasSessionExpiredDueToInactivity, clearActivityTracking, refreshSessionSentinel } from '@/lib/authStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { clearSessionToken } from '@/hooks/useSessionManager';
 
 /**
  * Hook that tracks user activity and handles 24-hour inactivity timeout
