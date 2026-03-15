@@ -29,6 +29,7 @@ import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { MessagesTabs } from '@/components/MessagesTabs';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
 
@@ -43,6 +44,7 @@ export default function Messages() {
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [activeTab, setActiveTab] = useState<ConversationTab>(hasTeam ? 'all' : 'candidates');
   const deepLinkHandled = useRef(false);
+  const isMobile = useIsMobile();
 
   // Handle deep-link: /messages?conversation=<id> (e.g. from SendMessageDialog)
   useEffect(() => {
@@ -228,6 +230,7 @@ export default function Messages() {
 
   const handleBackToList = () => {
     setShowMobileChat(false);
+    if (isMobile) setSelectedConversationId(null);
   };
 
   // Only show loading if there's no cached data at all
@@ -235,14 +238,14 @@ export default function Messages() {
   
   if (isLoading && !hasData) {
     return (
-     <div className="h-[calc(100dvh-100px)] md:h-[calc(100dvh-80px)] flex flex-col opacity-0 responsive-container-wide">
+     <div className="h-full min-h-0 flex flex-col opacity-0 responsive-container-wide">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
   }
 
   return (
-     <div className="h-[calc(100dvh-100px)] md:h-[calc(100dvh-80px)] flex flex-col animate-fade-in responsive-container-wide overflow-x-hidden">
+     <div className="h-full min-h-0 flex flex-col animate-fade-in responsive-container-wide overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -324,7 +327,7 @@ export default function Messages() {
                     <ConversationItem
                       key={conv.id}
                       conversation={conv}
-                      isSelected={selectedConversationId === conv.id}
+                      isSelected={selectedConversationId === conv.id && (!isMobile || showMobileChat)}
                       currentUserId={user?.id || ''}
                       onClick={() => handleSelectConversation(conv.id)}
                       category={categorizeConversation(conv)}
@@ -415,7 +418,7 @@ function ConversationItem({
         "w-full flex items-start gap-3 p-3 rounded-lg text-left transition-all focus:outline-none focus-visible:outline-none",
         isSelected 
           ? "bg-white/15 border border-white/20" 
-          : "hover:bg-white/10 border border-transparent"
+          : "md:hover:bg-white/10 border border-transparent"
       )}
       tabIndex={-1}
     >
