@@ -10,6 +10,16 @@ const SESSION_SENTINEL_KEY = 'parium-session-alive';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 /**
+ * Module-level flag shared with useInactivityTimeout.
+ * Set here (in authStorage) because this is the FIRST layer that detects
+ * inactivity — before useInactivityTimeout's periodic check fires.
+ * This ensures onAuthStateChange in useAuth shows the correct message.
+ */
+let _inactivityLogoutFromStorage = false;
+export const isInactivityLogoutFromStorage = () => _inactivityLogoutFromStorage;
+export const clearInactivityLogoutFromStorage = () => { _inactivityLogoutFromStorage = false; };
+
+/**
  * Session sentinel: a sessionStorage flag that indicates the browser tab is still open.
  * - Survives normal app-switching on mobile (tab stays alive in background)
  * - Disappears when the user actually closes the tab/browser/app
