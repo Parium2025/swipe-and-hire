@@ -160,6 +160,51 @@ function writeConversationsCache(userId: string, conversations: Conversation[]):
   }
 }
 
+function mergeConversationsWithLastKnownIdentity(
+  conversations: Conversation[],
+  previousConversations: Conversation[],
+  userId: string,
+): Conversation[] {
+  if (previousConversations.length === 0) return conversations;
+
+  const previousById = new Map(previousConversations.map((conv) => [conv.id, conv]));
+
+  return conversations.map((conv) => {
+    const previous = previousById.get(conv.id);
+    if (!previous) return conv;
+
+    let merged = conv;
+
+    if (hasUnknownIdentityForConversation(merged, userId) && !hasUnknownIdentityForConversation(previous, userId)) {
+      const previousMembersById = new Map((previous.members || []).map((member) => [member.user_id, member]));
+      const mergedMembers = (merged.members || []).map((member) => {
+        if (member.profile) return member;
+        const previousProfile = previousMembersById.get(member.user_id)?.profile;
+        return previousProfile ? { ...member, profile: previousProfile } : member;
+      });
+
+      const hasOtherMember = mergedMembers.some((member) => member.user_id !== userId);
+      const previousHasOtherMember = (previous.members || []).some((member) => member.user_id !== userId);
+
+      merged = {
+        ...merged,
+        members: !hasOtherMember && previousHasOtherMember ? previous.members : mergedMembers,
+        applicationSnapshot: merged.applicationSnapshot ?? previous.applicationSnapshot,
+      };
+    }
+
+    if (!merged.last_message && previous.last_message) {
+      merged = {
+        ...merged,
+        last_message: previous.last_message,
+        last_message_at: merged.last_message_at ?? previous.last_message_at,
+      };
+    }
+
+    return merged;
+  });
+}
+
 export function useConversations() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
