@@ -393,6 +393,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
           setTimeout(() => {
             clearAllAppCaches();
+            clearSessionToken();
             window.location.href = '/auth';
           }, 1500);
           return;

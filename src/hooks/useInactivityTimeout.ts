@@ -36,7 +36,20 @@ export const useInactivityTimeout = (isAuthenticated: boolean) => {
       if (hasSessionExpiredDueToInactivity()) {
         console.log('⏰ Session expired due to 24h inactivity - logging out');
         clearActivityTracking();
-        await supabase.auth.signOut();
+        
+        // Clean up session tracking BEFORE signing out to prevent
+        // "logged in on another device" false positives on next login
+        try {
+          const token = localStorage.getItem('parium_session_token');
+          if (token) {
+            await supabase.rpc('remove_session', { p_session_token: token });
+          }
+        } catch (err) {
+          console.warn('Session cleanup on inactivity timeout failed:', err);
+        }
+        clearSessionToken();
+        
+        await supabase.auth.signOut({ scope: 'local' });
       }
     };
 
