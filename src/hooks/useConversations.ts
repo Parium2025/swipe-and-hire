@@ -377,11 +377,17 @@ export function useConversationMessages(conversationId: string | null) {
     queryFn: async () => {
       if (!conversationId) return [];
 
+      // Fetch latest messages with a reasonable limit to prevent memory issues
+      // For conversations with 10k+ messages, this keeps the UI snappy
       const { data: messages, error } = await supabase
         .from('conversation_messages')
         .select('*')
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false })
+        .limit(200);
+
+      // Reverse to get chronological order (we fetched newest-first for the LIMIT to work correctly)
+      if (messages) messages.reverse();
 
       if (error) throw error;
 
