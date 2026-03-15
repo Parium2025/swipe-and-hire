@@ -146,6 +146,7 @@ export function useConversations() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const identityRecoveryTriggeredRef = useRef(false);
 
   // Fetch all conversations for current user
   const conversationsQuery = useQuery({
