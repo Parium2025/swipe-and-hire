@@ -42,15 +42,16 @@ interface NewConversationDialogProps {
 type ContactType = 'colleague' | 'candidate';
 
 interface Contact {
-  id: string;
+  id: string; // Unique key (applicationId for candidates, userId for colleagues)
   type: ContactType;
   firstName: string | null;
   lastName: string | null;
   companyName?: string | null;
   profileImageUrl: string | null;
-  jobTitle?: string; // For candidates - which job they applied to
-  applicationId?: string; // For candidates - link to frozen profile
-  jobId?: string; // For candidates - the job they applied to
+  jobTitle?: string;
+  applicationId?: string;
+  jobId?: string;
+  userId?: string; // Actual user_id for conversation creation (candidates)
 }
 
 export function NewConversationDialog({
@@ -92,7 +93,7 @@ export function NewConversationDialog({
     // This allows selecting the specific application context for the chat
     candidates.forEach(candidate => {
       list.push({
-        id: candidate.applicant_id,
+        id: candidate.application_id || candidate.applicant_id, // Unique per application
         type: 'candidate',
         firstName: candidate.first_name,
         lastName: candidate.last_name,
@@ -100,6 +101,7 @@ export function NewConversationDialog({
         jobTitle: candidate.job_title,
         applicationId: candidate.application_id,
         jobId: candidate.job_id,
+        userId: candidate.applicant_id, // Actual user ID for conversation creation
       });
     });
 
@@ -159,8 +161,11 @@ export function NewConversationDialog({
         ? selectedContact.jobId
         : undefined;
       
+      // Resolve actual user IDs (candidates store userId separately from their unique key)
+      const memberUserIds = selectedContactObjects.map(c => c.userId || c.id);
+      
       const result = await createConversation.mutateAsync({
-        memberIds: selectedContacts,
+        memberIds: memberUserIds,
         name: isGroup ? groupName.trim() || undefined : undefined,
         isGroup,
         initialMessage: initialMessage.trim() || undefined,

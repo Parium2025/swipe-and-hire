@@ -309,25 +309,7 @@ export function useConversations() {
     },
   });
 
-  // 🔥 Prefetch avatars when conversations are loaded (from cache or fresh)
-  useEffect(() => {
-    const conversations = conversationsQuery.data;
-    if (!conversations || !user) return;
-
-    conversations.forEach(conv => {
-      (conv.members || []).forEach(member => {
-        if (member.user_id !== user.id && member.profile) {
-          const isEmployer = member.profile.role === 'employer';
-          const storagePath = isEmployer && member.profile.company_logo_url 
-            ? member.profile.company_logo_url 
-            : member.profile.profile_image_url;
-          if (storagePath) {
-            prefetchMediaUrl(storagePath, isEmployer ? 'company-logo' : 'profile-image');
-          }
-        }
-      });
-    });
-  }, [conversationsQuery.data, user]);
+  // Avatar prefetch is handled inside queryFn — no duplicate useEffect needed
 
   // Subscribe to realtime updates for new messages
   // Debounced to prevent refetch storms at scale (1M+ users)
@@ -412,6 +394,7 @@ export function useConversationMessages(conversationId: string | null) {
     enabled: !!conversationId,
     // Keep messages in cache for 30 min so switching between conversations is instant
     gcTime: 30 * 60 * 1000,
+    staleTime: 60 * 1000, // 1 min — realtime handles live updates
   });
 
   // Subscribe to realtime messages for this conversation - instant cache update
@@ -489,7 +472,6 @@ export function useConversationMessages(conversationId: string | null) {
   // Send message with optimistic update - instant UI feedback
   const sendMessage = useCallback(async (content: string) => {
     if (!conversationId || !user || !content.trim()) return;
-    if (!navigator.onLine) throw new Error('Du är offline');
 
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage: ConversationMessage = {
