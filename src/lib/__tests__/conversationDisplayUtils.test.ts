@@ -142,7 +142,7 @@ describe('getConversationDisplayName', () => {
     ).toBe('OnlyLast');
   });
 
-  it('skips snapshot when both names are null and falls back to profile', () => {
+  it('keeps snapshot precedence when names are null (immutable per application)', () => {
     expect(
       getConversationDisplayName({
         isGroup: false,
@@ -150,10 +150,10 @@ describe('getConversationDisplayName', () => {
         snapshot: makeSnapshot({ first_name: null, last_name: null }),
         displayMember: makeMember({ first_name: 'Fallback', last_name: 'User' }),
       }),
-    ).toBe('Fallback User');
+    ).toBe('Okänd användare');
   });
 
-  it('skips snapshot when names are empty strings and falls back to profile', () => {
+  it('keeps snapshot precedence when names are empty strings', () => {
     expect(
       getConversationDisplayName({
         isGroup: false,
@@ -161,7 +161,7 @@ describe('getConversationDisplayName', () => {
         snapshot: makeSnapshot({ first_name: '', last_name: '' }),
         displayMember: makeMember({ first_name: 'Real', last_name: 'Person' }),
       }),
-    ).toBe('Real Person');
+    ).toBe('Okänd användare');
   });
 });
 
