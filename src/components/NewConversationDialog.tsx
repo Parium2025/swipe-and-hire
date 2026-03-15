@@ -92,7 +92,7 @@ export function NewConversationDialog({
     // This allows selecting the specific application context for the chat
     candidates.forEach(candidate => {
       list.push({
-        id: candidate.applicant_id,
+        id: candidate.application_id || candidate.applicant_id, // Unique per application
         type: 'candidate',
         firstName: candidate.first_name,
         lastName: candidate.last_name,
@@ -100,6 +100,7 @@ export function NewConversationDialog({
         jobTitle: candidate.job_title,
         applicationId: candidate.application_id,
         jobId: candidate.job_id,
+        userId: candidate.applicant_id, // Actual user ID for conversation creation
       });
     });
 
