@@ -235,14 +235,14 @@ export default function Messages() {
   
   if (isLoading && !hasData) {
     return (
-     <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col opacity-0 responsive-container-wide">
+     <div className="h-[calc(100dvh-100px)] md:h-[calc(100dvh-80px)] flex flex-col opacity-0 responsive-container-wide">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
   }
 
   return (
-     <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in responsive-container-wide overflow-x-hidden">
+     <div className="h-[calc(100dvh-100px)] md:h-[calc(100dvh-80px)] flex flex-col animate-fade-in responsive-container-wide overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -412,11 +412,12 @@ function ConversationItem({
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-start gap-3 p-3 rounded-lg text-left transition-all",
+        "w-full flex items-start gap-3 p-3 rounded-lg text-left transition-all focus:outline-none focus-visible:outline-none",
         isSelected 
           ? "bg-white/15 border border-white/20" 
           : "hover:bg-white/10 border border-transparent"
       )}
+      tabIndex={-1}
     >
       {/* Avatar with category indicator */}
       <div className="relative flex-shrink-0">
