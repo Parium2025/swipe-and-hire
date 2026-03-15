@@ -220,20 +220,38 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
       {/* Action buttons — glass purple & blue */}
       <div className="w-full min-w-0 flex items-center gap-3">
         <button
-          onClick={onOpenFullProfile}
+          onClick={() => setSendMessageOpen(true)}
           className="min-w-0 flex-1 py-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center gap-2"
         >
           <MessageSquare className="h-4 w-4 shrink-0" />
           <span className="truncate">Meddelande</span>
         </button>
         <button
-          onClick={onOpenFullProfile}
+          onClick={() => setBookInterviewOpen(true)}
           className="min-w-0 flex-1 py-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center gap-2"
         >
           <CalendarPlus className="h-4 w-4 shrink-0" />
           <span className="truncate">Boka möte</span>
         </button>
       </div>
+
+      {/* Direct dialogs — no need to go through full profile */}
+      <BookInterviewDialog
+        open={bookInterviewOpen}
+        onOpenChange={setBookInterviewOpen}
+        applicantId={application.applicant_id}
+        applicantName={`${application.first_name || ''} ${application.last_name || ''}`.trim()}
+        jobId={application.job_id}
+        jobTitle={application.job_title || ''}
+        applicationId={application.id}
+      />
+      <SendMessageDialog
+        open={sendMessageOpen}
+        onOpenChange={setSendMessageOpen}
+        recipientId={application.applicant_id}
+        recipientName={`${application.first_name || ''} ${application.last_name || ''}`.trim()}
+        jobId={application.job_id}
+      />
     </>
   );
 });
