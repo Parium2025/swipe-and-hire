@@ -596,7 +596,7 @@ function ChatView({
         />
 
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-pure-white truncate">{getDisplayName()}</h2>
+          <h2 className="font-semibold text-pure-white truncate">{displayName}</h2>
           {conversation.is_group && (
             <p className="text-pure-white text-xs">
               {conversation.members.length} medlemmar
