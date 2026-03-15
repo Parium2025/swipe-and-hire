@@ -23,8 +23,6 @@ import {
   Search,
   Briefcase,
   ChevronLeft,
-  Hash,
-  Circle,
 } from 'lucide-react';
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';

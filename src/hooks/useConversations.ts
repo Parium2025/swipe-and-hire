@@ -472,7 +472,6 @@ export function useConversationMessages(conversationId: string | null) {
   // Send message with optimistic update - instant UI feedback
   const sendMessage = useCallback(async (content: string) => {
     if (!conversationId || !user || !content.trim()) return;
-    if (!navigator.onLine) throw new Error('Du är offline');
 
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage: ConversationMessage = {
