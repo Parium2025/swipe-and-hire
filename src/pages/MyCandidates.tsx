@@ -440,15 +440,19 @@ const MyCandidates = () => {
     hookMarkAsViewed.mutate(applicationId);
   };
 
-  const handleOpenProfile = (candidate: MyCandidateData) => {
-    setSelectedCandidate(candidate);
-    setDialogOpen(true);
-    
+  const handleOpenProfile = useCallback((candidate: MyCandidateData) => {
+    // Find candidates in the same stage for continuous scroll
+    const stageCandidates = filteredCandidatesByStage[candidate.stage] || [];
+    const idx = stageCandidates.findIndex(c => c.id === candidate.id);
+
+    setSwipeStageCandidates(stageCandidates);
+    setSwipeInitialIndex(idx >= 0 ? idx : 0);
+    setSwipeViewerOpen(true);
+
     if (!candidate.viewed_at) {
       markApplicationAsViewed(candidate.application_id);
-      setSelectedCandidate(prev => prev ? { ...prev, viewed_at: new Date().toISOString() } : null);
     }
-  };
+  }, [filteredCandidatesByStage, markApplicationAsViewed]);
 
   // Prefetching
   const handlePrefetchCandidate = useCallback((candidate: MyCandidateData) => {
