@@ -80,24 +80,42 @@ interface CachedConversations {
   version?: number;
 }
 
+function hasText(value: string | null | undefined): boolean {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function hasUnknownIdentityForConversation(conv: Conversation, userId: string): boolean {
+  if (conv.is_group) return false;
+
+  const hasSnapshotName = hasText(conv.applicationSnapshot?.first_name) || hasText(conv.applicationSnapshot?.last_name);
+
+  const otherMember = (conv.members || []).find((m) => m.user_id !== userId);
+  if (!otherMember) return true;
+
+  const profile = otherMember.profile;
+  const hasProfileName =
+    hasText(profile?.company_name) ||
+    hasText(profile?.first_name) ||
+    hasText(profile?.last_name);
+
+  return !hasSnapshotName && !hasProfileName;
+}
+
 function hasUnknownConversationIdentity(conversations: Conversation[], userId: string): boolean {
-  return conversations.some((conv) => {
-    if (conv.is_group) return false;
+  return conversations.some((conv) => hasUnknownIdentityForConversation(conv, userId));
+}
 
-    const hasSnapshotName = !!(
-      conv.applicationSnapshot?.first_name || conv.applicationSnapshot?.last_name
-    );
-
-    const otherMember = (conv.members || []).find((m) => m.user_id !== userId);
-    if (!otherMember) return true;
-
-    const profile = otherMember.profile;
-    const hasProfileName = !!(
-      profile?.company_name || profile?.first_name || profile?.last_name
-    );
-
-    return !hasSnapshotName && !hasProfileName;
-  });
+function readConversationsCacheForRecovery(userId: string): Conversation[] {
+  try {
+    const raw = localStorage.getItem(CONVERSATIONS_CACHE_KEY);
+    if (!raw) return [];
+    const cached: CachedConversations = JSON.parse(raw);
+    if (cached.userId !== userId) return [];
+    if (!cached.version || cached.version < CACHE_VERSION) return [];
+    return Array.isArray(cached.conversations) ? cached.conversations : [];
+  } catch {
+    return [];
+  }
 }
 
 function readConversationsCache(userId: string): Conversation[] | null {
