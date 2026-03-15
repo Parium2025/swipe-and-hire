@@ -230,6 +230,7 @@ export default function Messages() {
 
   const handleBackToList = () => {
     setShowMobileChat(false);
+    if (isMobile) setSelectedConversationId(null);
   };
 
   // Only show loading if there's no cached data at all
