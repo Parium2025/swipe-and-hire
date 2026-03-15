@@ -80,6 +80,26 @@ interface CachedConversations {
   version?: number;
 }
 
+function hasUnknownConversationIdentity(conversations: Conversation[], userId: string): boolean {
+  return conversations.some((conv) => {
+    if (conv.is_group) return false;
+
+    const hasSnapshotName = !!(
+      conv.applicationSnapshot?.first_name || conv.applicationSnapshot?.last_name
+    );
+
+    const otherMember = (conv.members || []).find((m) => m.user_id !== userId);
+    if (!otherMember) return true;
+
+    const profile = otherMember.profile;
+    const hasProfileName = !!(
+      profile?.company_name || profile?.first_name || profile?.last_name
+    );
+
+    return !hasSnapshotName && !hasProfileName;
+  });
+}
+
 function readConversationsCache(userId: string): Conversation[] | null {
   try {
     const raw = localStorage.getItem(CONVERSATIONS_CACHE_KEY);
