@@ -1,6 +1,6 @@
 import { useState, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
-import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, X } from 'lucide-react';
+import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, Trash2, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ProfileVideo from '@/components/ProfileVideo';
 import { formatTimeAgo } from '@/lib/date';
@@ -28,6 +28,7 @@ interface CandidateSlideProfileTabProps {
     generatingSummary: boolean;
   };
   onOpenFullProfile: () => void;
+  onRemoveFromList?: () => void;
 }
 
 export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
@@ -40,6 +41,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
   initials,
   summaryHook,
   onOpenFullProfile,
+  onRemoveFromList,
 }: CandidateSlideProfileTabProps) {
   const [bioExpanded, setBioExpanded] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
@@ -217,25 +219,36 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
         </SectionCard>
       )}
 
-      {/* Action buttons — glass purple & blue */}
-      <div className="w-full min-w-0 flex items-center gap-3">
-        <button
-          onClick={() => setSendMessageOpen(true)}
-          className="min-w-0 flex-1 py-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center gap-2"
-        >
-          <MessageSquare className="h-4 w-4 shrink-0" />
-          <span className="truncate">Meddelande</span>
-        </button>
-        <button
-          onClick={() => setBookInterviewOpen(true)}
-          className="min-w-0 flex-1 py-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center gap-2"
-        >
-          <CalendarPlus className="h-4 w-4 shrink-0" />
-          <span className="truncate">Boka möte</span>
-        </button>
+      {/* Action buttons */}
+      <div className="w-full min-w-0 flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSendMessageOpen(true)}
+            className="min-w-0 flex-1 py-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center gap-2"
+          >
+            <MessageSquare className="h-4 w-4 shrink-0" />
+            <span className="truncate">Meddelande</span>
+          </button>
+          <button
+            onClick={() => setBookInterviewOpen(true)}
+            className="min-w-0 flex-1 py-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center gap-2"
+          >
+            <CalendarPlus className="h-4 w-4 shrink-0" />
+            <span className="truncate">Boka möte</span>
+          </button>
+        </div>
+        {onRemoveFromList && (
+          <button
+            onClick={onRemoveFromList}
+            className="w-full py-2.5 rounded-full bg-red-500/10 backdrop-blur-sm border border-red-500/30 text-red-400 text-sm font-medium active:scale-[0.97] active:bg-red-500/20 transition-all flex items-center justify-center gap-2"
+          >
+            <Trash2 className="h-4 w-4 shrink-0" />
+            <span>Ta bort</span>
+          </button>
+        )}
       </div>
 
-      {/* Direct dialogs — no need to go through full profile */}
+      {/* Direct dialogs — elevated z-index to render above SwipeViewer */}
       <BookInterviewDialog
         open={bookInterviewOpen}
         onOpenChange={setBookInterviewOpen}
@@ -244,6 +257,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
         jobId={application.job_id}
         jobTitle={application.job_title || ''}
         applicationId={application.id}
+        elevated
       />
       <SendMessageDialog
         open={sendMessageOpen}
@@ -252,6 +266,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
         recipientName={`${application.first_name || ''} ${application.last_name || ''}`.trim()}
         jobId={application.job_id}
         applicationId={application.id}
+        elevated
       />
     </>
   );

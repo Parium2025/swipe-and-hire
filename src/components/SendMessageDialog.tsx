@@ -31,6 +31,8 @@ interface SendMessageDialogProps {
   applicationId?: string | null;
   /** If true, navigate to messages page after sending */
   navigateToMessages?: boolean;
+  /** Render above z-[100] overlays (e.g. SwipeViewer) */
+  elevated?: boolean;
 }
 
 export function SendMessageDialog({
@@ -41,6 +43,7 @@ export function SendMessageDialog({
   jobId,
   applicationId,
   navigateToMessages = false,
+  elevated,
 }: SendMessageDialogProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -116,6 +119,7 @@ export function SendMessageDialog({
       }}>
         <DialogContentNoFocus 
           hideClose
+          elevated={elevated}
           className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-x-hidden overflow-y-auto"
         >
           <DialogHeader className="sr-only">

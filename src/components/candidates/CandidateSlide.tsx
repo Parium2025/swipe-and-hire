@@ -16,6 +16,7 @@ interface CandidateSlideProps {
   application: ApplicationData;
   rating: number;
   onOpenFullProfile: () => void;
+  onRemoveFromList?: () => void;
   isLast: boolean;
   isVisible: boolean;
 }
@@ -24,6 +25,7 @@ export const CandidateSlide = memo(function CandidateSlide({
   application,
   rating,
   onOpenFullProfile,
+  onRemoveFromList,
   isLast,
   isVisible,
 }: CandidateSlideProps) {
@@ -193,6 +195,7 @@ export const CandidateSlide = memo(function CandidateSlide({
                   initials={initials}
                   summaryHook={summaryHook}
                   onOpenFullProfile={onOpenFullProfile}
+                  onRemoveFromList={onRemoveFromList}
                 />
               )}
 

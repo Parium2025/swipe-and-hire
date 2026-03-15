@@ -12,6 +12,7 @@ interface CandidateSwipeViewerProps {
   onClose: () => void;
   onOpenFullProfile: (application: ApplicationData) => void;
   getDisplayRating: (app: ApplicationData) => number;
+  onRemoveCandidate?: (application: ApplicationData) => void;
 }
 
 /* ── Main Viewer ────────────────────────────────── */
@@ -22,6 +23,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   onClose,
   onOpenFullProfile,
   getDisplayRating,
+  onRemoveCandidate,
 }: CandidateSwipeViewerProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -119,6 +121,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 application={app}
                 rating={getDisplayRating(app)}
                 onOpenFullProfile={() => onOpenFullProfile(app)}
+                onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                 isLast={idx === applications.length - 1}
                 isVisible={Math.abs(idx - currentIndex) <= 1}
               />
