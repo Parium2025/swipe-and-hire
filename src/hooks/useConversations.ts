@@ -307,7 +307,9 @@ export function useConversations() {
       return result;
     },
     enabled: !!user,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    staleTime: 30 * 1000,
+    refetchOnMount: 'always',
+    refetchOnReconnect: true,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (!user) return undefined;
@@ -317,9 +319,26 @@ export function useConversations() {
     initialDataUpdatedAt: () => {
       if (!user) return undefined;
       const cached = readConversationsCache(user.id);
-      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+      return cached ? Date.now() - 60000 : undefined;
     },
   });
+
+  // Recovery path: if a stale in-memory state still resolves to unknown identity, force one refetch.
+  useEffect(() => {
+    if (!user || !conversationsQuery.data || conversationsQuery.isFetching) return;
+
+    const hasUnknownIdentity = hasUnknownConversationIdentity(conversationsQuery.data, user.id);
+
+    if (hasUnknownIdentity && !identityRecoveryTriggeredRef.current) {
+      identityRecoveryTriggeredRef.current = true;
+      conversationsQuery.refetch();
+      return;
+    }
+
+    if (!hasUnknownIdentity) {
+      identityRecoveryTriggeredRef.current = false;
+    }
+  }, [user, conversationsQuery.data, conversationsQuery.isFetching, conversationsQuery.refetch]);
 
   // Avatar prefetch is handled inside queryFn — no duplicate useEffect needed
 
