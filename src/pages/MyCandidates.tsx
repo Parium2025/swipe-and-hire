@@ -486,6 +486,43 @@ const MyCandidates = () => {
     setTimeout(() => setSelectedCandidate(null), 300);
   };
 
+  // ── Arrow navigation within same stage (mouse/desktop) ──
+  const handleNavigatePrev = useMemo(() => {
+    if (!selectedCandidate) return undefined;
+    const stageCandidates = filteredCandidatesByStage[selectedCandidate.stage] || [];
+    const idx = stageCandidates.findIndex(c => c.id === selectedCandidate.id);
+    if (idx <= 0) return undefined;
+    return () => {
+      const prev = stageCandidates[idx - 1];
+      setSelectedCandidate(prev);
+      if (!prev.viewed_at) markApplicationAsViewed(prev.application_id);
+    };
+  }, [selectedCandidate, filteredCandidatesByStage, markApplicationAsViewed]);
+
+  const handleNavigateNext = useMemo(() => {
+    if (!selectedCandidate) return undefined;
+    const stageCandidates = filteredCandidatesByStage[selectedCandidate.stage] || [];
+    const idx = stageCandidates.findIndex(c => c.id === selectedCandidate.id);
+    if (idx < 0 || idx >= stageCandidates.length - 1) return undefined;
+    return () => {
+      const next = stageCandidates[idx + 1];
+      setSelectedCandidate(next);
+      if (!next.viewed_at) markApplicationAsViewed(next.application_id);
+    };
+  }, [selectedCandidate, filteredCandidatesByStage, markApplicationAsViewed]);
+
+  const candidateNavIndex = useMemo(() => {
+    if (!selectedCandidate) return undefined;
+    const stageCandidates = filteredCandidatesByStage[selectedCandidate.stage] || [];
+    const idx = stageCandidates.findIndex(c => c.id === selectedCandidate.id);
+    return idx >= 0 ? idx : 0;
+  }, [selectedCandidate, filteredCandidatesByStage]);
+
+  const candidateNavTotal = useMemo(() => {
+    if (!selectedCandidate) return undefined;
+    return (filteredCandidatesByStage[selectedCandidate.stage] || []).length;
+  }, [selectedCandidate, filteredCandidatesByStage]);
+
   /** Map MyCandidateData → ApplicationData for CandidateSwipeViewer / Dialog */
   const mapCandidateToAppData = useCallback((c: MyCandidateData): ApplicationData => ({
     id: c.application_id,
