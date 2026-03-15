@@ -167,7 +167,6 @@ const MyCandidates = () => {
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [swipeStageCandidates, setSwipeStageCandidates] = useState<MyCandidateData[]>([]);
-  const [candidateToRemove, setCandidateToRemove] = useState<MyCandidateData | null>(null);
   
   // ── Centralized application fetching ─────────────────
   const candidateFallback = useMemo(() => selectedCandidate ? {
