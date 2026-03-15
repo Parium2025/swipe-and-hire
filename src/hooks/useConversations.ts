@@ -352,9 +352,18 @@ export function useConversations() {
   };
 }
 
+const MESSAGES_PAGE_SIZE = 200;
+
 export function useConversationMessages(conversationId: string | null) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+
+  // Reset hasMore when conversation changes
+  useEffect(() => {
+    setHasMore(true);
+  }, [conversationId]);
 
   const messagesQuery = useQuery({
     queryKey: ['conversation-messages', conversationId],
@@ -362,16 +371,21 @@ export function useConversationMessages(conversationId: string | null) {
       if (!conversationId) return [];
 
       // Fetch latest messages with a reasonable limit to prevent memory issues
-      // For conversations with 10k+ messages, this keeps the UI snappy
       const { data: messages, error } = await supabase
         .from('conversation_messages')
         .select('*')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: false })
-        .limit(200);
+        .limit(MESSAGES_PAGE_SIZE);
 
       if (error) throw error;
-      if (!messages || messages.length === 0) return [];
+      if (!messages || messages.length === 0) {
+        setHasMore(false);
+        return [];
+      }
+
+      // If we got fewer than the page size, there are no older messages
+      setHasMore(messages.length >= MESSAGES_PAGE_SIZE);
 
       // Reverse to get chronological order (we fetched newest-first for the LIMIT to work correctly)
       messages.reverse();
@@ -392,10 +406,69 @@ export function useConversationMessages(conversationId: string | null) {
       })) as ConversationMessage[];
     },
     enabled: !!conversationId,
-    // Keep messages in cache for 30 min so switching between conversations is instant
     gcTime: 30 * 60 * 1000,
-    staleTime: 60 * 1000, // 1 min — realtime handles live updates
+    staleTime: 60 * 1000,
   });
+
+  // Load older messages (prepend to existing)
+  const fetchOlderMessages = useCallback(async () => {
+    if (!conversationId || loadingOlder || !hasMore) return;
+
+    const currentMessages = queryClient.getQueryData<ConversationMessage[]>(
+      ['conversation-messages', conversationId]
+    );
+    if (!currentMessages || currentMessages.length === 0) return;
+
+    const oldestTimestamp = currentMessages[0].created_at;
+    setLoadingOlder(true);
+
+    try {
+      const { data: olderMessages, error } = await supabase
+        .from('conversation_messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .lt('created_at', oldestTimestamp)
+        .order('created_at', { ascending: false })
+        .limit(MESSAGES_PAGE_SIZE);
+
+      if (error) throw error;
+
+      if (!olderMessages || olderMessages.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      setHasMore(olderMessages.length >= MESSAGES_PAGE_SIZE);
+
+      // Reverse to chronological order
+      olderMessages.reverse();
+
+      // Fetch sender profiles for older messages
+      const newSenderIds = [...new Set(olderMessages.map(m => m.sender_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
+        .in('user_id', newSenderIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
+      const enrichedOlder = olderMessages.map(msg => ({
+        ...msg,
+        sender_profile: profileMap.get(msg.sender_id),
+      })) as ConversationMessage[];
+
+      // Prepend older messages to cache
+      queryClient.setQueryData<ConversationMessage[]>(
+        ['conversation-messages', conversationId],
+        (old) => [...enrichedOlder, ...(old || [])]
+      );
+    } catch (error) {
+      console.error('Failed to load older messages:', error);
+      toast.error('Kunde inte ladda äldre meddelanden');
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [conversationId, loadingOlder, hasMore, queryClient]);
 
   // Subscribe to realtime messages for this conversation - instant cache update
   useEffect(() => {
