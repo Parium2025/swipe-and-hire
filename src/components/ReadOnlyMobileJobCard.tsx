@@ -141,11 +141,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
   return (
     <Card 
-      className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98]"
+      className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] mx-auto w-full max-w-[340px]"
       onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`)}
     >
       {/* Visual header — image or gradient placeholder */}
-      <div className="relative w-full h-32 overflow-hidden">
+      <div className="relative w-full h-40 overflow-hidden">
         {displayUrl ? (
           <>
             <img
