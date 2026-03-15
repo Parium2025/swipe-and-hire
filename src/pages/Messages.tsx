@@ -504,22 +504,7 @@ function ChatView({
     return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Någon';
   };
   
-  // Build avatar profile preferring snapshot for candidates
-  const getAvatarProfile = () => {
-    if (snapshot && snapshot.profile_image_snapshot_url) {
-      return {
-        role: 'job_seeker' as const,
-        first_name: snapshot.first_name,
-        last_name: snapshot.last_name,
-        company_name: null,
-        profile_image_url: snapshot.profile_image_snapshot_url,
-        company_logo_url: null,
-      };
-    }
-    return displayMember?.profile;
-  };
-  
-  const avatarProfile = getAvatarProfile();
+  const avatarProfile = getConversationAvatarProfile(snapshot, displayMember);
 
   // Mark as read when opening
   useEffect(() => {
