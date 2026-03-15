@@ -40,9 +40,11 @@ export function getConversationDisplayName(opts: {
 
   if (isGroup && groupName) return groupName;
 
-  // Frozen name from application snapshot (strict check)
-  if (snapshot && (hasText(snapshot.first_name) || hasText(snapshot.last_name))) {
-    return buildFullName(snapshot.first_name, snapshot.last_name);
+  // Snapshot is immutable per application context.
+  // If snapshot exists, never leak updated live profile identity into conversation UI.
+  if (snapshot) {
+    const snapshotName = buildFullName(snapshot.first_name, snapshot.last_name);
+    return snapshotName || 'Okänd användare';
   }
 
   if (!displayMember?.profile) return 'Okänd användare';
