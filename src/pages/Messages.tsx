@@ -36,11 +36,28 @@ export default function Messages() {
   const { user, userRole } = useAuth();
   const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
   const { hasTeam } = useTeamMembers();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [activeTab, setActiveTab] = useState<ConversationTab>(hasTeam ? 'all' : 'candidates');
+  const deepLinkHandled = useRef(false);
+
+  // Handle deep-link: /messages?conversation=<id> (e.g. from SendMessageDialog)
+  useEffect(() => {
+    const conversationParam = searchParams.get('conversation');
+    if (conversationParam && conversations.length > 0 && !deepLinkHandled.current) {
+      const exists = conversations.some(c => c.id === conversationParam);
+      if (exists) {
+        setSelectedConversationId(conversationParam);
+        setShowMobileChat(true);
+        deepLinkHandled.current = true;
+        // Clean up URL param
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, conversations, setSearchParams]);
 
   // Pixel-perfect alignment: keep icon + text on the exact same row between the two empty states.
   const leftEmptyIconRef = useRef<HTMLDivElement | null>(null);
