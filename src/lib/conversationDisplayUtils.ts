@@ -55,42 +55,32 @@ export function getConversationDisplayName(opts: {
 /**
  * Build a profile object for ConversationAvatar, preferring snapshot data for candidates.
  *
- * Avatar priority:
- * 1. Snapshot with image → use snapshot (frozen candidate photo)
- * 2. Snapshot with names but no image → use live profile (which may have an image)
- * 3. No snapshot → use live profile
+ * Avatar priority (STRICT):
+ * 1. Snapshot EXISTS (with or without image) → always use snapshot.
+ *    This preserves the frozen state from application time. If the candidate
+ *    had no photo when applying, we show initials — NOT their current live photo.
+ * 2. No snapshot at all → use live profile
+ * 3. Nothing available → undefined
  */
 export function getConversationAvatarProfile(
   snapshot: ApplicationSnapshot | undefined,
   displayMember: ConversationMember | undefined,
 ): ProfileLike | undefined {
-  // Only prefer snapshot when it has an actual image to show.
-  // This prevents showing empty initials when the live profile has a real photo.
-  if (snapshot?.profile_image_snapshot_url) {
-    return {
-      role: 'job_seeker' as const,
-      first_name: snapshot.first_name,
-      last_name: snapshot.last_name,
-      company_name: null,
-      profile_image_url: snapshot.profile_image_snapshot_url,
-      company_logo_url: null,
-    };
-  }
-
-  // If live profile exists, use it (it may have a profile image even if snapshot doesn't)
-  if (displayMember?.profile) return displayMember.profile;
-
-  // Last resort: build from snapshot names (no image, but at least correct initials)
+  // Snapshot takes FULL priority — frozen identity from application time.
+  // Even if snapshot has no image, we use it (shows initials from snapshot name).
   if (snapshot && (hasText(snapshot.first_name) || hasText(snapshot.last_name))) {
     return {
       role: 'job_seeker' as const,
       first_name: snapshot.first_name,
       last_name: snapshot.last_name,
       company_name: null,
-      profile_image_url: null,
+      profile_image_url: snapshot.profile_image_snapshot_url || null,
       company_logo_url: null,
     };
   }
+
+  // No snapshot — use live profile
+  if (displayMember?.profile) return displayMember.profile;
 
   return undefined;
 }
