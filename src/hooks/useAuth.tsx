@@ -372,6 +372,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Clear all caches and reload after a short delay
           setTimeout(() => {
             clearAllAppCaches();
+            clearSessionToken();
             window.location.href = '/auth';
           }, 1500);
           return;
@@ -393,6 +394,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
           setTimeout(() => {
             clearAllAppCaches();
+            clearSessionToken();
             window.location.href = '/auth';
           }, 1500);
           return;
