@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { NewConversationDialog } from '@/components/NewConversationDialog';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
+import { getConversationDisplayName, getConversationAvatarProfile, getMessageSenderName } from '@/lib/conversationDisplayUtils';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
