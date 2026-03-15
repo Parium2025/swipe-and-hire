@@ -601,6 +601,9 @@ export function useConversationMessages(conversationId: string | null) {
     sendMessage,
     markAsRead,
     refetch: messagesQuery.refetch,
+    fetchOlderMessages,
+    hasMore,
+    loadingOlder,
   };
 }
 
