@@ -115,21 +115,13 @@ function readConversationsCache(userId: string): Conversation[] | null {
     // Don't use empty cache as valid data - force refetch
     if (cached.conversations.length === 0) return null;
 
-    // If we somehow cached a 1:1 conversation with only our own membership row,
-    // the UI will show “Okänd användare”. Invalidate that cache.
-    const hasMissingOtherMember = cached.conversations.some((conv) => {
-      if (conv.is_group) return false;
-      const otherMembers = (conv.members || []).filter((m) => m.user_id !== userId);
-      return otherMembers.length === 0;
-    });
-    if (hasMissingOtherMember) {
+    // Invalidate cache if any 1:1 conversation would render as "Okänd användare".
+    // We still keep instant-load UX, but never let unknown identity get stuck.
+    if (hasUnknownConversationIdentity(cached.conversations, userId)) {
       localStorage.removeItem(CONVERSATIONS_CACHE_KEY);
       return null;
     }
 
-    // Don't invalidate for missing profiles — use cached data as-is.
-    // The background refetch will update with fresh profile data.
-    // Previously this invalidated the cache, causing "Okänd användare" flash.
     return cached.conversations;
   } catch {
     return null;
