@@ -121,6 +121,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 application={app}
                 rating={getDisplayRating(app)}
                 onOpenFullProfile={() => onOpenFullProfile(app)}
+                onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                 isLast={idx === applications.length - 1}
                 isVisible={Math.abs(idx - currentIndex) <= 1}
               />
