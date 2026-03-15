@@ -927,6 +927,16 @@ const MyCandidates = () => {
         </DndContext>
       )}
 
+      {/* Swipe Viewer — continuous scroll navigation */}
+      <CandidateSwipeViewer
+        applications={swipeApplicationsData}
+        initialIndex={swipeInitialIndex}
+        open={swipeViewerOpen}
+        onClose={() => setSwipeViewerOpen(false)}
+        onOpenFullProfile={handleSwipeOpenFullProfile}
+        getDisplayRating={getDisplayRating}
+      />
+
       {/* Candidate Profile Dialog */}
       <CandidateProfileDialog
         application={selectedApplicationData as any}
