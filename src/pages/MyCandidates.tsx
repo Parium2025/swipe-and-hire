@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
+import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
