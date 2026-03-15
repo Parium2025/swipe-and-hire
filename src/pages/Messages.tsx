@@ -372,37 +372,14 @@ function ConversationItem({
   // Use frozen application snapshot if available, otherwise fall back to live profile
   const snapshot = conversation.applicationSnapshot;
   
-  const getDisplayName = () => {
-    if (conversation.is_group && conversation.name) {
-      return conversation.name;
-    }
-    // Use frozen name from application if available
-    if (snapshot && (snapshot.first_name || snapshot.last_name)) {
-      return `${snapshot.first_name || ''} ${snapshot.last_name || ''}`.trim();
-    }
-    if (!displayMember?.profile) return 'Okänd användare';
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_name) return p.company_name;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd användare';
-  };
+  const displayName = getConversationDisplayName({
+    isGroup: conversation.is_group,
+    groupName: conversation.name,
+    snapshot,
+    displayMember,
+  });
 
-  // Build a profile object for avatar, preferring snapshot data for candidates
-  const getAvatarProfile = () => {
-    if (snapshot && snapshot.profile_image_snapshot_url) {
-      // Return a synthetic profile with frozen snapshot data
-      return {
-        role: 'job_seeker' as const,
-        first_name: snapshot.first_name,
-        last_name: snapshot.last_name,
-        company_name: null,
-        profile_image_url: snapshot.profile_image_snapshot_url,
-        company_logo_url: null,
-      };
-    }
-    return displayMember?.profile;
-  };
-
-  const avatarProfile = getAvatarProfile();
+  const avatarProfile = getConversationAvatarProfile(snapshot, displayMember);
 
   const formatTime = (dateStr: string | null) => {
     if (!dateStr) return '';
