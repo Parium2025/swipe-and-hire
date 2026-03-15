@@ -772,7 +772,7 @@ function ChatView({
                 </div>
               </div>
             ))}
-            <div ref={messagesEndRef} />
+            
           </div>
         )}
       </ScrollArea>
