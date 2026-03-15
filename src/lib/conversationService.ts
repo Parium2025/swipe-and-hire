@@ -57,34 +57,53 @@ export async function createConversationForCandidate(
 ): Promise<string> {
   const conversationId = createConversationId();
 
-  let { data: created, error: convError } = await supabase
-    .from('conversations')
-    .insert({
-      id: conversationId,
-      is_group: false,
-      job_id: jobId || null,
-      application_id: applicationId || null,
-      candidate_id: candidateId,
-      created_by: userId,
-    })
-    .select('id')
-    .single();
-
-  // Fallback if references are stale/invalid
-  if (convError?.code === '23503') {
-    const retry = await supabase
+  const tryInsert = async (params: { job_id: string | null; application_id: string | null }) => {
+    return supabase
       .from('conversations')
       .insert({
         id: conversationId,
         is_group: false,
-        job_id: null,
-        application_id: null,
+        job_id: params.job_id,
+        application_id: params.application_id,
         candidate_id: candidateId,
         created_by: userId,
       })
       .select('id')
       .single();
+  };
 
+  // Attempt 1: full context (preferred for immutable per-application snapshot)
+  let { data: created, error: convError } = await tryInsert({
+    job_id: jobId || null,
+    application_id: applicationId || null,
+  });
+
+  // Attempt 2: keep application context even if job FK is stale
+  if (convError?.code === '23503' && applicationId) {
+    const retry = await tryInsert({
+      job_id: null,
+      application_id: applicationId,
+    });
+    created = retry.data;
+    convError = retry.error;
+  }
+
+  // Attempt 3: keep job context even if application FK is stale
+  if (convError?.code === '23503' && jobId) {
+    const retry = await tryInsert({
+      job_id: jobId,
+      application_id: null,
+    });
+    created = retry.data;
+    convError = retry.error;
+  }
+
+  // Attempt 4: last resort (no context)
+  if (convError?.code === '23503') {
+    const retry = await tryInsert({
+      job_id: null,
+      application_id: null,
+    });
     created = retry.data;
     convError = retry.error;
   }
