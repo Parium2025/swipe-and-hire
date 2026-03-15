@@ -181,6 +181,7 @@ export function SendMessageDialog({
       {/* Discard confirmation dialog - matching UnsavedChangesDialog design */}
       <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
         <AlertDialogContentNoFocus
+          elevated={elevated}
           className="max-w-lg bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden"
         >
           <AlertDialogHeader className="text-center">
