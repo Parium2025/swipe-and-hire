@@ -736,7 +736,7 @@ function ChatView({
         ) : (
           <div className="space-y-4">
             {/* Load older messages button */}
-            {hasMore && messages.length >= 200 && (
+            {hasMore && (
               <div className="flex justify-center py-2">
                 <Button
                   variant="ghost"
