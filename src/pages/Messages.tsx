@@ -498,7 +498,7 @@ function ChatView({
   onBack: () => void;
   currentUserRole: 'job_seeker' | 'employer' | null;
 }) {
-  const { messages, isLoading, sendMessage, markAsRead } = useConversationMessages(conversation.id);
+  const { messages, isLoading, sendMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
