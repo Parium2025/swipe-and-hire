@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { NewConversationDialog } from '@/components/NewConversationDialog';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
+import { getConversationDisplayName, getConversationAvatarProfile, getMessageSenderName } from '@/lib/conversationDisplayUtils';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -371,37 +372,14 @@ function ConversationItem({
   // Use frozen application snapshot if available, otherwise fall back to live profile
   const snapshot = conversation.applicationSnapshot;
   
-  const getDisplayName = () => {
-    if (conversation.is_group && conversation.name) {
-      return conversation.name;
-    }
-    // Use frozen name from application if available
-    if (snapshot && (snapshot.first_name || snapshot.last_name)) {
-      return `${snapshot.first_name || ''} ${snapshot.last_name || ''}`.trim();
-    }
-    if (!displayMember?.profile) return 'Okänd användare';
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_name) return p.company_name;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd användare';
-  };
+  const displayName = getConversationDisplayName({
+    isGroup: conversation.is_group,
+    groupName: conversation.name,
+    snapshot,
+    displayMember,
+  });
 
-  // Build a profile object for avatar, preferring snapshot data for candidates
-  const getAvatarProfile = () => {
-    if (snapshot && snapshot.profile_image_snapshot_url) {
-      // Return a synthetic profile with frozen snapshot data
-      return {
-        role: 'job_seeker' as const,
-        first_name: snapshot.first_name,
-        last_name: snapshot.last_name,
-        company_name: null,
-        profile_image_url: snapshot.profile_image_snapshot_url,
-        company_logo_url: null,
-      };
-    }
-    return displayMember?.profile;
-  };
-
-  const avatarProfile = getAvatarProfile();
+  const avatarProfile = getConversationAvatarProfile(snapshot, displayMember);
 
   const formatTime = (dateStr: string | null) => {
     if (!dateStr) return '';
@@ -466,7 +444,7 @@ function ConversationItem({
             "font-medium truncate text-white",
             conversation.unread_count > 0 && "font-semibold"
           )}>
-            {getDisplayName()}
+            {displayName}
           </span>
           <span className="text-pure-white text-xs flex-shrink-0">
             {formatTime(conversation.last_message_at)}
@@ -526,22 +504,7 @@ function ChatView({
     return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Någon';
   };
   
-  // Build avatar profile preferring snapshot for candidates
-  const getAvatarProfile = () => {
-    if (snapshot && snapshot.profile_image_snapshot_url) {
-      return {
-        role: 'job_seeker' as const,
-        first_name: snapshot.first_name,
-        last_name: snapshot.last_name,
-        company_name: null,
-        profile_image_url: snapshot.profile_image_snapshot_url,
-        company_logo_url: null,
-      };
-    }
-    return displayMember?.profile;
-  };
-  
-  const avatarProfile = getAvatarProfile();
+  const avatarProfile = getConversationAvatarProfile(snapshot, displayMember);
 
   // Mark as read when opening
   useEffect(() => {
@@ -589,19 +552,12 @@ function ChatView({
     }
   };
 
-  const getDisplayName = () => {
-    if (conversation.is_group && conversation.name) {
-      return conversation.name;
-    }
-    // Use frozen name from application if available
-    if (snapshot && (snapshot.first_name || snapshot.last_name)) {
-      return `${snapshot.first_name || ''} ${snapshot.last_name || ''}`.trim();
-    }
-    if (!displayMember?.profile) return 'Okänd användare';
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_name) return p.company_name;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd användare';
-  };
+  const displayName = getConversationDisplayName({
+    isGroup: conversation.is_group,
+    groupName: conversation.name,
+    snapshot,
+    displayMember,
+  });
 
   // Group messages by date
   const groupedMessages = messages.reduce((groups, msg) => {
@@ -640,7 +596,7 @@ function ChatView({
         />
 
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-pure-white truncate">{getDisplayName()}</h2>
+          <h2 className="font-semibold text-pure-white truncate">{displayName}</h2>
           {conversation.is_group && (
             <p className="text-pure-white text-xs">
               {conversation.members.length} medlemmar
@@ -786,12 +742,7 @@ function MessageBubble({
   isGroup: boolean;
   currentUserRole: 'job_seeker' | 'employer' | null;
 }) {
-  const getDisplayName = () => {
-    const p = message.sender_profile;
-    if (!p) return 'Okänd';
-    if (p.role === 'employer' && p.company_name) return p.company_name;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd';
-  };
+  const senderName = getMessageSenderName(message.sender_profile);
 
   // Avatar URL resolution is now handled by ConversationAvatar component
 
@@ -847,7 +798,7 @@ function MessageBubble({
         {/* Sender name for group chats */}
         {isGroup && showAvatar && !isOwn && (
           <span className="text-pure-white text-xs mb-1 ml-1">
-            {getDisplayName()}
+            {senderName}
           </span>
         )}
 

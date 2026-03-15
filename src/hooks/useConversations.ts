@@ -230,41 +230,30 @@ export function useConversations() {
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-      // Fetch ALL messages for these conversations in ONE query
-      // We'll use this to calculate both last_message AND unread_count
-      const { data: allMessages } = await supabase
-        .from('conversation_messages')
-        .select('*')
-        .in('conversation_id', conversationIds)
-        .order('created_at', { ascending: false });
+      // 🔥 Use efficient DB function instead of fetching ALL messages
+      // This scales to millions of messages - only returns latest + unread count per conversation
+      const { data: summaries } = await supabase
+        .rpc('get_conversation_summaries', { p_user_id: user.id });
 
-      // Group last messages by conversation
       const lastMessageMap = new Map<string, ConversationMessage>();
       const unreadCounts = new Map<string, number>();
       
       // Initialize unread counts
       conversationIds.forEach(id => unreadCounts.set(id, 0));
       
-      // Process all messages in memory (much faster than N database calls)
-      allMessages?.forEach(msg => {
-        // Track last message per conversation
-        if (!lastMessageMap.has(msg.conversation_id)) {
-          lastMessageMap.set(msg.conversation_id, {
-            ...msg,
-            sender_profile: profileMap.get(msg.sender_id) || undefined,
+      summaries?.forEach((s: any) => {
+        if (s.last_message_content) {
+          lastMessageMap.set(s.conversation_id, {
+            id: `summary-${s.conversation_id}`,
+            conversation_id: s.conversation_id,
+            sender_id: s.last_message_sender_id,
+            content: s.last_message_content,
+            created_at: s.last_message_created_at,
+            is_system_message: s.last_message_is_system || false,
+            sender_profile: profileMap.get(s.last_message_sender_id) || undefined,
           });
         }
-        
-        // Count unread messages (not from current user, after last_read)
-        if (msg.sender_id !== user.id) {
-          const lastRead = lastReadMap.get(msg.conversation_id);
-          if (!lastRead || new Date(msg.created_at) > new Date(lastRead)) {
-            unreadCounts.set(
-              msg.conversation_id, 
-              (unreadCounts.get(msg.conversation_id) || 0) + 1
-            );
-          }
-        }
+        unreadCounts.set(s.conversation_id, Number(s.unread_count) || 0);
       });
 
       // Build final conversation objects
@@ -598,75 +587,6 @@ export function useCreateConversation() {
           // Check if job context is changing
           if (applicationId && applicationId !== previousApplicationId) {
             needsJobContextSwitch = true;
-          }
-        } else {
-          // Fallback: look for legacy conversations (by application_id or membership)
-          if (applicationId) {
-            const { data: legacyByApp } = await supabase
-              .from('conversations')
-              .select('id, application_id')
-              .eq('application_id', applicationId)
-              .single();
-
-            if (legacyByApp) {
-              // Migrate: set candidate_id on this conversation
-              await supabase
-                .from('conversations')
-                .update({ candidate_id: candidateId })
-                .eq('id', legacyByApp.id);
-              
-              conversationId = legacyByApp.id;
-              isExisting = true;
-            }
-          }
-
-          // Still no conversation? Check by membership
-          if (!conversationId) {
-            const { data: myMemberships } = await supabase
-              .from('conversation_members')
-              .select('conversation_id')
-              .eq('user_id', user.id);
-
-            if (myMemberships) {
-              for (const membership of myMemberships) {
-                const { data: otherMember } = await supabase
-                  .from('conversation_members')
-                  .select('user_id')
-                  .eq('conversation_id', membership.conversation_id)
-                  .eq('user_id', candidateId)
-                  .single();
-
-                if (otherMember) {
-                  const { count } = await supabase
-                    .from('conversation_members')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('conversation_id', membership.conversation_id);
-
-                  if (count === 2) {
-                    // Found existing 1-1 - migrate to unified model
-                    const { data: conv } = await supabase
-                      .from('conversations')
-                      .select('application_id')
-                      .eq('id', membership.conversation_id)
-                      .single();
-
-                    await supabase
-                      .from('conversations')
-                      .update({ candidate_id: candidateId })
-                      .eq('id', membership.conversation_id);
-
-                    conversationId = membership.conversation_id;
-                    isExisting = true;
-                    previousApplicationId = conv?.application_id || null;
-                    
-                    if (applicationId && applicationId !== previousApplicationId) {
-                      needsJobContextSwitch = true;
-                    }
-                    break;
-                  }
-                }
-              }
-            }
           }
         }
       }
