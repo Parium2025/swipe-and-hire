@@ -552,19 +552,12 @@ function ChatView({
     }
   };
 
-  const getDisplayName = () => {
-    if (conversation.is_group && conversation.name) {
-      return conversation.name;
-    }
-    // Use frozen name from application if available
-    if (snapshot && (snapshot.first_name || snapshot.last_name)) {
-      return `${snapshot.first_name || ''} ${snapshot.last_name || ''}`.trim();
-    }
-    if (!displayMember?.profile) return 'Okänd användare';
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_name) return p.company_name;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd användare';
-  };
+  const displayName = getConversationDisplayName({
+    isGroup: conversation.is_group,
+    groupName: conversation.name,
+    snapshot,
+    displayMember,
+  });
 
   // Group messages by date
   const groupedMessages = messages.reduce((groups, msg) => {
