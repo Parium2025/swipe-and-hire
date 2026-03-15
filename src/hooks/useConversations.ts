@@ -377,11 +377,17 @@ export function useConversationMessages(conversationId: string | null) {
     queryFn: async () => {
       if (!conversationId) return [];
 
+      // Fetch latest messages with a reasonable limit to prevent memory issues
+      // For conversations with 10k+ messages, this keeps the UI snappy
       const { data: messages, error } = await supabase
         .from('conversation_messages')
         .select('*')
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false })
+        .limit(200);
+
+      // Reverse to get chronological order (we fetched newest-first for the LIMIT to work correctly)
+      if (messages) messages.reverse();
 
       if (error) throw error;
 
@@ -570,23 +576,37 @@ export function useCreateConversation() {
       let previousApplicationId: string | null = null;
 
       // For 1-1 chats, look for existing unified conversation with this candidate
+      // IMPORTANT: Must scope to conversations the current user is a member of,
+      // otherwise two different employers messaging the same candidate would share a thread!
       if (!isGroup && memberIds.length === 1) {
-        // Find conversation by candidate_id (new unified approach)
-        const { data: existingByCandidate } = await supabase
-          .from('conversations')
-          .select('id, application_id')
-          .eq('candidate_id', candidateId)
-          .not('candidate_id', 'is', null)
-          .single();
+        // First get conversation IDs the current user belongs to
+        const { data: myMemberships } = await supabase
+          .from('conversation_members')
+          .select('conversation_id')
+          .eq('user_id', user.id);
 
-        if (existingByCandidate) {
-          conversationId = existingByCandidate.id;
-          isExisting = true;
-          previousApplicationId = existingByCandidate.application_id;
-          
-          // Check if job context is changing
-          if (applicationId && applicationId !== previousApplicationId) {
-            needsJobContextSwitch = true;
+        const myConvIds = myMemberships?.map(m => m.conversation_id) || [];
+
+        if (myConvIds.length > 0) {
+          const { data: existingByCandidate } = await supabase
+            .from('conversations')
+            .select('id, application_id')
+            .eq('candidate_id', candidateId)
+            .not('candidate_id', 'is', null)
+            .in('id', myConvIds)
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (existingByCandidate) {
+            conversationId = existingByCandidate.id;
+            isExisting = true;
+            previousApplicationId = existingByCandidate.application_id;
+            
+            // Check if job context is changing
+            if (applicationId && applicationId !== previousApplicationId) {
+              needsJobContextSwitch = true;
+            }
           }
         }
       }
@@ -609,25 +629,26 @@ export function useCreateConversation() {
         if (convError) throw convError;
         conversationId = conversation.id;
 
-        // Add creator as admin member
+        // Add creator as admin member (upsert to handle race conditions)
         await supabase
           .from('conversation_members')
-          .insert({
-            conversation_id: conversationId,
-            user_id: user.id,
-            is_admin: true,
-          });
+          .upsert(
+            { conversation_id: conversationId, user_id: user.id, is_admin: true },
+            { onConflict: 'conversation_id,user_id' }
+          );
 
-        // Add other members
+        // Add other members (ignore duplicates)
         for (const memberId of memberIds) {
           if (memberId !== user.id) {
-            await supabase
+            const { error: addErr } = await supabase
               .from('conversation_members')
               .insert({
                 conversation_id: conversationId,
                 user_id: memberId,
                 is_admin: false,
               });
+            // Ignore duplicate key - member already exists
+            if (addErr && addErr.code !== '23505') throw addErr;
           }
         }
       }
