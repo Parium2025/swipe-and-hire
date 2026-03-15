@@ -238,7 +238,7 @@ export default function Messages() {
   
   if (isLoading && !hasData) {
     return (
-     <div className="h-[calc(100dvh-100px)] md:h-[calc(100dvh-80px)] flex flex-col opacity-0 responsive-container-wide">
+     <div className="h-full min-h-0 flex flex-col opacity-0 responsive-container-wide">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
