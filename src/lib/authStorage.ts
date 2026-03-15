@@ -193,8 +193,9 @@ export class AuthStorageAdapter implements Storage {
     if (key.includes('supabase.auth')) {
       // Check 24h inactivity timeout (applies to all users)
       if (hasSessionExpiredDueToInactivity()) {
-        console.log('⏰ Session expired due to 24h inactivity - logging out');
+        console.log('⏰ Session expired due to 24h inactivity (detected in authStorage) - logging out');
         console.log(`📊 Last activity: ${getTimeSinceLastActivity()}`);
+        _inactivityLogoutFromStorage = true; // Signal to onAuthStateChange
         this.clearAuthData();
         clearActivityTracking();
         return null;
