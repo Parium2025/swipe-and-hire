@@ -733,14 +733,15 @@ function ChatView({
                 {/* Messages for this date */}
                 <div className="space-y-3">
                   {msgs.map((msg, idx) => (
-                    <MessageBubble
-                      key={msg.id}
-                      message={msg}
-                      isOwn={msg.sender_id === currentUserId}
-                      showAvatar={idx === 0 || msgs[idx - 1]?.sender_id !== msg.sender_id}
-                      isGroup={conversation.is_group}
-                      currentUserRole={currentUserRole}
-                    />
+                    <div key={msg.id} id={`msg-${msg.id}`}>
+                      <MessageBubble
+                        message={msg}
+                        isOwn={msg.sender_id === currentUserId}
+                        showAvatar={idx === 0 || msgs[idx - 1]?.sender_id !== msg.sender_id}
+                        isGroup={conversation.is_group}
+                        currentUserRole={currentUserRole}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
