@@ -536,6 +536,18 @@ function ChatView({
   // Use frozen application snapshot if available
   const snapshot = conversation.applicationSnapshot;
 
+  // Build a frozen sender profile for the candidate based on snapshot.
+  // This ensures message bubbles show the SAME identity as the conversation list.
+  const candidateUserId = conversation.candidate_id;
+  const snapshotSenderProfile = snapshot && candidateUserId ? {
+    first_name: snapshot.first_name,
+    last_name: snapshot.last_name,
+    company_name: null,
+    profile_image_url: snapshot.profile_image_snapshot_url,
+    company_logo_url: null,
+    role: 'job_seeker' as const,
+  } : null;
+
   // Get current user's display name for typing indicator
   const getCurrentUserName = () => {
     const currentMember = (conversation.members || []).find(m => m.user_id === currentUserId);
