@@ -268,21 +268,29 @@ const JobDetails = () => {
     return containingStage || directStage;
   }, [applicationsByStatus, activeStages]);
 
+
   const handleOpenProfile = useCallback((app: JobApplication) => {
     const stage = resolveStageForApplication(app);
     const stageApps = applicationsByStatus[stage] || [];
 
-    // Always use swipe viewer for continuous scroll navigation (touch + desktop)
-    const idx = stageApps.findIndex(a => a.id === app.id);
-    setSwipeStageApps(stageApps);
-    setSwipeInitialIndex(idx >= 0 ? idx : 0);
-    setSwipeViewerOpen(true);
+    if (isTouchDevice) {
+      // Touch: continuous vertical scroll viewer
+      const idx = stageApps.findIndex(a => a.id === app.id);
+      setSwipeStageApps(stageApps);
+      setSwipeInitialIndex(idx >= 0 ? idx : 0);
+      setSwipeViewerOpen(true);
+    } else {
+      // Mouse: open profile dialog
+      setSelectedApplication(app);
+      setSelectedStage(stage);
+      setDialogOpen(true);
+    }
 
     // Mark as viewed
     if (!app.viewed_at) {
       markApplicationAsViewed(app.id);
     }
-  }, [applicationsByStatus, resolveStageForApplication, markApplicationAsViewed]);
+  }, [applicationsByStatus, resolveStageForApplication, markApplicationAsViewed, isTouchDevice]);
 
   const swipeApplicationsAsData = useMemo(() => {
     return swipeStageApps.map(app => mapToApplicationData(app, jobId || '', job?.title || ''));

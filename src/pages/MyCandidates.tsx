@@ -76,11 +76,13 @@ import { CandidateCardContent } from '@/components/candidates/KanbanCandidateCar
 import { StageColumn } from '@/components/candidates/StageColumn';
 import { MobileMyCandidatesView } from '@/components/candidates/MobileMyCandidatesView';
 import { useDevice } from '@/hooks/use-device';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 
 const MyCandidates = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const device = useDevice();
+  const isTouchDevice = useTouchCapable();
   const useMobileView = device === 'mobile';
   const { stageConfig, stageOrder, deleteStage } = useStageSettings();
   const { setStageCount } = useKanbanLayout();
@@ -441,18 +443,23 @@ const MyCandidates = () => {
   };
 
   const handleOpenProfile = useCallback((candidate: MyCandidateData) => {
-    // Find candidates in the same stage for continuous scroll
-    const stageCandidates = filteredCandidatesByStage[candidate.stage] || [];
-    const idx = stageCandidates.findIndex(c => c.id === candidate.id);
-
-    setSwipeStageCandidates(stageCandidates);
-    setSwipeInitialIndex(idx >= 0 ? idx : 0);
-    setSwipeViewerOpen(true);
+    if (isTouchDevice) {
+      // Touch: continuous vertical scroll viewer
+      const stageCandidates = filteredCandidatesByStage[candidate.stage] || [];
+      const idx = stageCandidates.findIndex(c => c.id === candidate.id);
+      setSwipeStageCandidates(stageCandidates);
+      setSwipeInitialIndex(idx >= 0 ? idx : 0);
+      setSwipeViewerOpen(true);
+    } else {
+      // Mouse: open profile dialog
+      setSelectedCandidate(candidate);
+      setDialogOpen(true);
+    }
 
     if (!candidate.viewed_at) {
       markApplicationAsViewed(candidate.application_id);
     }
-  }, [filteredCandidatesByStage, markApplicationAsViewed]);
+  }, [filteredCandidatesByStage, markApplicationAsViewed, isTouchDevice]);
 
   // Prefetching
   const handlePrefetchCandidate = useCallback((candidate: MyCandidateData) => {
