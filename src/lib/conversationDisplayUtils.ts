@@ -1,4 +1,5 @@
 import type { ApplicationSnapshot, ConversationMember } from '@/hooks/useConversations';
+import type { ConversationProfileData as ProfileLike } from '@/types/conversation';
 
 /**
  * Shared display logic for conversations.
@@ -8,15 +9,6 @@ import type { ApplicationSnapshot, ConversationMember } from '@/hooks/useConvers
  * when ANY data source (snapshot, live profile, or cached profile) has a usable name.
  * The priority chain is: snapshot → live profile → fallback.
  */
-
-interface ProfileLike {
-  role?: 'job_seeker' | 'employer';
-  first_name?: string | null;
-  last_name?: string | null;
-  company_name?: string | null;
-  profile_image_url?: string | null;
-  company_logo_url?: string | null;
-}
 
 /** Strict non-empty text check — rejects null, undefined, and whitespace-only strings. */
 function hasText(value: string | null | undefined): boolean {
