@@ -7,6 +7,8 @@ import { formatTimeAgo } from '@/lib/date';
 import { CandidateSummarySection } from '@/components/candidateProfile/CandidateSummarySection';
 import { SectionErrorBoundary } from '@/components/candidateProfile';
 import { CvViewer } from '@/components/CvViewer';
+import { BookInterviewDialog } from '@/components/BookInterviewDialog';
+import { SendMessageDialog } from '@/components/SendMessageDialog';
 import { toast } from 'sonner';
 import { SectionCard, SectionLabel, employmentStatusLabels, workScheduleLabels, availabilityLabels } from './CandidateSlideConstants';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
