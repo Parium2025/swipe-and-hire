@@ -979,6 +979,13 @@ const MyCandidates = () => {
         onClose={() => setSwipeViewerOpen(false)}
         onOpenFullProfile={handleSwipeOpenFullProfile}
         getDisplayRating={getDisplayRating}
+        onRemoveCandidate={(app) => {
+          const original = displayedCandidates.find(c => c.application_id === app.id);
+          if (original) {
+            setSwipeViewerOpen(false);
+            handleRemoveCandidate(original);
+          }
+        }}
       />
 
       {/* Candidate Profile Dialog */}
