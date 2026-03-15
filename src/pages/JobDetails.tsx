@@ -272,17 +272,17 @@ const JobDetails = () => {
     const stage = resolveStageForApplication(app);
     const stageApps = applicationsByStatus[stage] || [];
 
-    if (isTouchDevice) {
-      const idx = stageApps.findIndex(a => a.id === app.id);
-      setSwipeStageApps(stageApps);
-      setSwipeInitialIndex(idx >= 0 ? idx : 0);
-      setSwipeViewerOpen(true);
-    } else {
-      setSelectedApplication(app);
-      setSelectedStage(stage);
-      setDialogOpen(true);
+    // Always use swipe viewer for continuous scroll navigation (touch + desktop)
+    const idx = stageApps.findIndex(a => a.id === app.id);
+    setSwipeStageApps(stageApps);
+    setSwipeInitialIndex(idx >= 0 ? idx : 0);
+    setSwipeViewerOpen(true);
+
+    // Mark as viewed
+    if (!app.viewed_at) {
+      markApplicationAsViewed(app.id);
     }
-  }, [isTouchDevice, applicationsByStatus, resolveStageForApplication]);
+  }, [applicationsByStatus, resolveStageForApplication, markApplicationAsViewed]);
 
   const swipeApplicationsAsData = useMemo(() => {
     return swipeStageApps.map(app => mapToApplicationData(app, jobId || '', job?.title || ''));
