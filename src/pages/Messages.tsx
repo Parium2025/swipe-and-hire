@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, type Ref } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useConversations, useConversationMessages, Conversation, ConversationMessage, useCreateConversation } from '@/hooks/useConversations';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
