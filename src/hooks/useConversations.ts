@@ -71,7 +71,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 7; // v7: strict identity recovery + partial-response guard for conversations
+const CACHE_VERSION = 8; // v8: resilient cache - filter instead of wipe, never cache empty results
 
 interface CachedConversations {
   userId: string;
@@ -123,24 +123,21 @@ function readConversationsCache(userId: string): Conversation[] | null {
     const raw = localStorage.getItem(CONVERSATIONS_CACHE_KEY);
     if (!raw) return null;
     const cached: CachedConversations = JSON.parse(raw);
-    // Only use if same user
     if (cached.userId !== userId) return null;
-    // Invalidate old cache versions (missing profiles, etc.)
     if (!cached.version || cached.version < CACHE_VERSION) {
       localStorage.removeItem(CONVERSATIONS_CACHE_KEY);
       return null;
     }
-    // Don't use empty cache as valid data - force refetch
     if (cached.conversations.length === 0) return null;
 
-    // Invalidate cache if any 1:1 conversation would render as "Okänd användare".
-    // We still keep instant-load UX, but never let unknown identity get stuck.
-    if (hasUnknownConversationIdentity(cached.conversations, userId)) {
-      localStorage.removeItem(CONVERSATIONS_CACHE_KEY);
-      return null;
-    }
+    // Filter out individual conversations with unknown identity instead of
+    // throwing away the ENTIRE cache. This prevents one bad conversation
+    // from causing all other conversations to disappear.
+    const validConversations = cached.conversations.filter(
+      (conv) => !hasUnknownIdentityForConversation(conv, userId)
+    );
 
-    return cached.conversations;
+    return validConversations.length > 0 ? validConversations : null;
   } catch {
     return null;
   }
@@ -225,7 +222,8 @@ export function useConversations() {
 
       if (memberError) throw memberError;
       if (!memberships || memberships.length === 0) {
-        writeConversationsCache(user.id, []);
+        // ⚠️ Never cache empty results — could be a transient RLS/network issue.
+        // Let React Query show stale data until a successful fetch returns real data.
         return [];
       }
 
@@ -304,21 +302,34 @@ export function useConversations() {
       // Get unique user IDs to fetch profiles
       const allUserIds = [...new Set((allMembers || []).map((m) => m.user_id))];
 
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-        .in('user_id', allUserIds);
+      // Profiles are best-effort — if this fails, conversations still render with snapshot/cached names
+      let profileMap = new Map<string, any>();
+      try {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
+          .in('user_id', allUserIds);
 
-      if (profilesError) throw profilesError;
-
-      const profileMap = new Map((profiles || []).map((p) => [p.user_id, p]));
+        if (!profilesError && profiles) {
+          profileMap = new Map(profiles.map((p) => [p.user_id, p]));
+        }
+      } catch {
+        // Non-fatal: identity recovery will fill in from cache/snapshot
+      }
 
       // 🔥 Use efficient DB function instead of fetching ALL messages
       // This scales to millions of messages - only returns latest + unread count per conversation
-      const { data: summaries, error: summariesError } = await supabase
-        .rpc('get_conversation_summaries', { p_user_id: user.id });
-
-      if (summariesError) throw summariesError;
+      // Summaries are best-effort — conversations still show without last message preview
+      let summaries: any[] = [];
+      try {
+        const { data: summariesData, error: summariesError } = await supabase
+          .rpc('get_conversation_summaries', { p_user_id: user.id });
+        if (!summariesError && summariesData) {
+          summaries = summariesData;
+        }
+      } catch {
+        // Non-fatal
+      }
 
       const lastMessageMap = new Map<string, ConversationMessage>();
       const unreadCounts = new Map<string, number>();
