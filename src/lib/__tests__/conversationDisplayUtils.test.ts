@@ -142,7 +142,7 @@ describe('getConversationDisplayName', () => {
     ).toBe('OnlyLast');
   });
 
-  it('skips snapshot when both names are null and falls back to profile', () => {
+  it('keeps snapshot precedence when names are null (immutable per application)', () => {
     expect(
       getConversationDisplayName({
         isGroup: false,
@@ -150,10 +150,10 @@ describe('getConversationDisplayName', () => {
         snapshot: makeSnapshot({ first_name: null, last_name: null }),
         displayMember: makeMember({ first_name: 'Fallback', last_name: 'User' }),
       }),
-    ).toBe('Fallback User');
+    ).toBe('Okänd användare');
   });
 
-  it('skips snapshot when names are empty strings and falls back to profile', () => {
+  it('keeps snapshot precedence when names are empty strings', () => {
     expect(
       getConversationDisplayName({
         isGroup: false,
@@ -161,7 +161,7 @@ describe('getConversationDisplayName', () => {
         snapshot: makeSnapshot({ first_name: '', last_name: '' }),
         displayMember: makeMember({ first_name: 'Real', last_name: 'Person' }),
       }),
-    ).toBe('Real Person');
+    ).toBe('Okänd användare');
   });
 });
 
@@ -229,13 +229,20 @@ describe('getConversationAvatarProfile', () => {
     });
   });
 
-  it('returns undefined when snapshot has no names and no image and no member', () => {
+  it('still returns snapshot profile when snapshot has no names/image (strict snapshot precedence)', () => {
     const snapshot = makeSnapshot({
       first_name: null,
       last_name: null,
       profile_image_snapshot_url: null,
     });
-    expect(getConversationAvatarProfile(snapshot, undefined)).toBeUndefined();
+    expect(getConversationAvatarProfile(snapshot, undefined)).toEqual({
+      role: 'job_seeker',
+      first_name: null,
+      last_name: null,
+      company_name: null,
+      profile_image_url: null,
+      company_logo_url: null,
+    });
   });
 });
 

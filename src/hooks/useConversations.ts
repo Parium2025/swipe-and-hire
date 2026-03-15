@@ -71,7 +71,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 9; // v9: profiles critical again + placeholderData prevents flash-to-empty
+const CACHE_VERSION = 10; // v10: remove aggressive cache filtering + preserve previous data on transient empty fetch
 
 interface CachedConversations {
   userId: string;
@@ -130,14 +130,9 @@ function readConversationsCache(userId: string): Conversation[] | null {
     }
     if (cached.conversations.length === 0) return null;
 
-    // Filter out individual conversations with unknown identity instead of
-    // throwing away the ENTIRE cache. This prevents one bad conversation
-    // from causing all other conversations to disappear.
-    const validConversations = cached.conversations.filter(
-      (conv) => !hasUnknownIdentityForConversation(conv, userId)
-    );
-
-    return validConversations.length > 0 ? validConversations : null;
+    // Non-aggressive cache policy: return all cached conversations.
+    // Unknown identity should be solved by recovery/refetch, not by hiding rows.
+    return cached.conversations;
   } catch {
     return null;
   }
@@ -222,8 +217,13 @@ export function useConversations() {
 
       if (memberError) throw memberError;
       if (!memberships || memberships.length === 0) {
-        // ⚠️ Never cache empty results — could be a transient RLS/network issue.
-        // Let React Query show stale data until a successful fetch returns real data.
+        // Avoid flash-to-empty on transient backend hiccups.
+        const previous = queryClient.getQueryData<Conversation[]>(['conversations', user.id]);
+        if (previous && previous.length > 0) return previous;
+
+        const cached = readConversationsCache(user.id);
+        if (cached && cached.length > 0) return cached;
+
         return [];
       }
 
