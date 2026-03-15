@@ -195,6 +195,7 @@ export const CandidateSlide = memo(function CandidateSlide({
                   initials={initials}
                   summaryHook={summaryHook}
                   onOpenFullProfile={onOpenFullProfile}
+                  onRemoveFromList={onRemoveFromList}
                 />
               )}
 
