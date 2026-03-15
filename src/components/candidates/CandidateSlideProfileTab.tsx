@@ -1,5 +1,6 @@
 import { useState, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
+import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, Trash2, X } from 'lucide-react';
 import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ProfileVideo from '@/components/ProfileVideo';
