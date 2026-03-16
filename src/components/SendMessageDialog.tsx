@@ -2,7 +2,7 @@ import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/componen
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -120,42 +120,41 @@ export function SendMessageDialog({
         <DialogContentNoFocus 
           hideClose
           elevated={elevated}
-          className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-x-hidden overflow-y-auto"
+          className="w-[min(90vw,500px)] glass-panel text-white max-h-[90vh] rounded-[24px] sm:rounded-xl overflow-x-hidden overflow-y-auto p-0"
         >
           <DialogHeader className="sr-only">
             <DialogTitle className="sr-only">Skicka meddelande</DialogTitle>
             <DialogDescription className="sr-only">Skriv ett meddelande till {recipientName}</DialogDescription>
           </DialogHeader>
           
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full">
-            <CardHeader className="pb-4 pt-6">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex-1 text-center text-xl flex items-center justify-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Skicka meddelande
-                </CardTitle>
-                <button
-                  onClick={handleClose}
-                  className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              <CardDescription className="text-white text-center text-sm leading-snug mt-2">
-                Skriv ett meddelande till {recipientName}
-              </CardDescription>
-            </CardHeader>
+          <div className="relative w-full p-6">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-white flex-1 text-center text-xl font-semibold flex items-center justify-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Chatta
+              </h3>
+              <button
+                onClick={handleClose}
+                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="text-white text-center text-sm leading-snug mb-5">
+              Skriv ett meddelande till {recipientName}
+            </p>
             
-            <CardContent className="space-y-4 px-4 pb-5 pt-2">
+            <div className="space-y-4">
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Skriv ditt meddelande här..."
-                className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-y transition-all duration-150 text-base"
+                className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/5 border-white/20 hover:border-white/30 text-white placeholder:text-white/30 resize-y transition-all duration-150 text-base focus:outline-none focus:ring-1 focus:ring-white/30"
                 disabled={!isOnline}
               />
 
               <Button
+                variant="glass"
                 onClick={handleSend}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
@@ -173,8 +172,8 @@ export function SendMessageDialog({
                 )}
                 {!isOnline ? 'Offline' : 'Skicka'}
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </DialogContentNoFocus>
       </Dialog>
 
