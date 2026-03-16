@@ -33,7 +33,7 @@ export const ProfileActions = ({
         <div className="flex justify-center gap-1">
           <Button onClick={onSendMessage} variant="glassPurple" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
             <MessageSquare className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
-            <span className="truncate">Meddela</span>
+            <span className="truncate">Chatta</span>
           </Button>
           <Button onClick={onBookInterview} variant="glassBlue" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
             <CalendarPlus className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
