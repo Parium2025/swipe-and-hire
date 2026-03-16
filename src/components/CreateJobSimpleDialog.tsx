@@ -311,7 +311,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
           hideClose
           forceMount
           overlayHidden={!open || !isWarmedUp}
-          className={"w-[min(90vw,400px)] glass-panel text-white max-h-[80vh] rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out p-0"}
+          className={"w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
           style={{ display: (!open || !isWarmedUp) ? 'none' : undefined }}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
@@ -319,7 +319,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
             <DialogTitle className="sr-only">Skapa jobb</DialogTitle>
             <DialogDescription className="sr-only">Välj mall eller ange titel</DialogDescription>
           </DialogHeader>
-          <Card className="bg-transparent border-none ring-0 shadow-none relative w-full transition-all duration-200">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full transition-all duration-200">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
