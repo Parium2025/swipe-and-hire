@@ -319,7 +319,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
             <DialogTitle className="sr-only">Skapa jobb</DialogTitle>
             <DialogDescription className="sr-only">Välj mall eller ange titel</DialogDescription>
           </DialogHeader>
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full transition-all duration-200">
+          <Card className="bg-transparent border-none ring-0 shadow-none relative w-full transition-all duration-200">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
