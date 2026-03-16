@@ -472,12 +472,16 @@ function ConversationItem({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-0.5">
-          <span className={cn(
-            "font-medium truncate text-white",
-            conversation.unread_count > 0 && "font-semibold"
-          )}>
-            {displayName}
-          </span>
+          {displayName === 'Okänd användare' ? (
+            <Skeleton className="h-4 w-24 bg-white/10 rounded" />
+          ) : (
+            <span className={cn(
+              "font-medium truncate text-white",
+              conversation.unread_count > 0 && "font-semibold"
+            )}>
+              {displayName}
+            </span>
+          )}
           <span className="text-pure-white text-xs flex-shrink-0">
             {formatTime(conversation.last_message_at)}
           </span>
@@ -702,7 +706,9 @@ function ChatView({
         />
 
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-pure-white truncate">{displayName}</h2>
+          <h2 className="font-semibold text-pure-white truncate">
+            {displayName === 'Okänd användare' ? <Skeleton className="h-4 w-28 bg-white/10 rounded inline-block" /> : displayName}
+          </h2>
           {conversation.is_group && (
             <p className="text-pure-white text-xs">
               {conversation.members.length} medlemmar
