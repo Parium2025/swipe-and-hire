@@ -43,10 +43,10 @@ export function BulkMessageDialog({ open, onOpenChange, count, onSend, progress 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => !isSending && onOpenChange(false)}>
       <div 
-        className="w-[min(90vw,400px)] bg-card-parium backdrop-blur-md border border-white/20 rounded-[24px] sm:rounded-xl shadow-lg overflow-hidden"
+        className="w-[min(90vw,400px)] glass-panel rounded-[24px] sm:rounded-xl overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <div className="bg-white/10 backdrop-blur-sm border-white/20 p-6 relative">
+        <div className="p-6 relative">
           {/* Header */}
           <div className="flex items-center justify-between mb-1">
             <h3 className="text-white flex-1 text-center text-xl font-semibold">
