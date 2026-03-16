@@ -706,7 +706,9 @@ function ChatView({
         />
 
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-pure-white truncate">{displayName}</h2>
+          <h2 className="font-semibold text-pure-white truncate">
+            {displayName === 'Okänd användare' ? <Skeleton className="h-4 w-28 bg-white/10 rounded inline-block" /> : displayName}
+          </h2>
           {conversation.is_group && (
             <p className="text-pure-white text-xs">
               {conversation.members.length} medlemmar
