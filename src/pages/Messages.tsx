@@ -711,12 +711,16 @@ function ChatView({
           <ChevronLeft className="h-5 w-5" />
         </Button>
 
-        <ConversationAvatar
-          profile={avatarProfile}
-          isGroup={conversation.is_group}
-          groupName={conversation.name}
-          size="md"
-        />
+        {displayName === 'Okänd användare' ? (
+          <Skeleton className="h-10 w-10 rounded-full bg-white/10 flex-shrink-0" />
+        ) : (
+          <ConversationAvatar
+            profile={avatarProfile}
+            isGroup={conversation.is_group}
+            groupName={conversation.name}
+            size="md"
+          />
+        )}
 
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-pure-white truncate">
