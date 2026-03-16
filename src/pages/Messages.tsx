@@ -423,6 +423,23 @@ function ConversationItem({
   const lastMessagePreview = conversation.last_message?.content || 'Inga meddelanden ännu';
   const isOwnMessage = conversation.last_message?.sender_id === currentUserId;
 
+  const identityUnknown = displayName === 'Okänd användare';
+
+  // When identity is unknown, render entire row as skeleton to prevent partial data flash
+  if (identityUnknown) {
+    return (
+      <div className="w-full flex items-start gap-3 p-3 rounded-lg border border-transparent">
+        <div className="relative flex-shrink-0">
+          <Skeleton className="h-12 w-12 rounded-full bg-white/10" />
+        </div>
+        <div className="flex-1 min-w-0 space-y-2 pt-1">
+          <Skeleton className="h-4 w-28 bg-white/10 rounded" />
+          <Skeleton className="h-3 w-40 bg-white/10 rounded" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <button
       onClick={onClick}
@@ -472,16 +489,12 @@ function ConversationItem({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-0.5">
-          {displayName === 'Okänd användare' ? (
-            <Skeleton className="h-4 w-24 bg-white/10 rounded" />
-          ) : (
-            <span className={cn(
-              "font-medium truncate text-white",
-              conversation.unread_count > 0 && "font-semibold"
-            )}>
-              {displayName}
-            </span>
-          )}
+          <span className={cn(
+            "font-medium truncate text-white",
+            conversation.unread_count > 0 && "font-semibold"
+          )}>
+            {displayName}
+          </span>
           <span className="text-pure-white text-xs flex-shrink-0">
             {formatTime(conversation.last_message_at)}
           </span>
