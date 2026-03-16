@@ -227,7 +227,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
             className="min-w-0 flex-1 h-9 px-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center"
           >
             <MessageSquare className="h-4 w-4 mr-1 shrink-0" />
-            <span className="truncate">Meddela</span>
+            <span className="truncate">Chatta</span>
           </button>
           <button
             onClick={() => setBookInterviewOpen(true)}
