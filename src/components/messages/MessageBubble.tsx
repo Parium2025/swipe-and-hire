@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { EmojiReactionPicker } from '@/components/messages/EmojiReactionPicker';
 import { getMessageSenderName } from '@/lib/conversationDisplayUtils';
-import { Briefcase, Check, CheckCheck, Paperclip, FileText, Image as ImageIcon, Play } from 'lucide-react';
+import { Briefcase, Check, CheckCheck, Paperclip, FileText, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { ConversationMessage } from '@/hooks/useConversations';
@@ -20,6 +20,16 @@ interface MessageBubbleProps {
   reactions?: GroupedReaction[];
   /** Toggle a reaction on this message */
   onToggleReaction?: (emoji: string) => void;
+  /** Trigger edit mode for this message */
+  onEdit?: (messageId: string, currentContent: string) => void;
+}
+
+/** Check if a message has been edited (updated_at > created_at by more than 2s) */
+function isEdited(message: ConversationMessage): boolean {
+  if (!message.updated_at || !message.created_at) return false;
+  const created = new Date(message.created_at).getTime();
+  const updated = new Date(message.updated_at).getTime();
+  return updated - created > 2000;
 }
 
 export function MessageBubble({
@@ -31,6 +41,7 @@ export function MessageBubble({
   isRead,
   reactions = [],
   onToggleReaction,
+  onEdit,
 }: MessageBubbleProps) {
   const senderName = getMessageSenderName(message.sender_profile);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -38,35 +49,37 @@ export function MessageBubble({
   const bubbleRef = useRef<HTMLDivElement>(null);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
 
+  const isTemp = message.id.startsWith('temp-');
+  const canEdit = isOwn && !isTemp && !message.is_system_message && !!onEdit;
+  const edited = isEdited(message);
+
   // Double-tap detection
   const handleTap = useCallback(() => {
-    if (!onToggleReaction || message.id.startsWith('temp-')) return;
+    if (!onToggleReaction || isTemp) return;
 
     const now = Date.now();
     const delta = now - lastTapRef.current;
     lastTapRef.current = now;
 
     if (delta < 350 && delta > 0) {
-      // Double tap detected
-      lastTapRef.current = 0; // Reset to prevent triple-tap
+      lastTapRef.current = 0;
       if (bubbleRef.current) {
         setAnchorRect(bubbleRef.current.getBoundingClientRect());
         setShowEmojiPicker(true);
       }
     }
-  }, [onToggleReaction, message.id]);
-
-  // Desktop hover click to open picker
-  const handleDesktopReaction = useCallback(() => {
-    if (bubbleRef.current) {
-      setAnchorRect(bubbleRef.current.getBoundingClientRect());
-      setShowEmojiPicker(true);
-    }
-  }, []);
+  }, [onToggleReaction, isTemp]);
 
   const handleReaction = (emoji: string) => {
     onToggleReaction?.(emoji);
   };
+
+  const handleEdit = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (canEdit) {
+      onEdit!(message.id, message.content);
+    }
+  }, [canEdit, onEdit, message.id, message.content]);
 
   // System message - job context switch marker
   if (message.is_system_message) {
@@ -112,10 +125,8 @@ export function MessageBubble({
             alt={message.attachment_name || 'Bild'}
             className="w-full h-auto rounded-lg bg-white/5"
             loading="lazy"
-            // Prevent layout shift: reserve space while loading
             style={{ aspectRatio: '4/3', objectFit: 'cover' }}
             onLoad={(e) => {
-              // Once loaded, switch to natural aspect ratio
               (e.target as HTMLImageElement).style.aspectRatio = '';
               (e.target as HTMLImageElement).style.objectFit = '';
             }}
@@ -195,21 +206,40 @@ export function MessageBubble({
             </span>
           )}
 
-          <div
-            ref={bubbleRef}
-            className={cn(
-              "px-4 py-2 rounded-2xl select-none",
-              isOwn
-                ? "bg-blue-500/30 border border-blue-500/40 rounded-br-md"
-                : "bg-white/10 border border-white/10 rounded-bl-md"
+          <div className="relative">
+            <div
+              ref={bubbleRef}
+              className={cn(
+                "px-4 py-2 rounded-2xl select-none",
+                isOwn
+                  ? "bg-blue-500/30 border border-blue-500/40 rounded-br-md"
+                  : "bg-white/10 border border-white/10 rounded-bl-md"
+              )}
+            >
+              {message.content && (
+                <p className="text-white text-sm whitespace-pre-wrap break-words">
+                  {message.content}
+                </p>
+              )}
+              {renderAttachment()}
+            </div>
+
+            {/* Edit button - visible on hover (desktop) */}
+            {canEdit && (
+              <button
+                onClick={handleEdit}
+                className={cn(
+                  "absolute top-1/2 -translate-y-1/2 p-1.5 rounded-full",
+                  "bg-white/10 border border-white/10 text-pure-white",
+                  "opacity-0 group-hover:opacity-100 md:hover:bg-white/20",
+                  "transition-all active:scale-90",
+                  isOwn ? "-left-8" : "-right-8"
+                )}
+                aria-label="Redigera meddelande"
+              >
+                <Pencil className="h-3 w-3" />
+              </button>
             )}
-          >
-            {message.content && (
-              <p className="text-white text-sm whitespace-pre-wrap break-words">
-                {message.content}
-              </p>
-            )}
-            {renderAttachment()}
           </div>
 
           {/* Reactions display */}
@@ -237,15 +267,18 @@ export function MessageBubble({
             <span className="text-pure-white text-[10px]">
               {format(new Date(message.created_at), 'HH:mm')}
             </span>
+            {/* Edited indicator */}
+            {edited && (
+              <span className="text-pure-white/60 text-[10px] italic">redigerat</span>
+            )}
             {/* Read receipt for own messages */}
-            {isOwn && !message.id.startsWith('temp-') && (
+            {isOwn && !isTemp && (
               isRead ? (
                 <CheckCheck className="h-3 w-3 text-blue-400" />
               ) : (
                 <Check className="h-3 w-3 text-pure-white" />
               )
             )}
-
           </div>
         </div>
       </div>
