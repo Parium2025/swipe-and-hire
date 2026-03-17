@@ -500,7 +500,7 @@ export function ChatView({
 
         {/* Search toggle */}
         <button
-          onClick={() => { setShowSearch(prev => !prev); if (showSearch) { setSearchQuery(''); setDebouncedQuery(''); setSearchMatchIds([]); setOlderMatchCount(0); } }}
+          onClick={() => { setShowSearch(prev => !prev); if (showSearch) { setSearchQuery(''); setDebouncedQuery(''); setSearchMatchIds([]); setDbSearchResultIds([]); setOlderMatchCount(0); } }}
           className={cn(
             "p-2 rounded-full transition-colors",
             showSearch ? "bg-white/15 text-white" : "text-pure-white md:hover:bg-white/10"
