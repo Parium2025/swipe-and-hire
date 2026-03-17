@@ -627,8 +627,6 @@ export function useConversationMessages(conversationId: string | null) {
           };
 
           // For own messages: check if it was already added optimistically.
-          // If so, skip. If NOT (e.g. optimistic update failed and was rolled back),
-          // let the realtime message through so it still appears.
           if (newMessage.sender_id === user.id) {
             const currentMessages = queryClient.getQueryData<ConversationMessage[]>(
               ['conversation-messages', conversationId]
@@ -647,7 +645,6 @@ export function useConversationMessages(conversationId: string | null) {
             .single();
 
           // Add message directly to cache - instant update!
-          // Also replace any remaining optimistic temp message for own messages
           queryClient.setQueryData<ConversationMessage[]>(
             ['conversation-messages', conversationId],
             (old) => {
@@ -656,7 +653,7 @@ export function useConversationMessages(conversationId: string | null) {
               // Check if message already exists by real ID
               if (old.some(m => m.id === newMessage.id)) return old;
 
-              // For own messages: replace temp placeholder if it exists (race: realtime before insert response)
+              // For own messages: replace temp placeholder if it exists
               if (newMessage.sender_id === user.id) {
                 const tempIdx = old.findIndex(m => m.id.startsWith('temp-') && m.content === newMessage.content);
                 if (tempIdx !== -1) {
@@ -672,6 +669,32 @@ export function useConversationMessages(conversationId: string | null) {
 
           // Also update conversation list to show new last message
           queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversation_messages',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const updated = payload.new as {
+            id: string;
+            content: string;
+            updated_at: string;
+          };
+
+          // Update the edited message in cache for real-time sync
+          queryClient.setQueryData<ConversationMessage[]>(
+            ['conversation-messages', conversationId],
+            (old) => old?.map(m =>
+              m.id === updated.id
+                ? { ...m, content: updated.content, updated_at: updated.updated_at }
+                : m
+            ) || []
+          );
         }
       )
       .subscribe();
