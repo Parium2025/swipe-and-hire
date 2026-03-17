@@ -211,7 +211,15 @@ export function ChatView({
 
     (async () => {
       try {
-        const pattern = `%${debouncedQuery}%`;
+        // Sanitize query: escape characters that PostgREST .or() interprets as syntax
+        const sanitized = debouncedQuery.replace(/[,().\\]/g, '');
+        if (!sanitized.trim()) {
+          setSearchMatchIds([]);
+          setOlderMatchCount(0);
+          setSearchingDb(false);
+          return;
+        }
+        const pattern = `%${sanitized}%`;
         const { data, error } = await supabase
           .from('conversation_messages')
           .select('id')
