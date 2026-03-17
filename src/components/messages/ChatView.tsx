@@ -203,20 +203,30 @@ export function ChatView({
   }, [searchQuery]);
 
   // DB-powered search: searches ALL messages in conversation (not just loaded)
+  const [dbSearchResultIds, setDbSearchResultIds] = useState<string[]>([]);
+
   useEffect(() => {
-    if (!debouncedQuery) return;
+    if (!debouncedQuery) {
+      setDbSearchResultIds([]);
+      return;
+    }
 
     let cancelled = false;
     setSearchingDb(true);
 
     (async () => {
       try {
-        // Sanitize query: escape characters that PostgREST .or() interprets as syntax
-        const sanitized = debouncedQuery.replace(/[,().\\]/g, '');
+        // Sanitize: strip PostgREST .or() syntax chars AND escape ILIKE wildcards
+        const sanitized = debouncedQuery
+          .replace(/[,().\\]/g, '')   // PostgREST syntax
+          .replace(/%/g, '\\%')       // ILIKE wildcard
+          .replace(/_/g, '\\_');      // ILIKE single-char wildcard
         if (!sanitized.trim()) {
-          setSearchMatchIds([]);
-          setOlderMatchCount(0);
-          setSearchingDb(false);
+          if (!cancelled) {
+            setDbSearchResultIds([]);
+            setSearchMatchIds([]);
+            setOlderMatchCount(0);
+          }
           return;
         }
         const pattern = `%${sanitized}%`;
@@ -228,17 +238,19 @@ export function ChatView({
           .or(`content.ilike.${pattern},attachment_name.ilike.${pattern}`)
           .order('created_at', { ascending: true });
 
-        if (cancelled || error) return;
+        if (cancelled) return;
 
-        const allMatchIds = (data || []).map(m => m.id);
-        const loadedIds = new Set(messages.map(m => m.id));
-        const localMatches = allMatchIds.filter(id => loadedIds.has(id));
-        const olderCount = allMatchIds.length - localMatches.length;
+        if (error) {
+          // Clear stale results on error instead of keeping old matches
+          setDbSearchResultIds([]);
+          setSearchMatchIds([]);
+          setOlderMatchCount(0);
+          return;
+        }
 
-        setSearchMatchIds(localMatches);
-        setOlderMatchCount(olderCount);
-        setSearchIndex(localMatches.length > 0 ? localMatches.length - 1 : 0);
+        setDbSearchResultIds((data || []).map(m => m.id));
       } catch {
+        if (cancelled) return;
         // Fallback to local search
         const query = debouncedQuery.toLowerCase();
         const matches = messages
@@ -247,6 +259,7 @@ export function ChatView({
             (m.attachment_name && m.attachment_name.toLowerCase().includes(query))
           ))
           .map(m => m.id);
+        setDbSearchResultIds([]);
         setSearchMatchIds(matches);
         setOlderMatchCount(0);
         setSearchIndex(matches.length > 0 ? matches.length - 1 : 0);
@@ -256,7 +269,22 @@ export function ChatView({
     })();
 
     return () => { cancelled = true; };
-  }, [debouncedQuery, conversation.id, messages]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQuery, conversation.id]);
+
+  // Separate effect: reconcile DB results with loaded messages (runs when messages update, NOT re-querying DB)
+  useEffect(() => {
+    if (dbSearchResultIds.length === 0 && debouncedQuery) return;
+    if (dbSearchResultIds.length === 0) return;
+
+    const loadedIds = new Set(messages.map(m => m.id));
+    const localMatches = dbSearchResultIds.filter(id => loadedIds.has(id));
+    const olderCount = dbSearchResultIds.length - localMatches.length;
+
+    setSearchMatchIds(localMatches);
+    setOlderMatchCount(olderCount);
+    setSearchIndex(prev => Math.min(prev, Math.max(0, localMatches.length - 1)));
+  }, [dbSearchResultIds, messages, debouncedQuery]);
 
   // Scroll to current search match
   useEffect(() => {
