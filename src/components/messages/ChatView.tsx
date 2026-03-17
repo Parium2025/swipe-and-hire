@@ -713,7 +713,9 @@ export function ChatView({
             <Paperclip className="h-3.5 w-3.5 text-pure-white flex-shrink-0" />
             <span className="text-sm text-pure-white truncate">{pendingFile.name}</span>
             <span className="text-pure-white text-xs flex-shrink-0">
-              {(pendingFile.size / 1024).toFixed(0)} KB
+              {pendingFile.size >= 1024 * 1024
+                ? `${(pendingFile.size / (1024 * 1024)).toFixed(1)} MB`
+                : `${(pendingFile.size / 1024).toFixed(0)} KB`}
             </span>
           </div>
           <button
