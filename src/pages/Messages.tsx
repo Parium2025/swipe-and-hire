@@ -467,7 +467,7 @@ function ConversationItem({
                 ? "border-emerald-500/50" 
                 : "border-blue-500/50"
           )}
-          fallbackClassName={category === 'candidates' ? "bg-emerald-500/20" : "bg-blue-500/20"}
+          fallbackClassName="bg-white/10"
         />
         {conversation.unread_count > 0 && (
           <div className="absolute -top-1 -left-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
