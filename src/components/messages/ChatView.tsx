@@ -524,6 +524,16 @@ export function ChatView({
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setShowSearch(false);
+                    setSearchQuery('');
+                    setDebouncedQuery('');
+                    setSearchMatchIds([]);
+                    setDbSearchResultIds([]);
+                    setOlderMatchCount(0);
+                  }
+                }}
                 placeholder="Sök meddelanden & filer..."
                 className="h-8 bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white text-sm"
                 autoFocus
