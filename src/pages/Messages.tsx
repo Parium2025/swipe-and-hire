@@ -515,11 +515,13 @@ function ChatView({
   currentUserId,
   onBack,
   currentUserRole,
+  category,
 }: { 
   conversation: Conversation;
   currentUserId: string;
   onBack: () => void;
   currentUserRole: 'job_seeker' | 'employer' | null;
+  category: 'candidates' | 'colleagues';
 }) {
   const { messages, isLoading, sendMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
