@@ -776,17 +776,33 @@ export function ChatView({
         </div>
       )}
 
+      {/* Edit indicator */}
+      {editingMessageId && (
+        <div className="px-4 py-2 border-t border-white/10 flex items-center gap-2">
+          <Pencil className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
+          <span className="text-sm text-pure-white flex-1 truncate">Redigerar meddelande</span>
+          <button
+            onClick={handleCancelEdit}
+            className="p-1.5 rounded-full md:hover:bg-white/10 text-pure-white active:scale-95 transition-all"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Input */}
       <div className="p-4 border-t border-white/10 flex-shrink-0">
         <div className="flex items-end gap-2">
-          {/* File attach button */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="h-11 w-11 flex-shrink-0 flex items-center justify-center rounded-xl text-pure-white md:hover:bg-white/10 active:scale-95 transition-all"
-            aria-label="Bifoga fil"
-          >
-            <Paperclip className="h-5 w-5" />
-          </button>
+          {/* File attach button - hidden during edit */}
+          {!editingMessageId && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="h-11 w-11 flex-shrink-0 flex items-center justify-center rounded-xl text-pure-white md:hover:bg-white/10 active:scale-95 transition-all"
+              aria-label="Bifoga fil"
+            >
+              <Paperclip className="h-5 w-5" />
+            </button>
+          )}
           <input
             ref={fileInputRef}
             type="file"
@@ -799,9 +815,18 @@ export function ChatView({
             ref={textareaRef}
             value={newMessage}
             onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Skriv ett meddelande..."
-            className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white rounded-xl"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape' && editingMessageId) {
+                handleCancelEdit();
+                return;
+              }
+              handleKeyDown(e);
+            }}
+            placeholder={editingMessageId ? "Redigera meddelandet..." : "Skriv ett meddelande..."}
+            className={cn(
+              "min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white rounded-xl",
+              editingMessageId && "border-blue-500/30"
+            )}
             rows={1}
           />
           <Button
@@ -809,10 +834,17 @@ export function ChatView({
             size="icon"
             onClick={handleSend}
             disabled={(!newMessage.trim() && !pendingFile) || sending}
-            className="h-11 w-11 flex-shrink-0 bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
+            className={cn(
+              "h-11 w-11 flex-shrink-0",
+              editingMessageId
+                ? "bg-emerald-500/20 border-emerald-500/40 hover:bg-emerald-500/30"
+                : "bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
+            )}
           >
             {sending || uploadingFile ? (
               <Loader2 className="h-4 w-4 animate-spin" />
+            ) : editingMessageId ? (
+              <Check className="h-4 w-4" />
             ) : (
               <Send className="h-4 w-4" />
             )}
