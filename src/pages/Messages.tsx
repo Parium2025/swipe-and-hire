@@ -259,7 +259,7 @@ export default function Messages() {
   return (
      <div className="flex-1 min-h-0 flex flex-col animate-fade-in responsive-container-wide overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 flex-shrink-0">
+      <div className="flex items-center justify-center mb-4 flex-shrink-0 relative">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
             <MessageSquare className="h-5 w-5 text-white" />
@@ -277,7 +277,7 @@ export default function Messages() {
           <Button
             variant="glass"
             onClick={() => setShowNewConversation(true)}
-            className="bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
+            className="absolute right-0 bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             <span className="hidden sm:inline">Ny konversation</span>
