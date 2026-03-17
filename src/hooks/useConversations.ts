@@ -733,7 +733,7 @@ export function useConversationMessages(conversationId: string | null) {
     // Optimistic update
     queryClient.setQueryData<ConversationMessage[]>(
       ['conversation-messages', conversationId],
-      (old) => old?.map(m => m.id === messageId ? { ...m, content: trimmed, updated_at: new Date().toISOString() } : m) || []
+      (old) => old?.map(m => m.id === messageId ? { ...m, content: trimmed, edited_at: new Date().toISOString() } : m) || []
     );
 
     try {
