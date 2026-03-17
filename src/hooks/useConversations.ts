@@ -38,6 +38,7 @@ export interface ConversationMessage {
   sender_id: string;
   content: string;
   created_at: string;
+  updated_at?: string;
   is_system_message: boolean;
   attachment_url?: string | null;
   attachment_type?: string | null;
