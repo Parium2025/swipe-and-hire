@@ -482,13 +482,15 @@ const MESSAGES_PAGE_SIZE = 200;
 export function useConversationMessages(conversationId: string | null) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
+  const prevConversationIdRef = useRef(conversationId);
 
-  // Reset hasMore when conversation changes
-  useEffect(() => {
-    setHasMore(true);
-  }, [conversationId]);
+  // Reset hasMore synchronously when conversation changes (before render)
+  if (conversationId !== prevConversationIdRef.current) {
+    prevConversationIdRef.current = conversationId;
+    setHasMore(false);
+  }
 
   const messagesQuery = useQuery({
     queryKey: ['conversation-messages', conversationId],
