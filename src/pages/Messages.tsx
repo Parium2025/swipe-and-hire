@@ -469,17 +469,6 @@ function ConversationItem({
           )}
           fallbackClassName={category === 'candidates' ? "bg-emerald-500/20" : "bg-blue-500/20"}
         />
-        {/* Category badge */}
-        <div className={cn(
-          "absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center border-2 border-slate-900",
-          category === 'candidates' ? "bg-emerald-500" : "bg-blue-500"
-        )}>
-          {category === 'candidates' ? (
-            <User className="h-2 w-2 text-white" />
-          ) : (
-            <Briefcase className="h-2 w-2 text-white" />
-          )}
-        </div>
         {conversation.unread_count > 0 && (
           <div className="absolute -top-1 -left-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
             {conversation.unread_count > 99 ? '99+' : conversation.unread_count}
