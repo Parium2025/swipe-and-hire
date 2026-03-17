@@ -116,10 +116,10 @@ export function ConversationItem({
           </span>
         </div>
 
-        {conversation.job && (
+        {(snapshot?.job_title || conversation.job?.title) && (
           <div className="flex items-center gap-1 text-pure-white text-xs mb-0.5">
             <Briefcase className="h-3 w-3" />
-            <span className="truncate">{conversation.job.title}</span>
+            <span className="truncate">{snapshot?.job_title || conversation.job?.title}</span>
           </div>
         )}
 
