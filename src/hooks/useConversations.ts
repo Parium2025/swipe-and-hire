@@ -699,6 +699,33 @@ export function useConversationMessages(conversationId: string | null) {
     }
   }, [conversationId, user, queryClient]);
 
+  // Edit an existing message
+  const editMessage = useCallback(async (messageId: string, newContent: string) => {
+    if (!conversationId || !user || !newContent.trim()) return;
+
+    const trimmed = newContent.trim();
+
+    // Optimistic update
+    queryClient.setQueryData<ConversationMessage[]>(
+      ['conversation-messages', conversationId],
+      (old) => old?.map(m => m.id === messageId ? { ...m, content: trimmed, updated_at: new Date().toISOString() } : m) || []
+    );
+
+    try {
+      const { error } = await supabase
+        .from('conversation_messages')
+        .update({ content: trimmed, updated_at: new Date().toISOString() })
+        .eq('id', messageId)
+        .eq('sender_id', user.id); // Security: only own messages
+
+      if (error) throw error;
+    } catch (error) {
+      // Rollback: refetch from DB
+      queryClient.invalidateQueries({ queryKey: ['conversation-messages', conversationId] });
+      throw error;
+    }
+  }, [conversationId, user, queryClient]);
+
   // Send message with optimistic update - instant UI feedback
   const sendMessage = useCallback(async (
     content: string,
