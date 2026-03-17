@@ -39,6 +39,9 @@ export interface ConversationMessage {
   content: string;
   created_at: string;
   is_system_message: boolean;
+  attachment_url?: string | null;
+  attachment_type?: string | null;
+  attachment_name?: string | null;
   sender_profile?: {
     first_name: string | null;
     last_name: string | null;
@@ -697,8 +700,11 @@ export function useConversationMessages(conversationId: string | null) {
   }, [conversationId, user, queryClient]);
 
   // Send message with optimistic update - instant UI feedback
-  const sendMessage = useCallback(async (content: string) => {
-    if (!conversationId || !user || !content.trim()) return;
+  const sendMessage = useCallback(async (
+    content: string,
+    attachment?: { url: string; type: string; name: string },
+  ) => {
+    if (!conversationId || !user || (!content.trim() && !attachment)) return;
 
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage: ConversationMessage = {
@@ -708,7 +714,10 @@ export function useConversationMessages(conversationId: string | null) {
       content: content.trim(),
       created_at: new Date().toISOString(),
       is_system_message: false,
-      sender_profile: undefined, // Will be filled by realtime update
+      attachment_url: attachment?.url || null,
+      attachment_type: attachment?.type || null,
+      attachment_name: attachment?.name || null,
+      sender_profile: undefined,
     };
 
     // Add message to cache immediately (optimistic)
@@ -724,6 +733,11 @@ export function useConversationMessages(conversationId: string | null) {
           conversation_id: conversationId,
           sender_id: user.id,
           content: content.trim(),
+          ...(attachment ? {
+            attachment_url: attachment.url,
+            attachment_type: attachment.type,
+            attachment_name: attachment.name,
+          } : {}),
         })
         .select()
         .single();
