@@ -182,20 +182,71 @@ export function ChatView({
     }
   }, [typingUsers, getViewportEl]);
 
-  // Search logic
+  // Debounce search query (300ms)
   useEffect(() => {
     if (!searchQuery.trim()) {
+      setDebouncedQuery('');
       setSearchMatchIds([]);
       setSearchIndex(0);
+      setOlderMatchCount(0);
       return;
     }
-    const query = searchQuery.toLowerCase();
-    const matches = messages
-      .filter(m => !m.is_system_message && m.content.toLowerCase().includes(query))
-      .map(m => m.id);
-    setSearchMatchIds(matches);
-    setSearchIndex(matches.length > 0 ? matches.length - 1 : 0); // Start at most recent match
-  }, [searchQuery, messages]);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      setDebouncedQuery(searchQuery.trim());
+    }, 300);
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchQuery]);
+
+  // DB-powered search: searches ALL messages in conversation (not just loaded)
+  useEffect(() => {
+    if (!debouncedQuery) return;
+
+    let cancelled = false;
+    setSearchingDb(true);
+
+    (async () => {
+      try {
+        const pattern = `%${debouncedQuery}%`;
+        const { data, error } = await supabase
+          .from('conversation_messages')
+          .select('id')
+          .eq('conversation_id', conversation.id)
+          .eq('is_system_message', false)
+          .or(`content.ilike.${pattern},attachment_name.ilike.${pattern}`)
+          .order('created_at', { ascending: true });
+
+        if (cancelled || error) return;
+
+        const allMatchIds = (data || []).map(m => m.id);
+        const loadedIds = new Set(messages.map(m => m.id));
+        const localMatches = allMatchIds.filter(id => loadedIds.has(id));
+        const olderCount = allMatchIds.length - localMatches.length;
+
+        setSearchMatchIds(localMatches);
+        setOlderMatchCount(olderCount);
+        setSearchIndex(localMatches.length > 0 ? localMatches.length - 1 : 0);
+      } catch {
+        // Fallback to local search
+        const query = debouncedQuery.toLowerCase();
+        const matches = messages
+          .filter(m => !m.is_system_message && (
+            m.content.toLowerCase().includes(query) ||
+            (m.attachment_name && m.attachment_name.toLowerCase().includes(query))
+          ))
+          .map(m => m.id);
+        setSearchMatchIds(matches);
+        setOlderMatchCount(0);
+        setSearchIndex(matches.length > 0 ? matches.length - 1 : 0);
+      } finally {
+        if (!cancelled) setSearchingDb(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [debouncedQuery, conversation.id, messages]);
 
   // Scroll to current search match
   useEffect(() => {
