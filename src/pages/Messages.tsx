@@ -690,7 +690,7 @@ function ChatView({
   };
 
   return (
-    <div className="flex-1 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden">
+    <div className="flex-1 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-white/10 flex-shrink-0">
         {/* Back button on mobile */}
