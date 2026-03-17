@@ -215,16 +215,6 @@ export function MessageBubble({
               )
             )}
 
-            {/* Emoji add button (desktop hover) */}
-            {!message.id.startsWith('temp-') && onToggleReaction && (
-              <button
-                onClick={(e) => { e.stopPropagation(); handleDesktopReaction(); }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 text-pure-white md:hover:text-white text-xs"
-                aria-label="Lägg till reaktion"
-              >
-                😊
-              </button>
-            )}
           </div>
         </div>
       </div>
