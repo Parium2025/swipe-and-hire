@@ -291,7 +291,7 @@ export default function Messages() {
         {/* Conversation List - Always visible on desktop, conditional on mobile */}
         <div className={cn(
           "w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col",
-          showMobileChat && "hidden md:flex"
+          showMobileChat ? "hidden md:flex" : "animate-fade-in md:animate-none"
         )}>
           {/* Header area (tabs + search). Used to align empty state between columns. */}
           <div className="flex-shrink-0">
