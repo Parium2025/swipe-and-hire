@@ -727,20 +727,18 @@ export function useConversationMessages(conversationId: string | null) {
     );
 
     try {
-      const insertPayload: Record<string, unknown> = {
-        conversation_id: conversationId,
-        sender_id: user.id,
-        content: content.trim(),
-      };
-      if (attachment) {
-        insertPayload.attachment_url = attachment.url;
-        insertPayload.attachment_type = attachment.type;
-        insertPayload.attachment_name = attachment.name;
-      }
-
       const { data, error } = await supabase
         .from('conversation_messages')
-        .insert(insertPayload)
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          content: content.trim(),
+          ...(attachment ? {
+            attachment_url: attachment.url,
+            attachment_type: attachment.type,
+            attachment_name: attachment.name,
+          } : {}),
+        })
         .select()
         .single();
 
