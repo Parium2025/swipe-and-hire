@@ -27,6 +27,8 @@ import {
   Search,
   ChevronUp,
   ChevronDown,
+  Pencil,
+  Check,
 } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -50,7 +52,7 @@ export function ChatView({
   currentUserRole,
   category,
 }: ChatViewProps) {
-  const { messages, isLoading, isError, refetch, sendMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id);
+  const { messages, isLoading, isError, refetch, sendMessage, editMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id);
   const { getReactionsForMessage, toggleReaction } = useMessageReactions(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
@@ -58,6 +60,9 @@ export function ChatView({
   const [sending, setSending] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  // Edit state
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editOriginalContent, setEditOriginalContent] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -134,6 +139,8 @@ export function ChatView({
     setDbSearchResultIds([]);
     setOlderMatchCount(0);
     setPendingFile(null);
+    setEditingMessageId(null);
+    setEditOriginalContent('');
   }, [conversation.id]);
 
   // Track if user is near bottom of scroll area
@@ -366,8 +373,49 @@ export function ChatView({
     };
   };
 
+  // Start editing a message
+  const handleStartEdit = useCallback((messageId: string, currentContent: string) => {
+    setEditingMessageId(messageId);
+    setEditOriginalContent(currentContent);
+    setNewMessage(currentContent);
+    setPendingFile(null);
+    // Focus textarea after state update
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      autoResizeTextarea();
+    }, 50);
+  }, [autoResizeTextarea]);
+
+  // Cancel editing
+  const handleCancelEdit = useCallback(() => {
+    setEditingMessageId(null);
+    setEditOriginalContent('');
+    setNewMessage('');
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+  }, []);
+
   const handleSend = async () => {
     if ((!newMessage.trim() && !pendingFile) || sending) return;
+
+    // Handle edit submission
+    if (editingMessageId) {
+      if (newMessage.trim() === editOriginalContent) {
+        // No changes, just cancel
+        handleCancelEdit();
+        return;
+      }
+      setSending(true);
+      try {
+        await editMessage(editingMessageId, newMessage.trim());
+        handleCancelEdit();
+      } catch (error) {
+        console.error('Error editing message:', error);
+        toast.error('Kunde inte redigera meddelandet');
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
 
     stopTyping(getCurrentUserName());
     setSending(true);
@@ -670,6 +718,7 @@ export function ChatView({
                           isRead={isRead}
                           reactions={!msg.id.startsWith('temp-') ? getReactionsForMessage(msg.id) : []}
                           onToggleReaction={!msg.id.startsWith('temp-') ? (emoji) => toggleReaction({ messageId: msg.id, emoji }) : undefined}
+                          onEdit={handleStartEdit}
                         />
                       </div>
                     );
@@ -727,17 +776,33 @@ export function ChatView({
         </div>
       )}
 
+      {/* Edit indicator */}
+      {editingMessageId && (
+        <div className="px-4 py-2 border-t border-white/10 flex items-center gap-2">
+          <Pencil className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
+          <span className="text-sm text-pure-white flex-1 truncate">Redigerar meddelande</span>
+          <button
+            onClick={handleCancelEdit}
+            className="p-1.5 rounded-full md:hover:bg-white/10 text-pure-white active:scale-95 transition-all"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Input */}
       <div className="p-4 border-t border-white/10 flex-shrink-0">
         <div className="flex items-end gap-2">
-          {/* File attach button */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="h-11 w-11 flex-shrink-0 flex items-center justify-center rounded-xl text-pure-white md:hover:bg-white/10 active:scale-95 transition-all"
-            aria-label="Bifoga fil"
-          >
-            <Paperclip className="h-5 w-5" />
-          </button>
+          {/* File attach button - hidden during edit */}
+          {!editingMessageId && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="h-11 w-11 flex-shrink-0 flex items-center justify-center rounded-xl text-pure-white md:hover:bg-white/10 active:scale-95 transition-all"
+              aria-label="Bifoga fil"
+            >
+              <Paperclip className="h-5 w-5" />
+            </button>
+          )}
           <input
             ref={fileInputRef}
             type="file"
@@ -750,9 +815,18 @@ export function ChatView({
             ref={textareaRef}
             value={newMessage}
             onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Skriv ett meddelande..."
-            className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white rounded-xl"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape' && editingMessageId) {
+                handleCancelEdit();
+                return;
+              }
+              handleKeyDown(e);
+            }}
+            placeholder={editingMessageId ? "Redigera meddelandet..." : "Skriv ett meddelande..."}
+            className={cn(
+              "min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white rounded-xl",
+              editingMessageId && "border-blue-500/30"
+            )}
             rows={1}
           />
           <Button
@@ -760,10 +834,17 @@ export function ChatView({
             size="icon"
             onClick={handleSend}
             disabled={(!newMessage.trim() && !pendingFile) || sending}
-            className="h-11 w-11 flex-shrink-0 bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
+            className={cn(
+              "h-11 w-11 flex-shrink-0",
+              editingMessageId
+                ? "bg-emerald-500/20 border-emerald-500/40 hover:bg-emerald-500/30"
+                : "bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
+            )}
           >
             {sending || uploadingFile ? (
               <Loader2 className="h-4 w-4 animate-spin" />
+            ) : editingMessageId ? (
+              <Check className="h-4 w-4" />
             ) : (
               <Send className="h-4 w-4" />
             )}
