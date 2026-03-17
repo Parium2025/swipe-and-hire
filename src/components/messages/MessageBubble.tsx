@@ -24,12 +24,9 @@ interface MessageBubbleProps {
   onEdit?: (messageId: string, currentContent: string) => void;
 }
 
-/** Check if a message has been edited (updated_at > created_at by more than 2s) */
+/** Check if a message has been explicitly edited by the user */
 function isEdited(message: ConversationMessage): boolean {
-  if (!message.updated_at || !message.created_at) return false;
-  const created = new Date(message.created_at).getTime();
-  const updated = new Date(message.updated_at).getTime();
-  return updated - created > 2000;
+  return !!message.edited_at;
 }
 
 export function MessageBubble({

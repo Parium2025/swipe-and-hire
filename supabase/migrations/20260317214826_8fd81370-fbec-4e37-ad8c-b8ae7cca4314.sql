@@ -1,0 +1,1 @@
+ALTER TABLE public.conversation_messages ADD COLUMN IF NOT EXISTS edited_at timestamptz DEFAULT NULL;

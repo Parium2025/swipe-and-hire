@@ -39,6 +39,7 @@ export interface ConversationMessage {
   content: string;
   created_at: string;
   updated_at?: string;
+  edited_at?: string | null;
   is_system_message: boolean;
   attachment_url?: string | null;
   attachment_type?: string | null;
@@ -683,7 +684,7 @@ export function useConversationMessages(conversationId: string | null) {
           const updated = payload.new as {
             id: string;
             content: string;
-            updated_at: string;
+            edited_at: string | null;
           };
 
           // Update the edited message in cache for real-time sync
@@ -691,7 +692,7 @@ export function useConversationMessages(conversationId: string | null) {
             ['conversation-messages', conversationId],
             (old) => old?.map(m =>
               m.id === updated.id
-                ? { ...m, content: updated.content, updated_at: updated.updated_at }
+                ? { ...m, content: updated.content, edited_at: updated.edited_at }
                 : m
             ) || []
           );
@@ -732,13 +733,13 @@ export function useConversationMessages(conversationId: string | null) {
     // Optimistic update
     queryClient.setQueryData<ConversationMessage[]>(
       ['conversation-messages', conversationId],
-      (old) => old?.map(m => m.id === messageId ? { ...m, content: trimmed, updated_at: new Date().toISOString() } : m) || []
+      (old) => old?.map(m => m.id === messageId ? { ...m, content: trimmed, edited_at: new Date().toISOString() } : m) || []
     );
 
     try {
-      const { error } = await supabase
-        .from('conversation_messages')
-        .update({ content: trimmed, updated_at: new Date().toISOString() })
+      const { error } = await (supabase
+        .from('conversation_messages') as any)
+        .update({ content: trimmed, edited_at: new Date().toISOString() })
         .eq('id', messageId)
         .eq('sender_id', user.id); // Security: only own messages
 
