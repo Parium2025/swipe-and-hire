@@ -694,14 +694,13 @@ function ChatView({
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-white/10 flex-shrink-0">
         {/* Back button on mobile */}
-        <Button
-          variant="ghost"
-          size="icon"
+        <button
+          type="button"
           onClick={onBack}
-          className="md:hidden text-pure-white hover:text-pure-white"
+          className="md:hidden text-pure-white active:scale-95 transition-transform p-2 -ml-2"
         >
           <ChevronLeft className="h-5 w-5" />
-        </Button>
+        </button>
 
         {displayName === 'Okänd användare' ? (
           <Skeleton className="h-10 w-10 rounded-full bg-white/10 flex-shrink-0" />
