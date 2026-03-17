@@ -39,6 +39,9 @@ export interface ConversationMessage {
   content: string;
   created_at: string;
   is_system_message: boolean;
+  attachment_url?: string | null;
+  attachment_type?: string | null;
+  attachment_name?: string | null;
   sender_profile?: {
     first_name: string | null;
     last_name: string | null;
