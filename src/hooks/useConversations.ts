@@ -794,6 +794,7 @@ export function useConversationMessages(conversationId: string | null) {
     isLoading: messagesQuery.isLoading,
     isError: messagesQuery.isError,
     sendMessage,
+    editMessage,
     markAsRead,
     refetch: messagesQuery.refetch,
     fetchOlderMessages,
