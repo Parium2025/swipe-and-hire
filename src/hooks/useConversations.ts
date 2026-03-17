@@ -724,6 +724,7 @@ export function useConversationMessages(conversationId: string | null) {
   return {
     messages: messagesQuery.data || [],
     isLoading: messagesQuery.isLoading,
+    isError: messagesQuery.isError,
     sendMessage,
     markAsRead,
     refetch: messagesQuery.refetch,
