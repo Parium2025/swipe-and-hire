@@ -509,7 +509,6 @@ export function ChatView({
                 <span className="text-pure-white text-xs whitespace-nowrap">{olderMatchCount} i äldre</span>
               )}
             </div>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
