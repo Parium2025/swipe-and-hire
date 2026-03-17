@@ -259,7 +259,7 @@ export default function Messages() {
   return (
      <div className="flex-1 min-h-0 flex flex-col animate-fade-in responsive-container-wide overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-center mb-4 flex-shrink-0 relative">
+      <div className={cn("flex items-center justify-center mb-4 flex-shrink-0 relative", showMobileChat && "hidden md:flex")}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
             <MessageSquare className="h-5 w-5 text-white" />
