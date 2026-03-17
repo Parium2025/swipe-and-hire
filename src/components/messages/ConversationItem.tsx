@@ -44,7 +44,10 @@ export function ConversationItem({
     return format(date, 'd MMM', { locale: sv });
   };
 
-  const lastMessagePreview = conversation.last_message?.content || 'Inga meddelanden ännu';
+  const lastMsg = conversation.last_message;
+  const lastMessagePreview = lastMsg
+    ? (lastMsg.is_system_message ? (lastMsg.content.startsWith('📋') ? '📋 Ny jobbkontext' : lastMsg.content) : lastMsg.content)
+    : 'Inga meddelanden ännu';
   const isOwnMessage = conversation.last_message?.sender_id === currentUserId;
 
   const identityUnknown = displayName === 'Okänd användare';

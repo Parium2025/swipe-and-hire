@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getIsOnline } from '@/lib/connectivityManager';
 import { useAuth } from './useAuth';
 import { prefetchMediaUrl } from './useMediaUrl';
 import { toast } from 'sonner';
@@ -629,7 +630,7 @@ export function useConversationMessages(conversationId: string | null) {
               ['conversation-messages', conversationId]
             );
             const alreadyExists = currentMessages?.some(
-              m => m.id === newMessage.id || (m.id.startsWith('temp-') && m.content === newMessage.content)
+              m => m.id === newMessage.id
             );
             if (alreadyExists) return;
           }
@@ -642,13 +643,24 @@ export function useConversationMessages(conversationId: string | null) {
             .single();
 
           // Add message directly to cache - instant update!
+          // Also replace any remaining optimistic temp message for own messages
           queryClient.setQueryData<ConversationMessage[]>(
             ['conversation-messages', conversationId],
             (old) => {
               if (!old) return [{ ...newMessage, sender_profile: senderProfile || undefined }];
               
-              // Check if message already exists
+              // Check if message already exists by real ID
               if (old.some(m => m.id === newMessage.id)) return old;
+
+              // For own messages: replace temp placeholder if it exists (race: realtime before insert response)
+              if (newMessage.sender_id === user.id) {
+                const tempIdx = old.findIndex(m => m.id.startsWith('temp-') && m.content === newMessage.content);
+                if (tempIdx !== -1) {
+                  const updated = [...old];
+                  updated[tempIdx] = { ...newMessage, sender_profile: senderProfile || undefined };
+                  return updated;
+                }
+              }
               
               return [...old, { ...newMessage, sender_profile: senderProfile || undefined }];
             }
@@ -668,7 +680,7 @@ export function useConversationMessages(conversationId: string | null) {
   // Mark conversation as read
   const markAsRead = useCallback(async () => {
     if (!conversationId || !user) return;
-    if (!navigator.onLine) return; // Silent fail for mark as read - non-critical
+    if (!getIsOnline()) return; // Silent fail for mark as read - non-critical
 
     try {
       await supabase
