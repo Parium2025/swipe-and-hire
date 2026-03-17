@@ -137,6 +137,8 @@ export function ChatView({
     setDbSearchResultIds([]);
     setOlderMatchCount(0);
     setPendingFile(null);
+    setEditingMessageId(null);
+    setEditOriginalContent('');
   }, [conversation.id]);
 
   // Track if user is near bottom of scroll area
