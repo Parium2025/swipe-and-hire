@@ -50,7 +50,7 @@ export function ChatView({
   currentUserRole,
   category,
 }: ChatViewProps) {
-  const { messages, isLoading, isError, refetch, sendMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id);
+  const { messages, isLoading, isError, refetch, sendMessage, editMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id);
   const { getReactionsForMessage, toggleReaction } = useMessageReactions(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
@@ -58,6 +58,9 @@ export function ChatView({
   const [sending, setSending] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  // Edit state
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editOriginalContent, setEditOriginalContent] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
