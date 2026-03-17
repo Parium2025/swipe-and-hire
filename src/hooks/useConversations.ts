@@ -684,7 +684,7 @@ export function useConversationMessages(conversationId: string | null) {
           const updated = payload.new as {
             id: string;
             content: string;
-            updated_at: string;
+            edited_at: string | null;
           };
 
           // Update the edited message in cache for real-time sync
@@ -692,7 +692,7 @@ export function useConversationMessages(conversationId: string | null) {
             ['conversation-messages', conversationId],
             (old) => old?.map(m =>
               m.id === updated.id
-                ? { ...m, content: updated.content, updated_at: updated.updated_at }
+                ? { ...m, content: updated.content, edited_at: updated.edited_at }
                 : m
             ) || []
           );
