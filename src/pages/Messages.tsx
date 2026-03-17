@@ -711,6 +711,14 @@ function ChatView({
             isGroup={conversation.is_group}
             groupName={conversation.name}
             size="md"
+            className={cn(
+              "border-2",
+              conversation.is_group 
+                ? "" 
+                : category === 'candidates' 
+                  ? "border-emerald-500/50" 
+                  : "border-blue-500/50"
+            )}
           />
         )}
 
