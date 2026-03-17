@@ -129,7 +129,9 @@ export function ChatView({
     // Reset search
     setShowSearch(false);
     setSearchQuery('');
+    setDebouncedQuery('');
     setSearchMatchIds([]);
+    setOlderMatchCount(0);
     setPendingFile(null);
   }, [conversation.id]);
 
