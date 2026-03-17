@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { EmojiReactionPicker } from '@/components/messages/EmojiReactionPicker';
 import { getMessageSenderName } from '@/lib/conversationDisplayUtils';
-import { Briefcase, Check, CheckCheck, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
+import { Briefcase, Check, CheckCheck, Paperclip, FileText, Image as ImageIcon, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { ConversationMessage } from '@/hooks/useConversations';
