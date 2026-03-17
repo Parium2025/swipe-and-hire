@@ -69,8 +69,12 @@ export function ChatView({
   // Search state
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [searchMatchIds, setSearchMatchIds] = useState<string[]>([]);
   const [searchIndex, setSearchIndex] = useState(0);
+  const [searchingDb, setSearchingDb] = useState(false);
+  const [olderMatchCount, setOlderMatchCount] = useState(0);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getViewportEl = useCallback((): HTMLDivElement | null => {
     if (!scrollAreaRef.current) return null;
