@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useConversationMessages, type Conversation, type ConversationMessage } from '@/hooks/useConversations';
+import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useOfflineMessageQueue } from '@/hooks/useOfflineMessageQueue';
 import { getIsOnline } from '@/lib/connectivityManager';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
@@ -19,12 +22,18 @@ import {
   Briefcase,
   ChevronLeft,
   RefreshCw,
+  Paperclip,
+  X,
+  Search,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 const MESSAGES_PAGE_SIZE = 200;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 interface ChatViewProps {
   conversation: Conversation;
@@ -42,16 +51,26 @@ export function ChatView({
   category,
 }: ChatViewProps) {
   const { messages, isLoading, isError, refetch, sendMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id);
+  const { getReactionsForMessage, toggleReaction } = useMessageReactions(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isNearBottomRef = useRef(true);
   const prevMessageCountRef = useRef(0);
   const prevFirstMessageIdRef = useRef<string | null>(null);
   const prevScrollHeightRef = useRef(0);
+
+  // Search state
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchMatchIds, setSearchMatchIds] = useState<string[]>([]);
+  const [searchIndex, setSearchIndex] = useState(0);
 
   const getViewportEl = useCallback((): HTMLDivElement | null => {
     if (!scrollAreaRef.current) return null;
@@ -103,6 +122,11 @@ export function ChatView({
     prevMessageCountRef.current = 0;
     prevFirstMessageIdRef.current = null;
     prevScrollHeightRef.current = 0;
+    // Reset search
+    setShowSearch(false);
+    setSearchQuery('');
+    setSearchMatchIds([]);
+    setPendingFile(null);
   }, [conversation.id]);
 
   // Track if user is near bottom of scroll area
@@ -113,7 +137,7 @@ export function ChatView({
     isNearBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < threshold;
   }, []);
 
-  // Smart scroll: keep all scrolling inside message viewport
+  // Smart scroll
   useEffect(() => {
     const viewport = getViewportEl();
     if (!viewport) return;
@@ -145,7 +169,7 @@ export function ChatView({
     prevScrollHeightRef.current = viewport.scrollHeight;
   }, [messages, currentUserId, getViewportEl]);
 
-  // Scroll to bottom when typing indicator appears (only if near bottom)
+  // Scroll to bottom when typing indicator appears
   useEffect(() => {
     const viewport = getViewportEl();
     if (!viewport) return;
@@ -154,15 +178,40 @@ export function ChatView({
     }
   }, [typingUsers, getViewportEl]);
 
+  // Search logic
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchMatchIds([]);
+      setSearchIndex(0);
+      return;
+    }
+    const query = searchQuery.toLowerCase();
+    const matches = messages
+      .filter(m => !m.is_system_message && m.content.toLowerCase().includes(query))
+      .map(m => m.id);
+    setSearchMatchIds(matches);
+    setSearchIndex(matches.length > 0 ? matches.length - 1 : 0); // Start at most recent match
+  }, [searchQuery, messages]);
+
+  // Scroll to current search match
+  useEffect(() => {
+    if (searchMatchIds.length === 0) return;
+    const matchId = searchMatchIds[searchIndex];
+    if (!matchId) return;
+    const el = document.getElementById(`msg-${matchId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [searchIndex, searchMatchIds]);
+
   // Auto-resize textarea
   const autoResizeTextarea = useCallback(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 128)}px`; // max-h-32 = 128px
+    el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
   }, []);
 
-  // Handle input change with typing indicator + autogrow
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewMessage(e.target.value);
     autoResizeTextarea();
@@ -171,15 +220,60 @@ export function ChatView({
     }
   };
 
+  // File upload
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error('Filen är för stor (max 10 MB)');
+      return;
+    }
+
+    setPendingFile(file);
+    // Reset input so same file can be selected again
+    e.target.value = '';
+  };
+
+  const uploadFile = async (file: File): Promise<{ url: string; type: string; name: string } | null> => {
+    const ext = file.name.split('.').pop() || 'bin';
+    const path = `${currentUserId}/${conversation.id}/${Date.now()}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from('message-attachments')
+      .upload(path, file, { contentType: file.type });
+
+    if (error) {
+      console.error('Upload error:', error);
+      toast.error('Kunde inte ladda upp filen');
+      return null;
+    }
+
+    // Get signed URL (private bucket)
+    const { data: signedData } = await supabase.storage
+      .from('message-attachments')
+      .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
+
+    if (!signedData?.signedUrl) {
+      toast.error('Kunde inte skapa länk till filen');
+      return null;
+    }
+
+    return {
+      url: signedData.signedUrl,
+      type: file.type,
+      name: file.name,
+    };
+  };
+
   const handleSend = async () => {
-    if (!newMessage.trim() || sending) return;
+    if ((!newMessage.trim() && !pendingFile) || sending) return;
 
     stopTyping(getCurrentUserName());
     setSending(true);
 
     try {
-      if (!getIsOnline()) {
-        // Queue for offline sync
+      if (!getIsOnline() && !pendingFile) {
         queueMessage({
           recipient_id: candidateUserId || otherMembers[0]?.user_id || '',
           content: newMessage.trim(),
@@ -188,11 +282,26 @@ export function ChatView({
         });
         toast.info('Meddelandet skickas när du är online igen');
         setNewMessage('');
-        // Reset textarea height
         if (textareaRef.current) textareaRef.current.style.height = 'auto';
       } else {
-        await sendMessage(newMessage);
+        // Upload file if pending
+        let attachment: { url: string; type: string; name: string } | null = null;
+        if (pendingFile) {
+          setUploadingFile(true);
+          attachment = await uploadFile(pendingFile);
+          setUploadingFile(false);
+          if (!attachment) {
+            setSending(false);
+            return;
+          }
+        }
+
+        await sendMessage(
+          newMessage.trim() || (pendingFile ? `📎 ${pendingFile.name}` : ''),
+          attachment ? { url: attachment.url, type: attachment.type, name: attachment.name } : undefined,
+        );
         setNewMessage('');
+        setPendingFile(null);
         if (textareaRef.current) textareaRef.current.style.height = 'auto';
       }
       textareaRef.current?.focus();
@@ -201,6 +310,7 @@ export function ChatView({
       toast.error('Kunde inte skicka meddelande');
     } finally {
       setSending(false);
+      setUploadingFile(false);
     }
   };
 
@@ -232,6 +342,8 @@ export function ChatView({
     if (isYesterday(date)) return 'Igår';
     return format(date, 'd MMMM yyyy', { locale: sv });
   };
+
+  const currentSearchMatchId = searchMatchIds[searchIndex] || null;
 
   return (
     <div className="flex-1 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden animate-fade-in">
@@ -285,7 +397,57 @@ export function ChatView({
             </p>
           )}
         </div>
+
+        {/* Search toggle */}
+        <button
+          onClick={() => { setShowSearch(prev => !prev); if (showSearch) { setSearchQuery(''); setSearchMatchIds([]); } }}
+          className={cn(
+            "p-2 rounded-full transition-colors",
+            showSearch ? "bg-white/15 text-white" : "text-pure-white md:hover:bg-white/10"
+          )}
+        >
+          <Search className="h-4 w-4" />
+        </button>
       </div>
+
+      {/* Search bar */}
+      <AnimatePresence>
+        {showSearch && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="border-b border-white/10 overflow-hidden"
+          >
+            <div className="flex items-center gap-2 p-3">
+              <Search className="h-4 w-4 text-pure-white flex-shrink-0" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Sök i konversation..."
+                className="h-8 bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white text-sm"
+                autoFocus
+              />
+              {searchMatchIds.length > 0 && (
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <span className="text-pure-white text-xs whitespace-nowrap">
+                    {searchIndex + 1}/{searchMatchIds.length}
+                  </span>
+                  <button onClick={() => setSearchIndex(i => Math.max(0, i - 1))} className="p-1 text-pure-white md:hover:text-white">
+                    <ChevronUp className="h-3.5 w-3.5" />
+                  </button>
+                  <button onClick={() => setSearchIndex(i => Math.min(searchMatchIds.length - 1, i + 1))} className="p-1 text-pure-white md:hover:text-white">
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+              {searchQuery && searchMatchIds.length === 0 && (
+                <span className="text-pure-white text-xs whitespace-nowrap">Inga träffar</span>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-4" onScrollCapture={handleScroll}>
@@ -364,14 +526,22 @@ export function ChatView({
                       ? { ...msg, sender_profile: snapshotSenderProfile }
                       : msg;
 
-                    // Determine if the other party has read this message
                     const isOwnMsg = msg.sender_id === currentUserId;
                     const isRead = isOwnMsg && otherMemberLastRead
                       ? otherMemberLastRead >= new Date(msg.created_at)
                       : false;
 
+                    const isSearchHighlighted = currentSearchMatchId === msg.id;
+
                     return (
-                      <div key={msg.id} id={`msg-${msg.id}`}>
+                      <div
+                        key={msg.id}
+                        id={`msg-${msg.id}`}
+                        className={cn(
+                          "transition-colors rounded-lg",
+                          isSearchHighlighted && "bg-yellow-500/10 ring-1 ring-yellow-500/30 p-1 -m-1"
+                        )}
+                      >
                         <MessageBubble
                           message={resolvedMessage}
                           isOwn={isOwnMsg}
@@ -379,6 +549,8 @@ export function ChatView({
                           isGroup={conversation.is_group}
                           currentUserRole={currentUserRole}
                           isRead={isRead}
+                          reactions={!msg.id.startsWith('temp-') ? getReactionsForMessage(msg.id) : []}
+                          onToggleReaction={!msg.id.startsWith('temp-') ? (emoji) => toggleReaction({ messageId: msg.id, emoji }) : undefined}
                         />
                       </div>
                     );
@@ -415,9 +587,44 @@ export function ChatView({
         )}
       </AnimatePresence>
 
+      {/* Pending file preview */}
+      {pendingFile && (
+        <div className="px-4 py-2 border-t border-white/10 flex items-center gap-2">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 flex-1 min-w-0">
+            <Paperclip className="h-3.5 w-3.5 text-pure-white flex-shrink-0" />
+            <span className="text-sm text-pure-white truncate">{pendingFile.name}</span>
+            <span className="text-pure-white text-xs flex-shrink-0">
+              {(pendingFile.size / 1024).toFixed(0)} KB
+            </span>
+          </div>
+          <button
+            onClick={() => setPendingFile(null)}
+            className="p-1.5 rounded-full md:hover:bg-white/10 text-pure-white"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Input */}
       <div className="p-4 border-t border-white/10 flex-shrink-0">
         <div className="flex items-end gap-2">
+          {/* File attach button */}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="h-11 w-11 flex-shrink-0 flex items-center justify-center rounded-xl text-pure-white md:hover:bg-white/10 active:scale-95 transition-all"
+            aria-label="Bifoga fil"
+          >
+            <Paperclip className="h-5 w-5" />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleFileSelect}
+            className="hidden"
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+          />
+
           <Textarea
             ref={textareaRef}
             value={newMessage}
@@ -431,10 +638,10 @@ export function ChatView({
             variant="glass"
             size="icon"
             onClick={handleSend}
-            disabled={!newMessage.trim() || sending}
+            disabled={(!newMessage.trim() && !pendingFile) || sending}
             className="h-11 w-11 flex-shrink-0 bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
           >
-            {sending ? (
+            {sending || uploadingFile ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <Send className="h-4 w-4" />
