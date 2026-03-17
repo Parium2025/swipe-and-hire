@@ -269,7 +269,7 @@ export function MessageBubble({
             </span>
             {/* Edited indicator */}
             {edited && (
-              <span className="text-pure-white/60 text-[10px] italic">redigerat</span>
+              <span className="text-pure-white text-[10px] italic">redigerat</span>
             )}
             {/* Read receipt for own messages */}
             {isOwn && !isTemp && (
