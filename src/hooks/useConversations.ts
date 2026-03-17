@@ -660,13 +660,18 @@ export function useConversationMessages(conversationId: string | null) {
     if (!conversationId || !user) return;
     if (!navigator.onLine) return; // Silent fail for mark as read - non-critical
 
-    await supabase
-      .from('conversation_members')
-      .update({ last_read_at: new Date().toISOString() })
-      .eq('conversation_id', conversationId)
-      .eq('user_id', user.id);
+    try {
+      await supabase
+        .from('conversation_members')
+        .update({ last_read_at: new Date().toISOString() })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
 
-    queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+    } catch (err) {
+      // Non-critical: log but don't block UX
+      console.warn('markAsRead failed:', err);
+    }
   }, [conversationId, user, queryClient]);
 
   // Send message with optimistic update - instant UI feedback
