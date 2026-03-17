@@ -668,7 +668,7 @@ export function useConversationMessages(conversationId: string | null) {
   // Mark conversation as read
   const markAsRead = useCallback(async () => {
     if (!conversationId || !user) return;
-    if (!navigator.onLine) return; // Silent fail for mark as read - non-critical
+    if (!getIsOnline()) return; // Silent fail for mark as read - non-critical
 
     try {
       await supabase
