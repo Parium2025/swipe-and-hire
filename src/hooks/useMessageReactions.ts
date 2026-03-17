@@ -23,26 +23,33 @@ export function useMessageReactions(conversationId: string | null) {
   const queryClient = useQueryClient();
 
   // Fetch all reactions for messages in this conversation
+  // We depend on the messages query being loaded first to get message IDs
+  const messagesData = queryClient.getQueryData<any[]>(['conversation-messages', conversationId]);
+  const messageIds = messagesData?.map((m: any) => m.id).filter((id: string) => !id.startsWith('temp-')) || [];
+
   const reactionsQuery = useQuery({
-    queryKey: ['message-reactions', conversationId],
+    queryKey: ['message-reactions', conversationId, messageIds.length],
     queryFn: async () => {
-      if (!conversationId) return [];
+      if (!conversationId || messageIds.length === 0) return [];
 
-      // Get message IDs for this conversation from cache
-      const messages = queryClient.getQueryData<any[]>(['conversation-messages', conversationId]);
-      const messageIds = messages?.map(m => m.id).filter(id => !id.startsWith('temp-')) || [];
-      
-      if (messageIds.length === 0) return [];
+      // Batch into chunks of 200 to avoid PostgREST URL length limits
+      const CHUNK_SIZE = 200;
+      const allReactions: MessageReaction[] = [];
 
-      const { data, error } = await supabase
-        .from('conversation_message_reactions')
-        .select('*')
-        .in('message_id', messageIds);
+      for (let i = 0; i < messageIds.length; i += CHUNK_SIZE) {
+        const chunk = messageIds.slice(i, i + CHUNK_SIZE);
+        const { data, error } = await supabase
+          .from('conversation_message_reactions')
+          .select('*')
+          .in('message_id', chunk);
 
-      if (error) throw error;
-      return (data || []) as MessageReaction[];
+        if (error) throw error;
+        if (data) allReactions.push(...(data as MessageReaction[]));
+      }
+
+      return allReactions;
     },
-    enabled: !!conversationId,
+    enabled: !!conversationId && messageIds.length > 0,
     staleTime: 30 * 1000,
   });
 
