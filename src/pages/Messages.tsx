@@ -362,6 +362,7 @@ export default function Messages() {
               currentUserId={user?.id || ''}
               onBack={handleBackToList}
               currentUserRole={(userRole?.role as 'job_seeker' | 'employer') || null}
+              category={categorizeConversation(selectedConversation)}
             />
           ) : (
             <EmptyChatState
