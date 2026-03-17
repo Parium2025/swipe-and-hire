@@ -629,7 +629,7 @@ export function useConversationMessages(conversationId: string | null) {
               ['conversation-messages', conversationId]
             );
             const alreadyExists = currentMessages?.some(
-              m => m.id === newMessage.id || (m.id.startsWith('temp-') && m.content === newMessage.content)
+              m => m.id === newMessage.id
             );
             if (alreadyExists) return;
           }
