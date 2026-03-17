@@ -131,6 +131,7 @@ export function ChatView({
     setSearchQuery('');
     setDebouncedQuery('');
     setSearchMatchIds([]);
+    setDbSearchResultIds([]);
     setOlderMatchCount(0);
     setPendingFile(null);
   }, [conversation.id]);
@@ -274,8 +275,14 @@ export function ChatView({
 
   // Separate effect: reconcile DB results with loaded messages (runs when messages update, NOT re-querying DB)
   useEffect(() => {
-    if (dbSearchResultIds.length === 0 && debouncedQuery) return;
-    if (dbSearchResultIds.length === 0) return;
+    if (dbSearchResultIds.length === 0) {
+      // DB returned 0 results (or was cleared) — clear local matches too
+      if (debouncedQuery) {
+        setSearchMatchIds([]);
+        setOlderMatchCount(0);
+      }
+      return;
+    }
 
     const loadedIds = new Set(messages.map(m => m.id));
     const localMatches = dbSearchResultIds.filter(id => loadedIds.has(id));
@@ -493,7 +500,7 @@ export function ChatView({
 
         {/* Search toggle */}
         <button
-          onClick={() => { setShowSearch(prev => !prev); if (showSearch) { setSearchQuery(''); setDebouncedQuery(''); setSearchMatchIds([]); setOlderMatchCount(0); } }}
+          onClick={() => { setShowSearch(prev => !prev); if (showSearch) { setSearchQuery(''); setDebouncedQuery(''); setSearchMatchIds([]); setDbSearchResultIds([]); setOlderMatchCount(0); } }}
           className={cn(
             "p-2 rounded-full transition-colors",
             showSearch ? "bg-white/15 text-white" : "text-pure-white md:hover:bg-white/10"
@@ -517,6 +524,16 @@ export function ChatView({
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setShowSearch(false);
+                    setSearchQuery('');
+                    setDebouncedQuery('');
+                    setSearchMatchIds([]);
+                    setDbSearchResultIds([]);
+                    setOlderMatchCount(0);
+                  }
+                }}
                 placeholder="Sök meddelanden & filer..."
                 className="h-8 bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white text-sm"
                 autoFocus
