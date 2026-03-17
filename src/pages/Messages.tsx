@@ -277,7 +277,7 @@ export default function Messages() {
           <Button
             variant="glass"
             onClick={() => setShowNewConversation(true)}
-            className="bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
+            className="absolute right-0 bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             <span className="hidden sm:inline">Ny konversation</span>
