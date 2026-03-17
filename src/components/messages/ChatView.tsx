@@ -371,8 +371,49 @@ export function ChatView({
     };
   };
 
+  // Start editing a message
+  const handleStartEdit = useCallback((messageId: string, currentContent: string) => {
+    setEditingMessageId(messageId);
+    setEditOriginalContent(currentContent);
+    setNewMessage(currentContent);
+    setPendingFile(null);
+    // Focus textarea after state update
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      autoResizeTextarea();
+    }, 50);
+  }, [autoResizeTextarea]);
+
+  // Cancel editing
+  const handleCancelEdit = useCallback(() => {
+    setEditingMessageId(null);
+    setEditOriginalContent('');
+    setNewMessage('');
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+  }, []);
+
   const handleSend = async () => {
     if ((!newMessage.trim() && !pendingFile) || sending) return;
+
+    // Handle edit submission
+    if (editingMessageId) {
+      if (newMessage.trim() === editOriginalContent) {
+        // No changes, just cancel
+        handleCancelEdit();
+        return;
+      }
+      setSending(true);
+      try {
+        await editMessage(editingMessageId, newMessage.trim());
+        handleCancelEdit();
+      } catch (error) {
+        console.error('Error editing message:', error);
+        toast.error('Kunde inte redigera meddelandet');
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
 
     stopTyping(getCurrentUserName());
     setSending(true);
