@@ -737,9 +737,9 @@ export function useConversationMessages(conversationId: string | null) {
     );
 
     try {
-      const { error } = await supabase
-        .from('conversation_messages')
-        .update({ content: trimmed, updated_at: new Date().toISOString() })
+      const { error } = await (supabase
+        .from('conversation_messages') as any)
+        .update({ content: trimmed, edited_at: new Date().toISOString() })
         .eq('id', messageId)
         .eq('sender_id', user.id); // Security: only own messages
 
