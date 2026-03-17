@@ -275,8 +275,14 @@ export function ChatView({
 
   // Separate effect: reconcile DB results with loaded messages (runs when messages update, NOT re-querying DB)
   useEffect(() => {
-    if (dbSearchResultIds.length === 0 && debouncedQuery) return;
-    if (dbSearchResultIds.length === 0) return;
+    if (dbSearchResultIds.length === 0) {
+      // DB returned 0 results (or was cleared) — clear local matches too
+      if (debouncedQuery) {
+        setSearchMatchIds([]);
+        setOlderMatchCount(0);
+      }
+      return;
+    }
 
     const loadedIds = new Set(messages.map(m => m.id));
     const localMatches = dbSearchResultIds.filter(id => loadedIds.has(id));
