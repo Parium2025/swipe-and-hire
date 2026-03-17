@@ -718,6 +718,7 @@ export function ChatView({
                           isRead={isRead}
                           reactions={!msg.id.startsWith('temp-') ? getReactionsForMessage(msg.id) : []}
                           onToggleReaction={!msg.id.startsWith('temp-') ? (emoji) => toggleReaction({ messageId: msg.id, emoji }) : undefined}
+                          onEdit={handleStartEdit}
                         />
                       </div>
                     );
