@@ -621,8 +621,18 @@ export function useConversationMessages(conversationId: string | null) {
             is_system_message: boolean;
           };
 
-          // Skip if it's our own message (we already added it optimistically)
-          if (newMessage.sender_id === user.id) return;
+          // For own messages: check if it was already added optimistically.
+          // If so, skip. If NOT (e.g. optimistic update failed and was rolled back),
+          // let the realtime message through so it still appears.
+          if (newMessage.sender_id === user.id) {
+            const currentMessages = queryClient.getQueryData<ConversationMessage[]>(
+              ['conversation-messages', conversationId]
+            );
+            const alreadyExists = currentMessages?.some(
+              m => m.id === newMessage.id || (m.id.startsWith('temp-') && m.content === newMessage.content)
+            );
+            if (alreadyExists) return;
+          }
 
           // Fetch sender profile for the new message
           const { data: senderProfile } = await supabase
