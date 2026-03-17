@@ -479,14 +479,20 @@ export function ChatView({
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Sök i konversation..."
+                placeholder="Sök meddelanden & filer..."
                 className="h-8 bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white text-sm"
                 autoFocus
               />
-              {searchMatchIds.length > 0 && (
+              {searchingDb && (
+                <Loader2 className="h-3.5 w-3.5 text-pure-white animate-spin flex-shrink-0" />
+              )}
+              {!searchingDb && searchMatchIds.length > 0 && (
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <span className="text-pure-white text-xs whitespace-nowrap">
                     {searchIndex + 1}/{searchMatchIds.length}
+                    {olderMatchCount > 0 && (
+                      <span className="text-pure-white/60"> (+{olderMatchCount})</span>
+                    )}
                   </span>
                   <button onClick={() => setSearchIndex(i => Math.max(0, i - 1))} className="p-1 text-pure-white md:hover:text-white">
                     <ChevronUp className="h-3.5 w-3.5" />
@@ -496,9 +502,13 @@ export function ChatView({
                   </button>
                 </div>
               )}
-              {searchQuery && searchMatchIds.length === 0 && (
+              {!searchingDb && debouncedQuery && searchMatchIds.length === 0 && olderMatchCount === 0 && (
                 <span className="text-pure-white text-xs whitespace-nowrap">Inga träffar</span>
               )}
+              {!searchingDb && searchMatchIds.length === 0 && olderMatchCount > 0 && (
+                <span className="text-pure-white text-xs whitespace-nowrap">{olderMatchCount} i äldre</span>
+              )}
+            </div>
             </div>
           </motion.div>
         )}
