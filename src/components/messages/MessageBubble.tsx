@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { EmojiReactionPicker } from '@/components/messages/EmojiReactionPicker';
 import { getMessageSenderName } from '@/lib/conversationDisplayUtils';
-import { Briefcase, Check, CheckCheck, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
+import { Briefcase, Check, CheckCheck, Paperclip, FileText, Image as ImageIcon, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { ConversationMessage } from '@/hooks/useConversations';
@@ -102,6 +102,7 @@ export function MessageBubble({
     if (!hasAttachment) return null;
 
     const isImage = message.attachment_type?.startsWith('image/');
+    const isVideo = message.attachment_type?.startsWith('video/');
 
     if (isImage) {
       return (
@@ -109,27 +110,57 @@ export function MessageBubble({
           <img
             src={message.attachment_url!}
             alt={message.attachment_name || 'Bild'}
-            className="w-full h-auto rounded-lg"
+            className="w-full h-auto rounded-lg bg-white/5"
             loading="lazy"
+            // Prevent layout shift: reserve space while loading
+            style={{ aspectRatio: '4/3', objectFit: 'cover' }}
+            onLoad={(e) => {
+              // Once loaded, switch to natural aspect ratio
+              (e.target as HTMLImageElement).style.aspectRatio = '';
+              (e.target as HTMLImageElement).style.objectFit = '';
+            }}
           />
         </div>
       );
     }
 
-    // File attachment
+    if (isVideo) {
+      return (
+        <div className="mt-2 rounded-lg overflow-hidden max-w-[240px]">
+          <video
+            src={message.attachment_url!}
+            className="w-full h-auto rounded-lg bg-white/5"
+            style={{ aspectRatio: '16/9', objectFit: 'cover' }}
+            preload="metadata"
+            playsInline
+            controls
+            controlsList="nodownload"
+          >
+            <track kind="captions" />
+          </video>
+          {message.attachment_name && (
+            <p className="text-pure-white text-xs mt-1 truncate px-1">
+              {message.attachment_name}
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    // File attachment (PDF, docs, etc.)
     return (
       <a
         href={message.attachment_url!}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 md:hover:bg-white/10 transition-colors"
+        className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 md:hover:bg-white/10 transition-colors min-h-touch"
       >
         {message.attachment_type?.includes('pdf') ? (
           <FileText className="h-4 w-4 text-red-400 flex-shrink-0" />
         ) : (
           <Paperclip className="h-4 w-4 text-pure-white flex-shrink-0" />
         )}
-        <span className="text-sm text-pure-white truncate">
+        <span className="text-sm text-pure-white truncate break-words [overflow-wrap:anywhere]">
           {message.attachment_name || 'Fil'}
         </span>
       </a>
