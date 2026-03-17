@@ -69,8 +69,12 @@ export function ChatView({
   // Search state
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [searchMatchIds, setSearchMatchIds] = useState<string[]>([]);
   const [searchIndex, setSearchIndex] = useState(0);
+  const [searchingDb, setSearchingDb] = useState(false);
+  const [olderMatchCount, setOlderMatchCount] = useState(0);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getViewportEl = useCallback((): HTMLDivElement | null => {
     if (!scrollAreaRef.current) return null;
@@ -125,7 +129,9 @@ export function ChatView({
     // Reset search
     setShowSearch(false);
     setSearchQuery('');
+    setDebouncedQuery('');
     setSearchMatchIds([]);
+    setOlderMatchCount(0);
     setPendingFile(null);
   }, [conversation.id]);
 
@@ -178,20 +184,71 @@ export function ChatView({
     }
   }, [typingUsers, getViewportEl]);
 
-  // Search logic
+  // Debounce search query (300ms)
   useEffect(() => {
     if (!searchQuery.trim()) {
+      setDebouncedQuery('');
       setSearchMatchIds([]);
       setSearchIndex(0);
+      setOlderMatchCount(0);
       return;
     }
-    const query = searchQuery.toLowerCase();
-    const matches = messages
-      .filter(m => !m.is_system_message && m.content.toLowerCase().includes(query))
-      .map(m => m.id);
-    setSearchMatchIds(matches);
-    setSearchIndex(matches.length > 0 ? matches.length - 1 : 0); // Start at most recent match
-  }, [searchQuery, messages]);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      setDebouncedQuery(searchQuery.trim());
+    }, 300);
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchQuery]);
+
+  // DB-powered search: searches ALL messages in conversation (not just loaded)
+  useEffect(() => {
+    if (!debouncedQuery) return;
+
+    let cancelled = false;
+    setSearchingDb(true);
+
+    (async () => {
+      try {
+        const pattern = `%${debouncedQuery}%`;
+        const { data, error } = await supabase
+          .from('conversation_messages')
+          .select('id')
+          .eq('conversation_id', conversation.id)
+          .eq('is_system_message', false)
+          .or(`content.ilike.${pattern},attachment_name.ilike.${pattern}`)
+          .order('created_at', { ascending: true });
+
+        if (cancelled || error) return;
+
+        const allMatchIds = (data || []).map(m => m.id);
+        const loadedIds = new Set(messages.map(m => m.id));
+        const localMatches = allMatchIds.filter(id => loadedIds.has(id));
+        const olderCount = allMatchIds.length - localMatches.length;
+
+        setSearchMatchIds(localMatches);
+        setOlderMatchCount(olderCount);
+        setSearchIndex(localMatches.length > 0 ? localMatches.length - 1 : 0);
+      } catch {
+        // Fallback to local search
+        const query = debouncedQuery.toLowerCase();
+        const matches = messages
+          .filter(m => !m.is_system_message && (
+            m.content.toLowerCase().includes(query) ||
+            (m.attachment_name && m.attachment_name.toLowerCase().includes(query))
+          ))
+          .map(m => m.id);
+        setSearchMatchIds(matches);
+        setOlderMatchCount(0);
+        setSearchIndex(matches.length > 0 ? matches.length - 1 : 0);
+      } finally {
+        if (!cancelled) setSearchingDb(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [debouncedQuery, conversation.id, messages]);
 
   // Scroll to current search match
   useEffect(() => {
@@ -400,7 +457,7 @@ export function ChatView({
 
         {/* Search toggle */}
         <button
-          onClick={() => { setShowSearch(prev => !prev); if (showSearch) { setSearchQuery(''); setSearchMatchIds([]); } }}
+          onClick={() => { setShowSearch(prev => !prev); if (showSearch) { setSearchQuery(''); setDebouncedQuery(''); setSearchMatchIds([]); setOlderMatchCount(0); } }}
           className={cn(
             "p-2 rounded-full transition-colors",
             showSearch ? "bg-white/15 text-white" : "text-pure-white md:hover:bg-white/10"
@@ -424,14 +481,20 @@ export function ChatView({
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Sök i konversation..."
+                placeholder="Sök meddelanden & filer..."
                 className="h-8 bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white text-sm"
                 autoFocus
               />
-              {searchMatchIds.length > 0 && (
+              {searchingDb && (
+                <Loader2 className="h-3.5 w-3.5 text-pure-white animate-spin flex-shrink-0" />
+              )}
+              {!searchingDb && searchMatchIds.length > 0 && (
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <span className="text-pure-white text-xs whitespace-nowrap">
                     {searchIndex + 1}/{searchMatchIds.length}
+                    {olderMatchCount > 0 && (
+                      <span className="text-pure-white/60"> (+{olderMatchCount})</span>
+                    )}
                   </span>
                   <button onClick={() => setSearchIndex(i => Math.max(0, i - 1))} className="p-1 text-pure-white md:hover:text-white">
                     <ChevronUp className="h-3.5 w-3.5" />
@@ -441,8 +504,11 @@ export function ChatView({
                   </button>
                 </div>
               )}
-              {searchQuery && searchMatchIds.length === 0 && (
+              {!searchingDb && debouncedQuery && searchMatchIds.length === 0 && olderMatchCount === 0 && (
                 <span className="text-pure-white text-xs whitespace-nowrap">Inga träffar</span>
+              )}
+              {!searchingDb && searchMatchIds.length === 0 && olderMatchCount > 0 && (
+                <span className="text-pure-white text-xs whitespace-nowrap">{olderMatchCount} i äldre</span>
               )}
             </div>
           </motion.div>
