@@ -700,8 +700,11 @@ export function useConversationMessages(conversationId: string | null) {
   }, [conversationId, user, queryClient]);
 
   // Send message with optimistic update - instant UI feedback
-  const sendMessage = useCallback(async (content: string) => {
-    if (!conversationId || !user || !content.trim()) return;
+  const sendMessage = useCallback(async (
+    content: string,
+    attachment?: { url: string; type: string; name: string },
+  ) => {
+    if (!conversationId || !user || (!content.trim() && !attachment)) return;
 
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage: ConversationMessage = {
@@ -711,7 +714,10 @@ export function useConversationMessages(conversationId: string | null) {
       content: content.trim(),
       created_at: new Date().toISOString(),
       is_system_message: false,
-      sender_profile: undefined, // Will be filled by realtime update
+      attachment_url: attachment?.url || null,
+      attachment_type: attachment?.type || null,
+      attachment_name: attachment?.name || null,
+      sender_profile: undefined,
     };
 
     // Add message to cache immediately (optimistic)
@@ -721,13 +727,20 @@ export function useConversationMessages(conversationId: string | null) {
     );
 
     try {
+      const insertPayload: Record<string, unknown> = {
+        conversation_id: conversationId,
+        sender_id: user.id,
+        content: content.trim(),
+      };
+      if (attachment) {
+        insertPayload.attachment_url = attachment.url;
+        insertPayload.attachment_type = attachment.type;
+        insertPayload.attachment_name = attachment.name;
+      }
+
       const { data, error } = await supabase
         .from('conversation_messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: content.trim(),
-        })
+        .insert(insertPayload)
         .select()
         .single();
 
