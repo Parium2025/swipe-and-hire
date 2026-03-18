@@ -86,7 +86,13 @@ export function useBulkMessageSync() {
         let sent = 0;
         const remaining = items.filter((i) => i.sender_id !== user.id);
 
-        for (const item of myItems) {
+        for (let i = 0; i < myItems.length; i++) {
+          const item = myItems[i];
+          // Exponential backoff for retried messages
+          if (item.attempts > 0) {
+            const delay = Math.min(1000 * Math.pow(2, item.attempts - 1), 30000);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
           try {
             let convId = await findExistingConversationId(user.id, item.applicant_id);
 

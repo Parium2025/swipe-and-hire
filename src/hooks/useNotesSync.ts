@@ -201,26 +201,26 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => clearTimeout(timer);
   }, [content, user?.id, isFetched, noteData, queryClient, queryKey, saveToDb]);
 
-  // Retry queued save when coming back online
+  // Retry queued save when coming back online (uses ConnectivityManager)
   useEffect(() => {
     if (!user?.id) return;
-    const handleOnline = async () => {
-      if (!hasLocalEditsRef.current) return;
-      console.log(`🔄 Back online — retrying ${table} save`);
-      setIsSaving(true);
-      const success = await saveToDb(contentRef.current);
-      if (success) {
-        hasLocalEditsRef.current = false;
-        setSaveFailed(false);
-        setLastSaved(new Date());
-        queryClient.invalidateQueries({ queryKey: [queryKey, user.id] });
-      } else {
-        setSaveFailed(true);
+    const unsub = onConnectivityChange(async (online) => {
+      if (online && hasLocalEditsRef.current) {
+        console.log(`🔄 Back online — retrying ${table} save`);
+        setIsSaving(true);
+        const success = await saveToDb(contentRef.current);
+        if (success) {
+          hasLocalEditsRef.current = false;
+          setSaveFailed(false);
+          setLastSaved(new Date());
+          queryClient.invalidateQueries({ queryKey: [queryKey, user.id] });
+        } else {
+          setSaveFailed(true);
+        }
+        setIsSaving(false);
       }
-      setIsSaving(false);
-    };
-    window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
+    });
+    return unsub;
   }, [user?.id, saveToDb, queryClient, queryKey, table]);
 
   // Keep a ref to the latest access token for beforeunload (avoids async in sync handler)

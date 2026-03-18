@@ -98,11 +98,6 @@ export function enqueueCandidateOperation(
 
   // Cap queue size to prevent localStorage overflow
   const newQueue = [...filtered, queued];
-  if (newQueue.length > MAX_QUEUE_SIZE) {
-    console.warn(`[CandidateOpsQueue] Queue exceeds ${MAX_QUEUE_SIZE}, dropping oldest`);
-    newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
-  }
-
   saveQueue(newQueue);
   
   // Notify Service Worker so it can trigger sync when connectivity returns

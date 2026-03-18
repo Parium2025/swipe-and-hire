@@ -96,9 +96,6 @@ export function useOfflineProfileQueue(userId: string | undefined) {
     const currentQueue = getQueue();
     const filtered = currentQueue.filter(q => q.userId !== userId);
     const newQueue = [...filtered, queued];
-    if (newQueue.length > MAX_QUEUE_SIZE) {
-      newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
-    }
     saveQueue(newQueue);
     setQueue([queued]);
 

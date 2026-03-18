@@ -72,10 +72,6 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     // Deduplicate: remove any existing action for this jobId, keep latest
     const filtered = currentQueue.filter(q => q.jobId !== jobId);
     const newQueue = [...filtered, { jobId, action, timestamp: Date.now(), attempts: 0 }];
-    // Cap queue size
-    if (newQueue.length > MAX_QUEUE_SIZE) {
-      newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
-    }
     saveQueue(newQueue);
     setQueue(newQueue);
     notifySwOfPendingOps();
