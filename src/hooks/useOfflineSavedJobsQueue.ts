@@ -147,12 +147,12 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
       }
     });
 
-    if (getIsOnline() && queue.length > 0) {
+    if (getIsOnline() && userId && getQueue().filter(q => q.userId === userId).length > 0) {
       syncQueue();
     }
 
     return unsub;
-  }, [syncQueue, queue.length]);
+  }, [syncQueue, userId]);
 
   return {
     queue,
