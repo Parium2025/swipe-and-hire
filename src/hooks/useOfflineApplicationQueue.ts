@@ -86,10 +86,9 @@ function getQueue(): QueuedApplication[] {
 }
 
 function saveQueue(queue: QueuedApplication[]) {
-  try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-  } catch {
-    console.error('Failed to save offline application queue');
+  const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
+  if (!saved) {
+    console.error('[ApplicationQueue] Failed to save — localStorage full even after eviction');
   }
 }
 
