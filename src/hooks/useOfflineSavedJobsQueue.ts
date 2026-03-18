@@ -44,10 +44,9 @@ function getQueue(): QueuedAction[] {
 }
 
 function saveQueue(queue: QueuedAction[]) {
-  try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-  } catch {
-    console.error('Failed to save offline saved jobs queue');
+  const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
+  if (!saved) {
+    console.error('[SavedJobsQueue] Failed to save — localStorage full even after eviction');
   }
 }
 
