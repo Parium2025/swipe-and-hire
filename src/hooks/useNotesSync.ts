@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 
 type NoteTable = 'employer_notes' | 'jobseeker_notes';
 type OwnerColumn = 'employer_id' | 'user_id';
