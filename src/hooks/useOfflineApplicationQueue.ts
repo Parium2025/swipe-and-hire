@@ -119,6 +119,10 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
     const currentQueue = getQueue();
     const filtered = currentQueue.filter(q => !(q.jobId === app.jobId && q.applicantId === app.applicantId));
     const newQueue = [...filtered, queued];
+    // Cap queue size
+    if (newQueue.length > MAX_QUEUE_SIZE) {
+      newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
+    }
     saveQueue(newQueue);
     setQueue(prev => [...prev.filter(q => !(q.jobId === app.jobId && q.applicantId === app.applicantId)), queued]);
 
