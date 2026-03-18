@@ -95,7 +95,7 @@ export function AppSidebar() {
   // Support items - add admin for Fredrik
   const supportItems = [
     { title: 'Kundtjänst', url: '/support', icon: MessageCircle },
-    ...(isAdmin ? [{ title: 'Admin Panel', url: '/admin', icon: Settings }] : [])
+    ...(isOrgAdmin ? [{ title: 'Admin Panel', url: '/admin', icon: Settings }] : [])
   ];
 
   // Listen for unsaved changes cancel event to close sidebar

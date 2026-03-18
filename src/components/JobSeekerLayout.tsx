@@ -185,7 +185,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
               <NotificationCenter />
               {/* Profile Avatar */}
               <MobileProfileAvatar />
-              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (
+              {isOrgAdmin && onViewChange && (
                 <div className="hidden md:block">
                   <DeveloperControls 
                     onViewChange={onViewChange}

@@ -180,7 +180,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
               <NotificationCenter />
               {/* Profile Avatar */}
               <EmployerMobileProfileAvatar />
-              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && (
+              {isOrgAdmin && (
                 <div className="hidden md:block">
                   <DeveloperControls 
                     onViewChange={onViewChange}

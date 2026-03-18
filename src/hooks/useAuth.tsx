@@ -1337,7 +1337,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isSuperAdmin = (): boolean => {
-    return userRole?.role === 'employer' && isOrgAdminFlag === true;
+    return userRole?.role === 'admin';
   };
 
   const isCompanyUser = (): boolean => {

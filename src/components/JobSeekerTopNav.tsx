@@ -95,7 +95,7 @@ function JobSeekerTopNav() {
   const coverUrl = preloadedCoverUrl || null;
   const hasVideo = !!(profile?.video_url || preloadedVideoUrl || videoUrl);
 
-  const isAdmin = user?.email === 'fredrikandits@hotmail.com';
+  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
 
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {

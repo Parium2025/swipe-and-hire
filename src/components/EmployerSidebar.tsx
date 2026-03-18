@@ -473,7 +473,7 @@ export function EmployerSidebar() {
         <SidebarSeparator className="bg-white/20 mx-4" />
 
         {/* Admin Panel - Only for specific user */}
-        {user?.email === 'fredrikandits@hotmail.com' && (
+        {isOrgAdmin && (
           <>
             <SidebarGroup>
               <SidebarGroupContent>
