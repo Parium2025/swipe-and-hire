@@ -57,11 +57,11 @@ export interface JobPosting {
 
 // Fetch job details with employer profile
 async function fetchJobDetails(jobId: string, userId: string): Promise<JobPosting | null> {
+  // Don't filter by employer_id — RLS + can_view_job_application handles org-wide access
   const { data, error } = await supabase
     .from('job_postings')
     .select('*')
     .eq('id', jobId)
-    .eq('employer_id', userId)
     .single();
   
   if (error) throw error;
