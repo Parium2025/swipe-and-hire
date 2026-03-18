@@ -146,13 +146,13 @@ async function bootstrap() {
     await authLogoPromise;
   }
 
-  // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
-  // NOTE: In preview we disable SW entirely to avoid sticky caching that can show outdated UI.
+  // Registrera Service Worker och Sync Engine
   if (import.meta.env.PROD && !isPreviewHost) {
-    registerServiceWorker().catch(() => {
-      // Silent fail - SW is optional enhancement
-    });
+    registerServiceWorker().catch(() => {});
   }
+  
+  // Initialize the offline sync engine (works regardless of SW)
+  initSyncEngine();
 
   const root = createRoot(document.getElementById('root')!);
   root.render(
