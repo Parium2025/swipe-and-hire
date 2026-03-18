@@ -2782,7 +2782,7 @@ const MobileJobWizard = ({
                     <button
                       type="button"
                       onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
-                      className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors"
+                      className="h-11 w-11 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
