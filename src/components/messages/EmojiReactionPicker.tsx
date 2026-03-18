@@ -127,7 +127,7 @@ export function EmojiReactionPicker({
               mass: 0.6,
             }}
           >
-            <div className="rounded-2xl bg-black/85 border border-white/15 backdrop-blur-xl shadow-2xl overflow-hidden">
+            <div className="rounded-2xl bg-black/85 border border-white/15 backdrop-blur-xl shadow-2xl overflow-y-auto" style={{ maxHeight: 'calc(100vh - 16px)' }}>
               {/* Quick-access top row (first 6 most common) */}
               <div className="flex items-center justify-around px-2 py-2.5 border-b border-white/10">
                 {EMOJI_CATEGORIES[0].emojis.slice(0, 6).map((emoji) => (
