@@ -54,10 +54,9 @@ function getBulkQueue(): QueuedMessage[] {
 }
 
 function saveBulkQueue(items: QueuedMessage[]) {
-  try {
-    localStorage.setItem(BULK_QUEUE_KEY, JSON.stringify(items));
-  } catch {
-    console.error('Failed to save bulk message queue');
+  const saved = safeSetItem(BULK_QUEUE_KEY, JSON.stringify(items));
+  if (!saved) {
+    console.error('[BulkMessageSync] Failed to save — localStorage full even after eviction');
   }
 }
 
