@@ -15,7 +15,6 @@ import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 const EmployerSettings = () => {
   const { user, profile, updateProfile, updatePassword } = useAuth();
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
