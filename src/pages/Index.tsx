@@ -536,7 +536,7 @@ const Index = () => {
         case '/support':
           return <Support />;
         case '/admin':
-          if (user.email === 'fredrikandits@hotmail.com') {
+          if (isAdmin) {
             return <SupportAdmin />;
           } else {
             navigate('/support');
