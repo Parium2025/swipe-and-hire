@@ -694,7 +694,7 @@ const EmployerProfile = () => {
                   id="first_name"
                   value={formData.first_name}
                   onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
@@ -703,7 +703,7 @@ const EmployerProfile = () => {
                   id="last_name"
                   value={formData.last_name}
                   onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 text-sm"
                 />
               </div>
             </div>
@@ -714,7 +714,7 @@ const EmployerProfile = () => {
                 id="email"
                 value={user?.email || ''}
                 readOnly
-                className="bg-white/5 border-white/10 text-white h-9 text-sm cursor-not-allowed"
+                className="bg-white/5 border-white/10 text-white h-11 text-sm cursor-not-allowed"
               />
             </div>
 
@@ -724,7 +724,7 @@ const EmployerProfile = () => {
                 id="role"
                 value={userRole?.role === 'employer' ? 'Admin' : 'Jobbsökare'}
                 readOnly
-                className="bg-white/5 border-white/10 text-white h-9 text-sm cursor-not-allowed"
+                className="bg-white/5 border-white/10 text-white h-11 text-sm cursor-not-allowed"
               />
             </div>
 
@@ -735,7 +735,7 @@ const EmployerProfile = () => {
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
                   placeholder="T.ex. Stockholm, Sverige"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 text-sm"
                 />
             </div>
 
@@ -746,7 +746,7 @@ const EmployerProfile = () => {
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   placeholder="T.ex. 070-123 45 67"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 text-sm"
                 />
             </div>
 
@@ -825,7 +825,7 @@ const EmployerProfile = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white text-sm h-9 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-left"
+                        className="w-full bg-white/5 border-white/10 text-white text-sm h-11 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-left"
                       >
                         <span className="truncate text-left flex-1 px-1 text-sm">
                           {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
@@ -877,7 +877,7 @@ const EmployerProfile = () => {
                     value={newSocialLink.url}
                     onChange={(e) => setNewSocialLink({...newSocialLink, url: e.target.value})}
                     placeholder="Klistra in din sociala medier länk här"
-                    className="bg-white/5 border-white/10 hover:border-white/50 text-white text-sm h-9 placeholder:text-white md:col-span-1"
+                    className="bg-white/5 border-white/10 hover:border-white/50 text-white text-sm h-11 placeholder:text-white md:col-span-1"
                   />
 
                   <Button
