@@ -192,7 +192,7 @@ export async function fetchSinceLastSync<T>(
 ): Promise<{ data: T[]; isPartial: boolean }> {
   const lastSync = getLastSyncTime(domain);
   
-  let query = supabase.from(table).select(selectColumns);
+  let query = (supabase.from(table as any) as any).select(selectColumns);
   
   if (additionalFilters) {
     query = additionalFilters(query);
