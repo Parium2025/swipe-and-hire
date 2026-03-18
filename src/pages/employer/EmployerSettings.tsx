@@ -133,7 +133,7 @@ const EmployerSettings = () => {
             />
           </div>
           <div className="flex justify-center pt-1">
-            <Button onClick={handlePasswordUpdate} variant="glass" className="h-9 px-6 text-sm">
+            <Button onClick={handlePasswordUpdate} variant="glass" className="h-11 !min-h-0 px-6 text-sm">
               Uppdatera lösenord
             </Button>
           </div>
