@@ -87,10 +87,16 @@ export function useOfflineMessageQueue(userId: string | undefined) {
       job_id: message.job_id,
       application_id: message.application_id || null,
       created_at: new Date().toISOString(),
+      queuedAt: Date.now(),
       attempts: 0,
     };
 
-    const newQueue = [...getQueuedMessages(), queuedMessage];
+    const existing = getQueuedMessages();
+    const newQueue = [...existing, queuedMessage];
+    // Cap queue to prevent localStorage overflow
+    if (newQueue.length > MAX_QUEUE_SIZE) {
+      newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
+    }
     saveQueuedMessages(newQueue);
     setQueue(prev => [...prev, queuedMessage]);
     notifySwOfPendingOps();
