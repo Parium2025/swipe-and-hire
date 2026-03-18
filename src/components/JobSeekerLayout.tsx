@@ -18,7 +18,7 @@ import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
 import { useDevice } from '@/hooks/use-device';
-import { DevOfflineToggle } from '@/components/DevOfflineToggle';
+
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
@@ -145,9 +145,6 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
           <main className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 relative z-10 flex flex-col" style={{ contain: 'layout style', WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', overscrollBehavior: 'contain' }}>
             {children}
           </main>
-          
-          {/* Floating dev offline toggle */}
-          <DevOfflineToggle />
         </div>
       </>
     );
