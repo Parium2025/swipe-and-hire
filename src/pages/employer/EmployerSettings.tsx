@@ -15,7 +15,6 @@ import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 const EmployerSettings = () => {
   const { user, profile, updateProfile, updatePassword } = useAuth();
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
@@ -57,6 +56,15 @@ const EmployerSettings = () => {
   };
 
   const handlePasswordUpdate = async () => {
+    if (passwordData.newPassword.length < 6) {
+      toast({
+        title: "Fel",
+        description: "Lösenordet måste vara minst 6 tecken.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
         title: "Fel",
@@ -68,7 +76,7 @@ const EmployerSettings = () => {
 
     try {
       await updatePassword(passwordData.newPassword);
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordData({ newPassword: '', confirmPassword: '' });
       toast({
         title: "Lösenord uppdaterat",
         description: "Ditt lösenord har uppdaterats framgångsrikt."
@@ -104,16 +112,6 @@ const EmployerSettings = () => {
 
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
         <div className="space-y-5 md:space-y-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="current-password" className="text-sm text-white">Nuvarande lösenord</Label>
-            <Input
-              id="current-password"
-              type="password"
-              value={passwordData.currentPassword}
-              onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm"
-            />
-          </div>
           <div className="space-y-1.5">
             <Label htmlFor="new-password" className="text-sm text-white">Nytt lösenord</Label>
             <Input

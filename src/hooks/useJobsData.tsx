@@ -166,9 +166,9 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       return result;
     },
     enabled: !!user,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    staleTime: 10 * 60 * 1000, // 10 min fallback if realtime drops
     gcTime: Infinity, // Keep in cache permanently during session
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
