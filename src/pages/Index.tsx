@@ -332,7 +332,7 @@ const Index = () => {
         !location.pathname.startsWith('/billing') && 
         !location.pathname.startsWith('/payment') && 
         !location.pathname.startsWith('/consent')) {
-      if (user.email === 'fredrikandits@hotmail.com') {
+      if (isAdmin) {
         setShowProfileSelector(true);
       }
     }
