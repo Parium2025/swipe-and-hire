@@ -39,7 +39,7 @@ const MAX_ATTEMPTS = 3;
 
 // ── localStorage helpers ──────────────────────────────────────────────
 
-const MAX_QUEUE_SIZE = 50;
+
 
 function isValidQueuedOp(item: unknown): item is QueuedCandidateOperation {
   if (!item || typeof item !== 'object') return false;
