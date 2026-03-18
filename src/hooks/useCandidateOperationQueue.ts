@@ -69,10 +69,11 @@ function getQueue(): QueuedCandidateOperation[] {
 }
 
 function saveQueue(queue: QueuedCandidateOperation[]) {
-  try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-  } catch {
-    console.error('[CandidateOpsQueue] Failed to persist queue');
+  const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
+  if (!saved) {
+    console.error('[CandidateOpsQueue] Failed to persist queue — localStorage full even after eviction');
+  }
+}
   }
 }
 
