@@ -52,10 +52,9 @@ function getQueuedMessages(): QueuedMessage[] {
 }
 
 function saveQueuedMessages(messages: QueuedMessage[]) {
-  try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(messages));
-  } catch {
-    console.error('Failed to save offline message queue');
+  const saved = safeSetItem(QUEUE_KEY, JSON.stringify(messages));
+  if (!saved) {
+    console.error('[MessageQueue] Failed to save — localStorage full even after eviction');
   }
 }
 
