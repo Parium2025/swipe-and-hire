@@ -55,8 +55,9 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
     }
   };
 
-  if (user?.email !== 'fredrikandits@hotmail.com' && user?.email !== 'pariumab2025@hotmail.com') {
+  if (adminLoading || !isAdmin) {
     return null;
+  }
   }
 
   return (
