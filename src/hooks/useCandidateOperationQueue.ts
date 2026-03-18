@@ -85,7 +85,25 @@ export function enqueueCandidateOperation(
 // ── Execute a single operation ────────────────────────────────────────
 
 async function executeOperation(op: QueuedCandidateOperation): Promise<boolean> {
-  try {
+  // Use conflict checking for operations that update existing records
+  if (op.type === 'stage_move' || op.type === 'rating_update' || op.type === 'notes_update') {
+    const result = await executeWithConflictCheck(
+      'my_candidates',
+      op.candidateId,
+      op.queuedAt,
+      () => executeOperationInner(op)
+    );
+    if (result.reason === 'conflict') {
+      console.log(`[CandidateOpsQueue] Dropped ${op.type} for ${op.candidateId} — server is newer`);
+      return true; // Treat as success (don't retry)
+    }
+    return result.applied;
+  }
+
+  return executeOperationInner(op);
+}
+
+async function executeOperationInner(op: QueuedCandidateOperation): Promise<boolean> {
     switch (op.type) {
       case 'stage_move': {
         const { error } = await supabase
