@@ -20,6 +20,7 @@ interface DeveloperControlsProps {
 
 const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, currentView }) => {
   const { user, userRole, switchRole, updateProfile } = useAuth();
+  const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
   const [switching, setSwitching] = useState(false);
   const navigate = useNavigate();
 
