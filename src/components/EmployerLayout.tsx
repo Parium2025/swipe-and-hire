@@ -119,7 +119,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
             <EmployerTopNav
               extraRight={
                 <div className="flex items-center gap-3">
-                  {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && (
+                  {isOrgAdmin && (
                     <DeveloperControls 
                       onViewChange={onViewChange}
                       currentView={developerView}
