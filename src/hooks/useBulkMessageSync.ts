@@ -23,6 +23,7 @@ interface QueuedMessage {
   application_id: string;
   content: string;
   created_at: string;
+  queuedAt: number;
   attempts: number;
 }
 
