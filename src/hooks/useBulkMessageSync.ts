@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
-import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
+
 import { safeSetItem } from '@/lib/safeStorage';
 import {
   findExistingConversationId,
