@@ -44,29 +44,51 @@ export function MessageBubble({
   const senderName = getMessageSenderName(message.sender_profile);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const lastTapRef = useRef(0);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const isTouch = useTouchCapable();
 
   const isTemp = message.id.startsWith('temp-');
   const canEdit = isOwn && !isTemp && !message.is_system_message && !!onEdit;
   const edited = isEdited(message);
 
-  // Double-tap detection
-  const handleTap = useCallback(() => {
+  const openEmojiPicker = useCallback(() => {
     if (!onToggleReaction || isTemp) return;
-
-    const now = Date.now();
-    const delta = now - lastTapRef.current;
-    lastTapRef.current = now;
-
-    if (delta < 350 && delta > 0) {
-      lastTapRef.current = 0;
-      if (bubbleRef.current) {
-        setAnchorRect(bubbleRef.current.getBoundingClientRect());
-        setShowEmojiPicker(true);
-      }
+    if (bubbleRef.current) {
+      setAnchorRect(bubbleRef.current.getBoundingClientRect());
+      setShowEmojiPicker(true);
     }
   }, [onToggleReaction, isTemp]);
+
+  // Long-press for touch devices (like iMessage)
+  const handleTouchStart = useCallback(() => {
+    if (!isTouch) return;
+    longPressTimerRef.current = setTimeout(() => {
+      longPressTimerRef.current = null;
+      openEmojiPicker();
+    }, 500);
+  }, [isTouch, openEmojiPicker]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback(() => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  // Double-click for mouse users
+  const handleDoubleClick = useCallback(() => {
+    if (isTouch) return;
+    openEmojiPicker();
+  }, [isTouch, openEmojiPicker]);
 
   const handleReaction = (emoji: string) => {
     onToggleReaction?.(emoji);
