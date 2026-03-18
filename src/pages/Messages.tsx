@@ -151,7 +151,7 @@ export default function Messages() {
             <MessageSquare className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Meddelanden</h1>
+            <h1 className="text-2xl font-bold text-white">Chattar</h1>
             {totalUnreadCount > 0 && (
               <p className="text-white text-sm">{totalUnreadCount} olästa meddelanden</p>
             )}
