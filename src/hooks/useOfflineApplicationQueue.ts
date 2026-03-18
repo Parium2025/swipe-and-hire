@@ -54,7 +54,6 @@ export interface QueuedApplication {
 
 const QUEUE_KEY = 'parium_offline_application_queue';
 const MAX_ATTEMPTS = 3;
-const MAX_QUEUE_SIZE = 20;
 
 /**
  * Validates that a parsed object has the required QueuedApplication shape.
