@@ -84,7 +84,7 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
   const syncQueue = useCallback(async () => {
     if (!userId || syncInProgress.current) return;
 
-    const currentQueue = getQueue();
+    const currentQueue = getQueue().filter(q => q.userId === userId);
     if (currentQueue.length === 0) return;
 
     syncInProgress.current = true;
