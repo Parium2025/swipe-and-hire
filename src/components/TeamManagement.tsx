@@ -257,7 +257,7 @@ const TeamManagement = () => {
             />
           </div>
           <Select value={inviteRole} onValueChange={setInviteRole}>
-            <SelectTrigger className="w-full sm:w-40 bg-white/5 border-white/10 text-white h-9 text-sm">
+            <SelectTrigger className="w-full sm:w-40 bg-white/5 border-white/10 text-white h-11 !min-h-0 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="glass-panel">
