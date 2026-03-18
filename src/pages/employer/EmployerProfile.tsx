@@ -885,7 +885,7 @@ const EmployerProfile = () => {
                     onClick={addSocialLink}
                     disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
                     variant="glass"
-                    className="h-9 text-sm"
+                    className="h-11 !min-h-0 text-sm"
                   >
                     Lägg till
                     <Plus className="h-3 w-3 ml-1.5" />
