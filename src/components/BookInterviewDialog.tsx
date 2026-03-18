@@ -330,13 +330,13 @@ export const BookInterviewDialog = ({
           </div>
 
           {/* Time and duration */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-[1fr_auto] gap-3">
             <div className="space-y-2">
               <Label className="text-white">Tid</Label>
               <Select value={time} onValueChange={setTime}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
-                  <Clock className="mr-2 h-4 w-4 flex-shrink-0" />
-                  <span className="flex-1 text-left">{time} → {endTime}</span>
+                  <Clock className="mr-1.5 h-4 w-4 flex-shrink-0" />
+                  <span className="flex-1 text-left truncate text-sm">{time} →{endTime}</span>
                 </SelectTrigger>
                 <SelectContent 
                   side="bottom" 
@@ -353,10 +353,10 @@ export const BookInterviewDialog = ({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 w-[90px]">
               <Label className="text-white">Längd</Label>
               <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
+                <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
