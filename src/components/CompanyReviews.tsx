@@ -352,7 +352,7 @@ const CompanyReviews = () => {
                   </div>
                   {review.comment && (
                     <p className="text-sm text-white mt-2 break-words [overflow-wrap:anywhere] overflow-hidden">
-                      <span className="text-white/70">Kommentar:</span> {review.comment}
+                      <span className="text-white">Kommentar:</span> {review.comment}
                     </p>
                   )}
                 </div>
