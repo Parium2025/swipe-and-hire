@@ -170,7 +170,10 @@ export function useOfflineProfileQueue(userId: string | undefined) {
       }
     }
 
-    saveQueue(remaining);
+    // Re-read and keep other users' profile updates untouched
+    const fullQueue = getQueue();
+    const otherUserUpdates = fullQueue.filter(q => q.userId !== userId);
+    saveQueue([...otherUserUpdates, ...remaining]);
     setQueue(remaining);
     syncInProgress.current = false;
     setSyncing(false);

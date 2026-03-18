@@ -176,7 +176,10 @@ export function useOfflineMessageQueue(userId: string | undefined) {
       }
     }
 
-    saveQueuedMessages(remaining);
+    // Re-read and keep other users' messages untouched
+    const fullQueue = getQueuedMessages();
+    const otherUserMessages = fullQueue.filter(m => m.sender_id !== userId);
+    saveQueuedMessages([...otherUserMessages, ...remaining]);
     setQueue(remaining);
     setSyncing(false);
     syncInProgress.current = false;
