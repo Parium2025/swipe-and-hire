@@ -61,10 +61,9 @@ function getQueue(): QueuedProfileUpdate[] {
 }
 
 function saveQueue(queue: QueuedProfileUpdate[]) {
-  try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-  } catch {
-    console.error('Failed to save offline profile queue');
+  const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
+  if (!saved) {
+    console.error('[ProfileQueue] Failed to save — localStorage full even after eviction');
   }
 }
 
