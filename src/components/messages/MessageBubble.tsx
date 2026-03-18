@@ -5,6 +5,7 @@ import { getMessageSenderName } from '@/lib/conversationDisplayUtils';
 import { Briefcase, Check, CheckCheck, Paperclip, FileText, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import type { ConversationMessage } from '@/hooks/useConversations';
 import type { GroupedReaction } from '@/hooks/useMessageReactions';
 
