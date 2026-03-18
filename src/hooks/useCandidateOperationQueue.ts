@@ -38,11 +38,31 @@ const MAX_ATTEMPTS = 3;
 
 // ── localStorage helpers ──────────────────────────────────────────────
 
+const MAX_QUEUE_SIZE = 50;
+
+function isValidQueuedOp(item: unknown): item is QueuedCandidateOperation {
+  if (!item || typeof item !== 'object') return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.id === 'string' &&
+    typeof obj.type === 'string' &&
+    typeof obj.candidateId === 'string' &&
+    typeof obj.recruiterId === 'string' &&
+    typeof obj.queuedAt === 'number' &&
+    typeof obj.attempts === 'number' &&
+    obj.payload != null && typeof obj.payload === 'object'
+  );
+}
+
 function getQueue(): QueuedCandidateOperation[] {
   try {
     const raw = localStorage.getItem(QUEUE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidQueuedOp);
   } catch {
+    try { localStorage.removeItem(QUEUE_KEY); } catch { /* ignore */ }
     return [];
   }
 }
