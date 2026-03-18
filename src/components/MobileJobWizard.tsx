@@ -4488,7 +4488,7 @@ const MobileJobWizard = ({
                                               {question.question_type === 'date' && (
                                                 <input
                                                   type="date"
-                                                  className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-9 focus:outline-none focus:border-white/40"
+                                                  className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-11 focus:outline-none focus:border-white/40"
                                                   value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
                                                   onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                 />
