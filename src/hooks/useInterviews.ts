@@ -3,6 +3,7 @@ import { safeSetItem } from '@/lib/safeStorage';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { getIsOnline } from '@/lib/connectivityManager';
 
 export interface Interview {
   id: string;
@@ -153,7 +154,7 @@ export const useInterviews = () => {
       interviewId: string; 
       status: Interview['status'];
     }) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!getIsOnline()) throw new Error('Du är offline');
       
       const { error } = await supabase
         .from('interviews')
@@ -170,7 +171,7 @@ export const useInterviews = () => {
   // Cancel interview
   const cancelInterview = useMutation({
     mutationFn: async (interviewId: string) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!getIsOnline()) throw new Error('Du är offline');
       
       const { error } = await supabase
         .from('interviews')
@@ -302,7 +303,7 @@ export const useCandidateInterviews = () => {
       interviewId: string; 
       accept: boolean;
     }) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!getIsOnline()) throw new Error('Du är offline');
       
       const { error } = await supabase
         .from('interviews')
