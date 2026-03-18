@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
