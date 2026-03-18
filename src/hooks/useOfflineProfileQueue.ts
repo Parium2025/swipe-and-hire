@@ -99,6 +99,9 @@ export function useOfflineProfileQueue(userId: string | undefined) {
     saveQueue(newQueue);
     setQueue([queued]);
 
+    // Notify SW for background sync
+    notifySwOfPendingOps();
+
     return queued;
   }, [userId]);
 
