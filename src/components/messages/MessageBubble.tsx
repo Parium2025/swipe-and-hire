@@ -202,7 +202,10 @@ export function MessageBubble({
     <>
       <div
         className={cn("flex gap-2 relative group", isOwn ? "flex-row-reverse" : "flex-row")}
-        onClick={handleTap}
+        onDoubleClick={handleDoubleClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
       >
         {/* Avatar space */}
         <div className="w-8 flex-shrink-0">
