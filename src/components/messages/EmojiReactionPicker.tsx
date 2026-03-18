@@ -62,19 +62,27 @@ export function EmojiReactionPicker({
 
   if (!anchorRect) return null;
 
-  // Calculate position - place above the message bubble
+  // Calculate position - prefer above, fall back to below if not enough space
   const pickerWidth = 280;
+  const pickerHeight = 200; // approximate picker height
   const viewportWidth = window.innerWidth;
+  const gap = 8;
 
   let left = isOwn
     ? anchorRect.right - pickerWidth
     : anchorRect.left;
 
-  // Clamp to viewport
+  // Clamp to viewport horizontally
   if (left < 8) left = 8;
   if (left + pickerWidth > viewportWidth - 8) left = viewportWidth - pickerWidth - 8;
 
-  const top = anchorRect.top - 8; // 8px above the bubble
+  // Decide above vs below: if not enough space above, show below
+  const spaceAbove = anchorRect.top;
+  const showBelow = spaceAbove < pickerHeight + gap + 40; // 40px safety margin
+
+  const top = showBelow
+    ? anchorRect.bottom + gap
+    : anchorRect.top - gap;
 
   return (
     <AnimatePresence>
@@ -96,11 +104,11 @@ export function EmojiReactionPicker({
             style={{
               left,
               top,
-              transform: 'translateY(-100%)',
+              transform: showBelow ? 'none' : 'translateY(-100%)',
             }}
-            initial={{ opacity: 0, scale: 0.85, y: 10 }}
+            initial={{ opacity: 0, scale: 0.85, y: showBelow ? -10 : 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.85, y: 10 }}
+            exit={{ opacity: 0, scale: 0.85, y: showBelow ? -10 : 10 }}
             transition={{
               type: 'spring',
               damping: 25,
