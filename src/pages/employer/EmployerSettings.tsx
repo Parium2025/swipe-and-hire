@@ -23,7 +23,7 @@ const EmployerSettings = () => {
   const [backgroundLocationEnabled, setBackgroundLocationEnabled] = useState(false);
   const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
   const isNativeApp = Capacitor.isNativePlatform();
-  const { isForced: isOfflineForced, toggle: toggleOfflineMode } = useForceOffline();
+  
 
   // Visa dev tools endast för specifikt testkonto
   const isDevAccount = user?.email?.toLowerCase().includes('parium') || 
