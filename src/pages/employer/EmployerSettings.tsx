@@ -7,9 +7,8 @@ import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
 import { Capacitor } from '@capacitor/core';
-import { MapPin, Smartphone, WifiOff, Bug, Bell, Mail } from 'lucide-react';
+import { MapPin, Smartphone, Bell, Mail } from 'lucide-react';
 import { MessageTemplatesSettings } from '@/components/MessageTemplatesSettings';
-import { useForceOffline } from '@/hooks/useOnlineStatus';
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 
