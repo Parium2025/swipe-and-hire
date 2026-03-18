@@ -545,7 +545,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                           setQuestionDraft({ ...questionDraft, options });
                         }}
                         placeholder={`Alternativ ${optionIndex + 1}`}
-                        className="h-9 text-sm"
+                        className="h-11 !min-h-0 text-sm"
                       />
                         <Button
                           variant="outline"
