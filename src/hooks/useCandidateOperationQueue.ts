@@ -104,6 +104,7 @@ async function executeOperation(op: QueuedCandidateOperation): Promise<boolean> 
 }
 
 async function executeOperationInner(op: QueuedCandidateOperation): Promise<boolean> {
+  try {
     switch (op.type) {
       case 'stage_move': {
         const { error } = await supabase
@@ -115,14 +116,12 @@ async function executeOperationInner(op: QueuedCandidateOperation): Promise<bool
       }
 
       case 'rating_update': {
-        // Update my_candidates
         const { error } = await supabase
           .from('my_candidates')
           .update({ rating: op.payload.rating })
           .eq('id', op.candidateId);
         if (error) throw error;
 
-        // Also persist to candidate_ratings
         if (op.applicantId && op.recruiterId) {
           await supabase
             .from('candidate_ratings')
@@ -139,14 +138,12 @@ async function executeOperationInner(op: QueuedCandidateOperation): Promise<bool
       }
 
       case 'notes_update': {
-        // Update my_candidates
         const { error } = await supabase
           .from('my_candidates')
           .update({ notes: op.payload.notes })
           .eq('id', op.candidateId);
         if (error) throw error;
 
-        // Also persist to candidate_notes
         if (op.applicantId && op.recruiterId) {
           const { data: existing } = await supabase
             .from('candidate_notes')
