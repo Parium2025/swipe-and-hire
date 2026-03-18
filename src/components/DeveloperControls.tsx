@@ -58,7 +58,6 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
   if (adminLoading || !isAdmin) {
     return null;
   }
-  }
 
   return (
     <DropdownMenu>
