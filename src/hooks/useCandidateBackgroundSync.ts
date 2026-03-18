@@ -266,14 +266,14 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
   // Uppdatera localStorage snapshot för instant first paint
   try {
     const snapshot = {
-      items: items.slice(0, 50),
+268:       items: items.slice(0, 50),
       timestamp: Date.now(),
     };
-    localStorage.setItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
+    safeSetItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
     
     // Spara betyg separat för snabb åtkomst
     if (Object.keys(ratingsMap).length > 0) {
-      localStorage.setItem(`ratings_cache_${userId}`, JSON.stringify({
+      safeSetItem(`ratings_cache_${userId}`, JSON.stringify({
         ratings: ratingsMap,
         timestamp: Date.now()
       }));
