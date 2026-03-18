@@ -41,17 +41,24 @@ const API_PATTERNS = [
   /\/rest\/v1\/job_questions/,
 ];
 
-// Kolla om URL är en bild
+// Offline queue keys to check in localStorage (read via IndexedDB or message)
+const OFFLINE_QUEUE_KEYS = [
+  'parium_offline_message_queue',
+  'parium_offline_application_queue',
+  'parium_offline_saved_jobs_queue',
+  'parium_offline_profile_queue',
+  'parium_candidate_ops_queue',
+];
+
 const isImageRequest = (url) => {
   return IMAGE_PATTERNS.some(pattern => pattern.test(url));
 };
 
-// Kolla om URL är ett API-anrop
 const isApiRequest = (url) => {
   return API_PATTERNS.some(pattern => pattern.test(url));
 };
 
-// Install event - förbered cachen
+// Install event
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...');
   
@@ -60,13 +67,12 @@ self.addEventListener('install', (event) => {
       console.log('[SW] Caching critical assets');
       return cache.addAll(CRITICAL_ASSETS);
     }).then(() => {
-      // Aktivera ny worker direkt
       return self.skipWaiting();
     })
   );
 });
 
-// Activate event - rensa gamla cachar
+// Activate event
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating service worker...');
   
@@ -81,61 +87,92 @@ self.addEventListener('activate', (event) => {
         })
       );
     }).then(() => {
-      // Ta över alla klienter direkt
       return self.clients.claim();
     })
   );
 });
 
-// Fetch event - Cache-first för bilder, Network-first för allt annat
+// ─── BACKGROUND SYNC ────────────────────────────────────────────────
+// When the browser regains connectivity, this fires even if the app tab
+// is closed. We notify all open clients to flush their offline queues.
+
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'parium-offline-sync') {
+    console.log('[SW] Background sync triggered');
+    
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+        if (clients.length > 0) {
+          // Notify all open tabs to run their sync logic
+          clients.forEach((client) => {
+            client.postMessage({ type: 'TRIGGER_OFFLINE_SYNC' });
+          });
+          console.log(`[SW] Notified ${clients.length} client(s) to sync`);
+        } else {
+          console.log('[SW] No open clients — sync will happen when app opens');
+        }
+        
+        // Notify completion
+        clients.forEach((client) => {
+          client.postMessage({ type: 'SYNC_COMPLETE' });
+        });
+      })
+    );
+  }
+});
+
+// ─── PERIODIC BACKGROUND SYNC (if available) ────────────────────────
+// Keeps data fresh even when the app isn't actively used
+
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'parium-periodic-sync') {
+    console.log('[SW] Periodic sync triggered');
+    
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window' }).then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({ type: 'TRIGGER_PERIODIC_SYNC' });
+        });
+      })
+    );
+  }
+});
+
+// Fetch event
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = request.url;
 
-  // Ignorera non-GET requests
   if (request.method !== 'GET') {
     return;
   }
 
-  // Hantera bilder med Cache-first strategin (permanent cache)
+  // Cache-first for images
   if (isImageRequest(url)) {
     event.respondWith(
       caches.open(IMAGE_CACHE).then(async (cache) => {
-        // Försök hämta från cache först
         const cachedResponse = await cache.match(request);
         
         if (cachedResponse) {
-          console.log('[SW] Serving image from cache:', url.substring(0, 80) + '...');
-          
-          // Returnera cached version direkt
-          // Uppdatera i bakgrunden (stale-while-revalidate)
+          // Stale-while-revalidate
           fetch(request).then((networkResponse) => {
             if (networkResponse && networkResponse.status === 200) {
               cache.put(request, networkResponse.clone());
             }
-          }).catch(() => {
-            // Ignorera network errors i bakgrunden
-          });
+          }).catch(() => {});
           
           return cachedResponse;
         }
 
-        // Om inte i cache, hämta från nätverk
         try {
-          console.log('[SW] Fetching image from network:', url.substring(0, 80) + '...');
           const networkResponse = await fetch(request);
           
-          // Cacha om det är en lyckad response
           if (networkResponse && networkResponse.status === 200) {
-            // Klona response innan vi cachar (kan bara läsas en gång)
             cache.put(request, networkResponse.clone());
-            console.log('[SW] Cached new image:', url.substring(0, 80) + '...');
           }
           
           return networkResponse;
         } catch (error) {
-          console.error('[SW] Failed to fetch image:', error);
-          // Returnera en fallback om möjligt
           throw error;
         }
       })
@@ -143,33 +180,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Hantera API-anrop med Cache-first strategin för offline support
+  // Network-first for API calls with cache fallback
   if (isApiRequest(url)) {
     event.respondWith(
       caches.open(API_CACHE).then(async (cache) => {
-        // Försök hämta från nätverk först
         try {
           const networkResponse = await fetch(request);
           
-          // Cacha lyckade GET requests
           if (networkResponse && networkResponse.status === 200 && request.method === 'GET') {
             cache.put(request, networkResponse.clone());
-            console.log('[SW] Cached API response:', url.substring(0, 80) + '...');
           }
           
           return networkResponse;
         } catch (error) {
-          // Om offline, försök hämta från cache
-          console.log('[SW] Network failed, trying cache for:', url.substring(0, 80) + '...');
           const cachedResponse = await cache.match(request);
           
           if (cachedResponse) {
-            console.log('[SW] Serving API response from cache (offline mode)');
             return cachedResponse;
           }
           
-          // Om ingen cache finns, returnera error response
-          console.error('[SW] No cache available for offline request');
           return new Response(JSON.stringify({ 
             error: 'Offline - ingen cachad data tillgänglig',
             offline: true 
@@ -183,7 +212,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // För app-shell (HTML/JS/CSS): alltid hämta färskt från nätverk för att undvika "fast" UI efter uppdateringar
+  // Network-first for app shell
   const isAppShell =
     request.mode === 'navigate' ||
     request.destination === 'script' ||
@@ -194,7 +223,6 @@ self.addEventListener('fetch', (event) => {
   if (isAppShell) {
     event.respondWith(
       fetch(new Request(request, { cache: 'reload' })).catch(async () => {
-        // Offline fallback
         const cached = await caches.match(request);
         if (cached) return cached;
         if (request.mode === 'navigate') {
@@ -207,22 +235,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // För alla andra requests: Network-first med cache fallback (för t.ex. fonts)
+  // Default: Network-first with cache fallback
   event.respondWith(
     fetch(request).catch(() => caches.match(request))
   );
 });
 
-// Message event - hantera meddelanden från appen
+// Message event
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
   
-  // Preload bilder på begäran
+  // Track pending offline ops (from the app)
+  if (event.data && event.data.type === 'PENDING_OFFLINE_OPS') {
+    console.log('[SW] App has pending offline ops, will sync when online');
+    // Register a sync event to handle when connectivity returns
+    if (self.registration && 'sync' in self.registration) {
+      self.registration.sync.register('parium-offline-sync').catch(() => {
+        console.log('[SW] Could not register sync — will rely on app-level sync');
+      });
+    }
+  }
+  
+  // Preload images
   if (event.data && event.data.type === 'PRELOAD_IMAGES') {
     const urls = event.data.urls || [];
-    console.log(`[SW] Preloading ${urls.length} images...`);
     
     event.waitUntil(
       caches.open(IMAGE_CACHE).then(async (cache) => {
@@ -233,26 +271,23 @@ self.addEventListener('message', (event) => {
               const response = await fetch(url);
               if (response && response.status === 200) {
                 await cache.put(url, response);
-                console.log('[SW] Preloaded:', url.substring(0, 80) + '...');
               }
             }
           } catch (error) {
             console.warn('[SW] Failed to preload:', url, error);
           }
         }
-        console.log('[SW] Preload complete!');
       })
     );
   }
 
-  // Rensa image cache på begäran
+  // Clear caches
   if (event.data && event.data.type === 'CLEAR_IMAGE_CACHE') {
     event.waitUntil(
       Promise.all([
         caches.delete(IMAGE_CACHE),
         caches.delete(API_CACHE)
       ]).then(() => {
-        console.log('[SW] Image and API cache cleared');
         return Promise.all([
           caches.open(IMAGE_CACHE),
           caches.open(API_CACHE)
@@ -262,4 +297,4 @@ self.addEventListener('message', (event) => {
   }
 });
 
-console.log('[SW] Service Worker loaded');
+console.log('[SW] Service Worker loaded (with background sync support)');

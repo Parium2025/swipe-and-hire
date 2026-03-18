@@ -2,6 +2,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import { executeWithConflictCheck, notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
 
 /**
  * 🚀 CANDIDATE OPERATION RETRY QUEUE
@@ -74,12 +75,35 @@ export function enqueueCandidateOperation(
   );
 
   saveQueue([...filtered, queued]);
+  
+  // Notify Service Worker so it can trigger sync when connectivity returns
+  notifySwOfPendingOps();
+  
   return queued;
 }
 
 // ── Execute a single operation ────────────────────────────────────────
 
 async function executeOperation(op: QueuedCandidateOperation): Promise<boolean> {
+  // Use conflict checking for operations that update existing records
+  if (op.type === 'stage_move' || op.type === 'rating_update' || op.type === 'notes_update') {
+    const result = await executeWithConflictCheck(
+      'my_candidates',
+      op.candidateId,
+      op.queuedAt,
+      () => executeOperationInner(op)
+    );
+    if (result.reason === 'conflict') {
+      console.log(`[CandidateOpsQueue] Dropped ${op.type} for ${op.candidateId} — server is newer`);
+      return true; // Treat as success (don't retry)
+    }
+    return result.applied;
+  }
+
+  return executeOperationInner(op);
+}
+
+async function executeOperationInner(op: QueuedCandidateOperation): Promise<boolean> {
   try {
     switch (op.type) {
       case 'stage_move': {
@@ -92,14 +116,12 @@ async function executeOperation(op: QueuedCandidateOperation): Promise<boolean> 
       }
 
       case 'rating_update': {
-        // Update my_candidates
         const { error } = await supabase
           .from('my_candidates')
           .update({ rating: op.payload.rating })
           .eq('id', op.candidateId);
         if (error) throw error;
 
-        // Also persist to candidate_ratings
         if (op.applicantId && op.recruiterId) {
           await supabase
             .from('candidate_ratings')
@@ -116,14 +138,12 @@ async function executeOperation(op: QueuedCandidateOperation): Promise<boolean> 
       }
 
       case 'notes_update': {
-        // Update my_candidates
         const { error } = await supabase
           .from('my_candidates')
           .update({ notes: op.payload.notes })
           .eq('id', op.candidateId);
         if (error) throw error;
 
-        // Also persist to candidate_notes
         if (op.applicantId && op.recruiterId) {
           const { data: existing } = await supabase
             .from('candidate_notes')

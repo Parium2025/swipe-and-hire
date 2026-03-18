@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
 
 interface QueuedAction {
   jobId: string;
@@ -73,6 +74,7 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     const newQueue = [...filtered, { jobId, action, timestamp: Date.now(), attempts: 0 }];
     saveQueue(newQueue);
     setQueue(newQueue);
+    notifySwOfPendingOps();
   }, []);
 
   // Sync all queued actions

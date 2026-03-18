@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
 
 /**
  * 🚀 OFFLINE JOB APPLICATION QUEUE
@@ -120,6 +121,7 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
     saveQueue(newQueue);
     setQueue(prev => [...prev.filter(q => !(q.jobId === app.jobId && q.applicantId === app.applicantId)), queued]);
 
+    notifySwOfPendingOps();
     return queued;
   }, []);
 

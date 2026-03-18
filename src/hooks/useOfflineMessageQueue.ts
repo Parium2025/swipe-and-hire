@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
 import {
   findExistingConversationId,
   createConversationForCandidate,
@@ -90,6 +91,7 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     const newQueue = [...getQueuedMessages(), queuedMessage];
     saveQueuedMessages(newQueue);
     setQueue(prev => [...prev, queuedMessage]);
+    notifySwOfPendingOps();
     return queuedMessage;
   }, [userId]);
 
