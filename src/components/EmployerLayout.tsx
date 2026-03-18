@@ -1,4 +1,5 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider } from "@/components/ui/sidebar";
