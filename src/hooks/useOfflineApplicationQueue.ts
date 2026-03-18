@@ -232,12 +232,12 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
     });
 
     // Also sync on mount if online and queue has items
-    if (getIsOnline() && queue.length > 0) {
+    if (getIsOnline() && getQueue().filter(a => a.applicantId === userId).length > 0) {
       syncQueue();
     }
 
     return unsub;
-  }, [syncQueue, queue.length]);
+  }, [syncQueue, userId]);
 
   // Check if a specific job has a queued application
   const isJobQueued = useCallback((jobId: string) => {

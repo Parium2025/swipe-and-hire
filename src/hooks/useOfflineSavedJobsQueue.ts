@@ -7,6 +7,7 @@ import { safeSetItem } from '@/lib/safeStorage';
 
 interface QueuedAction {
   jobId: string;
+  userId: string;
   action: 'save' | 'unsave';
   timestamp: number;
   attempts: number;
@@ -24,6 +25,7 @@ function isValidQueuedAction(item: unknown): item is QueuedAction {
   const obj = item as Record<string, unknown>;
   return (
     typeof obj.jobId === 'string' &&
+    typeof obj.userId === 'string' &&
     (obj.action === 'save' || obj.action === 'unsave') &&
     typeof obj.timestamp === 'number' &&
     typeof obj.attempts === 'number'
@@ -62,26 +64,27 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
   // Load queue on mount
   useEffect(() => {
     if (userId) {
-      setQueue(getQueue());
+      setQueue(getQueue().filter(q => q.userId === userId));
     }
   }, [userId]);
 
   // Enqueue an action
   const enqueue = useCallback((jobId: string, action: 'save' | 'unsave') => {
+    if (!userId) return;
     const currentQueue = getQueue();
-    // Deduplicate: remove any existing action for this jobId, keep latest
-    const filtered = currentQueue.filter(q => q.jobId !== jobId);
-    const newQueue = [...filtered, { jobId, action, timestamp: Date.now(), attempts: 0 }];
+    // Deduplicate: remove any existing action for this jobId+userId, keep latest
+    const filtered = currentQueue.filter(q => !(q.jobId === jobId && q.userId === userId));
+    const newQueue = [...filtered, { jobId, userId, action, timestamp: Date.now(), attempts: 0 }];
     saveQueue(newQueue);
-    setQueue(newQueue);
+    setQueue(prev => [...prev.filter(q => q.jobId !== jobId), { jobId, userId, action, timestamp: Date.now(), attempts: 0 }]);
     notifySwOfPendingOps();
-  }, []);
+  }, [userId]);
 
   // Sync all queued actions
   const syncQueue = useCallback(async () => {
     if (!userId || syncInProgress.current) return;
 
-    const currentQueue = getQueue();
+    const currentQueue = getQueue().filter(q => q.userId === userId);
     if (currentQueue.length === 0) return;
 
     syncInProgress.current = true;
@@ -126,7 +129,10 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
       }
     }
 
-    saveQueue(remaining);
+    // Re-read and keep ops for other users untouched
+    const fullQueue = getQueue();
+    const otherUserOps = fullQueue.filter(q => q.userId !== userId);
+    saveQueue([...otherUserOps, ...remaining]);
     setQueue(remaining);
     syncInProgress.current = false;
 
@@ -144,12 +150,12 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
       }
     });
 
-    if (getIsOnline() && queue.length > 0) {
+    if (getIsOnline() && userId && getQueue().filter(q => q.userId === userId).length > 0) {
       syncQueue();
     }
 
     return unsub;
-  }, [syncQueue, queue.length]);
+  }, [syncQueue, userId]);
 
   return {
     queue,

@@ -194,12 +194,12 @@ export function useOfflineMessageQueue(userId: string | undefined) {
       }
     });
 
-    if (getIsOnline() && queue.length > 0) {
+    if (getIsOnline() && getQueuedMessages().filter(m => m.sender_id === userId).length > 0) {
       syncQueue();
     }
 
     return unsub;
-  }, [syncQueue, queue.length]);
+  }, [syncQueue, userId]);
 
   const removeFromQueue = useCallback((messageId: string) => {
     const currentQueue = getQueuedMessages();
