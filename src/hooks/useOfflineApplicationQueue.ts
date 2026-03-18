@@ -199,7 +199,10 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
       }
     }
 
-    saveQueue(remaining);
+    // Re-read and keep other users' applications untouched
+    const fullQueue = getQueue();
+    const otherUserApps = fullQueue.filter(a => a.applicantId !== userId);
+    saveQueue([...otherUserApps, ...remaining]);
     setQueue(remaining);
     syncInProgress.current = false;
     setSyncing(false);

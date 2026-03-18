@@ -170,7 +170,10 @@ export function useOfflineProfileQueue(userId: string | undefined) {
       }
     }
 
-    saveQueue(remaining);
+    // Re-read and keep other users' profile updates untouched
+    const fullQueue = getQueue();
+    const otherUserUpdates = fullQueue.filter(q => q.userId !== userId);
+    saveQueue([...otherUserUpdates, ...remaining]);
     setQueue(remaining);
     syncInProgress.current = false;
     setSyncing(false);
@@ -192,8 +195,8 @@ export function useOfflineProfileQueue(userId: string | undefined) {
       }
     });
 
-    // Also sync on mount if online and queue has items
-    if (getIsOnline() && queue.length > 0) {
+    // Also sync on mount if online and queue has items (read from localStorage, not React state)
+    if (getIsOnline() && userId && getQueue().filter(q => q.userId === userId).length > 0) {
       syncQueue();
     }
 
