@@ -14,7 +14,6 @@ interface QueuedAction {
 
 const QUEUE_KEY = 'parium_offline_saved_jobs_queue';
 const MAX_ATTEMPTS = 3;
-const MAX_QUEUE_SIZE = 50;
 
 /**
  * Validates parsed data has the correct QueuedAction shape.
