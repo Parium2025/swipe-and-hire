@@ -186,7 +186,7 @@ const Support = () => {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full h-9 bg-white/5 border-white/10 text-white transition-colors justify-between text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white"
+                    className="w-full h-11 bg-white/5 border-white/10 text-white transition-colors justify-between text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white"
                   >
                     <span className="truncate text-left flex-1 px-1">
                       {categoryOptions.find(o => o.value === category)?.label || 'Välj kategori'}
@@ -239,7 +239,7 @@ const Support = () => {
               <Button 
                 type="submit" 
                 variant="glass"
-                className={`h-9 px-6 text-sm ${!isOnline ? 'bg-gray-500/50 cursor-not-allowed' : ''}`}
+                className={`h-11 px-6 text-sm ${!isOnline ? 'bg-gray-500/50 cursor-not-allowed' : ''}`}
                 disabled={loading || !isOnline}
               >
                 {loading ? 'Skickar...' : !isOnline ? (
