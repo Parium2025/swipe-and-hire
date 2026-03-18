@@ -1350,6 +1350,20 @@ All colors MUST be HSL.
   padding-inline: clamp(0.75rem, 2.5vw, 2rem);
 }
 
+/* Messages page: edge-to-edge on mobile, contained on larger screens */
+.messages-container {
+  width: 100%;
+  padding-inline: 0;
+}
+
+@media (min-width: 768px) {
+  .messages-container {
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: clamp(0.75rem, 2.5vw, 2rem);
+  }
+}
+
 /* ============================================
    DASHBOARD CARD HEIGHT
    Fixed height with breakpoints for reliable proportions
