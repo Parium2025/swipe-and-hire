@@ -1006,7 +1006,7 @@ const CompanyProfile = () => {
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
                   placeholder="https://din-webbsida.se"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"
                 />
               </div>
             </div>
