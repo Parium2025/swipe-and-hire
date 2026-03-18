@@ -899,7 +899,7 @@ const EmployerProfile = () => {
                 type="submit"
                 disabled={loading || !hasUnsavedChanges}
                 variant="glass"
-                className="h-9 px-6 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-11 !min-h-0 px-6 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
