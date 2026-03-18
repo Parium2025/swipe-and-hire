@@ -472,7 +472,7 @@ const Index = () => {
           return <Support />;
         case '/admin':
           // Endast Fredrik kan komma åt admin-sidan
-          if (user.email === 'fredrikandits@hotmail.com') {
+          if (isAdmin) {
             return <SupportAdmin />;
           } else {
             navigate('/support');
