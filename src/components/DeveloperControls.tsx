@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Settings, UserCheck, Building, Users, ArrowRightLeft, Code, Lightbulb } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useNavigate } from 'react-router-dom';
 
 interface DeveloperControlsProps {
