@@ -253,7 +253,7 @@ const TeamManagement = () => {
               placeholder="E-postadress"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white h-9 text-sm"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm"
             />
           </div>
           <Select value={inviteRole} onValueChange={setInviteRole}>
