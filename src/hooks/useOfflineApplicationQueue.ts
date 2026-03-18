@@ -172,7 +172,13 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
     let synced = 0;
     const syncedJobIds: string[] = [];
 
-    for (const app of currentQueue) {
+    for (let i = 0; i < currentQueue.length; i++) {
+      const app = currentQueue[i];
+      // Exponential backoff for retried operations
+      if (app.attempts > 0) {
+        const delay = Math.min(1000 * Math.pow(2, app.attempts - 1), 30000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
       const success = await syncApplication(app);
 
       if (success) {

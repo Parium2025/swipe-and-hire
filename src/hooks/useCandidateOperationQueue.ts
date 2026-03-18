@@ -236,7 +236,15 @@ export async function syncCandidateOperationQueue(userId?: string): Promise<numb
     const remaining: QueuedCandidateOperation[] = [];
     let synced = 0;
 
-    for (const op of queue) {
+    for (let i = 0; i < queue.length; i++) {
+      const op = queue[i];
+      
+      // Exponential backoff: wait before retrying failed ops
+      if (op.attempts > 0) {
+        const delay = Math.min(1000 * Math.pow(2, op.attempts - 1), 30000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      
       const success = await executeOperation(op);
 
       if (success) {

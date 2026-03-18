@@ -145,7 +145,13 @@ export function useOfflineProfileQueue(userId: string | undefined) {
     const remaining: QueuedProfileUpdate[] = [];
     let synced = 0;
 
-    for (const item of currentQueue) {
+    for (let i = 0; i < currentQueue.length; i++) {
+      const item = currentQueue[i];
+      // Exponential backoff for retried operations
+      if (item.attempts > 0) {
+        const delay = Math.min(1000 * Math.pow(2, item.attempts - 1), 30000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
       const success = await syncProfileUpdate(item);
 
       if (success) {

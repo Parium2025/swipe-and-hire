@@ -157,7 +157,13 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     const remaining: QueuedMessage[] = [];
     let syncedCount = 0;
 
-    for (const message of currentQueue) {
+    for (let i = 0; i < currentQueue.length; i++) {
+      const message = currentQueue[i];
+      // Exponential backoff for retried messages
+      if (message.attempts > 0) {
+        const delay = Math.min(1000 * Math.pow(2, message.attempts - 1), 30000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
       const success = await syncMessage(message);
       if (success) {
         syncedCount++;

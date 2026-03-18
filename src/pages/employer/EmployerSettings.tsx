@@ -236,41 +236,6 @@ const EmployerSettings = () => {
       {/* Team Management - Only visible for admins */}
       <TeamManagement />
 
-      {/* Developer Tools - Only for specific test account */}
-      {isDevAccount && (
-        <div className="bg-amber-500/10 backdrop-blur-sm border border-amber-500/30 rounded-lg p-6 md:p-4">
-          <div className="space-y-5 md:space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Bug className="h-4 w-4 text-amber-400" />
-              <h3 className="text-sm font-medium text-amber-300">Developer Tools</h3>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <Label className="text-sm text-white flex items-center gap-2">
-                  <WifiOff className="h-4 w-4 text-amber-400" />
-                  Offline Mode
-                </Label>
-                <p className="text-sm text-white/70">
-                  Simulera offline-läge för att testa hur appen beter sig utan internet
-                </p>
-              </div>
-              <Switch
-                checked={isOfflineForced}
-                onCheckedChange={(checked) => {
-                  toggleOfflineMode(checked);
-                  toast({
-                    title: checked ? "Offline-läge aktiverat" : "Offline-läge inaktiverat",
-                    description: checked 
-                      ? "Appen beter sig nu som om den är offline" 
-                      : "Normal anslutning återställd"
-                  });
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

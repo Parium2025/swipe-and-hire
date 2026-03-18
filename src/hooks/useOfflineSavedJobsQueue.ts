@@ -93,7 +93,13 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     const remaining: QueuedAction[] = [];
     let synced = 0;
 
-    for (const item of currentQueue) {
+    for (let i = 0; i < currentQueue.length; i++) {
+      const item = currentQueue[i];
+      // Exponential backoff for retried operations
+      if (item.attempts > 0) {
+        const delay = Math.min(1000 * Math.pow(2, item.attempts - 1), 30000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
       try {
         if (item.action === 'save') {
           const { error } = await supabase
