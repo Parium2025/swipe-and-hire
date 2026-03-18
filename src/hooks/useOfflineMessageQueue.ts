@@ -24,7 +24,6 @@ interface QueuedMessage {
 
 const QUEUE_KEY = 'parium_offline_message_queue';
 const MAX_ATTEMPTS = 3;
-const MAX_QUEUE_SIZE = 100;
 
 function isValidQueuedMessage(item: unknown): item is QueuedMessage {
   if (!item || typeof item !== 'object') return false;
