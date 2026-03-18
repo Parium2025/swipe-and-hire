@@ -74,8 +74,6 @@ function saveQueue(queue: QueuedCandidateOperation[]) {
     console.error('[CandidateOpsQueue] Failed to persist queue — localStorage full even after eviction');
   }
 }
-  }
-}
 
 // ── Public enqueue (can be called outside React) ──────────────────────
 
