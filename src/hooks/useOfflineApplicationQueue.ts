@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
 
 /**
  * 🚀 OFFLINE JOB APPLICATION QUEUE
