@@ -568,7 +568,6 @@ export function ChatView({
             className="border-b border-white/10 overflow-hidden"
           >
             <div className="flex items-center gap-2 p-3">
-              <Search className="h-4 w-4 text-pure-white flex-shrink-0" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
