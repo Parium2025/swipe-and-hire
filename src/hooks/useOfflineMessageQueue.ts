@@ -17,6 +17,7 @@ interface QueuedMessage {
   job_id: string | null;
   application_id?: string | null;
   created_at: string;
+  queuedAt: number;
   attempts: number;
 }
 
