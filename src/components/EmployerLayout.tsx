@@ -16,7 +16,7 @@ import { useCandidateBackgroundSync } from '@/hooks/useCandidateBackgroundSync';
 import { useEagerRatingsPreload } from '@/hooks/useEagerRatingsPreload';
 import { useEmployerBackgroundSync } from '@/hooks/useEmployerBackgroundSync';
 import { useEmployerPrefetch } from '@/hooks/useEmployerPrefetch';
-import { DevOfflineToggle } from '@/components/DevOfflineToggle';
+
 import { FloatingBubbles } from '@/components/FloatingBubbles';
 import { Plus } from 'lucide-react';
 import { EmployerLogoSidebarTrigger, EmployerMobileProfileAvatar } from '@/components/employer/EmployerMobileHeader';
