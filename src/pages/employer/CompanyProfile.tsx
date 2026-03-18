@@ -824,7 +824,7 @@ const CompanyProfile = () => {
                   id="company_name"
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"
                 />
               </div>
 
@@ -849,7 +849,7 @@ const CompanyProfile = () => {
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
                   maxLength={11}
-                  className={`bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white ${orgNumberError ? 'border-red-500/50' : ''}`}
+                  className={`bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white ${orgNumberError ? 'border-red-500/50' : ''}`}
                 />
                 {orgNumberError && (
                   <p className="text-red-400/80 text-sm mt-1">{orgNumberError}</p>
@@ -995,7 +995,7 @@ const CompanyProfile = () => {
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                   placeholder="Hammarby Backen 89555"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"
                 />
               </div>
 
@@ -1006,7 +1006,7 @@ const CompanyProfile = () => {
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
                   placeholder="https://din-webbsida.se"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"
                 />
               </div>
             </div>
@@ -1121,19 +1121,20 @@ const CompanyProfile = () => {
                     placeholder="Klistra in din sociala medier länk här"
                     value={newSocialLink.url}
                     onChange={(e) => setNewSocialLink(prev => ({ ...prev, url: e.target.value }))}
-                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
+                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
                   />
 
                   <Button
                     type="button"
                     onClick={addSocialLink}
                     disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
+                    size="sm"
                     className={cn(
-                      "w-full bg-white/5 border border-white/10 text-white h-9 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      "w-auto bg-white/5 border border-white/10 text-white h-9 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     )}
                   >
                     Lägg till
-                    <Plus className="h-4 w-4 ml-2" />
+                    <Plus className="h-3.5 w-3.5 ml-1.5" />
                   </Button>
                 </div>
               </div>
@@ -1179,7 +1180,7 @@ const CompanyProfile = () => {
                           value={formData.interview_video_link}
                           onChange={(e) => setFormData({...formData, interview_video_link: e.target.value})}
                           placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
-                          className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white flex-1"
+                          className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white flex-1"
                         />
                         
                         {/* Validation icons inline */}
@@ -1285,7 +1286,7 @@ const CompanyProfile = () => {
                         value={formData.interview_office_address}
                         onChange={(e) => setFormData({...formData, interview_office_address: e.target.value})}
                         placeholder="Storgatan 1, 111 22 Stockholm"
-                        className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
+                        className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"
                       />
                       <p className="text-xs text-white">Adressen som visas för kandidater vid fysiska intervjuer</p>
                     </div>
