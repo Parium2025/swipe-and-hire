@@ -181,7 +181,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     if (content === serverContent) return;
 
     const timer = setTimeout(async () => {
-      if (!navigator.onLine && !getIsOnline()) {
+      if (!getIsOnline()) {
         console.log('Offline - skipping note save');
         return;
       }

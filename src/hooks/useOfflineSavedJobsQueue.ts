@@ -7,6 +7,7 @@ import { safeSetItem } from '@/lib/safeStorage';
 
 interface QueuedAction {
   jobId: string;
+  userId: string;
   action: 'save' | 'unsave';
   timestamp: number;
   attempts: number;
