@@ -270,7 +270,7 @@ function JobSeekerTopNav() {
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
-                    isDropdownActive(supportItems) || (isAdmin && isActiveUrl('/admin')) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
+                    isDropdownActive(supportItems) || (isOrgAdmin && isActiveUrl('/admin')) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
                 <HelpCircle className="h-4 w-4 relative z-10" />
