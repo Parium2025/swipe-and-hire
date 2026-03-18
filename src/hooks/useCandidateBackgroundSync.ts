@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
@@ -268,11 +269,11 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       items: items.slice(0, 50),
       timestamp: Date.now(),
     };
-    localStorage.setItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
+    safeSetItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
     
     // Spara betyg separat för snabb åtkomst
     if (Object.keys(ratingsMap).length > 0) {
-      localStorage.setItem(`ratings_cache_${userId}`, JSON.stringify({
+      safeSetItem(`ratings_cache_${userId}`, JSON.stringify({
         ratings: ratingsMap,
         timestamp: Date.now()
       }));
@@ -443,7 +444,7 @@ async function syncStageSettings(userId: string, queryClient: ReturnType<typeof 
     
     // Spara till localStorage för instant first paint nästa gång
     const cacheKey = STAGE_SETTINGS_CACHE_KEY + userId;
-    localStorage.setItem(cacheKey, JSON.stringify({
+    safeSetItem(cacheKey, JSON.stringify({
       settings,
       timestamp: Date.now(),
     }));
