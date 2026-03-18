@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 
 type NoteTable = 'employer_notes' | 'jobseeker_notes';
 type OwnerColumn = 'employer_id' | 'user_id';
@@ -132,7 +133,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   // Synchronous save function (used by both debounce and beforeunload)
   const saveToDb = useCallback(async (contentToSave: string) => {
-    if (!user?.id || !navigator.onLine) return false;
+    if (!user?.id || !getIsOnline()) return false;
     const nd = noteDataRef.current;
 
     try {
@@ -180,7 +181,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     if (content === serverContent) return;
 
     const timer = setTimeout(async () => {
-      if (!navigator.onLine) {
+      if (!navigator.onLine && !getIsOnline()) {
         console.log('Offline - skipping note save');
         return;
       }
@@ -200,26 +201,26 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => clearTimeout(timer);
   }, [content, user?.id, isFetched, noteData, queryClient, queryKey, saveToDb]);
 
-  // Retry queued save when coming back online
+  // Retry queued save when coming back online (uses ConnectivityManager)
   useEffect(() => {
     if (!user?.id) return;
-    const handleOnline = async () => {
-      if (!hasLocalEditsRef.current) return;
-      console.log(`🔄 Back online — retrying ${table} save`);
-      setIsSaving(true);
-      const success = await saveToDb(contentRef.current);
-      if (success) {
-        hasLocalEditsRef.current = false;
-        setSaveFailed(false);
-        setLastSaved(new Date());
-        queryClient.invalidateQueries({ queryKey: [queryKey, user.id] });
-      } else {
-        setSaveFailed(true);
+    const unsub = onConnectivityChange(async (online) => {
+      if (online && hasLocalEditsRef.current) {
+        console.log(`🔄 Back online — retrying ${table} save`);
+        setIsSaving(true);
+        const success = await saveToDb(contentRef.current);
+        if (success) {
+          hasLocalEditsRef.current = false;
+          setSaveFailed(false);
+          setLastSaved(new Date());
+          queryClient.invalidateQueries({ queryKey: [queryKey, user.id] });
+        } else {
+          setSaveFailed(true);
+        }
+        setIsSaving(false);
       }
-      setIsSaving(false);
-    };
-    window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
+    });
+    return unsub;
   }, [user?.id, saveToDb, queryClient, queryKey, table]);
 
   // Keep a ref to the latest access token for beforeunload (avoids async in sync handler)

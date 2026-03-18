@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
+import { safeSetItem } from '@/lib/safeStorage';
 
 interface QueuedAction {
   jobId: string;
@@ -13,7 +14,6 @@ interface QueuedAction {
 
 const QUEUE_KEY = 'parium_offline_saved_jobs_queue';
 const MAX_ATTEMPTS = 3;
-const MAX_QUEUE_SIZE = 50;
 
 /**
  * Validates parsed data has the correct QueuedAction shape.
@@ -44,10 +44,9 @@ function getQueue(): QueuedAction[] {
 }
 
 function saveQueue(queue: QueuedAction[]) {
-  try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-  } catch {
-    console.error('Failed to save offline saved jobs queue');
+  const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
+  if (!saved) {
+    console.error('[SavedJobsQueue] Failed to save — localStorage full even after eviction');
   }
 }
 
@@ -73,10 +72,6 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     // Deduplicate: remove any existing action for this jobId, keep latest
     const filtered = currentQueue.filter(q => q.jobId !== jobId);
     const newQueue = [...filtered, { jobId, action, timestamp: Date.now(), attempts: 0 }];
-    // Cap queue size
-    if (newQueue.length > MAX_QUEUE_SIZE) {
-      newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
-    }
     saveQueue(newQueue);
     setQueue(newQueue);
     notifySwOfPendingOps();

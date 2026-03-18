@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { shouldApplyQueuedOp, notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
+import { safeSetItem } from '@/lib/safeStorage';
 
 /**
  * 🚀 OFFLINE PROFILE UPDATE QUEUE
@@ -29,7 +30,6 @@ export interface QueuedProfileUpdate {
 
 const QUEUE_KEY = 'parium_offline_profile_queue';
 const MAX_ATTEMPTS = 3;
-const MAX_QUEUE_SIZE = 10;
 
 /**
  * Validates that a parsed object has the required QueuedProfileUpdate shape.
@@ -61,10 +61,9 @@ function getQueue(): QueuedProfileUpdate[] {
 }
 
 function saveQueue(queue: QueuedProfileUpdate[]) {
-  try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-  } catch {
-    console.error('Failed to save offline profile queue');
+  const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
+  if (!saved) {
+    console.error('[ProfileQueue] Failed to save — localStorage full even after eviction');
   }
 }
 
@@ -97,9 +96,6 @@ export function useOfflineProfileQueue(userId: string | undefined) {
     const currentQueue = getQueue();
     const filtered = currentQueue.filter(q => q.userId !== userId);
     const newQueue = [...filtered, queued];
-    if (newQueue.length > MAX_QUEUE_SIZE) {
-      newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
-    }
     saveQueue(newQueue);
     setQueue([queued]);
 

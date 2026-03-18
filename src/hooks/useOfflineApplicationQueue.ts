@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
+import { safeSetItem } from '@/lib/safeStorage';
 
 /**
  * 🚀 OFFLINE JOB APPLICATION QUEUE
@@ -53,7 +54,6 @@ export interface QueuedApplication {
 
 const QUEUE_KEY = 'parium_offline_application_queue';
 const MAX_ATTEMPTS = 3;
-const MAX_QUEUE_SIZE = 20;
 
 /**
  * Validates that a parsed object has the required QueuedApplication shape.
@@ -86,10 +86,9 @@ function getQueue(): QueuedApplication[] {
 }
 
 function saveQueue(queue: QueuedApplication[]) {
-  try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-  } catch {
-    console.error('Failed to save offline application queue');
+  const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
+  if (!saved) {
+    console.error('[ApplicationQueue] Failed to save — localStorage full even after eviction');
   }
 }
 
@@ -119,10 +118,6 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
     const currentQueue = getQueue();
     const filtered = currentQueue.filter(q => !(q.jobId === app.jobId && q.applicantId === app.applicantId));
     const newQueue = [...filtered, queued];
-    // Cap queue size
-    if (newQueue.length > MAX_QUEUE_SIZE) {
-      newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
-    }
     saveQueue(newQueue);
     setQueue(prev => [...prev.filter(q => !(q.jobId === app.jobId && q.applicantId === app.applicantId)), queued]);
 

@@ -4,6 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
+import { safeSetItem } from '@/lib/safeStorage';
 import {
   findExistingConversationId,
   createConversationForCandidate,
@@ -21,6 +23,7 @@ interface QueuedMessage {
   application_id: string;
   content: string;
   created_at: string;
+  queuedAt: number;
   attempts: number;
 }
 
@@ -51,10 +54,9 @@ function getBulkQueue(): QueuedMessage[] {
 }
 
 function saveBulkQueue(items: QueuedMessage[]) {
-  try {
-    localStorage.setItem(BULK_QUEUE_KEY, JSON.stringify(items));
-  } catch {
-    console.error('Failed to save bulk message queue');
+  const saved = safeSetItem(BULK_QUEUE_KEY, JSON.stringify(items));
+  if (!saved) {
+    console.error('[BulkMessageSync] Failed to save — localStorage full even after eviction');
   }
 }
 
@@ -84,7 +86,13 @@ export function useBulkMessageSync() {
         let sent = 0;
         const remaining = items.filter((i) => i.sender_id !== user.id);
 
-        for (const item of myItems) {
+        for (let i = 0; i < myItems.length; i++) {
+          const item = myItems[i];
+          // Exponential backoff for retried messages
+          if (item.attempts > 0) {
+            const delay = Math.min(1000 * Math.pow(2, item.attempts - 1), 30000);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
           try {
             let convId = await findExistingConversationId(user.id, item.applicant_id);
 

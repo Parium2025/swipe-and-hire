@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { executeWithConflictCheck, notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
+import { safeSetItem } from '@/lib/safeStorage';
 
 /**
  * 🚀 CANDIDATE OPERATION RETRY QUEUE
@@ -38,7 +39,7 @@ const MAX_ATTEMPTS = 3;
 
 // ── localStorage helpers ──────────────────────────────────────────────
 
-const MAX_QUEUE_SIZE = 50;
+
 
 function isValidQueuedOp(item: unknown): item is QueuedCandidateOperation {
   if (!item || typeof item !== 'object') return false;
@@ -68,10 +69,9 @@ function getQueue(): QueuedCandidateOperation[] {
 }
 
 function saveQueue(queue: QueuedCandidateOperation[]) {
-  try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-  } catch {
-    console.error('[CandidateOpsQueue] Failed to persist queue');
+  const saved = safeSetItem(QUEUE_KEY, JSON.stringify(queue));
+  if (!saved) {
+    console.error('[CandidateOpsQueue] Failed to persist queue — localStorage full even after eviction');
   }
 }
 
@@ -96,11 +96,6 @@ export function enqueueCandidateOperation(
 
   // Cap queue size to prevent localStorage overflow
   const newQueue = [...filtered, queued];
-  if (newQueue.length > MAX_QUEUE_SIZE) {
-    console.warn(`[CandidateOpsQueue] Queue exceeds ${MAX_QUEUE_SIZE}, dropping oldest`);
-    newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
-  }
-
   saveQueue(newQueue);
   
   // Notify Service Worker so it can trigger sync when connectivity returns

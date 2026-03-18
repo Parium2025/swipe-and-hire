@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
+import { safeSetItem } from '@/lib/safeStorage';
 import {
   findExistingConversationId,
   createConversationForCandidate,
@@ -23,7 +24,6 @@ interface QueuedMessage {
 
 const QUEUE_KEY = 'parium_offline_message_queue';
 const MAX_ATTEMPTS = 3;
-const MAX_QUEUE_SIZE = 100;
 
 function isValidQueuedMessage(item: unknown): item is QueuedMessage {
   if (!item || typeof item !== 'object') return false;
@@ -52,10 +52,9 @@ function getQueuedMessages(): QueuedMessage[] {
 }
 
 function saveQueuedMessages(messages: QueuedMessage[]) {
-  try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(messages));
-  } catch {
-    console.error('Failed to save offline message queue');
+  const saved = safeSetItem(QUEUE_KEY, JSON.stringify(messages));
+  if (!saved) {
+    console.error('[MessageQueue] Failed to save — localStorage full even after eviction');
   }
 }
 
@@ -93,10 +92,6 @@ export function useOfflineMessageQueue(userId: string | undefined) {
 
     const existing = getQueuedMessages();
     const newQueue = [...existing, queuedMessage];
-    // Cap queue to prevent localStorage overflow
-    if (newQueue.length > MAX_QUEUE_SIZE) {
-      newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
-    }
     saveQueuedMessages(newQueue);
     setQueue(prev => [...prev, queuedMessage]);
     notifySwOfPendingOps();
