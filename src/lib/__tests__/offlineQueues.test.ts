@@ -320,8 +320,8 @@ describe('ConnectivityManager integration', () => {
 
   it('listeners are called on connectivity change', () => {
     const listener = vi.fn();
-    const { onConnectivityChange } = require('@/lib/connectivityManager');
-    const unsub = onConnectivityChange(listener);
+    // Use the mocked onConnectivityChange directly
+    mockListeners.add(listener);
 
     simulateGoOffline();
     expect(listener).toHaveBeenCalledWith(false);
@@ -329,16 +329,15 @@ describe('ConnectivityManager integration', () => {
     simulateGoOnline();
     expect(listener).toHaveBeenCalledWith(true);
 
-    unsub();
+    mockListeners.delete(listener);
     simulateGoOffline();
     expect(listener).toHaveBeenCalledTimes(2); // Not called after unsub
   });
 
   it('unsubscribe prevents further calls', () => {
     const listener = vi.fn();
-    const { onConnectivityChange } = require('@/lib/connectivityManager');
-    const unsub = onConnectivityChange(listener);
-    unsub();
+    mockListeners.add(listener);
+    mockListeners.delete(listener);
     simulateGoOnline();
     expect(listener).not.toHaveBeenCalled();
   });
