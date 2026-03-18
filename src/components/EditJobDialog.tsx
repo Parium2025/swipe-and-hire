@@ -2888,7 +2888,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   {question.question_type === 'date' && (
                                                     <input
                                                       type="date"
-                                                      className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-9"
+                                                      className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-11"
                                                       disabled
                                                     />
                                                   )}
