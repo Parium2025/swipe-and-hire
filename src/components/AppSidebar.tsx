@@ -90,7 +90,7 @@ export function AppSidebar() {
     }
   }, [preloadedVideoUrl]);
 
-  const isAdmin = user?.email === 'fredrikandits@hotmail.com';
+  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
 
   // Support items - add admin for Fredrik
   const supportItems = [
