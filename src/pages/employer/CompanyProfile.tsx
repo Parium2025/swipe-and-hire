@@ -1128,13 +1128,12 @@ const CompanyProfile = () => {
                     type="button"
                     onClick={addSocialLink}
                     disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
-                    size="sm"
                     className={cn(
-                      "w-auto bg-white/5 border border-white/10 text-white h-9 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      "w-full bg-white/5 border border-white/10 text-white h-11 !min-h-0 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     )}
                   >
                     Lägg till
-                    <Plus className="h-3.5 w-3.5 ml-1.5" />
+                    <Plus className="h-4 w-4 ml-2" />
                   </Button>
                 </div>
               </div>
