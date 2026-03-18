@@ -62,27 +62,39 @@ export function EmojiReactionPicker({
 
   if (!anchorRect) return null;
 
-  // Calculate position - prefer above, fall back to below if not enough space
+  // Robust viewport-aware positioning
   const pickerWidth = 280;
-  const pickerHeight = 200; // approximate picker height
+  const pickerHeight = 208; // estimated full height
   const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const margin = 8;
   const gap = 8;
 
-  let left = isOwn
-    ? anchorRect.right - pickerWidth
-    : anchorRect.left;
+  let left = isOwn ? anchorRect.right - pickerWidth : anchorRect.left;
+  left = Math.max(margin, Math.min(left, viewportWidth - pickerWidth - margin));
 
-  // Clamp to viewport horizontally
-  if (left < 8) left = 8;
-  if (left + pickerWidth > viewportWidth - 8) left = viewportWidth - pickerWidth - 8;
+  const spaceAbove = anchorRect.top - margin;
+  const spaceBelow = viewportHeight - anchorRect.bottom - margin;
 
-  // Decide above vs below: if not enough space above, show below
-  const spaceAbove = anchorRect.top;
-  const showBelow = spaceAbove < pickerHeight + gap + 40; // 40px safety margin
+  let top: number;
+  let verticalDirection: 'up' | 'down';
 
-  const top = showBelow
-    ? anchorRect.bottom + gap
-    : anchorRect.top - gap;
+  if (spaceAbove >= pickerHeight) {
+    // Place above bubble
+    top = anchorRect.top - pickerHeight - gap;
+    verticalDirection = 'up';
+  } else if (spaceBelow >= pickerHeight) {
+    // Place below bubble
+    top = anchorRect.bottom + gap;
+    verticalDirection = 'down';
+  } else {
+    // Bubble is too tall / limited space: clamp inside viewport and pick best animation direction
+    const preferredTop = spaceBelow >= spaceAbove
+      ? anchorRect.bottom + gap
+      : anchorRect.top - pickerHeight - gap;
+    top = Math.max(margin, Math.min(preferredTop, viewportHeight - pickerHeight - margin));
+    verticalDirection = spaceBelow >= spaceAbove ? 'down' : 'up';
+  }
 
   return (
     <AnimatePresence>
@@ -104,11 +116,10 @@ export function EmojiReactionPicker({
             style={{
               left,
               top,
-              transform: showBelow ? 'none' : 'translateY(-100%)',
             }}
-            initial={{ opacity: 0, scale: 0.85, y: showBelow ? -10 : 10 }}
+            initial={{ opacity: 0, scale: 0.85, y: verticalDirection === 'up' ? 10 : -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.85, y: showBelow ? -10 : 10 }}
+            exit={{ opacity: 0, scale: 0.85, y: verticalDirection === 'up' ? 10 : -10 }}
             transition={{
               type: 'spring',
               damping: 25,
@@ -116,7 +127,7 @@ export function EmojiReactionPicker({
               mass: 0.6,
             }}
           >
-            <div className="rounded-2xl bg-black/85 border border-white/15 backdrop-blur-xl shadow-2xl overflow-hidden">
+            <div className="rounded-2xl bg-black/85 border border-white/15 backdrop-blur-xl shadow-2xl overflow-y-auto" style={{ maxHeight: 'calc(100vh - 16px)' }}>
               {/* Quick-access top row (first 6 most common) */}
               <div className="flex items-center justify-around px-2 py-2.5 border-b border-white/10">
                 {EMOJI_CATEGORIES[0].emojis.slice(0, 6).map((emoji) => (
