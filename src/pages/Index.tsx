@@ -332,7 +332,7 @@ const Index = () => {
         !location.pathname.startsWith('/billing') && 
         !location.pathname.startsWith('/payment') && 
         !location.pathname.startsWith('/consent')) {
-      if (user.email === 'fredrikandits@hotmail.com') {
+      if (isAdmin) {
         setShowProfileSelector(true);
       }
     }
@@ -472,7 +472,7 @@ const Index = () => {
           return <Support />;
         case '/admin':
           // Endast Fredrik kan komma åt admin-sidan
-          if (user.email === 'fredrikandits@hotmail.com') {
+          if (isAdmin) {
             return <SupportAdmin />;
           } else {
             navigate('/support');
@@ -536,7 +536,7 @@ const Index = () => {
         case '/support':
           return <Support />;
         case '/admin':
-          if (user.email === 'fredrikandits@hotmail.com') {
+          if (isAdmin) {
             return <SupportAdmin />;
           } else {
             navigate('/support');

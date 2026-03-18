@@ -1,6 +1,7 @@
 import React, { memo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
@@ -95,7 +96,7 @@ function JobSeekerTopNav() {
   const coverUrl = preloadedCoverUrl || null;
   const hasVideo = !!(profile?.video_url || preloadedVideoUrl || videoUrl);
 
-  const isAdmin = user?.email === 'fredrikandits@hotmail.com';
+  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
 
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {
@@ -269,7 +270,7 @@ function JobSeekerTopNav() {
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
-                    isDropdownActive(supportItems) || (isAdmin && isActiveUrl('/admin')) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
+                    isDropdownActive(supportItems) || (isOrgAdmin && isActiveUrl('/admin')) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
                 <HelpCircle className="h-4 w-4 relative z-10" />
@@ -291,7 +292,7 @@ function JobSeekerTopNav() {
                   </DropdownMenuItem>
                 );
               })}
-              {isAdmin && (
+              {isOrgAdmin && (
                 <>
                   <DropdownMenuSeparator className="bg-white/20" />
                   <DropdownMenuItem

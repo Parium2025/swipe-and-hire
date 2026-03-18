@@ -1,4 +1,5 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -31,6 +32,7 @@ interface EmployerLayoutProps {
 // Inner component that uses the KanbanLayout context
 const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: EmployerLayoutProps) => {
   const { user } = useAuth();
+  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
   const { invalidateJobs } = useJobsData();
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
@@ -117,7 +119,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
             <EmployerTopNav
               extraRight={
                 <div className="flex items-center gap-3">
-                  {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && (
+                  {isOrgAdmin && (
                     <DeveloperControls 
                       onViewChange={onViewChange}
                       currentView={developerView}
@@ -178,7 +180,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
               <NotificationCenter />
               {/* Profile Avatar */}
               <EmployerMobileProfileAvatar />
-              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && (
+              {isOrgAdmin && (
                 <div className="hidden md:block">
                   <DeveloperControls 
                     onViewChange={onViewChange}

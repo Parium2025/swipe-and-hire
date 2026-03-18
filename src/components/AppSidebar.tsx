@@ -1,6 +1,7 @@
 import React, { useEffect, useState, memo, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { preloadImages } from "@/lib/serviceWorkerManager";
 
@@ -90,12 +91,12 @@ export function AppSidebar() {
     }
   }, [preloadedVideoUrl]);
 
-  const isAdmin = user?.email === 'fredrikandits@hotmail.com';
+  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
 
   // Support items - add admin for Fredrik
   const supportItems = [
     { title: 'Kundtjänst', url: '/support', icon: MessageCircle },
-    ...(isAdmin ? [{ title: 'Admin Panel', url: '/admin', icon: Settings }] : [])
+    ...(isOrgAdmin ? [{ title: 'Admin Panel', url: '/admin', icon: Settings }] : [])
   ];
 
   // Listen for unsaved changes cancel event to close sidebar

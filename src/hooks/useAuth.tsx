@@ -1337,7 +1337,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isSuperAdmin = (): boolean => {
-    return userRole?.role === 'employer' && user?.email === 'fredrikandits@hotmail.com';
+    if (!user?.id) return false;
+    // Check via RPC call result cached in userRole context
+    // The is_org_admin RPC is the source of truth
+    try {
+      const cached = localStorage.getItem('parium_is_org_admin_' + user.id);
+      if (cached) return JSON.parse(cached).isAdmin === true;
+    } catch { /* ignore */ }
+    return false;
   };
 
   const isCompanyUser = (): boolean => {

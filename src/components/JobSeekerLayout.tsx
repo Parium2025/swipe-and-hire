@@ -1,6 +1,7 @@
 import { ReactNode, memo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/AppSidebar';
 import JobSeekerTopNav from '@/components/JobSeekerTopNav';
@@ -87,6 +88,7 @@ const MobileProfileAvatar = () => {
 
 const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
   const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
+  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -120,7 +122,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
             <JobSeekerTopNav />
             {/* Developer controls */}
             <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
-              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (
+              {isOrgAdmin && onViewChange && (
                 <DeveloperControls 
                   onViewChange={onViewChange}
                   currentView={developerView || 'dashboard'}
@@ -183,7 +185,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
               <NotificationCenter />
               {/* Profile Avatar */}
               <MobileProfileAvatar />
-              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (
+              {isOrgAdmin && onViewChange && (
                 <div className="hidden md:block">
                   <DeveloperControls 
                     onViewChange={onViewChange}
