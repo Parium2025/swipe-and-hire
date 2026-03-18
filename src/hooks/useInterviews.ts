@@ -3,6 +3,7 @@ import { safeSetItem } from '@/lib/safeStorage';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { getIsOnline } from '@/lib/connectivityManager';
 
 export interface Interview {
   id: string;
