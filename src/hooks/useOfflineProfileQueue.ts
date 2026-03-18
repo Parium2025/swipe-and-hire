@@ -29,6 +29,7 @@ export interface QueuedProfileUpdate {
 
 const QUEUE_KEY = 'parium_offline_profile_queue';
 const MAX_ATTEMPTS = 3;
+const MAX_QUEUE_SIZE = 10;
 
 /**
  * Validates that a parsed object has the required QueuedProfileUpdate shape.
@@ -96,6 +97,9 @@ export function useOfflineProfileQueue(userId: string | undefined) {
     const currentQueue = getQueue();
     const filtered = currentQueue.filter(q => q.userId !== userId);
     const newQueue = [...filtered, queued];
+    if (newQueue.length > MAX_QUEUE_SIZE) {
+      newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
+    }
     saveQueue(newQueue);
     setQueue([queued]);
 
@@ -141,7 +145,13 @@ export function useOfflineProfileQueue(userId: string | undefined) {
     const remaining: QueuedProfileUpdate[] = [];
     let synced = 0;
 
-    for (const item of currentQueue) {
+    for (let i = 0; i < currentQueue.length; i++) {
+      const item = currentQueue[i];
+      // Exponential backoff for retried operations
+      if (item.attempts > 0) {
+        const delay = Math.min(1000 * Math.pow(2, item.attempts - 1), 30000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
       const success = await syncProfileUpdate(item);
 
       if (success) {

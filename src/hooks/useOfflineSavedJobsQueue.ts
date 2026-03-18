@@ -13,6 +13,7 @@ interface QueuedAction {
 
 const QUEUE_KEY = 'parium_offline_saved_jobs_queue';
 const MAX_ATTEMPTS = 3;
+const MAX_QUEUE_SIZE = 50;
 
 /**
  * Validates parsed data has the correct QueuedAction shape.
@@ -72,6 +73,10 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     // Deduplicate: remove any existing action for this jobId, keep latest
     const filtered = currentQueue.filter(q => q.jobId !== jobId);
     const newQueue = [...filtered, { jobId, action, timestamp: Date.now(), attempts: 0 }];
+    // Cap queue size
+    if (newQueue.length > MAX_QUEUE_SIZE) {
+      newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
+    }
     saveQueue(newQueue);
     setQueue(newQueue);
     notifySwOfPendingOps();
@@ -88,7 +93,13 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     const remaining: QueuedAction[] = [];
     let synced = 0;
 
-    for (const item of currentQueue) {
+    for (let i = 0; i < currentQueue.length; i++) {
+      const item = currentQueue[i];
+      // Exponential backoff for retried operations
+      if (item.attempts > 0) {
+        const delay = Math.min(1000 * Math.pow(2, item.attempts - 1), 30000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
       try {
         if (item.action === 'save') {
           const { error } = await supabase

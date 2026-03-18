@@ -38,11 +38,31 @@ const MAX_ATTEMPTS = 3;
 
 // ── localStorage helpers ──────────────────────────────────────────────
 
+const MAX_QUEUE_SIZE = 50;
+
+function isValidQueuedOp(item: unknown): item is QueuedCandidateOperation {
+  if (!item || typeof item !== 'object') return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.id === 'string' &&
+    typeof obj.type === 'string' &&
+    typeof obj.candidateId === 'string' &&
+    typeof obj.recruiterId === 'string' &&
+    typeof obj.queuedAt === 'number' &&
+    typeof obj.attempts === 'number' &&
+    obj.payload != null && typeof obj.payload === 'object'
+  );
+}
+
 function getQueue(): QueuedCandidateOperation[] {
   try {
     const raw = localStorage.getItem(QUEUE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidQueuedOp);
   } catch {
+    try { localStorage.removeItem(QUEUE_KEY); } catch { /* ignore */ }
     return [];
   }
 }
@@ -74,7 +94,14 @@ export function enqueueCandidateOperation(
     (q) => !(q.candidateId === op.candidateId && q.type === op.type)
   );
 
-  saveQueue([...filtered, queued]);
+  // Cap queue size to prevent localStorage overflow
+  const newQueue = [...filtered, queued];
+  if (newQueue.length > MAX_QUEUE_SIZE) {
+    console.warn(`[CandidateOpsQueue] Queue exceeds ${MAX_QUEUE_SIZE}, dropping oldest`);
+    newQueue.splice(0, newQueue.length - MAX_QUEUE_SIZE);
+  }
+
+  saveQueue(newQueue);
   
   // Notify Service Worker so it can trigger sync when connectivity returns
   notifySwOfPendingOps();
@@ -209,7 +236,15 @@ export async function syncCandidateOperationQueue(userId?: string): Promise<numb
     const remaining: QueuedCandidateOperation[] = [];
     let synced = 0;
 
-    for (const op of queue) {
+    for (let i = 0; i < queue.length; i++) {
+      const op = queue[i];
+      
+      // Exponential backoff: wait before retrying failed ops
+      if (op.attempts > 0) {
+        const delay = Math.min(1000 * Math.pow(2, op.attempts - 1), 30000);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      
       const success = await executeOperation(op);
 
       if (success) {

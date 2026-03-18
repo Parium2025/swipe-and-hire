@@ -2,38 +2,20 @@ import { useState, useEffect, useCallback, createContext, useContext, useRef, cr
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 
-// Global state för forcerad offline (för dev/test)
-let forceOfflineMode = false;
-let forceOfflineListeners: Set<() => void> = new Set();
-
-export const setForceOfflineMode = (enabled: boolean) => {
-  forceOfflineMode = enabled;
-  forceOfflineListeners.forEach(listener => listener());
-};
-
-export const getForceOfflineMode = () => forceOfflineMode;
-
 /**
  * Hook för att övervaka online/offline status (utan toast - använd useOnlineStatusWithToast för det)
  * Använder connectivityManager för riktigt connectivity-test (inte bara navigator.onLine)
  */
 export const useOnlineStatus = () => {
-  const [isOnline, setIsOnline] = useState(getIsOnline() && !forceOfflineMode);
+  const [isOnline, setIsOnline] = useState(getIsOnline());
 
   useEffect(() => {
-    // Lyssna på riktiga connectivity-ändringar (ping-baserat)
     const unsubConnectivity = onConnectivityChange((online) => {
-      setIsOnline(online && !forceOfflineMode);
+      setIsOnline(online);
     });
-
-    const handleForceChange = () => {
-      setIsOnline(getIsOnline() && !forceOfflineMode);
-    };
-    forceOfflineListeners.add(handleForceChange);
 
     return () => {
       unsubConnectivity();
-      forceOfflineListeners.delete(handleForceChange);
     };
   }, []);
 
@@ -44,7 +26,7 @@ export const useOnlineStatus = () => {
  * Hook för online-status MED återanslutnings-toast (endast för OnlineStatusProvider)
  */
 export const useOnlineStatusWithToast = () => {
-  const [isOnline, setIsOnline] = useState(getIsOnline() && !forceOfflineMode);
+  const [isOnline, setIsOnline] = useState(getIsOnline());
   const wasOfflineRef = useRef(false);
 
   useEffect(() => {
@@ -79,31 +61,18 @@ export const useOnlineStatusWithToast = () => {
     };
 
     const handleConnectivityChange = (online: boolean) => {
-      const effectiveOnline = online && !forceOfflineMode;
-
-      if (wasOfflineRef.current && effectiveOnline) {
+      if (wasOfflineRef.current && online) {
         showReconnectToast();
       }
 
-      wasOfflineRef.current = !effectiveOnline;
-      setIsOnline(effectiveOnline);
+      wasOfflineRef.current = !online;
+      setIsOnline(online);
     };
 
     const unsubConnectivity = onConnectivityChange(handleConnectivityChange);
 
-    const handleForceChange = () => {
-      const effectiveOnline = getIsOnline() && !forceOfflineMode;
-      if (wasOfflineRef.current && effectiveOnline) {
-        showReconnectToast();
-      }
-      wasOfflineRef.current = !effectiveOnline;
-      setIsOnline(effectiveOnline);
-    };
-    forceOfflineListeners.add(handleForceChange);
-
     return () => {
       unsubConnectivity();
-      forceOfflineListeners.delete(handleForceChange);
     };
   }, []);
 
@@ -149,26 +118,6 @@ export const useOnline = (): OnlineContextValue => {
       }
     },
   };
-};
-
-/**
- * Hook för forcerad offline-läge (dev tools)
- */
-export const useForceOffline = () => {
-  const [isForced, setIsForced] = useState(forceOfflineMode);
-
-  useEffect(() => {
-    const updateState = () => setIsForced(forceOfflineMode);
-    forceOfflineListeners.add(updateState);
-    return () => { forceOfflineListeners.delete(updateState); };
-  }, []);
-
-  const toggle = useCallback((enabled: boolean) => {
-    setForceOfflineMode(enabled);
-    setIsForced(enabled);
-  }, []);
-
-  return { isForced, toggle };
 };
 
 /**
