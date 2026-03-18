@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
+import { safeSetItem } from '@/lib/safeStorage';
 
 /**
  * 🚀 OFFLINE JOB APPLICATION QUEUE
