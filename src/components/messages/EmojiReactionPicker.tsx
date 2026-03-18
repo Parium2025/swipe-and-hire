@@ -146,11 +146,8 @@ export function EmojiReactionPicker({
               {/* Emoji grid */}
               <div className="grid grid-cols-6 gap-0.5 px-2 py-2">
                 {EMOJI_CATEGORIES[activeCategory].emojis.map((emoji, idx) => (
-                  <motion.button
+                  <button
                     key={`${activeCategory}-${emoji}-${idx}`}
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: idx * 0.02, duration: 0.15 }}
                     onClick={() => {
                       onSelectEmoji(emoji);
                       onClose();
@@ -158,7 +155,7 @@ export function EmojiReactionPicker({
                     className="w-10 h-10 flex items-center justify-center rounded-full md:hover:bg-white/15 active:scale-75 transition-all text-xl"
                   >
                     {emoji}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
             </div>
