@@ -132,7 +132,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   // Synchronous save function (used by both debounce and beforeunload)
   const saveToDb = useCallback(async (contentToSave: string) => {
-    if (!user?.id || !navigator.onLine) return false;
+    if (!user?.id || !getIsOnline()) return false;
     const nd = noteDataRef.current;
 
     try {
