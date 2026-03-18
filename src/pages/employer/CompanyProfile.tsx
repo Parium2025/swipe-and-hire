@@ -1180,7 +1180,7 @@ const CompanyProfile = () => {
                           value={formData.interview_video_link}
                           onChange={(e) => setFormData({...formData, interview_video_link: e.target.value})}
                           placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
-                          className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white flex-1"
+                          className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white flex-1"
                         />
                         
                         {/* Validation icons inline */}
