@@ -88,6 +88,7 @@ const MobileProfileAvatar = () => {
 
 const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
   const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
+  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
