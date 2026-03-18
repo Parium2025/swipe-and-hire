@@ -56,6 +56,15 @@ const EmployerSettings = () => {
   };
 
   const handlePasswordUpdate = async () => {
+    if (passwordData.newPassword.length < 6) {
+      toast({
+        title: "Fel",
+        description: "Lösenordet måste vara minst 6 tecken.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
         title: "Fel",
@@ -67,7 +76,7 @@ const EmployerSettings = () => {
 
     try {
       await updatePassword(passwordData.newPassword);
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordData({ newPassword: '', confirmPassword: '' });
       toast({
         title: "Lösenord uppdaterat",
         description: "Ditt lösenord har uppdaterats framgångsrikt."
