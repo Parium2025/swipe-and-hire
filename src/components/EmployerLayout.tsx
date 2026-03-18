@@ -207,9 +207,6 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
           <main ref={mainScrollRef} className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 pb-8 flex flex-col" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
             {children}
           </main>
-          
-          {/* Floating dev offline toggle */}
-          <DevOfflineToggle />
         </div>
       </div>
     </SidebarProvider>
