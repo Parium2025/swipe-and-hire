@@ -581,7 +581,7 @@ export function ChatView({
                     setOlderMatchCount(0);
                   }
                 }}
-                placeholder="Sök meddelanden & filer..."
+                placeholder="Sök efter meddelanden & filer..."
                 className="h-8 bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white text-sm"
                 autoFocus
               />
