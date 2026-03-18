@@ -37,12 +37,11 @@ export async function shouldApplyQueuedOp(
   idColumn = 'id'
 ): Promise<boolean> {
   try {
-    // Use a raw fetch to avoid strict type checking on dynamic table names
-    const { data, error } = await (supabase
-      .from(table as any)
+    const { data, error } = await (supabase as any)
+      .from(table)
       .select('updated_at')
-      .eq(idColumn as any, recordId)
-      .maybeSingle() as any);
+      .eq(idColumn, recordId)
+      .maybeSingle();
 
     if (error || !data?.updated_at) {
       // Record doesn't exist or no updated_at — apply the op
