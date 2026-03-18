@@ -444,7 +444,7 @@ async function syncStageSettings(userId: string, queryClient: ReturnType<typeof 
     
     // Spara till localStorage för instant first paint nästa gång
     const cacheKey = STAGE_SETTINGS_CACHE_KEY + userId;
-    localStorage.setItem(cacheKey, JSON.stringify({
+    safeSetItem(cacheKey, JSON.stringify({
       settings,
       timestamp: Date.now(),
     }));
