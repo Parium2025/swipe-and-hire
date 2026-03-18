@@ -193,7 +193,7 @@ export default function Messages() {
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Sök meddelanden & filer..."
+                placeholder="Sök efter chattar..."
                 className="bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white"
               />
             </div>
