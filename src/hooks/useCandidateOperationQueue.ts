@@ -75,6 +75,10 @@ export function enqueueCandidateOperation(
   );
 
   saveQueue([...filtered, queued]);
+  
+  // Notify Service Worker so it can trigger sync when connectivity returns
+  notifySwOfPendingOps();
+  
   return queued;
 }
 
