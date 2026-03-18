@@ -114,12 +114,14 @@ export function useOfflineMessageQueue(userId: string | undefined) {
           message.job_id,
           message.application_id
         );
-        await ensureConversationMemberships(
-          conversationId,
-          message.sender_id,
-          message.recipient_id
-        );
       }
+
+      // Always ensure memberships exist (defensive — handles corrupted state)
+      await ensureConversationMemberships(
+        conversationId,
+        message.sender_id,
+        message.recipient_id
+      );
 
       const { error } = await supabase
         .from('conversation_messages')
