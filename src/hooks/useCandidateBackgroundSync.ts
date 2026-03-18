@@ -266,7 +266,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
   // Uppdatera localStorage snapshot för instant first paint
   try {
     const snapshot = {
-268:       items: items.slice(0, 50),
+      items: items.slice(0, 50),
       timestamp: Date.now(),
     };
     safeSetItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
