@@ -154,7 +154,7 @@ export const useInterviews = () => {
       interviewId: string; 
       status: Interview['status'];
     }) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!getIsOnline()) throw new Error('Du är offline');
       
       const { error } = await supabase
         .from('interviews')
