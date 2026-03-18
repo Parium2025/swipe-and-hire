@@ -64,18 +64,19 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
   // Load queue on mount
   useEffect(() => {
     if (userId) {
-      setQueue(getQueue());
+      setQueue(getQueue().filter(q => q.userId === userId));
     }
   }, [userId]);
 
   // Enqueue an action
   const enqueue = useCallback((jobId: string, action: 'save' | 'unsave') => {
+    if (!userId) return;
     const currentQueue = getQueue();
-    // Deduplicate: remove any existing action for this jobId, keep latest
-    const filtered = currentQueue.filter(q => q.jobId !== jobId);
-    const newQueue = [...filtered, { jobId, action, timestamp: Date.now(), attempts: 0 }];
+    // Deduplicate: remove any existing action for this jobId+userId, keep latest
+    const filtered = currentQueue.filter(q => !(q.jobId === jobId && q.userId === userId));
+    const newQueue = [...filtered, { jobId, userId, action, timestamp: Date.now(), attempts: 0 }];
     saveQueue(newQueue);
-    setQueue(newQueue);
+    setQueue(prev => [...prev.filter(q => q.jobId !== jobId), { jobId, userId, action, timestamp: Date.now(), attempts: 0 }]);
     notifySwOfPendingOps();
   }, []);
 
