@@ -91,6 +91,7 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     const newQueue = [...getQueuedMessages(), queuedMessage];
     saveQueuedMessages(newQueue);
     setQueue(prev => [...prev, queuedMessage]);
+    notifySwOfPendingOps();
     return queuedMessage;
   }, [userId]);
 

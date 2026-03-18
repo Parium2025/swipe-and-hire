@@ -74,6 +74,7 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     const newQueue = [...filtered, { jobId, action, timestamp: Date.now(), attempts: 0 }];
     saveQueue(newQueue);
     setQueue(newQueue);
+    notifySwOfPendingOps();
   }, []);
 
   // Sync all queued actions

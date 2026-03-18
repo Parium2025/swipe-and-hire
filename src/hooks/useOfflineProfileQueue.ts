@@ -108,6 +108,13 @@ export function useOfflineProfileQueue(userId: string | undefined) {
   // Sync a single profile update
   const syncProfileUpdate = async (item: QueuedProfileUpdate): Promise<boolean> => {
     try {
+      // Conflict check: only apply if our change is newer than server
+      const shouldApply = await shouldApplyQueuedOp('profiles', item.userId, item.queuedAt, 'user_id');
+      if (!shouldApply) {
+        console.log('[ProfileQueue] Server has newer data — dropping queued update');
+        return true; // Treat as success (don't retry)
+      }
+
       const { error } = await supabase
         .from('profiles')
         .update(item.updates)

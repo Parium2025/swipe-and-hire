@@ -121,6 +121,7 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
     saveQueue(newQueue);
     setQueue(prev => [...prev.filter(q => !(q.jobId === app.jobId && q.applicantId === app.applicantId)), queued]);
 
+    notifySwOfPendingOps();
     return queued;
   }, []);
 
