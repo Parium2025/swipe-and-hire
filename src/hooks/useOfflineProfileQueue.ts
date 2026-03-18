@@ -198,7 +198,7 @@ export function useOfflineProfileQueue(userId: string | undefined) {
     }
 
     return unsub;
-  }, [syncQueue, queue.length]);
+  }, [syncQueue, userId]);
 
   return {
     queue,

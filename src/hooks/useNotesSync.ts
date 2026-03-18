@@ -262,17 +262,14 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       };
 
       try {
-        if (nd?.id) {
-          fetch(url, {
-            method: 'PATCH',
-            headers,
-            body,
-            keepalive: true,
-          });
-        } else {
-          const blob = new Blob([body], { type: 'application/json' });
-          navigator.sendBeacon(url + `?apikey=${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`, blob);
-        }
+        // Use fetch with keepalive for both INSERT and UPDATE
+        // sendBeacon can't set Authorization headers, which breaks RLS
+        fetch(url, {
+          method: nd?.id ? 'PATCH' : 'POST',
+          headers,
+          body,
+          keepalive: true,
+        });
       } catch {
         // localStorage already has the latest content as fallback
       }

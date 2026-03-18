@@ -118,6 +118,11 @@ export function useBulkMessageSync() {
             const nextAttempts = item.attempts + 1;
             if (nextAttempts < MAX_ATTEMPTS) {
               remaining.push({ ...item, attempts: nextAttempts });
+            } else {
+              toast.error('Ett massmeddelande kunde inte skickas', {
+                description: 'Vänligen försök skicka det igen manuellt.',
+                duration: 8000,
+              });
             }
           }
         }
