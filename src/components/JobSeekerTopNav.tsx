@@ -292,7 +292,7 @@ function JobSeekerTopNav() {
                   </DropdownMenuItem>
                 );
               })}
-              {isAdmin && (
+              {isOrgAdmin && (
                 <>
                   <DropdownMenuSeparator className="bg-white/20" />
                   <DropdownMenuItem

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, memo } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';

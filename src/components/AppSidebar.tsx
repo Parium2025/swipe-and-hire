@@ -1,6 +1,7 @@
 import React, { useEffect, useState, memo, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { preloadImages } from "@/lib/serviceWorkerManager";
 
