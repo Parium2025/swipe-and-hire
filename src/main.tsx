@@ -5,6 +5,7 @@ import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
+import { initSyncEngine } from './lib/offlineSyncEngine'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
