@@ -253,11 +253,11 @@ const TeamManagement = () => {
               placeholder="E-postadress"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white h-9 text-sm"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm"
             />
           </div>
           <Select value={inviteRole} onValueChange={setInviteRole}>
-            <SelectTrigger className="w-full sm:w-40 bg-white/5 border-white/10 text-white h-9 text-sm">
+            <SelectTrigger className="w-full sm:w-40 bg-white/5 border-white/10 text-white h-11 !min-h-0 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="glass-panel">
@@ -270,7 +270,7 @@ const TeamManagement = () => {
             onClick={handleInvite}
             disabled={inviting || !inviteEmail.trim() || !isOnline}
             variant="glass"
-            className={`h-9 px-4 text-sm ${!isOnline ? 'opacity-50' : ''}`}
+            className={`h-11 !min-h-0 px-4 text-sm ${!isOnline ? 'opacity-50' : ''}`}
           >
             {inviting ? (
               <Loader2 className="h-4 w-4 animate-spin" />

@@ -486,7 +486,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                 value={questionDraft.question_text}
                 onChange={(e) => setQuestionDraft({ ...questionDraft, question_text: e.target.value })}
                 placeholder="Gillar du äpplen?"
-                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
+                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
               />
             </div>
 
@@ -545,7 +545,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                           setQuestionDraft({ ...questionDraft, options });
                         }}
                         placeholder={`Alternativ ${optionIndex + 1}`}
-                        className="h-9 text-sm"
+                        className="h-11 !min-h-0 text-sm"
                       />
                         <Button
                           variant="outline"

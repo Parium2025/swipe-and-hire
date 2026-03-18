@@ -482,7 +482,7 @@ export function SelectionCriteriaDialog({
                       placeholder="T.ex. Har B-körkort"
                       value={drafts[criterion.id]?.title || ''}
                       onChange={(e) => handleDraftChange(criterion.id, 'title', e.target.value)}
-                      className="h-9 bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/50 text-sm focus:border-white/15 focus:ring-0 rounded-md"
+                      className="h-11 !min-h-0 bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/50 text-sm focus:border-white/15 focus:ring-0 rounded-md"
                     />
                   </div>
 
