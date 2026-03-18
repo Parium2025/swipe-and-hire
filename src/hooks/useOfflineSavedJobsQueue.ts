@@ -129,7 +129,10 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
       }
     }
 
-    saveQueue(remaining);
+    // Re-read and keep ops for other users untouched
+    const fullQueue = getQueue();
+    const otherUserOps = fullQueue.filter(q => q.userId !== userId);
+    saveQueue([...otherUserOps, ...remaining]);
     setQueue(remaining);
     syncInProgress.current = false;
 
