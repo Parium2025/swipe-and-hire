@@ -23,12 +23,6 @@ const EmployerSettings = () => {
   const [backgroundLocationEnabled, setBackgroundLocationEnabled] = useState(false);
   const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
   const isNativeApp = Capacitor.isNativePlatform();
-  
-
-  // Visa dev tools endast för specifikt testkonto
-  const isDevAccount = user?.email?.toLowerCase().includes('parium') || 
-                       user?.email?.toLowerCase().includes('@hp.com') ||
-                       profile?.company_name?.toLowerCase().includes('parium');
 
   // Load background location preference from profile
   useEffect(() => {
