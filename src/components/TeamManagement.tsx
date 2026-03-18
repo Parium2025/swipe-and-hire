@@ -270,7 +270,7 @@ const TeamManagement = () => {
             onClick={handleInvite}
             disabled={inviting || !inviteEmail.trim() || !isOnline}
             variant="glass"
-            className={`h-9 px-4 text-sm ${!isOnline ? 'opacity-50' : ''}`}
+            className={`h-11 !min-h-0 px-4 text-sm ${!isOnline ? 'opacity-50' : ''}`}
           >
             {inviting ? (
               <Loader2 className="h-4 w-4 animate-spin" />

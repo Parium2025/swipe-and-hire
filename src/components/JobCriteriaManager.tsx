@@ -266,7 +266,7 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
                 placeholder="T.ex. Har körkort"
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                className="h-9 bg-white/5 border-white/20 text-white placeholder:text-white/40"
+                className="h-11 !min-h-0 bg-white/5 border-white/20 text-white placeholder:text-white/40"
               />
               <p className="text-xs text-white/50">
                 Visas på kandidatkortet som referens för dig.
