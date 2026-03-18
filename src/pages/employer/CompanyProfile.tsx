@@ -1286,7 +1286,7 @@ const CompanyProfile = () => {
                         value={formData.interview_office_address}
                         onChange={(e) => setFormData({...formData, interview_office_address: e.target.value})}
                         placeholder="Storgatan 1, 111 22 Stockholm"
-                        className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
+                        className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"
                       />
                       <p className="text-xs text-white">Adressen som visas för kandidater vid fysiska intervjuer</p>
                     </div>
