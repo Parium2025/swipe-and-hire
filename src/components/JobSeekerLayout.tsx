@@ -18,7 +18,7 @@ import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
 import { useDevice } from '@/hooks/use-device';
-import { DevOfflineToggle } from '@/components/DevOfflineToggle';
+
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
