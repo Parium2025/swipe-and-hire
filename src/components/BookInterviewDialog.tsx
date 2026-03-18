@@ -353,10 +353,10 @@ export const BookInterviewDialog = ({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 w-[90px]">
               <Label className="text-white">Längd</Label>
               <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
+                <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
