@@ -885,7 +885,7 @@ const EmployerProfile = () => {
                     onClick={addSocialLink}
                     disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
                     variant="glass"
-                    className="h-9 text-sm"
+                    className="h-11 !min-h-0 text-sm"
                   >
                     Lägg till
                     <Plus className="h-3 w-3 ml-1.5" />
@@ -899,7 +899,7 @@ const EmployerProfile = () => {
                 type="submit"
                 disabled={loading || !hasUnsavedChanges}
                 variant="glass"
-                className="h-9 px-6 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-11 !min-h-0 px-6 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>

@@ -2253,7 +2253,7 @@ const Profile = () => {
                   <Button 
                     type="submit" 
                     variant="glassGreen"
-                    className="h-10 px-8 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed" 
+                    className="h-11 !min-h-0 px-8 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" 
                     disabled={loading || isUploadingMedia || isUploadingCover}
                   >
                     {loading ? 'Sparar...' : 'Spara ändringar'}
