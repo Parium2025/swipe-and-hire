@@ -29,6 +29,7 @@ export interface QueuedProfileUpdate {
 
 const QUEUE_KEY = 'parium_offline_profile_queue';
 const MAX_ATTEMPTS = 3;
+const MAX_QUEUE_SIZE = 10;
 
 /**
  * Validates that a parsed object has the required QueuedProfileUpdate shape.
