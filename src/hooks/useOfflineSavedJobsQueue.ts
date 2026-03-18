@@ -25,6 +25,7 @@ function isValidQueuedAction(item: unknown): item is QueuedAction {
   const obj = item as Record<string, unknown>;
   return (
     typeof obj.jobId === 'string' &&
+    typeof obj.userId === 'string' &&
     (obj.action === 'save' || obj.action === 'unsave') &&
     typeof obj.timestamp === 'number' &&
     typeof obj.attempts === 'number'
