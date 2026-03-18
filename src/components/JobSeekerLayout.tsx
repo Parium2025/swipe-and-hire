@@ -122,7 +122,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
             <JobSeekerTopNav />
             {/* Developer controls */}
             <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
-              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (
+              {isOrgAdmin && onViewChange && (
                 <DeveloperControls 
                   onViewChange={onViewChange}
                   currentView={developerView || 'dashboard'}
