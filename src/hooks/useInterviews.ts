@@ -171,7 +171,7 @@ export const useInterviews = () => {
   // Cancel interview
   const cancelInterview = useMutation({
     mutationFn: async (interviewId: string) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!getIsOnline()) throw new Error('Du är offline');
       
       const { error } = await supabase
         .from('interviews')
