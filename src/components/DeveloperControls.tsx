@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Settings, UserCheck, Building, Users, ArrowRightLeft, Code, Lightbulb } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useNavigate } from 'react-router-dom';
 
 interface DeveloperControlsProps {
@@ -19,6 +20,7 @@ interface DeveloperControlsProps {
 
 const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, currentView }) => {
   const { user, userRole, switchRole, updateProfile } = useAuth();
+  const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
   const [switching, setSwitching] = useState(false);
   const navigate = useNavigate();
 
@@ -53,7 +55,7 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
     }
   };
 
-  if (user?.email !== 'fredrikandits@hotmail.com' && user?.email !== 'pariumab2025@hotmail.com') {
+  if (adminLoading || !isAdmin) {
     return null;
   }
 
