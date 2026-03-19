@@ -18,7 +18,7 @@ const buttonVariants = cva(
           "rounded-md border border-input bg-background md:hover:bg-accent md:hover:text-accent-foreground active:scale-[0.97] active:bg-accent/80",
         // Neutral outline without accent hover for precise per-button control
         outlineNeutral:
-          "rounded-md border border-input bg-transparent md:hover:bg-transparent md:hover:text-inherit active:scale-[0.97] ",
+          "rounded-md border border-input bg-transparent md:hover:bg-transparent md:hover:text-inherit active:scale-[0.97]",
         secondary:
           "rounded-md bg-secondary text-secondary-foreground md:hover:bg-secondary/80 active:scale-[0.97] active:bg-secondary/70",
         ghost: "rounded-md md:hover:bg-accent md:hover:text-accent-foreground active:scale-[0.97] active:bg-accent/50",
