@@ -58,7 +58,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-white"
+              className="md:hidden p-2 rounded-full text-white hover:bg-white/10 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
