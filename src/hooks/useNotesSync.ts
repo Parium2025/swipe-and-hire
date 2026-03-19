@@ -189,16 +189,20 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         return;
       }
       setIsSaving(true);
-      const success = await saveToDb(latest);
-      if (success) {
-        hasLocalEditsRef.current = false;
-        serverContentRef.current = latest; // update local server snapshot to prevent re-trigger
+      const result = await saveToDb(latest);
+      if (result === 'saved') {
+        // Only clear edit flag if no NEW edits happened during save
+        if (contentRef.current === latest) {
+          hasLocalEditsRef.current = false;
+        }
+        serverContentRef.current = latest;
         setSaveFailed(false);
         setLastSaved(new Date());
         queryClient.invalidateQueries({ queryKey: [queryKey, user.id] });
-      } else {
+      } else if (result === 'failed') {
         setSaveFailed(true);
       }
+      // 'skipped' → do nothing, next content change will retry
       setIsSaving(false);
     }, 1200);
 
