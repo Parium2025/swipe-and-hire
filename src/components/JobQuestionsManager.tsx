@@ -525,6 +525,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                   <Button
                     variant="outline"
                     size="sm"
+                    className="rounded-full"
                     onClick={() => {
                       const options = questionDraft.options || [];
                       setQuestionDraft({ ...questionDraft, options: [...options, ''] });
