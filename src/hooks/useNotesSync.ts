@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
+import { safeSetItem } from '@/lib/safeStorage';
 
 type NoteTable = 'employer_notes' | 'jobseeker_notes';
 type OwnerColumn = 'employer_id' | 'user_id';
@@ -29,7 +30,6 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const queryClient = useQueryClient();
   const hasLocalEditsRef = useRef(false);
   const contentRef = useRef('');
-  const noteDataRef = useRef<{ id: string; content: string | null } | null>(null);
 
   const cacheKey = user?.id ? `${cachePrefix}_${user.id}` : cachePrefix;
 
@@ -87,15 +87,12 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     refetchOnMount: true,
   });
 
-  // Keep noteData ref in sync for beforeunload
-  useEffect(() => { noteDataRef.current = noteData ?? null; }, [noteData]);
-
   // Sync server value into cache
   useEffect(() => {
     if (typeof window === 'undefined' || !user?.id) return;
     if (!noteData) return;
     const serverContent = noteData.content ?? '';
-    localStorage.setItem(cacheKey, serverContent);
+    safeSetItem(cacheKey, serverContent);
     if (!hasLocalEditsRef.current) {
       setContent(serverContent);
     }
@@ -119,7 +116,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
             const newContent = (payload.new as any)?.content ?? '';
             setContent(newContent);
             if (typeof window !== 'undefined') {
-              localStorage.setItem(cacheKey, newContent);
+              safeSetItem(cacheKey, newContent);
             }
           }
           queryClient.invalidateQueries({ queryKey: [queryKey, user.id] });
@@ -132,23 +129,19 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     };
   }, [user?.id, cacheKey, queryClient, table, ownerColumn, queryKey]);
 
-  // Synchronous save function (used by both debounce and beforeunload)
+  // Save function — always upserts to avoid duplicates
   const saveToDb = useCallback(async (contentToSave: string) => {
     if (!user?.id || !getIsOnline()) return false;
-    const nd = noteDataRef.current;
 
     try {
-      let saveError;
-      // Always upsert to avoid duplicates — unique constraint on owner column
       const { error } = await (supabase
         .from(table) as any)
         .upsert(
           { [ownerColumn]: user.id, content: contentToSave },
           { onConflict: ownerColumn }
         );
-      saveError = error;
-      if (saveError) {
-        console.error(`❌ ${table} save failed:`, saveError.message);
+      if (error) {
+        console.error(`❌ ${table} save failed:`, error.message);
         return false;
       }
       console.log(`✅ ${table} saved to database`);
@@ -165,13 +158,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       setSaveFailed(false);
       setContent(next);
       if (typeof window !== 'undefined') {
-        localStorage.setItem(cacheKey, next);
+        safeSetItem(cacheKey, next);
       }
     },
     [cacheKey]
   );
 
-  // Auto-save with debounce
+  // Auto-save with debounce — uses contentRef to avoid stale closures
   useEffect(() => {
     if (!user?.id || !isFetched) return;
     const serverContent = noteData?.content ?? '';
@@ -183,7 +176,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         return;
       }
       setIsSaving(true);
-      const success = await saveToDb(content);
+      const success = await saveToDb(contentRef.current);
       if (success) {
         hasLocalEditsRef.current = false;
         setSaveFailed(false);
@@ -198,7 +191,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => clearTimeout(timer);
   }, [content, user?.id, isFetched, noteData, queryClient, queryKey, saveToDb]);
 
-  // Retry queued save when coming back online (uses ConnectivityManager)
+  // Retry queued save when coming back online
   useEffect(() => {
     if (!user?.id) return;
     const unsub = onConnectivityChange(async (online) => {
@@ -220,7 +213,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return unsub;
   }, [user?.id, saveToDb, queryClient, queryKey, table]);
 
-  // Keep a ref to the latest access token for beforeunload (avoids async in sync handler)
+  // Keep a ref to the latest access token for beforeunload
   const accessTokenRef = useRef<string | null>(null);
   useEffect(() => {
     if (!user?.id) return;
@@ -235,24 +228,21 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => subscription.unsubscribe();
   }, [user?.id]);
 
-  // beforeunload — flush unsaved changes immediately when closing tab
+  // beforeunload — flush unsaved changes via PostgREST upsert
   useEffect(() => {
     if (!user?.id) return;
     const handleBeforeUnload = () => {
       if (!hasLocalEditsRef.current) return;
       const token = accessTokenRef.current;
-      if (!token) return; // No valid session — localStorage already has the content
-      const nd = noteDataRef.current;
+      if (!token) return;
       const body = JSON.stringify({ [ownerColumn]: user.id, content: contentRef.current });
-
-      // Use PostgREST upsert via Prefer header to match the unique constraint
       const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}`;
 
       const headers = {
         'Content-Type': 'application/json',
         'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         'Authorization': `Bearer ${token}`,
-        'Prefer': `return=minimal,resolution=merge-duplicates`,
+        'Prefer': 'return=minimal,resolution=merge-duplicates',
       };
 
       try {
