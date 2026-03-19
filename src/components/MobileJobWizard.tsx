@@ -3162,27 +3162,9 @@ const MobileJobWizard = ({
                                         </button>
                                         <button
                                           type="button"
-                                          onClick={async () => {
+                                          onClick={() => {
                                             if (!template.id) return;
-                                            try {
-                                              const { error } = await supabase
-                                                .from('job_question_templates')
-                                                .delete()
-                                                .eq('id', template.id);
-                                              
-                                              if (error) throw error;
-                                              
-                                              setQuestionTemplates(prev => prev.filter(t => t.id !== template.id));
-                                              toast({
-                                                title: "Fråga borttagen"
-                                              });
-                                            } catch (error) {
-                                              console.error('Error deleting template:', error);
-                                              toast({
-                                                title: "Kunde inte ta bort frågan",
-                                                variant: "destructive"
-                                              });
-                                            }
+                                            setDeleteTemplateId(template.id);
                                           }}
                                           className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
                                         >
