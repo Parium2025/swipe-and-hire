@@ -321,7 +321,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
             <DialogDescription className="sr-only">Välj mall eller ange titel</DialogDescription>
           </DialogHeader>
           <AnimatedBackground showBubbles={false} />
-          <Card className="bg-transparent border-0 ring-0 shadow-none relative z-10 w-full transition-all duration-200">
+          <Card className="bg-transparent border-0 ring-0 shadow-none relative z-10 w-full min-w-0 transition-all duration-200 overflow-hidden">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
@@ -342,7 +342,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 px-4 pb-4">
+            <CardContent className="space-y-4 px-4 pb-4 overflow-hidden">
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Input
@@ -504,9 +504,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                     onClick={() => handleTemplateSelect(template.id, template.name)}
                                     onMouseDown={(e) => e.currentTarget.blur()}
                                     onMouseUp={(e) => e.currentTarget.blur()}
-                                    className="flex items-center flex-1 text-left hover:opacity-80 transition-opacity focus:outline-none focus:ring-0"
+                                    className="flex items-center flex-1 min-w-0 text-left hover:opacity-80 transition-opacity focus:outline-none focus:ring-0"
                                   >
-                                    <span className="font-medium text-white">{template.name}</span>
+                                    <span className="font-medium text-white truncate min-w-0">{template.name}</span>
                                     {template.is_default && (
                                       <span className="text-sm text-blue-400 ml-2">Standard</span>
                                     )}
