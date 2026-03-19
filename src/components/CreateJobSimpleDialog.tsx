@@ -331,7 +331,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                   onClick={handleClose}
                   onMouseDown={(e) => e.currentTarget.blur()}
                   onMouseUp={(e) => e.currentTarget.blur()}
-                  className="absolute right-2 top-2 h-8 w-8 text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
+                  className="absolute right-2 top-2 h-8 w-8 rounded-full text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 active:bg-white/20 focus:outline-none focus:ring-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -445,7 +445,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                   }}
                                   onMouseDown={(e) => e.currentTarget.blur()}
                                   onMouseUp={(e) => e.currentTarget.blur()}
-                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white transition-colors md:hover:text-white focus:outline-none focus:ring-0"
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-white transition-colors md:hover:text-white md:hover:bg-white/10 active:bg-white/20 focus:outline-none focus:ring-0"
                                   type="button"
                                 >
                                   <X className="h-4 w-4" />
@@ -575,7 +575,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                             }}
                             onMouseDown={(e) => e.currentTarget.blur()}
                             onMouseUp={(e) => e.currentTarget.blur()}
-                            className="h-8 w-8 text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
+                            className="h-8 w-8 rounded-full text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 active:bg-white/20 focus:outline-none focus:ring-0"
                           >
                             <X className="h-4 w-4" />
                           </Button>
