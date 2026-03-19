@@ -380,7 +380,7 @@ const MobileJobWizard = ({
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
   const [isWizardCloseTouchLocked, setIsWizardCloseTouchLocked] = useState(false);
-  const wizardCloseTouchLockTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const wizardCloseTouchLockTimeoutRef = useRef<number | null>(null);
 
   const lockWizardCloseTouch = useCallback((duration = 260) => {
     setIsWizardCloseTouchLocked(true);
