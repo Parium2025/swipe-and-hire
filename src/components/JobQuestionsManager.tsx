@@ -10,7 +10,17 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Trash2, GripVertical, HelpCircle, Search } from 'lucide-react';
+import { Plus, Trash2, GripVertical, HelpCircle, Search, AlertTriangle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import {
   DndContext,
   closestCenter,
