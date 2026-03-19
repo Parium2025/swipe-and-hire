@@ -139,18 +139,14 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
     try {
       let saveError;
-      if (nd?.id) {
-        const { error } = await (supabase
-          .from(table) as any)
-          .update({ content: contentToSave })
-          .eq('id', nd.id);
-        saveError = error;
-      } else {
-        const { error } = await (supabase
-          .from(table) as any)
-          .insert({ [ownerColumn]: user.id, content: contentToSave });
-        saveError = error;
-      }
+      // Always upsert to avoid duplicates — unique constraint on owner column
+      const { error } = await (supabase
+        .from(table) as any)
+        .upsert(
+          { [ownerColumn]: user.id, content: contentToSave },
+          { onConflict: ownerColumn }
+        );
+      saveError = error;
       if (saveError) {
         console.error(`❌ ${table} save failed:`, saveError.message);
         return false;
