@@ -109,8 +109,8 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
                 className={currentNews.source_url ? 'cursor-pointer group' : ''}
               >
-                <h3 className="text-xs sm:text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">{currentNews.title}</h3>
-                <p className="text-xs text-white line-clamp-1 mb-1">{currentNews.summary || currentNews.title}</p>
+                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">{currentNews.title}</h3>
+                <p className="text-sm text-white line-clamp-1 mb-1">{currentNews.summary || currentNews.title}</p>
                 {currentNews.published_at && (
                   <div className="flex items-center gap-1.5 text-white text-[10px] mb-1">
                     <Clock className="h-3 w-3" />
