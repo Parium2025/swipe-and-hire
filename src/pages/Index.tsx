@@ -520,6 +520,7 @@ const Index = () => {
         case '/messages':
           return <Messages />;
         case '/profile':
+        case '/employer-profile':
           return <EmployerProfile />;
         case '/company-profile':
           return <CompanyProfile />;
