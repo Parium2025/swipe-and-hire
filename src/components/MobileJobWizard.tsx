@@ -368,6 +368,7 @@ const MobileJobWizard = ({
   const [questionTemplates, setQuestionTemplates] = useState<JobQuestion[]>([]);
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
   
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
