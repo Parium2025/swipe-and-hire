@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 
 const IMAGE_CACHE = `parium-images-${CACHE_VERSION}`;
 const STATIC_CACHE = `parium-static-${CACHE_VERSION}`;
@@ -8,7 +8,7 @@ const API_CACHE = `parium-api-${CACHE_VERSION}`;
 const CRITICAL_ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json',
+  '/favicon.ico',
 ];
 
 // Mönster för bilder och filer som ska cachas permanent
@@ -61,15 +61,23 @@ const isApiRequest = (url) => {
 // Install event
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...');
-  
-  event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      console.log('[SW] Caching critical assets');
-      return cache.addAll(CRITICAL_ASSETS);
-    }).then(() => {
-      return self.skipWaiting();
-    })
-  );
+
+  event.waitUntil((async () => {
+    const cache = await caches.open(STATIC_CACHE);
+    console.log('[SW] Caching critical assets');
+
+    await Promise.allSettled(
+      CRITICAL_ASSETS.map(async (asset) => {
+        try {
+          await cache.add(asset);
+        } catch (error) {
+          console.warn('[SW] Failed to cache critical asset:', asset, error);
+        }
+      })
+    );
+
+    await self.skipWaiting();
+  })());
 });
 
 // Activate event

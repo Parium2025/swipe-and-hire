@@ -17,6 +17,7 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
   try {
     registration = await navigator.serviceWorker.register('/sw.js', {
       scope: '/',
+      updateViaCache: 'none',
     });
 
     // Force check for updates on load
