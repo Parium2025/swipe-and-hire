@@ -18,14 +18,14 @@ const buttonVariants = cva(
           "rounded-md border border-input bg-background md:hover:bg-accent md:hover:text-accent-foreground active:scale-[0.97] active:bg-accent/80",
         // Neutral outline without accent hover for precise per-button control
         outlineNeutral:
-          "rounded-md border border-input bg-transparent md:hover:bg-transparent md:hover:text-inherit active:scale-[0.97] active:bg-white/5",
+          "rounded-md border border-input bg-transparent md:hover:bg-transparent md:hover:text-inherit active:scale-[0.97] ",
         secondary:
           "rounded-md bg-secondary text-secondary-foreground md:hover:bg-secondary/80 active:scale-[0.97] active:bg-secondary/70",
         ghost: "rounded-md md:hover:bg-accent md:hover:text-accent-foreground active:scale-[0.97] active:bg-accent/50",
         link: "text-primary underline-offset-4 md:hover:underline active:opacity-70",
         // 🎨 Glassmorphism oval style - with touch feedback
         glass:
-          "rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-white/15 active:border-white/40",
+          "rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:border-white/30",
         // Glass variant with amber accent (for save/warning actions)
         glassAmber:
           "rounded-full bg-amber-500/20 backdrop-blur-sm border border-amber-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-amber-500/40",

@@ -331,7 +331,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                 onClick={handleClose}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                className="absolute right-4 top-4 h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors duration-300 active:bg-white/15 focus:outline-none focus:ring-0"
+                className="absolute right-4 top-4 h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors duration-300  focus:outline-none focus:ring-0"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -449,7 +449,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                 }}
                                 onMouseDown={(e) => e.currentTarget.blur()}
                                 onMouseUp={(e) => e.currentTarget.blur()}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-white transition-colors md:hover:text-white md:hover:bg-white/10 active:bg-white/20 focus:outline-none focus:ring-0"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-white transition-colors md:hover:text-white md:hover:bg-white/10  focus:outline-none focus:ring-0"
                                 type="button"
                               >
                                 <X className="h-4 w-4" />
@@ -561,7 +561,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                       onClick={() => {
                         handleTemplateSelect('none', '');
                       }}
-                      className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm text-white rounded-full bg-white/5 border border-white/20 md:hover:bg-white/15 md:hover:border-white/40 active:scale-[0.97] active:bg-white/15 transition-all duration-150"
+                      className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm text-white rounded-full bg-white/5 border border-white/20 md:hover:bg-white/15 md:hover:border-white/40 active:scale-[0.97]  transition-all duration-150"
                     >
                       <X className="h-3.5 w-3.5" />
                       <span>Rensa mall</span>

@@ -400,7 +400,7 @@ export const CandidateProfileDialog = ({
                                 setJobDropdownOpen(false);
                               }}
                               className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors min-h-touch ${
-                                isActive ? 'bg-white/15' : 'hover:bg-white/10 active:bg-white/15'
+                                isActive ? 'bg-white/15' : 'hover:bg-white/10 '
                               }`}
                             >
                               <div className="flex-1 min-w-0">

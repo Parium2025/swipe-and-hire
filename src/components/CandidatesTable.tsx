@@ -657,7 +657,7 @@ export function CandidatesTable({
                     key={application.id}
                     className={cn(
                       "group border-white/10 cursor-pointer transition-[background-color] duration-150",
-                      !selectionMode && "hover:bg-white/5 active:bg-white/10",
+                      !selectionMode && "hover:bg-white/5 active:scale-[0.98]",
                       isSelected && "bg-white/10"
                     )}
                     style={{ contain: 'layout style paint' }}

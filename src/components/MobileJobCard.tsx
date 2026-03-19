@@ -51,7 +51,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           ? "hover:bg-red-500/10 hover:border-red-500/30 active:bg-red-500/15" 
           : isDraft 
             ? "hover:bg-amber-500/10 hover:border-amber-500/30 active:bg-amber-500/15"
-            : "hover:bg-white/5 hover:border-white/50 active:bg-white/10"
+            : "hover:bg-white/5 hover:border-white/50 active:scale-[0.98]"
       }`}
       style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 180px' } as React.CSSProperties}
       onClick={handleCardClick}

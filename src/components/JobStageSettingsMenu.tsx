@@ -172,7 +172,7 @@ export function JobStageSettingsMenu({
             onSelect={() => {
               setTimeout(handleOpenRenameDialog, 100);
             }}
-            className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+            className="text-white md:hover:bg-white/10 focus:bg-white/10  cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
           >
             <Pencil className="h-3 w-3 mr-1.5 flex-shrink-0" />
             Byt namn
@@ -182,7 +182,7 @@ export function JobStageSettingsMenu({
           {isMobile ? (
             <DropdownMenuItem 
               onSelect={() => { setTimeout(() => setColorDialogOpen(true), 100); }}
-              className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+              className="text-white md:hover:bg-white/10 focus:bg-white/10  cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
             >
               <Palette className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="flex-1">Välj färg</span>
@@ -193,7 +193,7 @@ export function JobStageSettingsMenu({
             </DropdownMenuItem>
           ) : (
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
+              <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10  cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
                 <Palette className="h-3 w-3 mr-1.5 flex-shrink-0" />
                 <span className="flex-1">Välj färg</span>
                 <div 
@@ -219,14 +219,14 @@ export function JobStageSettingsMenu({
           {isMobile ? (
             <DropdownMenuItem 
               onSelect={() => { setTimeout(() => setIconDialogOpen(true), 100); }}
-              className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+              className="text-white md:hover:bg-white/10 focus:bg-white/10  cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
             >
               <Image className="h-3 w-3 mr-1.5 flex-shrink-0" />
               Välj ikon
             </DropdownMenuItem>
           ) : (
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
+              <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10  cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
                 <Image className="h-3 w-3 mr-1.5 flex-shrink-0" />
                 Välj ikon
               </DropdownMenuSubTrigger>
@@ -242,7 +242,7 @@ export function JobStageSettingsMenu({
                         className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
                           settings?.iconName === name 
                             ? 'bg-white/30 text-white ring-1 ring-white/40' 
-                            : 'md:hover:bg-white/20 active:bg-white/15 text-white/80'
+                            : 'md:hover:bg-white/20  text-white/80'
                         }`}
                         title={label}
                       >
@@ -262,14 +262,14 @@ export function JobStageSettingsMenu({
             isMobile ? (
               <DropdownMenuItem 
                 onSelect={() => { setTimeout(() => setMoveDialogOpen(true), 100); }}
-                className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+                className="text-white md:hover:bg-white/10 focus:bg-white/10  cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
               >
                 <MoveVertical className="h-3 w-3 mr-1.5 flex-shrink-0" />
                 Flytta
               </DropdownMenuItem>
             ) : (
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
+                <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10  cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
                   <MoveVertical className="h-3 w-3 mr-1.5 flex-shrink-0" />
                   Flytta
                 </DropdownMenuSubTrigger>
@@ -292,7 +292,7 @@ export function JobStageSettingsMenu({
                           className={`text-xs py-1.5 px-2 min-h-0 transition-colors duration-100 ${
                             isCurrent 
                               ? 'text-white/40 cursor-default' 
-                              : 'text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer'
+                              : 'text-white md:hover:bg-white/10 focus:bg-white/10  cursor-pointer'
                           }`}
                         >
                           <div 
@@ -314,7 +314,7 @@ export function JobStageSettingsMenu({
           {canDelete ? (
             <DropdownMenuItem 
               onSelect={() => { setTimeout(handleDeleteClick, 100); }}
-              className={`cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100 active:bg-white/10 ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
+              className={`cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100  ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
             >
               <Trash2 className="h-3 w-3 mr-1.5 flex-shrink-0" />
               Ta bort steg
@@ -424,7 +424,7 @@ export function JobStageSettingsMenu({
                 className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
                   settings?.iconName === name 
                     ? 'bg-white/30 text-white ring-1 ring-white/40' 
-                    : 'bg-white/5 active:bg-white/15 text-white/80'
+                    : 'bg-white/5  text-white/80'
                 }`}
                 title={label}
               >
@@ -460,7 +460,7 @@ export function JobStageSettingsMenu({
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all duration-100 touch-manipulation ${
                     isCurrent 
                       ? 'text-white/40 bg-white/5 cursor-default' 
-                      : 'text-white active:bg-white/15 active:scale-[0.98]'
+                      : 'text-white  active:scale-[0.98]'
                   }`}
                 >
                   <div 
