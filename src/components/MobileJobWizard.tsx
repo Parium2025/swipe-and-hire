@@ -3077,7 +3077,7 @@ const MobileJobWizard = ({
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onClick={createNewQuestion}
                         size="sm"
-                        className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                        className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
                       >
                         Skapa ny fråga
                         <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
