@@ -379,7 +379,20 @@ const MobileJobWizard = ({
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
-  
+  const [isWizardCloseTouchLocked, setIsWizardCloseTouchLocked] = useState(false);
+  const wizardCloseTouchLockTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+
+  const lockWizardCloseTouch = useCallback((duration = 260) => {
+    setIsWizardCloseTouchLocked(true);
+    if (wizardCloseTouchLockTimeoutRef.current) {
+      window.clearTimeout(wizardCloseTouchLockTimeoutRef.current);
+    }
+    wizardCloseTouchLockTimeoutRef.current = window.setTimeout(() => {
+      setIsWizardCloseTouchLocked(false);
+      wizardCloseTouchLockTimeoutRef.current = null;
+    }, duration);
+  }, []);
+
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
