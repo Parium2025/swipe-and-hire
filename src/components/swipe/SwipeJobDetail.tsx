@@ -119,7 +119,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             {/* Close */}
             <button
               onClick={onClose}
-              className="absolute top-3 right-4 z-10 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center active:scale-90 transition-transform"
+              className="absolute top-3 right-4 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center active:scale-90 transition-all"
               aria-label="Stäng"
             >
               <X className="w-4 h-4 text-white" />

@@ -113,7 +113,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             {searchInput && (
               <button
                 onClick={() => onSearchInputChange('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/10 rounded p-1 transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/10 rounded-full p-1 transition-colors"
                 aria-label="Rensa sökning"
               >
                 <X className="h-4 w-4" />

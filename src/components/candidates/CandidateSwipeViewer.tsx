@@ -93,7 +93,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             </span>
           </div>
           <button onClick={onClose} className="flex h-11 w-11 items-center justify-center touch-manipulation" aria-label="Stäng">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors">
               <X className="h-5 w-5 text-white" />
             </div>
           </button>

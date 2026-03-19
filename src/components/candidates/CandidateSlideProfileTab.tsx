@@ -188,7 +188,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
             <button
               type="button"
               onClick={() => setCvOpen(false)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 touch-manipulation"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors touch-manipulation"
               aria-label="Stäng"
             >
               <X className="h-5 w-5 text-white" />
