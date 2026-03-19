@@ -3095,7 +3095,7 @@ const MobileJobWizard = ({
                       </Button>
                     </div>
 
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <div className="space-y-3">
                       {(() => {
                         const filteredTemplates = questionTemplates.filter(template => 
                           template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
@@ -3199,11 +3199,11 @@ const MobileJobWizard = ({
                             Är du säker på att du vill ta bort denna fråga? Denna åtgärd går inte att ångra.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+                        <AlertDialogFooter className="flex-row justify-center gap-2 mt-4">
                           <AlertDialogCancel
                             onClick={() => setDeleteTemplateId(null)}
                             style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
-                            className="rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
+                            className="mt-0 rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
                           >
                             Avbryt
                           </AlertDialogCancel>
