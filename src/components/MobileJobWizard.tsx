@@ -11,6 +11,16 @@ import { clearDraftByKey } from '@/hooks/useFormDraft';
 // ... keep existing imports
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
@@ -368,6 +378,7 @@ const MobileJobWizard = ({
   const [questionTemplates, setQuestionTemplates] = useState<JobQuestion[]>([]);
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
   
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -2448,7 +2459,7 @@ const MobileJobWizard = ({
           </div>
 
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2">
+          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-2" style={{ WebkitOverflowScrolling: 'touch' }}>
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
               <div className="space-y-1.5 max-w-2xl mx-auto w-full">
@@ -2649,7 +2660,7 @@ const MobileJobWizard = ({
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="bg-white/10 border border-white/20 text-white hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-md cursor-pointer transition-all duration-300"
+                      className="bg-white/10 border border-white/20 text-white hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-full cursor-pointer transition-all duration-300"
                     >
                       <Plus className="w-4 h-4" />
                     </div>
@@ -3084,7 +3095,7 @@ const MobileJobWizard = ({
                       </Button>
                     </div>
 
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                       {(() => {
                         const filteredTemplates = questionTemplates.filter(template => 
                           template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
@@ -3151,27 +3162,9 @@ const MobileJobWizard = ({
                                         </button>
                                         <button
                                           type="button"
-                                          onClick={async () => {
+                                          onClick={() => {
                                             if (!template.id) return;
-                                            try {
-                                              const { error } = await supabase
-                                                .from('job_question_templates')
-                                                .delete()
-                                                .eq('id', template.id);
-                                              
-                                              if (error) throw error;
-                                              
-                                              setQuestionTemplates(prev => prev.filter(t => t.id !== template.id));
-                                              toast({
-                                                title: "Fråga borttagen"
-                                              });
-                                            } catch (error) {
-                                              console.error('Error deleting template:', error);
-                                              toast({
-                                                title: "Kunde inte ta bort frågan",
-                                                variant: "destructive"
-                                              });
-                                            }
+                                            setDeleteTemplateId(template.id);
                                           }}
                                           className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
                                         >
@@ -3187,6 +3180,67 @@ const MobileJobWizard = ({
                         );
                       })()}
                     </div>
+
+                    {/* Delete Template Confirmation */}
+                    <AlertDialog open={!!deleteTemplateId} onOpenChange={(open) => { if (!open) setDeleteTemplateId(null); }}>
+                      <AlertDialogContentNoFocus
+                        className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+                      >
+                        <AlertDialogHeader className="space-y-4 text-center">
+                          <div className="flex items-center justify-center gap-2.5">
+                            <div className="bg-red-500/20 p-2 rounded-full">
+                              <Trash2 className="h-4 w-4 text-red-400" />
+                            </div>
+                            <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                              Ta bort fråga
+                            </AlertDialogTitle>
+                          </div>
+                          <AlertDialogDescription className="text-white text-sm leading-relaxed">
+                            Är du säker på att du vill ta bort denna fråga? Denna åtgärd går inte att ångra.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+                          <AlertDialogCancel
+                            onClick={() => setDeleteTemplateId(null)}
+                            style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+                            className="rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
+                          >
+                            Avbryt
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={async () => {
+                              if (!deleteTemplateId) return;
+                              try {
+                                const { error } = await supabase
+                                  .from('job_question_templates')
+                                  .delete()
+                                  .eq('id', deleteTemplateId);
+                                
+                                if (error) throw error;
+                                
+                                setQuestionTemplates(prev => prev.filter(t => t.id !== deleteTemplateId));
+                                toast({
+                                  title: "Fråga borttagen"
+                                });
+                              } catch (error) {
+                                console.error('Error deleting template:', error);
+                                toast({
+                                  title: "Kunde inte ta bort frågan",
+                                  variant: "destructive"
+                                });
+                              }
+                              setDeleteTemplateId(null);
+                            }}
+                            variant="destructiveSoft"
+                            style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+                            className="rounded-full"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1.5" />
+                            Ta bort
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContentNoFocus>
+                    </AlertDialog>
 
                   </div>
                 ) : (
