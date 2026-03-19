@@ -3095,7 +3095,7 @@ const MobileJobWizard = ({
                       </Button>
                     </div>
 
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                       {(() => {
                         const filteredTemplates = questionTemplates.filter(template => 
                           template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
