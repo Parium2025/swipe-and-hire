@@ -3081,14 +3081,13 @@ const MobileJobWizard = ({
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={() => {
-                          requestAnimationFrame(() => {
-                            setShowQuestionTemplates(false);
-                            setQuestionSearchTerm('');
-                          });
+                          lockWizardCloseTouch();
+                          setShowQuestionTemplates(false);
+                          setQuestionSearchTerm('');
                         }}
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 active:bg-white/10 focus:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                        className={`h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 active:bg-white/10 active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
                       >
                         <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
                       </Button>
