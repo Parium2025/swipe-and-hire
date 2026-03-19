@@ -312,7 +312,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
           hideClose
           forceMount
           overlayHidden={!open || !isWarmedUp}
-          className={"parium-panel max-w-none w-[min(92vw,400px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
+          className={"parium-panel max-w-none w-[min(92vw,440px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
           style={{ display: (!open || !isWarmedUp) ? 'none' : undefined }}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
