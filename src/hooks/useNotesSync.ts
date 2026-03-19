@@ -84,6 +84,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     },
     enabled: !!user?.id,
     staleTime: 30000,
+    refetchOnMount: true,
   });
 
   // Keep noteData ref in sync for beforeunload
