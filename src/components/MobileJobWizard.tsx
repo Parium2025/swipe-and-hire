@@ -379,7 +379,20 @@ const MobileJobWizard = ({
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
-  
+  const [isWizardCloseTouchLocked, setIsWizardCloseTouchLocked] = useState(false);
+  const wizardCloseTouchLockTimeoutRef = useRef<number | null>(null);
+
+  const lockWizardCloseTouch = useCallback((duration = 260) => {
+    setIsWizardCloseTouchLocked(true);
+    if (wizardCloseTouchLockTimeoutRef.current) {
+      window.clearTimeout(wizardCloseTouchLockTimeoutRef.current);
+    }
+    wizardCloseTouchLockTimeoutRef.current = window.setTimeout(() => {
+      setIsWizardCloseTouchLocked(false);
+      wizardCloseTouchLockTimeoutRef.current = null;
+    }, duration);
+  }, []);
+
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -644,6 +657,14 @@ const MobileJobWizard = ({
     window.addEventListener('resize', recalc);
     return () => window.removeEventListener('resize', recalc);
   }, [showHingePreview]);
+
+  useEffect(() => {
+    return () => {
+      if (wizardCloseTouchLockTimeoutRef.current) {
+        window.clearTimeout(wizardCloseTouchLockTimeoutRef.current);
+      }
+    };
+  }, []);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
@@ -2444,7 +2465,7 @@ const MobileJobWizard = ({
               <button
                 onClick={handleClose}
                 onTouchEnd={(e) => { e.currentTarget.blur(); }}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 active:bg-white/10 transition-colors focus:outline-none [-webkit-tap-highlight-color:transparent]"
+                className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 active:bg-white/10 transition-colors focus:outline-none touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -3060,14 +3081,13 @@ const MobileJobWizard = ({
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={() => {
-                          requestAnimationFrame(() => {
-                            setShowQuestionTemplates(false);
-                            setQuestionSearchTerm('');
-                          });
+                          lockWizardCloseTouch();
+                          setShowQuestionTemplates(false);
+                          setQuestionSearchTerm('');
                         }}
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 active:bg-white/10 focus:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                        className={`h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 active:bg-white/10 active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
                       >
                         <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
                       </Button>
@@ -3263,15 +3283,14 @@ const MobileJobWizard = ({
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={() => {
-                          requestAnimationFrame(() => {
-                            setShowQuestionForm(false);
-                            setEditingQuestion(null);
-                            setShowQuestionTemplates(true);
-                          });
+                          lockWizardCloseTouch();
+                          setShowQuestionForm(false);
+                          setEditingQuestion(null);
+                          setShowQuestionTemplates(true);
                         }}
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 active:bg-white/10 focus:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                        className={`h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 active:bg-white/10 active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
                       >
                         <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
                       </Button>
