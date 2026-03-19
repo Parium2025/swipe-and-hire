@@ -312,7 +312,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
           hideClose
           forceMount
           overlayHidden={!open || !isWarmedUp}
-          className={"w-[min(90vw,400px)] bg-parium-gradient text-white border-none max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
+          className={"parium-panel max-w-none w-[min(92vw,400px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
           style={{ display: (!open || !isWarmedUp) ? 'none' : undefined }}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
@@ -321,28 +321,27 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
             <DialogDescription className="sr-only">Välj mall eller ange titel</DialogDescription>
           </DialogHeader>
           <AnimatedBackground showBubbles={false} />
-          <Card className="bg-transparent border-0 ring-0 shadow-none relative z-10 w-full min-w-0 transition-all duration-200 overflow-hidden">
-            <CardHeader className="pb-4 pt-6">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex-1 text-center text-xl">
-                  Skapa jobb
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleClose}
-                  onMouseDown={(e) => e.currentTarget.blur()}
-                  onMouseUp={(e) => e.currentTarget.blur()}
-                  className="absolute right-2 top-2 h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white transition-colors duration-300 hover:bg-white/10 active:bg-white/15 focus:outline-none focus:ring-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <CardDescription className="text-white text-center text-sm leading-snug mt-2">
+
+          <div className="relative z-10 flex flex-col max-h-[75vh] sm:max-h-[80vh]">
+            <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
+              <h2 className="text-white text-lg font-semibold">Skapa jobb</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="absolute right-4 top-4 h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors duration-300 active:bg-white/15 focus:outline-none focus:ring-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+              <p className="text-white text-center text-sm leading-snug">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 px-4 pb-4 overflow-hidden">
+              </p>
+
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Input
@@ -386,239 +385,206 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                         }
                       }}
                     >
-                        <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onMouseDown={(e) => e.currentTarget.blur()}
-                        onMouseUp={(e) => e.currentTarget.blur()}
-                        className="w-full bg-white/10 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/15 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-11 !min-h-0 py-2 px-3 focus:outline-none focus:ring-0 rounded-md overflow-hidden min-w-0"
-                        title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
-                      >
-                        <span className="text-sm truncate font-normal text-white min-w-0">
-                          {selectedTemplate?.name || 'Ingen mall (valfritt)'}
-                        </span>
-                        <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white ml-2 transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
-                      </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent 
-                          key={menuInstanceKey}
-                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-900/85 backdrop-blur-xl border-white/20 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
-                          style={{ 
-                            WebkitOverflowScrolling: 'touch', 
-                            overscrollBehaviorY: 'contain', 
-                            touchAction: 'pan-y'
-                          }}
-                          side="top"
-                          align="center"
-                          alignOffset={0}
-                          sideOffset={8}
-                          avoidCollisions={false}
-                          onWheel={(e) => e.stopPropagation()}
-                          onTouchStart={(e) => e.stopPropagation()}
-                          onTouchMove={(e) => e.stopPropagation()}
-                          onCloseAutoFocus={(e) => e.preventDefault()}
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onMouseDown={(e) => e.currentTarget.blur()}
+                          onMouseUp={(e) => e.currentTarget.blur()}
+                          className="w-full bg-white/10 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/15 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white mt-1 h-11 !min-h-0 py-2 px-3 focus:outline-none focus:ring-0 rounded-md overflow-hidden min-w-0"
+                          title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
                         >
-                          <div className="p-3 border-b border-white/20 sticky top-0 z-20 bg-slate-900">
-                            <div className="relative">
-                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
-                              <Input
-                                ref={(el) => {
-                                  if (el && templateMenuOpen) {
-                                    setTimeout(() => el.focus(), 0);
-                                  }
-                                }}
-                                placeholder="Sök mall..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                onKeyDown={(e) => {
-                                  e.stopPropagation();
-                                }}
-                                className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40 rounded-lg"
-                                autoComplete="off"
-                                autoFocus
-                              />
-                              {searchTerm && (
-                                <button
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setSearchTerm('');
-                                  }}
-                                  onMouseDown={(e) => e.currentTarget.blur()}
-                                  onMouseUp={(e) => e.currentTarget.blur()}
-                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-white transition-colors md:hover:text-white md:hover:bg-white/10 active:bg-white/20 focus:outline-none focus:ring-0"
-                                  type="button"
-                                >
-                                  <X className="h-4 w-4" />
-                                </button>
-                              )}
-                            </div>
+                          <div className="flex items-center gap-2 w-full min-w-0">
+                            <span className="text-sm truncate font-normal text-white flex-1 min-w-0 text-left" title={selectedTemplate?.name || 'Ingen mall (valfritt)'}>
+                              {selectedTemplate?.name || 'Ingen mall (valfritt)'}
+                            </span>
+                            <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
                           </div>
+                        </Button>
+                      </DropdownMenuTrigger>
 
-                          {/* Result indicator */}
-                          {searchTerm && (
-                            <div className="px-4 py-2 text-sm text-white border-b border-white/20">
-                              Visar <span className="text-white font-medium">{filteredTemplates.length}</span> av <span className="text-white font-medium">{templates.length}</span> mallar
-                            </div>
-                          )}
-
-                          <div className="flex-1 pb-2">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setTemplateMenuOpen(false);
-                                setOpen(false);
-                                // Samma delay som för MobileJobWizard för smidig övergång
-                                setTimeout(() => {
-                                  setShowTemplateWizard(true);
-                                }, 150);
-                              }}
-                              onFocus={(e) => {
-                                const searchInput = e.currentTarget.closest('[role="menu"]')?.querySelector('input');
-                                if (searchInput && document.activeElement === searchInput) {
-                                  e.preventDefault();
+                      <DropdownMenuContent 
+                        key={menuInstanceKey}
+                        className="w-[calc(100vw-2rem)] max-w-sm bg-slate-900/85 backdrop-blur-xl border-white/20 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
+                        style={{ 
+                          WebkitOverflowScrolling: 'touch', 
+                          overscrollBehaviorY: 'contain', 
+                          touchAction: 'pan-y'
+                        }}
+                        side="top"
+                        align="center"
+                        alignOffset={0}
+                        sideOffset={8}
+                        avoidCollisions={false}
+                        onWheel={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        onTouchMove={(e) => e.stopPropagation()}
+                        onCloseAutoFocus={(e) => e.preventDefault()}
+                      >
+                        <div className="p-3 border-b border-white/20 sticky top-0 z-20 bg-slate-900">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
+                            <Input
+                              ref={(el) => {
+                                if (el && templateMenuOpen) {
+                                  setTimeout(() => el.focus(), 0);
                                 }
                               }}
-                              className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
-                            >
-                              <div className="flex flex-col">
-                                <span className="font-medium text-white">+ Skapa en ny mall</span>
-                                <span className="text-sm text-white">Skapa en återanvändbar jobbmall</span>
-                              </div>
-                            </DropdownMenuItem>
-                            
-                            {filteredTemplates.map((template) => (
-                              <DropdownMenuItem
-                                key={template.id}
-                                onSelect={(e) => e.preventDefault()}
-                                onFocus={(e) => {
-                                  const searchInput = e.currentTarget.closest('[role="menu"]')?.querySelector('input');
-                                  if (searchInput && document.activeElement === searchInput) {
-                                    e.preventDefault();
-                                  }
+                              placeholder="Sök mall..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              onKeyDown={(e) => {
+                                e.stopPropagation();
+                              }}
+                              className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40 rounded-lg"
+                              autoComplete="off"
+                              autoFocus
+                            />
+                            {searchTerm && (
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setSearchTerm('');
                                 }}
-                                className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20 last:border-b-0"
+                                onMouseDown={(e) => e.currentTarget.blur()}
+                                onMouseUp={(e) => e.currentTarget.blur()}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-white transition-colors md:hover:text-white md:hover:bg-white/10 active:bg-white/20 focus:outline-none focus:ring-0"
+                                type="button"
                               >
-                                <div className="flex items-center justify-between w-full gap-3">
-                                  <button
-                                    onClick={() => handleTemplateSelect(template.id, template.name)}
-                                    onMouseDown={(e) => e.currentTarget.blur()}
-                                    onMouseUp={(e) => e.currentTarget.blur()}
-                                    className="flex items-center flex-1 min-w-0 text-left hover:opacity-80 transition-opacity focus:outline-none focus:ring-0"
-                                  >
-                                    <span className="font-medium text-white truncate min-w-0">{template.name}</span>
-                                    {template.is_default && (
-                                      <span className="text-sm text-blue-400 ml-2">Standard</span>
-                                    )}
-                                  </button>
-                                  <div className="flex gap-2 flex-shrink-0">
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setTemplateToEdit(template);
-                                        setTemplateMenuOpen(false);
-                                        setOpen(false);
-                                        setTimeout(() => {
-                                          setShowTemplateWizard(true);
-                                        }, 150);
-                                      }}
-                                      onMouseDown={(e) => e.currentTarget.blur()}
-                                      onMouseUp={(e) => e.currentTarget.blur()}
-                                      className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-colors duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95 focus:outline-none focus:ring-0"
-                                    >
-                                      <Edit size={14} />
-                                    </button>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setTemplateToDelete(template);
-                                      }}
-                                      onMouseDown={(e) => e.currentTarget.blur()}
-                                      onMouseUp={(e) => e.currentTarget.blur()}
-                                      className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-colors duration-300 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 active:scale-95 focus:outline-none focus:ring-0"
-                                    >
-                                      <Trash2 size={14} />
-                                    </button>
-                                  </div>
-                                </div>
-                              </DropdownMenuItem>
-                            ))}
-                            
-                            {filteredTemplates.length === 0 && searchTerm && (
-                              <div className="px-4 py-8 text-center">
-                                <p className="text-white font-medium">
-                                  Ingen mall hittades för ({searchTerm})
-                                </p>
-                              </div>
+                                <X className="h-4 w-4" />
+                              </button>
                             )}
                           </div>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      {selectedTemplate && (
-                        <div className="flex justify-center mt-3">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setSelectedTemplate(null);
-                              setJobTitle('');
-                              setHasUnsavedChanges(false);
-                              setTitleInputKey((k) => k + 1);
-                              setTimeout(() => {
-                                if (titleRef.current) {
-                                  titleRef.current.value = '';
-                                  titleRef.current.blur();
-                                  titleRef.current.focus();
-                                  titleRef.current.blur();
-                                }
-                              }, 0);
-                            }}
-                            onMouseDown={(e) => e.currentTarget.blur()}
-                            onMouseUp={(e) => e.currentTarget.blur()}
-                            className="h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white transition-colors duration-300 hover:bg-white/10 active:bg-white/15 focus:outline-none focus:ring-0"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
                         </div>
-                      )}
+
+                        {searchTerm && (
+                          <div className="px-4 py-2 text-sm text-white border-b border-white/20">
+                            Visar <span className="text-white font-medium">{filteredTemplates.length}</span> av <span className="text-white font-medium">{templates.length}</span> mallar
+                          </div>
+                        )}
+
+                        <div className="flex-1 pb-2">
+                          <DropdownMenuItem
+                            onSelect={() => handleTemplateSelect('none', '')}
+                            className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
+                          >
+                            <span className="font-medium text-white">Ingen mall (valfritt)</span>
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem
+                            onSelect={() => {
+                              setTemplateMenuOpen(false);
+                              setOpen(false);
+                              setTimeout(() => {
+                                setShowTemplateWizard(true);
+                              }, 150);
+                            }}
+                            className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
+                          >
+                            <div className="flex flex-col min-w-0 w-full">
+                              <span className="font-medium text-white">+ Skapa en ny mall</span>
+                              <span className="text-sm text-white">Skapa en återanvändbar jobbmall</span>
+                            </div>
+                          </DropdownMenuItem>
+                          
+                          {filteredTemplates.map((template) => (
+                            <DropdownMenuItem
+                              key={template.id}
+                              onSelect={() => handleTemplateSelect(template.id, template.name)}
+                              className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20 last:border-b-0"
+                            >
+                              <div className="flex items-center w-full gap-3 min-w-0">
+                                <div className="flex-1 min-w-0">
+                                  <span className="font-medium text-white truncate block" title={template.name}>{template.name}</span>
+                                </div>
+                                {template.is_default && (
+                                  <span className="text-xs text-white/80 shrink-0">Standard</span>
+                                )}
+                                <div className="flex gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setTemplateToEdit(template);
+                                      setTemplateMenuOpen(false);
+                                      setOpen(false);
+                                      setTimeout(() => {
+                                        setShowTemplateWizard(true);
+                                      }, 150);
+                                    }}
+                                    onMouseDown={(e) => e.currentTarget.blur()}
+                                    onMouseUp={(e) => e.currentTarget.blur()}
+                                    className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-colors duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95 focus:outline-none focus:ring-0"
+                                    aria-label={`Redigera mall ${template.name}`}
+                                  >
+                                    <Edit size={14} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setTemplateToDelete(template);
+                                    }}
+                                    onMouseDown={(e) => e.currentTarget.blur()}
+                                    onMouseUp={(e) => e.currentTarget.blur()}
+                                    className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-colors duration-300 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 active:scale-95 focus:outline-none focus:ring-0"
+                                    aria-label={`Ta bort mall ${template.name}`}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+                          
+                          {filteredTemplates.length === 0 && searchTerm && (
+                            <div className="px-4 py-8 text-center">
+                              <p className="text-white font-medium">
+                                Ingen mall hittades för ({searchTerm})
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 )}
               </div>
+            </div>
 
-              <div className="flex gap-2 pt-2">
-                <Button 
-                  onMouseDown={(e) => {
-                    e.currentTarget.blur();
-                    // Blur any focused input to prevent flash
-                    const activeEl = document.activeElement as HTMLElement;
-                    if (activeEl?.blur) activeEl.blur();
-                  }}
-                  onMouseUp={(e) => {
-                    e.currentTarget.blur();
-                  }}
-                  onClick={handleCreateJob}
-                  disabled={loading || !jobTitle.trim()}
-                  className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 ${
-                    !loading && jobTitle.trim() ? 'border border-white/30' : 'border border-transparent'
-                  }`}
-                >
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Skapa jobb
-                </Button>
-                <Button 
-                  variant="glass"
-                  onMouseDown={(e) => e.currentTarget.blur()}
-                  onMouseUp={(e) => e.currentTarget.blur()}
-                  onClick={handleClose}
-                  className="min-h-[44px] rounded-full"
-                >
-                  Avbryt
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="flex gap-2 p-4 border-t border-white/20 flex-shrink-0 bg-background/10">
+              <Button 
+                onMouseDown={(e) => {
+                  e.currentTarget.blur();
+                  const activeEl = document.activeElement as HTMLElement;
+                  if (activeEl?.blur) activeEl.blur();
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.blur();
+                }}
+                onClick={handleCreateJob}
+                disabled={loading || !jobTitle.trim()}
+                className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 ${
+                  !loading && jobTitle.trim() ? 'border border-white/30' : 'border border-transparent'
+                }`}
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Skapa jobb
+              </Button>
+              <Button 
+                variant="glass"
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                onClick={handleClose}
+                className="min-h-[44px] rounded-full"
+              >
+                Avbryt
+              </Button>
+            </div>
+          </div>
         </DialogContentNoFocus>
       </Dialog>
 
