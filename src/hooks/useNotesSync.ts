@@ -30,6 +30,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const queryClient = useQueryClient();
   const hasLocalEditsRef = useRef(false);
   const contentRef = useRef('');
+  const isSavingRef = useRef(false);
 
   const cacheKey = user?.id ? `${cachePrefix}_${user.id}` : cachePrefix;
 
@@ -130,9 +131,12 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   }, [user?.id, cacheKey, queryClient, table, ownerColumn, queryKey]);
 
   // Save function — always upserts to avoid duplicates
+  // Returns false if skipped due to in-flight save
   const saveToDb = useCallback(async (contentToSave: string) => {
     if (!user?.id || !getIsOnline()) return false;
+    if (isSavingRef.current) return false; // guard against overlapping saves
 
+    isSavingRef.current = true;
     try {
       const { error } = await (supabase
         .from(table) as any)
@@ -149,6 +153,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     } catch (err) {
       console.error(`Failed to save ${table}:`, err);
       return false;
+    } finally {
+      isSavingRef.current = false;
     }
   }, [user?.id, table, ownerColumn]);
 
@@ -165,20 +171,28 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   );
 
   // Auto-save with debounce — uses contentRef to avoid stale closures
+  // Compare against cached server content via ref to avoid invalidate-loop
+  const serverContentRef = useRef('');
+  useEffect(() => {
+    serverContentRef.current = noteData?.content ?? '';
+  }, [noteData]);
+
   useEffect(() => {
     if (!user?.id || !isFetched) return;
-    const serverContent = noteData?.content ?? '';
-    if (content === serverContent) return;
+    if (!hasLocalEditsRef.current) return; // only save user-initiated changes
 
     const timer = setTimeout(async () => {
+      const latest = contentRef.current;
+      if (latest === serverContentRef.current) return; // nothing changed vs server
       if (!getIsOnline()) {
         console.log('Offline - skipping note save');
         return;
       }
       setIsSaving(true);
-      const success = await saveToDb(contentRef.current);
+      const success = await saveToDb(latest);
       if (success) {
         hasLocalEditsRef.current = false;
+        serverContentRef.current = latest; // update local server snapshot to prevent re-trigger
         setSaveFailed(false);
         setLastSaved(new Date());
         queryClient.invalidateQueries({ queryKey: [queryKey, user.id] });
@@ -186,10 +200,10 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         setSaveFailed(true);
       }
       setIsSaving(false);
-    }, 500);
+    }, 1200);
 
     return () => clearTimeout(timer);
-  }, [content, user?.id, isFetched, noteData, queryClient, queryKey, saveToDb]);
+  }, [content, user?.id, isFetched, queryClient, queryKey, saveToDb]);
 
   // Retry queued save when coming back online
   useEffect(() => {
