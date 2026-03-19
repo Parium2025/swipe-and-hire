@@ -321,7 +321,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
             <DialogDescription className="sr-only">Välj mall eller ange titel</DialogDescription>
           </DialogHeader>
           <AnimatedBackground showBubbles={false} />
-          <Card className="bg-transparent border-0 ring-0 shadow-none relative z-10 w-full transition-all duration-200 overflow-hidden">
+          <Card className="bg-transparent border-0 ring-0 shadow-none relative z-10 w-full min-w-0 transition-all duration-200 overflow-hidden">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
