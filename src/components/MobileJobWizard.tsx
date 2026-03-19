@@ -2649,7 +2649,7 @@ const MobileJobWizard = ({
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="bg-white/10 border border-white/20 text-white hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-md cursor-pointer transition-all duration-300"
+                      className="bg-white/10 border border-white/20 text-white hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-full cursor-pointer transition-all duration-300"
                     >
                       <Plus className="w-4 h-4" />
                     </div>
