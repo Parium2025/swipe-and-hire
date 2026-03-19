@@ -131,10 +131,10 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   }, [user?.id, cacheKey, queryClient, table, ownerColumn, queryKey]);
 
   // Save function — always upserts to avoid duplicates
-  // Returns false if skipped due to in-flight save
-  const saveToDb = useCallback(async (contentToSave: string) => {
-    if (!user?.id || !getIsOnline()) return false;
-    if (isSavingRef.current) return false; // guard against overlapping saves
+  // Returns: 'saved' | 'skipped' | 'failed'
+  const saveToDb = useCallback(async (contentToSave: string): Promise<'saved' | 'skipped' | 'failed'> => {
+    if (!user?.id || !getIsOnline()) return 'skipped';
+    if (isSavingRef.current) return 'skipped'; // another save in-flight, not an error
 
     isSavingRef.current = true;
     try {
@@ -146,13 +146,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         );
       if (error) {
         console.error(`❌ ${table} save failed:`, error.message);
-        return false;
+        return 'failed';
       }
       console.log(`✅ ${table} saved to database`);
-      return true;
+      return 'saved';
     } catch (err) {
       console.error(`Failed to save ${table}:`, err);
-      return false;
+      return 'failed';
     } finally {
       isSavingRef.current = false;
     }
