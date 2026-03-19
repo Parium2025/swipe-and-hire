@@ -390,7 +390,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                         size="sm"
                         onMouseDown={(e) => e.currentTarget.blur()}
                         onMouseUp={(e) => e.currentTarget.blur()}
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10 focus:outline-none focus:ring-0"
+                        className="w-full bg-white/10 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/15 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-11 !min-h-0 py-2 whitespace-normal pr-10 focus:outline-none focus:ring-0 rounded-md"
                         title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
                       >
                         <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words font-normal text-white">
