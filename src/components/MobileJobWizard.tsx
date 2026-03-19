@@ -3362,7 +3362,7 @@ const MobileJobWizard = ({
                               onMouseUp={(e) => e.currentTarget.blur()}
                               onClick={addOption}
                               size="sm"
-                              className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 transition-colors duration-150 mt-2 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                              className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 rounded-full transition-colors duration-150 mt-2 focus:outline-none focus:ring-0 focus-visible:ring-0"
                             >
                               Lägg till alternativ
                               <Plus className="h-3.5 w-3.5 ml-1.5" />

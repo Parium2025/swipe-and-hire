@@ -1528,7 +1528,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     onMouseDown={(e) => e.currentTarget.blur()}
                     onMouseUp={(e) => e.currentTarget.blur()}
                     disabled={!editingQuestion.question_text?.trim()}
-                    className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-300 focus:outline-none focus:ring-0"
+                    className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 rounded-full touch-border-white transition-colors duration-300 focus:outline-none focus:ring-0"
                   >
                     Spara fråga
                   </Button>
