@@ -2448,7 +2448,7 @@ const MobileJobWizard = ({
           </div>
 
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2">
+          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-2" style={{ WebkitOverflowScrolling: 'touch' }}>
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
               <div className="space-y-1.5 max-w-2xl mx-auto w-full">
