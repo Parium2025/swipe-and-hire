@@ -2038,7 +2038,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               onMouseDown={(e) => e.currentTarget.blur()}
                               onMouseUp={(e) => e.currentTarget.blur()}
                               size="sm"
-                              className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium focus:outline-none focus:ring-0"
+                              className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full focus:outline-none focus:ring-0"
                             >
                               Lägg till fråga
                               <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
