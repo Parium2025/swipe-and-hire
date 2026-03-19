@@ -80,6 +80,7 @@ const SortableQuestionCard = ({
   getQuestionTypeLabel,
   onEdit
 }: SortableQuestionProps) => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const {
     attributes,
     listeners,
