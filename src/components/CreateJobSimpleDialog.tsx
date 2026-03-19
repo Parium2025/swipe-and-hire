@@ -342,7 +342,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 px-4 pb-4">
+            <CardContent className="space-y-4 px-4 pb-4 overflow-hidden">
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Input
