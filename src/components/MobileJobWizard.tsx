@@ -657,6 +657,14 @@ const MobileJobWizard = ({
     window.addEventListener('resize', recalc);
     return () => window.removeEventListener('resize', recalc);
   }, [showHingePreview]);
+
+  useEffect(() => {
+    return () => {
+      if (wizardCloseTouchLockTimeoutRef.current) {
+        window.clearTimeout(wizardCloseTouchLockTimeoutRef.current);
+      }
+    };
+  }, []);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
