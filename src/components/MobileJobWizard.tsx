@@ -2998,7 +2998,7 @@ const MobileJobWizard = ({
                           onMouseUp={(e) => e.currentTarget.blur()}
                           onClick={addCustomQuestion}
                           size="sm"
-                          className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                          className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
                         >
                           Lägg till fråga
                           <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -3077,7 +3077,7 @@ const MobileJobWizard = ({
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onClick={createNewQuestion}
                         size="sm"
-                        className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                        className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
                       >
                         Skapa ny fråga
                         <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -3209,10 +3209,10 @@ const MobileJobWizard = ({
                           setShowQuestionTemplates(true);
                         }}
                         variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white transition-colors duration-150 hover:bg-white/10 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                        size="icon"
+                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
                       </Button>
                     </div>
 
@@ -3362,7 +3362,7 @@ const MobileJobWizard = ({
                               onMouseUp={(e) => e.currentTarget.blur()}
                               onClick={addOption}
                               size="sm"
-                              className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 transition-colors duration-150 mt-2 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                              className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 rounded-full transition-colors duration-150 mt-2 focus:outline-none focus:ring-0 focus-visible:ring-0"
                             >
                               Lägg till alternativ
                               <Plus className="h-3.5 w-3.5 ml-1.5" />
@@ -3393,7 +3393,7 @@ const MobileJobWizard = ({
                           onMouseUp={(e) => e.currentTarget.blur()}
                           onClick={saveCustomQuestion}
                           disabled={!editingQuestion?.question_text?.trim()}
-                          className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                          className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 rounded-full touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
                         >
                           Spara fråga
                         </Button>

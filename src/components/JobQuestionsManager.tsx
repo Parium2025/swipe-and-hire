@@ -10,7 +10,17 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Trash2, GripVertical, HelpCircle, Search } from 'lucide-react';
+import { Plus, Trash2, GripVertical, HelpCircle, Search, AlertTriangle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import {
   DndContext,
   closestCenter,
@@ -70,6 +80,7 @@ const SortableQuestionCard = ({
   getQuestionTypeLabel,
   onEdit
 }: SortableQuestionProps) => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const {
     attributes,
     listeners,
@@ -86,6 +97,7 @@ const SortableQuestionCard = ({
   };
 
   return (
+    <>
     <Card 
       ref={setNodeRef} 
       style={style}
@@ -159,7 +171,7 @@ const SortableQuestionCard = ({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                onClick={() => removeQuestion(index)}
+                onClick={() => setShowDeleteConfirm(true)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -168,6 +180,45 @@ const SortableQuestionCard = ({
         </div>
       </CardContent>
     </Card>
+
+    <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <AlertDialogContentNoFocus
+        className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+      >
+        <AlertDialogHeader className="space-y-4 text-center">
+          <div className="flex items-center justify-center gap-2.5">
+            <div className="bg-red-500/20 p-2 rounded-full">
+              <AlertTriangle className="h-4 w-4 text-red-400" />
+            </div>
+            <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+              Ta bort fråga
+            </AlertDialogTitle>
+          </div>
+          <AlertDialogDescription className="text-white text-sm leading-relaxed">
+            Är du säker på att du vill ta bort denna fråga? Denna åtgärd går inte att ångra.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+          <AlertDialogCancel
+            onClick={() => setShowDeleteConfirm(false)}
+            style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+            className="rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
+          >
+            Avbryt
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => removeQuestion(index)}
+            variant="destructiveSoft"
+            style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+            className="rounded-full"
+          >
+            <Trash2 className="h-4 w-4 mr-1.5" />
+            Ta bort
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContentNoFocus>
+    </AlertDialog>
+    </>
   );
 };
 
@@ -440,7 +491,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
       {/* Add question button - always visible */}
       <Button 
         onClick={addQuestion}
-        className="w-full bg-primary hover:bg-primary/90 text-white"
+        className="w-full bg-primary hover:bg-primary/90 text-white rounded-full"
       >
         Skapa ny fråga
         <Plus className="h-4 w-4 ml-2 text-[hsl(var(--pure-white))]" />
@@ -525,6 +576,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                   <Button
                     variant="outline"
                     size="sm"
+                    className="rounded-full"
                     onClick={() => {
                       const options = questionDraft.options || [];
                       setQuestionDraft({ ...questionDraft, options: [...options, ''] });
@@ -566,13 +618,13 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
             {/* Action buttons */}
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={editingQuestionIndex !== null ? cancelEditQuestion : cancelAddQuestion} className="text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white">
+              <Button variant="outline" onClick={editingQuestionIndex !== null ? cancelEditQuestion : cancelAddQuestion} className="rounded-full text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white">
                 Avbryt
               </Button>
               <Button 
                 onClick={editingQuestionIndex !== null ? confirmEditQuestion : confirmAddQuestion}
                 disabled={!questionDraft.question_text.trim()}
-                className="text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
+                className="rounded-full text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
               >
                 Spara
               </Button>
@@ -617,7 +669,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
       {questions.length > 0 && (
         <div className="flex justify-end pt-4">
-          <Button onClick={saveQuestions} disabled={loading} className="text-white">
+          <Button onClick={saveQuestions} disabled={loading} className="rounded-full text-white">
             {loading ? 'Sparar...' : 'Spara frågor'}
           </Button>
         </div>
