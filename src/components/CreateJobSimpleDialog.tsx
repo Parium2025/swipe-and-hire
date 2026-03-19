@@ -311,7 +311,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
           hideClose
           forceMount
           overlayHidden={!open || !isWarmedUp}
-          className={"w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
+          className={"w-[min(90vw,400px)] bg-card-parium/95 text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
           style={{ display: (!open || !isWarmedUp) ? 'none' : undefined }}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
@@ -319,7 +319,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
             <DialogTitle className="sr-only">Skapa jobb</DialogTitle>
             <DialogDescription className="sr-only">Välj mall eller ange titel</DialogDescription>
           </DialogHeader>
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full transition-all duration-200">
+          <Card className="bg-transparent border-0 ring-0 shadow-none relative w-full transition-all duration-200">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
@@ -353,7 +353,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 hover:border-white/30 focus:border-white/20 text-white placeholder:text-white transition-colors duration-150 text-sm h-[44px] font-normal outline-none ring-0 focus:ring-0 focus:outline-none"
+                  className="bg-white/10 border-white/20 hover:border-white/30 focus:border-white/40 text-white placeholder:text-white transition-colors duration-150 text-sm h-11 !min-h-0 font-normal outline-none ring-0 focus:ring-0 focus:outline-none"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
@@ -390,7 +390,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                         size="sm"
                         onMouseDown={(e) => e.currentTarget.blur()}
                         onMouseUp={(e) => e.currentTarget.blur()}
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10 focus:outline-none focus:ring-0"
+                        className="w-full bg-white/10 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/15 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-11 !min-h-0 py-2 whitespace-normal pr-10 focus:outline-none focus:ring-0 rounded-md"
                         title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
                       >
                         <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words font-normal text-white">
