@@ -3060,8 +3060,10 @@ const MobileJobWizard = ({
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={() => {
-                          setShowQuestionTemplates(false);
-                          setQuestionSearchTerm('');
+                          requestAnimationFrame(() => {
+                            setShowQuestionTemplates(false);
+                            setQuestionSearchTerm('');
+                          });
                         }}
                         variant="ghost"
                         size="icon"
@@ -3261,9 +3263,11 @@ const MobileJobWizard = ({
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={() => {
-                          setShowQuestionForm(false);
-                          setEditingQuestion(null);
-                          setShowQuestionTemplates(true);
+                          requestAnimationFrame(() => {
+                            setShowQuestionForm(false);
+                            setEditingQuestion(null);
+                            setShowQuestionTemplates(true);
+                          });
                         }}
                         variant="ghost"
                         size="icon"
