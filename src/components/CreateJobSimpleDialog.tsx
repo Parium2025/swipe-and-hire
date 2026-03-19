@@ -504,9 +504,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                     onClick={() => handleTemplateSelect(template.id, template.name)}
                                     onMouseDown={(e) => e.currentTarget.blur()}
                                     onMouseUp={(e) => e.currentTarget.blur()}
-                                    className="flex items-center flex-1 text-left hover:opacity-80 transition-opacity focus:outline-none focus:ring-0"
+                                    className="flex items-center flex-1 min-w-0 text-left hover:opacity-80 transition-opacity focus:outline-none focus:ring-0"
                                   >
-                                    <span className="font-medium text-white">{template.name}</span>
+                                    <span className="font-medium text-white truncate min-w-0">{template.name}</span>
                                     {template.is_default && (
                                       <span className="text-sm text-blue-400 ml-2">Standard</span>
                                     )}
