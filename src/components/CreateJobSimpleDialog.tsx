@@ -555,16 +555,18 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
 
                 {/* Clear template selection */}
                 {selectedTemplate && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleTemplateSelect('none', '');
-                    }}
-                    className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors mt-1"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                    <span>Rensa mall</span>
-                  </button>
+                  <div className="flex justify-center mt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleTemplateSelect('none', '');
+                      }}
+                      className="flex items-center gap-1.5 text-sm text-white hover:text-white/80 transition-colors"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      <span>Rensa mall</span>
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
