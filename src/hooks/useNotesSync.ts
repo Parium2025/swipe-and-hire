@@ -216,13 +216,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       if (online && hasLocalEditsRef.current) {
         console.log(`🔄 Back online — retrying ${table} save`);
         setIsSaving(true);
-        const success = await saveToDb(contentRef.current);
-        if (success) {
+        const result = await saveToDb(contentRef.current);
+        if (result === 'saved') {
           hasLocalEditsRef.current = false;
           setSaveFailed(false);
           setLastSaved(new Date());
           queryClient.invalidateQueries({ queryKey: [queryKey, user.id] });
-        } else {
+        } else if (result === 'failed') {
           setSaveFailed(true);
         }
         setIsSaving(false);
