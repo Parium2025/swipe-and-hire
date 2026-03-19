@@ -3181,6 +3181,67 @@ const MobileJobWizard = ({
                       })()}
                     </div>
 
+                    {/* Delete Template Confirmation */}
+                    <AlertDialog open={!!deleteTemplateId} onOpenChange={(open) => { if (!open) setDeleteTemplateId(null); }}>
+                      <AlertDialogContentNoFocus
+                        className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+                      >
+                        <AlertDialogHeader className="space-y-4 text-center">
+                          <div className="flex items-center justify-center gap-2.5">
+                            <div className="bg-red-500/20 p-2 rounded-full">
+                              <Trash2 className="h-4 w-4 text-red-400" />
+                            </div>
+                            <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                              Ta bort fråga
+                            </AlertDialogTitle>
+                          </div>
+                          <AlertDialogDescription className="text-white text-sm leading-relaxed">
+                            Är du säker på att du vill ta bort denna fråga? Denna åtgärd går inte att ångra.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+                          <AlertDialogCancel
+                            onClick={() => setDeleteTemplateId(null)}
+                            style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+                            className="rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
+                          >
+                            Avbryt
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={async () => {
+                              if (!deleteTemplateId) return;
+                              try {
+                                const { error } = await supabase
+                                  .from('job_question_templates')
+                                  .delete()
+                                  .eq('id', deleteTemplateId);
+                                
+                                if (error) throw error;
+                                
+                                setQuestionTemplates(prev => prev.filter(t => t.id !== deleteTemplateId));
+                                toast({
+                                  title: "Fråga borttagen"
+                                });
+                              } catch (error) {
+                                console.error('Error deleting template:', error);
+                                toast({
+                                  title: "Kunde inte ta bort frågan",
+                                  variant: "destructive"
+                                });
+                              }
+                              setDeleteTemplateId(null);
+                            }}
+                            variant="destructiveSoft"
+                            style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+                            className="rounded-full"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1.5" />
+                            Ta bort
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContentNoFocus>
+                    </AlertDialog>
+
                   </div>
                 ) : (
                   /* Question Form */
