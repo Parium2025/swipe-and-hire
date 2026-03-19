@@ -392,10 +392,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                         size="sm"
                         onMouseDown={(e) => e.currentTarget.blur()}
                         onMouseUp={(e) => e.currentTarget.blur()}
-                        className="w-full bg-white/10 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/15 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-11 !min-h-0 py-2 pr-10 focus:outline-none focus:ring-0 rounded-md overflow-hidden"
+                        className="w-full bg-white/10 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/15 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-11 !min-h-0 py-2 px-3 focus:outline-none focus:ring-0 rounded-md overflow-hidden min-w-0"
                         title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
                       >
-                        <span className="text-left flex-1 px-1 text-sm truncate font-normal text-white min-w-0">
+                        <span className="text-sm truncate font-normal text-white min-w-0">
                           {selectedTemplate?.name || 'Ingen mall (valfritt)'}
                         </span>
                         <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white ml-2 transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
