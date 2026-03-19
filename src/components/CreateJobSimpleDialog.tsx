@@ -353,7 +353,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 hover:border-white/30 focus:border-white/20 text-white placeholder:text-white transition-colors duration-150 text-sm h-[44px] font-normal outline-none ring-0 focus:ring-0 focus:outline-none"
+                  className="bg-white/10 border-white/20 hover:border-white/30 focus:border-white/40 text-white placeholder:text-white transition-colors duration-150 text-sm h-11 !min-h-0 font-normal outline-none ring-0 focus:ring-0 focus:outline-none"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
