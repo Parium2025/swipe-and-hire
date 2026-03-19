@@ -55,7 +55,7 @@ export function BulkMessageDialog({ open, onOpenChange, count, onSend, progress 
             <button
               onClick={() => !isSending && onOpenChange(false)}
               disabled={isSending}
-              className="absolute right-2 top-2 h-8 w-8 flex items-center justify-center rounded-md text-white transition-colors duration-300 md:hover:bg-white/10 disabled:opacity-40"
+              className="absolute right-2 top-2 h-8 w-8 flex items-center justify-center rounded-full text-white transition-colors duration-300 md:hover:bg-white/10 disabled:opacity-40"
             >
               <X className="h-4 w-4" />
             </button>
