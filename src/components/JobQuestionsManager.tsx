@@ -618,7 +618,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
       {questions.length > 0 && (
         <div className="flex justify-end pt-4">
-          <Button onClick={saveQuestions} disabled={loading} className="text-white">
+          <Button onClick={saveQuestions} disabled={loading} className="rounded-full text-white">
             {loading ? 'Sparar...' : 'Spara frågor'}
           </Button>
         </div>
