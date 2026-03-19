@@ -11,6 +11,16 @@ import { clearDraftByKey } from '@/hooks/useFormDraft';
 // ... keep existing imports
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
