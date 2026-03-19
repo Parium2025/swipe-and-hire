@@ -561,7 +561,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                       onClick={() => {
                         handleTemplateSelect('none', '');
                       }}
-                      className="flex items-center gap-1.5 text-sm text-white hover:text-white/80 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm text-white rounded-full bg-white/5 border border-white/20 md:hover:bg-white/15 md:hover:border-white/40 active:scale-[0.97] active:bg-white/15 transition-all duration-150"
                     >
                       <X className="h-3.5 w-3.5" />
                       <span>Rensa mall</span>
