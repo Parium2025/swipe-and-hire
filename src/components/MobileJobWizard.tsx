@@ -2443,7 +2443,8 @@ const MobileJobWizard = ({
             {!showQuestionTemplates && !showQuestionForm && (
               <button
                 onClick={handleClose}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
+                onTouchEnd={(e) => { e.currentTarget.blur(); }}
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 active:bg-white/10 transition-colors focus:outline-none [-webkit-tap-highlight-color:transparent]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -3057,13 +3058,14 @@ const MobileJobWizard = ({
                           if (activeEl?.blur) activeEl.blur();
                         }}
                         onMouseUp={(e) => e.currentTarget.blur()}
+                        onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={() => {
                           setShowQuestionTemplates(false);
                           setQuestionSearchTerm('');
                         }}
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 active:bg-white/10 focus:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
                       >
                         <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
                       </Button>
@@ -3257,6 +3259,7 @@ const MobileJobWizard = ({
                           if (activeEl?.blur) activeEl.blur();
                         }}
                         onMouseUp={(e) => e.currentTarget.blur()}
+                        onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={() => {
                           setShowQuestionForm(false);
                           setEditingQuestion(null);
@@ -3264,7 +3267,7 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 active:bg-white/10 focus:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
                       >
                         <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
                       </Button>
