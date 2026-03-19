@@ -440,7 +440,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
       {/* Add question button - always visible */}
       <Button 
         onClick={addQuestion}
-        className="w-full bg-primary hover:bg-primary/90 text-white"
+        className="w-full bg-primary hover:bg-primary/90 text-white rounded-full"
       >
         Skapa ny fråga
         <Plus className="h-4 w-4 ml-2 text-[hsl(var(--pure-white))]" />
