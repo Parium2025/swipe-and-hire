@@ -573,7 +573,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
               <Button 
                 onClick={editingQuestionIndex !== null ? confirmEditQuestion : confirmAddQuestion}
                 disabled={!questionDraft.question_text.trim()}
-                className="text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
+                className="rounded-full text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
               >
                 Spara
               </Button>
