@@ -567,7 +567,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
             {/* Action buttons */}
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={editingQuestionIndex !== null ? cancelEditQuestion : cancelAddQuestion} className="text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white">
+              <Button variant="outline" onClick={editingQuestionIndex !== null ? cancelEditQuestion : cancelAddQuestion} className="rounded-full text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white">
                 Avbryt
               </Button>
               <Button 
