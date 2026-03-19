@@ -171,7 +171,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
               {/* Create job - plus icon only */}
               <button
                 onClick={() => createJobButtonRef.current?.click()}
-                className="flex items-center justify-center h-9 w-9 rounded-lg text-white hover:bg-white/10 transition-colors"
+                className="flex items-center justify-center h-9 w-9 rounded-full text-white hover:bg-white/10 transition-colors"
                 aria-label="Skapa ny annons"
               >
                 <Plus className="h-[18px] w-[18px]" />

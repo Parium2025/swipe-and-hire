@@ -109,7 +109,7 @@ function NotificationCenter() {
       <button
         ref={triggerRef}
         onClick={() => setOpen(v => !v)}
-        className="relative flex items-center justify-center h-9 w-9 rounded-lg text-white hover:bg-white/10 transition-colors"
+        className="relative flex items-center justify-center h-9 w-9 rounded-full text-white hover:bg-white/10 transition-colors"
         aria-label="Notifikationer"
       >
         <Bell className="h-[18px] w-[18px]" />
