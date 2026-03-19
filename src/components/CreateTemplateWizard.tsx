@@ -2036,10 +2036,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         onMouseDown={(e) => e.currentTarget.blur()}
                         onMouseUp={(e) => e.currentTarget.blur()}
                         variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white transition-colors duration-300 hover:bg-white/10 focus:outline-none focus:ring-0"
+                        size="icon"
+                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-none focus:ring-0"
                       >
-                        <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
+                        <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
                       </Button>
                     </div>
 
