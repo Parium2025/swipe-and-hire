@@ -851,7 +851,7 @@ const EmployerProfile = () => {
                             <DropdownMenuItem
                               key={platform.value}
                               onSelect={(e) => e.preventDefault()}
-                              className={`cursor-pointer hover:bg-white/10 active:bg-white/15 transition-colors px-3 py-2 focus:bg-white/10 rounded-md ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              className={`cursor-pointer hover:bg-white/10  transition-colors px-3 py-2 focus:bg-white/10 rounded-md ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                               onClick={() => {
                                 if (!isDisabled) {
                                   setNewSocialLink({...newSocialLink, platform: platform.value as SocialMediaLink['platform']});

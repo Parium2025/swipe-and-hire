@@ -132,7 +132,7 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
         <div className="flex items-center gap-1 flex-shrink-0">
           {!isMyCandidatesLoading && !isAlreadyAdded && !selectionMode && (
             <button
-              className="h-8 w-8 flex items-center justify-center rounded-full text-white active:bg-white/10"
+              className="h-8 w-8 flex items-center justify-center rounded-full text-white active:scale-[0.97]"
               onClick={(e) => {
                 e.stopPropagation();
                 if (hasTeam) {

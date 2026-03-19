@@ -113,7 +113,7 @@ export const JobSearchBar = memo(({
           <DropdownMenuTrigger asChild>
             <Button 
               variant="outline" 
-              className="w-auto min-w-[180px] bg-white/5 border-white/20 text-white backdrop-blur-[2px] transition-colors duration-150 will-change-transform md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus-visible:outline-none focus:ring-0 ring-0 outline-none active:bg-white/5 active:border-white/20 active:shadow-none data-[state=open]:bg-white/5 data-[state=open]:border-white/20"
+              className="w-auto min-w-[180px] bg-white/5 border-white/20 text-white backdrop-blur-[2px] transition-colors duration-150 will-change-transform md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus-visible:outline-none focus:ring-0 ring-0 outline-none active:border-white/20 active:shadow-none data-[state=open]:bg-white/5 data-[state=open]:border-white/20"
             >
               <ArrowUpDown className="mr-2 h-4 w-4" />
               {sortLabels[sortBy]}
@@ -195,7 +195,7 @@ export const JobSearchBar = memo(({
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="h-9 w-9 flex-shrink-0 text-white active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
+                className="h-9 w-9 flex-shrink-0 text-white  focus:outline-none focus-visible:outline-none focus:ring-0"
               >
                 <UserCheck className="h-4 w-4" />
               </Button>

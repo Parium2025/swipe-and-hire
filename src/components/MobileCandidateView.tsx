@@ -113,7 +113,7 @@ const CandidateRow = memo(function CandidateRow({
     <div
       ref={rowRef}
       className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-all duration-150 min-h-touch relative
-        ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:bg-white/[0.08]'}
+        ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:scale-[0.98]'}
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
       onClick={handleTap}
     >
@@ -194,7 +194,7 @@ const CandidateRow = memo(function CandidateRow({
               ref={triggerRef}
               onPointerDownCapture={measureMenuMetrics}
               onClick={e => e.stopPropagation()}
-              className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:bg-white/15 transition-colors flex-shrink-0"
+              className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:scale-[0.97] transition-colors flex-shrink-0"
               aria-label="Flytta kandidat"
             >
               <ChevronRight className="h-4 w-4 text-white/60" />
