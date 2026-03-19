@@ -337,8 +337,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
               </Button>
             </div>
 
-            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
-              <p className="text-white text-center text-sm leading-snug">
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-5">
+              <p className="text-white text-center text-sm leading-relaxed px-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </p>
 
