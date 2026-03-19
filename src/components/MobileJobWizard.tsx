@@ -2465,7 +2465,7 @@ const MobileJobWizard = ({
               <button
                 onClick={handleClose}
                 onTouchEnd={(e) => { e.currentTarget.blur(); }}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 active:bg-white/10 transition-colors focus:outline-none [-webkit-tap-highlight-color:transparent]"
+                className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 active:bg-white/10 transition-colors focus:outline-none touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
               >
                 <X className="h-4 w-4" />
               </button>
