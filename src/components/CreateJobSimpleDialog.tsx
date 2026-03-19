@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogDescripti
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X, Trash2, Edit, AlertTriangle } from 'lucide-react';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
@@ -311,7 +312,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
           hideClose
           forceMount
           overlayHidden={!open || !isWarmedUp}
-          className={"w-[min(90vw,400px)] bg-card-parium/95 text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
+          className={"w-[min(90vw,400px)] bg-parium-gradient text-white border-none max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
           style={{ display: (!open || !isWarmedUp) ? 'none' : undefined }}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
@@ -319,7 +320,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
             <DialogTitle className="sr-only">Skapa jobb</DialogTitle>
             <DialogDescription className="sr-only">Välj mall eller ange titel</DialogDescription>
           </DialogHeader>
-          <Card className="bg-transparent border-0 ring-0 shadow-none relative w-full transition-all duration-200">
+          <AnimatedBackground showBubbles={false} />
+          <Card className="bg-transparent border-0 ring-0 shadow-none relative z-10 w-full transition-all duration-200">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
@@ -390,10 +392,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                         size="sm"
                         onMouseDown={(e) => e.currentTarget.blur()}
                         onMouseUp={(e) => e.currentTarget.blur()}
-                        className="w-full bg-white/10 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/15 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-11 !min-h-0 py-2 whitespace-normal pr-10 focus:outline-none focus:ring-0 rounded-md"
+                        className="w-full bg-white/10 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/15 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-11 !min-h-0 py-2 pr-10 focus:outline-none focus:ring-0 rounded-md overflow-hidden"
                         title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
                       >
-                        <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words font-normal text-white">
+                        <span className="text-left flex-1 px-1 text-sm truncate font-normal text-white min-w-0">
                           {selectedTemplate?.name || 'Ingen mall (valfritt)'}
                         </span>
                         <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white ml-2 transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
