@@ -139,18 +139,14 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
     try {
       let saveError;
-      if (nd?.id) {
-        const { error } = await (supabase
-          .from(table) as any)
-          .update({ content: contentToSave })
-          .eq('id', nd.id);
-        saveError = error;
-      } else {
-        const { error } = await (supabase
-          .from(table) as any)
-          .insert({ [ownerColumn]: user.id, content: contentToSave });
-        saveError = error;
-      }
+      // Always upsert to avoid duplicates — unique constraint on owner column
+      const { error } = await (supabase
+        .from(table) as any)
+        .upsert(
+          { [ownerColumn]: user.id, content: contentToSave },
+          { onConflict: ownerColumn }
+        );
+      saveError = error;
       if (saveError) {
         console.error(`❌ ${table} save failed:`, saveError.message);
         return false;
@@ -247,26 +243,21 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       const token = accessTokenRef.current;
       if (!token) return; // No valid session — localStorage already has the content
       const nd = noteDataRef.current;
-      const body = nd?.id
-        ? JSON.stringify({ content: contentRef.current })
-        : JSON.stringify({ [ownerColumn]: user.id, content: contentRef.current });
+      const body = JSON.stringify({ [ownerColumn]: user.id, content: contentRef.current });
 
-      const url = nd?.id
-        ? `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}?id=eq.${nd.id}`
-        : `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}`;
+      // Use PostgREST upsert via Prefer header to match the unique constraint
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}`;
 
       const headers = {
         'Content-Type': 'application/json',
         'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         'Authorization': `Bearer ${token}`,
-        'Prefer': 'return=minimal',
+        'Prefer': `return=minimal,resolution=merge-duplicates`,
       };
 
       try {
-        // Use fetch with keepalive for both INSERT and UPDATE
-        // sendBeacon can't set Authorization headers, which breaks RLS
         fetch(url, {
-          method: nd?.id ? 'PATCH' : 'POST',
+          method: 'POST',
           headers,
           body,
           keepalive: true,
