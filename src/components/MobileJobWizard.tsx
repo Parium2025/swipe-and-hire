@@ -3060,8 +3060,10 @@ const MobileJobWizard = ({
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={() => {
-                          setShowQuestionTemplates(false);
-                          setQuestionSearchTerm('');
+                          requestAnimationFrame(() => {
+                            setShowQuestionTemplates(false);
+                            setQuestionSearchTerm('');
+                          });
                         }}
                         variant="ghost"
                         size="icon"
