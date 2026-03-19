@@ -239,7 +239,7 @@ export function JobStageSettingsMenu({
                       <button
                         key={name}
                         onClick={() => handleIconChange(name)}
-                        className={`w-8 h-8 rounded-md flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
+                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
                           settings?.iconName === name 
                             ? 'bg-white/30 text-white ring-1 ring-white/40' 
                             : 'md:hover:bg-white/20 active:bg-white/15 text-white/80'
@@ -421,7 +421,7 @@ export function JobStageSettingsMenu({
               <button
                 key={name}
                 onClick={() => handleIconChange(name)}
-                className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
                   settings?.iconName === name 
                     ? 'bg-white/30 text-white ring-1 ring-white/40' 
                     : 'bg-white/5 active:bg-white/15 text-white/80'

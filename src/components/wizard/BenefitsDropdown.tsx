@@ -125,7 +125,7 @@ export const BenefitsDropdown = ({
                   type="button"
                   onClick={addCustomBenefit}
                   disabled={!customBenefitInput.trim()}
-                  className="h-11 px-3 bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  className="h-11 w-11 px-0 bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center"
                 >
                   <Plus className="h-4 w-4" />
                 </button>

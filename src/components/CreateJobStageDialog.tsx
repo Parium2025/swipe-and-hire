@@ -111,7 +111,7 @@ export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: 
                   onClick={() => setIconName(name)}
                   onMouseDown={(e) => e.currentTarget.blur()}
                   onMouseUp={(e) => e.currentTarget.blur()}
-                  className={`p-2 rounded hover:bg-white/20 transition-colors duration-300 focus:outline-none focus:ring-0 ${
+                  className={`p-2 rounded-full hover:bg-white/20 transition-colors duration-300 focus:outline-none focus:ring-0 ${
                     iconName === name ? 'bg-white/20 ring-1 ring-white/40' : ''
                   }`}
                   title={iconLabel}

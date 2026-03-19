@@ -44,11 +44,11 @@ function Calendar({
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
         head_cell:
-          "text-white rounded-md w-9 font-normal text-[0.8rem]",
+          "text-white rounded-full w-9 font-normal text-[0.8rem]",
         row: "flex w-full mt-2",
         cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
         day: cn(
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-md text-white transition-colors",
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-full text-white transition-colors",
           "hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white"
         ),
         day_range_end: "day-range-end",
