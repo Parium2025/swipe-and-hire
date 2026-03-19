@@ -3052,7 +3052,7 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="sm"
-                        className="text-white transition-colors duration-150 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                        className="h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white transition-colors duration-150 hover:bg-white/10 focus:outline-none focus:ring-0 focus-visible:ring-0"
                       >
                         <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
                       </Button>
@@ -3210,7 +3210,7 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="sm"
-                        className="text-white transition-colors duration-150 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                        className="h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white transition-colors duration-150 hover:bg-white/10 focus:outline-none focus:ring-0 focus-visible:ring-0"
                       >
                         <X className="h-4 w-4" />
                       </Button>
