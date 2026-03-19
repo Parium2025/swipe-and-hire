@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogDescripti
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X, Trash2, Edit, AlertTriangle } from 'lucide-react';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
