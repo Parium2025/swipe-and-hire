@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { clearDraftByKey } from '@/hooks/useFormDraft';
 // ... keep existing imports
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
-import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -2465,9 +2465,9 @@ const MobileJobWizard = ({
               <button
                 onClick={handleClose}
                 onTouchEnd={(e) => { e.currentTarget.blur(); }}
-                className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20  transition-colors focus:outline-none touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
+                className={`${dialogCloseButtonClassName} touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
               >
-                <X className="h-4 w-4" />
+                <X className={dialogCloseIconClassName} />
               </button>
             )}
           </div>
@@ -3087,9 +3087,9 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="icon"
-                        className={`h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20  active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
+                        className={`h-7 w-7 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20 active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
                       >
-                        <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
+                        <X className={dialogCloseIconClassName} />
                       </Button>
                     </div>
 
@@ -3290,9 +3290,9 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="icon"
-                        className={`h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20  active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
+                        className={`h-7 w-7 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20 active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
                       >
-                        <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
+                        <X className={dialogCloseIconClassName} />
                       </Button>
                     </div>
 
