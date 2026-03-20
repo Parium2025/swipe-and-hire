@@ -95,6 +95,7 @@ const OS_CONFIG: Record<string, { label: string; color: string }> = {
 const DAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
 
 const EMPLOYER_ANALYTICS_CACHE_PREFIX = 'parium-employer-analytics:v2';
+const EMPLOYER_ANALYTICS_SELECTED_FILTER_KEY = 'parium-employer-analytics:selected-filter';
 
 const getEmployerAnalyticsCacheKey = (
   scope: 'overview' | 'advanced',
@@ -118,6 +119,27 @@ const writeEmployerAnalyticsCache = <T,>(key: string, value: T) => {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
     // Ignore storage quota / serialization issues.
+  }
+};
+
+const readPersistedEmployerAnalyticsFilter = (): number | null => {
+  if (typeof window === 'undefined') return 30;
+  try {
+    const raw = window.localStorage.getItem(EMPLOYER_ANALYTICS_SELECTED_FILTER_KEY);
+    if (raw === 'all') return null;
+    const parsed = Number(raw);
+    return TIME_FILTERS.some((filter) => filter.days === parsed) ? parsed : 30;
+  } catch {
+    return 30;
+  }
+};
+
+const persistEmployerAnalyticsFilter = (days: number | null) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(EMPLOYER_ANALYTICS_SELECTED_FILTER_KEY, days === null ? 'all' : String(days));
+  } catch {
+    // Ignore storage write issues.
   }
 };
 
@@ -500,7 +522,7 @@ const formatDuration = (seconds: number): string => {
 const EmployerAnalytics = memo(() => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [selectedDays, setSelectedDays] = useState<number | null>(30);
+  const [selectedDays, setSelectedDays] = useState<number | null>(() => readPersistedEmployerAnalyticsFilter());
   const overviewCacheKey = useMemo(
     () => getEmployerAnalyticsCacheKey('overview', user?.id, selectedDays),
     [user?.id, selectedDays],
@@ -545,19 +567,32 @@ const EmployerAnalytics = memo(() => {
   });
 
   useEffect(() => {
+    persistEmployerAnalyticsFilter(selectedDays);
+  }, [selectedDays]);
+
+  useEffect(() => {
     if (!user?.id) return;
 
     const warmAllQueries = () => {
-      void queryClient.prefetchQuery({
-        queryKey: ['employer-analytics-v2', user.id, null],
-        queryFn: () => fetchEmployerAnalyticsOverview(user.id, null),
-        staleTime: 2 * 60 * 1000,
-      });
+      TIME_FILTERS.forEach(({ days }) => {
+        const overviewKey = getEmployerAnalyticsCacheKey('overview', user.id, days);
+        const advancedKey = getEmployerAnalyticsCacheKey('advanced', user.id, days);
 
-      void queryClient.prefetchQuery({
-        queryKey: ['employer-advanced-analytics', user.id, null],
-        queryFn: () => fetchEmployerAnalyticsAdvanced(user.id, null),
-        staleTime: 2 * 60 * 1000,
+        if (!readEmployerAnalyticsCache<AnalyticsData>(overviewKey)) {
+          void queryClient.prefetchQuery({
+            queryKey: ['employer-analytics-v2', user.id, days],
+            queryFn: () => fetchEmployerAnalyticsOverview(user.id, days),
+            staleTime: 2 * 60 * 1000,
+          });
+        }
+
+        if (!readEmployerAnalyticsCache<AdvancedAnalyticsData>(advancedKey)) {
+          void queryClient.prefetchQuery({
+            queryKey: ['employer-advanced-analytics', user.id, days],
+            queryFn: () => fetchEmployerAnalyticsAdvanced(user.id, days),
+            staleTime: 2 * 60 * 1000,
+          });
+        }
       });
     };
 
