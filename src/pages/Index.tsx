@@ -69,7 +69,6 @@ const Index = () => {
     if (user && profile && location.pathname === '/') {
       // Alla roller landar på /home
       navigate('/home', { replace: true });
-      setIsInitializing(false);
       return;
     }
 
