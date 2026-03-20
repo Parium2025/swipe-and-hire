@@ -127,7 +127,7 @@ const InlineInfoTooltip = memo(({ content }: { content: string }) => (
       <button
         type="button"
         aria-label="Visa mer information"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-transform duration-75 ease-out hover:bg-white/10 hover:text-white/80 active:scale-[0.97]"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-transform duration-75 ease-out md:hover:bg-white/10 md:hover:text-white/80 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
       >
         <Info className="h-4 w-4" />
       </button>
