@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BarChart3, Target, Filter, Smartphone, Monitor, Tablet, HelpCircle, TrendingUp, TrendingDown, Minus, Eye, Users, CalendarCheck, Clock, Calendar, Info } from 'lucide-react';
 import { AdvancedAnalyticsSections, type AdvancedAnalyticsData } from '@/components/analytics/AdvancedAnalytics';
 import { useQuery } from '@tanstack/react-query';
@@ -121,22 +122,25 @@ const writeEmployerAnalyticsCache = <T,>(key: string, value: T) => {
 };
 
 const InlineInfoTooltip = memo(({ content }: { content: string }) => (
-  <TooltipProvider delayDuration={200}>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          aria-label="Visa mer information"
-          className="shrink-0 text-white hover:text-white/80 transition-colors"
-        >
-          <Info className="h-3.5 w-3.5" />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[220px] text-xs">
-        {content}
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
+  <Popover modal>
+    <PopoverTrigger asChild>
+      <button
+        type="button"
+        aria-label="Visa mer information"
+        className="shrink-0 text-white hover:text-white/80 transition-colors active:scale-[0.97]"
+      >
+        <Info className="h-3.5 w-3.5" />
+      </button>
+    </PopoverTrigger>
+    <PopoverContent
+      side="top"
+      align="end"
+      sideOffset={8}
+      className="w-[min(18rem,calc(100vw-2rem))] border-white/20 bg-background/95 p-3 text-xs leading-relaxed text-white pointer-events-auto z-[120]"
+    >
+      {content}
+    </PopoverContent>
+  </Popover>
 ));
 InlineInfoTooltip.displayName = 'InlineInfoTooltip';
 
