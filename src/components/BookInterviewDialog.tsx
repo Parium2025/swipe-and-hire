@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -284,9 +284,9 @@ export const BookInterviewDialog = ({
               </h2>
               <button
                 onClick={() => handleOpenChange(false)}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
+                className={dialogCloseButtonClassName}
               >
-                <X className="h-4 w-4" />
+                <X className={dialogCloseIconClassName} />
               </button>
           </div>
 
