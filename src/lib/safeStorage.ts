@@ -14,6 +14,7 @@ const EVICTION_KEYS_PREFIX = [
   'interviews_cache_',
   'job-details-cache-',
   'saved-jobs-cache',
+  'parium-employer-analytics:',
 ];
 
 /**

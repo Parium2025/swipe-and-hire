@@ -9,6 +9,13 @@ import { AdvancedAnalyticsSections, type AdvancedAnalyticsData } from '@/compone
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { differenceInDays } from 'date-fns';
+import {
+  getEmployerAnalyticsCacheKey,
+  persistEmployerAnalyticsFilter,
+  readEmployerAnalyticsCache,
+  readPersistedEmployerAnalyticsFilter,
+  writeEmployerAnalyticsCache,
+} from '@/components/analytics/employerAnalyticsCache';
 
 interface JobAnalytics {
   id: string;
@@ -93,55 +100,6 @@ const OS_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 const DAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
-
-const EMPLOYER_ANALYTICS_CACHE_PREFIX = 'parium-employer-analytics:v2';
-const EMPLOYER_ANALYTICS_SELECTED_FILTER_KEY = 'parium-employer-analytics:selected-filter';
-
-const getEmployerAnalyticsCacheKey = (
-  scope: 'overview' | 'advanced',
-  userId?: string,
-  days?: number | null,
-) => `${EMPLOYER_ANALYTICS_CACHE_PREFIX}:${scope}:${userId ?? 'guest'}:${days ?? 'all'}`;
-
-const readEmployerAnalyticsCache = <T,>(key: string): T | undefined => {
-  if (typeof window === 'undefined') return undefined;
-  try {
-    const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-const writeEmployerAnalyticsCache = <T,>(key: string, value: T) => {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Ignore storage quota / serialization issues.
-  }
-};
-
-const readPersistedEmployerAnalyticsFilter = (): number | null => {
-  if (typeof window === 'undefined') return 30;
-  try {
-    const raw = window.localStorage.getItem(EMPLOYER_ANALYTICS_SELECTED_FILTER_KEY);
-    if (raw === 'all') return null;
-    const parsed = Number(raw);
-    return TIME_FILTERS.some((filter) => filter.days === parsed) ? parsed : 30;
-  } catch {
-    return 30;
-  }
-};
-
-const persistEmployerAnalyticsFilter = (days: number | null) => {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(EMPLOYER_ANALYTICS_SELECTED_FILTER_KEY, days === null ? 'all' : String(days));
-  } catch {
-    // Ignore storage write issues.
-  }
-};
 
 const fetchEmployerAnalyticsOverview = async (userId: string, selectedDays: number | null) => {
   const params: { p_user_id: string; p_days_back?: number } = { p_user_id: userId };
