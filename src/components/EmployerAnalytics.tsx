@@ -129,7 +129,7 @@ const InlineInfoTooltip = memo(({ content }: { content: string }) => (
         aria-label="Visa mer information"
         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-[transform,background-color,color] duration-200 ease-out hover:bg-white/10 hover:text-white/80 active:scale-[0.97]"
       >
-        <Info className="h-4.5 w-4.5" />
+        <Info className="h-4 w-4" />
       </button>
     </PopoverTrigger>
     <PopoverContent
