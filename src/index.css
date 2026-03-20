@@ -179,10 +179,10 @@ All colors MUST be HSL.
     --radius: 0.5rem;
 
     /* Global control sizing (fluid, device-consistent) */
-    --control-height: clamp(2.75rem, 2.68rem + 0.24vw, 3rem);
-    --control-height-sm: clamp(2.5rem, 2.45rem + 0.18vw, 2.75rem);
-    --icon-button-size: clamp(2.5rem, 2.45rem + 0.18vw, 2.75rem);
-    --icon-button-size-sm: clamp(1.75rem, 1.72rem + 0.12vw, 2rem);
+    --control-height: clamp(2.75rem, 2.73rem + 0.08vw, 2.875rem);
+    --control-height-sm: clamp(2.5rem, 2.48rem + 0.08vw, 2.625rem);
+    --icon-button-size: clamp(2.5rem, 2.48rem + 0.08vw, 2.625rem);
+    --icon-button-size-sm: clamp(1.75rem, 1.73rem + 0.08vw, 1.875rem);
 
     /* Pure colors tokens */
     --pure-white: 0 0% 100%;
