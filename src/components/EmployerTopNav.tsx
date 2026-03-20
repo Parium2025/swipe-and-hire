@@ -250,7 +250,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Meddelanden Button */}
+          {/* Chattar Button */}
           <button
             onClick={() => handleNavigation('/messages')}
             className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
@@ -261,7 +261,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
               }`} 
             />
             <MessageCircle className="h-4 w-4 relative z-10" />
-            <span className="relative z-10">Meddelanden</span>
+            <span className="relative z-10">Chattar</span>
             {preloadedUnreadMessages > 0 && (
               <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center relative z-10">
                 {preloadedUnreadMessages}

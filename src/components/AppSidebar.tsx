@@ -234,7 +234,7 @@ export function AppSidebar() {
                  { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: preloadedTotalJobs, showBadge: false },
                  { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: preloadedSavedJobs, showBadge: false },
                  { title: 'Mina Ansökningar', url: '/my-applications', icon: FileText, count: preloadedMyApplications, showBadge: false },
-                 { title: 'Meddelanden', url: '/messages', icon: MessageCircle, count: preloadedJobSeekerUnreadMessages, showBadge: preloadedJobSeekerUnreadMessages > 0 },
+                 { title: 'Chattar', url: '/messages', icon: MessageCircle, count: preloadedJobSeekerUnreadMessages, showBadge: preloadedJobSeekerUnreadMessages > 0 },
                ].map((item) => (
                  <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
