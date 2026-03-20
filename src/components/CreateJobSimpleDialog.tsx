@@ -22,13 +22,15 @@ import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { JobTemplate } from '@/types/jobWizard';
+import { cn } from '@/lib/utils';
 
 interface CreateJobSimpleDialogProps {
   onJobCreated: (job: JobPosting) => void;
   triggerRef?: React.RefObject<HTMLButtonElement>;
+  triggerClassName?: string;
 }
 
-const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDialogProps) => {
+const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: CreateJobSimpleDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isWarmedUp, setIsWarmedUp] = useState(false);
   const [templates, setTemplates] = useState<JobTemplate[]>([]);
@@ -303,6 +305,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
           <Button 
             ref={triggerRef}
             variant="glass"
+            className={cn(triggerClassName)}
           >
             Skapa ny annons
             <Plus size={16} />

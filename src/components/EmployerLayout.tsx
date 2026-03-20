@@ -130,6 +130,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
                       invalidateJobs();
                     }}
                     triggerRef={createJobButtonRef}
+                     triggerClassName="transition-none active:scale-100 active:bg-white/5 active:border-white/20 active:shadow-none"
                   />
                 </div>
               }
