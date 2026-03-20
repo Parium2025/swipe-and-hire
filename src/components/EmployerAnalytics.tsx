@@ -579,18 +579,22 @@ const EmployerAnalytics = memo(() => {
         const advancedKey = getEmployerAnalyticsCacheKey('advanced', user.id, days);
 
         if (!readEmployerAnalyticsCache<AnalyticsData>(overviewKey)) {
-          void queryClient.prefetchQuery({
+          void queryClient.fetchQuery({
             queryKey: ['employer-analytics-v2', user.id, days],
             queryFn: () => fetchEmployerAnalyticsOverview(user.id, days),
             staleTime: 2 * 60 * 1000,
+          }).then((data) => {
+            if (data) writeEmployerAnalyticsCache(overviewKey, data);
           });
         }
 
         if (!readEmployerAnalyticsCache<AdvancedAnalyticsData>(advancedKey)) {
-          void queryClient.prefetchQuery({
+          void queryClient.fetchQuery({
             queryKey: ['employer-advanced-analytics', user.id, days],
             queryFn: () => fetchEmployerAnalyticsAdvanced(user.id, days),
             staleTime: 2 * 60 * 1000,
+          }).then((data) => {
+            if (data) writeEmployerAnalyticsCache(advancedKey, data);
           });
         }
       });
@@ -661,11 +665,19 @@ const EmployerAnalytics = memo(() => {
 
   const [show, setShow] = useState(() => Boolean(cachedRawData));
   useEffect(() => {
-    if (!isLoading && !show) {
-      const t = setTimeout(() => setShow(true), cachedRawData ? 0 : 80);
-      return () => clearTimeout(t);
+    if (cachedRawData) {
+      setShow(true);
+      return;
     }
-  }, [cachedRawData, isLoading, show]);
+
+    if (isLoading) {
+      setShow(false);
+      return;
+    }
+
+    const t = setTimeout(() => setShow(true), 80);
+    return () => clearTimeout(t);
+  }, [overviewCacheKey, cachedRawData, isLoading]);
 
   if (isLoading && !show) {
     return (
