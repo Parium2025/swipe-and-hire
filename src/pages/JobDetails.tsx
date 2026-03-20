@@ -37,6 +37,7 @@ import {
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
+import { KANBAN_BOARD_VIEWPORT_STYLE, resetDragState, resolveDropStage } from '@/lib/kanbanDrag';
 
 // Extracted sub-components
 import {
@@ -401,11 +402,7 @@ const JobDetails = () => {
   }, []);
 
   const resolveOverStatus = useCallback((overRawId?: string): string | null => {
-    if (!overRawId) return null;
-    if (activeStages.includes(overRawId)) return overRawId;
-    const overApp = applications.find((a) => a.id === overRawId);
-    if (overApp && activeStages.includes(overApp.status)) return overApp.status;
-    return null;
+    return resolveDropStage(overRawId, activeStages, applications, (application) => application.status);
   }, [activeStages, applications]);
 
   const handleDragOver = useCallback((event: DragOverEvent) => {
@@ -418,8 +415,7 @@ const JobDetails = () => {
     const { active, over } = event;
 
     if (!over) {
-      setActiveId(null);
-      setOverId(null);
+      resetDragState(setActiveId, setOverId);
       return;
     }
 
@@ -428,8 +424,7 @@ const JobDetails = () => {
     const targetStatus = resolveOverStatus(overRawId);
 
     if (!targetStatus) {
-      setActiveId(null);
-      setOverId(null);
+      resetDragState(setActiveId, setOverId);
       return;
     }
 
@@ -437,12 +432,10 @@ const JobDetails = () => {
     if (application && application.status !== targetStatus) {
       updateApplicationStatus(applicationId, targetStatus);
       requestAnimationFrame(() => {
-        setActiveId(null);
-        setOverId(null);
+        resetDragState(setActiveId, setOverId);
       });
     } else {
-      setActiveId(null);
-      setOverId(null);
+      resetDragState(setActiveId, setOverId);
     }
   }, [resolveOverStatus, applications, updateApplicationStatus]);
 
@@ -522,8 +515,7 @@ const JobDetails = () => {
                ref={dragScrollRef}
                className="flex gap-3 pb-4 pt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30" 
                style={{ 
-                 height: 'calc(100vh - 300px)',
-                 overflowY: 'hidden',
+                  ...KANBAN_BOARD_VIEWPORT_STYLE,
                  WebkitOverflowScrolling: 'touch',
                }}
             >
