@@ -300,12 +300,12 @@ export const BookInterviewDialog = ({
             <Label className="text-white">Datum</Label>
             <Popover modal>
               <PopoverTrigger asChild>
-                <button
-                  className={cn(
-                    "w-full flex items-center justify-start text-left font-normal bg-white/10 border border-white/20 rounded-md px-3 py-2 transition-colors hover:border-white/30",
-                    date ? "text-white" : "text-white/60"
-                  )}
-                >
+                  <button
+                    className={cn(
+                      "w-full h-[var(--control-height)] flex items-center justify-start text-left text-sm font-normal bg-white/10 border border-white/20 rounded-md px-3 py-2 transition-colors hover:border-white/30",
+                      date ? "text-white" : "text-white/60"
+                    )}
+                  >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {date ? (() => {
                     const formatted = format(date, 'EEEE d MMMM yyyy', { locale: sv });
@@ -330,7 +330,7 @@ export const BookInterviewDialog = ({
           </div>
 
           {/* Time and duration */}
-          <div className="grid grid-cols-[minmax(0,1fr)_6.75rem] sm:grid-cols-[minmax(0,1fr)_7.5rem] gap-3 items-end">
+          <div className="grid grid-cols-[minmax(0,1fr)_7.25rem] sm:grid-cols-[minmax(0,1fr)_8rem] gap-3 items-end">
             <div className="space-y-2">
               <Label className="text-white">Tid</Label>
               <Select value={time} onValueChange={setTime}>
@@ -356,7 +356,7 @@ export const BookInterviewDialog = ({
             <div className="space-y-2 w-full shrink-0">
               <Label className="text-white">Längd</Label>
               <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger className="w-full bg-white/10 border-white/20 text-white [&>svg]:text-white text-sm whitespace-nowrap pr-8">
+                <SelectTrigger className="w-full min-w-0 bg-white/10 border-white/20 text-white [&>svg]:text-white text-sm whitespace-nowrap pr-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
@@ -377,7 +377,7 @@ export const BookInterviewDialog = ({
               <button
                 type="button"
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
+                  "h-[var(--control-height-sm)] inline-flex items-center gap-1.5 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
                   locationType === 'video' 
                     ? "bg-white/20 border-white/40 text-white" 
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
@@ -392,7 +392,7 @@ export const BookInterviewDialog = ({
               <button
                 type="button"
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
+                  "h-[var(--control-height-sm)] inline-flex items-center gap-1.5 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
                   locationType === 'office' 
                     ? "bg-white/20 border-white/40 text-white" 
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
