@@ -194,7 +194,7 @@ const CandidateRow = memo(function CandidateRow({
               ref={triggerRef}
               onPointerDownCapture={measureMenuMetrics}
               onClick={e => e.stopPropagation()}
-              className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:scale-[0.97] transition-colors flex-shrink-0"
+              className="h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] flex items-center justify-center rounded-full bg-white/5 active:scale-[0.97] transition-colors flex-shrink-0 aspect-square"
               aria-label="Flytta kandidat"
             >
               <ChevronRight className="h-4 w-4 text-white/60" />
