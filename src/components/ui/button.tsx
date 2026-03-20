@@ -48,8 +48,10 @@ const buttonVariants = cva(
       size: {
         default: "h-[var(--control-height)] px-4 py-2",
         sm: "h-[var(--control-height-sm)] px-3",
+        compact: "h-[var(--control-height-compact)] px-3 text-[0.8125rem]",
         lg: "h-[var(--control-height)] px-8",
         icon: "h-[var(--icon-button-size)] w-[var(--icon-button-size)] p-0 shrink-0 aspect-square",
+        iconCompact: "h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] p-0 shrink-0 aspect-square",
       },
     },
     defaultVariants: {
