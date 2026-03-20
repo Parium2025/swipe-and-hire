@@ -4,6 +4,10 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+export const dialogCloseButtonClassName = "absolute right-4 top-4 z-50 flex h-8 w-8 !min-h-0 !min-w-0 shrink-0 aspect-square items-center justify-center overflow-hidden rounded-full bg-white/10 text-white transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 md:bg-transparent md:hover:bg-white/20 md:hover:text-white disabled:pointer-events-none"
+
+export const dialogCloseIconClassName = "h-4 w-4 shrink-0 text-white"
+
 const Dialog = DialogPrimitive.Root
 
 const DialogTrigger = DialogPrimitive.Trigger
@@ -48,8 +52,8 @@ const DialogContent = React.forwardRef<
     >
       {children}
       {!hideClose && (
-        <DialogPrimitive.Close className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:pointer-events-none z-50">
-          <X className="h-4 w-4 text-white" />
+        <DialogPrimitive.Close className={dialogCloseButtonClassName}>
+          <X className={dialogCloseIconClassName} />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       )}

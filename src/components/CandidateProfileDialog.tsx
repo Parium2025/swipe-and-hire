@@ -1,4 +1,5 @@
-import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { Briefcase, User, Activity, StickyNote, ChevronDown, ChevronLeft, ChevronRight, X, Check } from 'lucide-react';
@@ -297,9 +298,9 @@ export const CandidateProfileDialog = ({
             style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
             onClick={() => onOpenChange(false)}
             aria-label="Stäng"
-            className="shrink-0 flex h-8 w-8 !min-h-0 !min-w-0 aspect-square items-center justify-center rounded-full bg-white/10 text-white transition-colors touch-manipulation md:bg-transparent md:hover:bg-white/20 focus:outline-none focus:ring-0"
+            className={cn(dialogCloseButtonClassName, 'static')}
           >
-            <X className="h-4 w-4" />
+            <X className={dialogCloseIconClassName} />
           </button>
         </div>
 
@@ -486,9 +487,9 @@ export const CandidateProfileDialog = ({
                 style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
                 onClick={() => onOpenChange(false)}
                 aria-label="Stäng"
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors touch-manipulation"
+                className={cn(dialogCloseButtonClassName, 'right-2 top-1/2 -translate-y-1/2 touch-manipulation')}
               >
-                <X className="h-5 w-5 text-white" />
+                <X className={dialogCloseIconClassName} />
               </button>
             </div>
 
@@ -527,8 +528,8 @@ export const CandidateProfileDialog = ({
       <DialogContentNoFocus hideClose className="max-w-4xl overflow-hidden bg-transparent border-none shadow-none p-2 md:p-8 w-screen h-[100dvh] md:w-auto md:h-auto md:max-h-[90vh] !top-0 !left-0 !right-0 !bottom-0 !translate-x-0 !translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] rounded-none md:rounded-lg">
         <DialogHeader className="mb-2 md:mb-4 flex flex-row items-center justify-between">
           <DialogTitle className="text-white text-lg md:text-2xl">CV</DialogTitle>
-          <button type="button" onClick={() => setCvOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors touch-manipulation" aria-label="Stäng">
-            <X className="h-5 w-5 text-white" />
+          <button type="button" onClick={() => setCvOpen(false)} className={cn(dialogCloseButtonClassName, 'static touch-manipulation')} aria-label="Stäng">
+            <X className={dialogCloseIconClassName} />
           </button>
         </DialogHeader>
         {displayApp?.cv_url && signedCvUrl && (

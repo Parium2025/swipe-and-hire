@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, dialogCloseButtonClassName, dialogCloseIconClassName } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -331,9 +331,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                 onClick={handleClose}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                className="absolute right-4 top-4 h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors duration-300  focus:outline-none focus:ring-0"
+                className={dialogCloseButtonClassName}
               >
-                <X className="h-4 w-4" />
+                <X className={dialogCloseIconClassName} />
               </Button>
             </div>
 
