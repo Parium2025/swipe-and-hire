@@ -373,7 +373,7 @@ const SidebarInput = React.forwardRef<
       ref={ref}
       data-sidebar="input"
       className={cn(
-        "h-8 w-full bg-background shadow-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0",
+          "h-[var(--control-height-compact)] w-full bg-background shadow-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0",
         className
       )}
       {...props}
@@ -471,7 +471,7 @@ const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-        "duration-200 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 transition-[margin,opa] ease-linear [&>svg]:size-4 [&>svg]:shrink-0",
+          "duration-200 flex h-[var(--control-height-compact)] shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 transition-[margin,opa] ease-linear [&>svg]:size-4 [&>svg]:shrink-0",
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
         className
       )}
@@ -553,8 +553,8 @@ const sidebarMenuButtonVariants = cva(
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))]",
       },
       size: {
-        default: "h-8 text-sm",
-        sm: "h-7 text-xs",
+        default: "h-[var(--control-height-compact)] text-sm",
+        sm: "h-[calc(var(--control-height-compact)-0.25rem)] text-xs",
         lg: "h-12 text-sm group-data-[collapsible=icon]:!p-0",
       },
     },
@@ -691,7 +691,7 @@ const SidebarMenuSkeleton = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="menu-skeleton"
-      className={cn("rounded-md h-8 flex gap-2 px-2 items-center", className)}
+      className={cn("rounded-md h-[var(--control-height-compact)] flex gap-2 px-2 items-center", className)}
       {...props}
     >
       {showIcon && (
