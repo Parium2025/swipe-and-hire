@@ -46,10 +46,10 @@ const buttonVariants = cva(
           "rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-purple-500/40",
       },
       size: {
-        default: "min-h-touch md:h-10 px-4 py-2",
-        sm: "min-h-touch md:h-9 px-3",
-        lg: "min-h-touch md:h-11 px-8",
-        icon: "min-h-touch min-w-touch md:h-10 md:w-10",
+        default: "h-[var(--control-height)] px-4 py-2",
+        sm: "h-[var(--control-height-sm)] px-3",
+        lg: "h-[var(--control-height)] px-8",
+        icon: "h-[var(--icon-button-size)] w-[var(--icon-button-size)] p-0 shrink-0 aspect-square",
       },
     },
     defaultVariants: {
