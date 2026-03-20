@@ -148,7 +148,7 @@ export function SendMessageDialog({
 
             <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-5">
               <p className="text-white text-center text-sm leading-relaxed px-2">
-                Skriv ditt meddelande till {recipientName} för att starta chatten
+                Skriv ett meddelande till {recipientName} för att starta chatten.
               </p>
 
               <div className="space-y-2">
