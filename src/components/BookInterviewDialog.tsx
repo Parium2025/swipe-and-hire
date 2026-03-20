@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X, WifiOff } from 'lucide-react';
 import { format, startOfDay, isToday } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -18,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useOnline } from '@/hooks/useOnlineStatus';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 
 interface BookInterviewDialogProps {
   open: boolean;
@@ -268,33 +268,33 @@ export const BookInterviewDialog = ({
       <DialogContentNoFocus 
         hideClose
         elevated={elevated}
-        className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden flex flex-col"
+        className="parium-panel max-w-none w-[min(92vw,500px)] max-h-[85vh] bg-parium-gradient text-white border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden p-0 flex flex-col"
       >
         <DialogHeader className="sr-only">
           <DialogTitle className="sr-only">Boka intervju</DialogTitle>
           <DialogDescription className="sr-only">Skicka en intervjukallelse till {candidateName}</DialogDescription>
         </DialogHeader>
-        
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full flex flex-col flex-1 min-h-0">
-          <CardHeader className="pb-4 pt-6">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-white flex-1 text-center text-xl flex items-center justify-center gap-2">
+        <AnimatedBackground showBubbles={false} />
+
+        <div className="relative z-10 flex flex-col max-h-[85vh]">
+          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
+            <h2 className="text-white text-lg font-semibold flex items-center gap-2">
                 <CalendarIcon className="h-5 w-5" />
                 Boka intervju
-              </CardTitle>
+              </h2>
               <button
                 onClick={() => handleOpenChange(false)}
-                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
               >
                 <X className="h-4 w-4" />
               </button>
-            </div>
-            <CardDescription className="text-white text-center text-sm leading-snug mt-2">
-              Skicka en intervjukallelse till {candidateName} för tjänsten {jobTitle}
-            </CardDescription>
-          </CardHeader>
+          </div>
 
-        <CardContent className="space-y-4 px-4 pb-4 overflow-y-auto flex-1 min-h-0">
+          <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
+            <p className="text-white text-center text-sm leading-snug">
+              Skicka en intervjukallelse till {candidateName} för tjänsten {jobTitle}
+            </p>
+
           {/* Date picker */}
           <div className="space-y-2">
             <Label className="text-white">Datum</Label>
@@ -506,8 +506,8 @@ export const BookInterviewDialog = ({
                 Avbryt
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
       </DialogContentNoFocus>
     </Dialog>
