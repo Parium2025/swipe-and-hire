@@ -127,18 +127,20 @@ const InlineInfoTooltip = memo(({ content }: { content: string }) => (
       <button
         type="button"
         aria-label="Visa mer information"
-        className="shrink-0 text-white hover:text-white/80 transition-colors active:scale-[0.97]"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-[transform,background-color,color] duration-200 ease-out hover:bg-white/10 hover:text-white/80 active:scale-[0.97]"
       >
-        <Info className="h-3.5 w-3.5" />
+        <Info className="h-4.5 w-4.5" />
       </button>
     </PopoverTrigger>
     <PopoverContent
       side="top"
       align="end"
       sideOffset={8}
-      className="w-[min(18rem,calc(100vw-2rem))] border-white/20 bg-background/95 p-3 text-xs leading-relaxed text-white pointer-events-auto z-[120]"
+      className="z-[120] w-auto max-w-[min(18rem,calc(100vw-2rem))] border-0 bg-transparent p-0 shadow-none"
     >
-      {content}
+      <div className="glass-panel max-h-[300px] overflow-y-auto overscroll-contain rounded-md px-3 py-2 text-sm text-white shadow-md pointer-events-auto">
+        <p className="text-xs leading-relaxed text-white">{content}</p>
+      </div>
     </PopoverContent>
   </Popover>
 ));
@@ -665,7 +667,7 @@ const EmployerAnalytics = memo(() => {
                   <span className="min-w-0 flex-1 text-[11px] font-medium leading-tight text-white [overflow-wrap:anywhere]">
                     Bästa publiceringsdag
                   </span>
-                  <div className="shrink-0 pt-px">
+                  <div className="-mt-1 shrink-0">
                     <InlineInfoTooltip content="Veckodagen med flest annonsvisningar under vald tidsperiod. Hjälper dig tajma publiceringen av nya annonser." />
                   </div>
                 </div>
@@ -681,7 +683,7 @@ const EmployerAnalytics = memo(() => {
                   <span className="min-w-0 flex-1 text-[11px] font-medium leading-tight text-white [overflow-wrap:anywhere]">
                     Tid till första ansökan
                   </span>
-                  <div className="shrink-0 pt-px">
+                  <div className="-mt-1 shrink-0">
                     <InlineInfoTooltip content="Genomsnittlig tid från att en annons publiceras tills den får sin första ansökan. Baserat på annonser med minst en ansökan." />
                   </div>
                 </div>
