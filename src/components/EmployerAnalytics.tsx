@@ -127,7 +127,7 @@ const InlineInfoTooltip = memo(({ content }: { content: string }) => (
       <button
         type="button"
         aria-label="Visa mer information"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-[transform,background-color,color] duration-200 ease-out hover:bg-white/10 hover:text-white/80 active:scale-[0.97]"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-transform duration-75 ease-out hover:bg-white/10 hover:text-white/80 active:scale-[0.97]"
       >
         <Info className="h-4 w-4" />
       </button>
@@ -136,7 +136,7 @@ const InlineInfoTooltip = memo(({ content }: { content: string }) => (
       side="top"
       align="end"
       sideOffset={8}
-      className="z-[120] w-auto max-w-[min(18rem,calc(100vw-2rem))] border-0 bg-transparent p-0 shadow-none"
+      className="z-[120] w-auto max-w-[min(18rem,calc(100vw-2rem))] border-0 bg-transparent p-0 shadow-none data-[state=open]:animate-none data-[state=closed]:animate-none"
     >
       <div className="glass-panel max-h-[300px] overflow-y-auto overscroll-contain rounded-md px-3 py-2 text-sm text-white shadow-md pointer-events-auto">
         <p className="text-xs leading-relaxed text-white">{content}</p>
