@@ -69,6 +69,7 @@ import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 import { useStageSettings, getIconByName, CandidateStage } from '@/hooks/useStageSettings';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
 import { smartSearchCandidates } from '@/lib/smartSearch';
+import { KANBAN_BOARD_VIEWPORT_STYLE, TOUCH_TARGET_44_STYLE, resetDragState, resolveDropStage } from '@/lib/kanbanDrag';
 
 
 // ── Extracted components ─────────────────────────────
@@ -312,13 +313,9 @@ const MyCandidates = () => {
     return displayedCandidates.find(c => c.id === activeId) || null;
   }, [activeId, displayedCandidates]);
 
-  const resolveOverStage = (overRawId?: string): string | null => {
-    if (!overRawId) return null;
-    if (activeStageOrder.includes(overRawId)) return overRawId;
-    const overCandidate = displayedCandidates.find((c) => c.id === overRawId);
-    if (overCandidate && activeStageOrder.includes(overCandidate.stage)) return overCandidate.stage;
-    return null;
-  };
+  const resolveOverStage = useCallback((overRawId?: string): string | null => {
+    return resolveDropStage(overRawId, activeStageOrder, displayedCandidates, (candidate) => candidate.stage);
+  }, [activeStageOrder, displayedCandidates]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -369,12 +366,11 @@ const MyCandidates = () => {
     await deleteStage.mutateAsync(fromStage);
   }, [user, candidates, deleteStage, queryClient, debouncedSearchQuery, updateCandidatesCache]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over) {
-      setActiveId(null);
-      setOverId(null);
+      resetDragState(setActiveId, setOverId);
       return;
     }
 
@@ -383,8 +379,7 @@ const MyCandidates = () => {
     const targetStage = resolveOverStage(overRawId);
 
     if (!targetStage) {
-      setActiveId(null);
-      setOverId(null);
+      resetDragState(setActiveId, setOverId);
       return;
     }
 
@@ -392,14 +387,12 @@ const MyCandidates = () => {
     if (candidate && candidate.stage !== targetStage) {
       updateCandidateStage(candidateId, targetStage);
       requestAnimationFrame(() => {
-        setActiveId(null);
-        setOverId(null);
+        resetDragState(setActiveId, setOverId);
       });
     } else {
-      setActiveId(null);
-      setOverId(null);
+      resetDragState(setActiveId, setOverId);
     }
-  };
+  }, [displayedCandidates, resolveOverStage]);
 
   const handleMoveCandidate = (id: string, stage: CandidateStage) => {
     updateCandidateStage(id, stage);
@@ -906,9 +899,8 @@ const MyCandidates = () => {
           <div 
             className={`flex gap-3 pb-4 pt-2 w-full ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} 
             style={{ 
-              height: 'calc(100vh - 300px)',
+              ...KANBAN_BOARD_VIEWPORT_STYLE,
               overflowX: 'hidden',
-              overflowY: 'hidden',
             }}
           >
             {stagesToDisplay.map((stage, index) => {
@@ -1066,7 +1058,7 @@ const MyCandidates = () => {
           <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
             <AlertDialogCancel 
               onClick={() => setCandidateToRemove(null)}
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              style={TOUCH_TARGET_44_STYLE}
               className="flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
               Avbryt
@@ -1074,7 +1066,7 @@ const MyCandidates = () => {
             <AlertDialogAction
               onClick={confirmRemoveCandidate}
               variant="destructiveSoft"
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              style={TOUCH_TARGET_44_STYLE}
               className="flex-1 text-sm flex items-center justify-center rounded-full"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
@@ -1105,7 +1097,7 @@ const MyCandidates = () => {
           <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
             <AlertDialogCancel 
               onClick={() => setShowBulkDeleteConfirm(false)}
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+               style={TOUCH_TARGET_44_STYLE}
               className="flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
               Avbryt
@@ -1113,7 +1105,7 @@ const MyCandidates = () => {
             <AlertDialogAction
               onClick={confirmBulkDelete}
               variant="destructiveSoft"
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+               style={TOUCH_TARGET_44_STYLE}
               className="flex-1 text-sm flex items-center justify-center rounded-full"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
