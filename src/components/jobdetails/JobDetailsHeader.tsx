@@ -93,9 +93,9 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
           onMouseDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none touch-manipulation active:scale-95 relative z-50"
+          className="flex h-7 w-7 !min-h-0 !min-w-0 items-center justify-center overflow-hidden rounded-full text-white bg-white/10 transition-colors shrink-0 focus:outline-none touch-manipulation active:scale-95 relative z-50 md:hover:bg-white/20"
         >
-          <X className="h-5 w-5" />
+          <X className="h-3.5 w-3.5 text-white" />
         </button>
       </div>
 

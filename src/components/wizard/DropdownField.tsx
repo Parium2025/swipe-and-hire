@@ -64,9 +64,9 @@ export const DropdownField = ({
                   e.stopPropagation();
                   onClear();
                 }}
-                className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
+                className="flex h-7 w-7 !min-h-0 !min-w-0 items-center justify-center overflow-hidden rounded-full bg-white/10 transition-colors md:hover:bg-white/20"
               >
-                <X className="h-3 w-3 text-white" />
+                <X className="h-3.5 w-3.5 text-white" />
               </button>
             )}
             <ChevronDown className={`h-4 w-4 text-white transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
