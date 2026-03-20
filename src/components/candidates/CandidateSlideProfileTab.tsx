@@ -2,6 +2,7 @@ import { useState, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, Trash2, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import ProfileVideo from '@/components/ProfileVideo';
 import { formatTimeAgo } from '@/lib/date';
 import { CandidateSummarySection } from '@/components/candidateProfile/CandidateSummarySection';
@@ -222,28 +223,34 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
       {/* Action buttons — identical to desktop ProfileActions my-candidates variant */}
       <div className="w-full min-w-0">
         <div className="flex justify-center gap-1">
-          <button
+          <Button
             onClick={() => setSendMessageOpen(true)}
-            className="min-w-0 flex-1 h-9 px-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center"
+            variant="glassPurple"
+            size="sm"
+            className="min-w-0 flex-1"
           >
             <MessageSquare className="h-4 w-4 mr-1 shrink-0" />
             <span className="truncate">Chatta</span>
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setBookInterviewOpen(true)}
-            className="min-w-0 flex-1 h-9 px-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center"
+            variant="glassBlue"
+            size="sm"
+            className="min-w-0 flex-1"
           >
             <CalendarPlus className="h-4 w-4 mr-1 shrink-0" />
             <span className="truncate">Boka möte</span>
-          </button>
+          </Button>
           {onRemoveFromList && (
-            <button
+            <Button
               onClick={onRemoveFromList}
-              className="min-w-0 flex-1 h-9 px-3 rounded-full bg-red-500/20 backdrop-blur-sm border border-red-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-red-500/40 transition-all flex items-center justify-center"
+              variant="glassRed"
+              size="sm"
+              className="min-w-0 flex-1"
             >
               <Trash2 className="h-4 w-4 mr-1 shrink-0" />
               <span className="truncate">Ta bort</span>
-            </button>
+            </Button>
           )}
         </div>
       </div>
