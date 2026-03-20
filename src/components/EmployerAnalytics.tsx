@@ -120,6 +120,26 @@ const writeEmployerAnalyticsCache = <T,>(key: string, value: T) => {
   }
 };
 
+const InlineInfoTooltip = memo(({ content }: { content: string }) => (
+  <TooltipProvider delayDuration={200}>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label="Visa mer information"
+          className="shrink-0 text-white hover:text-white/80 transition-colors"
+        >
+          <Info className="h-3.5 w-3.5" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[220px] text-xs">
+        {content}
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+));
+InlineInfoTooltip.displayName = 'InlineInfoTooltip';
+
 /* ─── Trend pill ─── */
 const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
   current: number; previous: number; label: string; icon: React.ElementType; daysLabel: string;
@@ -344,22 +364,11 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
   return (
     <Card className="bg-white/5 border-white/10 overflow-hidden">
       <CardContent className="p-5">
-        <div className="flex items-center gap-1.5 mb-3">
-          <h3 className="text-sm font-medium text-white">Tid till första ansökan per annons</h3>
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button type="button" className="shrink-0 text-white hover:text-white/80 transition-colors">
-                  <Info className="h-3.5 w-3.5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-[260px]">
-                <p className="text-xs leading-relaxed">
-                  Visar hur snabbt varje annons fick sin första ansökan. Baren representerar antal ansökningar — längre bar = fler ansökningar.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-1 mb-3">
+            <h3 className="min-w-0 text-sm font-medium leading-tight text-white [overflow-wrap:anywhere]">
+              Tid till första ansökan per annons
+            </h3>
+            <InlineInfoTooltip content="Visar hur snabbt varje annons fick sin första ansökan. Baren representerar antal ansökningar — längre bar = fler ansökningar." />
         </div>
         <div className="space-y-2">
           {visible.map((t, i) => {
@@ -648,19 +657,14 @@ const EmployerAnalytics = memo(() => {
           {bestDay && (
             <Card className="bg-white/5 border-white/10 overflow-hidden">
               <CardContent className="p-4 flex flex-col h-full">
-                <div className="flex items-center gap-1.5 mb-2">
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-1.5 gap-y-1 mb-2">
                   <Calendar className="h-3.5 w-3.5 text-white shrink-0" />
-                  <span className="text-[11px] font-medium text-white truncate">Bästa publiceringsdag</span>
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-3.5 w-3.5 text-white cursor-default shrink-0" />
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[220px] text-xs">
-                        Veckodagen med flest annonsvisningar under vald tidsperiod. Hjälper dig tajma publiceringen av nya annonser.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <span className="min-w-0 text-[11px] font-medium leading-tight text-white [overflow-wrap:anywhere]">
+                    Bästa publiceringsdag
+                  </span>
+                  <div className="col-start-2">
+                    <InlineInfoTooltip content="Veckodagen med flest annonsvisningar under vald tidsperiod. Hjälper dig tajma publiceringen av nya annonser." />
+                  </div>
                 </div>
                 <p className="text-xl font-bold text-white">{DAY_NAMES[bestDay.day_of_week] || 'Okänd'}</p>
                 <p className="text-[11px] text-white mt-0.5">{bestDay.views} visningar på den dagen</p>
@@ -670,19 +674,14 @@ const EmployerAnalytics = memo(() => {
           {avgTtfa !== null && (
             <Card className="bg-white/5 border-white/10 overflow-hidden">
               <CardContent className="p-4 flex flex-col h-full">
-                <div className="flex items-center gap-1.5 mb-2">
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-1.5 gap-y-1 mb-2">
                   <Clock className="h-3.5 w-3.5 text-white shrink-0" />
-                  <span className="text-[11px] font-medium text-white truncate">Tid till första ansökan</span>
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-3.5 w-3.5 text-white cursor-default shrink-0" />
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[220px] text-xs">
-                        Genomsnittlig tid från att en annons publiceras tills den får sin första ansökan. Baserat på annonser med minst en ansökan.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <span className="min-w-0 text-[11px] font-medium leading-tight text-white [overflow-wrap:anywhere]">
+                    Tid till första ansökan
+                  </span>
+                  <div className="col-start-2">
+                    <InlineInfoTooltip content="Genomsnittlig tid från att en annons publiceras tills den får sin första ansökan. Baserat på annonser med minst en ansökan." />
+                  </div>
                 </div>
                 <p className="text-xl font-bold text-white">{formatDuration(avgTtfa)}</p>
                 <p className="text-[11px] text-white mt-0.5">genomsnitt ({ttfa.length} annonser)</p>
