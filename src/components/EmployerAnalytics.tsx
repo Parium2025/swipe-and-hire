@@ -122,7 +122,7 @@ const writeEmployerAnalyticsCache = <T,>(key: string, value: T) => {
 };
 
 const fetchEmployerAnalyticsOverview = async (userId: string, selectedDays: number | null) => {
-  const params: Record<string, string | number> = { p_user_id: userId };
+  const params: { p_user_id: string; p_days_back?: number } = { p_user_id: userId };
   if (selectedDays !== null) params.p_days_back = selectedDays;
   const { data, error } = await supabase.rpc('get_employer_analytics_v2', params);
   if (error) throw error;
@@ -130,7 +130,7 @@ const fetchEmployerAnalyticsOverview = async (userId: string, selectedDays: numb
 };
 
 const fetchEmployerAnalyticsAdvanced = async (userId: string, selectedDays: number | null) => {
-  const params: Record<string, string | number> = { p_user_id: userId };
+  const params: { p_user_id: string; p_days_back?: number } = { p_user_id: userId };
   if (selectedDays !== null) params.p_days_back = selectedDays;
   const { data, error } = await supabase.rpc('get_employer_advanced_analytics', params);
   if (error) throw error;
@@ -566,8 +566,8 @@ const EmployerAnalytics = memo(() => {
       return () => window.cancelIdleCallback(handle);
     }
 
-    const timeout = window.setTimeout(warmAllQueries, 250);
-    return () => window.clearTimeout(timeout);
+    const timeout = globalThis.setTimeout(warmAllQueries, 250);
+    return () => globalThis.clearTimeout(timeout);
   }, [queryClient, user?.id]);
 
   useEffect(() => {
