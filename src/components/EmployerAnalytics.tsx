@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BarChart3, Target, Filter, Smartphone, Monitor, Tablet, HelpCircle, TrendingUp, TrendingDown, Minus, Eye, Users, CalendarCheck, Clock, Calendar, Info } from 'lucide-react';
 import { AdvancedAnalyticsSections, type AdvancedAnalyticsData } from '@/components/analytics/AdvancedAnalytics';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { differenceInDays } from 'date-fns';
 
@@ -94,7 +94,7 @@ const OS_CONFIG: Record<string, { label: string; color: string }> = {
 
 const DAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
 
-const EMPLOYER_ANALYTICS_CACHE_PREFIX = 'parium-employer-analytics';
+const EMPLOYER_ANALYTICS_CACHE_PREFIX = 'parium-employer-analytics:v2';
 
 const getEmployerAnalyticsCacheKey = (
   scope: 'overview' | 'advanced',
@@ -119,6 +119,22 @@ const writeEmployerAnalyticsCache = <T,>(key: string, value: T) => {
   } catch {
     // Ignore storage quota / serialization issues.
   }
+};
+
+const fetchEmployerAnalyticsOverview = async (userId: string, selectedDays: number | null) => {
+  const params: Record<string, string | number> = { p_user_id: userId };
+  if (selectedDays !== null) params.p_days_back = selectedDays;
+  const { data, error } = await supabase.rpc('get_employer_analytics_v2', params);
+  if (error) throw error;
+  return data as unknown as AnalyticsData;
+};
+
+const fetchEmployerAnalyticsAdvanced = async (userId: string, selectedDays: number | null) => {
+  const params: Record<string, string | number> = { p_user_id: userId };
+  if (selectedDays !== null) params.p_days_back = selectedDays;
+  const { data, error } = await supabase.rpc('get_employer_advanced_analytics', params);
+  if (error) throw error;
+  return data as unknown as AdvancedAnalyticsData;
 };
 
 const InlineInfoTooltip = memo(({ content }: { content: string }) => (
@@ -483,6 +499,7 @@ const formatDuration = (seconds: number): string => {
 /* ─── Main component ─── */
 const EmployerAnalytics = memo(() => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedDays, setSelectedDays] = useState<number | null>(30);
   const overviewCacheKey = useMemo(
     () => getEmployerAnalyticsCacheKey('overview', user?.id, selectedDays),
@@ -501,18 +518,15 @@ const EmployerAnalytics = memo(() => {
     [advancedCacheKey],
   );
 
-  const { data: rawData, isLoading } = useQuery({
+  const { data: rawData, isLoading, isFetching } = useQuery({
     queryKey: ['employer-analytics-v2', user?.id, selectedDays],
     queryFn: async () => {
       if (!user) return null;
-      const params: any = { p_user_id: user.id };
-      if (selectedDays !== null) params.p_days_back = selectedDays;
-      const { data, error } = await supabase.rpc('get_employer_analytics_v2', params);
-      if (error) throw error;
-      return data as unknown as AnalyticsData;
+      return fetchEmployerAnalyticsOverview(user.id, selectedDays);
     },
     enabled: !!user,
-    placeholderData: (previousData) => previousData ?? cachedRawData,
+    initialData: () => cachedRawData,
+    initialDataUpdatedAt: () => 0,
     staleTime: 2 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
@@ -521,17 +535,40 @@ const EmployerAnalytics = memo(() => {
     queryKey: ['employer-advanced-analytics', user?.id, selectedDays],
     queryFn: async () => {
       if (!user) return null;
-      const params: any = { p_user_id: user.id };
-      if (selectedDays !== null) params.p_days_back = selectedDays;
-      const { data, error } = await supabase.rpc('get_employer_advanced_analytics', params);
-      if (error) throw error;
-      return data as unknown as AdvancedAnalyticsData;
+      return fetchEmployerAnalyticsAdvanced(user.id, selectedDays);
     },
     enabled: !!user,
-    placeholderData: (previousData) => previousData ?? cachedAdvancedData,
+    initialData: () => cachedAdvancedData,
+    initialDataUpdatedAt: () => 0,
     staleTime: 2 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const warmAllQueries = () => {
+      void queryClient.prefetchQuery({
+        queryKey: ['employer-analytics-v2', user.id, null],
+        queryFn: () => fetchEmployerAnalyticsOverview(user.id, null),
+        staleTime: 2 * 60 * 1000,
+      });
+
+      void queryClient.prefetchQuery({
+        queryKey: ['employer-advanced-analytics', user.id, null],
+        queryFn: () => fetchEmployerAnalyticsAdvanced(user.id, null),
+        staleTime: 2 * 60 * 1000,
+      });
+    };
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const handle = window.requestIdleCallback(warmAllQueries, { timeout: 1200 });
+      return () => window.cancelIdleCallback(handle);
+    }
+
+    const timeout = window.setTimeout(warmAllQueries, 250);
+    return () => window.clearTimeout(timeout);
+  }, [queryClient, user?.id]);
 
   useEffect(() => {
     if (rawData && user?.id) {
@@ -584,6 +621,8 @@ const EmployerAnalytics = memo(() => {
     const total = ttfa.reduce((s, t) => s + t.seconds_to_first, 0);
     return Math.round(total / ttfa.length);
   }, [ttfa]);
+
+  const shouldReserveBestDayCard = selectedDays === null && !bestDay && isFetching && avgTtfa !== null;
 
   const [show, setShow] = useState(() => Boolean(cachedRawData));
   useEffect(() => {
@@ -658,9 +697,9 @@ const EmployerAnalytics = memo(() => {
       )}
 
       {/* ─── NEW: Best day + Time to first application ─── */}
-      {(bestDay || avgTtfa !== null) && (
+      {(bestDay || avgTtfa !== null || shouldReserveBestDayCard) && (
         <div className="grid grid-cols-2 gap-2">
-          {bestDay && (
+          {(bestDay || shouldReserveBestDayCard) && (
             <Card className="bg-white/5 border-white/10 overflow-hidden">
               <CardContent className="p-4 flex flex-col h-full">
                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -671,8 +710,17 @@ const EmployerAnalytics = memo(() => {
                     <InlineInfoTooltip content="Veckodagen med flest annonsvisningar under vald tidsperiod. Hjälper dig tajma publiceringen av nya annonser." />
                   </div>
                 </div>
-                <p className="text-xl font-bold text-white">{DAY_NAMES[bestDay.day_of_week] || 'Okänd'}</p>
-                <p className="text-[11px] text-white mt-0.5">{bestDay.views} visningar på den dagen</p>
+                {bestDay ? (
+                  <>
+                    <p className="text-xl font-bold text-white">{DAY_NAMES[bestDay.day_of_week] || 'Okänd'}</p>
+                    <p className="text-[11px] text-white mt-0.5">{bestDay.views} visningar på den dagen</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="h-8 w-28 rounded-md bg-white/10 animate-pulse" />
+                    <div className="mt-2 h-3 w-24 rounded-md bg-white/10 animate-pulse" />
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
