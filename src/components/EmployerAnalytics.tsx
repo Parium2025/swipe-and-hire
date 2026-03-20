@@ -620,10 +620,10 @@ const EmployerAnalytics = memo(() => {
     return Math.round(total / ttfa.length);
   }, [ttfa]);
 
+  const shouldReserveBestDayCard = selectedDays === null && !bestDay && isFetching && avgTtfa !== null;
   const showBestDayCard = Boolean(bestDay || shouldReserveBestDayCard);
   const showAvgTtfaCard = avgTtfa !== null;
   const isSingleSummaryCard = showAvgTtfaCard && !showBestDayCard;
-  const shouldReserveBestDayCard = selectedDays === null && !bestDay && isFetching && avgTtfa !== null;
 
   const [show, setShow] = useState(() => Boolean(cachedRawData));
   useEffect(() => {
