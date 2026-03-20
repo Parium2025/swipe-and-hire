@@ -37,18 +37,18 @@ function Calendar({
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outlineNeutral" }),
-          "h-9 w-9 bg-white/5 border-white/10 text-white p-0 text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 transition-colors"
+          "h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] bg-white/5 border-white/10 text-white p-0 text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 transition-colors"
         ),
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
         head_cell:
-          "text-white rounded-full w-9 font-normal text-[0.8rem]",
+          "text-white rounded-full w-[var(--icon-button-size-compact)] font-normal text-[0.8rem]",
         row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
+        cell: "h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
         day: cn(
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-full text-white transition-colors",
+          "h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] p-0 font-normal aria-selected:opacity-100 rounded-full text-white transition-colors",
           "hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white"
         ),
         day_range_end: "day-range-end",
