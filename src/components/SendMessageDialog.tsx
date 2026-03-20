@@ -166,7 +166,9 @@ export function SendMessageDialog({
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isDisabled}
-                className="w-full h-11 !min-h-0 rounded-full border border-white/30 bg-white text-black transition-transform duration-150 active:scale-95 focus:outline-none focus:ring-0 md:hover:bg-white disabled:border-white/30 disabled:bg-white disabled:text-black disabled:opacity-60"
+                className={`w-full h-11 !min-h-0 rounded-full border transition-[border-color,transform] duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
+                  !sending && message.trim() && isOnline ? 'border-white/30' : 'border-transparent'
+                }`}
               >
                 {sending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
