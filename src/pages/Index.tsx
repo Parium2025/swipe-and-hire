@@ -1,301 +1,54 @@
-import { useEffect, useState, useMemo } from 'react';
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
-// smartSearchCandidates is applied inside useApplicationsData — not needed here
-import JobDetails from '@/pages/JobDetails';
-import JobTemplatesOverview from '@/components/JobTemplatesOverview';
-import CompanyReviews from '@/components/CompanyReviews';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import EmployerLayout from "@/components/EmployerLayout";
-import JobSeekerLayout from "@/components/JobSeekerLayout";
-import Dashboard from '@/components/Dashboard';
-import EmployerDashboard from '@/components/EmployerDashboard';
-import EmployerHome from '@/components/EmployerHome';
-import JobSeekerHome from '@/components/JobSeekerHome';
 import JobSwipe from '@/components/JobSwipe';
-// ProfileSetup removed - employers use EmployerWelcomeTunnel only
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
-import ProfilePreview from '@/pages/ProfilePreview';
 import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
 import AppOnboardingTour from '@/components/AppOnboardingTour';
-import Profile from '@/pages/Profile';
-import Consent from '@/pages/Consent';
-import SearchJobs from '@/pages/SearchJobs';
-import Subscription from '@/pages/Subscription';
-import Billing from '@/pages/Billing';
-import Support from '@/pages/Support';
-import SavedJobs from '@/pages/SavedJobs';
-import MyApplications from '@/pages/MyApplications';
-import SupportAdmin from '@/pages/SupportAdmin';
-import EmployerProfile from '@/pages/employer/EmployerProfile';
-import CompanyProfile from '@/pages/employer/CompanyProfile';
-import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
-import EmployerAnalytics from '@/components/EmployerAnalytics';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRightLeft, Search, Loader2, CheckSquare, X } from 'lucide-react';
-import { AnimatedBackground } from '@/components/AnimatedBackground';
 import KeepAlive from '@/components/KeepAlive';
-import { useApplicationsData } from '@/hooks/useApplicationsData';
-import { CandidatesTable } from '@/components/CandidatesTable';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
 import { TruncatedText } from '@/components/TruncatedText';
-import MyCandidates from '@/pages/MyCandidates';
-import Messages from '@/pages/Messages';
-import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
+import RouteFallback from '@/pages/index/RouteFallback';
 
-const CandidatesContent = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [questionFilters, setQuestionFilters] = useState<QuestionFilterValue[]>([]);
-  const [selectionMode, setSelectionMode] = useState(false);
+const JobDetails = lazy(() => import('@/pages/JobDetails'));
+const JobTemplatesOverview = lazy(() => import('@/components/JobTemplatesOverview'));
+const CompanyReviews = lazy(() => import('@/components/CompanyReviews'));
+const EmployerLayout = lazy(() => import('@/components/EmployerLayout'));
+const JobSeekerLayout = lazy(() => import('@/components/JobSeekerLayout'));
+const Dashboard = lazy(() => import('@/components/Dashboard'));
+const EmployerDashboard = lazy(() => import('@/components/EmployerDashboard'));
+const EmployerHome = lazy(() => import('@/components/EmployerHome'));
+const JobSeekerHome = lazy(() => import('@/components/JobSeekerHome'));
+const ProfilePreview = lazy(() => import('@/pages/ProfilePreview'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const Consent = lazy(() => import('@/pages/Consent'));
+const SearchJobs = lazy(() => import('@/pages/SearchJobs'));
+const Subscription = lazy(() => import('@/pages/Subscription'));
+const Billing = lazy(() => import('@/pages/Billing'));
+const Support = lazy(() => import('@/pages/Support'));
+const SavedJobs = lazy(() => import('@/pages/SavedJobs'));
+const MyApplications = lazy(() => import('@/pages/MyApplications'));
+const SupportAdmin = lazy(() => import('@/pages/SupportAdmin'));
+const EmployerProfile = lazy(() => import('@/pages/employer/EmployerProfile'));
+const CompanyProfile = lazy(() => import('@/pages/employer/CompanyProfile'));
+const EmployerSettings = lazy(() => import('@/pages/employer/EmployerSettings'));
+const EmployerAnalytics = lazy(() => import('@/components/EmployerAnalytics'));
+const MyCandidates = lazy(() => import('@/pages/MyCandidates'));
+const Messages = lazy(() => import('@/pages/Messages'));
+const CandidatesContent = lazy(() => import('@/pages/index/CandidatesContent'));
 
-  // Debounce search: 300ms delay before hitting the database
-  // Prevents spamming FTS queries on every keystroke (critical at 500k+ candidates)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  const { 
-    applications, 
-    stats, 
-    isLoading, 
-    error, 
-    refetch,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    hasReachedLimit,
-    continueLoading,
-    loadedCount,
-    updateRating,
-  } = useApplicationsData(debouncedSearch);
-  
-  // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
-  const [showContent, setShowContent] = useState(false);
-  useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => setShowContent(true), 150);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
-
-  // Safety check to prevent null crash
-  const safeApplications = applications || [];
-
-  // Filter applications by question filters
-  // NOTE: Smart search is already applied inside useApplicationsData (enrichedApplications)
-  // Do NOT apply smartSearchCandidates again here — it would double-filter and drop valid results
-  const filteredApplications = useMemo(() => {
-    let result = safeApplications;
-    
-    // Only apply question filters (smart search already done in hook)
-    if (questionFilters.length === 0) return result;
-
-    return result.filter(app => {
-      const customAnswers = app.custom_answers || {};
-      
-      return questionFilters.every(filter => {
-        const matchingKey = Object.keys(customAnswers).find(key => 
-          key.toLowerCase().includes(filter.question.toLowerCase()) ||
-          filter.question.toLowerCase().includes(key.toLowerCase())
-        );
-
-        if (!matchingKey) return false;
-
-        const answer = customAnswers[matchingKey];
-
-        if (filter.answers.length === 0) {
-          return answer !== undefined && answer !== null && answer !== '';
-        }
-
-        const normalizedAnswer = typeof answer === 'string' 
-          ? answer.toLowerCase() 
-          : typeof answer === 'boolean'
-            ? (answer ? 'ja' : 'nej')
-            : String(answer).toLowerCase();
-
-        return filter.answers.some(selectedAnswer => 
-          normalizedAnswer === selectedAnswer.toLowerCase() ||
-          (typeof answer === 'boolean' && (
-            (answer && selectedAnswer.toLowerCase() === 'ja') ||
-            (!answer && selectedAnswer.toLowerCase() === 'nej')
-          ))
-        );
-      });
-    });
-  }, [safeApplications, questionFilters]);
-
-  // Stats based on filtered results (already deduplicated by the hook)
-  const filteredStats = useMemo(() => ({
-    total: filteredApplications.length,
-    new: filteredApplications.filter(app => app.status === 'pending').length,
-    reviewing: filteredApplications.filter(app => app.status === 'reviewing').length,
-    hired: filteredApplications.filter(app => app.status === 'hired').length,
-    rejected: filteredApplications.filter(app => app.status === 'rejected').length,
-  }), [filteredApplications]);
-
-  if (isLoading || !showContent) {
-    return (
-       <div className="responsive-container-wide opacity-0">
-        {/* Invisible placeholder to prevent layout shift */}
-      </div>
-    );
-  }
-
-  return (
-     <div className="responsive-container-wide animate-fade-in">
-      {/* Main Content */}
-      <div className="space-y-4">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
-            Alla kandidater ({isLoading ? '...' : filteredStats.total})
-          </h1>
-          <p className="text-sm text-white mt-1">
-            Hantera och granska kandidater som sökt till dina jobbannonser
-          </p>
-        </div>
-
-        {/* Search Bar + Question Filter */}
-        {!isLoading && (
-          <div className="mb-6 space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
-              <Input
-                type="text"
-                placeholder="Sök på namn, email, telefon, plats, jobb..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white transition-colors"
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-center gap-2">
-                <QuestionFilter 
-                  value={questionFilters}
-                  onChange={setQuestionFilters}
-                  hideChips
-                />
-                <button
-                  onClick={() => setSelectionMode(prev => !prev)}
-                  className={`
-                    flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                    border whitespace-nowrap
-                    ${selectionMode 
-                      ? 'bg-white/20 border-white/30 text-white' 
-                      : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
-                    }
-                  `}
-                >
-                  {selectionMode ? (
-                    <span>Avsluta urval</span>
-                  ) : (
-                    <span>Välj kandidater</span>
-                  )}
-                </button>
-              </div>
-              {/* Filter chips below */}
-              {questionFilters.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <QuestionFilter 
-                    value={questionFilters}
-                    onChange={setQuestionFilters}
-                    chipsOnly
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {error ? (
-          <div className="text-center py-12 text-destructive">
-            Något gick fel vid hämtning av kandidater
-          </div>
-        ) : safeApplications.length === 0 && isLoading ? (
-          <Card className="bg-white/5 border-white/10 hover:border-white/50">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <Skeleton className="h-8 w-full bg-white/10" />
-                <Skeleton className="h-8 w-full bg-white/10" />
-                <Skeleton className="h-8 w-full bg-white/10" />
-                <Skeleton className="h-8 w-3/4 bg-white/10" />
-              </div>
-            </CardContent>
-          </Card>
-        ) : safeApplications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
-            <p className="text-white text-center">
-              Inga kandidater än.<br />
-              När någon söker till dina jobb så kommer deras ansökning att visas här.
-            </p>
-          </div>
-        ) : filteredApplications.length === 0 && (questionFilters.length > 0 || searchQuery.trim()) ? (
-          <div className="flex flex-col items-center justify-center py-12 px-4 bg-white/5 border border-white/10 rounded-lg">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-3">
-              <Search className="h-5 w-5 text-white" />
-            </div>
-            <p className="text-white font-medium text-base">Inga kandidater hittades</p>
-            <p className="text-white text-sm mt-1 text-center max-w-xs">
-              {searchQuery.trim() 
-                ? 'Försök med ett annat sökord eller kontrollera stavningen'
-                : 'Prova att ändra eller ta bort några filter'}
-            </p>
-            {(searchQuery.trim() || questionFilters.length > 0) && (
-              <Button
-                variant="glass"
-                size="sm"
-                onClick={() => {
-                  setSearchQuery('');
-                  setQuestionFilters([]);
-                }}
-                className="mt-3 text-xs"
-              >
-                Rensa filter
-                <ArrowRightLeft size={14} />
-              </Button>
-            )}
-          </div>
-        ) : (
-          <CandidatesTable 
-            applications={filteredApplications} 
-            onUpdate={refetch}
-            onLoadMore={fetchNextPage}
-            hasMore={hasNextPage && questionFilters.length === 0}
-            isLoadingMore={isFetchingNextPage}
-            selectionMode={selectionMode}
-            onSelectionModeChange={setSelectionMode}
-            hasReachedLimit={hasReachedLimit}
-            onContinueLoading={continueLoading}
-            loadedCount={loadedCount}
-            onRatingUpdate={(applicantId, rating) => updateRating.mutate({ applicantId, rating })}
-          />
-        )}
-      </div>
-    </div>
-  );
-};
+const renderDeferredRoute = (element: ReactNode) => <Suspense fallback={<RouteFallback />}>{element}</Suspense>;
 
 const Index = () => {
   const { user, profile, userRole, signOut, loading, authAction, switchRole } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
-  const [switching, setSwitching] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
   const [showIntroTutorial, setShowIntroTutorial] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(false);
-  const [uiReady, setUiReady] = useState(false);
-  const [showAuthCTA, setShowAuthCTA] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -336,16 +89,7 @@ const Index = () => {
         setShowProfileSelector(true);
       }
     }
-    
-    setIsInitializing(false);
-  }, [user, loading, navigate, profile, location.pathname]);
-
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setUiReady(true));
-    return () => {
-      cancelAnimationFrame(raf);
-    };
-  }, []);
+  }, [user, loading, navigate, profile, location.pathname, isAdmin]);
 
   // Vid logout/inloggning hanteras övergången av AuthSplashScreen - visa bara bakgrund
   if (loading && !user && authAction !== 'logout') {
@@ -359,9 +103,7 @@ const Index = () => {
 
   // Vänta på profil men visa bakgrund
   if (!profile) {
-    return (
-      <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />
-    );
+    return <RouteFallback />;
   }
 
   if (location.pathname === '/') {
@@ -431,7 +173,7 @@ const Index = () => {
 
   // While role is resolving, keep seamless background
   if (user && profile && !role) {
-    return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
+    return <RouteFallback />;
   }
   
   // isAdmin is now from database via useIsOrgAdmin hook
@@ -449,47 +191,49 @@ const Index = () => {
     const renderSidebarContent = (path: string) => {
       switch (path) {
         case '/home':
-          return <JobSeekerHome />;
+          return renderDeferredRoute(<JobSeekerHome />);
         case '/profile':
-          return <Profile />;
+          return renderDeferredRoute(<Profile />);
         case '/profile-preview':
-          return <ProfilePreview />;
+          return renderDeferredRoute(<ProfilePreview />);
         case '/consent':
-          return <Consent />;
+          return renderDeferredRoute(<Consent />);
         case '/search-jobs':
-          return <SearchJobs />;
+          return renderDeferredRoute(<SearchJobs />);
         case '/saved-jobs':
-          return <SavedJobs />;
+          return renderDeferredRoute(<SavedJobs />);
         case '/my-applications':
-          return <MyApplications />;
+          return renderDeferredRoute(<MyApplications />);
         case '/messages':
-          return <Messages />;
+          return renderDeferredRoute(<Messages />);
         case '/subscription':
-          return <Subscription />;
+          return renderDeferredRoute(<Subscription />);
         case '/billing':
-          return <Billing />;
+          return renderDeferredRoute(<Billing />);
         case '/support':
-          return <Support />;
+          return renderDeferredRoute(<Support />);
         case '/admin':
           // Endast Fredrik kan komma åt admin-sidan
           if (isAdmin) {
-            return <SupportAdmin />;
+            return renderDeferredRoute(<SupportAdmin />);
           } else {
             navigate('/support');
-            return <Support />;
+            return renderDeferredRoute(<Support />);
           }
         default:
-          return <JobSeekerHome />;
+          return renderDeferredRoute(<JobSeekerHome />);
       }
     };
 
     return (
-      <JobSeekerLayout developerView={developerView} onViewChange={setDeveloperView}>
-        <KeepAlive activeKey={location.pathname} render={(key) => renderSidebarContent(key)} />
-        {showTourOverlay && (
-          <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
-        )}
-      </JobSeekerLayout>
+      <Suspense fallback={<RouteFallback />}>
+        <JobSeekerLayout developerView={developerView} onViewChange={setDeveloperView}>
+          <KeepAlive activeKey={location.pathname} render={(key) => renderSidebarContent(key)} />
+          {showTourOverlay && (
+            <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
+          )}
+        </JobSeekerLayout>
+      </Suspense>
     );
   }
 
@@ -503,58 +247,60 @@ const Index = () => {
     const renderEmployerContent = (path: string) => {
       // Handle job details route with dynamic ID
       if (path.startsWith('/job-details/')) {
-        return <JobDetails />;
+        return renderDeferredRoute(<JobDetails />);
       }
       
       switch (path) {
         case '/home':
-          return <EmployerHome />;
+          return renderDeferredRoute(<EmployerHome />);
         case '/dashboard':
-          return <Dashboard />;
+          return renderDeferredRoute(<Dashboard />);
         case '/my-jobs':
-          return <EmployerDashboard />;
+          return renderDeferredRoute(<EmployerDashboard />);
         case '/candidates':
-          return <CandidatesContent />;
+          return renderDeferredRoute(<CandidatesContent />);
         case '/my-candidates':
-          return <MyCandidates />;
+          return renderDeferredRoute(<MyCandidates />);
         case '/messages':
-          return <Messages />;
+          return renderDeferredRoute(<Messages />);
         case '/profile':
         case '/employer-profile':
-          return <EmployerProfile />;
+          return renderDeferredRoute(<EmployerProfile />);
         case '/company-profile':
-          return <CompanyProfile />;
+          return renderDeferredRoute(<CompanyProfile />);
         case '/reviews':
-          return <CompanyReviews />;
+          return renderDeferredRoute(<CompanyReviews />);
         case '/templates':
-          return <JobTemplatesOverview />;
+          return renderDeferredRoute(<JobTemplatesOverview />);
         case '/settings':
-          return <EmployerSettings />;
+          return renderDeferredRoute(<EmployerSettings />);
         case '/reports':
-          return <EmployerAnalytics />;
+          return renderDeferredRoute(<EmployerAnalytics />);
         case '/billing':
-          return <Billing />;
+          return renderDeferredRoute(<Billing />);
         case '/support':
-          return <Support />;
+          return renderDeferredRoute(<Support />);
         case '/admin':
           if (isAdmin) {
-            return <SupportAdmin />;
+            return renderDeferredRoute(<SupportAdmin />);
           } else {
             navigate('/support');
-            return <Support />;
+            return renderDeferredRoute(<Support />);
           }
         default:
-          return <EmployerHome />;
+          return renderDeferredRoute(<EmployerHome />);
       }
     };
 
     return (
-      <EmployerLayout developerView={developerView} onViewChange={setDeveloperView}>
-        <KeepAlive activeKey={location.pathname} render={(key) => renderEmployerContent(key)} />
-        {showTourOverlay && (
-          <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
-        )}
-      </EmployerLayout>
+      <Suspense fallback={<RouteFallback />}>
+        <EmployerLayout developerView={developerView} onViewChange={setDeveloperView}>
+          <KeepAlive activeKey={location.pathname} render={(key) => renderEmployerContent(key)} />
+          {showTourOverlay && (
+            <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
+          )}
+        </EmployerLayout>
+      </Suspense>
     );
   }
 
