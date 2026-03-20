@@ -4,7 +4,7 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-export const dialogCloseButtonClassName = "absolute right-4 top-4 z-50 flex h-7 w-7 !min-h-0 !min-w-0 shrink-0 aspect-square items-center justify-center overflow-hidden rounded-full bg-white/10 text-white transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 md:bg-transparent md:hover:bg-white/20 md:hover:text-white disabled:pointer-events-none"
+export const dialogCloseButtonClassName = "absolute right-4 top-4 z-50 flex h-7 w-7 !min-h-0 !min-w-0 shrink-0 aspect-square items-center justify-center overflow-hidden rounded-full bg-white/10 text-white transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 md:hover:bg-white/20 md:hover:text-white disabled:pointer-events-none"
 
 export const dialogCloseIconClassName = "h-3.5 w-3.5 shrink-0 text-white"
 
