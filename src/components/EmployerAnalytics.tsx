@@ -362,6 +362,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
   const maxApps = Math.max(...enrichedTtfa.map(x => x.applications_count), 1);
   const visible = enrichedTtfa.slice(0, visibleCount);
   const hasMore = visibleCount < enrichedTtfa.length;
+  const canStepBack = visibleCount > initialCount + step;
 
   return (
     <Card className="bg-white/5 border-white/10 overflow-hidden">
@@ -437,7 +438,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
                 Visa fler ({enrichedTtfa.length - visibleCount} kvar)
               </button>
             )}
-            {visibleCount > initialCount && (
+            {canStepBack && (
               <button
                 onClick={() => setVisibleCount(prev => Math.max(prev - step, initialCount))}
                 className="py-2 px-4 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
@@ -619,6 +620,9 @@ const EmployerAnalytics = memo(() => {
     return Math.round(total / ttfa.length);
   }, [ttfa]);
 
+  const showBestDayCard = Boolean(bestDay || shouldReserveBestDayCard);
+  const showAvgTtfaCard = avgTtfa !== null;
+  const isSingleSummaryCard = showAvgTtfaCard && !showBestDayCard;
   const shouldReserveBestDayCard = selectedDays === null && !bestDay && isFetching && avgTtfa !== null;
 
   const [show, setShow] = useState(() => Boolean(cachedRawData));
@@ -702,9 +706,9 @@ const EmployerAnalytics = memo(() => {
       )}
 
       {/* ─── NEW: Best day + Time to first application ─── */}
-      {(bestDay || avgTtfa !== null || shouldReserveBestDayCard) && (
-        <div className="grid grid-cols-2 gap-2">
-          {(bestDay || shouldReserveBestDayCard) && (
+      {(showBestDayCard || showAvgTtfaCard) && (
+        <div className={isSingleSummaryCard ? 'flex justify-center' : 'grid grid-cols-2 gap-2'}>
+          {showBestDayCard && (
             <Card className="bg-white/5 border-white/10 overflow-hidden">
               <CardContent className="p-4 flex flex-col h-full">
                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -729,8 +733,8 @@ const EmployerAnalytics = memo(() => {
               </CardContent>
             </Card>
           )}
-          {avgTtfa !== null && (
-            <Card className="bg-white/5 border-white/10 overflow-hidden">
+          {showAvgTtfaCard && (
+            <Card className={`bg-white/5 border-white/10 overflow-hidden ${isSingleSummaryCard ? 'w-full sm:max-w-[32rem]' : ''}`}>
               <CardContent className="p-4 flex flex-col h-full">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <span className="min-w-0 flex-1 text-[11px] font-medium leading-tight text-white [overflow-wrap:anywhere]">
