@@ -162,7 +162,7 @@ export const JobSearchBar = memo(({
           {searchInput ? (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-1.5 top-1/2 transform -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 transition-colors focus:outline-none"
+              className="absolute right-1.5 top-1/2 flex h-7 w-7 !min-h-0 !min-w-0 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full text-white bg-white/10 transition-colors focus:outline-none md:hover:bg-white/20"
             >
               <X className="h-3.5 w-3.5" />
             </button>
