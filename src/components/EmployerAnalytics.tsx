@@ -93,6 +93,33 @@ const OS_CONFIG: Record<string, { label: string; color: string }> = {
 
 const DAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
 
+const EMPLOYER_ANALYTICS_CACHE_PREFIX = 'parium-employer-analytics';
+
+const getEmployerAnalyticsCacheKey = (
+  scope: 'overview' | 'advanced',
+  userId?: string,
+  days?: number | null,
+) => `${EMPLOYER_ANALYTICS_CACHE_PREFIX}:${scope}:${userId ?? 'guest'}:${days ?? 'all'}`;
+
+const readEmployerAnalyticsCache = <T,>(key: string): T | undefined => {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const writeEmployerAnalyticsCache = <T,>(key: string, value: T) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Ignore storage quota / serialization issues.
+  }
+};
+
 /* ─── Trend pill ─── */
 const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel }: {
   current: number; previous: number; label: string; icon: React.ElementType; daysLabel: string;
@@ -442,6 +469,22 @@ const formatDuration = (seconds: number): string => {
 const EmployerAnalytics = memo(() => {
   const { user } = useAuth();
   const [selectedDays, setSelectedDays] = useState<number | null>(30);
+  const overviewCacheKey = useMemo(
+    () => getEmployerAnalyticsCacheKey('overview', user?.id, selectedDays),
+    [user?.id, selectedDays],
+  );
+  const advancedCacheKey = useMemo(
+    () => getEmployerAnalyticsCacheKey('advanced', user?.id, selectedDays),
+    [user?.id, selectedDays],
+  );
+  const cachedRawData = useMemo(
+    () => readEmployerAnalyticsCache<AnalyticsData>(overviewCacheKey),
+    [overviewCacheKey],
+  );
+  const cachedAdvancedData = useMemo(
+    () => readEmployerAnalyticsCache<AdvancedAnalyticsData>(advancedCacheKey),
+    [advancedCacheKey],
+  );
 
   const { data: rawData, isLoading } = useQuery({
     queryKey: ['employer-analytics-v2', user?.id, selectedDays],
@@ -454,6 +497,7 @@ const EmployerAnalytics = memo(() => {
       return data as unknown as AnalyticsData;
     },
     enabled: !!user,
+    placeholderData: (previousData) => previousData ?? cachedRawData,
     staleTime: 2 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
@@ -469,9 +513,22 @@ const EmployerAnalytics = memo(() => {
       return data as unknown as AdvancedAnalyticsData;
     },
     enabled: !!user,
+    placeholderData: (previousData) => previousData ?? cachedAdvancedData,
     staleTime: 2 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
+
+  useEffect(() => {
+    if (rawData && user?.id) {
+      writeEmployerAnalyticsCache(overviewCacheKey, rawData);
+    }
+  }, [overviewCacheKey, rawData, user?.id]);
+
+  useEffect(() => {
+    if (advancedData && user?.id) {
+      writeEmployerAnalyticsCache(advancedCacheKey, advancedData);
+    }
+  }, [advancedCacheKey, advancedData, user?.id]);
 
   const analytics = useMemo(() => rawData?.jobs?.map((job: any, index: number) => {
     const views = Number(job.views_count);
@@ -513,13 +570,13 @@ const EmployerAnalytics = memo(() => {
     return Math.round(total / ttfa.length);
   }, [ttfa]);
 
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(() => Boolean(cachedRawData));
   useEffect(() => {
     if (!isLoading && !show) {
-      const t = setTimeout(() => setShow(true), 80);
+      const t = setTimeout(() => setShow(true), cachedRawData ? 0 : 80);
       return () => clearTimeout(t);
     }
-  }, [isLoading, show]);
+  }, [cachedRawData, isLoading, show]);
 
   if (isLoading && !show) {
     return (
