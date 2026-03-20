@@ -2,7 +2,6 @@ import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/componen
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -11,6 +10,7 @@ import { useOnline } from '@/hooks/useOnlineStatus';
 import { useFieldDraft } from '@/hooks/useFormDraft';
 import { useCreateConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -120,47 +120,54 @@ export function SendMessageDialog({
         <DialogContentNoFocus 
           hideClose
           elevated={elevated}
-          className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-x-hidden overflow-y-auto"
+          className="parium-panel max-w-none w-[min(92vw,440px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         >
           <DialogHeader className="sr-only">
-            <DialogTitle className="sr-only">Skicka meddelande</DialogTitle>
-            <DialogDescription className="sr-only">Skriv ett meddelande till {recipientName}</DialogDescription>
+            <DialogTitle className="sr-only">Chatta</DialogTitle>
+            <DialogDescription className="sr-only">Skriv ditt meddelande till {recipientName}</DialogDescription>
           </DialogHeader>
-          
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full">
-            <CardHeader className="pb-4 pt-6">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex-1 text-center text-xl flex items-center justify-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Skicka meddelande
-                </CardTitle>
-                <button
-                  onClick={handleClose}
-                  className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              <CardDescription className="text-white text-center text-sm leading-snug mt-2">
-                Skriv ett meddelande till {recipientName}
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent className="space-y-4 px-4 pb-5 pt-2">
+          <AnimatedBackground showBubbles={false} />
+
+          <div className="relative z-10 flex flex-col max-h-[75vh] sm:max-h-[80vh]">
+            <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
+              <h2 className="text-white text-lg font-semibold flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Chatta
+              </h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="absolute right-4 top-4 h-8 w-8 !min-h-0 !min-w-0 rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors duration-300 focus:outline-none focus:ring-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-5">
+              <p className="text-white text-center text-sm leading-relaxed px-2">
+                Skriv ditt meddelande till {recipientName} för att starta chatten
+              </p>
+
+              <div className="space-y-2">
+                <label className="text-white text-sm">Meddelande</label>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Skriv ditt meddelande här..."
-                className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-y transition-all duration-150 text-base"
+                  placeholder="Skriv här..."
+                  className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 hover:border-white/30 focus:border-white/40 text-white placeholder:text-white/50 resize-y transition-all duration-150 text-base"
                 disabled={!isOnline}
               />
+              </div>
 
               <Button
                 onClick={handleSend}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isDisabled}
-                className={`w-full min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
+                className={`w-full h-11 !min-h-0 rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
                   !sending && message.trim() && isOnline ? 'border border-white/30' : ''
                 }`}
               >
@@ -173,8 +180,8 @@ export function SendMessageDialog({
                 )}
                 {!isOnline ? 'Offline' : 'Skicka'}
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </DialogContentNoFocus>
       </Dialog>
 
