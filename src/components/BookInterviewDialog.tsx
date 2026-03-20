@@ -298,7 +298,7 @@ export const BookInterviewDialog = ({
           {/* Date picker */}
           <div className="space-y-2">
             <Label className="text-white">Datum</Label>
-            <Popover>
+            <Popover modal>
               <PopoverTrigger asChild>
                 <button
                   className={cn(
@@ -313,14 +313,14 @@ export const BookInterviewDialog = ({
                   })() : 'Välj datum'}
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="center" side="bottom" sideOffset={4} avoidCollisions={false}>
+              <PopoverContent className="w-auto p-0 pointer-events-auto z-[120]" align="center" side="bottom" sideOffset={4} avoidCollisions={false}>
                 <Calendar
                   mode="single"
                   selected={date}
                   onSelect={setDate}
                   disabled={(date) => date < startOfDay(new Date())}
                   initialFocus
-                  className="pointer-events-auto"
+                  className="pointer-events-auto touch-manipulation"
                   classNames={{
                     day_today: "" // Remove today highlight
                   }}
