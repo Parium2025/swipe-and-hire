@@ -617,7 +617,7 @@ const EmployerAnalytics = memo(() => {
     }
   }, [advancedCacheKey, advancedData, user?.id]);
 
-  const analytics = useMemo(() => rawData?.jobs?.map((job: any, index: number) => {
+  const analytics = useMemo(() => rawData?.jobs?.map((job: JobAnalytics, index: number) => {
     const views = Number(job.views_count);
     const applications = Number(job.applications_count);
     const interviews = Number(job.interviews_count);
@@ -633,12 +633,12 @@ const EmployerAnalytics = memo(() => {
     } as JobAnalytics;
   }) || [], [rawData]);
 
-  const deviceBreakdown = (rawData?.device_breakdown || []) as DeviceBreakdown[];
-  const osBreakdown = ((rawData as any)?.os_breakdown || []) as OsBreakdown[];
-  const dailyViews = (rawData?.daily_views || []) as DailyView[];
-  const trends = rawData?.trends as TrendData | null;
-  const bestDay = rawData?.best_day as BestDay | null;
-  const ttfa = (rawData?.time_to_first_application || []) as TimeToFirstApp[];
+  const deviceBreakdown = useMemo(() => rawData?.device_breakdown ?? [], [rawData]);
+  const osBreakdown = useMemo(() => rawData?.os_breakdown ?? [], [rawData]);
+  const dailyViews = useMemo(() => rawData?.daily_views ?? [], [rawData]);
+  const trends = rawData?.trends ?? null;
+  const bestDay = rawData?.best_day ?? null;
+  const ttfa = useMemo(() => rawData?.time_to_first_application ?? [], [rawData]);
 
   const totals = useMemo(() => {
     if (!analytics.length) return { views: 0, applications: 0, interviews: 0 };
