@@ -366,7 +366,7 @@ const MyCandidates = () => {
     await deleteStage.mutateAsync(fromStage);
   }, [user, candidates, deleteStage, queryClient, debouncedSearchQuery, updateCandidatesCache]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over) {
