@@ -76,7 +76,7 @@ const employerNavItems = [
     group: "huvudmeny"
   },
   {
-    title: "Meddelanden",
+    title: "Chattar",
     url: "/messages",
     icon: MessageCircle,
     group: "huvudmeny"

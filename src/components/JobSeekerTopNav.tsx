@@ -210,7 +210,7 @@ function JobSeekerTopNav() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Meddelanden Button */}
+          {/* Chattar Button */}
           <button
             onClick={() => handleNavigation('/messages')}
             className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
@@ -221,7 +221,7 @@ function JobSeekerTopNav() {
               }`} 
             />
             <MessageCircle className="h-4 w-4 relative z-10" />
-            <span className="relative z-10">Meddelanden</span>
+            <span className="relative z-10">Chattar</span>
             {preloadedJobSeekerUnreadMessages > 0 && (
               <span className="absolute -top-1 -right-1.5 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
                 {preloadedJobSeekerUnreadMessages > 9 ? '9+' : preloadedJobSeekerUnreadMessages}
