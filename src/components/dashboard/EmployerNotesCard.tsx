@@ -73,7 +73,7 @@ export const EmployerNotesCard = memo(() => {
                 Skriv påminnelser och anteckningar...
               </div>
             )}
-            <div className={notesEditor ? 'visible' : 'invisible'}>
+            <div className={notesEditor ? 'visible h-full' : 'invisible h-full'}>
               <RichNotesEditor
                 value={content}
                 onChange={handleChange}

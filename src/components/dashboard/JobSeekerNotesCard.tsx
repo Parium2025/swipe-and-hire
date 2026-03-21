@@ -73,7 +73,7 @@ export const JobSeekerNotesCard = memo(() => {
                 Skriv karriärmål, påminnelser...
               </div>
             )}
-            <div className={notesEditor ? 'visible' : 'invisible'}>
+            <div className={notesEditor ? 'visible h-full' : 'invisible h-full'}>
               <RichNotesEditor
                 value={content}
                 onChange={handleChange}
