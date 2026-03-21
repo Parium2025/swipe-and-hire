@@ -40,48 +40,4 @@ export default defineConfig(({ mode }) => ({
     // Avoid prebundling React multiple times which can cause Invalid Hook Call
     exclude: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
   },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return;
-
-          if (id.includes('react') || id.includes('scheduler')) {
-            return 'vendor-react';
-          }
-
-          if (id.includes('@supabase')) {
-            return 'vendor-backend';
-          }
-
-          if (id.includes('@tanstack')) {
-            return 'vendor-query';
-          }
-
-          if (
-            id.includes('@radix-ui') ||
-            id.includes('framer-motion') ||
-            id.includes('lucide-react') ||
-            id.includes('class-variance-authority') ||
-            id.includes('clsx') ||
-            id.includes('tailwind-merge') ||
-            id.includes('sonner')
-          ) {
-            return 'vendor-ui';
-          }
-
-          if (
-            id.includes('react-router') ||
-            id.includes('@dnd-kit') ||
-            id.includes('date-fns') ||
-            id.includes('recharts') ||
-            id.includes('pdfjs-dist') ||
-            id.includes('react-pdf')
-          ) {
-            return 'vendor-utils';
-          }
-        },
-      },
-    },
-  },
 }));

@@ -16,7 +16,6 @@ import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
 import { authSplashEvents } from '@/lib/authSplashEvents';
 import { useSessionManager, clearSessionToken } from '@/hooks/useSessionManager';
-import { imageCache } from '@/lib/imageCache';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -672,9 +671,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               try { sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, companyLogoUrl); } catch {}
               
               // Preload logo image
-              imageCache.preloadImages([companyLogoUrl]).catch((err) => {
-                console.warn('Company logo preload failed:', err);
-              });
+              (async () => {
+                try {
+                  const { imageCache } = await import('@/lib/imageCache');
+                  await imageCache.preloadImages([companyLogoUrl]);
+                } catch (err) {
+                  console.warn('Company logo preload failed:', err);
+                }
+              })();
             }
             
             // 🌤️ Preload weather location in background (for employer home page)

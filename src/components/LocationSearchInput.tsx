@@ -264,7 +264,7 @@ const LocationSearchInput = ({
         <PopoverTrigger asChild>
           <button
             className={cn(
-                "w-full h-[var(--control-height)] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50",
+              "w-full h-10 md:h-[44px] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50",
               "focus:outline-none focus:ring-2 focus:ring-white/20"
             )}
             aria-label="Välj plats"
@@ -281,7 +281,7 @@ const LocationSearchInput = ({
                   e.stopPropagation();
                   handleClear();
                 }}
-                className="flex h-[var(--icon-button-size-sm)] w-[var(--icon-button-size-sm)] items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 aspect-square"
+                className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
                 aria-label="Rensa"
               >
                 <X className="h-4 w-4" />

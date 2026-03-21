@@ -31,21 +31,21 @@ export const ProfileActions = ({
     return (
       <div className="pt-4 border-t border-white/20 space-y-3">
         <div className="flex justify-center gap-1">
-          <Button onClick={onSendMessage} variant="glassPurple" size="compact" className="min-w-0 flex-1 px-2 md:px-3 text-[11px] md:text-sm">
+          <Button onClick={onSendMessage} variant="glassPurple" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
             <MessageSquare className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
             <span className="truncate">Chatta</span>
           </Button>
-          <Button onClick={onBookInterview} variant="glassBlue" size="compact" className="min-w-0 flex-1 px-2 md:px-3 text-[11px] md:text-sm">
+          <Button onClick={onBookInterview} variant="glassBlue" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
             <CalendarPlus className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
             <span className="truncate">Boka möte</span>
           </Button>
           {hasTeam && (
-            <Button onClick={onShare} variant="glassAmber" size="compact" className="min-w-0 flex-1 px-2 md:px-3 text-[11px] md:text-sm">
+            <Button onClick={onShare} variant="glassAmber" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
               <Users className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
               <span className="truncate">Dela</span>
             </Button>
           )}
-          <Button onClick={onRemove} variant="glassRed" size="compact" className="min-w-0 flex-1 px-2 md:px-3 text-[11px] md:text-sm">
+          <Button onClick={onRemove} variant="glassRed" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
             <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
             <span className="truncate">Ta bort</span>
           </Button>
@@ -65,20 +65,20 @@ export const ProfileActions = ({
                 <button
                   onClick={() => prevStage && onStageChange(prevStage)}
                   disabled={!prevStage}
-                  className={`min-w-0 flex-1 h-[var(--control-height-compact)] inline-flex items-center justify-center gap-1 px-3 rounded-full text-sm transition-colors ${
+                  className={`min-w-0 flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                     prevStage ? 'text-white bg-white/10 hover:bg-white/20' : 'opacity-40 text-white/50'
                   }`}
                 >
                   <ChevronLeft className="h-4 w-4 flex-shrink-0" />
                   <span className="truncate min-w-0">Till {(prevLabel || 'föregående').replace('?', '')}</span>
                 </button>
-                <div className="flex h-[var(--control-height-compact)] flex-shrink min-w-0 max-w-[40%] items-center justify-center px-3 rounded-full bg-white/20 text-white text-xs font-medium truncate text-center">
+                <div className="flex-shrink min-w-0 max-w-[40%] px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium truncate text-center">
                   {(stageConfig[currentStage]?.label || currentStage).replace('?', '')}
                 </div>
                 <button
                   onClick={() => nextStage && onStageChange(nextStage)}
                   disabled={!nextStage}
-                  className={`min-w-0 flex-1 h-[var(--control-height-compact)] inline-flex items-center justify-center gap-1 px-3 rounded-full text-sm transition-colors ${
+                  className={`min-w-0 flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                     nextStage ? 'text-white bg-white/10 hover:bg-white/20' : 'opacity-40 text-white/50'
                   }`}
                 >
