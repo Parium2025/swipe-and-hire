@@ -20,7 +20,6 @@ import {
   ScrollText,
   Trash2,
   Wand2,
-  ChevronDown,
 } from 'lucide-react';
 import {
   DEFAULT_OUTREACH_AUTOMATIONS,
@@ -89,7 +88,6 @@ export function MessageTemplatesSettings() {
   const [savingAutomation, setSavingAutomation] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [runningDispatch, setRunningDispatch] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [templateForm, setTemplateForm] = useState<TemplateForm>(EMPTY_TEMPLATE_FORM);
   const [automationForm, setAutomationForm] = useState<AutomationForm>(EMPTY_AUTOMATION_FORM);
 
@@ -313,65 +311,61 @@ export function MessageTemplatesSettings() {
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+      <div className="mb-3 flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white">
-            <MessageSquareText className="h-3.5 w-3.5" />
+          <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white">
+            <MessageSquareText className="h-3 w-3" />
             Outreach Studio
           </div>
-          <h3 className="text-base md:text-lg font-semibold text-white">Mallar, regler och utskick</h3>
-          <p className="text-sm text-white">Skapa meddelanden och välj när de ska skickas.</p>
+          <h3 className="text-sm font-semibold text-white md:text-base">Mallar, regler och utskick</h3>
+          <p className="text-xs text-white md:text-sm">Skapa meddelanden och välj när de ska skickas.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-          <Button size="sm" variant="glassPurple" onClick={seedDefaults} disabled={seeding}>
-            {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+          <Button size="sm" variant="glassPurple" onClick={seedDefaults} disabled={seeding} className="px-3 text-xs">
+            {seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
             Kom igång snabbt
           </Button>
-          <Button size="sm" variant="glassBlue" onClick={handleRunDispatch} disabled={runningDispatch}>
-            {runningDispatch ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
+          <Button size="sm" variant="glassBlue" onClick={handleRunDispatch} disabled={runningDispatch} className="px-3 text-xs">
+            {runningDispatch ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Rocket className="h-3.5 w-3.5" />}
             Skicka nu
-          </Button>
-          <Button size="sm" variant="glass" onClick={() => setShowAdvanced((prev) => !prev)}>
-            <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-            {showAdvanced ? 'Dölj avancerat' : 'Visa avancerat'}
           </Button>
         </div>
       </div>
 
-      <div className="mb-4 grid gap-2 md:grid-cols-3">
+      <div className="mb-3 grid gap-2 md:grid-cols-3">
         {[
           { label: 'Mallar', value: templates.length, icon: Bot },
           { label: 'Aktiva regler', value: automations.filter((item) => item.is_enabled).length, icon: RefreshCw },
           { label: 'Väntar på att skickas', value: logs.filter((item) => item.status === 'pending').length, icon: ScrollText },
         ].map(({ label, value, icon: Icon }) => (
-          <div key={label} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5">
+          <div key={label} className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-white">{label}</p>
-                <p className="mt-1 text-xl font-semibold text-white">{value}</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-white md:text-[11px]">{label}</p>
+                <p className="mt-0.5 text-lg font-semibold text-white md:text-xl">{value}</p>
               </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5">
-                <Icon className="h-4 w-4 text-white" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5">
+                <Icon className="h-3.5 w-3.5 text-white" />
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <Tabs defaultValue="templates" className="space-y-4">
-        <TabsList className={`grid h-auto w-full rounded-full border border-white/10 bg-white/5 p-1 ${showAdvanced ? 'grid-cols-3' : 'grid-cols-2'}`}>
-          <TabsTrigger value="templates" className="rounded-full data-[state=active]:bg-white/10 data-[state=active]:text-white">Mallar</TabsTrigger>
-          <TabsTrigger value="automations" className="rounded-full data-[state=active]:bg-white/10 data-[state=active]:text-white">Regler</TabsTrigger>
-          {showAdvanced && <TabsTrigger value="logs" className="rounded-full data-[state=active]:bg-white/10 data-[state=active]:text-white">Logg</TabsTrigger>}
+      <Tabs defaultValue="templates" className="space-y-3">
+        <TabsList className="grid h-[var(--control-height-compact)] w-full grid-cols-3 rounded-2xl border border-white/10 bg-white/5 p-1">
+          <TabsTrigger value="templates" className="rounded-xl px-2 text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white">Mallar</TabsTrigger>
+          <TabsTrigger value="automations" className="rounded-xl px-2 text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white">Regler</TabsTrigger>
+          <TabsTrigger value="logs" className="rounded-xl px-2 text-xs data-[state=active]:bg-white/10 data-[state=active]:text-white">Logg</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="templates" className="mt-0 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-3.5">
-            <div className="mb-4 flex items-center justify-between gap-3">
+        <TabsContent value="templates" className="mt-0 grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+            <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <h4 className="text-base font-semibold text-white">Mallbibliotek</h4>
-                <p className="text-sm text-white">Skriv färdiga meddelanden för varje kanal.</p>
+                <h4 className="text-sm font-semibold text-white md:text-base">Mallbibliotek</h4>
+                <p className="text-xs text-white md:text-sm">Skriv färdiga meddelanden för varje kanal.</p>
               </div>
             </div>
 
@@ -380,23 +374,24 @@ export function MessageTemplatesSettings() {
             ) : templates.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga mallar ännu.</div>
             ) : (
-              <div className="space-y-3">
+                <div className="space-y-2.5">
                 {templates.map((template) => (
-                    <div key={template.id} className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="space-y-2">
+                    <div key={template.id} className="rounded-2xl border border-white/10 bg-white/5 p-2.5">
+                    <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-sm font-semibold text-white">{template.name}</p>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
                         </div>
-                        {template.subject && <p className="text-xs text-white">{template.subject}</p>}
-                        <p className="line-clamp-2 text-sm text-white">{template.body}</p>
+                        {template.subject && <p className="text-[11px] text-white md:text-xs">{template.subject}</p>}
+                        <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
                       </div>
                       <div className="flex items-center gap-2">
                           <Button
                           variant="glass"
                           size="sm"
+                           className="px-3 text-xs"
                           onClick={() => setTemplateForm({
                             id: template.id,
                             name: template.name,
@@ -409,7 +404,7 @@ export function MessageTemplatesSettings() {
                           <Pencil className="h-3.5 w-3.5" />
                           Redigera
                         </Button>
-                        <Button variant="glassRed" size="sm" onClick={() => handleDeleteTemplate(template.id)}>
+                        <Button variant="glassRed" size="sm" className="px-2.5" onClick={() => handleDeleteTemplate(template.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -420,11 +415,11 @@ export function MessageTemplatesSettings() {
             )}
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-3.5 space-y-4">
+          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h4 className="text-base font-semibold text-white">Skapa mall</h4>
-                <p className="text-sm text-white">Använd variabler för att göra utskicken personliga.</p>
+                <h4 className="text-sm font-semibold text-white md:text-base">Skapa mall</h4>
+                <p className="text-xs text-white md:text-sm">Använd variabler för att göra utskicken personliga.</p>
               </div>
               <div className="flex items-center gap-2 text-xs text-white">
                 <span>Aktiv</span>
@@ -456,14 +451,14 @@ export function MessageTemplatesSettings() {
 
             <div className="space-y-2">
               <Label className="text-white">Innehåll</Label>
-              <Textarea value={templateForm.body} onChange={(e) => setTemplateForm((prev) => ({ ...prev, body: e.target.value }))} className="min-h-[180px] bg-white/5 border-white/10 text-white" />
+              <Textarea value={templateForm.body} onChange={(e) => setTemplateForm((prev) => ({ ...prev, body: e.target.value }))} className="min-h-[144px] bg-white/5 border-white/10 text-white" />
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
               <p className="mb-2 text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
               <div className="flex flex-wrap gap-2">
                 {OUTREACH_VARIABLES.map((variable) => (
-                  <button key={variable.key} type="button" onClick={() => setTemplateForm((prev) => ({ ...prev, body: `${prev.body}{${variable.key}}` }))} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white hover:border-white/30 hover:text-white">
+                  <button key={variable.key} type="button" onClick={() => setTemplateForm((prev) => ({ ...prev, body: `${prev.body}{${variable.key}}` }))} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white hover:border-white/30 hover:text-white md:text-xs">
                     {`{${variable.key}}`}
                   </button>
                 ))}
@@ -471,39 +466,39 @@ export function MessageTemplatesSettings() {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="glassBlue" onClick={handleSaveTemplate} disabled={savingTemplate}>{savingTemplate ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}{templateForm.id ? 'Uppdatera mall' : 'Spara mall'}</Button>
-              <Button variant="glass" onClick={() => setTemplateForm(EMPTY_TEMPLATE_FORM)}>Rensa</Button>
+              <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveTemplate} disabled={savingTemplate}>{savingTemplate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{templateForm.id ? 'Uppdatera mall' : 'Spara mall'}</Button>
+              <Button variant="glass" size="sm" className="px-3 text-xs" onClick={() => setTemplateForm(EMPTY_TEMPLATE_FORM)}>Rensa</Button>
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="automations" className="mt-0 grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-3.5">
+        <TabsContent value="automations" className="mt-0 grid gap-3 xl:grid-cols-[1.05fr_0.95fr]">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
             ) : automations.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga regler ännu.</div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {automations.map((automation) => {
                   const linkedTemplate = templates.find((template) => template.id === automation.template_id);
                   return (
-                    <div key={automation.id} className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="space-y-2">
+                    <div key={automation.id} className="rounded-2xl border border-white/10 bg-white/5 p-2.5">
+                      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="space-y-1.5">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="text-sm font-semibold text-white">{automation.name}</p>
                             <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(automation.trigger)}</span>
                             <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(automation.channel)}</span>
                           </div>
-                          <p className="text-sm text-white">{linkedTemplate?.name ?? 'Ingen mall vald'} · {getOutreachRecipientLabel(automation.recipient_type)}</p>
+                          <p className="text-xs text-white md:text-sm">{linkedTemplate?.name ?? 'Ingen mall vald'} · {getOutreachRecipientLabel(automation.recipient_type)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-white">
+                          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] text-white md:text-xs">
                             <span>Aktiv</span>
                             <Switch checked={automation.is_enabled} onCheckedChange={(checked) => void handleToggleAutomation(automation, checked)} />
                           </div>
-                          <Button variant="glass" size="sm" onClick={() => setAutomationForm({
+                          <Button variant="glass" size="sm" className="px-3 text-xs" onClick={() => setAutomationForm({
                             id: automation.id,
                             name: automation.name,
                             trigger: automation.trigger,
@@ -513,7 +508,7 @@ export function MessageTemplatesSettings() {
                             delay_minutes: automation.delay_minutes,
                             is_enabled: automation.is_enabled,
                           })}><Pencil className="h-3.5 w-3.5" />Redigera</Button>
-                          <Button variant="glassRed" size="sm" onClick={() => handleDeleteAutomation(automation.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          <Button variant="glassRed" size="sm" className="px-2.5" onClick={() => handleDeleteAutomation(automation.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                         </div>
                       </div>
                     </div>
@@ -523,10 +518,10 @@ export function MessageTemplatesSettings() {
             )}
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-3.5 space-y-4">
+          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
             <div>
-              <h4 className="text-base font-semibold text-white">Skapa regel</h4>
-              <p className="text-sm text-white">Välj när ett meddelande ska skickas och vilken mall som ska användas.</p>
+              <h4 className="text-sm font-semibold text-white md:text-base">Skapa regel</h4>
+              <p className="text-xs text-white md:text-sm">Välj när ett meddelande ska skickas och vilken mall som ska användas.</p>
             </div>
             <div className="space-y-2">
               <Label className="text-white">Namn</Label>
@@ -576,32 +571,32 @@ export function MessageTemplatesSettings() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
               <div>
                 <p className="text-sm font-medium text-white">Aktiv direkt</p>
-                <p className="text-xs text-white">Stäng av om du vill spara regeln utan att använda den än.</p>
+                <p className="text-[11px] text-white md:text-xs">Stäng av om du vill spara regeln utan att använda den än.</p>
               </div>
               <Switch checked={automationForm.is_enabled} onCheckedChange={(checked) => setAutomationForm((prev) => ({ ...prev, is_enabled: checked }))} />
             </div>
             <div className="flex gap-2">
-              <Button variant="glassBlue" onClick={handleSaveAutomation} disabled={savingAutomation || !automationForm.template_id}>{savingAutomation ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}{automationForm.id ? 'Uppdatera automation' : 'Spara automation'}</Button>
-              <Button variant="glass" onClick={() => setAutomationForm(EMPTY_AUTOMATION_FORM)}>Rensa</Button>
+              <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveAutomation} disabled={savingAutomation || !automationForm.template_id}>{savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{automationForm.id ? 'Uppdatera automation' : 'Spara automation'}</Button>
+              <Button variant="glass" size="sm" className="px-3 text-xs" onClick={() => setAutomationForm(EMPTY_AUTOMATION_FORM)}>Rensa</Button>
             </div>
           </div>
         </TabsContent>
 
-        {showAdvanced && <TabsContent value="logs" className="mt-0 rounded-3xl border border-white/10 bg-white/5 p-3.5">
+        <TabsContent value="logs" className="mt-0 rounded-2xl border border-white/10 bg-white/5 p-3">
           {loading ? (
             <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
           ) : logs.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga utskick ännu.</div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {logs.map((log) => {
                 const template = templates.find((item) => item.id === log.template_id);
                 return (
-                  <div key={log.id} className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <div key={log.id} className="rounded-2xl border border-white/10 bg-white/5 p-2.5">
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
                       <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(log.trigger)}</span>
                       <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(log.channel)}</span>
                       <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{log.status}</span>
@@ -614,7 +609,7 @@ export function MessageTemplatesSettings() {
               })}
             </div>
           )}
-        </TabsContent>}
+        </TabsContent>
       </Tabs>
     </div>
   );
