@@ -1,29 +1,71 @@
 import { useEffect, useLayoutEffect } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
-/**
- * Custom ScrollRestoration component for BrowserRouter.
- * Restores scroll position when navigating back/forward,
- * and scrolls to top on new navigations (PUSH).
- */
+const SCROLL_STORAGE_KEY = 'parium-scroll-positions';
+
+const getManagedScrollContainer = (): HTMLElement | null => {
+  return document.querySelector('[data-main-scroll-container="true"]');
+};
+
+const readPositions = (): Record<string, number> => {
+  try {
+    const raw = sessionStorage.getItem(SCROLL_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+const writePositions = (positions: Record<string, number>) => {
+  try {
+    sessionStorage.setItem(SCROLL_STORAGE_KEY, JSON.stringify(positions));
+  } catch {
+    // ignore
+  }
+};
+
 export function ScrollRestoration() {
   const location = useLocation();
   const navigationType = useNavigationType();
 
-  // Use layout effect for immediate scroll changes
+  useEffect(() => {
+    const scrollContainer = getManagedScrollContainer();
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const positions = readPositions();
+      positions[location.pathname] = scrollContainer.scrollTop;
+      writePositions(positions);
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [location.pathname]);
+
   useLayoutEffect(() => {
-    if (navigationType === 'PUSH') {
-      // New navigation - scroll to top
-      window.scrollTo(0, 0);
-    }
-    // For POP (back/forward), browser handles scroll restoration automatically
-    // when history.scrollRestoration is 'auto' (default)
+    let attempts = 0;
+
+    const applyScroll = () => {
+      const scrollContainer = getManagedScrollContainer();
+      if (!scrollContainer) {
+        if (attempts < 12) {
+          attempts += 1;
+          requestAnimationFrame(applyScroll);
+        }
+        return;
+      }
+
+      const positions = readPositions();
+      const targetTop = navigationType === 'POP' ? (positions[location.pathname] ?? 0) : 0;
+      scrollContainer.scrollTo({ top: targetTop, behavior: 'auto' });
+    };
+
+    applyScroll();
   }, [location.pathname, navigationType]);
 
-  // Ensure browser's native scroll restoration is enabled
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'auto';
+      window.history.scrollRestoration = 'manual';
     }
   }, []);
 

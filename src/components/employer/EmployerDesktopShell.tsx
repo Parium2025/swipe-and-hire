@@ -57,6 +57,7 @@ const EmployerDesktopShell = ({
 
         <main
           ref={mainScrollRef}
+          data-main-scroll-container="true"
           className="flex-1 min-h-0 overflow-y-auto p-3 relative z-10 flex flex-col"
           style={{ willChange: 'scroll-position', WebkitOverflowScrolling: 'touch' } as CSSProperties}
         >
