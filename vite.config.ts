@@ -3,24 +3,6 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-const getPackageName = (id: string) => {
-  const normalizedId = id.replace(/\\/g, "/").split("?")[0];
-  const nodeModulesPath = normalizedId.split("/node_modules/")[1];
-
-  if (!nodeModulesPath) return null;
-
-  const cleanPath = nodeModulesPath.startsWith(".pnpm/")
-    ? nodeModulesPath.split("/").slice(1)
-    : nodeModulesPath.split("/");
-
-  const [scopeOrName, maybeName] = cleanPath;
-  if (!scopeOrName) return null;
-
-  return scopeOrName.startsWith("@") && maybeName
-    ? `${scopeOrName}/${maybeName}`
-    : scopeOrName;
-};
-
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -62,67 +44,42 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          const packageName = getPackageName(id);
-          if (!packageName) return;
+          if (!id.includes('node_modules')) return;
 
-          if (["react", "react-dom", "scheduler"].includes(packageName)) {
+          if (id.includes('react') || id.includes('scheduler')) {
             return 'vendor-react';
           }
 
-          if (packageName.startsWith('@supabase/')) {
+          if (id.includes('@supabase')) {
             return 'vendor-backend';
           }
 
-          if (packageName.startsWith('@tanstack/')) {
+          if (id.includes('@tanstack')) {
             return 'vendor-query';
           }
 
           if (
-            packageName.startsWith('@radix-ui/') ||
-            [
-              'class-variance-authority',
-              'clsx',
-              'cmdk',
-              'framer-motion',
-              'input-otp',
-              'lucide-react',
-              'next-themes',
-              'sonner',
-              'tailwind-merge',
-              'vaul',
-            ].includes(packageName)
+            id.includes('@radix-ui') ||
+            id.includes('framer-motion') ||
+            id.includes('lucide-react') ||
+            id.includes('class-variance-authority') ||
+            id.includes('clsx') ||
+            id.includes('tailwind-merge') ||
+            id.includes('sonner')
           ) {
             return 'vendor-ui';
           }
 
-          if (["react-router", "react-router-dom"].includes(packageName)) {
-            return 'vendor-routing';
-          }
-
-          if (packageName.startsWith('@dnd-kit/')) {
-            return 'vendor-dnd';
-          }
-
-          if (packageName.startsWith('@tiptap/')) {
-            return 'vendor-editor';
-          }
-
-          if (["pdfjs-dist", "react-pdf"].includes(packageName)) {
-            return 'vendor-pdf';
-          }
-
-          if (["date-fns", "recharts"].includes(packageName)) {
+          if (
+            id.includes('react-router') ||
+            id.includes('@dnd-kit') ||
+            id.includes('date-fns') ||
+            id.includes('recharts') ||
+            id.includes('pdfjs-dist') ||
+            id.includes('react-pdf')
+          ) {
             return 'vendor-utils';
           }
-
-          if (
-            packageName.startsWith('@capacitor/') ||
-            packageName.startsWith('@capacitor-community/')
-          ) {
-            return 'vendor-native';
-          }
-
-          return 'vendor-misc';
         },
       },
     },
