@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -57,6 +58,8 @@ type AutomationForm = {
   is_enabled: boolean;
 };
 
+type StudioTab = 'templates' | 'automations' | 'logs';
+
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
   name: '',
@@ -88,6 +91,11 @@ export function MessageTemplatesSettings() {
   const [savingAutomation, setSavingAutomation] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [runningDispatch, setRunningDispatch] = useState(false);
+  const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('templates');
+  const templatesTabRef = useRef<HTMLButtonElement>(null);
+  const automationsTabRef = useRef<HTMLButtonElement>(null);
+  const logsTabRef = useRef<HTMLButtonElement>(null);
+  const [tabIndicatorStyle, setTabIndicatorStyle] = useState({ left: 4, width: 0 });
   const [templateForm, setTemplateForm] = useState<TemplateForm>(EMPTY_TEMPLATE_FORM);
   const [automationForm, setAutomationForm] = useState<AutomationForm>(EMPTY_AUTOMATION_FORM);
 
@@ -105,6 +113,28 @@ export function MessageTemplatesSettings() {
       setAutomationForm((prev) => ({ ...prev, template_id: channelTemplates[0]?.id ?? '' }));
     }
   }, [channelTemplates, automationForm.template_id]);
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const refs = {
+        templates: templatesTabRef,
+        automations: automationsTabRef,
+        logs: logsTabRef,
+      } as const;
+
+      const currentRef = refs[activeStudioTab]?.current;
+      if (!currentRef) return;
+
+      setTabIndicatorStyle({
+        left: currentRef.offsetLeft,
+        width: currentRef.offsetWidth,
+      });
+    };
+
+    updateIndicator();
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [activeStudioTab, templates.length, automations.length, logs.length]);
 
   const fetchStudio = async () => {
     if (!user) return;
@@ -353,12 +383,53 @@ export function MessageTemplatesSettings() {
         ))}
       </div>
 
-      <Tabs defaultValue="templates" className="space-y-2.5">
-        <TabsList className="grid h-[calc(var(--control-height-compact)-2px)] w-full grid-cols-3 rounded-2xl border border-white/10 bg-white/5 p-0.5">
-          <TabsTrigger value="templates" className="rounded-xl px-2 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-white md:text-xs">Mallar</TabsTrigger>
-          <TabsTrigger value="automations" className="rounded-xl px-2 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-white md:text-xs">Regler</TabsTrigger>
-          <TabsTrigger value="logs" className="rounded-xl px-2 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-white md:text-xs">Logg</TabsTrigger>
-        </TabsList>
+      <Tabs value={activeStudioTab} onValueChange={(value) => setActiveStudioTab(value as StudioTab)} className="space-y-2.5">
+        <div className="relative mx-auto flex w-fit gap-0.5 rounded-md border border-white/10 bg-white/5 p-1 backdrop-blur-[2px]" role="tablist" aria-label="Outreach sektioner">
+          <motion.div
+            className="absolute bottom-1 top-1 rounded-[5px] bg-parium-navy"
+            initial={false}
+            animate={{
+              left: tabIndicatorStyle.left,
+              width: tabIndicatorStyle.width,
+            }}
+            transition={{
+              type: 'spring',
+              stiffness: 300,
+              damping: 35,
+              mass: 0.8,
+            }}
+          />
+          <button
+            ref={templatesTabRef}
+            type="button"
+            role="tab"
+            aria-selected={activeStudioTab === 'templates'}
+            onClick={() => setActiveStudioTab('templates')}
+            className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
+          >
+            Mallar
+          </button>
+          <button
+            ref={automationsTabRef}
+            type="button"
+            role="tab"
+            aria-selected={activeStudioTab === 'automations'}
+            onClick={() => setActiveStudioTab('automations')}
+            className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
+          >
+            Regler
+          </button>
+          <button
+            ref={logsTabRef}
+            type="button"
+            role="tab"
+            aria-selected={activeStudioTab === 'logs'}
+            onClick={() => setActiveStudioTab('logs')}
+            className="relative z-10 rounded-[5px] px-3 py-1 text-xs font-medium text-white whitespace-nowrap"
+          >
+            Logg
+          </button>
+        </div>
 
         <TabsContent value="templates" className="mt-0 grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
@@ -378,20 +449,20 @@ export function MessageTemplatesSettings() {
                 {templates.map((template) => (
                     <div key={template.id} className="rounded-2xl border border-white/10 bg-white/5 p-2">
                     <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="space-y-1.5">
+                      <div className="min-w-0 space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-semibold text-white">{template.name}</p>
+                          <p className="truncate text-sm font-semibold text-white">{template.name}</p>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
                         </div>
                         {template.subject && <p className="text-[11px] text-white md:text-xs">{template.subject}</p>}
                         <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex shrink-0 items-center gap-1.5 self-end lg:self-start">
                           <Button
                           variant="glass"
                           size="sm"
-                           className="h-[var(--control-height-compact)] rounded-full px-2.5 text-[11px] md:text-xs"
+                            className="h-7 rounded-full px-2 text-[10px] md:text-[11px]"
                           onClick={() => setTemplateForm({
                             id: template.id,
                             name: template.name,
@@ -401,11 +472,11 @@ export function MessageTemplatesSettings() {
                             is_active: template.is_active,
                           })}
                         >
-                           <Pencil className="h-3 w-3" />
+                           <Pencil className="h-2.5 w-2.5" />
                           Redigera
                         </Button>
-                        <Button variant="glassRed" size="sm" className="h-8 w-8 rounded-full p-0" onClick={() => handleDeleteTemplate(template.id)}>
-                          <Trash2 className="h-3 w-3" />
+                        <Button variant="glassRed" size="sm" className="h-7 w-7 rounded-full p-0" onClick={() => handleDeleteTemplate(template.id)}>
+                          <Trash2 className="h-2.5 w-2.5" />
                         </Button>
                       </div>
                     </div>
@@ -485,20 +556,20 @@ export function MessageTemplatesSettings() {
                   return (
                     <div key={automation.id} className="rounded-2xl border border-white/10 bg-white/5 p-2">
                       <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="space-y-1.5">
+                        <div className="min-w-0 space-y-1.5">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-sm font-semibold text-white">{automation.name}</p>
+                            <p className="truncate text-sm font-semibold text-white">{automation.name}</p>
                             <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(automation.trigger)}</span>
                             <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(automation.channel)}</span>
                           </div>
                           <p className="text-xs text-white md:text-sm">{linkedTemplate?.name ?? 'Ingen mall vald'} · {getOutreachRecipientLabel(automation.recipient_type)}</p>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] text-white md:text-xs">
+                        <div className="flex shrink-0 items-center gap-1.5 self-end lg:self-start">
+                          <div className="flex h-7 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-white md:text-[11px]">
                             <span>Aktiv</span>
                             <Switch checked={automation.is_enabled} onCheckedChange={(checked) => void handleToggleAutomation(automation, checked)} />
                           </div>
-                          <Button variant="glass" size="sm" className="h-[var(--control-height-compact)] rounded-full px-2.5 text-[11px] md:text-xs" onClick={() => setAutomationForm({
+                          <Button variant="glass" size="sm" className="h-7 rounded-full px-2 text-[10px] md:text-[11px]" onClick={() => setAutomationForm({
                             id: automation.id,
                             name: automation.name,
                             trigger: automation.trigger,
@@ -507,8 +578,8 @@ export function MessageTemplatesSettings() {
                             template_id: automation.template_id,
                             delay_minutes: automation.delay_minutes,
                             is_enabled: automation.is_enabled,
-                          })}><Pencil className="h-3 w-3" />Redigera</Button>
-                          <Button variant="glassRed" size="sm" className="h-8 w-8 rounded-full p-0" onClick={() => handleDeleteAutomation(automation.id)}><Trash2 className="h-3 w-3" /></Button>
+                          })}><Pencil className="h-2.5 w-2.5" />Redigera</Button>
+                          <Button variant="glassRed" size="sm" className="h-7 w-7 rounded-full p-0" onClick={() => handleDeleteAutomation(automation.id)}><Trash2 className="h-2.5 w-2.5" /></Button>
                         </div>
                       </div>
                     </div>
