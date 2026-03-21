@@ -416,13 +416,8 @@
             localStorage.setItem(key, v);
           } else if (prev !== v) {
             localStorage.setItem(key, v);
-            // Best-effort purge of runtime caches to fight iOS PWA sticky caching
-            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-              navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
-            }
-            if (window.caches && caches.keys) {
-              caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(() => {});
-            }
+            // Behåll bild-/profil-cache intakt.
+            // Gör endast en kontrollerad URL-versionering för att hämta ny app-shell.
             const url = new URL(window.location.href);
             url.searchParams.set('v', v.replace(/\D/g, '').slice(0, 12));
             if (window.location.href !== url.toString()) {
@@ -501,7 +496,29 @@
     </script>
     <script type="module">
       if (!window.__pariumPreviewResetInProgress) {
-        import('/src/main.tsx');
+        const retryKey = 'parium_bootstrap_retry_once';
+
+        import('/src/main.tsx')
+          .then(() => {
+            try {
+              sessionStorage.removeItem(retryKey);
+            } catch (e) {
+              // noop
+            }
+          })
+          .catch(() => {
+            try {
+              const alreadyRetried = sessionStorage.getItem(retryKey) === '1';
+              if (!alreadyRetried) {
+                sessionStorage.setItem(retryKey, '1');
+                const url = new URL(window.location.href);
+                url.searchParams.set('__boot', String(Date.now()));
+                window.location.replace(url.toString());
+              }
+            } catch (e) {
+              window.location.reload();
+            }
+          });
       }
     </script>
   </body>
