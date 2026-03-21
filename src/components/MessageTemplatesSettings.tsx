@@ -475,7 +475,12 @@ export function MessageTemplatesSettings() {
                            <Pencil className="h-2.5 w-2.5" />
                           Redigera
                         </Button>
-                        <Button variant="glassRed" size="sm" className="h-7 w-7 rounded-full p-0" onClick={() => handleDeleteTemplate(template.id)}>
+                        <Button
+                          variant="outlineNeutral"
+                          size="sm"
+                          className="h-7 w-7 rounded-full border-white/10 p-0 text-white hover:border-destructive/50 hover:bg-destructive/15 hover:text-destructive"
+                          onClick={() => handleDeleteTemplate(template.id)}
+                        >
                           <Trash2 className="h-2.5 w-2.5" />
                         </Button>
                       </div>
@@ -579,7 +584,12 @@ export function MessageTemplatesSettings() {
                             delay_minutes: automation.delay_minutes,
                             is_enabled: automation.is_enabled,
                           })}><Pencil className="h-2.5 w-2.5" />Redigera</Button>
-                          <Button variant="glassRed" size="sm" className="h-7 w-7 rounded-full p-0" onClick={() => handleDeleteAutomation(automation.id)}><Trash2 className="h-2.5 w-2.5" /></Button>
+                          <Button
+                            variant="outlineNeutral"
+                            size="sm"
+                            className="h-7 w-7 rounded-full border-white/10 p-0 text-white hover:border-destructive/50 hover:bg-destructive/15 hover:text-destructive"
+                            onClick={() => handleDeleteAutomation(automation.id)}
+                          ><Trash2 className="h-2.5 w-2.5" /></Button>
                         </div>
                       </div>
                     </div>
