@@ -1010,6 +1010,7 @@ export function MessageTemplatesSettings() {
                 Rensa
               </Button>
             </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="automations" className="mt-0 grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
@@ -1143,7 +1144,6 @@ export function MessageTemplatesSettings() {
                 </div>
               </>
             )}
-          </div>
           </div>
         </TabsContent>
 
