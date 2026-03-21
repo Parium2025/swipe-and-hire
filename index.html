@@ -402,27 +402,34 @@
     <div id="root"></div>
     <script>
       try {
-        const meta = document.querySelector('meta[name="build-version"]');
-        const v = meta?.getAttribute('content') || '';
-        const key = 'parium_build_version';
-        const prev = localStorage.getItem(key);
-        if (!prev) {
-          localStorage.setItem(key, v);
-        } else if (prev !== v) {
-          localStorage.setItem(key, v);
-          // Best-effort purge of runtime caches to fight iOS PWA sticky caching
-          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-            navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
-          }
-          if (window.caches && caches.keys) {
-            caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(() => {});
-          }
-          const url = new URL(window.location.href);
-          url.searchParams.set('v', v.replace(/\D/g, '').slice(0, 12));
-          if (window.location.href !== url.toString()) {
-            window.location.replace(url.toString());
-          } else {
-            window.location.reload();
+        const hostname = window.location.hostname;
+        const isPreviewHost = hostname.includes('id-preview--') || hostname.includes('lovableproject.com');
+
+        // Preview använder egen cache/versionshantering. Undvik extra URL-versionering här
+        // eftersom den kan skapa 412-fel i modul-laddning i preview.
+        if (!isPreviewHost) {
+          const meta = document.querySelector('meta[name="build-version"]');
+          const v = meta?.getAttribute('content') || '';
+          const key = 'parium_build_version';
+          const prev = localStorage.getItem(key);
+          if (!prev) {
+            localStorage.setItem(key, v);
+          } else if (prev !== v) {
+            localStorage.setItem(key, v);
+            // Best-effort purge of runtime caches to fight iOS PWA sticky caching
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+              navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
+            }
+            if (window.caches && caches.keys) {
+              caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(() => {});
+            }
+            const url = new URL(window.location.href);
+            url.searchParams.set('v', v.replace(/\D/g, '').slice(0, 12));
+            if (window.location.href !== url.toString()) {
+              window.location.replace(url.toString());
+            } else {
+              window.location.reload();
+            }
           }
         }
       } catch (e) { /* noop */ }
@@ -449,6 +456,6 @@
       // SW disabled in preview - handled by main.tsx in production only
       // This prevents SW from interfering with HMR and causing slow reloads on touch devices
     </script>
-    <script type="module" src="/src/main.tsx?v=20251004-1510"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
