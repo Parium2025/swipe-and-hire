@@ -42,9 +42,8 @@ import {
 type TemplateForm = {
   id: string | null;
   name: string;
-  channel: 'chat' | 'email' | 'push';
-  subject: string;
-  body: string;
+  channels: AutomationChannel[];
+  channelContent: Record<AutomationChannel, { subject: string; body: string }>;
   is_active: boolean;
 };
 
@@ -75,9 +74,12 @@ type StudioTab = 'templates' | 'automations' | 'logs';
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
   name: '',
-  channel: 'chat',
-  subject: '',
-  body: '',
+  channels: ['push'],
+  channelContent: {
+    chat: { subject: '', body: '' },
+    email: { subject: '', body: '' },
+    push: { subject: '', body: '' },
+  },
   is_active: true,
 };
 
@@ -126,6 +128,7 @@ export function MessageTemplatesSettings() {
   const logsTabRef = useRef<HTMLButtonElement>(null);
   const [tabIndicatorStyle, setTabIndicatorStyle] = useState({ left: 4, width: 0 });
   const [templateForm, setTemplateForm] = useState<TemplateForm>(EMPTY_TEMPLATE_FORM);
+  const [activeTemplateChannel, setActiveTemplateChannel] = useState<AutomationChannel>('push');
   const [automationForm, setAutomationForm] = useState<AutomationForm>(EMPTY_AUTOMATION_FORM);
 
   const activeTemplatesByChannel = useMemo(() => ({
@@ -163,6 +166,13 @@ export function MessageTemplatesSettings() {
   useEffect(() => {
     if (user) void fetchStudio();
   }, [user]);
+
+  useEffect(() => {
+    if (templateForm.channels.length === 0) return;
+    if (!templateForm.channels.includes(activeTemplateChannel)) {
+      setActiveTemplateChannel(templateForm.channels[0]);
+    }
+  }, [templateForm.channels, activeTemplateChannel]);
 
   useEffect(() => {
     setAutomationForm((prev) => {
@@ -307,34 +317,129 @@ export function MessageTemplatesSettings() {
   };
 
   const handleSaveTemplate = async () => {
-    if (!user || !templateForm.name.trim() || !templateForm.body.trim()) return;
+    if (!user || !templateForm.name.trim() || templateForm.channels.length === 0) return;
+
+    const selectedChannels = CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel));
+    const missingBody = selectedChannels.some((channel) => !templateForm.channelContent[channel].body.trim());
+
+    if (missingBody) {
+      toast.error('Fyll i innehåll för alla valda kanaler');
+      return;
+    }
+
     setSavingTemplate(true);
 
-    const payload = {
+    const baseName = templateForm.name.trim();
+    const createPayload = (channel: AutomationChannel, name: string) => ({
       owner_user_id: user.id,
       organization_id: organizationId,
-      name: templateForm.name.trim(),
-      channel: templateForm.channel,
-      subject: templateForm.channel === 'chat' ? null : templateForm.subject.trim() || null,
-      body: templateForm.body.trim(),
+      name,
+      channel,
+      subject: channel === 'chat' ? null : templateForm.channelContent[channel].subject.trim() || null,
+      body: templateForm.channelContent[channel].body.trim(),
       is_active: templateForm.is_active,
-    };
+    });
 
-    const query = templateForm.id
-      ? supabase.from('outreach_templates').update(payload).eq('id', templateForm.id)
-      : supabase.from('outreach_templates').insert({ ...payload, is_default: false });
+    if (templateForm.id) {
+      const [primaryChannel, ...extraChannels] = selectedChannels;
+      const { error: updateError } = await supabase
+        .from('outreach_templates')
+        .update(createPayload(primaryChannel, baseName))
+        .eq('id', templateForm.id);
 
-    const { error } = await query;
+      if (updateError) {
+        toast.error('Kunde inte uppdatera mallen');
+        setSavingTemplate(false);
+        return;
+      }
 
-    if (error) {
-      toast.error('Kunde inte spara mallen');
-    } else {
-      toast.success(templateForm.id ? 'Mall uppdaterad' : 'Mall skapad');
+      if (extraChannels.length > 0) {
+        const extraRows = extraChannels.map((channel) => ({
+          ...createPayload(channel, `${baseName} · ${getOutreachChannelLabel(channel)}`),
+          is_default: false,
+        }));
+
+        const { error: insertError } = await supabase.from('outreach_templates').insert(extraRows);
+        if (insertError) {
+          toast.error('Mallen uppdaterades, men kopior kunde inte skapas för alla kanaler');
+          setSavingTemplate(false);
+          await fetchStudio();
+          return;
+        }
+      }
+
+      toast.success('Mall uppdaterad');
       setTemplateForm(EMPTY_TEMPLATE_FORM);
+      setActiveTemplateChannel('push');
       await fetchStudio();
+    } else {
+      const rows = selectedChannels.map((channel) => ({
+        ...createPayload(
+          channel,
+          selectedChannels.length > 1 ? `${baseName} · ${getOutreachChannelLabel(channel)}` : baseName,
+        ),
+        is_default: false,
+      }));
+
+      const { error } = await supabase.from('outreach_templates').insert(rows);
+
+      if (error) {
+        toast.error('Kunde inte spara mallen');
+      } else {
+        toast.success('Mall skapad');
+        setTemplateForm(EMPTY_TEMPLATE_FORM);
+        setActiveTemplateChannel('push');
+        await fetchStudio();
+      }
     }
 
     setSavingTemplate(false);
+  };
+
+  const toggleTemplateChannel = (channel: AutomationChannel) => {
+    setTemplateForm((prev) => {
+      const isSelected = prev.channels.includes(channel);
+
+      if (isSelected) {
+        return {
+          ...prev,
+          channels: prev.channels.filter((value) => value !== channel),
+        };
+      }
+
+      const sourceChannel = prev.channels[0] ?? channel;
+      const sourceContent = prev.channelContent[sourceChannel];
+      const existing = prev.channelContent[channel];
+      const shouldCopy = !existing.body.trim() && !existing.subject.trim();
+
+      return {
+        ...prev,
+        channels: [...prev.channels, channel].sort(
+          (a, b) => CHANNEL_ORDER.indexOf(a) - CHANNEL_ORDER.indexOf(b),
+        ),
+        channelContent: {
+          ...prev.channelContent,
+          [channel]: shouldCopy ? { ...sourceContent } : existing,
+        },
+      };
+    });
+  };
+
+  const setTemplateChannelContent = (
+    channel: AutomationChannel,
+    field: 'subject' | 'body',
+    value: string,
+  ) => {
+    setTemplateForm((prev) => ({
+      ...prev,
+      channelContent: {
+        ...prev.channelContent,
+        [channel]: {
+          ...prev.channelContent[channel],
+          [field]: value,
+        },
+      },
+    }));
   };
 
   const handleSaveAutomation = async () => {
@@ -617,9 +722,21 @@ export function MessageTemplatesSettings() {
                           onClick={() => setTemplateForm({
                             id: template.id,
                             name: template.name,
-                            channel: template.channel,
-                            subject: template.subject ?? '',
-                            body: template.body,
+                            channels: [template.channel as AutomationChannel],
+                            channelContent: {
+                              chat: {
+                                subject: template.channel === 'chat' ? template.subject ?? '' : '',
+                                body: template.channel === 'chat' ? template.body : '',
+                              },
+                              email: {
+                                subject: template.channel === 'email' ? template.subject ?? '' : '',
+                                body: template.channel === 'email' ? template.body : '',
+                              },
+                              push: {
+                                subject: template.channel === 'push' ? template.subject ?? '' : '',
+                                body: template.channel === 'push' ? template.body : '',
+                              },
+                            },
                             is_active: template.is_active,
                           })}
                         >
@@ -660,38 +777,116 @@ export function MessageTemplatesSettings() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white">Kanal</Label>
-              <Select value={templateForm.channel} onValueChange={(value: TemplateForm['channel']) => setTemplateForm((prev) => ({ ...prev, channel: value, subject: value === 'chat' ? '' : prev.subject }))}>
-                <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {OUTREACH_CHANNEL_OPTIONS.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Label className="text-white">Kanaler</Label>
+              <p className="text-[11px] text-white/80">Välj flera kanaler så dupliceras mallen automatiskt per kanal.</p>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {OUTREACH_CHANNEL_OPTIONS.map((option) => {
+                  const channel = option.value as AutomationChannel;
+                  const checked = templateForm.channels.includes(channel);
+
+                  return (
+                    <div
+                      key={option.value}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={checked}
+                      onClick={() => {
+                        toggleTemplateChannel(channel);
+                        if (!checked) setActiveTemplateChannel(channel);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          toggleTemplateChannel(channel);
+                          if (!checked) setActiveTemplateChannel(channel);
+                        }
+                      }}
+                      className={[
+                        'flex min-h-11 items-center gap-2 rounded-2xl border px-3 py-2 text-left text-sm transition-colors',
+                        checked
+                          ? 'border-white/30 bg-white/10 text-white'
+                          : 'border-white/10 bg-white/5 text-white md:hover:border-white/20',
+                      ].join(' ')}
+                    >
+                      <Checkbox checked={checked} className="pointer-events-none" />
+                      <span className="font-medium">{option.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            {templateForm.channel !== 'chat' && (
-              <div className="space-y-2">
-                <Label className="text-white">Rubrik</Label>
-                <Input value={templateForm.subject} onChange={(e) => setTemplateForm((prev) => ({ ...prev, subject: e.target.value }))} className="bg-white/5 border-white/10 text-white" />
-              </div>
-            )}
-
             <div className="space-y-2">
-              <Label className="text-white">Innehåll</Label>
-              <Textarea value={templateForm.body} onChange={(e) => setTemplateForm((prev) => ({ ...prev, body: e.target.value }))} className="min-h-[144px] bg-white/5 border-white/10 text-white" />
+              <Label className="text-white">Innehåll per kanal</Label>
+              {templateForm.channels.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-3 text-xs text-white/80">Välj minst en kanal för att skapa mallen.</div>
+              ) : (
+                <div className="space-y-2">
+                  {CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel)).map((channel) => (
+                    <div key={channel} className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <Label className="text-white">Kanal: {getOutreachChannelLabel(channel)}</Label>
+                      </div>
+
+                      {channel !== 'chat' && (
+                        <div className="space-y-2">
+                          <Label className="text-white">Rubrik</Label>
+                          <Input
+                            value={templateForm.channelContent[channel].subject}
+                            onFocus={() => setActiveTemplateChannel(channel)}
+                            onChange={(e) => setTemplateChannelContent(channel, 'subject', e.target.value)}
+                            className="bg-white/5 border-white/10 text-white"
+                          />
+                        </div>
+                      )}
+
+                      <div className="space-y-2">
+                        <Label className="text-white">Innehåll</Label>
+                        <Textarea
+                          value={templateForm.channelContent[channel].body}
+                          onFocus={() => setActiveTemplateChannel(channel)}
+                          onChange={(e) => setTemplateChannelContent(channel, 'body', e.target.value)}
+                          className="min-h-[120px] bg-white/5 border-white/10 text-white"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
               <div className="mb-2">
                 <p className="text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
-                <p className="mt-1 text-[11px] text-white/80">Tryck på en etikett så läggs den in automatiskt i texten.</p>
+                <p className="mt-1 text-[11px] text-white/80">
+                  Tryck på en etikett så läggs den in i vald kanal: {getOutreachChannelLabel(activeTemplateChannel).toLowerCase()}.
+                </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {OUTREACH_VARIABLES.map((variable) => (
                   <button
                     key={variable.key}
                     type="button"
-                    onClick={() => setTemplateForm((prev) => ({ ...prev, body: `${prev.body}{${variable.key}}` }))}
+                    onClick={() => {
+                      setTemplateForm((prev) => {
+                        const targetChannel = prev.channels.includes(activeTemplateChannel)
+                          ? activeTemplateChannel
+                          : prev.channels[0];
+
+                        if (!targetChannel) return prev;
+
+                        return {
+                          ...prev,
+                          channelContent: {
+                            ...prev.channelContent,
+                            [targetChannel]: {
+                              ...prev.channelContent[targetChannel],
+                              body: `${prev.channelContent[targetChannel].body}{${variable.key}}`,
+                            },
+                          },
+                        };
+                      });
+                    }}
                     className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-left text-white transition-colors md:hover:border-white/30 md:hover:text-white"
                   >
                     <span className="block text-[11px] font-medium md:text-xs">{variable.label}</span>
@@ -703,7 +898,17 @@ export function MessageTemplatesSettings() {
 
             <div className="flex flex-wrap gap-2">
               <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveTemplate} disabled={savingTemplate}>{savingTemplate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{templateForm.id ? 'Uppdatera mall' : 'Spara mall'}</Button>
-              <Button variant="glass" size="sm" className="px-3 text-xs" onClick={() => setTemplateForm(EMPTY_TEMPLATE_FORM)}>Rensa</Button>
+              <Button
+                variant="glass"
+                size="sm"
+                className="px-3 text-xs"
+                onClick={() => {
+                  setTemplateForm(EMPTY_TEMPLATE_FORM);
+                  setActiveTemplateChannel('push');
+                }}
+              >
+                Rensa
+              </Button>
             </div>
           </div>
         </TabsContent>
