@@ -1,6 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { MessageSquare, CalendarPlus, Users, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { StageSettings } from '@/hooks/useStageSettings';
+import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
+import type { ButtonProps } from '@/components/ui/button';
+
+interface QuickAction {
+  key: ManualOutreachActionKey;
+  label: string;
+  variant: ButtonProps['variant'];
+  onClick: () => void;
+}
 
 interface ProfileActionsProps {
   variant: 'all-candidates' | 'my-candidates';
@@ -13,6 +22,7 @@ interface ProfileActionsProps {
   stageOrder?: string[];
   stageConfig?: Record<string, StageSettings>;
   onStageChange?: (newStage: string) => void;
+  quickActions?: QuickAction[];
 }
 
 export const ProfileActions = ({
@@ -26,10 +36,29 @@ export const ProfileActions = ({
   stageOrder,
   stageConfig,
   onStageChange,
+  quickActions = [],
 }: ProfileActionsProps) => {
   if (variant === 'my-candidates') {
     return (
       <div className="pt-4 border-t border-white/20 space-y-3">
+        {quickActions.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-center text-[10px] font-medium uppercase tracking-[0.18em] text-white/70">Snabbutskick</p>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {quickActions.map((action) => (
+                <Button
+                  key={action.key}
+                  onClick={action.onClick}
+                  variant={action.variant}
+                  className="h-8 px-3 text-[11px] md:h-9 md:text-sm"
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-center gap-1">
           <Button onClick={onSendMessage} variant="glassPurple" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
             <MessageSquare className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
@@ -94,15 +123,30 @@ export const ProfileActions = ({
   }
 
   return (
-    <div className="border-t border-white/15 pt-4 mt-4 flex justify-center gap-2">
-      <Button onClick={onSendMessage} variant="glassPurple" size="default">
-        <MessageSquare className="h-4 w-4 mr-1.5" />
-        Meddelande
-      </Button>
-      <Button onClick={onBookInterview} variant="glassBlue" size="default">
-        <CalendarPlus className="h-4 w-4 mr-1.5" />
-        Boka möte
-      </Button>
+    <div className="border-t border-white/15 pt-4 mt-4 space-y-3">
+      {quickActions.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-center text-[10px] font-medium uppercase tracking-[0.18em] text-white/70">Snabbutskick</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {quickActions.map((action) => (
+              <Button key={action.key} onClick={action.onClick} variant={action.variant} size="sm">
+                {action.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap justify-center gap-2">
+        <Button onClick={onSendMessage} variant="glassPurple" size="default">
+          <MessageSquare className="h-4 w-4 mr-1.5" />
+          Meddelande
+        </Button>
+        <Button onClick={onBookInterview} variant="glassBlue" size="default">
+          <CalendarPlus className="h-4 w-4 mr-1.5" />
+          Boka möte
+        </Button>
+      </div>
     </div>
   );
 };

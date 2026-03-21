@@ -14,6 +14,7 @@ import ProfileVideo from '@/components/ProfileVideo';
 import { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
+import { useOutreachManualActions } from '@/hooks/useOutreachManualActions';
 import { CvViewer } from '@/components/CvViewer';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
@@ -36,6 +37,7 @@ import {
   QUESTIONS_STORAGE_KEY,
 } from '@/components/candidateProfile';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
 
 function useProfileImageUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-image');
@@ -96,6 +98,7 @@ export const CandidateProfileDialog = ({
   );
   const [bookInterviewOpen, setBookInterviewOpen] = useState(false);
   const [sendMessageOpen, setSendMessageOpen] = useState(false);
+  const [sendMessagePreset, setSendMessagePreset] = useState<ManualOutreachActionKey | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
@@ -156,6 +159,7 @@ export const CandidateProfileDialog = ({
     cvUrl: activeApplication?.cv_url || null,
     open,
   });
+  const outreachManualActions = useOutreachManualActions(open);
 
   useEffect(() => {
     if (!application) return;
@@ -255,6 +259,30 @@ export const CandidateProfileDialog = ({
   };
 
   const candidateName = `${displayApp.first_name || ''} ${displayApp.last_name || ''}`.trim() || 'Kandidat';
+  const quickActions = [
+    outreachManualActions.hasAction('progress')
+      ? {
+          key: 'progress' as const,
+          label: 'Gå vidare',
+          variant: outreachManualActions.groups.progress.action.buttonVariant,
+          onClick: () => {
+            setSendMessagePreset('progress');
+            setSendMessageOpen(true);
+          },
+        }
+      : null,
+    outreachManualActions.hasAction('rejection')
+      ? {
+          key: 'rejection' as const,
+          label: 'Avslag',
+          variant: outreachManualActions.groups.rejection.action.buttonVariant,
+          onClick: () => {
+            setSendMessagePreset('rejection');
+            setSendMessageOpen(true);
+          },
+        }
+      : null,
+  ].filter(Boolean);
 
   return (
     <>
@@ -438,7 +466,10 @@ export const CandidateProfileDialog = ({
           <ProfileActions
             variant={variant}
             hasTeam={hasTeam}
-            onSendMessage={() => setSendMessageOpen(true)}
+            onSendMessage={() => {
+              setSendMessagePreset(null);
+              setSendMessageOpen(true);
+            }}
             onBookInterview={() => setBookInterviewOpen(true)}
             onShare={() => setShareDialogOpen(true)}
             onRemove={() => setRemoveConfirmOpen(true)}
@@ -446,6 +477,7 @@ export const CandidateProfileDialog = ({
             stageOrder={stageOrder}
             stageConfig={stageConfig}
             onStageChange={onStageChange}
+            quickActions={quickActions}
           />
           </div>
 
@@ -562,11 +594,15 @@ export const CandidateProfileDialog = ({
     {displayApp && (
       <SendMessageDialog
         open={sendMessageOpen}
-        onOpenChange={setSendMessageOpen}
+        onOpenChange={(nextOpen) => {
+          setSendMessageOpen(nextOpen);
+          if (!nextOpen) setSendMessagePreset(null);
+        }}
         recipientId={displayApp.applicant_id}
         recipientName={candidateName}
         jobId={displayApp.job_id}
         applicationId={displayApp.id}
+        presetAction={sendMessagePreset}
       />
     )}
 

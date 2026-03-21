@@ -11,6 +11,8 @@ import { CvViewer } from '@/components/CvViewer';
 import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { SendMessageDialog } from '@/components/SendMessageDialog';
 import { toast } from 'sonner';
+import { useOutreachManualActions } from '@/hooks/useOutreachManualActions';
+import { MANUAL_OUTREACH_ACTIONS, type ManualOutreachActionKey } from '@/lib/outreachManualActions';
 import { SectionCard, SectionLabel, employmentStatusLabels, workScheduleLabels, availabilityLabels } from './CandidateSlideConstants';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import type { CandidateSummaryCacheValue } from '@/components/candidateProfile/candidateProfileCache';
@@ -48,6 +50,8 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
   const [cvOpen, setCvOpen] = useState(false);
   const [bookInterviewOpen, setBookInterviewOpen] = useState(false);
   const [sendMessageOpen, setSendMessageOpen] = useState(false);
+  const [sendMessagePreset, setSendMessagePreset] = useState<ManualOutreachActionKey | null>(null);
+  const outreachManualActions = useOutreachManualActions(true);
 
   const handleOpenCv = useCallback(() => {
     if (!application.cv_url || !signedCvUrl) {
@@ -222,9 +226,33 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
 
       {/* Action buttons — identical to desktop ProfileActions my-candidates variant */}
       <div className="w-full min-w-0">
+        {MANUAL_OUTREACH_ACTIONS.filter((action) => outreachManualActions.hasAction(action.key)).length > 0 && (
+          <div className="mb-2 space-y-2">
+            <p className="text-center text-[10px] font-medium uppercase tracking-[0.18em] text-white/70">Snabbutskick</p>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {MANUAL_OUTREACH_ACTIONS.filter((action) => outreachManualActions.hasAction(action.key)).map((action) => (
+                <Button
+                  key={action.key}
+                  onClick={() => {
+                    setSendMessagePreset(action.key);
+                    setSendMessageOpen(true);
+                  }}
+                  variant={action.buttonVariant}
+                  size="sm"
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-center gap-1">
           <Button
-            onClick={() => setSendMessageOpen(true)}
+            onClick={() => {
+              setSendMessagePreset(null);
+              setSendMessageOpen(true);
+            }}
             variant="glassPurple"
             size="sm"
             className="min-w-0 flex-1"
@@ -268,11 +296,15 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
       />
       <SendMessageDialog
         open={sendMessageOpen}
-        onOpenChange={setSendMessageOpen}
+        onOpenChange={(nextOpen) => {
+          setSendMessageOpen(nextOpen);
+          if (!nextOpen) setSendMessagePreset(null);
+        }}
         recipientId={application.applicant_id}
         recipientName={`${application.first_name || ''} ${application.last_name || ''}`.trim()}
         jobId={application.job_id}
         applicationId={application.id}
+        presetAction={sendMessagePreset}
         elevated
       />
     </>
