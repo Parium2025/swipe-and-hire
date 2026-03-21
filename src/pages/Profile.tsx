@@ -1710,7 +1710,7 @@ const Profile = () => {
               )}
               
               {(isProfileVideo && !!videoUrl) && !isUploadingMedia && (
-                <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
+                <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
                   {isProfileVideo ? 'Video' : 'Bild'} uppladdad!
                 </Badge>
               )}
@@ -1743,7 +1743,7 @@ const Profile = () => {
                         variant="outline" 
                         size="sm"
                         onClick={handleEditExistingCover}
-                        className="w-full h-8 font-normal bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                        className="w-full h-8 rounded-full font-normal bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
                       >
                         Anpassa din bild
                       </Button>
