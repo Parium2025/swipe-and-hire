@@ -311,15 +311,15 @@ export function MessageTemplatesSettings() {
   };
 
   return (
-    <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white">
             <MessageSquareText className="h-3.5 w-3.5" />
             Outreach Studio
           </div>
           <h3 className="text-lg font-semibold text-white">Professionella mallar, automationer och logg</h3>
-          <p className="text-sm text-white/70">Bygg ditt eget utskickssystem för chat, e-post och push i Parium-stil.</p>
+          <p className="text-sm text-white">Bygg ditt eget utskickssystem för chat, e-post och push i Parium-stil.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="glassPurple" onClick={seedDefaults} disabled={seeding}>
@@ -342,11 +342,11 @@ export function MessageTemplatesSettings() {
           <div key={label} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-white/55">{label}</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-white">{label}</p>
                 <p className="mt-1 text-2xl font-semibold text-white">{value}</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5">
-                <Icon className="h-4 w-4 text-white/75" />
+                <Icon className="h-4 w-4 text-white" />
               </div>
             </div>
           </div>
@@ -365,14 +365,14 @@ export function MessageTemplatesSettings() {
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <h4 className="text-base font-semibold text-white">Mallbibliotek</h4>
-                <p className="text-sm text-white/65">Välj kanal och bygg premiumcopy.</p>
+                <p className="text-sm text-white">Välj kanal och bygg premiumcopy.</p>
               </div>
             </div>
 
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
             ) : templates.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white/60">Inga mallar ännu.</div>
+              <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga mallar ännu.</div>
             ) : (
               <div className="space-y-3">
                 {templates.map((template) => (
@@ -381,11 +381,11 @@ export function MessageTemplatesSettings() {
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-sm font-semibold text-white">{template.name}</p>
-                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white/60">{getOutreachChannelLabel(template.channel)}</span>
-                          {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white/45">Inaktiv</span>}
+                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
+                          {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
                         </div>
-                        {template.subject && <p className="text-xs text-white/55">{template.subject}</p>}
-                        <p className="line-clamp-2 text-sm text-white/75">{template.body}</p>
+                        {template.subject && <p className="text-xs text-white">{template.subject}</p>}
+                        <p className="line-clamp-2 text-sm text-white">{template.body}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
@@ -418,9 +418,9 @@ export function MessageTemplatesSettings() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h4 className="text-base font-semibold text-white">Mallredigerare</h4>
-                <p className="text-sm text-white/65">Använd variabler för att få rätt ton i varje utskick.</p>
+                <p className="text-sm text-white">Använd variabler för att få rätt ton i varje utskick.</p>
               </div>
-              <div className="flex items-center gap-2 text-xs text-white/65">
+              <div className="flex items-center gap-2 text-xs text-white">
                 <span>Aktiv</span>
                 <Switch checked={templateForm.is_active} onCheckedChange={(checked) => setTemplateForm((prev) => ({ ...prev, is_active: checked }))} />
               </div>
@@ -454,10 +454,10 @@ export function MessageTemplatesSettings() {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-              <p className="mb-2 text-xs uppercase tracking-[0.16em] text-white/55">Variabler</p>
+              <p className="mb-2 text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
               <div className="flex flex-wrap gap-2">
                 {OUTREACH_VARIABLES.map((variable) => (
-                  <button key={variable.key} type="button" onClick={() => setTemplateForm((prev) => ({ ...prev, body: `${prev.body}{${variable.key}}` }))} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70 hover:border-white/30 hover:text-white">
+                  <button key={variable.key} type="button" onClick={() => setTemplateForm((prev) => ({ ...prev, body: `${prev.body}{${variable.key}}` }))} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white hover:border-white/30 hover:text-white">
                     {`{${variable.key}}`}
                   </button>
                 ))}
@@ -476,7 +476,7 @@ export function MessageTemplatesSettings() {
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
             ) : automations.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white/60">Inga automationer ännu.</div>
+              <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga automationer ännu.</div>
             ) : (
               <div className="space-y-3">
                 {automations.map((automation) => {
@@ -487,13 +487,13 @@ export function MessageTemplatesSettings() {
                         <div className="space-y-2">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="text-sm font-semibold text-white">{automation.name}</p>
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white/60">{getOutreachTriggerLabel(automation.trigger)}</span>
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white/60">{getOutreachChannelLabel(automation.channel)}</span>
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(automation.trigger)}</span>
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(automation.channel)}</span>
                           </div>
-                          <p className="text-sm text-white/72">{linkedTemplate?.name ?? 'Ingen mall vald'} · {getOutreachRecipientLabel(automation.recipient_type)}</p>
+                          <p className="text-sm text-white">{linkedTemplate?.name ?? 'Ingen mall vald'} · {getOutreachRecipientLabel(automation.recipient_type)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70">
+                          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-white">
                             <span>Aktiv</span>
                             <Switch checked={automation.is_enabled} onCheckedChange={(checked) => void handleToggleAutomation(automation, checked)} />
                           </div>
@@ -520,7 +520,7 @@ export function MessageTemplatesSettings() {
           <div className="rounded-3xl border border-white/10 bg-white/5 p-4 space-y-4">
             <div>
               <h4 className="text-base font-semibold text-white">Automationsbyggare</h4>
-              <p className="text-sm text-white/65">Koppla rätt mall till rätt trigger och kanal.</p>
+              <p className="text-sm text-white">Koppla rätt mall till rätt trigger och kanal.</p>
             </div>
             <div className="space-y-2">
               <Label className="text-white">Namn</Label>
@@ -573,7 +573,7 @@ export function MessageTemplatesSettings() {
             <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
               <div>
                 <p className="text-sm font-medium text-white">Aktivera direkt</p>
-                <p className="text-xs text-white/60">Slå av om du bara vill spara konfigurationen.</p>
+                <p className="text-xs text-white">Slå av om du bara vill spara konfigurationen.</p>
               </div>
               <Switch checked={automationForm.is_enabled} onCheckedChange={(checked) => setAutomationForm((prev) => ({ ...prev, is_enabled: checked }))} />
             </div>
@@ -588,7 +588,7 @@ export function MessageTemplatesSettings() {
           {loading ? (
             <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
           ) : logs.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white/60">Inga utskick ännu.</div>
+            <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga utskick ännu.</div>
           ) : (
             <div className="space-y-3">
               {logs.map((log) => {
@@ -596,13 +596,13 @@ export function MessageTemplatesSettings() {
                 return (
                   <div key={log.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white/60">{getOutreachTriggerLabel(log.trigger)}</span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white/60">{getOutreachChannelLabel(log.channel)}</span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white/60">{log.status}</span>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(log.trigger)}</span>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(log.channel)}</span>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{log.status}</span>
                     </div>
                     <p className="text-sm font-medium text-white">{template?.name ?? 'Direktutskick'}</p>
-                    <p className="text-xs text-white/55 mt-1">{new Date(log.created_at).toLocaleString('sv-SE')}{log.sent_at ? ` · skickad ${new Date(log.sent_at).toLocaleString('sv-SE')}` : ''}</p>
-                    {log.error_message && <p className="text-sm text-white/72 mt-2">{log.error_message}</p>}
+                    <p className="text-xs text-white mt-1">{new Date(log.created_at).toLocaleString('sv-SE')}{log.sent_at ? ` · skickad ${new Date(log.sent_at).toLocaleString('sv-SE')}` : ''}</p>
+                    {log.error_message && <p className="text-sm text-white mt-2">{log.error_message}</p>}
                   </div>
                 );
               })}
