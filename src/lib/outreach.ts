@@ -38,7 +38,7 @@ export const OUTREACH_CHANNEL_OPTIONS: { value: OutreachChannel; label: string }
 
 export const OUTREACH_TRIGGER_OPTIONS: { value: OutreachTrigger; label: string }[] = [
   { value: 'application_received', label: 'Ansökan inkommen' },
-  { value: 'application_no_response_14d', label: 'Ingen respons efter 14 dagar' },
+  { value: 'application_no_response_14d', label: 'Annons avslutas' },
   { value: 'interview_before', label: 'Före intervju' },
   { value: 'interview_after', label: 'Efter intervju' },
   { value: 'job_closed', label: 'Annons avslutas' },
@@ -106,20 +106,6 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
     channel: 'push',
     subject: '{company_name}',
     body: 'Din ansökan till {job_title} är mottagen.',
-    is_active: true,
-  },
-  {
-    name: 'Ingen respons 14 dagar · professionellt mejl',
-    channel: 'email',
-    subject: 'Status på din ansökan till {job_title}',
-    body: 'Hej {candidate_name},\n\nVi vill uppdatera dig om att din ansökan till {job_title} hos {company_name} fortfarande behandlas. Tack för ditt tålamod – vi återkommer så snart vi har nästa steg.\n\nVänliga hälsningar,\n{company_name}',
-    is_active: true,
-  },
-  {
-    name: 'Ingen respons 14 dagar · push',
-    channel: 'push',
-    subject: '{company_name}',
-    body: 'Din ansökan till {job_title} behandlas fortfarande. Vi återkommer snart.',
     is_active: true,
   },
   {
@@ -203,7 +189,7 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
 
 export const DEFAULT_OUTREACH_AUTOMATIONS: Array<{
   name: string;
-  trigger: Extract<OutreachTrigger, 'application_received' | 'application_no_response_14d' | 'interview_before' | 'interview_after' | 'job_closed'>;
+  trigger: Extract<OutreachTrigger, 'application_received' | 'interview_before' | 'interview_after' | 'job_closed'>;
   channel: OutreachChannel;
   recipient_type: OutreachRecipient;
   delay_minutes: number;
@@ -224,22 +210,6 @@ export const DEFAULT_OUTREACH_AUTOMATIONS: Array<{
     recipient_type: 'candidate',
     delay_minutes: 0,
     templateName: 'Ansökan inkommen · push',
-  },
-  {
-    name: 'Ingen respons 14 dagar · e-post',
-    trigger: 'application_no_response_14d',
-    channel: 'email',
-    recipient_type: 'candidate',
-    delay_minutes: 0,
-    templateName: 'Ingen respons 14 dagar · professionellt mejl',
-  },
-  {
-    name: 'Ingen respons 14 dagar · push',
-    trigger: 'application_no_response_14d',
-    channel: 'push',
-    recipient_type: 'candidate',
-    delay_minutes: 0,
-    templateName: 'Ingen respons 14 dagar · push',
   },
   {
     name: 'Före intervju · e-post',
