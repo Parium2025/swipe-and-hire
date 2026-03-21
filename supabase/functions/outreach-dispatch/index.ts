@@ -46,6 +46,11 @@ const renderTemplate = (template: string | null | undefined, data: Record<string
   return output;
 };
 
+const getPayloadObject = (payload: Record<string, unknown> | null) => {
+  if (!payload || Array.isArray(payload)) return {};
+  return payload;
+};
+
 const getToken = (request: Request) => {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
@@ -164,14 +169,26 @@ async function dispatchLog(log: OutreachLog) {
     if (log.channel === 'email') {
       if (!context.recipientEmail) throw new Error('Kandidaten saknar e-postadress');
       if (!resend) throw new Error('RESEND_API_KEY saknas');
+      const trackingUrl = `${supabaseUrl}/functions/v1/outreach-open-track?logId=${encodeURIComponent(log.id)}`;
       const result = await resend.emails.send({
         from: `${context.companyName} via Parium <noreply@parium.se>`,
         to: [context.recipientEmail],
         subject: subject || `Meddelande från ${context.companyName}`,
-        html: `<div style="font-family:Arial,sans-serif;background:#071733;padding:32px;color:#fff"><div style="max-width:640px;margin:0 auto;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:32px"><h1 style="margin-top:0;font-size:24px">${subject || 'Meddelande från Parium'}</h1><p style="line-height:1.7;white-space:pre-line">${body}</p></div></div>`,
+        html: `<div style="font-family:Arial,sans-serif;background:#071733;padding:32px;color:#fff"><div style="max-width:640px;margin:0 auto;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:32px"><h1 style="margin-top:0;font-size:24px">${subject || 'Meddelande från Parium'}</h1><p style="line-height:1.7;white-space:pre-line">${body}</p></div><img src="${trackingUrl}" alt="" width="1" height="1" style="display:block;width:1px;height:1px;opacity:0;border:0;overflow:hidden" /></div>`,
       });
       if ((result as { error?: unknown }).error) throw new Error('E-postutskicket misslyckades');
-      await admin.from('outreach_dispatch_logs').update({ status: 'sent', sent_at: new Date().toISOString(), recipient_email: context.recipientEmail, error_message: null }).eq('id', log.id);
+      const emailMessageId = (result as { data?: { id?: string }; id?: string }).data?.id ?? (result as { id?: string }).id ?? null;
+      await admin.from('outreach_dispatch_logs').update({
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+        recipient_email: context.recipientEmail,
+        payload: {
+          ...getPayloadObject(log.payload),
+          tracking_url: trackingUrl,
+          email_message_id: emailMessageId,
+        },
+        error_message: null,
+      }).eq('id', log.id);
       return {};
     }
 

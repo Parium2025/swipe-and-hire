@@ -152,6 +152,46 @@ const getDelayFieldHint = (trigger: OutreachTrigger) => {
 const normalizeTimelineTrigger = (trigger: OutreachTrigger): OutreachTrigger =>
   trigger === 'application_no_response_14d' ? 'job_closed' : trigger;
 
+const getLogPayload = (log: OutreachDispatchLog) => {
+  if (!log.payload || typeof log.payload !== 'object' || Array.isArray(log.payload)) return null;
+  return log.payload as Record<string, unknown>;
+};
+
+const getLogOpenedAt = (log: OutreachDispatchLog) => {
+  const value = getLogPayload(log)?.opened_at;
+  return typeof value === 'string' ? value : null;
+};
+
+const isDeliveredLog = (log: OutreachDispatchLog) => log.status === 'sent' || log.status === 'opened';
+
+const getLogStatusLabel = (log: OutreachDispatchLog) => {
+  switch (log.status) {
+    case 'pending':
+      return 'Väntar';
+    case 'failed':
+      return 'Misslyckat';
+    case 'opened':
+      return 'Öppnat';
+    case 'sent':
+      return 'Levererat';
+    default:
+      return log.status;
+  }
+};
+
+const getLogStatusBadgeClassName = (status: string) => {
+  switch (status) {
+    case 'failed':
+      return 'border-destructive/40 bg-destructive/15 text-destructive';
+    case 'opened':
+      return 'border-primary/40 bg-primary/15 text-white';
+    case 'sent':
+      return 'border-white/20 bg-white/10 text-white';
+    default:
+      return 'border-white/10 bg-white/5 text-white';
+  }
+};
+
 export function MessageTemplatesSettings() {
   const { user, profile } = useAuth();
   const organizationId = (profile as { organization_id?: string | null } | null)?.organization_id ?? null;
@@ -252,6 +292,17 @@ export function MessageTemplatesSettings() {
   }, [automationGroups, selectedTemplateFamily]);
 
   const automationFormHasAllTemplates = automationForm.channels.length > 0 && automationForm.channels.every((channel) => Boolean(automationForm.template_ids[channel]));
+
+  const logSummary = useMemo(() => logs.reduce(
+    (acc, log) => {
+      if (log.status === 'pending') acc.pending += 1;
+      if (log.status === 'failed') acc.failed += 1;
+      if (isDeliveredLog(log)) acc.delivered += 1;
+      if (log.status === 'opened' || Boolean(getLogOpenedAt(log))) acc.opened += 1;
+      return acc;
+    },
+    { pending: 0, delivered: 0, failed: 0, opened: 0 },
+  ), [logs]);
 
   const buildAutomationFormFromFamily = (family: TemplateFamily, group: AutomationGroup | null): AutomationForm => ({
     id: group?.primary.id ?? null,
@@ -1155,22 +1206,40 @@ export function MessageTemplatesSettings() {
           ) : logs.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga utskick ännu.</div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
+              <div className="grid gap-2 md:grid-cols-4">
+                {[
+                  { label: 'Väntar', value: logSummary.pending },
+                  { label: 'Levererat', value: logSummary.delivered },
+                  { label: 'Misslyckat', value: logSummary.failed },
+                  { label: 'Öppnat', value: logSummary.opened },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-white/80">{item.label}</p>
+                    <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-2">
               {logs.map((log) => {
                 const template = templates.find((item) => item.id === log.template_id);
+                const openedAt = getLogOpenedAt(log);
                 return (
                   <div key={log.id} className="rounded-2xl border border-white/10 bg-white/5 p-2">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(log.trigger)}</span>
                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(log.channel)}</span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{log.status}</span>
+                      <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${getLogStatusBadgeClassName(log.status)}`}>{getLogStatusLabel(log)}</span>
                     </div>
                     <p className="text-sm font-medium text-white">{template?.name ?? 'Direktutskick'}</p>
                     <p className="text-xs text-white mt-1">{new Date(log.created_at).toLocaleString('sv-SE')}{log.sent_at ? ` · skickad ${new Date(log.sent_at).toLocaleString('sv-SE')}` : ''}</p>
+                    {openedAt && <p className="mt-1 text-xs text-white/80">Öppnad {new Date(openedAt).toLocaleString('sv-SE')}</p>}
                     {log.error_message && <p className="text-sm text-white mt-2">{log.error_message}</p>}
                   </div>
                 );
               })}
+              </div>
             </div>
           )}
         </TabsContent>
