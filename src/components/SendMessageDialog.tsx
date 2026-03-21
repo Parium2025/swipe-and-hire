@@ -2,10 +2,12 @@ import { Dialog, DialogHeader, DialogTitle, DialogDescription, dialogCloseButton
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { useState } from 'react';
-import { Loader2, Send, MessageSquare, WifiOff, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Loader2, Mail, MessageSquare, Send, Smartphone, WifiOff, X } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useFieldDraft } from '@/hooks/useFormDraft';
 import { useCreateConversation } from '@/hooks/useConversations';
@@ -20,6 +22,15 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
+import { renderOutreachText, type OutreachTemplate } from '@/lib/outreach';
+
+type ManualChannel = 'chat' | 'email' | 'push';
+
+const MANUAL_CHANNELS: Array<{ value: ManualChannel; label: string; icon: typeof MessageSquare }> = [
+  { value: 'chat', label: 'Chat', icon: MessageSquare },
+  { value: 'email', label: 'E-post', icon: Mail },
+  { value: 'push', label: 'Push', icon: Smartphone },
+];
 
 interface SendMessageDialogProps {
   open: boolean;
@@ -45,7 +56,7 @@ export function SendMessageDialog({
   navigateToMessages = false,
   elevated,
 }: SendMessageDialogProps) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const { isOnline, showOfflineToast } = useOnline();
   const createConversation = useCreateConversation();
@@ -55,6 +66,36 @@ export function SendMessageDialog({
   const [message, setMessage, clearMessageDraft] = useFieldDraft(draftKey);
   const [sending, setSending] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [templates, setTemplates] = useState<OutreachTemplate[]>([]);
+  const [selectedChannels, setSelectedChannels] = useState<ManualChannel[]>(['chat']);
+  const [selectedTemplateIds, setSelectedTemplateIds] = useState<Partial<Record<ManualChannel, string>>>({});
+
+  useEffect(() => {
+    if (!open) return;
+    const fetchTemplates = async () => {
+      const { data, error } = await supabase.from('outreach_templates').select('*').eq('is_active', true).order('created_at', { ascending: false });
+      if (!error) setTemplates((data ?? []).filter((template) => ['chat', 'email', 'push'].includes(template.channel)) as OutreachTemplate[]);
+    };
+    void fetchTemplates();
+  }, [open]);
+
+  const templateContext = useMemo(() => ({
+    candidate_name: recipientName,
+    first_name: recipientName.split(' ')[0] ?? recipientName,
+    company_name: profile?.company_name ?? 'Parium',
+    message: message.trim(),
+    job_title: 'din process',
+  }), [recipientName, profile?.company_name, message]);
+
+  const templatesByChannel = useMemo(() => ({
+    chat: templates.filter((template) => template.channel === 'chat'),
+    email: templates.filter((template) => template.channel === 'email'),
+    push: templates.filter((template) => template.channel === 'push'),
+  }), [templates]);
+
+  const toggleChannel = (channel: ManualChannel) => {
+    setSelectedChannels((prev) => prev.includes(channel) ? (prev.length === 1 ? prev : prev.filter((item) => item !== channel)) : [...prev, channel]);
+  };
 
   const handleSend = async () => {
     if (!isOnline) {
@@ -62,26 +103,64 @@ export function SendMessageDialog({
       return;
     }
     
-    if (!user || !message.trim()) return;
+    if (!user) return;
+
+    const chatSelected = selectedChannels.includes('chat');
+    if (chatSelected && !message.trim() && !selectedTemplateIds.chat) return;
+
+    if (selectedChannels.includes('email') && !selectedTemplateIds.email) {
+      toast.error('Välj en e-postmall');
+      return;
+    }
+
+    if (selectedChannels.includes('push') && !selectedTemplateIds.push) {
+      toast.error('Välj en pushmall');
+      return;
+    }
 
     setSending(true);
     try {
-      // Use the new conversation system with frozen profile support
-      const result = await createConversation.mutateAsync({
-        memberIds: [recipientId],
-        jobId: jobId || null,
-        applicationId: applicationId || null,
-        initialMessage: message.trim(),
-      });
+      const multiChannel = selectedChannels.includes('email') || selectedChannels.includes('push') || Boolean(selectedTemplateIds.chat);
+      let conversationId: string | undefined;
+
+      if (multiChannel) {
+        const { data, error } = await supabase.functions.invoke('outreach-dispatch', {
+          body: {
+            mode: 'manual',
+            recipientUserId: recipientId,
+            jobId: jobId || null,
+            applicationId: applicationId || null,
+            sends: selectedChannels.map((channel) => ({
+              channel,
+              templateId: selectedTemplateIds[channel] ?? null,
+              customBody: channel === 'chat' ? message.trim() : null,
+            })),
+          },
+        });
+
+        if (error) throw error;
+        conversationId = (data as { chatConversationId?: string } | null)?.chatConversationId;
+      } else {
+        const result = await createConversation.mutateAsync({
+          memberIds: [recipientId],
+          jobId: jobId || null,
+          applicationId: applicationId || null,
+          initialMessage: message.trim(),
+        });
+
+        conversationId = result.id;
+      }
 
       toast.success(`Meddelande skickat till ${recipientName}`);
       setMessage('');
       clearMessageDraft();
+      setSelectedChannels(['chat']);
+      setSelectedTemplateIds({});
       onOpenChange(false);
       
       // Navigate to the conversation if requested
-      if (navigateToMessages && result.id) {
-        navigate(`/messages?conversation=${result.id}`);
+      if (navigateToMessages && conversationId) {
+        navigate(`/messages?conversation=${conversationId}`);
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -102,11 +181,13 @@ export function SendMessageDialog({
   const handleDiscardAndClose = () => {
     setMessage('');
     clearMessageDraft();
+    setSelectedChannels(['chat']);
+    setSelectedTemplateIds({});
     setShowDiscardConfirm(false);
     onOpenChange(false);
   };
 
-  const isDisabled = !message.trim() || sending || !isOnline;
+  const isDisabled = sending || !isOnline;
 
   return (
     <>
@@ -148,10 +229,57 @@ export function SendMessageDialog({
 
             <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-5">
               <p className="text-white text-center text-sm leading-relaxed px-2">
-                Skriv ett meddelande till {recipientName} för att starta chatten.
+                Skicka ett premiumutskick till {recipientName} via chat, e-post och push.
               </p>
 
               <div className="space-y-2">
+                <Label className="text-white">Kanaler</Label>
+                <div className="flex flex-wrap gap-2">
+                  {MANUAL_CHANNELS.map(({ value, label, icon: Icon }) => {
+                    const active = selectedChannels.includes(value);
+                    return (
+                      <Button key={value} type="button" variant={active ? 'glassBlue' : 'glass'} size="sm" onClick={() => toggleChannel(value)}>
+                        <Icon className="h-3.5 w-3.5" />
+                        {label}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {selectedChannels.includes('chat') && templatesByChannel.chat.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-white">Chatmall</Label>
+                  <Select
+                    value={selectedTemplateIds.chat ?? ''}
+                    onValueChange={(value) => {
+                      setSelectedTemplateIds((prev) => ({ ...prev, chat: value }));
+                      const template = templatesByChannel.chat.find((item) => item.id === value);
+                      if (template) setMessage(renderOutreachText(template.body, templateContext));
+                    }}
+                  >
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white"><SelectValue placeholder="Välj chatmall" /></SelectTrigger>
+                    <SelectContent>
+                      {templatesByChannel.chat.map((template) => <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {selectedChannels.filter((channel) => channel !== 'chat').map((channel) => (
+                <div key={channel} className="space-y-2">
+                  <Label className="text-white">{channel === 'email' ? 'E-postmall' : 'Pushmall'}</Label>
+                  <Select value={selectedTemplateIds[channel] ?? ''} onValueChange={(value) => setSelectedTemplateIds((prev) => ({ ...prev, [channel]: value }))}>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white"><SelectValue placeholder="Välj mall" /></SelectTrigger>
+                    <SelectContent>
+                      {templatesByChannel[channel].map((template) => <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+
+              <div className="space-y-2">
+                <Label className="text-white">Chattmeddelande</Label>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}

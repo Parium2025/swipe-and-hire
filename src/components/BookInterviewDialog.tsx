@@ -152,7 +152,7 @@ export const BookInterviewDialog = ({
       scheduledAt.setHours(hours, minutes, 0, 0);
 
       // Create interview
-      const { error } = await supabase.from('interviews').insert({
+      const { data: interviewRow, error } = await supabase.from('interviews').insert({
         job_id: jobId,
         applicant_id: candidateId,
         application_id: applicationId,
@@ -164,55 +164,30 @@ export const BookInterviewDialog = ({
         subject: subject || null,
         message: message || null,
         status: 'pending',
-      });
+      }).select('id').single();
 
       if (error) throw error;
 
-      // Get candidate email from job_applications table
-      const { data: applicationData } = await supabase
-        .from('job_applications')
-        .select('email')
-        .eq('id', applicationId)
-        .single();
-
-      // Send email notification to candidate
-      if (applicationData?.email) {
-        try {
-          const { error: emailError } = await supabase.functions.invoke('send-interview-invitation', {
-            body: {
-              candidateEmail: applicationData.email,
-              candidateName,
-              companyName: companyName || 'Arbetsgivaren',
-              jobTitle,
-              scheduledAt: scheduledAt.toISOString(),
-              durationMinutes: parseInt(duration),
-              locationType,
-              locationDetails: locationDetails || null,
-              message: message || null,
-            },
-          });
-
-          if (emailError) {
-            console.error('Error sending interview email:', emailError);
-            toast.success(`Intervju bokad för ${candidateName}`, {
-              description: 'OBS: E-postbekräftelse kunde inte skickas',
-            });
-          } else {
-            toast.success(`Intervjukallelse skickad till ${candidateName}`, {
-              description: 'En bekräftelse har skickats via e-post',
-            });
-          }
-        } catch (emailErr) {
-          console.error('Error invoking email function:', emailErr);
-          toast.success(`Intervju bokad för ${candidateName}`, {
-            description: 'OBS: E-postbekräftelse kunde inte skickas',
-          });
-        }
-      } else {
-        toast.success(`Intervju bokad för ${candidateName}`, {
-          description: 'Kandidaten har ingen e-postadress registrerad',
+      let description = 'Intervjun är bokad.';
+      try {
+        const { data: dispatchData, error: dispatchError } = await supabase.functions.invoke('outreach-dispatch', {
+          body: {
+            processPending: true,
+            trigger: 'interview_scheduled',
+            interviewId: interviewRow.id,
+          },
         });
+        if (dispatchError) throw dispatchError;
+        const processedCount = Number((dispatchData as { processedCount?: number } | null)?.processedCount ?? 0);
+        description = processedCount > 0
+          ? `Automationerna gick ut i ${processedCount} kanal${processedCount > 1 ? 'er' : ''}.`
+          : 'Intervjun är bokad och väntar på nästa utskickskörning.';
+      } catch (dispatchErr) {
+        console.error('Error invoking outreach-dispatch:', dispatchErr);
+        description = 'Intervjun är bokad. Automationerna kan köras från Outreach Studio.';
       }
+
+      toast.success(`Intervju bokad för ${candidateName}`, { description });
 
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
       onOpenChange(false);
