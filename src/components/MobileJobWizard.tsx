@@ -198,6 +198,16 @@ const MobileJobWizard = ({
       setInitialFormData(null);
       setInitialCustomQuestions([]);
       setHasUnsavedChanges(false);
+      setJobImageDisplayUrl(null);
+      setJobImageDesktopDisplayUrl(null);
+      setOriginalImageUrl(null);
+      setOriginalDesktopImageUrl(null);
+      setOriginalStoragePath(null);
+      setOriginalDesktopStoragePath(null);
+      setImageIsEdited(false);
+      setDesktopImageIsEdited(false);
+      setManualFocus(null);
+      setImageTimestamp(Date.now());
       
       // Load existing job data if editing a draft
       if (existingJob) {
