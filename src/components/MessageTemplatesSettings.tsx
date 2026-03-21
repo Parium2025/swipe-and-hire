@@ -341,7 +341,7 @@ export function MessageTemplatesSettings() {
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
       <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white">
@@ -431,8 +431,8 @@ export function MessageTemplatesSettings() {
           </button>
         </div>
 
-        <TabsContent value="templates" className="mt-0 grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+        <TabsContent value="templates" className="mt-0 grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+          <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h4 className="text-sm font-semibold text-white md:text-base">Mallbibliotek</h4>
@@ -448,17 +448,17 @@ export function MessageTemplatesSettings() {
                 <div className="space-y-2">
                 {templates.map((template) => (
                     <div key={template.id} className="rounded-2xl border border-white/10 bg-white/5 p-2">
-                    <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                       <div className="min-w-0 space-y-1.5">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate text-sm font-semibold text-white">{template.name}</p>
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <p className="max-w-full truncate text-sm font-semibold text-white">{template.name}</p>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
                         </div>
                         {template.subject && <p className="text-[11px] text-white md:text-xs">{template.subject}</p>}
                         <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
                       </div>
-                      <div className="flex shrink-0 items-center gap-1.5 self-end lg:self-start">
+                      <div className="flex flex-wrap items-center justify-end gap-1.5">
                           <Button
                           variant="glass"
                           size="sm"
@@ -486,7 +486,7 @@ export function MessageTemplatesSettings() {
             )}
           </div>
 
-          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div className="min-w-0 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h4 className="text-sm font-semibold text-white md:text-base">Skapa mall</h4>
@@ -536,15 +536,15 @@ export function MessageTemplatesSettings() {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveTemplate} disabled={savingTemplate}>{savingTemplate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{templateForm.id ? 'Uppdatera mall' : 'Spara mall'}</Button>
               <Button variant="glass" size="sm" className="px-3 text-xs" onClick={() => setTemplateForm(EMPTY_TEMPLATE_FORM)}>Rensa</Button>
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="automations" className="mt-0 grid gap-3 xl:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+        <TabsContent value="automations" className="mt-0 grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+          <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3">
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
             ) : automations.length === 0 ? (
@@ -555,17 +555,17 @@ export function MessageTemplatesSettings() {
                   const linkedTemplate = templates.find((template) => template.id === automation.template_id);
                   return (
                     <div key={automation.id} className="rounded-2xl border border-white/10 bg-white/5 p-2">
-                      <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                         <div className="min-w-0 space-y-1.5">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="truncate text-sm font-semibold text-white">{automation.name}</p>
+                          <div className="flex min-w-0 flex-wrap items-center gap-2">
+                            <p className="max-w-full truncate text-sm font-semibold text-white">{automation.name}</p>
                             <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(automation.trigger)}</span>
                             <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(automation.channel)}</span>
                           </div>
                           <p className="text-xs text-white md:text-sm">{linkedTemplate?.name ?? 'Ingen mall vald'} · {getOutreachRecipientLabel(automation.recipient_type)}</p>
                         </div>
-                        <div className="flex shrink-0 items-center gap-1.5 self-end lg:self-start">
-                          <div className="flex h-7 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-white md:text-[11px]">
+                        <div className="flex flex-wrap items-center justify-end gap-1.5">
+                          <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-white md:text-[11px]">
                             <span>Aktiv</span>
                             <Switch checked={automation.is_enabled} onCheckedChange={(checked) => void handleToggleAutomation(automation, checked)} />
                           </div>
@@ -589,7 +589,7 @@ export function MessageTemplatesSettings() {
             )}
           </div>
 
-          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div className="min-w-0 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
             <div>
               <h4 className="text-sm font-semibold text-white md:text-base">Skapa regel</h4>
               <p className="text-xs text-white md:text-sm">Välj när ett meddelande ska skickas och vilken mall som ska användas.</p>
@@ -598,7 +598,7 @@ export function MessageTemplatesSettings() {
               <Label className="text-white">Namn</Label>
               <Input value={automationForm.name} onChange={(e) => setAutomationForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-white/5 border-white/10 text-white" />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-2">
               <div className="space-y-2">
                 <Label className="text-white">När ska det skickas?</Label>
                 <Select value={automationForm.trigger} onValueChange={(value: AutomationForm['trigger']) => setAutomationForm((prev) => ({ ...prev, trigger: value }))}>
@@ -608,6 +608,8 @@ export function MessageTemplatesSettings() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="grid gap-2">
               <div className="space-y-2">
                 <Label className="text-white">Var ska det skickas?</Label>
                 <Select value={automationForm.channel} onValueChange={(value: AutomationForm['channel']) => setAutomationForm((prev) => ({ ...prev, channel: value }))}>
@@ -618,7 +620,7 @@ export function MessageTemplatesSettings() {
                 </Select>
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-2">
               <div className="space-y-2">
                 <Label className="text-white">Vem ska få det?</Label>
                 <Select value={automationForm.recipient_type} onValueChange={(value: AutomationForm['recipient_type']) => setAutomationForm((prev) => ({ ...prev, recipient_type: value }))}>
@@ -628,6 +630,8 @@ export function MessageTemplatesSettings() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="grid gap-2">
               <div className="space-y-2">
                 <Label className="text-white">Väntetid (min)</Label>
                 <Input type="number" min={0} value={automationForm.delay_minutes} onChange={(e) => setAutomationForm((prev) => ({ ...prev, delay_minutes: Number(e.target.value) || 0 }))} className="bg-white/5 border-white/10 text-white" />
@@ -642,21 +646,21 @@ export function MessageTemplatesSettings() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
-              <div>
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-white">Aktiv direkt</p>
-                <p className="text-[11px] text-white md:text-xs">Stäng av om du vill spara regeln utan att använda den än.</p>
+                <p className="text-[11px] text-white md:text-xs [overflow-wrap:anywhere]">Stäng av om du vill spara regeln utan att använda den än.</p>
               </div>
               <Switch checked={automationForm.is_enabled} onCheckedChange={(checked) => setAutomationForm((prev) => ({ ...prev, is_enabled: checked }))} />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveAutomation} disabled={savingAutomation || !automationForm.template_id}>{savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{automationForm.id ? 'Uppdatera automation' : 'Spara automation'}</Button>
               <Button variant="glass" size="sm" className="px-3 text-xs" onClick={() => setAutomationForm(EMPTY_AUTOMATION_FORM)}>Rensa</Button>
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="logs" className="mt-0 rounded-2xl border border-white/10 bg-white/5 p-3">
+        <TabsContent value="logs" className="mt-0 min-w-0 rounded-2xl border border-white/10 bg-white/5 p-3">
           {loading ? (
             <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
           ) : logs.length === 0 ? (
