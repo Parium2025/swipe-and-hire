@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
+import { supabase } from '@/integrations/supabase/client';
 import { renderOutreachText, type OutreachTemplate } from '@/lib/outreach';
 
 type ManualChannel = 'chat' | 'email' | 'push';
