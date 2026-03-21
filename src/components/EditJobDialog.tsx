@@ -3555,9 +3555,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   <button
                                     type="button"
                                     onClick={openImageEditor}
-                                    className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
+                                    className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-colors text-sm font-medium"
                                   >
-                                    Justera bild
+                                    Anpassa din bild
                                   </button>
                                   <button
                                     type="button"
@@ -3567,7 +3567,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       setJobImageDisplayUrl(null);
                                       setManualFocus(null);
                                     }}
-                                    className="p-1.5 rounded-lg text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
                                     aria-label="Ta bort mobilbild"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -3627,9 +3627,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   <button
                                     type="button"
                                     onClick={openDesktopImageEditor}
-                                    className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
+                                    className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-colors text-sm font-medium"
                                   >
-                                    Justera bild
+                                    Anpassa din bild
                                   </button>
                                   <button
                                     type="button"
@@ -3638,7 +3638,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       setOriginalDesktopImageUrl(null);
                                       setJobImageDesktopDisplayUrl(null);
                                     }}
-                                    className="p-1.5 rounded-lg text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
                                     aria-label="Ta bort datorbild"
                                   >
                                     <Trash2 className="w-4 h-4" />
