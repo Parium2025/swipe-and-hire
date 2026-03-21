@@ -320,7 +320,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
         <PopoverTrigger asChild>
           <button
             className={`
-              flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+              flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all
               border whitespace-nowrap min-w-0 flex-shrink-0
               ${open || hasFilters 
                 ? 'bg-white/20 border-white/30 text-white' 

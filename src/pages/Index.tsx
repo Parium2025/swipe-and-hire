@@ -189,7 +189,7 @@ const CandidatesContent = () => {
                 <button
                   onClick={() => setSelectionMode(prev => !prev)}
                   className={`
-                    flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                    flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all
                     border whitespace-nowrap
                     ${selectionMode 
                       ? 'bg-white/20 border-white/30 text-white' 
