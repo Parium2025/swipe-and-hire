@@ -2730,7 +2730,14 @@ export type Database = {
     Enums: {
       outreach_channel: "chat" | "email" | "push"
       outreach_recipient: "candidate" | "employer"
-      outreach_trigger: "job_closed" | "interview_scheduled" | "manual_send"
+      outreach_trigger:
+        | "job_closed"
+        | "interview_scheduled"
+        | "manual_send"
+        | "application_received"
+        | "application_no_response_14d"
+        | "interview_before"
+        | "interview_after"
       user_role: "job_seeker" | "employer"
     }
     CompositeTypes: {
@@ -2861,7 +2868,15 @@ export const Constants = {
     Enums: {
       outreach_channel: ["chat", "email", "push"],
       outreach_recipient: ["candidate", "employer"],
-      outreach_trigger: ["job_closed", "interview_scheduled", "manual_send"],
+      outreach_trigger: [
+        "job_closed",
+        "interview_scheduled",
+        "manual_send",
+        "application_received",
+        "application_no_response_14d",
+        "interview_before",
+        "interview_after",
+      ],
       user_role: ["job_seeker", "employer"],
     },
   },
