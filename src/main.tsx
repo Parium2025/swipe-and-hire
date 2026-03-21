@@ -1,6 +1,4 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import * as Sentry from '@sentry/react'
 import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
@@ -40,20 +38,24 @@ const preloadAndDecodeImage = async (src: string, id: string) => {
   }
 };
 
-// Initialize Sentry for error tracking in production
-if (import.meta.env.PROD) {
-  Sentry.init({
-    dsn: "https://bc7456823e992b35ceb78455f6b6ff24@o4510693219237888.ingest.de.sentry.io/4510693244207184",
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration(),
-    ],
-    // Performance monitoring - capture 10% of transactions
-    tracesSampleRate: 0.1,
-    // Session replay - capture 10% of sessions, 100% on error
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
-  });
+async function initSentryIfNeeded() {
+  if (!import.meta.env.PROD) return;
+
+  try {
+    const Sentry = await import('@sentry/react');
+    Sentry.init({
+      dsn: "https://bc7456823e992b35ceb78455f6b6ff24@o4510693219237888.ingest.de.sentry.io/4510693244207184",
+      integrations: [
+        Sentry.browserTracingIntegration(),
+        Sentry.replayIntegration(),
+      ],
+      tracesSampleRate: 0.1,
+      replaysSessionSampleRate: 0.1,
+      replaysOnErrorSampleRate: 1.0,
+    });
+  } catch {
+    // Never block app startup if monitoring fails to load.
+  }
 }
 
 function redirectAuthTokensIfNeeded() {
@@ -101,6 +103,8 @@ async function bootstrap() {
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
+  void initSentryIfNeeded();
+
   // ✅ Preview hygiene: ensure we are never stuck on an old cached bundle/UI.
   // The preview environment should always reflect the latest code immediately.
   const isPreviewHost = (() => {
@@ -141,9 +145,14 @@ async function bootstrap() {
   const authLogoPromise = preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
   void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
 
-  // On /auth, wait for logo to be fully decoded before rendering
+  // On /auth, never block app mount indefinitely on image decode.
+  // Some mobile browsers can stall decode() for data-URI images, which would
+  // otherwise leave users on a blank blue screen before React mounts.
   if (isAuthRoute) {
-    await authLogoPromise;
+    await Promise.race([
+      authLogoPromise,
+      new Promise((resolve) => setTimeout(resolve, 800)),
+    ]);
   }
 
   // Registrera Service Worker och Sync Engine

@@ -238,7 +238,10 @@
               splash.style.display = 'flex';
               
               // Function to fade in content (not the container)
+              var contentShown = false;
               function showContent() {
+                if (contentShown) return;
+                contentShown = true;
                 requestAnimationFrame(function() {
                   splash.classList.add('content-ready');
                 });
@@ -252,6 +255,9 @@
                 logo.onload = showContent;
                 // Fallback if image fails
                 logo.onerror = showContent;
+                // SAFETY: if the image load event stalls on mobile/network edge cases,
+                // never leave users on a blank blue screen.
+                setTimeout(showContent, 800);
               }
               
               // Fade dots first (0.5s before splash fades)
@@ -268,6 +274,12 @@
                   splash.style.display = 'none';
                 }, 500);
               }, 2000);
+
+              // Final failsafe: even if a prior animation step stalls, force-hide it.
+              setTimeout(function() {
+                splash.classList.add('fade-out');
+                splash.style.display = 'none';
+              }, 2600);
             }
           }
         } catch(e) {}
