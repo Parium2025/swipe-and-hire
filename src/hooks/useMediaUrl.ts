@@ -6,11 +6,60 @@ import { imageCache } from '@/lib/imageCache';
 const signedUrlMemoryCache = new Map<string, { url: string; expiresAt: number }>();
 
 // Track pågående laddningar globalt för att undvika duplicerade requests
-const ongoingLoads = new Set<string>();
+const ongoingLoads = new Map<string, Promise<string | null>>();
 
 // LocalStorage cache key
 const getCacheKey = (storagePath: string, mediaType: MediaType) => 
   `media_url_${mediaType}_${storagePath}`;
+
+const shouldWarmBlobCache = (mediaType: MediaType) =>
+  mediaType === 'profile-image' ||
+  mediaType === 'cover-image' ||
+  mediaType === 'company-logo' ||
+  mediaType === 'job-image';
+
+function storeSignedUrlCache(
+  cacheKey: string,
+  signedUrl: string,
+  expiresInSeconds: number,
+  now: number
+) {
+  const expiresAt = now + (expiresInSeconds * 1000 * 0.8);
+  const cacheData = { url: signedUrl, expiresAt };
+
+  signedUrlMemoryCache.set(cacheKey, cacheData);
+
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+  } catch {
+    // Ignore localStorage errors
+  }
+}
+
+function getOrCreateSignedUrlLoad(
+  storagePath: string,
+  mediaType: MediaType,
+  expiresInSeconds: number
+) {
+  const cacheKey = getCacheKey(storagePath, mediaType);
+  const existing = ongoingLoads.get(cacheKey);
+  if (existing) return existing;
+
+  const now = Date.now();
+  const promise = getMediaUrl(storagePath, mediaType, expiresInSeconds)
+    .then((signedUrl) => {
+      if (signedUrl) {
+        storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now);
+      }
+      return signedUrl;
+    })
+    .finally(() => {
+      ongoingLoads.delete(cacheKey);
+    });
+
+  ongoingLoads.set(cacheKey, promise);
+  return promise;
+}
 
 // Hämta cached URL synkront (för initial render utan flicker)
 function getCachedUrlSync(storagePath: string, mediaType: MediaType): string | null {
@@ -89,23 +138,13 @@ export function useMediaUrl(storagePath: string | null | undefined, mediaType: M
       setUrl(cachedUrl);
       
       // Ladda blob i bakgrunden för ännu snabbare framtida laddning
-      if (!cachedUrl.startsWith('blob:')) {
+      if (shouldWarmBlobCache(mediaType) && !cachedUrl.startsWith('blob:')) {
         imageCache.loadImage(cachedUrl).catch(() => {});
       }
       return;
     }
 
     const cacheKey = getCacheKey(storagePath, mediaType);
-    
-    // Undvik dubbla requests för samma resurs globalt
-    if (ongoingLoads.has(cacheKey)) return;
-    
-    // Dubbelkolla cache igen (race condition protection)
-    const blobUrl = imageCache.getCachedUrl(storagePath);
-    if (blobUrl) {
-      setUrl(blobUrl);
-      return;
-    }
     
     const memCached = signedUrlMemoryCache.get(cacheKey);
     const now = Date.now();
@@ -115,33 +154,19 @@ export function useMediaUrl(storagePath: string | null | undefined, mediaType: M
         signedUrlMemoryCache.delete(cacheKey);
       } else {
         setUrl(memCached.url);
-        imageCache.loadImage(memCached.url).catch(() => {});
+        if (shouldWarmBlobCache(mediaType)) {
+          imageCache.loadImage(memCached.url).catch(() => {});
+        }
         return;
       }
     }
 
-    // Ingen cache finns, generera ny signed URL
-    ongoingLoads.add(cacheKey);
-
     (async () => {
       try {
-        const signedUrl = await getMediaUrl(storagePath, mediaType, expiresInSeconds);
+        const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds);
         
         if (!signedUrl || !mountedRef.current) {
-          ongoingLoads.delete(cacheKey);
           return;
-        }
-
-        // Cacha signed URL (expires 80% av faktisk expire tid för säkerhet)
-        const expiresAt = now + (expiresInSeconds * 1000 * 0.8);
-        const cacheData = { url: signedUrl, expiresAt };
-        
-        signedUrlMemoryCache.set(cacheKey, cacheData);
-        
-        try {
-          localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-        } catch (e) {
-          // Ignore localStorage errors
         }
 
         // Visa signed URL direkt
@@ -150,18 +175,18 @@ export function useMediaUrl(storagePath: string | null | undefined, mediaType: M
         }
 
         // Ladda blob i bakgrunden för ännu snabbare framtida laddning
-        imageCache.loadImage(signedUrl)
-          .then(blobUrl => {
-            if (mountedRef.current) {
-              setUrl(blobUrl);
-            }
-          })
-          .catch(() => {});
+        if (shouldWarmBlobCache(mediaType)) {
+          imageCache.loadImage(signedUrl)
+            .then(blobUrl => {
+              if (mountedRef.current) {
+                setUrl(blobUrl);
+              }
+            })
+            .catch(() => {});
+        }
 
       } catch (e) {
         console.error('Failed to get media URL:', e);
-      } finally {
-        ongoingLoads.delete(cacheKey);
       }
     })();
 
@@ -184,35 +209,22 @@ export async function prefetchMediaUrl(
   // Om vi redan har en cached signed URL (eller blob) → bara säkerställ blob
   const cached = getCachedUrlSync(storagePath, mediaType);
   if (cached) {
-    if (!cached.startsWith('blob:')) {
+    if (shouldWarmBlobCache(mediaType) && !cached.startsWith('blob:')) {
       await imageCache.loadImage(cached).catch(() => {});
     }
     return;
   }
 
-  // Undvik dubbla requests
-  if (ongoingLoads.has(cacheKey)) return;
-  ongoingLoads.add(cacheKey);
-
   try {
-    const signedUrl = await getMediaUrl(storagePath, mediaType, expiresInSeconds);
+    const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds);
     if (!signedUrl) return;
 
-    // Cacha signed URL (expires 80% av faktisk expire tid för säkerhet)
-    const expiresAt = now + (expiresInSeconds * 1000 * 0.8);
-    const cacheData = { url: signedUrl, expiresAt };
-
-    signedUrlMemoryCache.set(cacheKey, cacheData);
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-    } catch {
-      // ignore
-    }
-
     // Preloada till blob-cache (så UI kan visa direkt)
-    await imageCache.loadImage(signedUrl).catch(() => {});
+    if (shouldWarmBlobCache(mediaType)) {
+      await imageCache.loadImage(signedUrl).catch(() => {});
+    }
   } finally {
-    ongoingLoads.delete(cacheKey);
+    // no-op: promise cleanup happens inside getOrCreateSignedUrlLoad
   }
 }
 
