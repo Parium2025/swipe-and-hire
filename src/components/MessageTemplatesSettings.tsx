@@ -34,6 +34,7 @@ import {
   type OutreachAutomation,
   type OutreachDispatchLog,
   type OutreachTemplate,
+  type OutreachTrigger,
 } from '@/lib/outreach';
 
 type TemplateForm = {
@@ -48,7 +49,7 @@ type TemplateForm = {
 type AutomationForm = {
   id: string | null;
   name: string;
-  trigger: 'job_closed' | 'interview_scheduled';
+  trigger: OutreachTrigger;
   channel: 'chat' | 'email' | 'push';
   recipient_type: 'candidate' | 'employer';
   template_id: string;
@@ -608,7 +609,6 @@ export function MessageTemplatesSettings() {
             </div>
           )}
         </TabsContent>
-      </Tabs>
       </Tabs>
     </div>
   );
