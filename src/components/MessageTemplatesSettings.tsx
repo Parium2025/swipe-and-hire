@@ -478,7 +478,7 @@ export function MessageTemplatesSettings() {
                         <Button
                           variant="outlineNeutral"
                           size="sm"
-                          className="h-7 w-7 rounded-full border-white/10 p-0 text-white hover:border-destructive/50 hover:bg-destructive/15 hover:text-destructive"
+                          className="h-7 w-7 rounded-full border-white/10 p-0 text-white transition-colors md:hover:border-destructive/40 md:hover:bg-destructive/20 md:hover:text-destructive"
                           onClick={() => handleDeleteTemplate(template.id)}
                         >
                           <Trash2 className="h-2.5 w-2.5" />
@@ -531,11 +531,20 @@ export function MessageTemplatesSettings() {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-              <p className="mb-2 text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
+              <div className="mb-2">
+                <p className="text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
+                <p className="mt-1 text-[11px] text-white/80">Tryck på en etikett så läggs den in automatiskt i texten.</p>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {OUTREACH_VARIABLES.map((variable) => (
-                  <button key={variable.key} type="button" onClick={() => setTemplateForm((prev) => ({ ...prev, body: `${prev.body}{${variable.key}}` }))} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white hover:border-white/30 hover:text-white md:text-xs">
-                    {`{${variable.key}}`}
+                  <button
+                    key={variable.key}
+                    type="button"
+                    onClick={() => setTemplateForm((prev) => ({ ...prev, body: `${prev.body}{${variable.key}}` }))}
+                    className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-left text-white transition-colors md:hover:border-white/30 md:hover:text-white"
+                  >
+                    <span className="block text-[11px] font-medium md:text-xs">{variable.label}</span>
+                    <span className="block text-[10px] text-white/70">{`{${variable.key}}`}</span>
                   </button>
                 ))}
               </div>
@@ -587,7 +596,7 @@ export function MessageTemplatesSettings() {
                           <Button
                             variant="outlineNeutral"
                             size="sm"
-                            className="h-7 w-7 rounded-full border-white/10 p-0 text-white hover:border-destructive/50 hover:bg-destructive/15 hover:text-destructive"
+                            className="h-7 w-7 rounded-full border-white/10 p-0 text-white transition-colors md:hover:border-destructive/40 md:hover:bg-destructive/20 md:hover:text-destructive"
                             onClick={() => handleDeleteAutomation(automation.id)}
                           ><Trash2 className="h-2.5 w-2.5" /></Button>
                         </div>
