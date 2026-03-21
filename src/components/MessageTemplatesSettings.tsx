@@ -609,7 +609,6 @@ export function MessageTemplatesSettings() {
           )}
         </TabsContent>
       </Tabs>
-      </Tabs>
     </div>
   );
 }
