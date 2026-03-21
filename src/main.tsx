@@ -111,6 +111,17 @@ function redirectAuthTokensIfNeeded() {
   return false;
 }
 
+function isPreviewEnvironment() {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    const host = window.location.hostname;
+    return host.includes('id-preview--') || host.includes('lovableproject.com');
+  } catch {
+    return false;
+  }
+}
+
 async function bootstrap() {
   if (typeof window !== 'undefined') {
     try {
@@ -127,13 +138,7 @@ async function bootstrap() {
 
   // ✅ Preview hygiene: ensure we are never stuck on an old cached bundle/UI.
   // The preview environment should always reflect the latest code immediately.
-  const isPreviewHost = (() => {
-    try {
-      return typeof window !== 'undefined' && window.location.hostname.includes('id-preview--');
-    } catch {
-      return false;
-    }
-  })();
+  const isPreviewHost = isPreviewEnvironment();
 
   if (isPreviewHost) {
     // Best-effort cleanup without blocking first paint.
@@ -175,13 +180,10 @@ async function bootstrap() {
     ]);
   }
 
-  // Registrera Service Worker och Sync Engine
+  // Registrera Service Worker
   if (import.meta.env.PROD && !isPreviewHost) {
     registerServiceWorker().catch(() => {});
   }
-  
-  // Initialize the offline sync engine (works regardless of SW)
-  initSyncEngine();
 
   const root = createRoot(document.getElementById('root')!);
   root.render(
@@ -189,6 +191,13 @@ async function bootstrap() {
       <App />
     </GlobalErrorBoundary>
   );
+
+  // Never block first paint/mount on sync initialization.
+  try {
+    initSyncEngine();
+  } catch {
+    // Ignore sync engine startup errors so UI can still render.
+  }
 
   requestAnimationFrame(() => {
     requestAnimationFrame(markAppMounted);
