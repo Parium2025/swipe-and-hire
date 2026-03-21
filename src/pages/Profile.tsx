@@ -1718,13 +1718,13 @@ const Profile = () => {
               {/* Anpassa din bild button - only show for images, not videos */}
               {(!isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
                 <div className="flex flex-col items-center space-y-2">
-                  <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
+                  <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
                     Bild uppladdad!
                   </Badge>
                   <button 
                     type="button"
                     onClick={handleEditExistingProfile}
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-3 py-1 text-sm font-medium rounded-md transition-colors"
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
                   >
                     Anpassa din bild
                   </button>
@@ -1802,7 +1802,7 @@ const Profile = () => {
                 
                 {coverImageUrl && !isUploadingCover && (
                   <div className="flex items-center justify-center">
-                    <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md flex items-center justify-center">
+                    <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
                       Cover-bild uppladdad!
                     </Badge>
                   </div>
