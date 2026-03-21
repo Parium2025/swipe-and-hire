@@ -675,7 +675,7 @@ const MyCandidates = () => {
               <button
                 onClick={() => displayedCandidates.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
                 onMouseDown={(e) => e.preventDefault()}
-                className={`rounded-lg px-4 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
+                className={`rounded-full px-4 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
                   isSelectionMode 
                     ? 'bg-white/10 ring-white' 
                     : displayedCandidates.length > 0 
@@ -692,7 +692,7 @@ const MyCandidates = () => {
               <button
                 onClick={() => displayedCandidates.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
                 onMouseDown={(e) => e.preventDefault()}
-                className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
+                className={`rounded-full px-3 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
                   isSelectionMode 
                     ? 'bg-white/10 ring-1 ring-white hover:bg-white/15' 
                     : displayedCandidates.length > 0 
