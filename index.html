@@ -11,7 +11,7 @@
     <meta name="description" content="Parium">
     <meta name="author" content="Lovable" />
     <meta http-equiv="Content-Language" content="sv-SE" />
-    <meta name="build-version" content="2026-03-21T00:30Z" />
+    <meta name="build-version" content="2026-01-03T21:15Z" />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -176,39 +176,6 @@
     #auth-splash-dots.fading {
       opacity: 0;
     }
-    #auth-splash-fallback {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      width: min(320px, calc(100vw - 48px));
-      margin-top: 24px;
-      text-align: center;
-      color: hsl(0 0% 100%);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
-    #auth-splash-fallback p {
-      margin: 0;
-      font-size: 0.95rem;
-      line-height: 1.45;
-      color: hsla(0 0% 100% / 0.82);
-    }
-    #auth-splash-retry {
-      appearance: none;
-      border: 1px solid hsla(0 0% 100% / 0.24);
-      background: hsla(0 0% 100% / 0.08);
-      color: hsl(0 0% 100%);
-      border-radius: 999px;
-      padding: 10px 18px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    #auth-splash.recovery #auth-splash-fallback {
-      display: flex;
-    }
     #auth-splash-dots span {
       width: 10px;
       height: 10px;
@@ -251,10 +218,6 @@
         <span></span>
         <span></span>
       </div>
-      <div id="auth-splash-fallback" aria-live="polite">
-        <p>Inloggningen tar längre tid än väntat. Vi håller kvar laddningsskärmen tills appen är redo.</p>
-        <button id="auth-splash-retry" type="button">Försök igen</button>
-      </div>
     </div>
     <script>
       // Show auth splash ONLY on /auth route during hard refresh (NOT SPA navigation)
@@ -270,69 +233,15 @@
           if ((path === '/auth' || path === '/auth/') && !skipSplash) {
             var splash = document.getElementById('auth-splash');
             var logo = document.getElementById('auth-splash-logo');
-            var dots = document.getElementById('auth-splash-dots');
-            var retryButton = document.getElementById('auth-splash-retry');
-            var retriedKey = 'parium-auth-hard-refresh-retried';
             if (splash && logo) {
               // Display container IMMEDIATELY with dark background to block auth content
               splash.style.display = 'flex';
               
               // Function to fade in content (not the container)
-              var contentShown = false;
-              var exitStarted = false;
-              var recoveryShown = false;
               function showContent() {
-                if (contentShown) return;
-                contentShown = true;
                 requestAnimationFrame(function() {
                   splash.classList.add('content-ready');
                 });
-              }
-
-              function clearRetryFlag() {
-                try {
-                  sessionStorage.removeItem(retriedKey);
-                } catch (e) {}
-              }
-
-              function startExit() {
-                if (exitStarted || recoveryShown) return;
-                exitStarted = true;
-                if (dots) dots.classList.add('fading');
-                setTimeout(function() {
-                  splash.classList.add('fade-out');
-                  setTimeout(function() {
-                    splash.style.display = 'none';
-                    clearRetryFlag();
-                  }, 500);
-                }, 400);
-              }
-
-              function showRecovery() {
-                if (recoveryShown || window.__pariumAppMounted === true) return;
-                recoveryShown = true;
-                splash.classList.remove('fade-out');
-                splash.classList.add('content-ready', 'recovery');
-                if (dots) dots.classList.add('fading');
-              }
-
-              function tryExitIfMounted() {
-                if (window.__pariumAppMounted === true) {
-                  startExit();
-                }
-              }
-
-              if (retryButton) {
-                retryButton.addEventListener('click', function() {
-                  clearRetryFlag();
-                  window.location.reload();
-                });
-              }
-
-              if (window.__pariumAppMounted === true) {
-                startExit();
-              } else {
-                window.addEventListener('parium:app-mounted', startExit, { once: true });
               }
               
               // Wait for logo to load, then fade in content
@@ -343,39 +252,22 @@
                 logo.onload = showContent;
                 // Fallback if image fails
                 logo.onerror = showContent;
-                // SAFETY: if the image load event stalls on mobile/network edge cases,
-                // never leave users on a blank blue screen.
-                setTimeout(showContent, 800);
               }
-
-              // Keep polling briefly in case the app mounts before the event listener is attached.
-              setTimeout(tryExitIfMounted, 1200);
-              setTimeout(tryExitIfMounted, 2200);
-
-              // If the app still hasn't mounted, do one guarded hard refresh.
-              // If that still doesn't recover, keep the splash visible and show retry UI
-              // instead of ever dropping to a blank blue screen.
+              
+              // Fade dots first (0.5s before splash fades)
               setTimeout(function() {
-                if (window.__pariumAppMounted === true) {
-                  startExit();
-                  return;
-                }
-
-                var alreadyRetried = false;
-                try {
-                  alreadyRetried = sessionStorage.getItem(retriedKey) === '1';
-                } catch (e) {}
-
-                if (!alreadyRetried) {
-                  try {
-                    sessionStorage.setItem(retriedKey, '1');
-                  } catch (e) {}
-                  window.location.reload();
-                  return;
-                }
-
-                showRecovery();
-              }, 3200);
+                var dots = document.getElementById('auth-splash-dots');
+                if (dots) dots.classList.add('fading');
+              }, 1500);
+              
+              // Fade out entire splash after 2 seconds
+              setTimeout(function() {
+                splash.classList.add('fade-out');
+                // Remove from DOM after fade
+                setTimeout(function() {
+                  splash.style.display = 'none';
+                }, 500);
+              }, 2000);
             }
           }
         } catch(e) {}
@@ -402,29 +294,27 @@
     <div id="root"></div>
     <script>
       try {
-        const hostname = window.location.hostname;
-        const isPreviewHost = hostname.includes('id-preview--') || hostname.includes('lovableproject.com');
-
-        // Preview använder egen cache/versionshantering. Undvik extra URL-versionering här
-        // eftersom den kan skapa 412-fel i modul-laddning i preview.
-        if (!isPreviewHost) {
-          const meta = document.querySelector('meta[name="build-version"]');
-          const v = meta?.getAttribute('content') || '';
-          const key = 'parium_build_version';
-          const prev = localStorage.getItem(key);
-          if (!prev) {
-            localStorage.setItem(key, v);
-          } else if (prev !== v) {
-            localStorage.setItem(key, v);
-            // Behåll bild-/profil-cache intakt.
-            // Gör endast en kontrollerad URL-versionering för att hämta ny app-shell.
-            const url = new URL(window.location.href);
-            url.searchParams.set('v', v.replace(/\D/g, '').slice(0, 12));
-            if (window.location.href !== url.toString()) {
-              window.location.replace(url.toString());
-            } else {
-              window.location.reload();
-            }
+        const meta = document.querySelector('meta[name="build-version"]');
+        const v = meta?.getAttribute('content') || '';
+        const key = 'parium_build_version';
+        const prev = localStorage.getItem(key);
+        if (!prev) {
+          localStorage.setItem(key, v);
+        } else if (prev !== v) {
+          localStorage.setItem(key, v);
+          // Best-effort purge of runtime caches to fight iOS PWA sticky caching
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
+          }
+          if (window.caches && caches.keys) {
+            caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(() => {});
+          }
+          const url = new URL(window.location.href);
+          url.searchParams.set('v', v.replace(/\D/g, '').slice(0, 12));
+          if (window.location.href !== url.toString()) {
+            window.location.replace(url.toString());
+          } else {
+            window.location.reload();
           }
         }
       } catch (e) { /* noop */ }
@@ -451,6 +341,6 @@
       // SW disabled in preview - handled by main.tsx in production only
       // This prevents SW from interfering with HMR and causing slow reloads on touch devices
     </script>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx?v=20251004-1510"></script>
   </body>
 </html>

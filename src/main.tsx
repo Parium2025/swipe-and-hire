@@ -1,4 +1,6 @@
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import * as Sentry from '@sentry/react'
 import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
@@ -6,18 +8,6 @@ import { registerServiceWorker } from './lib/serviceWorkerManager'
 import { initSyncEngine } from './lib/offlineSyncEngine'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 import authLogoDataUri from './assets/parium-auth-logo.png?inline'
-
-function markAppMounted() {
-  if (typeof window === 'undefined') return;
-
-  try {
-    (window as any).__pariumAppMounted = true;
-    sessionStorage.removeItem('parium-auth-hard-refresh-retried');
-    window.dispatchEvent(new CustomEvent('parium:app-mounted'));
-  } catch {
-    // Never block app start for mount bookkeeping.
-  }
-}
 
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
@@ -50,24 +40,20 @@ const preloadAndDecodeImage = async (src: string, id: string) => {
   }
 };
 
-async function initSentryIfNeeded() {
-  if (!import.meta.env.PROD) return;
-
-  try {
-    const Sentry = await import('@sentry/react');
-    Sentry.init({
-      dsn: "https://bc7456823e992b35ceb78455f6b6ff24@o4510693219237888.ingest.de.sentry.io/4510693244207184",
-      integrations: [
-        Sentry.browserTracingIntegration(),
-        Sentry.replayIntegration(),
-      ],
-      tracesSampleRate: 0.1,
-      replaysSessionSampleRate: 0.1,
-      replaysOnErrorSampleRate: 1.0,
-    });
-  } catch {
-    // Never block app startup if monitoring fails to load.
-  }
+// Initialize Sentry for error tracking in production
+if (import.meta.env.PROD) {
+  Sentry.init({
+    dsn: "https://bc7456823e992b35ceb78455f6b6ff24@o4510693219237888.ingest.de.sentry.io/4510693244207184",
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration(),
+    ],
+    // Performance monitoring - capture 10% of transactions
+    tracesSampleRate: 0.1,
+    // Session replay - capture 10% of sessions, 100% on error
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  });
 }
 
 function redirectAuthTokensIfNeeded() {
@@ -111,34 +97,19 @@ function redirectAuthTokensIfNeeded() {
   return false;
 }
 
-function isPreviewEnvironment() {
-  if (typeof window === 'undefined') return false;
-
-  try {
-    const host = window.location.hostname;
-    return host.includes('id-preview--') || host.includes('lovableproject.com');
-  } catch {
-    return false;
-  }
-}
-
 async function bootstrap() {
-  if (typeof window !== 'undefined') {
-    try {
-      (window as any).__pariumAppMounted = false;
-    } catch {
-      // ignore
-    }
-  }
-
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
-  void initSentryIfNeeded();
-
   // ✅ Preview hygiene: ensure we are never stuck on an old cached bundle/UI.
   // The preview environment should always reflect the latest code immediately.
-  const isPreviewHost = isPreviewEnvironment();
+  const isPreviewHost = (() => {
+    try {
+      return typeof window !== 'undefined' && window.location.hostname.includes('id-preview--');
+    } catch {
+      return false;
+    }
+  })();
 
   if (isPreviewHost) {
     // Best-effort cleanup without blocking first paint.
@@ -170,20 +141,18 @@ async function bootstrap() {
   const authLogoPromise = preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
   void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
 
-  // On /auth, never block app mount indefinitely on image decode.
-  // Some mobile browsers can stall decode() for data-URI images, which would
-  // otherwise leave users on a blank blue screen before React mounts.
+  // On /auth, wait for logo to be fully decoded before rendering
   if (isAuthRoute) {
-    await Promise.race([
-      authLogoPromise,
-      new Promise((resolve) => setTimeout(resolve, 800)),
-    ]);
+    await authLogoPromise;
   }
 
-  // Registrera Service Worker
+  // Registrera Service Worker och Sync Engine
   if (import.meta.env.PROD && !isPreviewHost) {
     registerServiceWorker().catch(() => {});
   }
+  
+  // Initialize the offline sync engine (works regardless of SW)
+  initSyncEngine();
 
   const root = createRoot(document.getElementById('root')!);
   root.render(
@@ -191,17 +160,6 @@ async function bootstrap() {
       <App />
     </GlobalErrorBoundary>
   );
-
-  // Never block first paint/mount on sync initialization.
-  try {
-    initSyncEngine();
-  } catch {
-    // Ignore sync engine startup errors so UI can still render.
-  }
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(markAppMounted);
-  });
 }
 
 void bootstrap();

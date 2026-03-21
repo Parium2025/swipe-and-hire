@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v3';
 
 const IMAGE_CACHE = `parium-images-${CACHE_VERSION}`;
 const STATIC_CACHE = `parium-static-${CACHE_VERSION}`;
@@ -151,16 +151,6 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = request.url;
 
-   // Never interfere with preview/dev hosts.
-  try {
-    const hostname = new URL(url).hostname;
-    if (hostname.includes('id-preview--') || hostname.includes('lovableproject.com')) {
-      return;
-    }
-  } catch (_) {
-    // ignore URL parsing errors
-  }
-
   if (request.method !== 'GET') {
     return;
   }
@@ -230,16 +220,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first only for HTML navigation (avoid aggressive cache-reload for JS/CSS)
-  if (request.mode === 'navigate') {
+  // Network-first for app shell
+  const isAppShell =
+    request.mode === 'navigate' ||
+    request.destination === 'script' ||
+    request.destination === 'style' ||
+    request.destination === 'worker' ||
+    /\.(js|css|html)(\?|$)/.test(new URL(url).pathname);
+
+  if (isAppShell) {
     event.respondWith(
-      fetch(request).catch(async () => {
+      fetch(new Request(request, { cache: 'reload' })).catch(async () => {
         const cached = await caches.match(request);
         if (cached) return cached;
-
-        const offlineShell = await caches.match('/index.html');
-        if (offlineShell) return offlineShell;
-
+        if (request.mode === 'navigate') {
+          const offlineShell = await caches.match('/index.html');
+          if (offlineShell) return offlineShell;
+        }
         throw new Error('Network error and no cache');
       })
     );
