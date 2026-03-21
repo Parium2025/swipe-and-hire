@@ -122,7 +122,7 @@ export function ActiveSessionsSettings() {
             size="sm"
             onClick={fetchSessions}
             disabled={loading}
-            className="h-7 w-7 p-0 text-white/50 hover:text-white hover:bg-white/10"
+            className="h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] shrink-0 aspect-square rounded-full p-0 text-white transition-colors hover:bg-transparent hover:text-white active:scale-100 active:bg-transparent md:hover:bg-transparent"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
           </Button>
