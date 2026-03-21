@@ -458,24 +458,11 @@
     </script>
     <script>
       (function () {
-        function loadAppModule() {
-          var script = document.createElement('script');
-          script.type = 'module';
-          script.src = '/src/main.tsx';
-          document.body.appendChild(script);
-        }
-
         try {
           var hostname = window.location.hostname;
           var isPreviewHost = hostname.includes('id-preview--') || hostname.includes('lovableproject.com');
+          if (!isPreviewHost) return;
 
-          // Production/Published: starta direkt (ingen ändring av cache-beteende där)
-          if (!isPreviewHost) {
-            loadAppModule();
-            return;
-          }
-
-          // Preview-only: gör en engångs-reset av ev. stale SW/cache innan moduler laddas
           var resetKey = 'parium_preview_bootstrap_reset_v1';
           var alreadyReset = false;
           try {
@@ -484,10 +471,10 @@
             alreadyReset = false;
           }
 
-          if (alreadyReset) {
-            loadAppModule();
-            return;
-          }
+          if (alreadyReset) return;
+
+          // Stoppa modul-import på första laddningen tills preview-cacher är rensade.
+          window.__pariumPreviewResetInProgress = true;
 
           try {
             sessionStorage.setItem(resetKey, '1');
@@ -505,14 +492,17 @@
                 })
               : Promise.resolve(),
           ]).finally(function () {
-            // Reloada EN gång i preview för att starta med ren runtime-miljö
             window.location.reload();
           });
         } catch (e) {
-          // Fallback: försök alltid starta appen
-          loadAppModule();
+          // noop
         }
       })();
+    </script>
+    <script type="module">
+      if (!window.__pariumPreviewResetInProgress) {
+        import('/src/main.tsx');
+      }
     </script>
   </body>
 </html>
