@@ -456,6 +456,63 @@
       // SW disabled in preview - handled by main.tsx in production only
       // This prevents SW from interfering with HMR and causing slow reloads on touch devices
     </script>
-    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      (function () {
+        function loadAppModule() {
+          var script = document.createElement('script');
+          script.type = 'module';
+          script.src = '/src/main.tsx';
+          document.body.appendChild(script);
+        }
+
+        try {
+          var hostname = window.location.hostname;
+          var isPreviewHost = hostname.includes('id-preview--') || hostname.includes('lovableproject.com');
+
+          // Production/Published: starta direkt (ingen ändring av cache-beteende där)
+          if (!isPreviewHost) {
+            loadAppModule();
+            return;
+          }
+
+          // Preview-only: gör en engångs-reset av ev. stale SW/cache innan moduler laddas
+          var resetKey = 'parium_preview_bootstrap_reset_v1';
+          var alreadyReset = false;
+          try {
+            alreadyReset = sessionStorage.getItem(resetKey) === '1';
+          } catch (e) {
+            alreadyReset = false;
+          }
+
+          if (alreadyReset) {
+            loadAppModule();
+            return;
+          }
+
+          try {
+            sessionStorage.setItem(resetKey, '1');
+          } catch (e) {}
+
+          Promise.allSettled([
+            (navigator.serviceWorker && navigator.serviceWorker.getRegistrations)
+              ? navigator.serviceWorker.getRegistrations().then(function (regs) {
+                  return Promise.allSettled(regs.map(function (r) { return r.unregister(); }));
+                })
+              : Promise.resolve(),
+            (window.caches && caches.keys)
+              ? caches.keys().then(function (keys) {
+                  return Promise.allSettled(keys.map(function (k) { return caches.delete(k); }));
+                })
+              : Promise.resolve(),
+          ]).finally(function () {
+            // Reloada EN gång i preview för att starta med ren runtime-miljö
+            window.location.reload();
+          });
+        } catch (e) {
+          // Fallback: försök alltid starta appen
+          loadAppModule();
+        }
+      })();
+    </script>
   </body>
 </html>
