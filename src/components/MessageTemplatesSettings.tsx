@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -47,15 +48,26 @@ type TemplateForm = {
   is_active: boolean;
 };
 
+type AutomationChannel = 'chat' | 'email' | 'push';
+
 type AutomationForm = {
   id: string | null;
+  group_id: string | null;
+  automation_ids: string[];
   name: string;
   trigger: OutreachTrigger;
-  channel: 'chat' | 'email' | 'push';
+  channels: AutomationChannel[];
   recipient_type: 'candidate' | 'employer';
-  template_id: string;
+  template_ids: Partial<Record<AutomationChannel, string>>;
   delay_minutes: number;
   is_enabled: boolean;
+};
+
+type AutomationGroup = {
+  groupId: string;
+  automations: OutreachAutomation[];
+  channels: AutomationChannel[];
+  primary: OutreachAutomation;
 };
 
 type StudioTab = 'templates' | 'automations' | 'logs';
@@ -71,13 +83,30 @@ const EMPTY_TEMPLATE_FORM: TemplateForm = {
 
 const EMPTY_AUTOMATION_FORM: AutomationForm = {
   id: null,
+  group_id: null,
+  automation_ids: [],
   name: '',
   trigger: 'job_closed',
-  channel: 'email',
+  channels: ['email'],
   recipient_type: 'candidate',
-  template_id: '',
+  template_ids: {},
   delay_minutes: 0,
   is_enabled: true,
+};
+
+const CHANNEL_ORDER: AutomationChannel[] = ['chat', 'email', 'push'];
+
+const isAutomationChannel = (value: string): value is AutomationChannel => CHANNEL_ORDER.includes(value as AutomationChannel);
+
+const getAutomationGroupId = (automation: OutreachAutomation) => {
+  const filters = automation.filters;
+
+  if (filters && typeof filters === 'object' && !Array.isArray(filters)) {
+    const groupId = (filters as Record<string, unknown>).group_id;
+    if (typeof groupId === 'string' && groupId.trim()) return groupId;
+  }
+
+  return automation.id;
 };
 
 export function MessageTemplatesSettings() {
@@ -99,20 +128,72 @@ export function MessageTemplatesSettings() {
   const [templateForm, setTemplateForm] = useState<TemplateForm>(EMPTY_TEMPLATE_FORM);
   const [automationForm, setAutomationForm] = useState<AutomationForm>(EMPTY_AUTOMATION_FORM);
 
-  const channelTemplates = useMemo(
-    () => templates.filter((template) => template.channel === automationForm.channel && template.is_active),
-    [templates, automationForm.channel],
-  );
+  const activeTemplatesByChannel = useMemo(() => ({
+    chat: templates.filter((template) => template.channel === 'chat' && template.is_active),
+    email: templates.filter((template) => template.channel === 'email' && template.is_active),
+    push: templates.filter((template) => template.channel === 'push' && template.is_active),
+  }), [templates]);
+
+  const automationGroups = useMemo<AutomationGroup[]>(() => {
+    const grouped = new Map<string, OutreachAutomation[]>();
+
+    automations.forEach((automation) => {
+      const groupId = getAutomationGroupId(automation);
+      const existing = grouped.get(groupId) ?? [];
+      existing.push(automation);
+      grouped.set(groupId, existing);
+    });
+
+    return Array.from(grouped.entries()).map(([groupId, items]) => {
+      const sortedItems = [...items].sort(
+        (a, b) => CHANNEL_ORDER.indexOf(a.channel as AutomationChannel) - CHANNEL_ORDER.indexOf(b.channel as AutomationChannel),
+      );
+
+      return {
+        groupId,
+        automations: sortedItems,
+        channels: CHANNEL_ORDER.filter((channel) => sortedItems.some((item) => item.channel === channel)),
+        primary: sortedItems[0],
+      };
+    });
+  }, [automations]);
+
+  const automationFormHasAllTemplates = automationForm.channels.length > 0 && automationForm.channels.every((channel) => Boolean(automationForm.template_ids[channel]));
 
   useEffect(() => {
     if (user) void fetchStudio();
   }, [user]);
 
   useEffect(() => {
-    if (!channelTemplates.some((template) => template.id === automationForm.template_id)) {
-      setAutomationForm((prev) => ({ ...prev, template_id: channelTemplates[0]?.id ?? '' }));
-    }
-  }, [channelTemplates, automationForm.template_id]);
+    setAutomationForm((prev) => {
+      const nextTemplateIds = { ...prev.template_ids };
+      let changed = false;
+
+      CHANNEL_ORDER.forEach((channel) => {
+        const isSelected = prev.channels.includes(channel);
+        const channelTemplates = activeTemplatesByChannel[channel];
+
+        if (!isSelected) {
+          if (channel in nextTemplateIds) {
+            delete nextTemplateIds[channel];
+            changed = true;
+          }
+          return;
+        }
+
+        const currentTemplateId = nextTemplateIds[channel] ?? '';
+        const isValid = currentTemplateId ? channelTemplates.some((template) => template.id === currentTemplateId) : false;
+        const fallbackTemplateId = channelTemplates[0]?.id ?? '';
+
+        if (!isValid && currentTemplateId !== fallbackTemplateId) {
+          nextTemplateIds[channel] = fallbackTemplateId;
+          changed = true;
+        }
+      });
+
+      return changed ? { ...prev, template_ids: nextTemplateIds } : prev;
+    });
+  }, [activeTemplatesByChannel, automationForm.channels]);
 
   useEffect(() => {
     const updateIndicator = () => {
@@ -257,32 +338,72 @@ export function MessageTemplatesSettings() {
   };
 
   const handleSaveAutomation = async () => {
-    if (!user || !automationForm.name.trim() || !automationForm.template_id) return;
+    if (!user || !automationForm.name.trim() || automationForm.channels.length === 0) return;
+
+    const missingTemplate = automationForm.channels.some((channel) => !automationForm.template_ids[channel]);
+    if (missingTemplate) {
+      toast.error('Välj en mall för varje vald kanal');
+      return;
+    }
+
     setSavingAutomation(true);
 
-    const payload = {
+    const groupId = automationForm.group_id ?? crypto.randomUUID();
+    const basePayload = {
       owner_user_id: user.id,
       organization_id: organizationId,
       name: automationForm.name.trim(),
       trigger: automationForm.trigger,
-      channel: automationForm.channel,
       recipient_type: automationForm.recipient_type,
-      template_id: automationForm.template_id,
       delay_minutes: automationForm.delay_minutes,
-      filters: {},
+      filters: { group_id: groupId },
       is_enabled: automationForm.is_enabled,
     };
 
-    const query = automationForm.id
-      ? supabase.from('outreach_automations').update(payload).eq('id', automationForm.id)
-      : supabase.from('outreach_automations').insert(payload);
+    const existingAutomations = automations.filter((automation) => automationForm.automation_ids.includes(automation.id));
+    const existingByChannel = new Map(existingAutomations.map((automation) => [automation.channel as AutomationChannel, automation]));
+    const selectedChannels = new Set(automationForm.channels);
 
-    const { error } = await query;
+    const updates = automationForm.channels
+      .map((channel) => {
+        const existing = existingByChannel.get(channel);
+        if (!existing) return null;
 
-    if (error) {
-      toast.error('Kunde inte spara automationen');
+        return supabase
+          .from('outreach_automations')
+          .update({
+            ...basePayload,
+            channel,
+            template_id: automationForm.template_ids[channel] ?? '',
+          })
+          .eq('id', existing.id);
+      })
+      .filter(Boolean);
+
+    const inserts = automationForm.channels
+      .filter((channel) => !existingByChannel.has(channel))
+      .map((channel) => ({
+        ...basePayload,
+        channel,
+        template_id: automationForm.template_ids[channel] ?? '',
+      }));
+
+    const removeIds = existingAutomations
+      .filter((automation) => !selectedChannels.has(automation.channel as AutomationChannel))
+      .map((automation) => automation.id);
+
+    const results = await Promise.all([
+      ...updates,
+      ...(inserts.length > 0 ? [supabase.from('outreach_automations').insert(inserts)] : []),
+      ...(removeIds.length > 0 ? [supabase.from('outreach_automations').delete().in('id', removeIds)] : []),
+    ]);
+
+    const failedResult = results.find((result) => result?.error);
+
+    if (failedResult?.error) {
+      toast.error('Kunde inte spara regeln');
     } else {
-      toast.success(automationForm.id ? 'Automation uppdaterad' : 'Automation skapad');
+      toast.success(automationForm.id ? 'Regel uppdaterad' : 'Regel skapad');
       setAutomationForm(EMPTY_AUTOMATION_FORM);
       await fetchStudio();
     }
@@ -304,27 +425,54 @@ export function MessageTemplatesSettings() {
     }
   };
 
-  const handleDeleteAutomation = async (id: string) => {
+  const handleDeleteAutomation = async (ids: string[]) => {
     const { error } = await supabase
       .from('outreach_automations')
       .delete()
-      .eq('id', id);
+      .in('id', ids);
 
     if (error) {
-      toast.error('Kunde inte ta bort automationen');
+      toast.error('Kunde inte ta bort regeln');
     } else {
-      toast.success('Automation borttagen');
+      toast.success('Regel borttagen');
       await fetchStudio();
     }
   };
 
-  const handleToggleAutomation = async (automation: OutreachAutomation, enabled: boolean) => {
-    const { error } = await supabase.from('outreach_automations').update({ is_enabled: enabled }).eq('id', automation.id);
+  const handleToggleAutomation = async (group: AutomationGroup, enabled: boolean) => {
+    const { error } = await supabase.from('outreach_automations').update({ is_enabled: enabled }).in('id', group.automations.map((automation) => automation.id));
     if (error) {
-      toast.error('Kunde inte uppdatera automationen');
+      toast.error('Kunde inte uppdatera regeln');
       return;
     }
-    setAutomations((prev) => prev.map((item) => (item.id === automation.id ? { ...item, is_enabled: enabled } : item)));
+    setAutomations((prev) => prev.map((item) => (group.automations.some((automation) => automation.id === item.id) ? { ...item, is_enabled: enabled } : item)));
+  };
+
+  const handleEditAutomationGroup = (group: AutomationGroup) => {
+    setAutomationForm({
+      id: group.primary.id,
+      group_id: group.groupId,
+      automation_ids: group.automations.map((automation) => automation.id),
+      name: group.primary.name,
+      trigger: group.primary.trigger,
+      channels: group.channels,
+      recipient_type: group.primary.recipient_type,
+      template_ids: group.automations.reduce<Partial<Record<AutomationChannel, string>>>((acc, automation) => {
+        acc[automation.channel as AutomationChannel] = automation.template_id;
+        return acc;
+      }, {}),
+      delay_minutes: group.primary.delay_minutes,
+      is_enabled: group.automations.some((automation) => automation.is_enabled),
+    });
+  };
+
+  const toggleAutomationChannel = (channel: AutomationChannel, checked: boolean) => {
+    setAutomationForm((prev) => ({
+      ...prev,
+      channels: checked
+        ? [...prev.channels, channel].filter((value, index, array) => array.indexOf(value) === index)
+        : prev.channels.filter((value) => value !== channel),
+    }));
   };
 
   const handleRunDispatch = async () => {
@@ -353,7 +501,7 @@ export function MessageTemplatesSettings() {
         </div>
         <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:justify-end">
           <Button size="sm" variant="glassPurple" onClick={seedDefaults} disabled={seeding} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
-            {seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+          {seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
             Kom igång snabbt
           </Button>
           <Button size="sm" variant="glassBlue" onClick={handleRunDispatch} disabled={runningDispatch} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
@@ -364,9 +512,9 @@ export function MessageTemplatesSettings() {
       </div>
 
       <div className="mb-3 grid gap-1.5 md:grid-cols-3">
-        {[
+          {[
           { label: 'Mallar', value: templates.length, icon: Bot },
-          { label: 'Aktiva regler', value: automations.filter((item) => item.is_enabled).length, icon: RefreshCw },
+           { label: 'Aktiva regler', value: automationGroups.filter((group) => group.automations.some((item) => item.is_enabled)).length, icon: RefreshCw },
           { label: 'Väntar på att skickas', value: logs.filter((item) => item.status === 'pending').length, icon: ScrollText },
         ].map(({ label, value, icon: Icon }) => (
           <div key={label} className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-1.5">
@@ -561,43 +709,41 @@ export function MessageTemplatesSettings() {
           <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3">
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
-            ) : automations.length === 0 ? (
+            ) : automationGroups.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga regler ännu.</div>
             ) : (
                 <div className="space-y-2">
-                {automations.map((automation) => {
-                  const linkedTemplate = templates.find((template) => template.id === automation.template_id);
+                {automationGroups.map((group) => {
+                  const linkedTemplates = group.channels.map((channel) => {
+                    const automation = group.automations.find((item) => item.channel === channel);
+                    const template = templates.find((item) => item.id === automation?.template_id);
+                    return `${getOutreachChannelLabel(channel)}: ${template?.name ?? 'Ingen mall vald'}`;
+                  });
+
                   return (
-                    <div key={automation.id} className="rounded-2xl border border-white/10 bg-white/5 p-2">
+                    <div key={group.groupId} className="rounded-2xl border border-white/10 bg-white/5 p-2">
                       <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                         <div className="min-w-0 space-y-1.5">
                           <div className="flex min-w-0 flex-wrap items-center gap-2">
-                            <p className="max-w-full truncate text-sm font-semibold text-white">{automation.name}</p>
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(automation.trigger)}</span>
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(automation.channel)}</span>
+                            <p className="max-w-full truncate text-sm font-semibold text-white">{group.primary.name}</p>
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(group.primary.trigger)}</span>
+                            {group.channels.map((channel) => (
+                              <span key={channel} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(channel)}</span>
+                            ))}
                           </div>
-                          <p className="text-xs text-white md:text-sm">{linkedTemplate?.name ?? 'Ingen mall vald'} · {getOutreachRecipientLabel(automation.recipient_type)}</p>
+                          <p className="text-xs text-white md:text-sm">{linkedTemplates.join(' · ')} · {getOutreachRecipientLabel(group.primary.recipient_type)}</p>
                         </div>
                         <div className="flex flex-wrap items-center justify-end gap-1.5">
                           <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-white md:text-[11px]">
                             <span>Aktiv</span>
-                            <Switch checked={automation.is_enabled} onCheckedChange={(checked) => void handleToggleAutomation(automation, checked)} />
+                            <Switch checked={group.automations.some((automation) => automation.is_enabled)} onCheckedChange={(checked) => void handleToggleAutomation(group, checked)} />
                           </div>
-                          <Button variant="glass" size="sm" className="h-7 rounded-full px-2 text-[10px] md:text-[11px]" onClick={() => setAutomationForm({
-                            id: automation.id,
-                            name: automation.name,
-                            trigger: automation.trigger,
-                            channel: automation.channel,
-                            recipient_type: automation.recipient_type,
-                            template_id: automation.template_id,
-                            delay_minutes: automation.delay_minutes,
-                            is_enabled: automation.is_enabled,
-                          })}><Pencil className="h-2.5 w-2.5" />Redigera</Button>
+                          <Button variant="glass" size="sm" className="h-7 rounded-full px-2 text-[10px] md:text-[11px]" onClick={() => handleEditAutomationGroup(group)}><Pencil className="h-2.5 w-2.5" />Redigera</Button>
                           <Button
                             variant="outlineNeutral"
                             size="sm"
                             className="h-7 w-7 rounded-full border-white/10 p-0 text-white transition-colors md:hover:border-destructive/40 md:hover:bg-destructive/20 md:hover:text-destructive"
-                            onClick={() => handleDeleteAutomation(automation.id)}
+                            onClick={() => handleDeleteAutomation(group.automations.map((automation) => automation.id))}
                           ><Trash2 className="h-2.5 w-2.5" /></Button>
                         </div>
                       </div>
@@ -631,12 +777,25 @@ export function MessageTemplatesSettings() {
             <div className="grid gap-2">
               <div className="space-y-2">
                 <Label className="text-white">Var ska det skickas?</Label>
-                <Select value={automationForm.channel} onValueChange={(value: AutomationForm['channel']) => setAutomationForm((prev) => ({ ...prev, channel: value }))}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {OUTREACH_CHANNEL_OPTIONS.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <p className="text-[11px] text-white/80">Du kan välja en eller flera kanaler i samma regel.</p>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {OUTREACH_CHANNEL_OPTIONS.map((option) => {
+                    const checked = automationForm.channels.includes(option.value as AutomationChannel);
+
+                    return (
+                      <label
+                        key={option.value}
+                        className="flex cursor-pointer items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white transition-colors md:hover:border-white/20"
+                      >
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(value) => toggleAutomationChannel(option.value as AutomationChannel, Boolean(value))}
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
             </div>
             <div className="grid gap-2">
@@ -658,12 +817,38 @@ export function MessageTemplatesSettings() {
             </div>
             <div className="space-y-2">
               <Label className="text-white">Vilken mall ska användas?</Label>
-              <Select value={automationForm.template_id} onValueChange={(value) => setAutomationForm((prev) => ({ ...prev, template_id: value }))}>
-                <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue placeholder="Välj mall" /></SelectTrigger>
-                <SelectContent>
-                  {channelTemplates.length === 0 ? <SelectItem value="__none" disabled>Skapa först en mall för den här kanalen</SelectItem> : channelTemplates.map((template) => <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                {automationForm.channels.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-3 text-xs text-white/80">Välj minst en kanal för att koppla mallar.</div>
+                ) : (
+                  automationForm.channels.map((channel) => {
+                    const channelTemplates = activeTemplatesByChannel[channel];
+
+                    return (
+                      <div key={channel} className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
+                        <Label className="text-white">Mall för {getOutreachChannelLabel(channel).toLowerCase()}</Label>
+                        <Select
+                          value={automationForm.template_ids[channel] ?? ''}
+                          onValueChange={(value) => setAutomationForm((prev) => ({
+                            ...prev,
+                            template_ids: {
+                              ...prev.template_ids,
+                              [channel]: value,
+                            },
+                          }))}
+                        >
+                          <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue placeholder="Välj mall" /></SelectTrigger>
+                          <SelectContent>
+                            {channelTemplates.length === 0
+                              ? <SelectItem value="__none" disabled>Skapa först en mall för {getOutreachChannelLabel(channel).toLowerCase()}</SelectItem>
+                              : channelTemplates.map((template) => <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
             <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
               <div className="min-w-0">
@@ -673,7 +858,7 @@ export function MessageTemplatesSettings() {
               <Switch checked={automationForm.is_enabled} onCheckedChange={(checked) => setAutomationForm((prev) => ({ ...prev, is_enabled: checked }))} />
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveAutomation} disabled={savingAutomation || !automationForm.template_id}>{savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{automationForm.id ? 'Uppdatera automation' : 'Spara automation'}</Button>
+              <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveAutomation} disabled={savingAutomation || !automationFormHasAllTemplates}>{savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{automationForm.id ? 'Uppdatera regel' : 'Spara regel'}</Button>
               <Button variant="glass" size="sm" className="px-3 text-xs" onClick={() => setAutomationForm(EMPTY_AUTOMATION_FORM)}>Rensa</Button>
             </div>
           </div>
