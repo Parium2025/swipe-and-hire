@@ -66,7 +66,7 @@ export const renderOutreachText = (template: string | null | undefined, data: Re
   let output = template ?? '';
 
   Object.entries(data).forEach(([key, value]) => {
-    output = output.replaceAll(`{${key}}`, value == null ? '' : String(value));
+    output = output.split(`{${key}}`).join(value == null ? '' : String(value));
   });
 
   return output;
