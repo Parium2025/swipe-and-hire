@@ -131,8 +131,6 @@ const getDelayFieldLabel = (trigger: OutreachTrigger) => {
       return 'Minuter före intervjun';
     case 'interview_after':
       return 'Minuter efter intervjun';
-    case 'application_no_response_14d':
-      return 'Extra minuter efter dag 14';
     default:
       return 'Väntetid (min)';
   }
@@ -144,14 +142,15 @@ const getDelayFieldHint = (trigger: OutreachTrigger) => {
       return 'Exempel: 60 = skicka 1 timme innan intervjun.';
     case 'interview_after':
       return 'Exempel: 180 = skicka 3 timmar efter intervjun.';
-    case 'application_no_response_14d':
-      return '0 betyder exakt efter 14 dagar utan respons.';
     case 'application_received':
       return '0 betyder direkt när ansökan kommer in.';
     default:
       return '0 betyder direkt när händelsen sker.';
   }
 };
+
+const normalizeTimelineTrigger = (trigger: OutreachTrigger): OutreachTrigger =>
+  trigger === 'application_no_response_14d' ? 'job_closed' : trigger;
 
 export function MessageTemplatesSettings() {
   const { user, profile } = useAuth();
@@ -259,7 +258,10 @@ export function MessageTemplatesSettings() {
     group_id: group?.groupId ?? null,
     automation_ids: group?.automations.map((automation) => automation.id) ?? [],
     name: group?.primary.name ?? family.baseName,
-    trigger: group?.primary.trigger && group.primary.trigger !== 'manual_send' ? group.primary.trigger : 'application_received',
+    trigger:
+      group?.primary.trigger && group.primary.trigger !== 'manual_send'
+        ? normalizeTimelineTrigger(group.primary.trigger)
+        : 'application_received',
     channels: family.channels,
     recipient_type: 'candidate',
     template_ids: family.channels.reduce<Partial<Record<AutomationChannel, string>>>((acc, channel) => {
@@ -1100,7 +1102,7 @@ export function MessageTemplatesSettings() {
                   <Select value={automationForm.trigger} onValueChange={(value: AutomationForm['trigger']) => setAutomationForm((prev) => ({ ...prev, trigger: value }))}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {OUTREACH_TRIGGER_OPTIONS.filter((option) => !['manual_send', 'interview_scheduled'].includes(option.value)).map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
+                      {OUTREACH_TRIGGER_OPTIONS.filter((option) => !['manual_send', 'interview_scheduled', 'application_no_response_14d'].includes(option.value)).map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
