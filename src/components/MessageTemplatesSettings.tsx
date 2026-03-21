@@ -588,7 +588,7 @@ export function MessageTemplatesSettings() {
           {loading ? (
             <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
           ) : logs.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white/60">Inga utskick ännu.</div>
+            <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga utskick ännu.</div>
           ) : (
             <div className="space-y-3">
               {logs.map((log) => {
@@ -596,13 +596,13 @@ export function MessageTemplatesSettings() {
                 return (
                   <div key={log.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white/60">{getOutreachTriggerLabel(log.trigger)}</span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white/60">{getOutreachChannelLabel(log.channel)}</span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white/60">{log.status}</span>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachTriggerLabel(log.trigger)}</span>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(log.channel)}</span>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">{log.status}</span>
                     </div>
                     <p className="text-sm font-medium text-white">{template?.name ?? 'Direktutskick'}</p>
-                    <p className="text-xs text-white/55 mt-1">{new Date(log.created_at).toLocaleString('sv-SE')}{log.sent_at ? ` · skickad ${new Date(log.sent_at).toLocaleString('sv-SE')}` : ''}</p>
-                    {log.error_message && <p className="text-sm text-white/72 mt-2">{log.error_message}</p>}
+                    <p className="text-xs text-white mt-1">{new Date(log.created_at).toLocaleString('sv-SE')}{log.sent_at ? ` · skickad ${new Date(log.sent_at).toLocaleString('sv-SE')}` : ''}</p>
+                    {log.error_message && <p className="text-sm text-white mt-2">{log.error_message}</p>}
                   </div>
                 );
               })}
