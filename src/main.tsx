@@ -7,6 +7,18 @@ import { initSyncEngine } from './lib/offlineSyncEngine'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
+function markAppMounted() {
+  if (typeof window === 'undefined') return;
+
+  try {
+    (window as any).__pariumAppMounted = true;
+    sessionStorage.removeItem('parium-auth-hard-refresh-retried');
+    window.dispatchEvent(new CustomEvent('parium:app-mounted'));
+  } catch {
+    // Never block app start for mount bookkeeping.
+  }
+}
+
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
   try {
@@ -100,6 +112,14 @@ function redirectAuthTokensIfNeeded() {
 }
 
 async function bootstrap() {
+  if (typeof window !== 'undefined') {
+    try {
+      (window as any).__pariumAppMounted = false;
+    } catch {
+      // ignore
+    }
+  }
+
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
@@ -169,6 +189,10 @@ async function bootstrap() {
       <App />
     </GlobalErrorBoundary>
   );
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(markAppMounted);
+  });
 }
 
 void bootstrap();

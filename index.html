@@ -176,6 +176,39 @@
     #auth-splash-dots.fading {
       opacity: 0;
     }
+    #auth-splash-fallback {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: min(320px, calc(100vw - 48px));
+      margin-top: 24px;
+      text-align: center;
+      color: hsl(0 0% 100%);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    #auth-splash-fallback p {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      color: hsla(0 0% 100% / 0.82);
+    }
+    #auth-splash-retry {
+      appearance: none;
+      border: 1px solid hsla(0 0% 100% / 0.24);
+      background: hsla(0 0% 100% / 0.08);
+      color: hsl(0 0% 100%);
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    #auth-splash.recovery #auth-splash-fallback {
+      display: flex;
+    }
     #auth-splash-dots span {
       width: 10px;
       height: 10px;
@@ -218,6 +251,10 @@
         <span></span>
         <span></span>
       </div>
+      <div id="auth-splash-fallback" aria-live="polite">
+        <p>Inloggningen tar längre tid än väntat. Vi håller kvar laddningsskärmen tills appen är redo.</p>
+        <button id="auth-splash-retry" type="button">Försök igen</button>
+      </div>
     </div>
     <script>
       // Show auth splash ONLY on /auth route during hard refresh (NOT SPA navigation)
@@ -233,18 +270,69 @@
           if ((path === '/auth' || path === '/auth/') && !skipSplash) {
             var splash = document.getElementById('auth-splash');
             var logo = document.getElementById('auth-splash-logo');
+            var dots = document.getElementById('auth-splash-dots');
+            var retryButton = document.getElementById('auth-splash-retry');
+            var retriedKey = 'parium-auth-hard-refresh-retried';
             if (splash && logo) {
               // Display container IMMEDIATELY with dark background to block auth content
               splash.style.display = 'flex';
               
               // Function to fade in content (not the container)
               var contentShown = false;
+              var exitStarted = false;
+              var recoveryShown = false;
               function showContent() {
                 if (contentShown) return;
                 contentShown = true;
                 requestAnimationFrame(function() {
                   splash.classList.add('content-ready');
                 });
+              }
+
+              function clearRetryFlag() {
+                try {
+                  sessionStorage.removeItem(retriedKey);
+                } catch (e) {}
+              }
+
+              function startExit() {
+                if (exitStarted || recoveryShown) return;
+                exitStarted = true;
+                if (dots) dots.classList.add('fading');
+                setTimeout(function() {
+                  splash.classList.add('fade-out');
+                  setTimeout(function() {
+                    splash.style.display = 'none';
+                    clearRetryFlag();
+                  }, 500);
+                }, 400);
+              }
+
+              function showRecovery() {
+                if (recoveryShown || window.__pariumAppMounted === true) return;
+                recoveryShown = true;
+                splash.classList.remove('fade-out');
+                splash.classList.add('content-ready', 'recovery');
+                if (dots) dots.classList.add('fading');
+              }
+
+              function tryExitIfMounted() {
+                if (window.__pariumAppMounted === true) {
+                  startExit();
+                }
+              }
+
+              if (retryButton) {
+                retryButton.addEventListener('click', function() {
+                  clearRetryFlag();
+                  window.location.reload();
+                });
+              }
+
+              if (window.__pariumAppMounted === true) {
+                startExit();
+              } else {
+                window.addEventListener('parium:app-mounted', startExit, { once: true });
               }
               
               // Wait for logo to load, then fade in content
@@ -259,27 +347,35 @@
                 // never leave users on a blank blue screen.
                 setTimeout(showContent, 800);
               }
-              
-              // Fade dots first (0.5s before splash fades)
-              setTimeout(function() {
-                var dots = document.getElementById('auth-splash-dots');
-                if (dots) dots.classList.add('fading');
-              }, 1500);
-              
-              // Fade out entire splash after 2 seconds
-              setTimeout(function() {
-                splash.classList.add('fade-out');
-                // Remove from DOM after fade
-                setTimeout(function() {
-                  splash.style.display = 'none';
-                }, 500);
-              }, 2000);
 
-              // Final failsafe: even if a prior animation step stalls, force-hide it.
+              // Keep polling briefly in case the app mounts before the event listener is attached.
+              setTimeout(tryExitIfMounted, 1200);
+              setTimeout(tryExitIfMounted, 2200);
+
+              // If the app still hasn't mounted, do one guarded hard refresh.
+              // If that still doesn't recover, keep the splash visible and show retry UI
+              // instead of ever dropping to a blank blue screen.
               setTimeout(function() {
-                splash.classList.add('fade-out');
-                splash.style.display = 'none';
-              }, 2600);
+                if (window.__pariumAppMounted === true) {
+                  startExit();
+                  return;
+                }
+
+                var alreadyRetried = false;
+                try {
+                  alreadyRetried = sessionStorage.getItem(retriedKey) === '1';
+                } catch (e) {}
+
+                if (!alreadyRetried) {
+                  try {
+                    sessionStorage.setItem(retriedKey, '1');
+                  } catch (e) {}
+                  window.location.reload();
+                  return;
+                }
+
+                showRecovery();
+              }, 3200);
             }
           }
         } catch(e) {}
