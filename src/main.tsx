@@ -141,9 +141,14 @@ async function bootstrap() {
   const authLogoPromise = preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
   void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
 
-  // On /auth, wait for logo to be fully decoded before rendering
+  // On /auth, never block app mount indefinitely on image decode.
+  // Some mobile browsers can stall decode() for data-URI images, which would
+  // otherwise leave users on a blank blue screen before React mounts.
   if (isAuthRoute) {
-    await authLogoPromise;
+    await Promise.race([
+      authLogoPromise,
+      new Promise((resolve) => setTimeout(resolve, 800)),
+    ]);
   }
 
   // Registrera Service Worker och Sync Engine
