@@ -466,13 +466,16 @@ export function MessageTemplatesSettings() {
     });
   };
 
-  const toggleAutomationChannel = (channel: AutomationChannel, checked: boolean) => {
-    setAutomationForm((prev) => ({
-      ...prev,
-      channels: checked
-        ? [...prev.channels, channel].filter((value, index, array) => array.indexOf(value) === index)
-        : prev.channels.filter((value) => value !== channel),
-    }));
+  const toggleAutomationChannel = (channel: AutomationChannel) => {
+    setAutomationForm((prev) => {
+      const isSelected = prev.channels.includes(channel);
+      return {
+        ...prev,
+        channels: isSelected
+          ? prev.channels.filter((value) => value !== channel)
+          : [...prev.channels, channel],
+      };
+    });
   };
 
   const handleRunDispatch = async () => {
@@ -784,11 +787,18 @@ export function MessageTemplatesSettings() {
                     const checked = automationForm.channels.includes(channel);
 
                     return (
-                      <button
+                      <div
                         key={option.value}
-                        type="button"
+                        role="button"
+                        tabIndex={0}
                         aria-pressed={checked}
-                        onClick={() => toggleAutomationChannel(channel, !checked)}
+                        onClick={() => toggleAutomationChannel(channel)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            toggleAutomationChannel(channel);
+                          }
+                        }}
                         className={[
                           'flex min-h-11 items-center gap-2 rounded-2xl border px-3 py-2 text-left text-sm transition-colors',
                           checked
@@ -798,11 +808,10 @@ export function MessageTemplatesSettings() {
                       >
                         <Checkbox
                           checked={checked}
-                          onCheckedChange={(value) => toggleAutomationChannel(channel, Boolean(value))}
                           className="pointer-events-none"
                         />
                         <span className="font-medium">{option.label}</span>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
