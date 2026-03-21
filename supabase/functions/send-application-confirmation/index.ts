@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -81,6 +83,27 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { applicant_email, applicant_first_name, job_title, company_name }: ApplicationConfirmationRequest = await req.json();
+
+    const dispatchResponse = await fetch(`${supabaseUrl}/functions/v1/outreach-dispatch`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${supabaseServiceKey}`,
+      },
+      body: JSON.stringify({ trigger: "application_received" }),
+    });
+
+    if (dispatchResponse.ok) {
+      const dispatchData = await dispatchResponse.json().catch(() => ({}));
+      const processedCount = Number(dispatchData?.processedCount ?? 0);
+
+      if (processedCount > 0) {
+        return new Response(JSON.stringify({ success: true, processedCount, mode: "outreach_automation" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+    }
 
     console.log(`Sending application confirmation to ${applicant_email} for job: ${job_title}`);
 

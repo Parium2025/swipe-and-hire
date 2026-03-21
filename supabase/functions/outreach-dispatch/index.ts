@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 import { Resend } from 'npm:resend@2.0.0';
 
 type OutreachChannel = 'chat' | 'email' | 'push';
-type OutreachTrigger = 'job_closed' | 'interview_scheduled' | 'manual_send';
+type OutreachTrigger = 'application_received' | 'application_no_response_14d' | 'interview_before' | 'interview_after' | 'job_closed' | 'interview_scheduled' | 'manual_send';
 
 type OutreachTemplate = {
   id: string;
@@ -141,6 +141,7 @@ async function dispatchLog(log: OutreachLog) {
     scheduled_date: context.scheduledDate,
     scheduled_time: context.scheduledTime,
     duration_minutes: context.durationMinutes,
+    location_type: (log.payload?.location_type as string | undefined) ?? '',
     location_details: context.locationDetails,
     message: context.message,
   };
