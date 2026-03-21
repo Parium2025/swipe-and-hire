@@ -46,7 +46,7 @@ function NotificationItem({
             if (!notification.is_read) onRead(notification.id);
             if (route) onNavigate(route);
           }}
-          className={`w-full flex items-start gap-3 px-3 py-2.5 text-left transition-colors rounded-lg ${
+          className={`w-full flex items-start gap-3 px-3 py-3 text-left transition-colors rounded-lg ${
             notification.is_read 
               ? 'opacity-60 hover:bg-white/5' 
               : 'hover:bg-white/10 bg-white/5'
@@ -168,21 +168,23 @@ function NotificationCenter() {
           </div>
 
           {/* Notification list */}
-          <div className="overflow-y-auto flex-1 p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="overflow-y-auto flex-1 p-2" style={{ WebkitOverflowScrolling: 'touch' }}>
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-white">
                 <Bell className="h-8 w-8 mb-3 opacity-60" />
                 <p className="text-sm">Inga notifikationer</p>
               </div>
             ) : (
-              notifications.map(n => (
-                <NotificationItem
-                  key={n.id}
-                  notification={n}
-                  onRead={markAsRead}
-                  onNavigate={handleNavigate}
-                />
-              ))
+              <div className="space-y-1.5">
+                {notifications.map(n => (
+                  <NotificationItem
+                    key={n.id}
+                    notification={n}
+                    onRead={markAsRead}
+                    onNavigate={handleNavigate}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>
