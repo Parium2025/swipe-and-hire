@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
 import { toast } from 'sonner';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 
 // Page size for scalable pagination
 const PAGE_SIZE = 50;
@@ -180,6 +181,23 @@ export function useColleagueCandidates(colleagueId: string | null) {
       const lastItem = myCandidates[myCandidates.length - 1];
       cursorRef.current = lastItem.updated_at;
       setHasMore(myCandidates.length === PAGE_SIZE);
+
+      const imagePaths = result
+        .map((item) => item.profile_image_url)
+        .filter((path): path is string => typeof path === 'string' && path.trim() !== '')
+        .slice(0, 12);
+      const videoPaths = result
+        .filter((item) => item.is_profile_video && item.video_url)
+        .map((item) => item.video_url)
+        .filter((path): path is string => typeof path === 'string' && path.trim() !== '')
+        .slice(0, 8);
+
+      setTimeout(() => {
+        void Promise.allSettled([
+          ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image')),
+          ...videoPaths.map((path) => prefetchMediaUrl(path, 'profile-video')),
+        ]);
+      }, 0);
 
       if (loadMore) {
         setCandidates(prev => [...prev, ...result]);

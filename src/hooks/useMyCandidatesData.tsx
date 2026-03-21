@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/useCandidateOperationQueue';
 import { getIsOnline } from '@/lib/connectivityManager';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
@@ -228,6 +229,23 @@ export function useMyCandidatesData(searchQuery: string = '') {
         const lastItem = searchResults[searchResults.length - 1];
         const nextCursor = searchResults.length === PAGE_SIZE ? lastItem.updated_at : null;
 
+        const imagePaths = items
+          .map((item) => item.profile_image_url)
+          .filter((path): path is string => typeof path === 'string' && path.trim() !== '')
+          .slice(0, 12);
+        const videoPaths = items
+          .filter((item) => item.is_profile_video && item.video_url)
+          .map((item) => item.video_url)
+          .filter((path): path is string => typeof path === 'string' && path.trim() !== '')
+          .slice(0, 8);
+
+        setTimeout(() => {
+          void Promise.allSettled([
+            ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image')),
+            ...videoPaths.map((path) => prefetchMediaUrl(path, 'profile-video')),
+          ]);
+        }, 0);
+
         return { items, nextCursor };
       }
 
@@ -377,6 +395,23 @@ export function useMyCandidatesData(searchQuery: string = '') {
       // Determine next cursor for pagination
       const lastItem = myCandidates[myCandidates.length - 1];
       const nextCursor = myCandidates.length === PAGE_SIZE ? lastItem.updated_at : null;
+
+      const imagePaths = items
+        .map((item) => item.profile_image_url)
+        .filter((path): path is string => typeof path === 'string' && path.trim() !== '')
+        .slice(0, 12);
+      const videoPaths = items
+        .filter((item) => item.is_profile_video && item.video_url)
+        .map((item) => item.video_url)
+        .filter((path): path is string => typeof path === 'string' && path.trim() !== '')
+        .slice(0, 8);
+
+      setTimeout(() => {
+        void Promise.allSettled([
+          ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image')),
+          ...videoPaths.map((path) => prefetchMediaUrl(path, 'profile-video')),
+        ]);
+      }, 0);
 
       // 🔥 Cache first page for instant-load on next visit (only for non-search)
       if (!pageParam && !searchQuery && items.length > 0) {
