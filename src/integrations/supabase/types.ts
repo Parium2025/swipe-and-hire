@@ -1619,6 +1619,225 @@ export type Database = {
         }
         Relationships: []
       }
+      outreach_automations: {
+        Row: {
+          channel: Database["public"]["Enums"]["outreach_channel"]
+          created_at: string
+          delay_minutes: number
+          filters: Json
+          id: string
+          is_enabled: boolean
+          name: string
+          organization_id: string | null
+          owner_user_id: string
+          recipient_type: Database["public"]["Enums"]["outreach_recipient"]
+          template_id: string
+          trigger: Database["public"]["Enums"]["outreach_trigger"]
+          updated_at: string
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["outreach_channel"]
+          created_at?: string
+          delay_minutes?: number
+          filters?: Json
+          id?: string
+          is_enabled?: boolean
+          name: string
+          organization_id?: string | null
+          owner_user_id: string
+          recipient_type?: Database["public"]["Enums"]["outreach_recipient"]
+          template_id: string
+          trigger: Database["public"]["Enums"]["outreach_trigger"]
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["outreach_channel"]
+          created_at?: string
+          delay_minutes?: number
+          filters?: Json
+          id?: string
+          is_enabled?: boolean
+          name?: string
+          organization_id?: string | null
+          owner_user_id?: string
+          recipient_type?: Database["public"]["Enums"]["outreach_recipient"]
+          template_id?: string
+          trigger?: Database["public"]["Enums"]["outreach_trigger"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_automations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_automations_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_dispatch_logs: {
+        Row: {
+          automation_id: string | null
+          channel: Database["public"]["Enums"]["outreach_channel"]
+          conversation_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          interview_id: string | null
+          job_id: string | null
+          organization_id: string | null
+          owner_user_id: string
+          payload: Json
+          recipient_email: string | null
+          recipient_user_id: string | null
+          sent_at: string | null
+          status: string
+          template_id: string | null
+          trigger: Database["public"]["Enums"]["outreach_trigger"]
+        }
+        Insert: {
+          automation_id?: string | null
+          channel: Database["public"]["Enums"]["outreach_channel"]
+          conversation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          interview_id?: string | null
+          job_id?: string | null
+          organization_id?: string | null
+          owner_user_id: string
+          payload?: Json
+          recipient_email?: string | null
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+          template_id?: string | null
+          trigger: Database["public"]["Enums"]["outreach_trigger"]
+        }
+        Update: {
+          automation_id?: string | null
+          channel?: Database["public"]["Enums"]["outreach_channel"]
+          conversation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          interview_id?: string | null
+          job_id?: string | null
+          organization_id?: string | null
+          owner_user_id?: string
+          payload?: Json
+          recipient_email?: string | null
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+          template_id?: string | null
+          trigger?: Database["public"]["Enums"]["outreach_trigger"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_dispatch_logs_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_automations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_dispatch_logs_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_dispatch_logs_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_dispatch_logs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_dispatch_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_dispatch_logs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_templates: {
+        Row: {
+          body: string
+          channel: Database["public"]["Enums"]["outreach_channel"]
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          organization_id: string | null
+          owner_user_id: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          channel: Database["public"]["Enums"]["outreach_channel"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          organization_id?: string | null
+          owner_user_id: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          channel?: Database["public"]["Enums"]["outreach_channel"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          organization_id?: string | null
+          owner_user_id?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_cv_summaries: {
         Row: {
           analyzed_at: string
@@ -2199,6 +2418,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_outreach_scope: {
+        Args: { p_organization_id?: string; p_owner_user_id: string }
+        Returns: boolean
+      }
       can_view_job_application: { Args: { p_job_id: string }; Returns: boolean }
       cleanup_stale_sessions: { Args: never; Returns: number }
       complete_cv_analysis: {
@@ -2325,6 +2548,22 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      get_outreach_automation_for_event: {
+        Args: {
+          p_channel: Database["public"]["Enums"]["outreach_channel"]
+          p_owner_user_id: string
+          p_trigger: Database["public"]["Enums"]["outreach_trigger"]
+        }
+        Returns: {
+          automation_id: string
+          body: string
+          delay_minutes: number
+          filters: Json
+          recipient_type: Database["public"]["Enums"]["outreach_recipient"]
+          subject: string
+          template_id: string
+        }[]
+      }
       get_user_organization_id: { Args: { p_user_id: string }; Returns: string }
       has_applied_to_employer: {
         Args: { p_applicant_id: string; p_employer_id: string }
@@ -2384,6 +2623,10 @@ export type Database = {
         Returns: Json
       }
       remove_session: { Args: { p_session_token: string }; Returns: undefined }
+      render_outreach_template: {
+        Args: { p_data?: Json; p_template: string }
+        Returns: string
+      }
       reorder_job_stages: {
         Args: { p_job_id: string; p_stage_keys: string[] }
         Returns: undefined
@@ -2485,6 +2728,9 @@ export type Database = {
       try_uuid: { Args: { p_text: string }; Returns: string }
     }
     Enums: {
+      outreach_channel: "chat" | "email" | "push"
+      outreach_recipient: "candidate" | "employer"
+      outreach_trigger: "job_closed" | "interview_scheduled" | "manual_send"
       user_role: "job_seeker" | "employer"
     }
     CompositeTypes: {
@@ -2613,6 +2859,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      outreach_channel: ["chat", "email", "push"],
+      outreach_recipient: ["candidate", "employer"],
+      outreach_trigger: ["job_closed", "interview_scheduled", "manual_send"],
       user_role: ["job_seeker", "employer"],
     },
   },
