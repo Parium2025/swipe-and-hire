@@ -1,8 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.83.0";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -10,63 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-const getFollowupTemplate = (firstName: string, jobTitle: string, companyName: string) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Uppdatering om din ansökan – Parium</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
-  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
-    <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
-          <tr>
-            <td style="background-color: #1E3A8A; padding: 32px 30px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="margin: 0 0 4px 0; font-size: 24px; font-weight: bold; color: #ffffff;">Parium</h1>
-              <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.8);">Uppdatering om din ansökan</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 36px 30px;">
-              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
-                Hej ${firstName}!
-              </p>
-              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
-                Det har gått 14 dagar sedan du ansökte till <strong>${jobTitle}</strong> hos <strong>${companyName}</strong> och vi vill bara informera dig att din ansökan fortfarande behandlas.
-              </p>
-              <div style="background-color: #FFFBEB; border-left: 4px solid #F59E0B; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 24px 0;">
-                <p style="margin: 0; font-size: 14px; color: #92400E; line-height: 1.5;">
-                  Rekryteringsprocesser kan ta tid. Om arbetsgivaren är intresserad kommer de att kontakta dig direkt via Parium.
-                </p>
-              </div>
-              <p style="margin: 20px 0 0; font-size: 15px; color: #333; line-height: 1.6;">
-                Under tiden – håll din profil uppdaterad och fortsätt söka nya jobb! Nya möjligheter dyker upp dagligen.
-              </p>
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 0;">
-                <tr>
-                  <td align="center">
-                    <a href="https://parium.se/search-jobs" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 15px; font-weight: bold; line-height: 46px; text-align: center; text-decoration: none; width: 240px;">Sök fler jobb</a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #F9FAFB; padding: 20px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
-              <p style="margin: 0; font-size: 13px; color: #9CA3AF;">Parium AB · Stockholm<br/>Du får detta mail automatiskt 14 dagar efter din ansökan. Du kan hantera mejlinställningar i appen.</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-`;
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -101,30 +41,82 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Found ${applications?.length || 0} applications for 14-day followup`);
 
-    let sentCount = 0;
+    let queuedCount = 0;
+
     for (const app of (applications || [])) {
-      if (!app.email || !app.first_name) continue;
+      const employerId = (app.job_postings as any)?.employer_id;
+      if (!employerId) continue;
 
-      const jobTitle = (app.job_postings as any)?.title || 'Okänt jobb';
-      const companyName = (app.job_postings as any)?.profiles?.company_name || 'Företaget';
+      const { data: matchingAutomations, error: automationError } = await supabase
+        .from("outreach_automations")
+        .select("id, owner_user_id, organization_id, template_id, channel, recipient_type, delay_minutes, filters")
+        .eq("owner_user_id", employerId)
+        .eq("trigger", "application_no_response_14d")
+        .eq("recipient_type", "candidate")
+        .eq("is_enabled", true);
 
-      try {
-        await resend.emails.send({
-          from: "Parium <noreply@parium.se>",
-          to: [app.email],
-          subject: `Uppdatering om din ansökan – ${jobTitle}`,
-          html: getFollowupTemplate(app.first_name, jobTitle, companyName),
+      if (automationError) {
+        console.error("Error fetching application followup automations:", automationError);
+        continue;
+      }
+
+      for (const automation of matchingAutomations || []) {
+        const { data: existingLog } = await supabase
+          .from("outreach_dispatch_logs")
+          .select("id")
+          .eq("automation_id", automation.id)
+          .eq("recipient_user_id", app.applicant_id)
+          .eq("job_id", app.id)
+          .eq("trigger", "application_no_response_14d")
+          .limit(1)
+          .maybeSingle();
+
+        if (existingLog) continue;
+
+        const { error: insertError } = await supabase.from("outreach_dispatch_logs").insert({
+          owner_user_id: automation.owner_user_id,
+          organization_id: automation.organization_id,
+          automation_id: automation.id,
+          template_id: automation.template_id,
+          trigger: "application_no_response_14d",
+          channel: automation.channel,
+          recipient_user_id: app.applicant_id,
+          job_id: app.id,
+          payload: {
+            source: "application-followup",
+            application_id: app.id,
+            queued_at: new Date().toISOString(),
+            delay_minutes: automation.delay_minutes,
+            filters: automation.filters,
+          },
+          status: "pending",
         });
-        sentCount++;
-      } catch (emailError) {
-        console.error(`Failed to send followup to ${app.email}:`, emailError);
+
+        if (!insertError) queuedCount += 1;
       }
     }
 
-    console.log(`Sent ${sentCount} followup emails`);
+    let processedCount = 0;
+    if (queuedCount > 0) {
+      const dispatchResponse = await fetch(`${supabaseUrl}/functions/v1/outreach-dispatch`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+        },
+        body: JSON.stringify({ trigger: "application_no_response_14d" }),
+      });
+
+      if (dispatchResponse.ok) {
+        const dispatchData = await dispatchResponse.json().catch(() => ({}));
+        processedCount = Number(dispatchData?.processedCount ?? 0);
+      }
+    }
+
+    console.log(`Queued ${queuedCount} and processed ${processedCount} 14-day followups`);
 
     return new Response(
-      JSON.stringify({ sent: sentCount, total: applications?.length || 0 }),
+      JSON.stringify({ queued: queuedCount, processed: processedCount, total: applications?.length || 0 }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {

@@ -19,6 +19,19 @@ interface Interview {
   } | null;
 }
 
+interface InterviewTimelineAutomation {
+  id: string;
+  owner_user_id: string;
+  organization_id: string | null;
+  channel: "chat" | "email" | "push";
+  template_id: string;
+  trigger: "interview_before" | "interview_after";
+  delay_minutes: number;
+  filters: Record<string, unknown> | null;
+}
+
+const WINDOW_PADDING_MS = 60 * 1000;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -32,6 +45,97 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const now = new Date();
+
+    const queueInterviewTimelineDispatches = async (trigger: "interview_before" | "interview_after") => {
+      const { data: automations, error: automationsError } = await supabase
+        .from("outreach_automations")
+        .select("id, owner_user_id, organization_id, channel, template_id, trigger, delay_minutes, filters")
+        .eq("trigger", trigger)
+        .eq("recipient_type", "candidate")
+        .eq("is_enabled", true);
+
+      if (automationsError) {
+        console.error(`Error fetching ${trigger} automations:`, automationsError);
+        return 0;
+      }
+
+      let queued = 0;
+
+      for (const automation of (automations || []) as InterviewTimelineAutomation[]) {
+        const delayMs = Math.max(automation.delay_minutes ?? 0, 0) * 60 * 1000;
+        const targetTime = trigger === "interview_before"
+          ? new Date(now.getTime() + delayMs)
+          : new Date(now.getTime() - delayMs);
+
+        const rangeStart = new Date(targetTime.getTime() - WINDOW_PADDING_MS).toISOString();
+        const rangeEnd = new Date(targetTime.getTime() + WINDOW_PADDING_MS).toISOString();
+
+        const interviewStatuses = trigger === "interview_before" ? ["confirmed"] : ["confirmed", "completed"];
+
+        const { data: interviews, error: interviewsError } = await supabase
+          .from("interviews")
+          .select("id, applicant_id, employer_id, job_id, scheduled_at, location_type, location_details")
+          .eq("employer_id", automation.owner_user_id)
+          .in("status", interviewStatuses)
+          .gte("scheduled_at", rangeStart)
+          .lte("scheduled_at", rangeEnd);
+
+        if (interviewsError) {
+          console.error(`Error fetching interviews for ${trigger}:`, interviewsError);
+          continue;
+        }
+
+        for (const interview of interviews || []) {
+          const { data: existingLog } = await supabase
+            .from("outreach_dispatch_logs")
+            .select("id")
+            .eq("automation_id", automation.id)
+            .eq("interview_id", interview.id)
+            .eq("recipient_user_id", interview.applicant_id)
+            .eq("trigger", trigger)
+            .limit(1)
+            .maybeSingle();
+
+          if (existingLog) continue;
+
+          const { error: insertError } = await supabase.from("outreach_dispatch_logs").insert({
+            owner_user_id: automation.owner_user_id,
+            organization_id: automation.organization_id,
+            automation_id: automation.id,
+            template_id: automation.template_id,
+            trigger,
+            channel: automation.channel,
+            recipient_user_id: interview.applicant_id,
+            interview_id: interview.id,
+            job_id: interview.job_id,
+            payload: {
+              source: "interview-reminders",
+              queued_at: now.toISOString(),
+              delay_minutes: automation.delay_minutes,
+              filters: automation.filters,
+              location_type: interview.location_type,
+              location_details: interview.location_details,
+            },
+            status: "pending",
+          });
+
+          if (!insertError) queued += 1;
+        }
+      }
+
+      if (queued > 0) {
+        await fetch(`${supabaseUrl}/functions/v1/outreach-dispatch`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseServiceKey}`,
+          },
+          body: JSON.stringify({ trigger }),
+        });
+      }
+
+      return queued;
+    };
 
     // ─────────────────────────────────────────────────────────
     // PART 1: 10-minute pre-interview reminders (existing)
@@ -244,7 +348,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`Interview reminders completed: ${remindersSent} pre-reminders, ${followupRemindersSent} follow-up reminders`);
+    const beforeInterviewQueued = await queueInterviewTimelineDispatches("interview_before");
+    const afterInterviewQueued = await queueInterviewTimelineDispatches("interview_after");
+
+    console.log(`Interview reminders completed: ${remindersSent} pre-reminders, ${followupRemindersSent} follow-up reminders, ${beforeInterviewQueued} queued before-interview messages, ${afterInterviewQueued} queued after-interview messages`);
 
     return new Response(
       JSON.stringify({
@@ -252,6 +359,8 @@ Deno.serve(async (req) => {
         interviews_processed: upcomingInterviews?.length || 0,
         reminders_sent: remindersSent,
         followup_reminders_sent: followupRemindersSent,
+        outreach_before_queued: beforeInterviewQueued,
+        outreach_after_queued: afterInterviewQueued,
         errors: errors.length > 0 ? errors : undefined,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -37,6 +37,10 @@ export const OUTREACH_CHANNEL_OPTIONS: { value: OutreachChannel; label: string }
 ];
 
 export const OUTREACH_TRIGGER_OPTIONS: { value: OutreachTrigger; label: string }[] = [
+  { value: 'application_received', label: 'Ansökan inkommen' },
+  { value: 'application_no_response_14d', label: 'Ingen respons efter 14 dagar' },
+  { value: 'interview_before', label: 'Före intervju' },
+  { value: 'interview_after', label: 'Efter intervju' },
   { value: 'job_closed', label: 'Annons avslutas' },
   { value: 'interview_scheduled', label: 'Intervju bokas' },
   { value: 'manual_send', label: 'Manuellt utskick' },
@@ -91,6 +95,62 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
   is_active: boolean;
 }> = [
   {
+    name: 'Ansökan inkommen · professionellt mejl',
+    channel: 'email',
+    subject: 'Vi har tagit emot din ansökan till {job_title}',
+    body: 'Hej {candidate_name},\n\nTack för din ansökan till {job_title} hos {company_name}. Vi har nu tagit emot din ansökan och återkommer så snart vi kan.\n\nVänliga hälsningar,\n{company_name}',
+    is_active: true,
+  },
+  {
+    name: 'Ansökan inkommen · push',
+    channel: 'push',
+    subject: '{company_name}',
+    body: 'Din ansökan till {job_title} är mottagen.',
+    is_active: true,
+  },
+  {
+    name: 'Ingen respons 14 dagar · professionellt mejl',
+    channel: 'email',
+    subject: 'Status på din ansökan till {job_title}',
+    body: 'Hej {candidate_name},\n\nVi vill uppdatera dig om att din ansökan till {job_title} hos {company_name} fortfarande behandlas. Tack för ditt tålamod – vi återkommer så snart vi har nästa steg.\n\nVänliga hälsningar,\n{company_name}',
+    is_active: true,
+  },
+  {
+    name: 'Ingen respons 14 dagar · push',
+    channel: 'push',
+    subject: '{company_name}',
+    body: 'Din ansökan till {job_title} behandlas fortfarande. Vi återkommer snart.',
+    is_active: true,
+  },
+  {
+    name: 'Före intervju · professionellt mejl',
+    channel: 'email',
+    subject: 'Påminnelse inför din intervju för {job_title}',
+    body: 'Hej {candidate_name},\n\nDetta är en påminnelse om din intervju för {job_title} hos {company_name}.\nDatum: {scheduled_date}\nTid: {scheduled_time}\nTyp: {location_type}\nPlats/länk: {location_details}\n\n{message}\n\nVänliga hälsningar,\n{company_name}',
+    is_active: true,
+  },
+  {
+    name: 'Före intervju · push',
+    channel: 'push',
+    subject: 'Intervjupåminnelse',
+    body: '{job_title} · {scheduled_date} {scheduled_time}',
+    is_active: true,
+  },
+  {
+    name: 'Efter intervju · professionellt mejl',
+    channel: 'email',
+    subject: 'Tack för din intervju för {job_title}',
+    body: 'Hej {candidate_name},\n\nTack för intervjun för {job_title} hos {company_name}. Vi uppskattar din tid och återkommer när vi har nästa steg i processen.\n\nVänliga hälsningar,\n{company_name}',
+    is_active: true,
+  },
+  {
+    name: 'Efter intervju · push',
+    channel: 'push',
+    subject: '{company_name}',
+    body: 'Tack för din intervju för {job_title}. Vi återkommer med nästa steg.',
+    is_active: true,
+  },
+  {
     name: 'Chat · varm uppdatering',
     channel: 'chat',
     subject: null,
@@ -143,27 +203,75 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
 
 export const DEFAULT_OUTREACH_AUTOMATIONS: Array<{
   name: string;
-  trigger: Extract<OutreachTrigger, 'job_closed' | 'interview_scheduled'>;
+  trigger: Extract<OutreachTrigger, 'application_received' | 'application_no_response_14d' | 'interview_before' | 'interview_after' | 'job_closed'>;
   channel: OutreachChannel;
   recipient_type: OutreachRecipient;
   delay_minutes: number;
   templateName: string;
 }> = [
   {
-    name: 'Intervju bokad · e-post',
-    trigger: 'interview_scheduled',
+    name: 'Ansökan inkommen · e-post',
+    trigger: 'application_received',
     channel: 'email',
     recipient_type: 'candidate',
     delay_minutes: 0,
-    templateName: 'Intervju · premiummejl',
+    templateName: 'Ansökan inkommen · professionellt mejl',
   },
   {
-    name: 'Intervju bokad · push',
-    trigger: 'interview_scheduled',
+    name: 'Ansökan inkommen · push',
+    trigger: 'application_received',
     channel: 'push',
     recipient_type: 'candidate',
     delay_minutes: 0,
-    templateName: 'Intervju · premiumpush',
+    templateName: 'Ansökan inkommen · push',
+  },
+  {
+    name: 'Ingen respons 14 dagar · e-post',
+    trigger: 'application_no_response_14d',
+    channel: 'email',
+    recipient_type: 'candidate',
+    delay_minutes: 0,
+    templateName: 'Ingen respons 14 dagar · professionellt mejl',
+  },
+  {
+    name: 'Ingen respons 14 dagar · push',
+    trigger: 'application_no_response_14d',
+    channel: 'push',
+    recipient_type: 'candidate',
+    delay_minutes: 0,
+    templateName: 'Ingen respons 14 dagar · push',
+  },
+  {
+    name: 'Före intervju · e-post',
+    trigger: 'interview_before',
+    channel: 'email',
+    recipient_type: 'candidate',
+    delay_minutes: 60,
+    templateName: 'Före intervju · professionellt mejl',
+  },
+  {
+    name: 'Före intervju · push',
+    trigger: 'interview_before',
+    channel: 'push',
+    recipient_type: 'candidate',
+    delay_minutes: 60,
+    templateName: 'Före intervju · push',
+  },
+  {
+    name: 'Efter intervju · e-post',
+    trigger: 'interview_after',
+    channel: 'email',
+    recipient_type: 'candidate',
+    delay_minutes: 180,
+    templateName: 'Efter intervju · professionellt mejl',
+  },
+  {
+    name: 'Efter intervju · push',
+    trigger: 'interview_after',
+    channel: 'push',
+    recipient_type: 'candidate',
+    delay_minutes: 180,
+    templateName: 'Efter intervju · push',
   },
   {
     name: 'Annons avslutas · e-post',
