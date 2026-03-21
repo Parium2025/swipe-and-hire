@@ -27,13 +27,13 @@ const EmployerLocationPanel = ({
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <Label className="text-sm text-white">Bakgrundsplats för väder</Label>
-            <p className="text-sm text-white/70">
+            <p className="text-sm text-white">
               {isNativeApp
                 ? 'Uppdatera vädret automatiskt även när appen är i bakgrunden'
                 : 'Aktiveras endast i native-appen (iOS/Android)'}
             </p>
             {!isNativeApp && (
-              <div className="flex items-center gap-1.5 mt-1.5 text-xs text-white/50">
+              <div className="flex items-center gap-1.5 mt-1.5 text-xs text-white">
                 <Smartphone className="h-3 w-3" />
                 <span>Tillgänglig i mobilappen</span>
               </div>

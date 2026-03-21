@@ -185,9 +185,9 @@ export function MessageTemplatesSettings() {
         <MessageSquareText className="h-4 w-4 text-white" />
         <h3 className="text-sm font-medium text-white">Meddelandemallar</h3>
       </div>
-      <p className="text-xs text-white/60 mb-4">
+      <p className="text-xs text-white mb-4">
         Skapa professionella svarsmallar som skickas automatiskt till kandidater när ett jobb avslutas.
-        Mallen markerad med ⭐ används som standard. Använd <code className="text-blue-300">{'{job_title}'}</code> för att infoga jobbtiteln.
+        Mallen markerad med ⭐ används som standard. Använd <code className="text-white">{'{job_title}'}</code> för att infoga jobbtiteln.
       </p>
 
       {loading ? (
@@ -196,7 +196,7 @@ export function MessageTemplatesSettings() {
         </div>
       ) : templates.length === 0 ? (
         <div className="text-center py-6 space-y-3">
-          <p className="text-sm text-white/50">Inga mallar ännu</p>
+          <p className="text-sm text-white">Inga mallar ännu</p>
           <Button
             variant="glass"
             onClick={seedDefaults}
@@ -244,7 +244,7 @@ export function MessageTemplatesSettings() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleSetDefault(template.id)}
-                        className={`transition-colors ${template.is_default ? 'text-yellow-400' : 'text-white/20 hover:text-white/40'}`}
+                        className={`transition-colors ${template.is_default ? 'text-white' : 'text-white hover:text-white'}`}
                         title={template.is_default ? 'Standardmall' : 'Gör till standard'}
                       >
                         <Star className="h-4 w-4" fill={template.is_default ? 'currentColor' : 'none'} />
@@ -259,7 +259,7 @@ export function MessageTemplatesSettings() {
                           setEditingId(template.id);
                           setEditForm({ title: template.title, content: template.content });
                         }}
-                        className="text-white/50 hover:text-white h-7 px-2 text-xs"
+                        className="text-white h-7 px-2 text-xs"
                       >
                         Redigera
                       </Button>
@@ -267,13 +267,13 @@ export function MessageTemplatesSettings() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(template.id)}
-                        className="text-red-400/60 hover:text-red-400 h-7 px-2"
+                        className="text-white h-7 px-2"
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
-                  <p className="text-xs text-white/50 line-clamp-2">{template.content}</p>
+                  <p className="text-xs text-white line-clamp-2">{template.content}</p>
                 </>
               )}
             </div>
@@ -299,7 +299,7 @@ export function MessageTemplatesSettings() {
                   {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
                   <span className="ml-1">Skapa</span>
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setShowNew(false)} className="text-white/60">
+                <Button variant="ghost" size="sm" onClick={() => setShowNew(false)} className="text-white">
                   Avbryt
                 </Button>
               </div>
@@ -309,7 +309,7 @@ export function MessageTemplatesSettings() {
               variant="ghost"
               size="sm"
               onClick={() => setShowNew(true)}
-              className="text-white/50 hover:text-white w-full justify-center border border-dashed border-white/10"
+              className="text-white w-full justify-center border border-dashed border-white/10"
             >
               <Plus className="h-3 w-3 mr-1" />
               Lägg till mall

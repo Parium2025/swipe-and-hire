@@ -27,11 +27,11 @@ const EmployerNotificationsPanel = ({ isEnabled, toggle, prefsLoading }: Employe
         </div>
 
         <div className="flex items-center justify-end gap-6 pr-1 pb-1 border-b border-white/10">
-          <div className="flex items-center gap-1 text-xs text-white/50">
+          <div className="flex items-center gap-1 text-xs text-white">
             <Smartphone className="h-3 w-3" />
             <span>Push</span>
           </div>
-          <div className="flex items-center gap-1 text-xs text-white/50">
+          <div className="flex items-center gap-1 text-xs text-white">
             <Mail className="h-3 w-3" />
             <span>Mejl</span>
           </div>
@@ -41,7 +41,7 @@ const EmployerNotificationsPanel = ({ isEnabled, toggle, prefsLoading }: Employe
           <div key={type} className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <Label className="text-sm text-white">{label}</Label>
-              <p className="text-sm text-white/70">{desc}</p>
+              <p className="text-sm text-white">{desc}</p>
             </div>
             <div className="flex items-center gap-6 ml-3">
               <Switch
