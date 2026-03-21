@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, Mail, MessageSquare, Send, Smartphone, WifiOff, X } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useFieldDraft } from '@/hooks/useFormDraft';
@@ -24,6 +24,7 @@ import {
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { supabase } from '@/integrations/supabase/client';
 import { renderOutreachText, type OutreachTemplate } from '@/lib/outreach';
+import { getManualOutreachTemplateGroups, type ManualOutreachActionKey } from '@/lib/outreachManualActions';
 
 type ManualChannel = 'chat' | 'email' | 'push';
 
@@ -45,6 +46,7 @@ interface SendMessageDialogProps {
   navigateToMessages?: boolean;
   /** Render above z-[100] overlays (e.g. SwipeViewer) */
   elevated?: boolean;
+  presetAction?: ManualOutreachActionKey | null;
 }
 
 export function SendMessageDialog({
@@ -56,6 +58,7 @@ export function SendMessageDialog({
   applicationId,
   navigateToMessages = false,
   elevated,
+  presetAction = null,
 }: SendMessageDialogProps) {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -70,6 +73,7 @@ export function SendMessageDialog({
   const [templates, setTemplates] = useState<OutreachTemplate[]>([]);
   const [selectedChannels, setSelectedChannels] = useState<ManualChannel[]>(['chat']);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<Partial<Record<ManualChannel, string>>>({});
+  const appliedPresetRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -93,6 +97,42 @@ export function SendMessageDialog({
     email: templates.filter((template) => template.channel === 'email'),
     push: templates.filter((template) => template.channel === 'push'),
   }), [templates]);
+
+  const manualActionTemplates = useMemo(() => getManualOutreachTemplateGroups(templates), [templates]);
+  const presetGroup = presetAction ? manualActionTemplates[presetAction] : null;
+  const dialogTitle = presetGroup?.action.label ?? 'Chatta';
+
+  useEffect(() => {
+    if (!open) {
+      appliedPresetRef.current = null;
+      return;
+    }
+
+    if (!presetAction || !presetGroup || presetGroup.channels.length === 0) {
+      appliedPresetRef.current = null;
+      return;
+    }
+
+    const presetSignature = `${presetAction}-${recipientId}-${jobId ?? 'no-job'}`;
+    if (appliedPresetRef.current === presetSignature) return;
+
+    const nextChannels = presetGroup.channels.filter((channel): channel is ManualChannel => ['chat', 'email', 'push'].includes(channel));
+    const nextTemplateIds = nextChannels.reduce<Partial<Record<ManualChannel, string>>>((acc, channel) => {
+      const template = presetGroup.templatesByChannel[channel];
+      if (template) acc[channel] = template.id;
+      return acc;
+    }, {});
+
+    setSelectedChannels(nextChannels);
+    setSelectedTemplateIds(nextTemplateIds);
+
+    const chatTemplate = presetGroup.templatesByChannel.chat;
+    if (chatTemplate) {
+      setMessage(renderOutreachText(chatTemplate.body, templateContext));
+    }
+
+    appliedPresetRef.current = presetSignature;
+  }, [jobId, open, presetAction, presetGroup, recipientId, setMessage, templateContext]);
 
   const toggleChannel = (channel: ManualChannel) => {
     setSelectedChannels((prev) => prev.includes(channel) ? (prev.length === 1 ? prev : prev.filter((item) => item !== channel)) : [...prev, channel]);
@@ -214,7 +254,7 @@ export function SendMessageDialog({
             <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
               <h2 className="text-white text-lg font-semibold flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
-                Chatta
+                {dialogTitle}
               </h2>
               <Button
                 variant="ghost"
@@ -230,7 +270,9 @@ export function SendMessageDialog({
 
             <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-5">
               <p className="text-white text-center text-sm leading-relaxed px-2">
-                Skicka ett premiumutskick till {recipientName} via chat, e-post och push.
+                {presetGroup
+                  ? `Skicka ${presetGroup.action.label.toLowerCase()} till ${recipientName} med de mallar som finns klara.`
+                  : `Skicka ett premiumutskick till ${recipientName} via chat, e-post och push.`}
               </p>
 
               <div className="space-y-2">
