@@ -777,25 +777,40 @@ export function MessageTemplatesSettings() {
             <div className="grid gap-2">
               <div className="space-y-2">
                 <Label className="text-white">Var ska det skickas?</Label>
-                <p className="text-[11px] text-white/80">Du kan välja en eller flera kanaler i samma regel.</p>
+                <p className="text-[11px] text-white/80">Välj en eller flera kanaler. Tryck igen för att ta bort.</p>
                 <div className="grid gap-2 sm:grid-cols-3">
                   {OUTREACH_CHANNEL_OPTIONS.map((option) => {
-                    const checked = automationForm.channels.includes(option.value as AutomationChannel);
+                    const channel = option.value as AutomationChannel;
+                    const checked = automationForm.channels.includes(channel);
 
                     return (
-                      <label
+                      <button
                         key={option.value}
-                        className="flex cursor-pointer items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white transition-colors md:hover:border-white/20"
+                        type="button"
+                        aria-pressed={checked}
+                        onClick={() => toggleAutomationChannel(channel, !checked)}
+                        className={[
+                          'flex min-h-11 items-center gap-2 rounded-2xl border px-3 py-2 text-left text-sm transition-colors',
+                          checked
+                            ? 'border-white/30 bg-white/10 text-white'
+                            : 'border-white/10 bg-white/5 text-white md:hover:border-white/20',
+                        ].join(' ')}
                       >
                         <Checkbox
                           checked={checked}
-                          onCheckedChange={(value) => toggleAutomationChannel(option.value as AutomationChannel, Boolean(value))}
+                          onCheckedChange={(value) => toggleAutomationChannel(channel, Boolean(value))}
+                          className="pointer-events-none"
                         />
-                        <span>{option.label}</span>
-                      </label>
+                        <span className="font-medium">{option.label}</span>
+                      </button>
                     );
                   })}
                 </div>
+                {automationForm.channels.length > 0 && (
+                  <p className="text-[11px] text-white/80">
+                    Valda kanaler: {automationForm.channels.map((channel) => getOutreachChannelLabel(channel)).join(', ')}
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid gap-2">
