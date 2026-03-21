@@ -128,7 +128,7 @@ export function ActiveSessionsSettings() {
           </Button>
         </div>
 
-        <p className="text-xs text-white/50">
+        <p className="text-xs text-white">
           Du kan ha max 2 aktiva sessioner samtidigt. Om du loggar in på en tredje enhet avslutas den äldsta sessionen automatiskt.
         </p>
 
@@ -145,7 +145,7 @@ export function ActiveSessionsSettings() {
             ))}
           </div>
         ) : sessions.length === 0 ? (
-          <p className="text-sm text-white/70 text-center py-4">Inga aktiva sessioner hittades</p>
+          <p className="text-sm text-white text-center py-4">Inga aktiva sessioner hittades</p>
         ) : (
           <div className="space-y-2">
             {sessions.map((session) => (
@@ -157,7 +157,7 @@ export function ActiveSessionsSettings() {
                     : 'bg-white/5 border border-transparent'
                 }`}
               >
-                <div className="text-white/70">
+                 <div className="text-white">
                   {getDeviceIcon(session.device_label)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -171,7 +171,7 @@ export function ActiveSessionsSettings() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-white/50">
+                  <p className="text-xs text-white">
                     Aktiv {formatDistanceToNow(new Date(session.last_heartbeat_at), {
                       addSuffix: true,
                       locale: sv,
@@ -180,11 +180,11 @@ export function ActiveSessionsSettings() {
                 </div>
                 {!session.is_current && (
                   <Button
-                    variant="ghost"
+                    variant="glass"
                     size="sm"
                     onClick={() => handleKickSession(session.id)}
                     disabled={kickingId === session.id}
-                    className="h-8 px-2.5 text-xs text-white/60 hover:text-red-400 hover:bg-red-500/10 shrink-0"
+                    className="h-8 rounded-full px-3 text-xs text-white shrink-0"
                   >
                     <LogOut className={`h-3.5 w-3.5 mr-1 ${kickingId === session.id ? 'animate-spin' : ''}`} />
                     Logga ut
