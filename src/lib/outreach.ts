@@ -82,3 +82,103 @@ export const formatOutreachDate = (iso: string) =>
 
 export const formatOutreachTime = (iso: string) =>
   new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+
+export const DEFAULT_OUTREACH_TEMPLATES: Array<{
+  name: string;
+  channel: OutreachChannel;
+  subject: string | null;
+  body: string;
+  is_active: boolean;
+}> = [
+  {
+    name: 'Chat · varm uppdatering',
+    channel: 'chat',
+    subject: null,
+    body: 'Hej {first_name}! {message}',
+    is_active: true,
+  },
+  {
+    name: 'E-post · professionell uppdatering',
+    channel: 'email',
+    subject: 'Uppdatering från {company_name}',
+    body: 'Hej {candidate_name},\n\n{message}\n\nVänliga hälsningar,\n{company_name}',
+    is_active: true,
+  },
+  {
+    name: 'Push · kort uppdatering',
+    channel: 'push',
+    subject: '{company_name}',
+    body: '{message}',
+    is_active: true,
+  },
+  {
+    name: 'Intervju · premiummejl',
+    channel: 'email',
+    subject: 'Intervju bokad för {job_title}',
+    body: 'Hej {candidate_name},\n\nDin intervju för {job_title} hos {company_name} är bokad till {scheduled_date} kl. {scheduled_time}.\nPlats: {location_details}\n\n{message}\n\nVänliga hälsningar,\n{company_name}',
+    is_active: true,
+  },
+  {
+    name: 'Intervju · premiumpush',
+    channel: 'push',
+    subject: 'Intervju bokad',
+    body: '{job_title} · {scheduled_date} {scheduled_time}',
+    is_active: true,
+  },
+  {
+    name: 'Jobb avslutat · professionellt mejl',
+    channel: 'email',
+    subject: 'Uppdatering kring {job_title}',
+    body: 'Hej {candidate_name},\n\nTjänsten {job_title} hos {company_name} är nu avslutad. Tack för ditt intresse och för att du sökte till oss.\n\nVänliga hälsningar,\n{company_name}',
+    is_active: true,
+  },
+  {
+    name: 'Jobb avslutat · push',
+    channel: 'push',
+    subject: '{company_name}',
+    body: 'Tjänsten {job_title} är nu avslutad. Tack för din ansökan.',
+    is_active: true,
+  },
+];
+
+export const DEFAULT_OUTREACH_AUTOMATIONS: Array<{
+  name: string;
+  trigger: Extract<OutreachTrigger, 'job_closed' | 'interview_scheduled'>;
+  channel: OutreachChannel;
+  recipient_type: OutreachRecipient;
+  delay_minutes: number;
+  templateName: string;
+}> = [
+  {
+    name: 'Intervju bokad · e-post',
+    trigger: 'interview_scheduled',
+    channel: 'email',
+    recipient_type: 'candidate',
+    delay_minutes: 0,
+    templateName: 'Intervju · premiummejl',
+  },
+  {
+    name: 'Intervju bokad · push',
+    trigger: 'interview_scheduled',
+    channel: 'push',
+    recipient_type: 'candidate',
+    delay_minutes: 0,
+    templateName: 'Intervju · premiumpush',
+  },
+  {
+    name: 'Annons avslutas · e-post',
+    trigger: 'job_closed',
+    channel: 'email',
+    recipient_type: 'candidate',
+    delay_minutes: 10,
+    templateName: 'Jobb avslutat · professionellt mejl',
+  },
+  {
+    name: 'Annons avslutas · push',
+    trigger: 'job_closed',
+    channel: 'push',
+    recipient_type: 'candidate',
+    delay_minutes: 0,
+    templateName: 'Jobb avslutat · push',
+  },
+];
