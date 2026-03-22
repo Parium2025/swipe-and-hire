@@ -234,7 +234,7 @@ export const SortableApplicationCard = memo(({
   const dragProps = isSelectionMode ? {} : { ...attributes, ...listeners };
 
   return (
-    <div ref={setNodeRef} style={style} {...dragProps}>
+    <div ref={setNodeRef} style={style} data-dnd-draggable="true" {...dragProps}>
       <ApplicationCardContent 
         application={application} 
         isDragging={isDragging} 
