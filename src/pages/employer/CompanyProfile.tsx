@@ -1063,7 +1063,7 @@ const CompanyProfile = () => {
                             e.stopPropagation();
                             handleRemoveLinkClick(index);
                           }}
-                          className="border-destructive/40 bg-destructive/20 text-white transition-all duration-300 md:hover:border-destructive/50 md:hover:bg-destructive/30 md:hover:text-white flex-shrink-0"
+                          className="border-destructive/40 bg-destructive/20 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white flex-shrink-0"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
