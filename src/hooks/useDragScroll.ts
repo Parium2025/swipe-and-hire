@@ -15,7 +15,7 @@ import { getInputCapability } from '@/hooks/useInputCapability';
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
   const state = useRef({ isDown: false, isDragging: false, startX: 0, scrollLeft: 0 });
-  const DRAG_THRESHOLD = 6;
+  const DRAG_THRESHOLD = 0;
   const INTERACTIVE_SELECTOR = 'button, a, input, textarea, select, [role="button"], [draggable="true"], [data-dnd-draggable="true"]';
 
   const onMouseDown = useCallback((e: MouseEvent) => {
@@ -33,12 +33,17 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     // Don't hijack clicks on truly interactive elements
     if (!target || target.closest(INTERACTIVE_SELECTOR)) return;
 
+    // Prevent browser text selection while using grab-to-scroll
+    e.preventDefault();
+
     state.current = {
       isDown: true,
       isDragging: false,
       startX: e.clientX - el.getBoundingClientRect().left,
       scrollLeft: el.scrollLeft,
     };
+    el.style.cursor = 'grabbing';
+    el.style.userSelect = 'none';
   }, []);
 
   const onMouseUp = useCallback(() => {
@@ -60,8 +65,6 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     if (!state.current.isDragging) {
       if (delta < DRAG_THRESHOLD) return;
       state.current.isDragging = true;
-      el.style.cursor = 'grabbing';
-      el.style.userSelect = 'none';
     }
 
     e.preventDefault();
