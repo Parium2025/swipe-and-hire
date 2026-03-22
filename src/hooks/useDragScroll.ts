@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import { getInputCapability } from '@/hooks/useInputCapability';
 
 /**
@@ -13,13 +13,19 @@ import { getInputCapability } from '@/hooks/useInputCapability';
  * while still allowing smooth horizontal drag behavior.
  */
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
-  const ref = useRef<T>(null);
+  const elementRef = useRef<T | null>(null);
+  const [node, setNode] = useState<T | null>(null);
   const state = useRef({ isDown: false, isDragging: false, startX: 0, scrollLeft: 0 });
   const DRAG_THRESHOLD = 0;
   const INTERACTIVE_SELECTOR = 'button, a, input, textarea, select, [role="button"], [draggable="true"], [data-dnd-draggable="true"]';
 
+  const setRef = useCallback((element: T | null) => {
+    elementRef.current = element;
+    setNode(element);
+  }, []);
+
   const onMouseDown = useCallback((e: MouseEvent) => {
-    const el = ref.current;
+    const el = elementRef.current;
     if (!el) return;
     if (e.button !== 0) return;
 
@@ -47,7 +53,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   }, []);
 
   const onMouseUp = useCallback(() => {
-    const el = ref.current;
+    const el = elementRef.current;
     if (!el || !state.current.isDown) return;
     state.current.isDown = false;
     state.current.isDragging = false;
@@ -57,7 +63,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
 
   const onMouseMove = useCallback((e: MouseEvent) => {
     if (!state.current.isDown) return;
-    const el = ref.current;
+    const el = elementRef.current;
     if (!el) return;
     const x = e.clientX - el.getBoundingClientRect().left;
     const delta = Math.abs(x - state.current.startX);
@@ -73,7 +79,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   }, []);
 
   useEffect(() => {
-    const el = ref.current;
+    const el = node;
     if (!el) return;
 
     // Only attach mouse-based drag scroll for non-touch devices
@@ -92,7 +98,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
       window.removeEventListener('mouseup', onMouseUp);
       window.removeEventListener('blur', onMouseUp);
     };
-  }, [onMouseDown, onMouseUp, onMouseMove]);
+  }, [node, onMouseDown, onMouseUp, onMouseMove]);
 
-  return ref;
+  return setRef;
 }
