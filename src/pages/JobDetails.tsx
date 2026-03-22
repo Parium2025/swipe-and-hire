@@ -520,7 +520,7 @@ const JobDetails = () => {
           >
              <div 
                ref={dragScrollRef}
-               className="flex gap-3 pb-4 pt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30" 
+               className="flex gap-3 pb-4 pt-2 overflow-x-auto select-none cursor-grab active:cursor-grabbing scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30" 
                style={{ 
                  height: 'calc(100vh - 300px)',
                  overflowY: 'hidden',
