@@ -56,7 +56,6 @@ type TemplateForm = {
   name: string;
   channels: AutomationChannel[];
   channelContent: Record<AutomationChannel, { subject: string; body: string }>;
-  is_active: boolean;
 };
 
 type AutomationChannel = 'chat' | 'email' | 'push';
@@ -129,8 +128,11 @@ const EMPTY_TEMPLATE_FORM: TemplateForm = {
     email: { subject: '', body: '' },
     push: { subject: '', body: '' },
   },
-  is_active: true,
 };
+
+const TEMPLATE_EDITOR_VARIABLES = OUTREACH_VARIABLES.filter((variable) =>
+  ['candidate_name', 'first_name', 'company_name', 'job_title', 'message'].includes(variable.key),
+);
 
 const EMPTY_AUTOMATION_FORM: AutomationForm = {
   id: null,
@@ -618,7 +620,7 @@ export function MessageTemplatesSettings() {
       channel,
       subject: channel === 'chat' ? null : templateForm.channelContent[channel].subject.trim() || null,
       body: templateForm.channelContent[channel].body.trim(),
-      is_active: templateForm.is_active,
+      is_active: true,
     });
 
     if (templateForm.id) {
@@ -1127,7 +1129,6 @@ export function MessageTemplatesSettings() {
                                 body: template.channel === 'push' ? template.body : '',
                               },
                             },
-                            is_active: template.is_active,
                           })}
                         >
                            <Pencil className="h-2.5 w-2.5" />
@@ -1157,10 +1158,6 @@ export function MessageTemplatesSettings() {
                   <InfoHint text="Här bygger du grunden för automatiska eller manuella utskick. Börja med namn, välj kanaler och skriv sedan innehåll per kanal." />
                 </div>
                 <p className="text-xs text-white md:text-sm">Använd variabler för att göra utskicken personliga.</p>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-white">
-                <span>Aktiv</span>
-                <Switch checked={templateForm.is_active} onCheckedChange={(checked) => setTemplateForm((prev) => ({ ...prev, is_active: checked }))} />
               </div>
             </div>
 
@@ -1261,14 +1258,14 @@ export function MessageTemplatesSettings() {
               <div className="mb-2">
                 <div className="flex items-center gap-2">
                   <p className="text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
-                  <InfoHint text="Variabler fyller i personliga uppgifter automatiskt, till exempel kandidatens namn, jobbtitel eller intervjutid, så att mallen känns levande utan att du skriver allt manuellt." />
+                  <InfoHint text="Här visar vi bara stabila variabler som fungerar i vanliga mallar. Intervjudatum, tid, längd och plats/länk hör hemma i själva bokningsflödet och fylls därifrån när en intervju skapas." />
                 </div>
                 <p className="mt-1 text-[11px] text-white">
                   Tryck på en etikett så läggs den in i vald kanal: {getOutreachChannelLabel(activeTemplateChannel).toLowerCase()}.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {OUTREACH_VARIABLES.map((variable) => (
+                {TEMPLATE_EDITOR_VARIABLES.map((variable) => (
                   <button
                     key={variable.key}
                     type="button"
