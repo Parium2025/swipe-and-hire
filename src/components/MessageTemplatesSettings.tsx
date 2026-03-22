@@ -954,7 +954,7 @@ export function MessageTemplatesSettings() {
               <p>Det här lägger in färdiga startmallar och standardregler så att ni snabbt kommer igång med Outreach Studio.</p>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-left text-white">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/80">Det som skapas</p>
-                <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-white/90">
+                <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-white">
                   <li>Färdiga mallar för chatt, e-post och push</li>
                   <li>Standardregler för vanliga steg i kandidatflödet</li>
                   <li>Allt går att redigera eller ta bort efteråt</li>
@@ -1384,7 +1384,7 @@ export function MessageTemplatesSettings() {
                             ? `Kopplad till ${getOutreachTriggerLabel(linkedGroup.primary.trigger)}`
                             : 'Inte kopplad till tidslinjen ännu'}
                         </p>
-                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/80">
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-white">
                           <span>{linkedGroup ? formatAutomationDelay(linkedGroup.primary.delay_minutes) : 'Ingen tid vald ännu'}</span>
                           <span>•</span>
                           <span className={ruleState.key === 'active' ? 'text-green-300' : 'text-white'}>{ruleState.label}</span>
@@ -1440,7 +1440,7 @@ export function MessageTemplatesSettings() {
                 <div className="space-y-2">
                   <Label className="text-white">{getDelayFieldLabel(automationForm.trigger)}</Label>
                   <Input type="number" min={0} value={automationForm.delay_minutes} onChange={(e) => setAutomationForm((prev) => ({ ...prev, delay_minutes: Number(e.target.value) || 0 }))} className="bg-white/5 border-white/10 text-white" />
-                  <p className="text-[11px] text-white/80">{getDelayFieldHint(automationForm.trigger)}</p>
+                  <p className="text-[11px] text-white">{getDelayFieldHint(automationForm.trigger)}</p>
                 </div>
 
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
@@ -1494,7 +1494,7 @@ export function MessageTemplatesSettings() {
                   { label: 'Öppnat', value: logSummary.opened },
                 ].map((item) => (
                   <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-white/80">{item.label}</p>
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-white">{item.label}</p>
                     <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
                   </div>
                 ))}
@@ -1513,7 +1513,7 @@ export function MessageTemplatesSettings() {
                     </div>
                     <p className="text-sm font-medium text-white">{template?.name ?? 'Direktutskick'}</p>
                     <p className="text-xs text-white mt-1">{new Date(log.created_at).toLocaleString('sv-SE')}{log.sent_at ? ` · skickad ${new Date(log.sent_at).toLocaleString('sv-SE')}` : ''}</p>
-                    {openedAt && <p className="mt-1 text-xs text-white/80">Öppnad {new Date(openedAt).toLocaleString('sv-SE')}</p>}
+                    {openedAt && <p className="mt-1 text-xs text-white">Öppnad {new Date(openedAt).toLocaleString('sv-SE')}</p>}
                     {log.error_message && <p className="text-sm text-white mt-2">{log.error_message}</p>}
                   </div>
                 );
