@@ -222,11 +222,11 @@ const getAutomationGroupState = (group: AutomationGroup | null) => {
   }
 
   if (group.automations.some((automation) => automation.is_enabled)) {
-    return {
-      key: 'active' as const,
-      label: 'Aktiv',
-      badgeClassName: 'border-primary/40 bg-primary/15 text-white',
-    };
+      return {
+        key: 'active' as const,
+        label: 'Aktiv',
+        badgeClassName: 'border-green-500/30 bg-green-500/20 text-green-300',
+      };
   }
 
   return {
