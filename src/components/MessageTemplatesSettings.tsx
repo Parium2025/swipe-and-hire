@@ -8,6 +8,16 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -79,6 +89,15 @@ type TemplateFamily = {
 
 type StudioTab = 'templates' | 'automations' | 'logs';
 type AutomationVisibilityFilter = 'all' | 'active' | 'paused' | 'unlinked';
+
+type PendingDeleteAction = {
+  kind: 'template' | 'automation';
+  ids: string[];
+  title: string;
+  description: string;
+  successMessage: string;
+  errorMessage: string;
+};
 
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
@@ -263,6 +282,8 @@ export function MessageTemplatesSettings() {
   const [automationForm, setAutomationForm] = useState<AutomationForm>(EMPTY_AUTOMATION_FORM);
   const [selectedTemplateFamilyKey, setSelectedTemplateFamilyKey] = useState<string | null>(null);
   const [automationVisibilityFilter, setAutomationVisibilityFilter] = useState<AutomationVisibilityFilter>('all');
+  const [pendingDeleteAction, setPendingDeleteAction] = useState<PendingDeleteAction | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const activeTemplatesByChannel = useMemo(() => ({
     chat: templates.filter((template) => template.channel === 'chat' && template.is_active),
@@ -756,31 +777,74 @@ export function MessageTemplatesSettings() {
     setSavingAutomation(false);
   };
 
-  const handleDeleteTemplate = async (id: string) => {
+  const handleDeleteTemplate = async (id: string, successMessage = 'Mall borttagen', errorMessage = 'Kunde inte ta bort mallen') => {
     const { error } = await supabase
       .from('outreach_templates')
       .delete()
       .eq('id', id);
 
     if (error) {
-      toast.error('Kunde inte ta bort mallen');
+      toast.error(errorMessage);
     } else {
-      toast.success('Mall borttagen');
+      toast.success(successMessage);
       await fetchStudio();
     }
   };
 
-  const handleDeleteAutomation = async (ids: string[]) => {
+  const handleDeleteAutomation = async (ids: string[], successMessage = 'Regel borttagen', errorMessage = 'Kunde inte ta bort regeln') => {
     const { error } = await supabase
       .from('outreach_automations')
       .delete()
       .in('id', ids);
 
     if (error) {
-      toast.error('Kunde inte ta bort regeln');
+      toast.error(errorMessage);
     } else {
-      toast.success('Regel borttagen');
+      toast.success(successMessage);
       await fetchStudio();
+    }
+  };
+
+  const openDeleteTemplateDialog = (template: OutreachTemplate) => {
+    setPendingDeleteAction({
+      kind: 'template',
+      ids: [template.id],
+      title: 'Ta bort mall',
+      description: `Är du säker på att du vill ta bort mallen "${template.name}"? Denna åtgärd går inte att ångra.`,
+      successMessage: 'Mall borttagen',
+      errorMessage: 'Kunde inte ta bort mallen',
+    });
+  };
+
+  const openDeleteAutomationDialog = (group: AutomationGroup, family: TemplateFamily | null) => {
+    const ruleName = family?.baseName ?? group.primary.name;
+
+    setPendingDeleteAction({
+      kind: 'automation',
+      ids: group.automations.map((automation) => automation.id),
+      title: 'Ta bort regel',
+      description: `Är du säker på att du vill ta bort regeln "${ruleName}"? Denna åtgärd går inte att ångra.`,
+      successMessage: 'Regel borttagen',
+      errorMessage: 'Kunde inte ta bort regeln',
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    const action = pendingDeleteAction;
+    if (!action || isDeleting) return;
+
+    setIsDeleting(true);
+
+    try {
+      if (action.kind === 'template') {
+        await handleDeleteTemplate(action.ids[0], action.successMessage, action.errorMessage);
+      } else {
+        await handleDeleteAutomation(action.ids, action.successMessage, action.errorMessage);
+      }
+
+      setPendingDeleteAction(null);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -819,7 +883,47 @@ export function MessageTemplatesSettings() {
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
+    <>
+      <AlertDialog
+        open={Boolean(pendingDeleteAction)}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) setPendingDeleteAction(null);
+        }}
+      >
+        <AlertDialogContentNoFocus className="w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] rounded-2xl border border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-sm sm:max-w-md sm:p-6">
+          <AlertDialogHeader className="space-y-3 text-center">
+            <AlertDialogTitle className="text-base font-semibold text-white md:text-lg">
+              {pendingDeleteAction?.title}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-relaxed text-white">
+              {pendingDeleteAction?.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex-row gap-2 sm:justify-center">
+            <AlertDialogCancel
+              disabled={isDeleting}
+              onClick={() => setPendingDeleteAction(null)}
+              className="mt-0 flex-1 rounded-full border-white/20 bg-white/10 text-sm text-white transition-all duration-300 md:hover:border-white/50 md:hover:bg-white/20 md:hover:text-white"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructiveSoft"
+              disabled={isDeleting}
+              onClick={(event) => {
+                event.preventDefault();
+                void handleConfirmDelete();
+              }}
+              className="flex-1 rounded-full text-sm"
+            >
+              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
+
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
       <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white">
@@ -969,7 +1073,7 @@ export function MessageTemplatesSettings() {
                           variant="outlineNeutral"
                           size="sm"
                           className="h-7 w-7 rounded-full border-white/10 p-0 text-white transition-colors md:hover:border-destructive/40 md:hover:bg-destructive/20 md:hover:text-destructive"
-                          onClick={() => handleDeleteTemplate(template.id)}
+                          onClick={() => openDeleteTemplateDialog(template)}
                         >
                           <Trash2 className="h-2.5 w-2.5" />
                         </Button>
@@ -1305,7 +1409,7 @@ export function MessageTemplatesSettings() {
                       variant="outlineNeutral"
                       size="sm"
                       className="h-9 rounded-full border-white/10 px-3 text-white transition-colors md:hover:border-destructive/40 md:hover:bg-destructive/20 md:hover:text-destructive"
-                      onClick={() => handleDeleteAutomation(selectedAutomationGroup.automations.map((automation) => automation.id))}
+                      onClick={() => openDeleteAutomationDialog(selectedAutomationGroup, selectedTemplateFamily)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       Ta bort regel
@@ -1361,6 +1465,7 @@ export function MessageTemplatesSettings() {
           )}
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </>
   );
 }
