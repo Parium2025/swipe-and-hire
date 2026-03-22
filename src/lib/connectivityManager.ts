@@ -18,6 +18,7 @@ let _isActuallyOnline = navigator.onLine;
 let _listeners = new Set<(online: boolean) => void>();
 let _heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 let _queryClient: QueryClient | null = null;
+let _connectivityCheckVersion = 0;
 
 // ─── Heartbeat ping ──────────────────────────────────────────────
 
@@ -34,9 +35,11 @@ async function checkConnectivity(): Promise<boolean> {
   // If browser says offline, trust it immediately
   if (!navigator.onLine) return false;
 
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), PING_TIMEOUT);
+    timeout = setTimeout(() => controller.abort(), PING_TIMEOUT);
 
     // Ping our own origin with cache-busting to avoid SW/CDN caches
     const response = await fetch(`${window.location.origin}/favicon.ico?_cb=${Date.now()}`, {
@@ -46,9 +49,9 @@ async function checkConnectivity(): Promise<boolean> {
       signal: controller.signal,
     });
 
-    clearTimeout(timeout);
-    // no-cors responses have type 'opaque' with status 0, which is fine — it means we reached the server
-    return response.type === 'opaque' || response.ok;
+    // no-cors responses have type 'opaque' with status 0, which is fine — it means we reached the server.
+    // For same-origin requests, any HTTP status (>0) still proves connectivity (even 404).
+    return response.type === 'opaque' || response.status > 0;
   } catch (err: any) {
     // AbortError = timeout = likely offline
     if (err?.name === 'AbortError') return false;
@@ -56,7 +59,24 @@ async function checkConnectivity(): Promise<boolean> {
     if (err instanceof TypeError) return false;
     // Other errors are ambiguous, trust navigator.onLine
     return navigator.onLine;
+  } finally {
+    if (timeout) clearTimeout(timeout);
   }
+}
+
+/**
+ * Run connectivity check with race protection.
+ * Only the latest in-flight check is allowed to update global state.
+ */
+async function runConnectivityCheck(): Promise<boolean> {
+  const version = ++_connectivityCheckVersion;
+  const online = await checkConnectivity();
+
+  if (version === _connectivityCheckVersion) {
+    setOnlineState(online);
+  }
+
+  return online;
 }
 
 function setOnlineState(online: boolean) {
@@ -83,8 +103,7 @@ function restartHeartbeat() {
   if (_heartbeatTimer) clearInterval(_heartbeatTimer);
   const interval = _isActuallyOnline ? HEARTBEAT_INTERVAL : HEARTBEAT_INTERVAL_OFFLINE;
   _heartbeatTimer = setInterval(async () => {
-    const online = await checkConnectivity();
-    setOnlineState(online);
+    await runConnectivityCheck();
   }, interval);
 }
 
@@ -100,12 +119,15 @@ export function initConnectivityManager(queryClient: QueryClient) {
   // Override TanStack's default online detection
   onlineManager.setEventListener((setOnline) => {
     const handleOnline = () => {
-      // Don't trust the event blindly — verify with a ping
-      checkConnectivity().then(setOnlineState);
+      // Recover UI immediately when browser regains network, then verify.
+      setOnlineState(true);
+      setOnline(true);
+      void runConnectivityCheck();
     };
     const handleOffline = () => {
       // Browser says offline — trust it immediately
       setOnlineState(false);
+      setOnline(false);
     };
 
     window.addEventListener('online', handleOnline);
@@ -114,7 +136,7 @@ export function initConnectivityManager(queryClient: QueryClient) {
     // Also check on visibility change (tab unfrozen)
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
-        checkConnectivity().then(setOnlineState);
+        void runConnectivityCheck();
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
@@ -127,7 +149,7 @@ export function initConnectivityManager(queryClient: QueryClient) {
   });
 
   // Initial connectivity check
-  checkConnectivity().then(setOnlineState);
+  void runConnectivityCheck();
 
   // Start heartbeat
   restartHeartbeat();
@@ -138,12 +160,7 @@ export function initConnectivityManager(queryClient: QueryClient) {
       if (event.data?.type === 'TRIGGER_OFFLINE_SYNC') {
         console.log('[ConnectivityManager] SW triggered offline sync');
         // Force a connectivity check and notify listeners
-        checkConnectivity().then((online) => {
-          if (online) {
-            setOnlineState(true);
-            // Listeners will be notified, which triggers all queue syncs
-          }
-        });
+        void runConnectivityCheck();
       }
     });
   }
@@ -162,7 +179,5 @@ export function getIsOnline(): boolean {
 
 /** Force a connectivity check right now */
 export async function forceConnectivityCheck(): Promise<boolean> {
-  const online = await checkConnectivity();
-  setOnlineState(online);
-  return online;
+  return runConnectivityCheck();
 }
