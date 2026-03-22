@@ -17,6 +17,24 @@ export function RealtimeKeepAlive() {
   useEffect(() => {
     let wasHidden = false;
 
+    const forceRealtimeReconnect = () => {
+      const channels = supabase.getChannels();
+      if (channels.length === 0) return;
+
+      // Hard reconnect to avoid stale "joined" channel states after tab freeze/network blips
+      try {
+        supabase.realtime.disconnect();
+        supabase.realtime.connect();
+      } catch {
+        // Fallback: ensure disconnected channels attempt to rejoin
+        channels.forEach(channel => {
+          if (channel.state !== 'joined' && channel.state !== 'joining') {
+            channel.subscribe();
+          }
+        });
+      }
+    };
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         wasHidden = true;
@@ -26,22 +44,7 @@ export function RealtimeKeepAlive() {
       // Tab became visible again after being hidden
       if (document.visibilityState === 'visible' && wasHidden) {
         wasHidden = false;
-
-        // Force all Realtime channels to reconnect by toggling the connection
-        // This ensures the WebSocket is alive and receiving events
-        const channels = supabase.getChannels();
-        
-        if (channels.length > 0) {
-          // Re-subscribe each channel to force reconnect
-          channels.forEach(channel => {
-            // Check if the channel's socket is still connected
-            // If not, unsubscribe and resubscribe to force reconnect
-            const state = channel.state;
-            if (state !== 'joined' && state !== 'joining') {
-              channel.subscribe();
-            }
-          });
-        }
+        forceRealtimeReconnect();
       }
     };
 
@@ -49,12 +52,7 @@ export function RealtimeKeepAlive() {
     
     // Also handle the 'online' event in case connection was lost
     const handleOnline = () => {
-      const channels = supabase.getChannels();
-      channels.forEach(channel => {
-        if (channel.state !== 'joined' && channel.state !== 'joining') {
-          channel.subscribe();
-        }
-      });
+      forceRealtimeReconnect();
     };
 
     window.addEventListener('online', handleOnline);
