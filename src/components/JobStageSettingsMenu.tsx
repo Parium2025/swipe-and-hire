@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,6 +74,15 @@ export function JobStageSettingsMenu({
   const [liveColor, setLiveColor] = useState<string | null>(null);
   
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const moveOptions = useMemo(
+    () => orderedStages.map((key, idx) => ({
+      key,
+      idx,
+      setting: stageSettings[key],
+      isCurrent: key === stageKey,
+    })),
+    [orderedStages, stageSettings, stageKey]
+  );
   
   // Use liveColor while dragging, fall back to saved color
   const displayColor = liveColor ?? settings?.color ?? '#0EA5E9';
@@ -84,6 +93,14 @@ export function JobStageSettingsMenu({
       setNewLabel(settings.label);
     }
   }, [settings?.label]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
 
   const handleOpenRenameDialog = () => {
     setNewLabel(settings?.label || '');
@@ -145,6 +162,13 @@ export function JobStageSettingsMenu({
     }
   };
 
+  const handleMoveStage = (targetPosition: number) => {
+    moveStageToPosition({ stageKey, targetPosition });
+    setMoveDialogOpen(false);
+    setMenuOpen(false);
+    toast.success('Steg flyttat');
+  };
+
   return (
     <>
       <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
@@ -203,8 +227,8 @@ export function JobStageSettingsMenu({
                 />
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
-                <DropdownMenuSubContent 
-                  className="p-2 bg-card-parium border-white/20"
+                 <DropdownMenuSubContent 
+                   className="p-2 border-white/20 bg-card-parium"
                   sideOffset={4}
                 >
                   <HexColorPicker 
@@ -232,8 +256,8 @@ export function JobStageSettingsMenu({
                 Välj ikon
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
-                <DropdownMenuSubContent 
-                  className="bg-card-parium border-white/20 w-48"
+                 <DropdownMenuSubContent 
+                   className="w-48 border-white/20 bg-card-parium"
                 >
                   <div className="grid grid-cols-5 gap-0.5 p-1.5">
                     {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
@@ -275,21 +299,16 @@ export function JobStageSettingsMenu({
                   Flytta
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent 
-                    className="bg-card-parium border-white/20 w-44"
+                 <DropdownMenuSubContent 
+                     className="w-44 border-white/20 bg-card-parium"
                     sideOffset={4}
                   >
-                    {orderedStages.map((key, idx) => {
-                      const s = stageSettings[key];
-                      const isCurrent = key === stageKey;
+                     {moveOptions.map(({ key, idx, setting: s, isCurrent }) => {
                       return (
                         <DropdownMenuItem
                           key={key}
                           disabled={isCurrent}
-                          onSelect={() => {
-                            moveStageToPosition({ stageKey, targetPosition: idx });
-                            toast.success('Steg flyttat');
-                          }}
+                           onSelect={() => handleMoveStage(idx)}
                           className={`text-xs py-1.5 px-2 min-h-0 transition-colors duration-100 ${
                             isCurrent 
                               ? 'text-white/40 cursor-default' 
@@ -446,18 +465,12 @@ export function JobStageSettingsMenu({
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-1 py-2">
-            {orderedStages.map((key, idx) => {
-              const s = stageSettings[key];
-              const isCurrent = key === stageKey;
+             {moveOptions.map(({ key, idx, setting: s, isCurrent }) => {
               return (
                 <button
                   key={key}
                   disabled={isCurrent}
-                  onClick={() => {
-                    moveStageToPosition({ stageKey, targetPosition: idx });
-                    toast.success('Steg flyttat');
-                    setMoveDialogOpen(false);
-                  }}
+                   onClick={() => handleMoveStage(idx)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all duration-100 touch-manipulation ${
                     isCurrent 
                       ? 'text-white/40 bg-white/5 cursor-default' 
