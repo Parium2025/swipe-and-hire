@@ -94,14 +94,14 @@ export const ApplicationCardContent = memo(({
   
   return (
     <div 
-      className={`bg-foreground/5 ring-1 ring-inset rounded-md px-2 py-1.5 group relative
+      className={`bg-background/35 ring-1 ring-inset rounded-md px-2 py-1.5 group relative backdrop-blur-sm shadow-sm shadow-background/20
         transition-all duration-200 ease-out
         ${isSelectionMode ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
         ${isSelected 
-          ? 'ring-1 ring-foreground/30 bg-foreground/[0.08]' 
+          ? 'ring-1 ring-primary-foreground/35 bg-background/45 shadow-md shadow-background/25' 
           : isDragging 
-            ? 'ring-2 ring-inset ring-primary/50 bg-foreground/10 scale-[1.02] shadow-lg shadow-primary/20' 
-            : 'ring-foreground/10 hover:ring-foreground/30 hover:bg-foreground/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-background/20'
+            ? 'ring-2 ring-inset ring-primary/50 bg-background/45 scale-[1.02] shadow-lg shadow-primary/20' 
+            : 'ring-primary-foreground/15 hover:ring-primary-foreground/28 hover:bg-background/45 hover:-translate-y-0.5 hover:shadow-md hover:shadow-background/25'
         }`}
       onClick={handleClick}
       onMouseEnter={onPrefetch}
@@ -130,7 +130,7 @@ export const ApplicationCardContent = memo(({
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <p className="text-primary-foreground font-medium text-xs truncate group-hover:text-primary-foreground/80 transition-colors cursor-default">
+                  <p className="text-primary-foreground font-medium text-xs truncate transition-colors cursor-default group-hover:text-primary-foreground">
                   {application.first_name} {application.last_name}
                 </p>
               </TooltipTrigger>
@@ -141,7 +141,7 @@ export const ApplicationCardContent = memo(({
           </TooltipProvider>
           <StarRating rating={application.rating} />
           {(appliedTime || lastActiveTime) && (
-            <div className="flex items-center gap-1.5 mt-0.5 text-muted-foreground text-[10px]">
+            <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-primary-foreground/78">
               {appliedTime && (
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
@@ -178,7 +178,7 @@ export const ApplicationCardContent = memo(({
       </div>
 
       {hasResults && (
-        <div className="flex flex-wrap gap-1 mt-1.5 pt-1.5 border-t border-foreground/5">
+        <div className="mt-1.5 flex flex-wrap gap-1 border-t border-primary-foreground/10 pt-1.5">
           {criterionResults.map((cr) => (
             <CriterionIconBadge
               key={cr.criterion_id}
