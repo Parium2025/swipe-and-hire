@@ -72,7 +72,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
   }, [recruiterTooltipOpen]);
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4 relative z-30">
+    <div className="relative z-30 rounded-lg border border-white/14 bg-white/[0.035] p-3 backdrop-blur-sm md:p-4">
       <div className="flex items-start justify-between gap-2">
         <TruncatedText 
           text={job.title} 
@@ -93,7 +93,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
           onMouseDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
-          className="flex h-7 w-7 !min-h-0 !min-w-0 items-center justify-center overflow-hidden rounded-full text-white bg-white/10 transition-colors shrink-0 focus:outline-none touch-manipulation active:scale-95 relative z-50 md:hover:bg-white/20"
+          className="relative z-50 flex h-7 w-7 !min-h-0 !min-w-0 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.08] text-white transition-colors touch-manipulation active:scale-95 focus:outline-none md:hover:bg-white/[0.14]"
         >
           <X className="h-3.5 w-3.5 text-white" />
         </button>
@@ -122,13 +122,13 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
 
       <div className="mt-3 space-y-1.5 md:space-y-0">
         <div className="grid grid-cols-3 md:grid-cols-5 gap-1.5 min-w-0">
-          <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
+          <div className="flex min-w-0 items-center justify-center gap-1 overflow-hidden rounded-lg border border-white/10 bg-white/[0.045] px-2 py-1.5 backdrop-blur-sm">
             <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
             <span className="text-white text-xs font-medium truncate">{job.views_count}</span>
             <span className="text-white text-xs truncate">Visn.</span>
           </div>
 
-          <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
+          <div className="flex min-w-0 items-center justify-center gap-1 overflow-hidden rounded-lg border border-white/10 bg-white/[0.045] px-2 py-1.5 backdrop-blur-sm">
             <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
             <span className="text-white text-xs font-medium truncate">{job.applications_count}</span>
             <span className="text-white text-xs truncate">Ans.</span>
@@ -140,7 +140,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
                 <TooltipTrigger asChild>
                   <div 
                     ref={recruiterTooltipRef}
-                    className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 cursor-default min-w-0 overflow-hidden"
+                    className="flex min-w-0 cursor-default items-center justify-center gap-1 overflow-hidden rounded-lg border border-white/10 bg-white/[0.045] px-2 py-1.5 backdrop-blur-sm"
                     onClick={() => setRecruiterTooltipOpen(prev => !prev)}
                   >
                     <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-[10px] text-white font-medium shrink-0">
@@ -161,7 +161,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
               </Tooltip>
             </TooltipProvider>
           ) : (
-            <div className="bg-white/5 rounded-lg px-2 py-1.5 min-w-0" />
+            <div className="min-w-0 rounded-lg border border-white/10 bg-white/[0.045] px-2 py-1.5 backdrop-blur-sm" />
           )}
 
           <button
@@ -169,10 +169,10 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
             onMouseDown={(e) => e.preventDefault()}
             className={`hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
               isSelectionMode 
-                ? 'bg-white/10 ring-1 ring-white hover:bg-white/15' 
+                ? 'border border-white/18 bg-white/[0.08] ring-1 ring-white/70 hover:bg-white/[0.12]' 
                 : applicationsCount > 0 
-                  ? 'bg-white/5 hover:bg-white/10' 
-                  : 'bg-white/5 opacity-40 cursor-default'
+                  ? 'border border-white/10 bg-white/[0.045] hover:bg-white/[0.08]' 
+                  : 'border border-white/8 bg-white/[0.04] opacity-40 cursor-default'
             }`}
           >
             <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
@@ -189,10 +189,10 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
             onMouseDown={(e) => e.preventDefault()}
             className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
               isSelectionMode 
-                ? 'bg-white/10 ring-white' 
+                ? 'bg-white/[0.08] ring-white/70' 
                 : applicationsCount > 0 
-                  ? 'bg-white/5 ring-white/30' 
-                  : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
+                  ? 'bg-white/[0.045] ring-white/30' 
+                  : 'bg-white/[0.04] ring-white/20 opacity-40 cursor-default'
             }`}
           >
             <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
