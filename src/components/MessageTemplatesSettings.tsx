@@ -106,10 +106,10 @@ function InfoHint({ text }: { text: string }) {
       <TooltipTrigger asChild>
         <button
           type="button"
-          className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition-colors md:hover:border-white/30 md:hover:bg-white/10"
+          className="inline-flex h-4 w-4 items-center justify-center text-white transition-opacity md:hover:opacity-80"
           aria-label="Visa mer information"
         >
-          <Info className="h-3 w-3" />
+          <Info className="h-4 w-4" />
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-[280px] border border-white/20 bg-white/10 text-white backdrop-blur-sm">
