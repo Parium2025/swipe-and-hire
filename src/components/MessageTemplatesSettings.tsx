@@ -26,7 +26,6 @@ import {
   Bot,
   Info,
   Loader2,
-  MessageSquareText,
   Pencil,
   Plus,
   RefreshCw,
@@ -986,10 +985,6 @@ export function MessageTemplatesSettings() {
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
       <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white">
-            <MessageSquareText className="h-3 w-3" />
-            Outreach Studio
-          </div>
           <h3 className="text-sm font-semibold text-white md:text-base">Mallar, regler och utskick</h3>
           <p className="text-xs text-white md:text-sm">Skapa meddelanden och välj när de ska skickas.</p>
         </div>
