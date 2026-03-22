@@ -874,8 +874,8 @@ const MyCandidates = () => {
                       disabled={selectedCandidateIds.size === 0}
                       onClick={() => setShowBulkDeleteConfirm(true)}
                       onMouseDown={(e) => e.preventDefault()}
-                      className={`flex items-center justify-center px-1.5 h-7 outline-none focus:outline-none transition-all duration-200 rounded-md ${
-                        selectedCandidateIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-red-400'
+                      className={`flex h-7 items-center justify-center rounded-md px-1.5 outline-none focus:outline-none transition-all duration-200 ${
+                        selectedCandidateIds.size === 0 ? 'cursor-not-allowed border border-destructive/20 bg-destructive/10 text-white/30' : 'border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
                       }`}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -1180,8 +1180,8 @@ const MyCandidates = () => {
               disabled={selectedCandidateIds.size === 0}
               onClick={() => setShowBulkDeleteConfirm(true)}
               onMouseDown={(e) => e.preventDefault()}
-              className={`flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 outline-none focus:outline-none md:hover:bg-white/10 transition-all duration-200 rounded-md ${
-                selectedCandidateIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-red-400'
+              className={`flex h-8 flex-shrink-0 items-center rounded-md px-2 text-xs whitespace-nowrap outline-none focus:outline-none transition-all duration-200 ${
+                selectedCandidateIds.size === 0 ? 'cursor-not-allowed border border-destructive/20 bg-destructive/10 text-white/30' : 'border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
               }`}
             >
               <Trash2 className="h-3.5 w-3.5 mr-1" />

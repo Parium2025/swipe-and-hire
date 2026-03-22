@@ -1516,7 +1516,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         e.stopPropagation();
                         deleteProfileMedia();
                       }}
-                      className="absolute -top-3 -right-3 bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg"
+                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -1614,7 +1614,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                             e.stopPropagation();
                             deleteCoverImage();
                           }}
-                          className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg"
+                          className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>

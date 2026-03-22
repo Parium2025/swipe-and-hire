@@ -152,7 +152,7 @@ export function SavedSearchesDropdown({
                 
                 <button
                   onClick={(e) => handleDeleteClick(e, search)}
-                  className="p-1.5 rounded-full text-white md:hover:text-red-400 md:hover:bg-red-500/10 transition-colors shrink-0"
+                  className="shrink-0 rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                   aria-label="Ta bort sparad sökning"
                 >
                   <Trash2 className="h-3.5 w-3.5" />

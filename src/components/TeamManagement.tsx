@@ -345,7 +345,7 @@ const TeamManagement = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleRemoveMember(member.user_id)}
-                      className="h-8 w-8 text-white hover:text-red-400 hover:bg-red-500/10"
+                      className="h-8 w-8 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

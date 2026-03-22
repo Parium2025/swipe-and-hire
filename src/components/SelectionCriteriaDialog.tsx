@@ -469,7 +469,7 @@ export function SelectionCriteriaDialog({
                     </span>
                     <button
                       onClick={() => deleteCriterion(criterion.id)}
-                      className="p-1 rounded text-white hover:text-red-400/80 transition-colors"
+                      className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                       aria-label="Ta bort"
                     >
                       <Trash2 className="h-3.5 w-3.5" />

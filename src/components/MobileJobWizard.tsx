@@ -3200,7 +3200,7 @@ const MobileJobWizard = ({
                                             if (!template.id) return;
                                             setDeleteTemplateId(template.id);
                                           }}
-                                          className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                          className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-all duration-300 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                                         >
                                           <Trash2 className="h-3.5 w-3.5" />
                                         </button>
@@ -3436,7 +3436,7 @@ const MobileJobWizard = ({
                                   }}
                                   onMouseUp={(e) => e.currentTarget.blur()}
                                   onClick={() => removeOption(index)}
-                                  className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-colors duration-150 flex-shrink-0 focus:outline-none focus:ring-0"
+                                  className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors duration-150 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
@@ -4747,7 +4747,7 @@ const MobileJobWizard = ({
                                 setImageIsEdited(false);
                                 setManualFocus(null);
                               }}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                               aria-label="Ta bort mobilbild"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -4813,7 +4813,7 @@ const MobileJobWizard = ({
                                 setOriginalDesktopStoragePath(null);
                                 setDesktopImageIsEdited(false);
                               }}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                               aria-label="Ta bort datorbild"
                             >
                               <Trash2 className="w-4 h-4" />
