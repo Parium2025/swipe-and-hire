@@ -1292,7 +1292,7 @@ export function MessageTemplatesSettings() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveTemplate} disabled={savingTemplate}>{savingTemplate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{templateForm.id ? 'Uppdatera mall' : 'Spara mall'}</Button>
               <Button
                 variant="glass"
@@ -1317,7 +1317,7 @@ export function MessageTemplatesSettings() {
                 <p className="text-xs text-white md:text-sm">Välj vad du vill se och öppna en regel i dropdownen i stället för en lång lista.</p>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+              <div className="space-y-2">
                 <div className="space-y-2">
                   <Label className="text-white">Visa</Label>
                   <Select value={automationVisibilityFilter} onValueChange={(value: AutomationVisibilityFilter) => setAutomationVisibilityFilter(value)}>
@@ -1330,18 +1330,6 @@ export function MessageTemplatesSettings() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div className="flex items-end">
-                  <Button
-                    variant="glassBlue"
-                    size="sm"
-                    className="h-10 w-10 rounded-full p-0"
-                    onClick={handleCreateAutomationShortcut}
-                    aria-label="Lägg till ny regel"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
 
@@ -1472,7 +1460,7 @@ export function MessageTemplatesSettings() {
                   <Switch checked={automationForm.is_enabled} onCheckedChange={(checked) => setAutomationForm((prev) => ({ ...prev, is_enabled: checked }))} />
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center justify-center gap-2">
                   <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveAutomation} disabled={savingAutomation || !automationFormHasAllTemplates}>{savingAutomation ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{automationForm.id ? 'Uppdatera regel' : 'Spara regel'}</Button>
                   {selectedAutomationGroup && (
                     <Button
