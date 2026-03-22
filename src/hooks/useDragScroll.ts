@@ -15,12 +15,13 @@ import { getInputCapability } from '@/hooks/useInputCapability';
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
   const state = useRef({ isDown: false, isDragging: false, startX: 0, scrollLeft: 0 });
-  const DRAG_THRESHOLD = 12;
+  const DRAG_THRESHOLD = 6;
   const INTERACTIVE_SELECTOR = 'button, a, input, textarea, select, [role="button"], [draggable="true"], [data-dnd-draggable="true"]';
 
   const onMouseDown = useCallback((e: MouseEvent) => {
     const el = ref.current;
     if (!el) return;
+    if (e.button !== 0) return;
 
     const rawTarget = e.target;
     const target = rawTarget instanceof Element
@@ -32,12 +33,17 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     // Don't hijack clicks on truly interactive elements
     if (!target || target.closest(INTERACTIVE_SELECTOR)) return;
 
-    state.current = { isDown: true, isDragging: false, startX: e.pageX - el.offsetLeft, scrollLeft: el.scrollLeft };
+    state.current = {
+      isDown: true,
+      isDragging: false,
+      startX: e.clientX - el.getBoundingClientRect().left,
+      scrollLeft: el.scrollLeft,
+    };
   }, []);
 
   const onMouseUp = useCallback(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || !state.current.isDown) return;
     state.current.isDown = false;
     state.current.isDragging = false;
     el.style.cursor = 'grab';
@@ -48,7 +54,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     if (!state.current.isDown) return;
     const el = ref.current;
     if (!el) return;
-    const x = e.pageX - el.offsetLeft;
+    const x = e.clientX - el.getBoundingClientRect().left;
     const delta = Math.abs(x - state.current.startX);
 
     if (!state.current.isDragging) {
@@ -63,15 +69,6 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     el.scrollLeft = state.current.scrollLeft - walk;
   }, []);
 
-  const onMouseLeave = useCallback(() => {
-    const el = ref.current;
-    if (!el) return;
-    state.current.isDown = false;
-    state.current.isDragging = false;
-    el.style.cursor = 'grab';
-    el.style.userSelect = '';
-  }, []);
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -82,16 +79,17 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
 
     el.style.cursor = 'grab';
     el.addEventListener('mousedown', onMouseDown);
-    el.addEventListener('mouseup', onMouseUp);
-    el.addEventListener('mousemove', onMouseMove);
-    el.addEventListener('mouseleave', onMouseLeave);
+    window.addEventListener('mousemove', onMouseMove, { passive: false });
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('blur', onMouseUp);
+
     return () => {
       el.removeEventListener('mousedown', onMouseDown);
-      el.removeEventListener('mouseup', onMouseUp);
-      el.removeEventListener('mousemove', onMouseMove);
-      el.removeEventListener('mouseleave', onMouseLeave);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('blur', onMouseUp);
     };
-  }, [onMouseDown, onMouseUp, onMouseMove, onMouseLeave]);
+  }, [onMouseDown, onMouseUp, onMouseMove]);
 
   return ref;
 }
