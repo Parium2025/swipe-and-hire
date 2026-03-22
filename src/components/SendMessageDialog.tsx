@@ -25,6 +25,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { supabase } from '@/integrations/supabase/client';
 import { renderOutreachText, type OutreachTemplate } from '@/lib/outreach';
 import { getManualOutreachTemplateGroups, type ManualOutreachActionKey } from '@/lib/outreachManualActions';
+import { readCachedOutreachTemplates, writeCachedOutreachTemplates } from '@/lib/outreachStudioCache';
 
 type ManualChannel = 'chat' | 'email' | 'push';
 
@@ -70,19 +71,29 @@ export function SendMessageDialog({
   const [message, setMessage, clearMessageDraft] = useFieldDraft(draftKey);
   const [sending, setSending] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
-  const [templates, setTemplates] = useState<OutreachTemplate[]>([]);
+  const [templates, setTemplates] = useState<OutreachTemplate[]>(() => (user ? readCachedOutreachTemplates(user.id) ?? [] : []));
   const [selectedChannels, setSelectedChannels] = useState<ManualChannel[]>(['chat']);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<Partial<Record<ManualChannel, string>>>({});
   const appliedPresetRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !user) return;
+
+    const cached = readCachedOutreachTemplates(user.id);
+    if (cached && cached.length > 0) {
+      setTemplates(cached);
+    }
+
     const fetchTemplates = async () => {
       const { data, error } = await supabase.from('outreach_templates').select('*').eq('is_active', true).order('created_at', { ascending: false });
-      if (!error) setTemplates((data ?? []).filter((template) => ['chat', 'email', 'push'].includes(template.channel)) as OutreachTemplate[]);
+      if (!error) {
+        const filtered = (data ?? []).filter((template) => ['chat', 'email', 'push'].includes(template.channel)) as OutreachTemplate[];
+        setTemplates(filtered);
+        writeCachedOutreachTemplates(user.id, filtered);
+      }
     };
     void fetchTemplates();
-  }, [open]);
+  }, [open, user]);
 
   const templateContext = useMemo(() => ({
     candidate_name: recipientName,
