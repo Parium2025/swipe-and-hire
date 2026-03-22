@@ -241,7 +241,7 @@ const matchesAutomationVisibilityFilter = (group: AutomationGroup | null, filter
   return getAutomationGroupState(group).key === filter;
 };
 
-const formatAutomationDelay = (minutes: number) => (minutes === 0 ? '0 min · Direkt' : `${minutes} min`);
+const formatAutomationDelay = (minutes: number) => (minutes === 0 ? 'Direkt' : `${minutes} min`);
 
 const getLogPayload = (log: OutreachDispatchLog) => {
   if (!log.payload || typeof log.payload !== 'object' || Array.isArray(log.payload)) return null;
@@ -1399,7 +1399,7 @@ export function MessageTemplatesSettings() {
                         <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/80">
                           <span>{linkedGroup ? formatAutomationDelay(linkedGroup.primary.delay_minutes) : 'Ingen tid vald ännu'}</span>
                           <span>•</span>
-                          <span>{ruleState.label}</span>
+                          <span className={ruleState.key === 'active' ? 'text-green-300' : 'text-white'}>{ruleState.label}</span>
                         </div>
                       </div>
                     );
