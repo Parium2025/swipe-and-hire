@@ -78,6 +78,7 @@ type TemplateFamily = {
 };
 
 type StudioTab = 'templates' | 'automations' | 'logs';
+type AutomationVisibilityFilter = 'all' | 'active' | 'paused' | 'unlinked';
 
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
@@ -149,8 +150,57 @@ const getDelayFieldHint = (trigger: OutreachTrigger) => {
   }
 };
 
+const AUTOMATION_VISIBILITY_OPTIONS: { value: AutomationVisibilityFilter; label: string }[] = [
+  { value: 'all', label: 'Alla regler' },
+  { value: 'active', label: 'Aktiva regler' },
+  { value: 'paused', label: 'Pausade regler' },
+  { value: 'unlinked', label: 'Saknar regel' },
+];
+
 const normalizeTimelineTrigger = (trigger: OutreachTrigger): OutreachTrigger =>
   trigger === 'application_no_response_14d' ? 'job_closed' : trigger;
+
+const getLinkedAutomationGroup = (family: TemplateFamily, groups: AutomationGroup[]) => (
+  groups.find((group) => {
+    const matchedChannels = family.channels.filter((channel) => {
+      const template = family.templatesByChannel[channel];
+      return group.automations.some((automation) => automation.channel === channel && automation.template_id === template?.id);
+    });
+
+    return matchedChannels.length === family.channels.length && group.channels.length === family.channels.length;
+  }) ?? null
+);
+
+const getAutomationGroupState = (group: AutomationGroup | null) => {
+  if (!group) {
+    return {
+      key: 'unlinked' as const,
+      label: 'Ingen regel',
+      badgeClassName: 'border-white/10 bg-white/5 text-white',
+    };
+  }
+
+  if (group.automations.some((automation) => automation.is_enabled)) {
+    return {
+      key: 'active' as const,
+      label: 'Aktiv',
+      badgeClassName: 'border-primary/40 bg-primary/15 text-white',
+    };
+  }
+
+  return {
+    key: 'paused' as const,
+    label: 'Pausad',
+    badgeClassName: 'border-white/20 bg-white/10 text-white',
+  };
+};
+
+const matchesAutomationVisibilityFilter = (group: AutomationGroup | null, filter: AutomationVisibilityFilter) => {
+  if (filter === 'all') return true;
+  return getAutomationGroupState(group).key === filter;
+};
+
+const formatAutomationDelay = (minutes: number) => (minutes === 0 ? '0 min · Direkt' : `${minutes} min`);
 
 const getLogPayload = (log: OutreachDispatchLog) => {
   if (!log.payload || typeof log.payload !== 'object' || Array.isArray(log.payload)) return null;
@@ -212,6 +262,7 @@ export function MessageTemplatesSettings() {
   const [activeTemplateChannel, setActiveTemplateChannel] = useState<AutomationChannel>('push');
   const [automationForm, setAutomationForm] = useState<AutomationForm>(EMPTY_AUTOMATION_FORM);
   const [selectedTemplateFamilyKey, setSelectedTemplateFamilyKey] = useState<string | null>(null);
+  const [automationVisibilityFilter, setAutomationVisibilityFilter] = useState<AutomationVisibilityFilter>('all');
 
   const activeTemplatesByChannel = useMemo(() => ({
     chat: templates.filter((template) => template.channel === 'chat' && template.is_active),
@@ -278,17 +329,15 @@ export function MessageTemplatesSettings() {
     [templateFamilies, selectedTemplateFamilyKey],
   );
 
+  const filteredTemplateFamilies = useMemo(
+    () => templateFamilies.filter((family) => matchesAutomationVisibilityFilter(getLinkedAutomationGroup(family, automationGroups), automationVisibilityFilter)),
+    [automationGroups, automationVisibilityFilter, templateFamilies],
+  );
+
   const selectedAutomationGroup = useMemo(() => {
     if (!selectedTemplateFamily) return null;
 
-    return automationGroups.find((group) => {
-      const matchedChannels = selectedTemplateFamily.channels.filter((channel) => {
-        const template = selectedTemplateFamily.templatesByChannel[channel];
-        return group.automations.some((automation) => automation.channel === channel && automation.template_id === template?.id);
-      });
-
-      return matchedChannels.length === selectedTemplateFamily.channels.length && group.channels.length === selectedTemplateFamily.channels.length;
-    }) ?? null;
+    return getLinkedAutomationGroup(selectedTemplateFamily, automationGroups);
   }, [automationGroups, selectedTemplateFamily]);
 
   const automationFormHasAllTemplates = automationForm.channels.length > 0 && automationForm.channels.every((channel) => Boolean(automationForm.template_ids[channel]));
@@ -345,6 +394,14 @@ export function MessageTemplatesSettings() {
       setSelectedTemplateFamilyKey(templateFamilies[0].key);
     }
   }, [templateFamilies, selectedTemplateFamilyKey]);
+
+  useEffect(() => {
+    if (filteredTemplateFamilies.length === 0) return;
+
+    if (!selectedTemplateFamilyKey || !filteredTemplateFamilies.some((family) => family.key === selectedTemplateFamilyKey)) {
+      setSelectedTemplateFamilyKey(filteredTemplateFamilies[0].key);
+    }
+  }, [filteredTemplateFamilies, selectedTemplateFamilyKey]);
 
   useEffect(() => {
     if (!selectedTemplateFamily) {
@@ -749,6 +806,18 @@ export function MessageTemplatesSettings() {
     setRunningDispatch(false);
   };
 
+  const handleCreateAutomationShortcut = () => {
+    const firstUnlinkedFamily = templateFamilies.find((family) => !getLinkedAutomationGroup(family, automationGroups));
+
+    if (!firstUnlinkedFamily) {
+      toast.info('Alla mallar har redan en regel. Välj en befintlig regel i dropdownen för att redigera den.');
+      return;
+    }
+
+    setAutomationVisibilityFilter('unlinked');
+    setSelectedTemplateFamilyKey(firstUnlinkedFamily.key);
+  };
+
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
       <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
@@ -1068,57 +1137,102 @@ export function MessageTemplatesSettings() {
 
         <TabsContent value="automations" className="mt-0 grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
           <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3">
+            <div className="mb-3 space-y-3">
+              <div>
+                <h4 className="text-sm font-semibold text-white md:text-base">Regelöversikt</h4>
+                <p className="text-xs text-white md:text-sm">Välj vad du vill se och öppna en regel i dropdownen i stället för en lång lista.</p>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="space-y-2">
+                  <Label className="text-white">Visa</Label>
+                  <Select value={automationVisibilityFilter} onValueChange={(value: AutomationVisibilityFilter) => setAutomationVisibilityFilter(value)}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {AUTOMATION_VISIBILITY_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-end">
+                  <Button
+                    variant="glassBlue"
+                    size="sm"
+                    className="h-10 w-10 rounded-full p-0"
+                    onClick={handleCreateAutomationShortcut}
+                    aria-label="Lägg till ny regel"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white">Regel / mall</Label>
+                <Select
+                  value={selectedTemplateFamilyKey ?? undefined}
+                  onValueChange={setSelectedTemplateFamilyKey}
+                  disabled={loading || filteredTemplateFamilies.length === 0}
+                >
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
+                    <SelectValue placeholder="Välj regel eller mall" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredTemplateFamilies.map((family) => {
+                      const ruleState = getAutomationGroupState(getLinkedAutomationGroup(family, automationGroups));
+                      return (
+                        <SelectItem key={family.key} value={family.key}>
+                          {`${family.baseName} · ${ruleState.label}`}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
             ) : templateFamilies.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Skapa först en mall under Mallar.</div>
+            ) : filteredTemplateFamilies.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inget matchar filtret just nu.</div>
             ) : (
-              <div className="space-y-2">
-                {templateFamilies.map((family) => {
-                  const linkedGroup = automationGroups.find((group) => {
-                    const matchedChannels = family.channels.filter((channel) => {
-                      const template = family.templatesByChannel[channel];
-                      return group.automations.some((automation) => automation.channel === channel && automation.template_id === template?.id);
-                    });
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                {selectedTemplateFamily ? (
+                  (() => {
+                    const linkedGroup = getLinkedAutomationGroup(selectedTemplateFamily, automationGroups);
+                    const ruleState = getAutomationGroupState(linkedGroup);
 
-                    return matchedChannels.length === family.channels.length && group.channels.length === family.channels.length;
-                  }) ?? null;
-
-                  return (
-                    <button
-                      key={family.key}
-                      type="button"
-                      onClick={() => setSelectedTemplateFamilyKey(family.key)}
-                      className={[
-                        'w-full rounded-2xl border p-3 text-left transition-colors',
-                        selectedTemplateFamilyKey === family.key
-                          ? 'border-white/30 bg-white/10'
-                          : 'border-white/10 bg-white/5 md:hover:border-white/20',
-                      ].join(' ')}
-                    >
+                    return (
                       <div className="space-y-2">
                         <div className="flex min-w-0 flex-wrap items-center gap-2">
-                          <p className="max-w-full truncate text-sm font-semibold text-white">{family.baseName}</p>
-                          {family.channels.map((channel) => (
+                          <p className="max-w-full truncate text-sm font-semibold text-white">{selectedTemplateFamily.baseName}</p>
+                          {selectedTemplateFamily.channels.map((channel) => (
                             <span key={channel} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(channel)}</span>
                           ))}
+                          <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${ruleState.badgeClassName}`}>{ruleState.label}</span>
                         </div>
                         <p className="text-xs text-white md:text-sm">
                           {linkedGroup
                             ? `Kopplad till ${getOutreachTriggerLabel(linkedGroup.primary.trigger)}`
                             : 'Inte kopplad till tidslinjen ännu'}
                         </p>
-                        {linkedGroup && (
-                          <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/80">
-                            <span>{linkedGroup.primary.delay_minutes} min</span>
-                            <span>•</span>
-                            <span>{linkedGroup.automations.some((automation) => automation.is_enabled) ? 'Aktiv' : 'Pausad'}</span>
-                          </div>
-                        )}
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/80">
+                          <span>{linkedGroup ? formatAutomationDelay(linkedGroup.primary.delay_minutes) : 'Ingen tid vald ännu'}</span>
+                          <span>•</span>
+                          <span>{ruleState.label}</span>
+                        </div>
                       </div>
-                    </button>
-                  );
-                })}
+                    );
+                  })()
+                ) : (
+                  <p className="text-sm text-white">Välj en regel i dropdownen för att visa detaljerna här.</p>
+                )}
               </div>
             )}
           </div>
@@ -1140,6 +1254,9 @@ export function MessageTemplatesSettings() {
                     {selectedTemplateFamily.channels.map((channel) => (
                       <span key={channel} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(channel)}</span>
                     ))}
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${getAutomationGroupState(selectedAutomationGroup).badgeClassName}`}>
+                      {getAutomationGroupState(selectedAutomationGroup).label}
+                    </span>
                   </div>
                 </div>
 
