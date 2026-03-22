@@ -1102,10 +1102,10 @@ export function MessageTemplatesSettings() {
                         <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-1.5">
-                          <Button
-                          variant="glass"
+                        <Button
+                          variant="outlineNeutral"
                           size="sm"
-                            className="h-7 rounded-full px-2 text-[10px] md:text-[11px]"
+                          className="h-7 w-7 rounded-full border-white/10 p-0 text-white transition-colors md:hover:border-white/20 md:hover:bg-white/10 md:hover:text-white"
                           onClick={() => setTemplateForm({
                             id: template.id,
                             name: template.name,
@@ -1126,8 +1126,7 @@ export function MessageTemplatesSettings() {
                             },
                           })}
                         >
-                           <Pencil className="h-2.5 w-2.5" />
-                          Redigera
+                          <Pencil className="h-2.5 w-2.5" />
                         </Button>
                         <Button
                           variant="outlineNeutral"
