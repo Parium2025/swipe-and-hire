@@ -1102,10 +1102,10 @@ export function MessageTemplatesSettings() {
                         <p className="line-clamp-2 text-xs text-white md:text-sm">{template.body}</p>
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-1.5">
-                          <Button
+                        <Button
                           variant="glass"
                           size="sm"
-                            className="h-7 rounded-full px-2 text-[10px] md:text-[11px]"
+                          className="h-7 rounded-full px-2 text-[10px] !bg-transparent !shadow-none md:text-[11px] md:hover:!bg-white/5"
                           onClick={() => setTemplateForm({
                             id: template.id,
                             name: template.name,
