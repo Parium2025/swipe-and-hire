@@ -478,7 +478,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleDeleteClick(job as JobPosting);
                               }}
-                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 border-white/20 text-white transition-[background-color,border-color,color] duration-150 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 active:scale-95"
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-[background-color,border-color,color] duration-150 md:hover:border-destructive/50 md:hover:bg-destructive/30 md:hover:text-white active:scale-95"
                             >
                               <Trash2 size={14} />
                             </button>

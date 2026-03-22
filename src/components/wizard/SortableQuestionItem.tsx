@@ -91,7 +91,7 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300"
+              className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-all duration-300 md:hover:border-destructive/50 md:hover:bg-destructive/30 md:hover:text-white"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
