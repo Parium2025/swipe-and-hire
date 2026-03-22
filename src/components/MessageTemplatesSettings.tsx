@@ -1080,7 +1080,7 @@ export function MessageTemplatesSettings() {
         </div>
 
         <TabsContent value="templates" className="mt-0 grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-          <div className="min-w-0 overflow-hidden p-0">
+          <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h4 className="text-sm font-semibold text-white md:text-base">Mallbibliotek</h4>
@@ -1150,7 +1150,7 @@ export function MessageTemplatesSettings() {
             )}
           </div>
 
-          <div className="min-w-0 space-y-3 p-0">
+          <div className="min-w-0 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
