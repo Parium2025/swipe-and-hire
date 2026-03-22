@@ -103,13 +103,13 @@ export const StatusColumn = memo(({
         style={{ backgroundColor: `${displayColor}55` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
-          <Icon className="h-3.5 w-3.5 text-foreground flex-shrink-0" />
+          <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
           <TruncatedText
             text={stageConfig.label}
-            className="font-medium text-xs text-foreground truncate flex-1 min-w-0"
+            className="font-medium text-xs text-white truncate flex-1 min-w-0"
           />
           <span 
-            className="text-foreground text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
+            className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}88` }}
           >
             {applications.length}
@@ -117,7 +117,7 @@ export const StatusColumn = memo(({
           {onOpenCriteriaDialog && (
             <button
               onClick={onOpenCriteriaDialog}
-              className="p-1 rounded hover:bg-foreground/20 transition-colors text-foreground/70 hover:text-primary"
+              className="p-1 rounded hover:bg-white/20 transition-colors text-white/80 hover:text-white"
               title="Urvalskriterier"
             >
               <Sparkles className="h-3.5 w-3.5" />
@@ -151,7 +151,7 @@ export const StatusColumn = memo(({
         >
           {isOver && (
             <div className="mb-2 flex items-center justify-center">
-              <div className="rounded-md bg-foreground/10 backdrop-blur-sm ring-1 ring-inset ring-foreground/20 px-4 py-3 text-xs font-medium text-foreground animate-pulse">
+              <div className="rounded-md bg-foreground/10 backdrop-blur-sm ring-1 ring-inset ring-foreground/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
                 Släpp här
               </div>
             </div>
@@ -174,7 +174,7 @@ export const StatusColumn = memo(({
           </SortableContext>
 
           {applications.length === 0 && !isOver && (
-            <div className="text-center py-8 text-xs text-foreground">
+            <div className="text-center py-8 text-xs text-white">
               Inga kandidater i detta steg
             </div>
           )}
@@ -183,7 +183,7 @@ export const StatusColumn = memo(({
         {canScrollDown && (
           <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-foreground/5 to-transparent z-10 pointer-events-none rounded-b-lg flex items-end justify-center pb-1">
             <div className="animate-bounce">
-              <ChevronDown className="h-3.5 w-3.5 text-foreground/60" />
+              <ChevronDown className="h-3.5 w-3.5 text-white/70" />
             </div>
           </div>
         )}
