@@ -990,14 +990,14 @@ export function MessageTemplatesSettings() {
         </div>
         <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:justify-end">
           <div className="flex items-center gap-1.5">
-            <Button size="sm" variant="glassPurple" onClick={() => setShowSeedConfirmDialog(true)} disabled={seeding} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
+            <Button size="sm" variant="glass" onClick={() => setShowSeedConfirmDialog(true)} disabled={seeding} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
               {seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
               Kom igång snabbt
             </Button>
             <InfoHint text="Lägger in färdiga startmallar och standardregler som ni sedan kan redigera efter företagets ton och process." />
           </div>
           <div className="flex items-center gap-1.5">
-            <Button size="sm" variant="glassBlue" onClick={handleRunDispatch} disabled={runningDispatch} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
+            <Button size="sm" variant="glass" onClick={handleRunDispatch} disabled={runningDispatch} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
               {runningDispatch ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Rocket className="h-3.5 w-3.5" />}
               Skicka nu
             </Button>
