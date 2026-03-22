@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -49,6 +49,7 @@ import {
   type OutreachTemplate,
   type OutreachTrigger,
 } from '@/lib/outreach';
+import { readCachedOutreachStudio, writeCachedOutreachStudio } from '@/lib/outreachStudioCache';
 
 type TemplateForm = {
   id: string | null;
@@ -286,10 +287,12 @@ const getLogStatusBadgeClassName = (status: string) => {
 export function MessageTemplatesSettings() {
   const { user, profile } = useAuth();
   const organizationId = (profile as { organization_id?: string | null } | null)?.organization_id ?? null;
-  const [templates, setTemplates] = useState<OutreachTemplate[]>([]);
-  const [automations, setAutomations] = useState<OutreachAutomation[]>([]);
-  const [logs, setLogs] = useState<OutreachDispatchLog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cachedStudio = useMemo(() => (user ? readCachedOutreachStudio(user.id) : null), [user]);
+  const [templates, setTemplates] = useState<OutreachTemplate[]>(() => cachedStudio?.templates ?? []);
+  const [automations, setAutomations] = useState<OutreachAutomation[]>(() => cachedStudio?.automations ?? []);
+  const [logs, setLogs] = useState<OutreachDispatchLog[]>(() => cachedStudio?.logs ?? []);
+  const [loading, setLoading] = useState(!cachedStudio);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [savingAutomation, setSavingAutomation] = useState(false);
   const [seeding, setSeeding] = useState(false);
@@ -307,6 +310,7 @@ export function MessageTemplatesSettings() {
   const [pendingDeleteAction, setPendingDeleteAction] = useState<PendingDeleteAction | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSeedConfirmDialog, setShowSeedConfirmDialog] = useState(false);
+  const fetchRequestIdRef = useRef(0);
 
   const activeTemplatesByChannel = useMemo(() => ({
     chat: templates.filter((template) => template.channel === 'chat' && template.is_active),
@@ -417,9 +421,90 @@ export function MessageTemplatesSettings() {
     is_enabled: group ? group.automations.some((automation) => automation.is_enabled) : true,
   });
 
-  useEffect(() => {
-    if (user) void fetchStudio();
+  const fetchStudio = useCallback(async (options?: { silent?: boolean }) => {
+    if (!user) return;
+
+    const requestId = ++fetchRequestIdRef.current;
+    const cached = readCachedOutreachStudio(user.id);
+
+    if (options?.silent) {
+      setIsRefreshing(true);
+    } else {
+      setLoading(!cached);
+    }
+
+    const [templatesRes, automationsRes, logsRes] = await Promise.all([
+      supabase.from('outreach_templates').select('*').order('created_at', { ascending: false }),
+      supabase.from('outreach_automations').select('*').order('created_at', { ascending: false }),
+      supabase.from('outreach_dispatch_logs').select('*').order('created_at', { ascending: false }).limit(40),
+    ]);
+
+    if (requestId !== fetchRequestIdRef.current) return;
+
+    const firstError = templatesRes.error || automationsRes.error || logsRes.error;
+
+    if (firstError) {
+      console.error('Error fetching outreach studio:', firstError);
+      if (!cached) {
+        toast.error('Kunde inte läsa in Outreach Studio');
+      }
+    } else {
+      const nextStudio = {
+        templates: templatesRes.data || [],
+        automations: automationsRes.data || [],
+        logs: logsRes.data || [],
+      };
+
+      setTemplates(nextStudio.templates);
+      setAutomations(nextStudio.automations);
+      setLogs(nextStudio.logs);
+      writeCachedOutreachStudio(user.id, nextStudio);
+    }
+
+    setLoading(false);
+    setIsRefreshing(false);
   }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const cached = readCachedOutreachStudio(user.id);
+    if (cached) {
+      setTemplates(cached.templates);
+      setAutomations(cached.automations);
+      setLogs(cached.logs);
+      setLoading(false);
+    }
+
+    void fetchStudio({ silent: Boolean(cached) });
+  }, [user, fetchStudio]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`outreach-studio-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'outreach_templates' },
+        () => void fetchStudio({ silent: true }),
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'outreach_automations' },
+        () => void fetchStudio({ silent: true }),
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'outreach_dispatch_logs' },
+        () => void fetchStudio({ silent: true }),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchStudio]);
 
   useEffect(() => {
     if (templateForm.channels.length === 0) return;
@@ -509,28 +594,6 @@ export function MessageTemplatesSettings() {
     return () => window.removeEventListener('resize', updateIndicator);
   }, [activeStudioTab, templates.length, automations.length, logs.length]);
 
-  const fetchStudio = async () => {
-    if (!user) return;
-    setLoading(true);
-
-    const [templatesRes, automationsRes, logsRes] = await Promise.all([
-      supabase.from('outreach_templates').select('*').order('created_at', { ascending: false }),
-      supabase.from('outreach_automations').select('*').order('created_at', { ascending: false }),
-      supabase.from('outreach_dispatch_logs').select('*').order('created_at', { ascending: false }).limit(40),
-    ]);
-
-    if (templatesRes.error || automationsRes.error || logsRes.error) {
-      console.error('Error fetching outreach studio:', templatesRes.error || automationsRes.error || logsRes.error);
-      toast.error('Kunde inte läsa in Outreach Studio');
-    } else {
-      setTemplates(templatesRes.data || []);
-      setAutomations(automationsRes.data || []);
-      setLogs(logsRes.data || []);
-    }
-
-    setLoading(false);
-  };
-
   const seedDefaults = async () => {
     if (!user) return;
     setSeeding(true);
@@ -588,14 +651,14 @@ export function MessageTemplatesSettings() {
       if (error) {
         toast.error('Mallar skapades men reglerna kunde inte aktiveras');
         setSeeding(false);
-        await fetchStudio();
+        await fetchStudio({ silent: true });
         return;
       }
     }
 
     toast.success('Snabbstart aktiverad');
     setSeeding(false);
-    await fetchStudio();
+    await fetchStudio({ silent: true });
   };
 
   const handleSaveTemplate = async () => {
@@ -645,7 +708,7 @@ export function MessageTemplatesSettings() {
         if (insertError) {
           toast.error('Mallen uppdaterades, men kopior kunde inte skapas för alla kanaler');
           setSavingTemplate(false);
-          await fetchStudio();
+          await fetchStudio({ silent: true });
           return;
         }
       }
@@ -654,7 +717,7 @@ export function MessageTemplatesSettings() {
         setSelectedTemplateFamilyKey(baseName);
       setTemplateForm(EMPTY_TEMPLATE_FORM);
       setActiveTemplateChannel('push');
-      await fetchStudio();
+      await fetchStudio({ silent: true });
     } else {
       const rows = selectedChannels.map((channel) => ({
         ...createPayload(
@@ -673,7 +736,7 @@ export function MessageTemplatesSettings() {
         setSelectedTemplateFamilyKey(baseName);
         setTemplateForm(EMPTY_TEMPLATE_FORM);
         setActiveTemplateChannel('push');
-        await fetchStudio();
+        await fetchStudio({ silent: true });
       }
     }
 
@@ -794,7 +857,7 @@ export function MessageTemplatesSettings() {
     } else {
       toast.success(automationForm.id ? 'Regel uppdaterad' : 'Regel skapad');
       setAutomationForm(EMPTY_AUTOMATION_FORM);
-      await fetchStudio();
+      await fetchStudio({ silent: true });
     }
 
     setSavingAutomation(false);
@@ -810,7 +873,7 @@ export function MessageTemplatesSettings() {
       toast.error(errorMessage);
     } else {
       toast.success(successMessage);
-      await fetchStudio();
+      await fetchStudio({ silent: true });
     }
   };
 
@@ -824,7 +887,7 @@ export function MessageTemplatesSettings() {
       toast.error(errorMessage);
     } else {
       toast.success(successMessage);
-      await fetchStudio();
+      await fetchStudio({ silent: true });
     }
   };
 
@@ -888,7 +951,7 @@ export function MessageTemplatesSettings() {
     } else {
       const count = Number((data as { processedCount?: number } | null)?.processedCount ?? 0);
       toast.success(count > 0 ? `${count} utskick skickades` : 'Inga väntande utskick');
-      await fetchStudio();
+      await fetchStudio({ silent: true });
     }
     setRunningDispatch(false);
   };
