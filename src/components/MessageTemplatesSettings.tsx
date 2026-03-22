@@ -1466,7 +1466,7 @@ export function MessageTemplatesSettings() {
                     <Button
                       variant="outlineNeutral"
                       size="sm"
-                      className="h-9 rounded-full border-white/10 px-3 text-white transition-colors md:hover:border-destructive/40 md:hover:bg-destructive/20 md:hover:text-destructive"
+                      className="h-9 rounded-full border-white/10 px-3 text-white transition-colors md:hover:border-white/20 md:hover:bg-white/10 md:hover:text-white"
                       onClick={() => openDeleteAutomationDialog(selectedAutomationGroup, selectedTemplateFamily)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
