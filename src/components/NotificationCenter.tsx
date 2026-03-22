@@ -154,7 +154,7 @@ function NotificationCenter() {
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => clearAll()}
-                      className="flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-colors md:hover:border-destructive/50 md:hover:bg-destructive/30 md:hover:text-white"
+                      className="flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

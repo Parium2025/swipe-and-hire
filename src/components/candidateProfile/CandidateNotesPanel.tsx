@@ -154,7 +154,7 @@ export const CandidateNotesPanel = ({
                               </button>
                               <button
                                 onClick={() => onConfirmDelete(note.id)}
-                                className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-all duration-300 md:hover:border-destructive/50 md:hover:bg-destructive/30 md:hover:text-white"
+                                className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>

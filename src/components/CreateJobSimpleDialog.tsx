@@ -533,7 +533,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                     }}
                                     onMouseDown={(e) => e.currentTarget.blur()}
                                     onMouseUp={(e) => e.currentTarget.blur()}
-                                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 backdrop-blur-[2px] text-white transition-colors duration-300 md:hover:border-destructive/50 md:hover:bg-destructive/30 md:hover:text-white active:scale-95 focus:outline-none focus:ring-0"
+                                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 backdrop-blur-[2px] text-white transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-95 focus:outline-none focus:ring-0"
                                     aria-label={`Ta bort mall ${template.name}`}
                                   >
                                     <Trash2 size={14} />
