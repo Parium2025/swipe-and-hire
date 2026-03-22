@@ -3567,7 +3567,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       setJobImageDisplayUrl(null);
                                       setManualFocus(null);
                                     }}
-                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                                     aria-label="Ta bort mobilbild"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -3638,7 +3638,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       setOriginalDesktopImageUrl(null);
                                       setJobImageDesktopDisplayUrl(null);
                                     }}
-                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                                     aria-label="Ta bort datorbild"
                                   >
                                     <Trash2 className="w-4 h-4" />
