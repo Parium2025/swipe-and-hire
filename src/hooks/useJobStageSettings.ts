@@ -124,6 +124,55 @@ export function useJobStageSettings(jobId: string | undefined) {
   const sortedEntries = Object.entries(stageSettings).sort((a, b) => a[1].orderIndex - b[1].orderIndex);
   sortedEntries.forEach(([key]) => orderedStages.push(key));
 
+  const buildStageSettingRecord = (stageKey: string, orderIndex: number, existing?: DbJobStageSetting): DbJobStageSetting => {
+    const fallback = stageSettings[stageKey] || DEFAULT_JOB_STAGES[stageKey] || {
+      label: stageKey,
+      color: '#0EA5E9',
+      iconName: 'inbox',
+      isCustom: !DEFAULT_JOB_STAGE_KEYS.includes(stageKey as any),
+      orderIndex,
+    };
+
+    return {
+      id: existing?.id || `temp-${stageKey}`,
+      job_id: existing?.job_id || jobId || '',
+      stage_key: stageKey,
+      custom_label: existing?.custom_label ?? fallback.label,
+      color: existing?.color ?? fallback.color,
+      icon_name: existing?.icon_name ?? fallback.iconName,
+      is_custom: existing?.is_custom ?? fallback.isCustom,
+      order_index: orderIndex,
+    };
+  };
+
+  const persistMissingOrderedStages = async () => {
+    if (!jobId) throw new Error('No job ID');
+
+    const existingKeys = new Set(dbSettings.map((setting) => setting.stage_key));
+    const missingStageKeys = orderedStages.filter((key) => !existingKeys.has(key));
+
+    if (missingStageKeys.length === 0) return;
+
+    const inserts = missingStageKeys.map((key) => {
+      const setting = stageSettings[key];
+      return {
+        job_id: jobId,
+        stage_key: key,
+        custom_label: setting?.label || DEFAULT_JOB_STAGES[key]?.label || key,
+        color: setting?.color || DEFAULT_JOB_STAGES[key]?.color || '#0EA5E9',
+        icon_name: setting?.iconName || DEFAULT_JOB_STAGES[key]?.iconName || 'inbox',
+        is_custom: !DEFAULT_JOB_STAGE_KEYS.includes(key as any),
+        order_index: setting?.orderIndex ?? orderedStages.indexOf(key),
+      };
+    });
+
+    const { error } = await supabase
+      .from('job_stage_settings')
+      .insert(inserts);
+
+    if (error) throw error;
+  };
+
   // Update stage setting
   const updateStageMutation = useMutation({
     mutationFn: async ({ 
@@ -203,31 +252,7 @@ export function useJobStageSettings(jobId: string | undefined) {
       const stageKey = `custom_${Date.now()}`;
       const newOrderIndex = orderedStages.length;
 
-      // Ensure existing default stages are persisted to DB before adding custom one
-      // (only stages currently shown but not yet in DB — NOT deleted stages)
-      const existingKeys = dbSettings.map(s => s.stage_key);
-      const unpersisted = orderedStages.filter(key => !existingKeys.includes(key));
-
-      if (unpersisted.length > 0) {
-        const inserts = unpersisted.map(key => {
-          const setting = stageSettings[key];
-          return {
-            job_id: jobId,
-            stage_key: key,
-            custom_label: setting?.label || DEFAULT_JOB_STAGES[key]?.label || key,
-            color: setting?.color || DEFAULT_JOB_STAGES[key]?.color || '#0EA5E9',
-            icon_name: setting?.iconName || DEFAULT_JOB_STAGES[key]?.iconName || 'inbox',
-            is_custom: !DEFAULT_JOB_STAGE_KEYS.includes(key as any),
-            order_index: setting?.orderIndex ?? orderedStages.length,
-          };
-        });
-
-        const { error: defaultError } = await supabase
-          .from('job_stage_settings')
-          .insert(inserts);
-        
-        if (defaultError) throw defaultError;
-      }
+      await persistMissingOrderedStages();
 
       // Insert new custom stage
       const { error } = await supabase
@@ -289,6 +314,8 @@ export function useJobStageSettings(jobId: string | undefined) {
       if (!navigator.onLine) throw new Error('Du är offline – försök igen när du har anslutning');
       if (!jobId) throw new Error('No job ID');
 
+      await persistMissingOrderedStages();
+
       const currentIndex = orderedStages.indexOf(stageKey);
       if (currentIndex === -1) throw new Error('Stage not found');
       if (targetPosition === currentIndex) return;
@@ -310,7 +337,6 @@ export function useJobStageSettings(jobId: string | undefined) {
       const prev = queryClient.getQueryData(['job-stage-settings', jobId]);
 
       queryClient.setQueryData(['job-stage-settings', jobId], (old: DbJobStageSetting[] | undefined) => {
-        if (!old) return old;
         const currentIdx = orderedStages.indexOf(stageKey);
         if (currentIdx === -1) return old;
 
@@ -318,10 +344,9 @@ export function useJobStageSettings(jobId: string | undefined) {
         newOrder.splice(currentIdx, 1);
         newOrder.splice(targetPosition, 0, stageKey);
 
-        return old.map(s => {
-          const newIdx = newOrder.indexOf(s.stage_key);
-          return newIdx !== -1 ? { ...s, order_index: newIdx } : s;
-        });
+        const existingByKey = new Map((old || []).map((setting) => [setting.stage_key, setting]));
+
+        return newOrder.map((key, idx) => buildStageSettingRecord(key, idx, existingByKey.get(key)));
       });
 
       return { prev };
