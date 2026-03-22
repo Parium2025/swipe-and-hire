@@ -1177,7 +1177,7 @@ export function MessageTemplatesSettings() {
                 <Label className="text-white">Kanaler</Label>
                 <InfoHint text="Välj var meddelandet ska kunna skickas. Om du väljer flera kanaler skapas en version per kanal som du kan anpassa separat." />
               </div>
-              <p className="text-[11px] text-white/80">Välj flera kanaler så dupliceras mallen automatiskt per kanal.</p>
+              <p className="text-[11px] text-white">Välj flera kanaler så dupliceras mallen automatiskt per kanal.</p>
               <div className="grid gap-2 sm:grid-cols-3">
                 {OUTREACH_CHANNEL_OPTIONS.map((option) => {
                   const channel = option.value as AutomationChannel;
@@ -1201,7 +1201,7 @@ export function MessageTemplatesSettings() {
                         }
                       }}
                       className={[
-                        'flex min-h-11 items-center gap-2 rounded-2xl border px-3 py-2 text-left text-sm transition-colors',
+                        'flex h-[var(--control-height-compact)] items-center gap-2 rounded-full border px-3 py-1 text-left text-xs transition-colors',
                         checked
                           ? 'border-white/30 bg-white/10 text-white'
                           : 'border-white/10 bg-white/5 text-white md:hover:border-white/20',
@@ -1221,7 +1221,7 @@ export function MessageTemplatesSettings() {
                 <InfoHint text="Skriv exakt det kunden eller kandidaten ska få i respektive kanal. E-post kan ha rubrik, medan chatt och push fokuserar på ett kortare budskap." />
               </div>
               {templateForm.channels.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-3 text-xs text-white/80">Välj minst en kanal för att skapa mallen.</div>
+                <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-3 text-xs text-white">Välj minst en kanal för att skapa mallen.</div>
               ) : (
                 <div className="space-y-2">
                   {CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel)).map((channel) => (
@@ -1263,7 +1263,7 @@ export function MessageTemplatesSettings() {
                   <p className="text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
                   <InfoHint text="Variabler fyller i personliga uppgifter automatiskt, till exempel kandidatens namn, jobbtitel eller intervjutid, så att mallen känns levande utan att du skriver allt manuellt." />
                 </div>
-                <p className="mt-1 text-[11px] text-white/80">
+                <p className="mt-1 text-[11px] text-white">
                   Tryck på en etikett så läggs den in i vald kanal: {getOutreachChannelLabel(activeTemplateChannel).toLowerCase()}.
                 </p>
               </div>
