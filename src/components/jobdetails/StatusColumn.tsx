@@ -151,7 +151,7 @@ export const StatusColumn = memo(({
         >
           {isOver && (
             <div className="mb-2 flex items-center justify-center">
-              <div className="rounded-md bg-foreground/10 backdrop-blur-sm ring-1 ring-inset ring-foreground/20 px-4 py-3 text-xs font-medium text-foreground animate-pulse">
+              <div className="rounded-md bg-foreground/10 backdrop-blur-sm ring-1 ring-inset ring-foreground/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
                 Släpp här
               </div>
             </div>
