@@ -564,7 +564,7 @@ const EmployerDashboard = memo(() => {
                                   </button>
                                 )}
                                 <button
-                                  className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white h-8 rounded-lg border border-white/20 bg-white/5 transition-colors duration-150 active:scale-[0.97] hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400"
+                                  className="flex-1 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/20 text-xs font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteClick(jobPosting);

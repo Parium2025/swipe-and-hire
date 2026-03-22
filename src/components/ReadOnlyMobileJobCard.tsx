@@ -170,7 +170,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           <button
             onClick={handleDeleteClick}
             aria-label="Ta bort ansökan"
-            className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90 hover:bg-red-500/30 hover:border-red-500/40"
+            className="absolute top-2.5 right-2.5 flex h-9 w-9 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-all duration-150 active:scale-90 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
           >
             <Trash2 className="h-4 w-4 text-white" />
           </button>

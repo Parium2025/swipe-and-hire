@@ -438,7 +438,7 @@ const JobTemplatesOverview = () => {
                       onClick={() => handleDelete(template.id, template.name)}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className="bg-white/10 border-white/20 text-white transition-colors duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 hover:text-white md:hover:text-white focus:outline-none focus:ring-0"
+                      className="border-destructive/40 bg-destructive/20 text-white transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
                     >
                       <Trash2 size={14} className="mr-1" />
                       Ta bort

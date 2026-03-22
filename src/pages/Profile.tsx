@@ -1679,7 +1679,7 @@ const Profile = () => {
                     e.stopPropagation();
                     deleteProfileMedia();
                   }}
-                  className="absolute -top-3 -right-3 bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                  className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -1765,7 +1765,7 @@ const Profile = () => {
                       <button
                         onClick={deleteCoverImage}
                         disabled={isUploadingCover}
-                        className="absolute -right-10 bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
+                        className="absolute -right-10 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors disabled:opacity-50 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -2167,7 +2167,7 @@ const Profile = () => {
                         <button
                           type="button"
                           onClick={handleDeleteCv}
-                          className="text-white hover:text-destructive transition-colors"
+                          className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                           title="Ta bort CV"
                         >
                           <Trash2 className="h-4 w-4" />
