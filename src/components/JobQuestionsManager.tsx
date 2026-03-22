@@ -170,7 +170,7 @@ const SortableQuestionCard = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 border border-destructive/40 bg-destructive/20 text-white md:hover:border-destructive/50 md:hover:bg-destructive/30 md:hover:text-white"
+                className="h-8 w-8 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                 onClick={() => setShowDeleteConfirm(true)}
               >
                 <Trash2 className="h-4 w-4" />

@@ -1131,7 +1131,7 @@ export function MessageTemplatesSettings() {
                         <Button
                           variant="outlineNeutral"
                           size="sm"
-                          className="h-7 w-7 rounded-full border-destructive/40 bg-destructive/20 p-0 text-white transition-colors md:hover:border-destructive/50 md:hover:bg-destructive/30 md:hover:text-white"
+                          className="h-7 w-7 rounded-full border-destructive/40 bg-destructive/20 p-0 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                           onClick={() => openDeleteTemplateDialog(template)}
                         >
                           <Trash2 className="h-2.5 w-2.5" />
@@ -1466,7 +1466,7 @@ export function MessageTemplatesSettings() {
                     <Button
                       variant="outlineNeutral"
                       size="sm"
-                      className="h-9 rounded-full border-destructive/40 bg-destructive/20 px-3 text-white transition-colors md:hover:border-destructive/50 md:hover:bg-destructive/30 md:hover:text-white"
+                      className="h-9 rounded-full border-destructive/40 bg-destructive/20 px-3 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                       onClick={() => openDeleteAutomationDialog(selectedAutomationGroup, selectedTemplateFamily)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
