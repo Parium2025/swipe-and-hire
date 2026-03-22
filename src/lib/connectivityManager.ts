@@ -23,7 +23,7 @@ let _connectivityCheckVersion = 0;
 // ─── Heartbeat ping ──────────────────────────────────────────────
 
 const HEARTBEAT_INTERVAL = 30_000; // 30s when online
-const HEARTBEAT_INTERVAL_OFFLINE = 5_000; // 5s when offline (check more frequently)
+const HEARTBEAT_INTERVAL_OFFLINE = 2_000; // 2s when offline (check more frequently)
 const PING_TIMEOUT = 5_000;
 
 /**
@@ -32,26 +32,23 @@ const PING_TIMEOUT = 5_000;
  * Falls back to navigator.onLine if the request errors in an ambiguous way.
  */
 async function checkConnectivity(): Promise<boolean> {
-  // If browser says offline, trust it immediately
-  if (!navigator.onLine) return false;
-
   let timeout: ReturnType<typeof setTimeout> | null = null;
 
   try {
     const controller = new AbortController();
     timeout = setTimeout(() => controller.abort(), PING_TIMEOUT);
 
-    // Ping our own origin with cache-busting to avoid SW/CDN caches
+    // Ping our own origin with cache-busting to avoid SW/CDN caches.
+    // Avoid trusting navigator.onLine here because it can lag after rapid toggles.
     const response = await fetch(`${window.location.origin}/favicon.ico?_cb=${Date.now()}`, {
       method: 'HEAD',
-      mode: 'no-cors',
       cache: 'no-store',
+      credentials: 'same-origin',
       signal: controller.signal,
     });
 
-    // no-cors responses have type 'opaque' with status 0, which is fine — it means we reached the server.
-    // For same-origin requests, any HTTP status (>0) still proves connectivity (even 404).
-    return response.type === 'opaque' || response.status > 0;
+    // Any HTTP response means we successfully reached the origin.
+    return response.status > 0;
   } catch (err: any) {
     // AbortError = timeout = likely offline
     if (err?.name === 'AbortError') return false;
@@ -139,12 +136,25 @@ export function initConnectivityManager(queryClient: QueryClient) {
         void runConnectivityCheck();
       }
     };
+
+    const handleFocus = () => {
+      void runConnectivityCheck();
+    };
+
+    const handlePageShow = () => {
+      void runConnectivityCheck();
+    };
+
     document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('pageshow', handlePageShow);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('pageshow', handlePageShow);
     };
   });
 

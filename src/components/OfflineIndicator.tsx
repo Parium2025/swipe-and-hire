@@ -3,6 +3,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WifiOff, Loader2, Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { getLatestDraftTime } from '@/lib/draftUtils';
+import { forceConnectivityCheck } from '@/lib/connectivityManager';
 
 export const OfflineIndicator = () => {
   const isOnline = useOnlineStatus();
@@ -51,7 +52,11 @@ export const OfflineIndicator = () => {
   // Räkna sekunder offline och visa "Återansluter..." efter 10 sekunder
   useEffect(() => {
     if (!isOnline) {
+      void forceConnectivityCheck();
+
       const timer = setInterval(() => {
+        void forceConnectivityCheck();
+
         setSecondsOffline(prev => {
           const newVal = prev + 1;
           if (newVal >= 10) {
