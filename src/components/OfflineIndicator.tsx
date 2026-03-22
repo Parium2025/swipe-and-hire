@@ -13,6 +13,7 @@ export const OfflineIndicator = () => {
   const [shouldRender, setShouldRender] = useState(false);
   const [draftTime, setDraftTime] = useState<string | null>(null);
   const wasOnlineRef = useRef(true);
+  const showDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Hämta senaste draft-tid när vi går offline
   useEffect(() => {
@@ -25,16 +26,21 @@ export const OfflineIndicator = () => {
   // Hantera fade in/out animation
   useEffect(() => {
     if (!isOnline) {
-      // Gick offline - visa med fade in
-      setShouldRender(true);
-      // Liten delay för att trigga animation
-      requestAnimationFrame(() => {
+      if (showDelayTimerRef.current) clearTimeout(showDelayTimerRef.current);
+      showDelayTimerRef.current = setTimeout(() => {
+        setShouldRender(true);
         requestAnimationFrame(() => {
-          setIsVisible(true);
+          requestAnimationFrame(() => {
+            setIsVisible(true);
+          });
         });
-      });
+      }, 900);
       wasOnlineRef.current = false;
     } else if (!wasOnlineRef.current) {
+      if (showDelayTimerRef.current) {
+        clearTimeout(showDelayTimerRef.current);
+        showDelayTimerRef.current = null;
+      }
       // Kom tillbaka online - fade ut
       setIsVisible(false);
       // Vänta på animation innan vi tar bort från DOM
@@ -47,6 +53,13 @@ export const OfflineIndicator = () => {
       wasOnlineRef.current = true;
       return () => clearTimeout(timer);
     }
+
+    return () => {
+      if (showDelayTimerRef.current) {
+        clearTimeout(showDelayTimerRef.current);
+        showDelayTimerRef.current = null;
+      }
+    };
   }, [isOnline]);
 
   // Räkna sekunder offline och visa "Återansluter..." efter 10 sekunder

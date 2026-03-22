@@ -19,12 +19,17 @@ let _listeners = new Set<(online: boolean) => void>();
 let _heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 let _queryClient: QueryClient | null = null;
 let _connectivityCheckVersion = 0;
+let _pendingOfflineTimer: ReturnType<typeof setTimeout> | null = null;
 
 // ─── Heartbeat ping ──────────────────────────────────────────────
 
 const HEARTBEAT_INTERVAL = 30_000; // 30s when online
 const HEARTBEAT_INTERVAL_OFFLINE = 2_000; // 2s when offline (check more frequently)
 const PING_TIMEOUT = 5_000;
+const OFFLINE_CONFIRMATION_DELAY = 1200;
+const CONNECTIVITY_RETRY_DELAY = 350;
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Lightweight connectivity check.
@@ -32,33 +37,41 @@ const PING_TIMEOUT = 5_000;
  * Falls back to navigator.onLine if the request errors in an ambiguous way.
  */
 async function checkConnectivity(): Promise<boolean> {
-  let timeout: ReturnType<typeof setTimeout> | null = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
 
-  try {
-    const controller = new AbortController();
-    timeout = setTimeout(() => controller.abort(), PING_TIMEOUT);
+    try {
+      const controller = new AbortController();
+      timeout = setTimeout(() => controller.abort(), PING_TIMEOUT);
 
-    // Ping our own origin with cache-busting to avoid SW/CDN caches.
-    // Avoid trusting navigator.onLine here because it can lag after rapid toggles.
-    const response = await fetch(`${window.location.origin}/favicon.ico?_cb=${Date.now()}`, {
-      method: 'HEAD',
-      cache: 'no-store',
-      credentials: 'same-origin',
-      signal: controller.signal,
-    });
+      // Ping our own origin with cache-busting to avoid SW/CDN caches.
+      // Avoid trusting navigator.onLine here because it can lag after rapid toggles.
+      const response = await fetch(`${window.location.origin}/favicon.ico?_cb=${Date.now()}`, {
+        method: 'HEAD',
+        cache: 'no-store',
+        credentials: 'same-origin',
+        signal: controller.signal,
+      });
 
-    // Any HTTP response means we successfully reached the origin.
-    return response.status > 0;
-  } catch (err: any) {
-    // AbortError = timeout = likely offline
-    if (err?.name === 'AbortError') return false;
-    // TypeError usually means network failure
-    if (err instanceof TypeError) return false;
-    // Other errors are ambiguous, trust navigator.onLine
-    return navigator.onLine;
-  } finally {
-    if (timeout) clearTimeout(timeout);
+      // Any HTTP response means we successfully reached the origin.
+      return response.status > 0;
+    } catch (err: any) {
+      const isRetryableFailure = err?.name === 'AbortError' || err instanceof TypeError;
+
+      if (attempt === 0 && isRetryableFailure && navigator.onLine) {
+        await wait(CONNECTIVITY_RETRY_DELAY);
+        continue;
+      }
+
+      if (err?.name === 'AbortError') return false;
+      if (err instanceof TypeError) return false;
+      return navigator.onLine;
+    } finally {
+      if (timeout) clearTimeout(timeout);
+    }
   }
+
+  return false;
 }
 
 /**
@@ -69,14 +82,47 @@ async function runConnectivityCheck(): Promise<boolean> {
   const version = ++_connectivityCheckVersion;
   const online = await checkConnectivity();
 
-  if (version === _connectivityCheckVersion) {
-    setOnlineState(online);
+  if (version !== _connectivityCheckVersion) {
+    return online;
   }
 
-  return online;
+  if (online) {
+    if (_pendingOfflineTimer) {
+      clearTimeout(_pendingOfflineTimer);
+      _pendingOfflineTimer = null;
+    }
+    setOnlineState(true);
+    return true;
+  }
+
+  if (!_isActuallyOnline) {
+    setOnlineState(false);
+    return false;
+  }
+
+  if (_pendingOfflineTimer) {
+    clearTimeout(_pendingOfflineTimer);
+  }
+
+  _pendingOfflineTimer = setTimeout(async () => {
+    if (version !== _connectivityCheckVersion) return;
+
+    const confirmedOnline = await checkConnectivity();
+    if (version !== _connectivityCheckVersion) return;
+
+    _pendingOfflineTimer = null;
+    setOnlineState(confirmedOnline);
+  }, OFFLINE_CONFIRMATION_DELAY);
+
+  return false;
 }
 
 function setOnlineState(online: boolean) {
+  if (online && _pendingOfflineTimer) {
+    clearTimeout(_pendingOfflineTimer);
+    _pendingOfflineTimer = null;
+  }
+
   const changed = _isActuallyOnline !== online;
   _isActuallyOnline = online;
 
