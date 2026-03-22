@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
   Bot,
+  Info,
   Loader2,
   MessageSquareText,
   Pencil,
@@ -98,6 +100,25 @@ type PendingDeleteAction = {
   successMessage: string;
   errorMessage: string;
 };
+
+function InfoHint({ text }: { text: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition-colors md:hover:border-white/30 md:hover:bg-white/10"
+          aria-label="Visa mer information"
+        >
+          <Info className="h-3 w-3" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[280px] border border-white/20 bg-white/10 text-white backdrop-blur-sm">
+        <p className="text-xs leading-relaxed text-white">{text}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 const EMPTY_TEMPLATE_FORM: TemplateForm = {
   id: null,
@@ -284,6 +305,7 @@ export function MessageTemplatesSettings() {
   const [automationVisibilityFilter, setAutomationVisibilityFilter] = useState<AutomationVisibilityFilter>('all');
   const [pendingDeleteAction, setPendingDeleteAction] = useState<PendingDeleteAction | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showSeedConfirmDialog, setShowSeedConfirmDialog] = useState(false);
 
   const activeTemplatesByChannel = useMemo(() => ({
     chat: templates.filter((template) => template.channel === 'chat' && template.is_active),
@@ -883,7 +905,7 @@ export function MessageTemplatesSettings() {
   };
 
   return (
-    <>
+    <TooltipProvider delayDuration={120}>
       <AlertDialog
         open={Boolean(pendingDeleteAction)}
         onOpenChange={(open) => {
@@ -923,6 +945,42 @@ export function MessageTemplatesSettings() {
         </AlertDialogContentNoFocus>
       </AlertDialog>
 
+      <AlertDialog open={showSeedConfirmDialog} onOpenChange={setShowSeedConfirmDialog}>
+        <AlertDialogContentNoFocus className="w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] rounded-2xl border border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-sm sm:max-w-lg sm:p-6">
+          <AlertDialogHeader className="space-y-3 text-center">
+            <AlertDialogTitle className="text-base font-semibold text-white md:text-lg">Kom igång snabbt</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3 text-sm leading-relaxed text-white">
+              <p>Det här lägger in färdiga startmallar och standardregler så att ni snabbt kommer igång med Outreach Studio.</p>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-left text-white">
+                <p className="text-xs uppercase tracking-[0.16em] text-white/80">Det som skapas</p>
+                <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-white/90">
+                  <li>Färdiga mallar för chatt, e-post och push</li>
+                  <li>Standardregler för vanliga steg i kandidatflödet</li>
+                  <li>Allt går att redigera eller ta bort efteråt</li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex-row gap-2 sm:justify-center">
+            <AlertDialogCancel className="mt-0 flex-1 rounded-full border-white/20 bg-white/10 text-sm text-white transition-all duration-300 md:hover:border-white/50 md:hover:bg-white/20 md:hover:text-white">
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="default"
+              onClick={(event) => {
+                event.preventDefault();
+                setShowSeedConfirmDialog(false);
+                void seedDefaults();
+              }}
+              className="flex-1 rounded-full text-sm"
+            >
+              {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+              Fortsätt
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
+
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
       <div className="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div>
@@ -934,14 +992,20 @@ export function MessageTemplatesSettings() {
           <p className="text-xs text-white md:text-sm">Skapa meddelanden och välj när de ska skickas.</p>
         </div>
         <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:justify-end">
-          <Button size="sm" variant="glassPurple" onClick={seedDefaults} disabled={seeding} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
-          {seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
-            Kom igång snabbt
-          </Button>
-          <Button size="sm" variant="glassBlue" onClick={handleRunDispatch} disabled={runningDispatch} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
-            {runningDispatch ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Rocket className="h-3.5 w-3.5" />}
-            Skicka nu
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button size="sm" variant="glassPurple" onClick={() => setShowSeedConfirmDialog(true)} disabled={seeding} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
+              {seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+              Kom igång snabbt
+            </Button>
+            <InfoHint text="Lägger in färdiga startmallar och standardregler som ni sedan kan redigera efter företagets ton och process." />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Button size="sm" variant="glassBlue" onClick={handleRunDispatch} disabled={runningDispatch} className="h-[var(--control-height-compact)] px-2.5 text-[11px] md:text-xs">
+              {runningDispatch ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Rocket className="h-3.5 w-3.5" />}
+              Skicka nu
+            </Button>
+            <InfoHint text="Kör väntande utskick direkt. Bra vid test eller om ni vill trigga utskick manuellt utan att vänta på nästa schemalagda körning." />
+          </div>
         </div>
       </div>
 
@@ -1088,7 +1152,10 @@ export function MessageTemplatesSettings() {
           <div className="min-w-0 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h4 className="text-sm font-semibold text-white md:text-base">Skapa mall</h4>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-white md:text-base">Skapa mall</h4>
+                  <InfoHint text="Här bygger du grunden för automatiska eller manuella utskick. Börja med namn, välj kanaler och skriv sedan innehåll per kanal." />
+                </div>
                 <p className="text-xs text-white md:text-sm">Använd variabler för att göra utskicken personliga.</p>
               </div>
               <div className="flex items-center gap-2 text-xs text-white">
@@ -1098,12 +1165,18 @@ export function MessageTemplatesSettings() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white">Namn</Label>
+              <div className="flex items-center gap-2">
+                <Label className="text-white">Namn</Label>
+                <InfoHint text="Ge mallen ett tydligt namn som gör det lätt att förstå när den ska användas, till exempel 'Intervju bokad' eller 'Avslutad annons'." />
+              </div>
               <Input value={templateForm.name} onChange={(e) => setTemplateForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-white/5 border-white/10 text-white" />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white">Kanaler</Label>
+              <div className="flex items-center gap-2">
+                <Label className="text-white">Kanaler</Label>
+                <InfoHint text="Välj var meddelandet ska kunna skickas. Om du väljer flera kanaler skapas en version per kanal som du kan anpassa separat." />
+              </div>
               <p className="text-[11px] text-white/80">Välj flera kanaler så dupliceras mallen automatiskt per kanal.</p>
               <div className="grid gap-2 sm:grid-cols-3">
                 {OUTREACH_CHANNEL_OPTIONS.map((option) => {
@@ -1143,7 +1216,10 @@ export function MessageTemplatesSettings() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white">Innehåll per kanal</Label>
+              <div className="flex items-center gap-2">
+                <Label className="text-white">Innehåll per kanal</Label>
+                <InfoHint text="Skriv exakt det kunden eller kandidaten ska få i respektive kanal. E-post kan ha rubrik, medan chatt och push fokuserar på ett kortare budskap." />
+              </div>
               {templateForm.channels.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-3 text-xs text-white/80">Välj minst en kanal för att skapa mallen.</div>
               ) : (
@@ -1183,7 +1259,10 @@ export function MessageTemplatesSettings() {
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
               <div className="mb-2">
-                <p className="text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs uppercase tracking-[0.16em] text-white">Variabler</p>
+                  <InfoHint text="Variabler fyller i personliga uppgifter automatiskt, till exempel kandidatens namn, jobbtitel eller intervjutid, så att mallen känns levande utan att du skriver allt manuellt." />
+                </div>
                 <p className="mt-1 text-[11px] text-white/80">
                   Tryck på en etikett så läggs den in i vald kanal: {getOutreachChannelLabel(activeTemplateChannel).toLowerCase()}.
                 </p>
@@ -1466,6 +1545,6 @@ export function MessageTemplatesSettings() {
         </TabsContent>
       </Tabs>
       </div>
-    </>
+    </TooltipProvider>
   );
 }
