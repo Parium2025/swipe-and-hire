@@ -56,6 +56,7 @@ export const StatusColumn = memo(({
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const displayColor = liveColor || stageConfig.color;
   const Icon = getJobStageIconByName(stageConfig.iconName);
   
   const { setNodeRef, isOver } = useDroppable({
@@ -98,7 +99,8 @@ export const StatusColumn = memo(({
       }}
     >
       <div 
-        className={`group mb-2 flex-shrink-0 rounded-md border border-white/20 bg-white/5 px-2 py-1.5 backdrop-blur-sm transition-all ${isOver ? 'ring-2 ring-white/35' : ''}`}
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-foreground/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-foreground/40' : ''}`}
+        style={{ backgroundColor: `${displayColor}55` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
           <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
@@ -107,7 +109,8 @@ export const StatusColumn = memo(({
             className="font-medium text-xs text-white truncate flex-1 min-w-0"
           />
           <span 
-            className="flex-shrink-0 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] text-white ring-1 ring-inset ring-white/15"
+            className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
+            style={{ backgroundColor: `${displayColor}88` }}
           >
             {applications.length}
           </span>
