@@ -46,6 +46,7 @@ import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
+import { useTouchInteractionLock } from '@/hooks/useTouchInteractionLock';
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -400,19 +401,7 @@ const MobileJobWizard = ({
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
-  const [isWizardCloseTouchLocked, setIsWizardCloseTouchLocked] = useState(false);
-  const wizardCloseTouchLockTimeoutRef = useRef<number | null>(null);
-
-  const lockWizardCloseTouch = useCallback((duration = 520) => {
-    setIsWizardCloseTouchLocked(true);
-    if (wizardCloseTouchLockTimeoutRef.current) {
-      window.clearTimeout(wizardCloseTouchLockTimeoutRef.current);
-    }
-    wizardCloseTouchLockTimeoutRef.current = window.setTimeout(() => {
-      setIsWizardCloseTouchLocked(false);
-      wizardCloseTouchLockTimeoutRef.current = null;
-    }, duration);
-  }, []);
+  const { isInteractionLocked: isWizardCloseTouchLocked, lockInteraction: lockWizardCloseTouch } = useTouchInteractionLock(680);
 
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -679,13 +668,6 @@ const MobileJobWizard = ({
     return () => window.removeEventListener('resize', recalc);
   }, [showHingePreview]);
 
-  useEffect(() => {
-    return () => {
-      if (wizardCloseTouchLockTimeoutRef.current) {
-        window.clearTimeout(wizardCloseTouchLockTimeoutRef.current);
-      }
-    };
-  }, []);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
@@ -2524,6 +2506,7 @@ const MobileJobWizard = ({
                   handleClose();
                 }}
                 onTouchEnd={(e) => { e.currentTarget.blur(); }}
+                disabled={isWizardCloseTouchLocked}
                 className={`${dialogCloseButtonClassName} touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
               >
                 <X className={dialogCloseIconClassName} />
@@ -3138,14 +3121,6 @@ const MobileJobWizard = ({
                     <div className="flex items-center justify-between">
                       <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                       <Button
-                        onPointerDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        onTouchStart={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
                         onMouseDown={(e) => {
                           e.currentTarget.blur();
                           const activeEl = document.activeElement as HTMLElement;
@@ -3153,11 +3128,16 @@ const MobileJobWizard = ({
                         }}
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
-                        onClick={() => {
-                          setShowQuestionTemplates(false);
-                          setQuestionSearchTerm('');
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           lockWizardCloseTouch();
+                          window.setTimeout(() => {
+                            setShowQuestionTemplates(false);
+                            setQuestionSearchTerm('');
+                          }, 0);
                         }}
+                        disabled={isWizardCloseTouchLocked}
                         variant="ghost"
                         size="icon"
                         className={`h-7 w-7 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20 active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
@@ -3348,29 +3328,24 @@ const MobileJobWizard = ({
                         {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
                       </h3>
                       <Button
-                        onPointerDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
                         onMouseDown={(e) => {
                           e.currentTarget.blur();
                           const activeEl = document.activeElement as HTMLElement;
                           if (activeEl?.blur) activeEl.blur();
-                        }}
-                        onTouchStart={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
                         }}
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setShowQuestionForm(false);
-                          setEditingQuestion(null);
-                          setShowQuestionTemplates(true);
                           lockWizardCloseTouch();
+                          window.setTimeout(() => {
+                            setShowQuestionForm(false);
+                            setEditingQuestion(null);
+                            setShowQuestionTemplates(true);
+                          }, 0);
                         }}
+                        disabled={isWizardCloseTouchLocked}
                         variant="ghost"
                         size="icon"
                         className={`h-7 w-7 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20 active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
