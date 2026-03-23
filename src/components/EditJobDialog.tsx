@@ -34,6 +34,7 @@ import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
+import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePositioner';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { useIsMobile } from '@/hooks/use-mobile';
