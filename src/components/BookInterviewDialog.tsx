@@ -137,12 +137,6 @@ export const BookInterviewDialog = ({
       return;
     }
     
-    // Check if online before booking
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
@@ -443,29 +437,18 @@ export const BookInterviewDialog = ({
             {/* Actions */}
             <div className="flex gap-2 pt-4">
               <Button 
-                onClick={() => {
-                  if (!isOnline) {
-                    showOfflineToast();
-                    return;
-                  }
-                  handleSubmit();
-                }} 
+                onClick={() => handleSubmit()} 
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                disabled={isSubmitting || !date || !isOnline}
+                disabled={isSubmitting || !date}
                 className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
-                  !isSubmitting && date && isOnline ? 'border border-white/30' : ''
+                  !isSubmitting && date ? 'border border-white/30' : ''
                 }`}
               >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
                     Skickar...
-                  </>
-                ) : !isOnline ? (
-                  <>
-                    <WifiOff className="h-4 w-4 mr-1.5" />
-                    Offline
                   </>
                 ) : (
                   'Skicka intervjukallelse'

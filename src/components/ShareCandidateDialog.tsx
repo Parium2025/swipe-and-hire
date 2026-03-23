@@ -43,11 +43,6 @@ export function ShareCandidateDialog({
   const { isOnline, showOfflineToast } = useOnline();
 
   const handleShare = async (memberId: string, memberName: string) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
-    
     setSharing(memberId);
     try {
       // Check if already in their list
@@ -129,16 +124,14 @@ export function ShareCandidateDialog({
                     <Button
                       size="sm"
                       variant={isShared ? 'outline' : 'glassBlue'}
-                      disabled={isSharing || isShared || !isOnline}
+                      disabled={isSharing || isShared}
                       onClick={() => handleShare(member.userId, fullName)}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className={`transition-colors duration-300 focus:outline-none focus:ring-0 ${!isOnline ? 'opacity-50' : ''}`}
+                      className="transition-colors duration-300 focus:outline-none focus:ring-0"
                     >
                       {isSharing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : !isOnline ? (
-                        <WifiOff className="h-4 w-4" />
                       ) : isShared ? (
                         <>
                           <Check className="h-4 w-4 mr-1" />

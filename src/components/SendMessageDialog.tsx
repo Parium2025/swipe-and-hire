@@ -150,11 +150,6 @@ export function SendMessageDialog({
   };
 
   const handleSend = async () => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
-    
     if (!user) return;
 
     const chatSelected = selectedChannels.includes('chat');
@@ -239,7 +234,7 @@ export function SendMessageDialog({
     onOpenChange(false);
   };
 
-  const isDisabled = sending || !isOnline;
+  const isDisabled = sending;
 
   return (
     <>

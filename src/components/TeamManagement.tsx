@@ -105,11 +105,6 @@ const TeamManagement = () => {
   };
 
   const handleInvite = async () => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
-    
     if (!inviteEmail.trim() || !organizationId) {
       toast({
         title: "Fel",
@@ -141,11 +136,6 @@ const TeamManagement = () => {
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
-    
     if (memberId === user?.id) {
       toast({
         title: "Fel",
@@ -181,11 +171,6 @@ const TeamManagement = () => {
   };
 
   const handleRoleChange = async (memberId: string, newRole: string) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
-    
     if (memberId === user?.id && newRole !== 'admin') {
       toast({
         title: "Fel",
@@ -268,18 +253,16 @@ const TeamManagement = () => {
           </Select>
           <Button 
             onClick={handleInvite}
-            disabled={inviting || !inviteEmail.trim() || !isOnline}
+            disabled={inviting || !inviteEmail.trim()}
             variant="glass"
-            className={`h-11 !min-h-0 px-4 text-sm ${!isOnline ? 'opacity-50' : ''}`}
+            className="h-11 !min-h-0 px-4 text-sm"
           >
             {inviting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
-            ) : !isOnline ? (
-              <WifiOff className="h-4 w-4 mr-2" />
             ) : (
               <Mail className="h-4 w-4 mr-2" />
             )}
-            {!isOnline ? 'Offline' : 'Bjud in'}
+            Bjud in
           </Button>
         </div>
       </div>
