@@ -401,7 +401,6 @@ const MobileJobWizard = ({
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
-  const [closeGuardKey, setCloseGuardKey] = useState(0);
 
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -3087,8 +3086,8 @@ const MobileJobWizard = ({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-white font-medium text-lg">Välj fråga</h3>
-                      <Button
-                        key={`close-templates-${closeGuardKey}`}
+                      <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -3096,12 +3095,10 @@ const MobileJobWizard = ({
                           setQuestionSearchTerm('');
                         }}
                         onTouchEnd={(e) => e.currentTarget.blur()}
-                        variant="ghost"
-                        size="icon"
-                        className="close-guard-animated h-7 w-7 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
+                        className={`${dialogCloseButtonClassName} static right-auto top-auto z-auto touch-manipulation [-webkit-tap-highlight-color:transparent]`}
                       >
                         <X className={dialogCloseIconClassName} />
-                      </Button>
+                      </button>
                     </div>
 
                     <div className="relative">
@@ -3285,23 +3282,20 @@ const MobileJobWizard = ({
                       <h3 className="text-white font-medium text-lg">
                         {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
                       </h3>
-                      <Button
-                        key={`close-form-${closeGuardKey}`}
+                      <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setCloseGuardKey(k => k + 1);
                           setShowQuestionForm(false);
                           setEditingQuestion(null);
                           setShowQuestionTemplates(true);
                         }}
                         onTouchEnd={(e) => e.currentTarget.blur()}
-                        variant="ghost"
-                        size="icon"
-                        className="close-guard-animated h-7 w-7 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
+                        className={`${dialogCloseButtonClassName} static right-auto top-auto z-auto touch-manipulation [-webkit-tap-highlight-color:transparent]`}
                       >
                         <X className={dialogCloseIconClassName} />
-                      </Button>
+                      </button>
                     </div>
 
                     <div className="space-y-4">
