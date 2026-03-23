@@ -2483,10 +2483,10 @@ const MobileJobWizard = ({
           </div>
 
           {/* Progress Bar */}
-          <div className="premium-edit-progress-wrap">
+          <div className="px-4 py-2 flex-shrink-0">
             <Progress 
               value={progress} 
-              className="premium-edit-progress"
+              className="h-1 bg-white/20 [&>div]:bg-white"
             />
           </div>
 
