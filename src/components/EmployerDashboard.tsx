@@ -549,28 +549,28 @@ const EmployerDashboard = memo(() => {
                               }
                             }}
                             footer={
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 pt-0.5">
                                 {(!isExpired || isDraft) && (
                                   <button
-                                    className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white h-8 rounded-lg border border-white/20 bg-white/5 transition-colors duration-150 active:scale-[0.97] hover:bg-white/10"
+                                    className="flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:bg-white/10"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       if (isDraft) handleEditDraft(jobPosting);
                                       else handleEditJob(jobPosting);
                                     }}
                                   >
-                                    <Edit className="h-3.5 w-3.5" />
+                                    <Edit className="h-4 w-4" />
                                     Redigera
                                   </button>
                                 )}
                                 <button
-                                  className="flex-1 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/20 text-xs font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                                  className="flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/20 px-4 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteClick(jobPosting);
                                   }}
                                 >
-                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <Trash2 className="h-4 w-4" />
                                   Ta bort
                                 </button>
                               </div>
