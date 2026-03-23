@@ -364,6 +364,28 @@ All colors MUST be HSL.
     line-height: 1.5;
   }
 
+  .premium-edit-shell :is(input:not([type="checkbox"]):not([type="radio"]), textarea) {
+    font-size: 1rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .premium-edit-shell input.h-11 {
+    height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
+    min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  .premium-edit-shell div.h-11.cursor-pointer,
+  .premium-edit-shell button.h-11 {
+    height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
+    min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
+  }
+
+  .premium-edit-shell :is(input, textarea)::placeholder {
+    font-size: 1rem;
+  }
+
   .premium-edit-pill-action {
     min-height: var(--control-height);
     padding-inline: 1rem;
