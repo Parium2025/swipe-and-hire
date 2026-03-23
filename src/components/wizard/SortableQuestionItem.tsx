@@ -48,6 +48,7 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
     transition: isDragging ? undefined : transition,
     opacity: isDragging ? 0.5 : 1,
     willChange: 'transform',
+    zIndex: isDragging ? 20 : 'auto',
   };
 
   const questionText = question.question_text || 'Ingen frågetext';
@@ -63,12 +64,17 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
       <div
         ref={setNodeRef}
         style={style}
-        className="group select-none rounded-lg border border-white/10 bg-white/5 p-2.5 backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:bg-white/8"
+        className={`group select-none rounded-lg border p-2.5 transition-colors duration-150 ${
+          isDragging
+            ? 'border-white/30 bg-white/10 shadow-sm'
+            : 'border-white/10 bg-white/5 md:hover:border-white/20 md:hover:bg-white/8'
+        }`}
       >
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {/* Drag handle */}
             <div
+              data-dnd-draggable="true"
               {...attributes}
               {...listeners}
                 className="-m-1 flex h-9 w-9 flex-shrink-0 cursor-grab touch-none select-none items-center justify-center rounded-full text-white transition-colors active:cursor-grabbing md:hover:bg-white/10"
