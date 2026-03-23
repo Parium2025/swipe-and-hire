@@ -118,11 +118,6 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
   // ─── Save ───────────────────────────────────────────────────────
   const saveNote = useCallback(async (noteText: string, clearDraft: () => void) => {
     if (!noteText.trim() || !applicantId || !user) return;
-    if (!navigator.onLine) {
-      toast.error('Du måste vara online för att spara anteckningar');
-      return;
-    }
-
     const nowISO = new Date().toISOString();
     const optimisticNote: CandidateNote = {
       id: `temp-${Date.now()}`,
@@ -171,11 +166,6 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
   // ─── Delete (optimistic) ────────────────────────────────────────
   const deleteNote = useCallback(async (noteId: string) => {
     if (!applicantId) return;
-    if (!navigator.onLine) {
-      toast.error('Du måste vara online för att ta bort anteckningar');
-      return;
-    }
-
     const previous = [...notes];
     persistOptimistic(applicantId, notes.filter(n => n.id !== noteId));
     setDeletingNoteId(null);
