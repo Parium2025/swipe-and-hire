@@ -1288,10 +1288,9 @@ const MobileJobWizard = ({
   }, []);
 
   const editCustomQuestion = useCallback((question: JobQuestion) => {
-    lockWizardCloseTouch(420);
     setEditingQuestion(question);
     setShowQuestionForm(true);
-  }, [lockWizardCloseTouch]);
+  }, []);
   
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
@@ -3131,6 +3130,14 @@ const MobileJobWizard = ({
                     <div className="flex items-center justify-between">
                       <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                       <Button
+                        onPointerDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        onTouchStart={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
                         onMouseDown={(e) => {
                           e.currentTarget.blur();
                           const activeEl = document.activeElement as HTMLElement;
@@ -3139,9 +3146,9 @@ const MobileJobWizard = ({
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={() => {
-                          lockWizardCloseTouch();
                           setShowQuestionTemplates(false);
                           setQuestionSearchTerm('');
+                          lockWizardCloseTouch(280);
                         }}
                         variant="ghost"
                         size="icon"
@@ -3334,8 +3341,8 @@ const MobileJobWizard = ({
                       </h3>
                       <Button
                         onPointerDown={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
-                          lockWizardCloseTouch(420);
                         }}
                         onMouseDown={(e) => {
                           e.currentTarget.blur();
@@ -3343,18 +3350,18 @@ const MobileJobWizard = ({
                           if (activeEl?.blur) activeEl.blur();
                         }}
                         onTouchStart={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
-                          lockWizardCloseTouch(420);
                         }}
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          lockWizardCloseTouch(420);
                           setShowQuestionForm(false);
                           setEditingQuestion(null);
                           setShowQuestionTemplates(true);
+                          lockWizardCloseTouch(280);
                         }}
                         variant="ghost"
                         size="icon"
