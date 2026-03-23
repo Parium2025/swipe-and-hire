@@ -2507,11 +2507,9 @@ const MobileJobWizard = ({
               <button
                 onPointerDown={(e) => {
                   e.stopPropagation();
-                  lockWizardCloseTouch(420);
                 }}
                 onTouchStart={(e) => {
                   e.stopPropagation();
-                  lockWizardCloseTouch(420);
                 }}
                 onClick={(e) => {
                   e.preventDefault();
@@ -3100,7 +3098,7 @@ const MobileJobWizard = ({
                         <DndContext
                           sensors={sensors}
                           collisionDetection={closestCenter}
-                          autoScroll={false}
+                          autoScroll={true}
                           measuring={{
                             droppable: {
                               strategy: MeasuringStrategy.WhileDragging,
