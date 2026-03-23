@@ -1,0 +1,1 @@
+ALTER TABLE public.job_postings ADD COLUMN IF NOT EXISTS image_focus_position text NOT NULL DEFAULT 'center';

@@ -42,6 +42,7 @@ export interface SearchJob {
   updated_at: string;
   expires_at: string | null;
   search_rank: number;
+  image_focus_position: string;
   // Added after enrichment
   company_name: string;
   company_logo_url?: string;

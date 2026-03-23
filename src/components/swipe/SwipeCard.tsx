@@ -10,6 +10,7 @@ export interface SwipeJob {
   location: string;
   employment_type?: string;
   job_image_url?: string;
+  image_focus_position?: string;
   views_count: number;
   applications_count: number;
   created_at: string;
@@ -103,7 +104,10 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
           <img
             src={imageUrl}
             alt={job.title}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${
+              job.image_focus_position === 'top' ? 'object-top' : 
+              job.image_focus_position === 'bottom' ? 'object-bottom' : 'object-center'
+            }`}
             loading="eager"
             draggable={false}
           />
