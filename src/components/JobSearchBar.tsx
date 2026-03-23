@@ -157,7 +157,7 @@ export const JobSearchBar = memo(({
             placeholder="Titel, Plats, Anställningstyp..."
             value={searchInput}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="dashboard-control-compact pl-10 pr-12 text-left bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white placeholder:text-left focus:outline-none focus-visible:outline-none focus:ring-0"
+            className="dashboard-control-compact pl-10 pr-12 text-base text-left bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white placeholder:text-left focus:outline-none focus-visible:outline-none focus:ring-0"
           />
           {searchInput ? (
             <button
