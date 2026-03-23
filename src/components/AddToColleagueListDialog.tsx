@@ -39,10 +39,6 @@ export function AddToColleagueListDialog({
   const { isOnline, showOfflineToast } = useOnline();
 
   const handleAddToList = async (recruiterId: string, isOwnList: boolean) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
     
     setIsAdding(recruiterId);
     try {
