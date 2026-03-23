@@ -149,16 +149,6 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   // Reviews are now fetched via useCompanyReviewsCache hook
 
   const handleSubmitReview = async () => {
-    // Check if online before submitting
-    if (!navigator.onLine) {
-      toast({
-        title: "Offline",
-        description: "Du måste vara online för att skicka en kommentar",
-        variant: "destructive",
-      });
-      return;
-    }
-
     // Require at least 1 star
     if (newRating < 1) {
       toast({

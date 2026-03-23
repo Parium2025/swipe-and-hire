@@ -199,12 +199,7 @@ export function useCandidateSummary({ applicantId, jobId, applicationId, cvUrl, 
   // ─── Generate summary via edge function ─────────────────────────
   const generateAiSummary = useCallback(async (silent = false) => {
     if (!applicantId) return;
-    if (!navigator.onLine) {
-      if (!silent) toast.error('Du måste vara online för att generera sammanfattning');
-      return;
-    }
-
-    setGeneratingSummary(true);
+setGeneratingSummary(true);
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-cv-summary', {
@@ -301,7 +296,7 @@ export function useCandidateSummary({ applicantId, jobId, applicationId, cvUrl, 
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const poll = async () => {
-      if (!navigator.onLine || attempt >= MAX_ATTEMPTS) return;
+      if (attempt >= MAX_ATTEMPTS) return;
       attempt++;
 
       try {

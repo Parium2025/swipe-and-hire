@@ -132,8 +132,6 @@ export function useCandidateActivities(applicantId: string | null) {
       metadata?: Record<string, any>;
     }) => {
       if (!user) throw new Error('Not authenticated');
-      if (!navigator.onLine) throw new Error('Du är offline');
-
       const { data, error } = await supabase
         .from('candidate_activities')
         .insert({
@@ -162,8 +160,6 @@ export function useCandidateActivities(applicantId: string | null) {
       applicantId: string;
     }) => {
       if (!user) throw new Error('Not authenticated');
-      if (!navigator.onLine) throw new Error('Du är offline');
-
       // Use the database function to delete all note activities for this applicant
       // This works regardless of who created the activity
       const { error } = await supabase.rpc('delete_note_activities_for_applicant', {

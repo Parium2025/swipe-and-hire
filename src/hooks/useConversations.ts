@@ -851,7 +851,6 @@ export function useCreateConversation() {
       initialMessage?: string;
     }) => {
       if (!user) throw new Error('Not authenticated');
-      if (!navigator.onLine) throw new Error('Du är offline');
 
       const candidateId = memberIds[0]; // The job seeker
       let conversationId: string | null = null;

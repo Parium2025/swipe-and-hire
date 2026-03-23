@@ -182,7 +182,6 @@ export function useJobStageSettings(jobId: string | undefined) {
       stageKey: string; 
       updates: Partial<{ label: string; color: string; iconName: string }> 
     }) => {
-      if (!navigator.onLine) throw new Error('Du är offline – försök igen när du har anslutning');
       if (!jobId) throw new Error('No job ID');
 
       const existing = dbSettings.find(s => s.stage_key === stageKey);
@@ -245,7 +244,6 @@ export function useJobStageSettings(jobId: string | undefined) {
       color: string; 
       iconName: string; 
     }) => {
-      if (!navigator.onLine) throw new Error('Du är offline – försök igen när du har anslutning');
       if (!jobId) throw new Error('No job ID');
 
       // Generate unique stage key
@@ -278,7 +276,6 @@ export function useJobStageSettings(jobId: string | undefined) {
   // Delete stage (with optimistic update)
   const deleteStageMutation = useMutation({
     mutationFn: async (stageKey: string) => {
-      if (!navigator.onLine) throw new Error('Du är offline – försök igen när du har anslutning');
       if (!jobId) throw new Error('No job ID');
 
       const { error } = await supabase
@@ -311,7 +308,6 @@ export function useJobStageSettings(jobId: string | undefined) {
   // Reorder stage - move to a specific position (atomic DB function)
   const reorderStageMutation = useMutation({
     mutationFn: async ({ stageKey, targetPosition }: { stageKey: string; targetPosition: number }) => {
-      if (!navigator.onLine) throw new Error('Du är offline – försök igen när du har anslutning');
       if (!jobId) throw new Error('No job ID');
 
       await persistMissingOrderedStages();

@@ -936,16 +936,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const handleSubmit = async () => {
-    // Check if online before submitting
-    if (!navigator.onLine) {
-      toast({
-        title: 'Offline',
-        description: 'Du måste vara online för att slutföra registreringen',
-        variant: 'destructive'
-      });
-      return;
-    }
-    
     setIsSubmitting(true);
     try {
       console.log('Starting profile update with data:', {

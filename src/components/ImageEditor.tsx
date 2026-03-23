@@ -287,13 +287,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       return;
     }
     
-    if (!navigator.onLine) {
-      toast.error('Ingen anslutning', {
-        description: 'Kontrollera din internetanslutning och försök igen',
-      });
-      return;
-    }
-    
     setIsSaving(true);
     
     // Om användaren INTE gjort några ändringar, behåll originalet
