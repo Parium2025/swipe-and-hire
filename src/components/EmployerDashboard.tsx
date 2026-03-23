@@ -76,6 +76,7 @@ const EmployerDashboard = memo(() => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<JobPosting | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [pendingEditJobId, setPendingEditJobId] = useState<string | null>(null);
   const { user, profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const { toast } = useToast();
   
@@ -130,6 +131,15 @@ const EmployerDashboard = memo(() => {
   const pageSize = 20;
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
+  const editLaunchTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (editLaunchTimeoutRef.current) {
+        window.clearTimeout(editLaunchTimeoutRef.current);
+      }
+    };
+  }, []);
   
   // Check if there are any drafts
   const hasDrafts = useMemo(() => jobs.some(job => !job.is_active), [jobs]);
@@ -230,6 +240,27 @@ const EmployerDashboard = memo(() => {
     setDraftToEdit(job);
     setDraftWizardOpen(true);
   };
+
+  const handlePremiumEditOpen = useCallback((job: JobPosting, mode: 'draft' | 'published') => {
+    if (pendingEditJobId) return;
+
+    setPendingEditJobId(job.id);
+
+    if (editLaunchTimeoutRef.current) {
+      window.clearTimeout(editLaunchTimeoutRef.current);
+    }
+
+    editLaunchTimeoutRef.current = window.setTimeout(() => {
+      if (mode === 'draft') {
+        handleEditDraft(job);
+      } else {
+        handleEditJob(job);
+      }
+
+      setPendingEditJobId(null);
+      editLaunchTimeoutRef.current = null;
+    }, 150);
+  }, [pendingEditJobId]);
 
   // Handle row click - drafts open wizard, active jobs go to details
   const handleJobRowClick = (job: JobPosting) => {
@@ -552,15 +583,14 @@ const EmployerDashboard = memo(() => {
                               <div className="flex items-center gap-2 pt-0.5">
                                 {(!isExpired || isDraft) && (
                                   <button
-                                    className="flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:bg-white/10"
+                                    className={`flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-[transform,opacity,background-color] duration-200 active:scale-[0.97] md:hover:bg-white/10 ${pendingEditJobId === job.id ? 'pointer-events-none opacity-70' : ''}`}
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      if (isDraft) handleEditDraft(jobPosting);
-                                      else handleEditJob(jobPosting);
+                                      handlePremiumEditOpen(jobPosting, isDraft ? 'draft' : 'published');
                                     }}
                                   >
                                     <Edit className="h-4 w-4" />
-                                    Redigera
+                                    {pendingEditJobId === job.id ? 'Öppnar...' : 'Redigera'}
                                   </button>
                                 )}
                                 <button
