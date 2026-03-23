@@ -842,6 +842,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         pitch: job.pitch || '',
         job_image_url: job.job_image_url || '',
         job_image_desktop_url: job.job_image_desktop_url || '',
+        job_image_card_url: (job as any).job_image_card_url || '',
         image_focus_position: (job as any).image_focus_position || 'center'
       };
       setFormData(newFormData);
@@ -1457,6 +1458,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_card_url: formData.job_image_card_url || null,
         image_focus_position: formData.image_focus_position || 'center'
       };
 
