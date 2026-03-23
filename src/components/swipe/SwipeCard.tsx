@@ -104,10 +104,14 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
           <img
             src={imageUrl}
             alt={job.title}
-            className={`w-full h-full object-cover ${
-              job.image_focus_position === 'top' ? 'object-top' : 
-              job.image_focus_position === 'bottom' ? 'object-bottom' : 'object-center'
-            }`}
+            className="w-full h-full object-cover"
+            style={{ objectPosition: `center ${(() => {
+              const v = job.image_focus_position;
+              if (!v || v === 'center') return '50%';
+              if (v === 'top') return '20%';
+              if (v === 'bottom') return '80%';
+              return `${v}%`;
+            })()}` }}
             loading="eager"
             draggable={false}
           />
