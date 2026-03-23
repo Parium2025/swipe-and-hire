@@ -45,6 +45,7 @@ import { createSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -52,6 +53,7 @@ import {
   DndContext,
   closestCenter,
   KeyboardSensor,
+  MeasuringStrategy,
   PointerSensor,
   TouchSensor,
   useSensor,
@@ -135,23 +137,24 @@ const MobileJobWizard = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
   const isMobile = useIsMobile();
+  const isTouchCapable = useTouchCapable();
   
   // Drag and drop sensors
   const touchSensor = useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 180,
-      tolerance: 12,
+      delay: 120,
+      tolerance: 8,
     },
   });
   const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: {
-      distance: 10,
+      distance: 6,
     },
   });
   const keyboardSensor = useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates,
   });
-  const sensors = useSensors(...(isMobile ? [touchSensor, keyboardSensor] : [pointerSensor, keyboardSensor]));
+  const sensors = useSensors(...(isTouchCapable ? [touchSensor, keyboardSensor] : [pointerSensor, keyboardSensor]));
   
   // Reset state when dialog closes
   useEffect(() => {
@@ -2471,7 +2474,25 @@ const MobileJobWizard = ({
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} />
-        <div className="premium-edit-shell">
+        <div className="premium-edit-shell relative">
+          {isWizardCloseTouchLocked && (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 z-[120] touch-manipulation"
+              onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onPointerUp={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            />
+          )}
           {/* Header */}
           <div className="premium-edit-header">
             <DialogHeader className="text-center sm:text-center">
@@ -2492,7 +2513,11 @@ const MobileJobWizard = ({
                   e.stopPropagation();
                   lockWizardCloseTouch(420);
                 }}
-                onClick={handleClose}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleClose();
+                }}
                 onTouchEnd={(e) => { e.currentTarget.blur(); }}
                 className={`${dialogCloseButtonClassName} touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
               >
@@ -3075,6 +3100,12 @@ const MobileJobWizard = ({
                         <DndContext
                           sensors={sensors}
                           collisionDetection={closestCenter}
+                          autoScroll={false}
+                          measuring={{
+                            droppable: {
+                              strategy: MeasuringStrategy.WhileDragging,
+                            },
+                          }}
                           onDragEnd={handleDragEnd}
                         >
                           <SortableContext
@@ -3319,7 +3350,9 @@ const MobileJobWizard = ({
                         }}
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           lockWizardCloseTouch(420);
                           setShowQuestionForm(false);
                           setEditingQuestion(null);
