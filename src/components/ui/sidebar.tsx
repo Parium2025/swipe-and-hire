@@ -221,7 +221,7 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             data-mobile="true"
             className={cn(
-              "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] flex-col bg-gradient-parium p-0 text-sidebar-foreground ease-out",
+              "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] max-w-[calc(100vw-0.75rem)] flex-col overflow-hidden border-r border-sidebar-border/40 bg-gradient-parium p-0 text-sidebar-foreground shadow-[0_20px_60px_hsl(var(--background)/0.35)] ease-out supports-[backdrop-filter]:backdrop-blur-xl",
               transitionsReady && "transition-transform duration-300 will-change-transform",
               side === "left" ? "left-0" : "right-0",
               openMobile
@@ -236,7 +236,10 @@ const Sidebar = React.forwardRef<
               } as React.CSSProperties
             }
           >
-            <div className="flex h-full w-full flex-col overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div
+              className="flex h-full min-h-0 w-full flex-col overflow-x-hidden overflow-y-auto overscroll-contain touch-pan-y"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
               {children}
             </div>
           </div>
@@ -436,7 +439,7 @@ const SidebarContent = React.forwardRef<
       ref={ref}
       data-sidebar="content"
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        "flex min-h-0 flex-1 flex-col gap-2 overflow-hidden group-data-[collapsible=icon]:overflow-hidden",
         className
       )}
       {...props}
@@ -453,7 +456,7 @@ const SidebarGroup = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
+      className={cn("relative flex w-full min-w-0 shrink-0 flex-col p-2", className)}
       {...props}
     />
   )
@@ -471,7 +474,7 @@ const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-          "duration-200 flex h-[var(--control-height-compact)] shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 transition-[margin,opa] ease-linear [&>svg]:size-4 [&>svg]:shrink-0",
+          "duration-200 flex h-[var(--control-height-compact)] shrink-0 items-center rounded-md px-2 text-[13px] font-medium uppercase tracking-[0.18em] text-sidebar-foreground/70 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 transition-[margin,opa] ease-linear md:text-xs md:tracking-wide [&>svg]:size-4 [&>svg]:shrink-0",
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
         className
       )}
@@ -544,7 +547,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-0 focus:outline-none focus-visible:outline-none focus:shadow-none disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex min-h-[var(--control-height)] w-full items-center gap-3 overflow-hidden rounded-md p-2 text-left outline-none ring-sidebar-ring transition-[width,height,padding] touch-manipulation [-webkit-tap-highlight-color:transparent] focus-visible:ring-0 focus:outline-none focus-visible:outline-none focus:shadow-none disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 md:min-h-[var(--control-height-compact)] [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -553,8 +556,8 @@ const sidebarMenuButtonVariants = cva(
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))]",
       },
       size: {
-        default: "h-[var(--control-height-compact)] text-sm",
-        sm: "h-[calc(var(--control-height-compact)-0.25rem)] text-xs",
+        default: "h-[var(--control-height)] px-3 text-[0.95rem] md:h-[var(--control-height-compact)] md:px-2 md:text-sm",
+        sm: "h-[var(--control-height-sm)] px-3 text-sm md:h-[calc(var(--control-height-compact)-0.25rem)] md:px-2 md:text-xs",
         lg: "h-12 text-sm group-data-[collapsible=icon]:!p-0",
       },
     },
