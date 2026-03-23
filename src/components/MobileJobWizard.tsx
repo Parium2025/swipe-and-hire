@@ -2455,19 +2455,19 @@ const MobileJobWizard = ({
       onOpenChange(isOpen);
     }}>
       <DialogContentNoFocus 
-        className="premium-modal-motion parium-panel max-w-none w-[min(92vw,400px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
+        className="premium-modal-motion premium-edit-dialog parium-panel max-w-none h-auto bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} />
-        <div className="flex flex-col h-full max-h-[75vh] sm:max-h-[80vh] relative z-10">
+        <div className="premium-edit-shell">
           {/* Header */}
-          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
+          <div className="premium-edit-header">
             <DialogHeader className="text-center sm:text-center">
-              <DialogTitle className="text-white text-lg">
+              <DialogTitle className="premium-edit-title">
                 {steps[currentStep].title}
               </DialogTitle>
-              <div className="text-sm text-white">
+              <div className="premium-edit-step-meta">
                 Steg {currentStep + 1} av {steps.length}
               </div>
             </DialogHeader>
@@ -2483,18 +2483,18 @@ const MobileJobWizard = ({
           </div>
 
           {/* Progress Bar */}
-          <div className="px-4 py-2 flex-shrink-0">
+          <div className="premium-edit-progress-wrap">
             <Progress 
               value={progress} 
-              className="h-1 bg-white/20 [&>div]:bg-white"
+              className="premium-edit-progress"
             />
           </div>
 
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div ref={scrollContainerRef} className="premium-edit-scroll" style={{ WebkitOverflowScrolling: 'touch' }}>
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
-              <div className="space-y-1.5 max-w-2xl mx-auto w-full">
+              <div className="premium-edit-step">
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Jobbtitel *</Label>
                   <Input
@@ -2562,7 +2562,7 @@ const MobileJobWizard = ({
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                     rows={3}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white p-2 text-sm resize-none leading-tight focus:border-white/40 min-h-[80px] sm:min-h-[200px]"
+                    className="premium-edit-textarea bg-white/10 border-white/20 text-white placeholder:text-white text-sm resize-none focus:border-white/40 sm:min-h-[200px]"
                   />
                 </div>
 
@@ -2899,7 +2899,7 @@ const MobileJobWizard = ({
 
             {/* Step 2: Var finns jobbet? */}
             {currentStep === 1 && (
-              <div className="space-y-1.5 max-w-2xl mx-auto w-full">
+              <div className="premium-edit-step">
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">
@@ -4734,7 +4734,7 @@ const MobileJobWizard = ({
                             <button
                               type="button"
                               onClick={openImageEditor}
-                              className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-colors text-sm font-medium"
+                              className="premium-edit-pill-action bg-white/20 hover:bg-white/30 text-white transition-colors"
                             >
                               Anpassa din bild
                             </button>
@@ -4747,7 +4747,7 @@ const MobileJobWizard = ({
                                 setImageIsEdited(false);
                                 setManualFocus(null);
                               }}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                              className="premium-edit-icon-action inline-flex items-center justify-center border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                               aria-label="Ta bort mobilbild"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -4801,7 +4801,7 @@ const MobileJobWizard = ({
                             <button
                               type="button"
                               onClick={openDesktopImageEditor}
-                              className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-colors text-sm font-medium"
+                              className="premium-edit-pill-action bg-white/20 hover:bg-white/30 text-white transition-colors"
                             >
                               Anpassa din bild
                             </button>
@@ -4813,7 +4813,7 @@ const MobileJobWizard = ({
                                 setOriginalDesktopStoragePath(null);
                                 setDesktopImageIsEdited(false);
                               }}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                              className="premium-edit-icon-action inline-flex items-center justify-center border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                               aria-label="Ta bort datorbild"
                             >
                               <Trash2 className="w-4 h-4" />
