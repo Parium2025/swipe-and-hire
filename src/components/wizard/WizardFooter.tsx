@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Loader2, CheckCircle, WifiOff } from 'lucide-react';
-import { useOnline } from '@/hooks/useOnlineStatus';
+import { ArrowLeft, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import type { MouseEvent, TouchEvent } from 'react';
 
 export interface WizardFooterProps {
@@ -49,7 +48,7 @@ export const WizardFooter = ({
   hideBackOnFirstStep = false,
   className = '',
 }: WizardFooterProps) => {
-  const { isOnline, showOfflineToast } = useOnline();
+  const showBackButton = hideBackOnFirstStep ? currentStep > 0 : true;
   const showBackButton = hideBackOnFirstStep ? currentStep > 0 : true;
   const backDisabled = currentStep === 0;
   
@@ -144,11 +143,6 @@ export const WizardFooter = ({
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               {loadingLabel}
-            </>
-          ) : !isOnline ? (
-            <>
-              <WifiOff className="h-4 w-4 mr-2" />
-              Offline
             </>
           ) : (
             <>
