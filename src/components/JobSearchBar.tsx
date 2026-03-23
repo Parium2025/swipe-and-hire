@@ -152,12 +152,12 @@ export const JobSearchBar = memo(({
       <div className="dashboard-mobile-controls md:hidden">
         {/* Search field with sort button inside */}
         <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-white" />
+          <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
           <Input
             placeholder="Titel, Plats, Anställningstyp..."
             value={searchInput}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="dashboard-control-compact pl-10 pr-12 text-base text-left bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white placeholder:text-left focus:outline-none focus-visible:outline-none focus:ring-0"
+            className="dashboard-control-compact pl-11 pr-12 text-base font-medium text-left bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:text-left placeholder:font-normal focus:outline-none focus-visible:outline-none focus:ring-0"
           />
           {searchInput ? (
             <button
