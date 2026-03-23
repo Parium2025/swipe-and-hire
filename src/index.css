@@ -716,6 +716,8 @@ All colors MUST be HSL.
   .dashboard-tabs-viewport {
     width: 100%;
     max-width: 100%;
+    display: flex;
+    justify-content: center;
     overflow-x: auto;
     padding-inline: 0.125rem;
     -ms-overflow-style: none;
