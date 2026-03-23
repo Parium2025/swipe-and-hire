@@ -1406,12 +1406,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const handleSubmit = async () => {
     if (!user || !job || loading) return;
 
-    // Check if online before saving
-    if (!navigator.onLine) {
-      toast({ title: 'Offline', description: 'Du måste vara online för att spara ändringar', variant: 'destructive' });
-      return;
-    }
-
     setLoading(true);
     try {
       // Hämta län och kommun från postnummer
