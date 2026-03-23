@@ -62,7 +62,6 @@ export function SendMessageDialog({
 }: SendMessageDialogProps) {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const { isOnline, showOfflineToast } = useOnline();
   const createConversation = useCreateConversation();
   
   // Auto-save message draft to localStorage (unique per recipient + application)
@@ -343,17 +342,15 @@ export function SendMessageDialog({
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isDisabled}
                 className={`w-full h-11 !min-h-0 rounded-full border transition-[border-color,transform] duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
-                  !sending && message.trim() && isOnline ? 'border-white/30' : 'border-transparent'
+                  !sending && message.trim() ? 'border-white/30' : 'border-transparent'
                 }`}
               >
                 {sending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-                ) : !isOnline ? (
-                  <WifiOff className="h-4 w-4 mr-1.5" />
                 ) : (
                   <Send className="h-4 w-4 mr-1.5" />
                 )}
-                {!isOnline ? 'Offline' : 'Skicka'}
+                Skicka
               </Button>
             </div>
           </div>

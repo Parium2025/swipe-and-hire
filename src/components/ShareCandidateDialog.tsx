@@ -39,7 +39,7 @@ export function ShareCandidateDialog({
   const { teamMembers, hasTeam, isLoading } = useTeamMembers();
   const [sharing, setSharing] = useState<string | null>(null);
   const [shared, setShared] = useState<Set<string>>(new Set());
-  const { isOnline, showOfflineToast } = useOnline();
+  
 
   const handleShare = async (memberId: string, memberName: string) => {
     setSharing(memberId);

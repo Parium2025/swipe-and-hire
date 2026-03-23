@@ -49,7 +49,6 @@ export const BookInterviewDialog = ({
   elevated,
 }: BookInterviewDialogProps) => {
   const { user, profile } = useAuth();
-  const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   

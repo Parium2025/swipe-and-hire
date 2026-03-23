@@ -41,7 +41,7 @@ const TeamManagement = () => {
   const [inviteRole, setInviteRole] = useState('recruiter');
   const [inviting, setInviting] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
-  const { isOnline, showOfflineToast } = useOnline();
+  
 
   useEffect(() => {
     fetchTeamMembers();
