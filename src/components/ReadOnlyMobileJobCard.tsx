@@ -22,6 +22,7 @@ interface ReadOnlyMobileJobCardProps {
     created_at: string;
     expires_at?: string;
     job_image_url?: string;
+    job_image_card_url?: string;
     image_focus_position?: string;
     company_name?: string;
     positions_count?: number;
