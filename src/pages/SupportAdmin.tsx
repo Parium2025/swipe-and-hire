@@ -156,16 +156,6 @@ const SupportAdmin = () => {
   const sendReply = async () => {
     if (!selectedTicket || !replyMessage.trim()) return;
     
-    // Check if online before sending
-    if (!navigator.onLine) {
-      toast({
-        title: 'Offline',
-        description: 'Du måste vara online för att skicka svar',
-        variant: 'destructive'
-      });
-      return;
-    }
-
     setReplyLoading(true);
     try {
       const { error } = await supabase
