@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Pencil, Trash2, AlertTriangle } from 'lucide-react';
@@ -31,7 +31,7 @@ const getQuestionTypeLabel = (type: string) => {
   }
 };
 
-export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionItemProps) => {
+const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQuestionItemProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const {
@@ -45,8 +45,9 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? undefined : transition,
     opacity: isDragging ? 0.5 : 1,
+    willChange: 'transform',
   };
 
   const questionText = question.question_text || 'Ingen frågetext';
@@ -62,7 +63,7 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
       <div
         ref={setNodeRef}
         style={style}
-        className="bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group"
+        className="group select-none rounded-lg border border-white/10 bg-white/5 p-2.5 backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:bg-white/8"
       >
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -70,7 +71,7 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
             <div
               {...attributes}
               {...listeners}
-               className="-m-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white transition-colors touch-none cursor-grab active:cursor-grabbing md:hover:bg-white/10"
+                className="-m-1 flex h-9 w-9 flex-shrink-0 cursor-grab touch-none select-none items-center justify-center rounded-full text-white transition-colors active:cursor-grabbing md:hover:bg-white/10"
             >
               <GripVertical className="h-4 w-4" />
             </div>
@@ -157,5 +158,7 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
     </>
   );
 };
+
+export const SortableQuestionItem = memo(SortableQuestionItemComponent);
 
 export default SortableQuestionItem;

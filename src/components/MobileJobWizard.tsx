@@ -44,6 +44,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -133,24 +134,24 @@ const MobileJobWizard = ({
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
+  const isMobile = useIsMobile();
   
   // Drag and drop sensors
-  const sensors = useSensors(
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 120,
-        tolerance: 10,
-      },
-    }),
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 180,
+      tolerance: 12,
+    },
+  });
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 10,
+    },
+  });
+  const keyboardSensor = useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates,
+  });
+  const sensors = useSensors(...(isMobile ? [touchSensor, keyboardSensor] : [pointerSensor, keyboardSensor]));
   
   // Reset state when dialog closes
   useEffect(() => {
@@ -1277,16 +1278,19 @@ const MobileJobWizard = ({
     setEditingQuestion(null);
   };
 
-  const deleteCustomQuestion = (questionId: string) => {
-    setCustomQuestions(prev => prev.filter(q => q.id !== questionId));
-  };
+  const deleteCustomQuestion = useCallback((questionId: string) => {
+    setCustomQuestions(prev => prev
+      .filter(q => q.id !== questionId)
+      .map((question, index) => ({ ...question, order_index: index })));
+  }, []);
 
-  const editCustomQuestion = (question: JobQuestion) => {
+  const editCustomQuestion = useCallback((question: JobQuestion) => {
+    lockWizardCloseTouch(420);
     setEditingQuestion(question);
     setShowQuestionForm(true);
-  };
+  }, [lockWizardCloseTouch]);
   
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
@@ -1303,7 +1307,7 @@ const MobileJobWizard = ({
         }));
       });
     }
-  };
+  }, []);
 
   const updateQuestionField = (field: keyof JobQuestion, value: any) => {
     if (!editingQuestion) return;

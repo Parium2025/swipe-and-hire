@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -26,6 +36,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
+import { useIsMobile } from '@/hooks/use-mobile';
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
   DndContext,
@@ -129,6 +140,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [questionTemplates, setQuestionTemplates] = useState<JobQuestion[]>([]);
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
+  const [isWizardCloseTouchLocked, setIsWizardCloseTouchLocked] = useState(false);
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
   const [isScrolledTop, setIsScrolledTop] = useState(true);
@@ -175,6 +188,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const occupationRef = useRef<HTMLDivElement>(null);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
+  const wizardCloseTouchLockTimeoutRef = useRef<number | null>(null);
+  const isMobile = useIsMobile();
 
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
@@ -270,22 +285,40 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   // Drag and drop sensors
-  const sensors = useSensors(
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 120,
-        tolerance: 10,
-      },
-    }),
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 180,
+      tolerance: 12,
+    },
+  });
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 10,
+    },
+  });
+  const keyboardSensor = useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates,
+  });
+  const sensors = useSensors(...(isMobile ? [touchSensor, keyboardSensor] : [pointerSensor, keyboardSensor]));
+
+  const lockWizardCloseTouch = useCallback((duration = 320) => {
+    setIsWizardCloseTouchLocked(true);
+    if (wizardCloseTouchLockTimeoutRef.current) {
+      window.clearTimeout(wizardCloseTouchLockTimeoutRef.current);
+    }
+    wizardCloseTouchLockTimeoutRef.current = window.setTimeout(() => {
+      setIsWizardCloseTouchLocked(false);
+      wizardCloseTouchLockTimeoutRef.current = null;
+    }, duration);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (wizardCloseTouchLockTimeoutRef.current) {
+        window.clearTimeout(wizardCloseTouchLockTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const steps = [
     {
@@ -1115,11 +1148,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   }, [showOccupationDropdown, showEmploymentTypeDropdown, showSalaryTypeDropdown, showSalaryTransparencyDropdown, showBenefitsDropdown, showWorkLocationDropdown, showRemoteWorkDropdown, showQuestionTypeDropdown]);
 
   // Question management functions
-  const addCustomQuestion = () => {
+  const addCustomQuestion = useCallback(() => {
     setShowQuestionTemplates(true);
-  };
+  }, []);
 
-  const createNewQuestion = () => {
+  const createNewQuestion = useCallback(() => {
+    lockWizardCloseTouch(420);
     const newQuestion: JobQuestion = {
       question_text: '',
       question_type: 'text',
@@ -1130,7 +1164,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     setEditingQuestion(newQuestion);
     setShowQuestionTemplates(false);
     setShowQuestionForm(true);
-  };
+  }, [customQuestions.length, lockWizardCloseTouch]);
 
   const useQuestionTemplate = async (template: any) => {
     const filteredOptions = template.options?.filter((opt: string) => opt.trim() !== '') || [];
@@ -1269,16 +1303,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     setEditingQuestion(null);
   };
 
-  const deleteCustomQuestion = (questionId: string) => {
-    setCustomQuestions(prev => prev.filter(q => q.id !== questionId));
-  };
+  const deleteCustomQuestion = useCallback((questionId: string) => {
+    setCustomQuestions(prev => prev
+      .filter(q => q.id !== questionId)
+      .map((question, index) => ({ ...question, order_index: index })));
+  }, []);
 
-  const editCustomQuestion = (question: JobQuestion) => {
+  const editCustomQuestion = useCallback((question: JobQuestion) => {
+    lockWizardCloseTouch(420);
     setEditingQuestion(question);
     setShowQuestionForm(true);
-  };
+  }, [lockWizardCloseTouch]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
@@ -1294,7 +1331,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         }));
       });
     }
-  };
+  }, []);
 
   const updateQuestionField = (field: keyof JobQuestion, value: any) => {
     if (!editingQuestion) return;
@@ -1522,8 +1559,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 </div>
               </DialogHeader>
               <button
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  lockWizardCloseTouch(420);
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  lockWizardCloseTouch(420);
+                }}
                 onClick={handleClose}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
+                onTouchEnd={(e) => e.currentTarget.blur()}
+                className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -2087,6 +2133,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                             <Button
                               onClick={() => {
+                                lockWizardCloseTouch(320);
                                 setShowQuestionTemplates(false);
                                 setQuestionSearchTerm('');
                               }}
@@ -2176,6 +2223,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               <button
                                                 type="button"
                                                 onClick={() => {
+                                                  lockWizardCloseTouch(420);
                                                   setEditingQuestion({
                                                     ...(template as JobQuestion),
                                                     template_id: (template as any).id
@@ -2191,27 +2239,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               </button>
                                               <button
                                                 type="button"
-                                                onClick={async () => {
+                                                onClick={() => {
                                                   if (!(template as any).id) return;
-                                                  try {
-                                                    const { error } = await supabase
-                                                      .from('job_question_templates')
-                                                      .delete()
-                                                      .eq('id', (template as any).id);
-                                                    
-                                                    if (error) throw error;
-                                                    
-                                                    setQuestionTemplates(prev => prev.filter(t => (t as any).id !== (template as any).id));
-                                                    toast({
-                                                      title: "Fråga borttagen"
-                                                    });
-                                                  } catch (error) {
-                                                    console.error('Error deleting template:', error);
-                                                    toast({
-                                                      title: "Kunde inte ta bort frågan",
-                                                      variant: "destructive"
-                                                    });
-                                                  }
+                                                  setDeleteTemplateId((template as any).id);
                                                 }}
                                                 onMouseDown={(e) => e.currentTarget.blur()}
                                                 onMouseUp={(e) => e.currentTarget.blur()}
@@ -2230,6 +2260,64 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             })()}
                           </div>
 
+                          <AlertDialog open={!!deleteTemplateId} onOpenChange={(open) => { if (!open) setDeleteTemplateId(null); }}>
+                            <AlertDialogContentNoFocus
+                              className="mx-0 w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] rounded-xl border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-sm sm:w-[28rem] sm:max-w-md sm:p-6"
+                            >
+                              <AlertDialogHeader className="space-y-4 text-center">
+                                <div className="flex items-center justify-center gap-2.5">
+                                  <div className="rounded-full bg-destructive/20 p-2">
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  </div>
+                                  <AlertDialogTitle className="text-base font-semibold text-white md:text-lg">
+                                    Ta bort fråga
+                                  </AlertDialogTitle>
+                                </div>
+                                <AlertDialogDescription className="text-sm leading-relaxed text-white">
+                                  Är du säker på att du vill ta bort denna fråga? Denna åtgärd går inte att ångra.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter className="mt-4 flex-row justify-center gap-2">
+                                <AlertDialogCancel
+                                  onClick={() => setDeleteTemplateId(null)}
+                                  style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+                                  className="mt-0 rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
+                                >
+                                  Avbryt
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={async () => {
+                                    if (!deleteTemplateId) return;
+                                    try {
+                                      const { error } = await supabase
+                                        .from('job_question_templates')
+                                        .delete()
+                                        .eq('id', deleteTemplateId);
+
+                                      if (error) throw error;
+
+                                      setQuestionTemplates(prev => prev.filter(t => (t as any).id !== deleteTemplateId));
+                                      toast({ title: 'Fråga borttagen' });
+                                    } catch (error) {
+                                      console.error('Error deleting template:', error);
+                                      toast({
+                                        title: 'Kunde inte ta bort frågan',
+                                        variant: 'destructive'
+                                      });
+                                    }
+                                    setDeleteTemplateId(null);
+                                  }}
+                                  variant="destructiveSoft"
+                                  style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+                                  className="rounded-full"
+                                >
+                                  <Trash2 className="mr-1.5 h-4 w-4" />
+                                  Ta bort
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContentNoFocus>
+                          </AlertDialog>
+
                         </div>
                       ) : (
                         <div className="space-y-4">
@@ -2238,7 +2326,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
                             </h3>
                           <Button
+                            onPointerDown={(e) => {
+                              e.stopPropagation();
+                              lockWizardCloseTouch(420);
+                            }}
+                            onTouchStart={(e) => {
+                              e.stopPropagation();
+                              lockWizardCloseTouch(420);
+                            }}
                             onClick={() => {
+                              lockWizardCloseTouch(420);
                               setShowQuestionForm(false);
                               setEditingQuestion(null);
                               setShowQuestionTemplates(true);
