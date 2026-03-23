@@ -285,6 +285,100 @@ All colors MUST be HSL.
     transform-origin: center bottom;
   }
 
+  .premium-edit-dialog {
+    width: min(92vw, 26rem);
+    max-height: min(88vh, 52rem);
+  }
+
+  .premium-edit-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: min(88vh, 52rem);
+    position: relative;
+    z-index: 10;
+    overflow: hidden;
+  }
+
+  .premium-edit-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1rem, 0.92rem + 0.4vw, 1.125rem);
+    border-bottom: 1px solid hsl(var(--sidebar-foreground) / 0.2);
+    flex-shrink: 0;
+    background: hsl(var(--background) / 0.1);
+  }
+
+  .premium-edit-title {
+    font-size: clamp(1.0625rem, 1rem + 0.24vw, 1.1875rem);
+    line-height: 1.2;
+    color: hsl(var(--primary-foreground));
+  }
+
+  .premium-edit-step-meta {
+    font-size: clamp(0.8125rem, 0.79rem + 0.12vw, 0.875rem);
+    line-height: 1.35;
+    color: hsl(var(--primary-foreground));
+    opacity: 0.92;
+  }
+
+  .premium-edit-progress-wrap {
+    padding: 0.625rem 1rem 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .premium-edit-progress {
+    height: 0.25rem;
+    background: hsl(var(--sidebar-foreground) / 0.18);
+  }
+
+  .premium-edit-progress > div {
+    background: hsl(var(--primary-foreground));
+  }
+
+  .premium-edit-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: clamp(1rem, 0.92rem + 0.32vw, 1.125rem);
+    padding-top: 0.875rem;
+    padding-bottom: 1.125rem;
+  }
+
+  .premium-edit-step {
+    width: 100%;
+    max-width: 42rem;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.875rem, 0.8rem + 0.32vw, 1rem);
+  }
+
+  .premium-edit-textarea {
+    min-height: clamp(8.5rem, 8rem + 1.8vw, 10rem);
+    padding-block: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .premium-edit-pill-action {
+    min-height: var(--control-height);
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .premium-edit-icon-action {
+    width: var(--icon-button-size-sm);
+    height: var(--icon-button-size-sm);
+    border-radius: 9999px;
+  }
+
   .premium-modal-motion[data-state="open"] {
     animation: premium-modal-in 320ms cubic-bezier(0.22, 1, 0.36, 1);
   }
