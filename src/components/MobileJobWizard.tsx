@@ -403,7 +403,7 @@ const MobileJobWizard = ({
   const [isWizardCloseTouchLocked, setIsWizardCloseTouchLocked] = useState(false);
   const wizardCloseTouchLockTimeoutRef = useRef<number | null>(null);
 
-  const lockWizardCloseTouch = useCallback((duration = 260) => {
+  const lockWizardCloseTouch = useCallback((duration = 520) => {
     setIsWizardCloseTouchLocked(true);
     if (wizardCloseTouchLockTimeoutRef.current) {
       window.clearTimeout(wizardCloseTouchLockTimeoutRef.current);
@@ -2478,6 +2478,14 @@ const MobileJobWizard = ({
             <div
               aria-hidden="true"
               className="absolute inset-0 z-[120] touch-manipulation"
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onPointerDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -3148,7 +3156,7 @@ const MobileJobWizard = ({
                         onClick={() => {
                           setShowQuestionTemplates(false);
                           setQuestionSearchTerm('');
-                          lockWizardCloseTouch(280);
+                          lockWizardCloseTouch();
                         }}
                         variant="ghost"
                         size="icon"
@@ -3361,7 +3369,7 @@ const MobileJobWizard = ({
                           setShowQuestionForm(false);
                           setEditingQuestion(null);
                           setShowQuestionTemplates(true);
-                          lockWizardCloseTouch(280);
+                          lockWizardCloseTouch();
                         }}
                         variant="ghost"
                         size="icon"
