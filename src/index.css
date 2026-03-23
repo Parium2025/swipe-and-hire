@@ -1664,3 +1664,12 @@ All colors MUST be HSL.
 .glass-dropdown {
   @apply absolute z-50 glass-panel rounded-md mt-1;
 }
+
+/* Touch-safe close button: blocks pointer events briefly after mount to prevent ghost-click bleed */
+@keyframes close-guard-appear {
+  0%, 99% { pointer-events: none; }
+  100% { pointer-events: auto; }
+}
+.close-guard-animated {
+  animation: close-guard-appear 350ms linear forwards;
+}

@@ -46,7 +46,7 @@ import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
-import { useTouchInteractionLock } from '@/hooks/useTouchInteractionLock';
+
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -2456,32 +2456,6 @@ const MobileJobWizard = ({
       >
         <AnimatedBackground showBubbles={false} />
         <div className="premium-edit-shell relative">
-          {isWizardCloseTouchLocked && (
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 z-[120] touch-manipulation"
-              onTouchStart={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onPointerUp={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            />
-          )}
           {/* Header */}
           <div className="premium-edit-header">
             <DialogHeader className="text-center sm:text-center">
@@ -2494,20 +2468,13 @@ const MobileJobWizard = ({
             </DialogHeader>
             {!showQuestionTemplates && !showQuestionForm && (
               <button
-                onPointerDown={(e) => {
-                  e.stopPropagation();
-                }}
-                onTouchStart={(e) => {
-                  e.stopPropagation();
-                }}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   handleClose();
                 }}
-                onTouchEnd={(e) => { e.currentTarget.blur(); }}
-                disabled={isWizardCloseTouchLocked}
-                className={`${dialogCloseButtonClassName} touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
+                onTouchEnd={(e) => e.currentTarget.blur()}
+                className={`${dialogCloseButtonClassName} touch-manipulation [-webkit-tap-highlight-color:transparent]`}
               >
                 <X className={dialogCloseIconClassName} />
               </button>
@@ -3121,26 +3088,17 @@ const MobileJobWizard = ({
                     <div className="flex items-center justify-between">
                       <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                       <Button
-                        onMouseDown={(e) => {
-                          e.currentTarget.blur();
-                          const activeEl = document.activeElement as HTMLElement;
-                          if (activeEl?.blur) activeEl.blur();
-                        }}
-                        onMouseUp={(e) => e.currentTarget.blur()}
-                        onTouchEnd={(e) => { e.currentTarget.blur(); }}
+                        key={`close-templates-${closeGuardKey}`}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          lockWizardCloseTouch();
-                          window.setTimeout(() => {
-                            setShowQuestionTemplates(false);
-                            setQuestionSearchTerm('');
-                          }, 0);
+                          setShowQuestionTemplates(false);
+                          setQuestionSearchTerm('');
                         }}
-                        disabled={isWizardCloseTouchLocked}
+                        onTouchEnd={(e) => e.currentTarget.blur()}
                         variant="ghost"
                         size="icon"
-                        className={`h-7 w-7 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20 active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
+                        className="close-guard-animated h-7 w-7 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                       >
                         <X className={dialogCloseIconClassName} />
                       </Button>
@@ -3328,27 +3286,19 @@ const MobileJobWizard = ({
                         {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
                       </h3>
                       <Button
-                        onMouseDown={(e) => {
-                          e.currentTarget.blur();
-                          const activeEl = document.activeElement as HTMLElement;
-                          if (activeEl?.blur) activeEl.blur();
-                        }}
-                        onMouseUp={(e) => e.currentTarget.blur()}
-                        onTouchEnd={(e) => { e.currentTarget.blur(); }}
+                        key={`close-form-${closeGuardKey}`}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          lockWizardCloseTouch();
-                          window.setTimeout(() => {
-                            setShowQuestionForm(false);
-                            setEditingQuestion(null);
-                            setShowQuestionTemplates(true);
-                          }, 0);
+                          setCloseGuardKey(k => k + 1);
+                          setShowQuestionForm(false);
+                          setEditingQuestion(null);
+                          setShowQuestionTemplates(true);
                         }}
-                        disabled={isWizardCloseTouchLocked}
+                        onTouchEnd={(e) => e.currentTarget.blur()}
                         variant="ghost"
                         size="icon"
-                        className={`h-7 w-7 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20 active:scale-100 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
+                        className="close-guard-animated h-7 w-7 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-150 md:hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                       >
                         <X className={dialogCloseIconClassName} />
                       </Button>
