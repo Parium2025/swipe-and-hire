@@ -168,9 +168,9 @@ export function AppSidebar() {
       className={`border-r-0 bg-transparent ${collapsed ? 'w-16' : 'w-64'}`}
       collapsible="icon"
     >
-      <SidebarContent className="gap-0">
+      <SidebarContent className="gap-0 overflow-x-hidden">
         {/* User Profile Section - always mounted to preload, but only visible when not collapsed */}
-        <div className={`p-4 ${collapsed ? 'hidden' : ''}`}>
+        <div className={`shrink-0 p-4 ${collapsed ? 'hidden' : ''}`}>
           <div className="flex items-center gap-3">
             {hasVideo && videoUrl ? (
               <ProfileVideo
@@ -400,7 +400,7 @@ export function AppSidebar() {
             variant="glass"
             data-allow-border="true"
             className={`
-              w-full justify-start
+              min-h-[var(--control-height)] w-full justify-start text-[0.95rem] md:min-h-[var(--control-height-compact)] md:text-sm
               ${collapsed ? 'px-2' : 'px-4'}
             `}
           >
