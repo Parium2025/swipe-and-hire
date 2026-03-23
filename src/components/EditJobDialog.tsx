@@ -38,7 +38,7 @@ import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
-import { useTouchInteractionLock } from '@/hooks/useTouchInteractionLock';
+
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
   DndContext,
@@ -144,7 +144,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
-  const { isInteractionLocked: isWizardCloseTouchLocked, lockInteraction: lockWizardCloseTouch } = useTouchInteractionLock(680);
+  const [closeGuardKey, setCloseGuardKey] = useState(0);
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
   const [isScrolledTop, setIsScrolledTop] = useState(true);
@@ -1530,32 +1530,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         >
           <AnimatedBackground showBubbles={false} variant="card" />
           <div className="premium-edit-shell relative">
-            {isWizardCloseTouchLocked && (
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 z-[120] touch-manipulation"
-                onTouchStart={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onPointerDown={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onPointerUp={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              />
-            )}
             {/* Header */}
             <div className="premium-edit-header">
               <DialogHeader className="text-center sm:text-center">
@@ -1568,20 +1542,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               </DialogHeader>
               {!showQuestionTemplates && !showQuestionForm && (
                 <button
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                  }}
-                  onTouchStart={(e) => {
-                    e.stopPropagation();
-                  }}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleClose();
                   }}
                   onTouchEnd={(e) => e.currentTarget.blur()}
-                  disabled={isWizardCloseTouchLocked}
-                  className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
+                  className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -2151,21 +2118,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <div className="flex items-center justify-between">
                             <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                             <Button
+                              key={`close-templates-${closeGuardKey}`}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                lockWizardCloseTouch();
-                                window.setTimeout(() => {
-                                  setShowQuestionTemplates(false);
-                                  setQuestionSearchTerm('');
-                                }, 0);
+                                setShowQuestionTemplates(false);
+                                setQuestionSearchTerm('');
                               }}
-                              onMouseDown={(e) => e.currentTarget.blur()}
-                              onMouseUp={(e) => e.currentTarget.blur()}
-                              disabled={isWizardCloseTouchLocked}
+                              onTouchEnd={(e) => e.currentTarget.blur()}
                               variant="ghost"
                               size="icon"
-                              className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-none focus:ring-0"
+                              className="close-guard-animated h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-none focus:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                             >
                               <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
                             </Button>
@@ -2349,22 +2312,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
                             </h3>
                           <Button
+                            key={`close-form-${closeGuardKey}`}
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              lockWizardCloseTouch();
-                              window.setTimeout(() => {
-                                setShowQuestionForm(false);
-                                setEditingQuestion(null);
-                                setShowQuestionTemplates(true);
-                              }, 0);
+                              setCloseGuardKey(k => k + 1);
+                              setShowQuestionForm(false);
+                              setEditingQuestion(null);
+                              setShowQuestionTemplates(true);
                             }}
-                            onMouseDown={(e) => e.currentTarget.blur()}
-                            onMouseUp={(e) => e.currentTarget.blur()}
-                            disabled={isWizardCloseTouchLocked}
+                            onTouchEnd={(e) => e.currentTarget.blur()}
                             variant="ghost"
                             size="icon"
-                            className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-none focus:ring-0"
+                            className="close-guard-animated h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-none focus:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                           >
                             <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
                           </Button>
