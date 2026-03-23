@@ -1582,11 +1582,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               <button
                 onPointerDown={(e) => {
                   e.stopPropagation();
-                  lockWizardCloseTouch(420);
                 }}
                 onTouchStart={(e) => {
                   e.stopPropagation();
-                  lockWizardCloseTouch(420);
                 }}
                 onClick={(e) => {
                   e.preventDefault();
@@ -2131,7 +2129,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               <DndContext
                                 sensors={sensors}
                                 collisionDetection={closestCenter}
-                                autoScroll={false}
+                                autoScroll={true}
                                 measuring={{
                                   droppable: {
                                     strategy: MeasuringStrategy.WhileDragging,
