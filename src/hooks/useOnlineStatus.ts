@@ -119,16 +119,3 @@ export const useOnline = (): OnlineContextValue => {
     },
   };
 };
-
-/**
- * Utility-funktion för att få disabled-state baserat på online-status
- */
-export const useOfflineDisabled = (additionalDisabled = false) => {
-  const { isOnline, showOfflineToast } = useOnline();
-  
-  return {
-    isDisabled: !isOnline || additionalDisabled,
-    isOffline: !isOnline,
-    onDisabledClick: showOfflineToast,
-  };
-};
