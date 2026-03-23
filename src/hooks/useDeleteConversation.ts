@@ -14,8 +14,6 @@ export function useDeleteConversation() {
   const deleteMutation = useMutation({
     mutationFn: async (conversationId: string) => {
       if (!user) throw new Error('Not authenticated');
-      if (!navigator.onLine) throw new Error('Du är offline');
-
       // Remove own membership from conversation (effectively "deleting" it for this user)
       const { error } = await supabase
         .from('conversation_members')
