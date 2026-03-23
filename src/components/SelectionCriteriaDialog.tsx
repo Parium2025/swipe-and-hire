@@ -228,8 +228,6 @@ export function SelectionCriteriaDialog({
 
   const addNewCriterion = async () => {
     if (!user) return;
-    if (!isOnline) { showOfflineToast(); return; }
-    
     try {
       const { data, error } = await supabase
         .from('job_criteria')
@@ -258,7 +256,6 @@ export function SelectionCriteriaDialog({
   };
 
   const deleteCriterion = async (id: string) => {
-    if (!isOnline) { showOfflineToast(); return; }
     
     try {
       const { error } = await supabase
@@ -289,7 +286,6 @@ export function SelectionCriteriaDialog({
   };
 
   const handleSaveAndActivate = async () => {
-    if (!isOnline) { showOfflineToast(); return; }
     
     let hasErrors = false;
     const validCriteria: { id: string; title: string; prompt: string }[] = [];
