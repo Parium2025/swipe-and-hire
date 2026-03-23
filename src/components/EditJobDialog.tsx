@@ -304,7 +304,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   });
   const sensors = useSensors(...(isTouchCapable ? [touchSensor, keyboardSensor] : [pointerSensor, keyboardSensor]));
 
-  const lockWizardCloseTouch = useCallback((duration = 320) => {
+  const lockWizardCloseTouch = useCallback((duration = 520) => {
     setIsWizardCloseTouchLocked(true);
     if (wizardCloseTouchLockTimeoutRef.current) {
       window.clearTimeout(wizardCloseTouchLockTimeoutRef.current);
@@ -1553,6 +1553,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               <div
                 aria-hidden="true"
                 className="absolute inset-0 z-[120] touch-manipulation"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
                 onPointerDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -1577,23 +1585,25 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   Steg {currentStep + 1} av {steps.length}
                 </div>
               </DialogHeader>
-              <button
-                onPointerDown={(e) => {
-                  e.stopPropagation();
-                }}
-                onTouchStart={(e) => {
-                  e.stopPropagation();
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleClose();
-                }}
-                onTouchEnd={(e) => e.currentTarget.blur()}
-                className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
-              >
-                <X className="h-4 w-4" />
-              </button>
+              {!showQuestionTemplates && !showQuestionForm && (
+                <button
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleClose();
+                  }}
+                  onTouchEnd={(e) => e.currentTarget.blur()}
+                  className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
             {/* Progress Bar */}
@@ -2172,7 +2182,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 e.stopPropagation();
                                 setShowQuestionTemplates(false);
                                 setQuestionSearchTerm('');
-                                lockWizardCloseTouch(280);
+                                lockWizardCloseTouch();
                               }}
                               onMouseDown={(e) => e.currentTarget.blur()}
                               onMouseUp={(e) => e.currentTarget.blur()}
@@ -2376,7 +2386,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               setShowQuestionForm(false);
                               setEditingQuestion(null);
                               setShowQuestionTemplates(true);
-                              lockWizardCloseTouch(280);
+                              lockWizardCloseTouch();
                             }}
                             onMouseDown={(e) => e.currentTarget.blur()}
                             onMouseUp={(e) => e.currentTarget.blur()}
