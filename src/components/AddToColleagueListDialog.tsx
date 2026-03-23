@@ -9,7 +9,7 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { ResolvedAvatar } from '@/components/ui/resolved-avatar';
 import { TeamMember } from '@/hooks/useTeamMembers';
-import { UserCheck, Users, WifiOff } from 'lucide-react';
+import { UserCheck, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
