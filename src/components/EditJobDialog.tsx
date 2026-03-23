@@ -93,6 +93,7 @@ interface JobPosting {
   pitch?: string;
   job_image_url?: string;
   job_image_desktop_url?: string;
+  job_image_card_url?: string;
 }
 
 interface JobFormData {
@@ -124,6 +125,7 @@ interface JobFormData {
   pitch: string;
   job_image_url: string;
   job_image_desktop_url: string;
+  job_image_card_url: string;
   image_focus_position: string;
 }
 
@@ -152,8 +154,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
+  const [jobImageCardDisplayUrl, setJobImageCardDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [originalDesktopImageUrl, setOriginalDesktopImageUrl] = useState<string | null>(null);
+  const [originalCardImageUrl, setOriginalCardImageUrl] = useState<string | null>(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
   const [editingImageType, setEditingImageType] = useState<'mobile' | 'desktop'>('mobile');
@@ -224,6 +228,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     pitch: '',
     job_image_url: '',
     job_image_desktop_url: '',
+    job_image_card_url: '',
     image_focus_position: 'center'
   });
 
