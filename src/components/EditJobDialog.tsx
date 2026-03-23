@@ -3790,6 +3790,81 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             </>
                           )}
                         </div>
+
+                        {/* Card image section */}
+                        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Bookmark className="h-4 w-4 text-white" />
+                            <span className="text-white font-medium text-sm sm:text-base">Jobbkortsbild (valfritt)</span>
+                          </div>
+                          <p className="text-white text-xs sm:text-sm mb-3">
+                            Bild som visas i jobbkorten i sökning och dashboard. Om ingen laddas upp används mobilbilden.
+                          </p>
+                          
+                          {!jobImageCardDisplayUrl && (
+                            <FileUpload
+                              mediaType="job-image"
+                              uploadType="image"
+                              onFileUploaded={async (storagePath, fileName) => {
+                                handleInputChange('job_image_card_url', storagePath);
+                                setOriginalCardImageUrl(storagePath);
+                                
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('job-images')
+                                  .getPublicUrl(storagePath);
+                                  
+                                if (publicUrl) {
+                                  setJobImageCardDisplayUrl(publicUrl);
+                                  const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+                                  await preloadSingleFile(publicUrl);
+                                }
+                              }}
+                              acceptedFileTypes={['image/*']}
+                              maxFileSize={5 * 1024 * 1024}
+                            />
+                          )}
+                          
+                          {jobImageCardDisplayUrl && (
+                            <>
+                              <div className="mt-3 flex justify-center">
+                                <div className="w-full max-w-md aspect-[16/9] rounded-lg overflow-hidden">
+                                  <img 
+                                    src={jobImageCardDisplayUrl} 
+                                    alt="Jobbkortsbild förhandsvisning" 
+                                    className="w-full h-full object-cover"
+                                    style={{ objectPosition: `center ${parseFocusPosition(formData.image_focus_position)}%` }}
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="mt-4 space-y-3">
+                                <div className="flex justify-center items-center gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleInputChange('job_image_card_url', '');
+                                      setOriginalCardImageUrl(null);
+                                      setJobImageCardDisplayUrl(null);
+                                    }}
+                                    className="premium-edit-icon-action inline-flex items-center justify-center border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                                    aria-label="Ta bort jobbkortsbild"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Drag-based focus position picker for card */}
+                              <div className="mt-3">
+                                <JobImagePositioner
+                                  imageUrl={jobImageCardDisplayUrl}
+                                  focusPercent={parseFocusPosition(formData.image_focus_position)}
+                                  onFocusChange={(pct) => handleInputChange('image_focus_position', String(pct))}
+                                />
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
