@@ -1581,12 +1581,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               </DialogHeader>
               <button
                 onPointerDown={(e) => {
-                  e.preventDefault();
                   e.stopPropagation();
                   lockWizardCloseTouch(420);
                 }}
                 onTouchStart={(e) => {
-                  e.preventDefault();
                   e.stopPropagation();
                   lockWizardCloseTouch(420);
                 }}
@@ -2136,7 +2134,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 autoScroll={false}
                                 measuring={{
                                   droppable: {
-                                    strategy: MeasuringStrategy.Optimized,
+                                    strategy: MeasuringStrategy.WhileDragging,
                                   },
                                 }}
                                 onDragEnd={handleDragEnd}
@@ -2166,12 +2164,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                             <Button
                               onPointerDown={(e) => {
-                                e.preventDefault();
                                 e.stopPropagation();
                                 lockWizardCloseTouch(320);
                               }}
                               onTouchStart={(e) => {
-                                e.preventDefault();
                                 e.stopPropagation();
                                 lockWizardCloseTouch(320);
                               }}
@@ -2370,12 +2366,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             </h3>
                           <Button
                             onPointerDown={(e) => {
-                              e.preventDefault();
                               e.stopPropagation();
                               lockWizardCloseTouch(420);
                             }}
                             onTouchStart={(e) => {
-                              e.preventDefault();
                               e.stopPropagation();
                               lockWizardCloseTouch(420);
                             }}
