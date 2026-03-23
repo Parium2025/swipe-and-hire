@@ -6,9 +6,8 @@ import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { Loader2, Check, Users, WifiOff } from 'lucide-react';
+import { Loader2, Check, Users } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface ShareCandidateDialogProps {
   open: boolean;

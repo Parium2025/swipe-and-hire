@@ -9,8 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Users, UserPlus, Trash2, Crown, Loader2, Mail, WifiOff } from 'lucide-react';
-import { useOnline } from '@/hooks/useOnlineStatus';
+import { Users, UserPlus, Trash2, Crown, Loader2, Mail } from 'lucide-react';
 
 interface TeamMember {
   user_id: string;

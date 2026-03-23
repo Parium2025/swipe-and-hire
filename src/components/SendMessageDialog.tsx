@@ -7,8 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2, Mail, MessageSquare, Send, Smartphone, WifiOff, X } from 'lucide-react';
-import { useOnline } from '@/hooks/useOnlineStatus';
+import { Loader2, Mail, MessageSquare, Send, Smartphone, X } from 'lucide-react';
 import { useFieldDraft } from '@/hooks/useFormDraft';
 import { useCreateConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
