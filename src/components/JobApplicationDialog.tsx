@@ -13,8 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileText, Video, CheckSquare, List, Heart, WifiOff, X } from 'lucide-react';
-import { useOnline } from '@/hooks/useOnlineStatus';
+import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileText, Video, CheckSquare, List, Heart, X } from 'lucide-react';
 
 // Draft key for localStorage
 const JOB_DIALOG_DRAFT_PREFIX = 'parium_draft_job-dialog-';
@@ -70,7 +69,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const { isOnline, showOfflineToast } = useOnline();
+  
 
   // Standard questions that are auto-filled from profile
   const standardQuestions = [
@@ -531,17 +530,13 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
             <div className="p-4 border-t border-white/20 bg-background/10 flex-shrink-0">
               <Button
                 onClick={handleSubmit}
-                disabled={submitting || !canSubmit() || !isOnline}
+                disabled={submitting || !canSubmit()}
                 variant="glassGreen"
-                className={`w-full ${!isOnline ? 'opacity-50' : ''}`}
+                className="w-full"
                 size="lg"
               >
-                {!isOnline ? (
-                  <WifiOff className="h-4 w-4 mr-2" />
-                ) : (
-                  <Heart className="h-4 w-4 mr-2" />
-                )}
-                {submitting ? 'Skickar...' : !isOnline ? 'Offline' : 'Skicka ansökan'}
+                <Heart className="h-4 w-4 mr-2" />
+                {submitting ? 'Skickar...' : 'Skicka ansökan'}
               </Button>
             </div>
           </div>

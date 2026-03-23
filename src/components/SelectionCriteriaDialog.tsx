@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
-import { useOnline } from '@/hooks/useOnlineStatus';
+
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
@@ -61,7 +61,7 @@ export function SelectionCriteriaDialog({
 }: SelectionCriteriaDialogProps) {
   const isMobile = useIsMobile();
   const { user } = useAuth();
-  const { isOnline, showOfflineToast } = useOnline();
+  
   const [criteria, setCriteria] = useState<JobCriterion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -228,8 +228,6 @@ export function SelectionCriteriaDialog({
 
   const addNewCriterion = async () => {
     if (!user) return;
-    if (!isOnline) { showOfflineToast(); return; }
-    
     try {
       const { data, error } = await supabase
         .from('job_criteria')
@@ -258,7 +256,6 @@ export function SelectionCriteriaDialog({
   };
 
   const deleteCriterion = async (id: string) => {
-    if (!isOnline) { showOfflineToast(); return; }
     
     try {
       const { error } = await supabase
@@ -289,7 +286,6 @@ export function SelectionCriteriaDialog({
   };
 
   const handleSaveAndActivate = async () => {
-    if (!isOnline) { showOfflineToast(); return; }
     
     let hasErrors = false;
     const validCriteria: { id: string; title: string; prompt: string }[] = [];

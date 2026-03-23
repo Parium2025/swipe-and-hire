@@ -6,10 +6,10 @@ import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Clock, CheckCircle, AlertCircle, ChevronDown, Check, WifiOff } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, ChevronDown, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useOnline } from '@/hooks/useOnlineStatus';
+
 import { useFieldDraft } from '@/hooks/useFormDraft';
 
 interface SupportTicket {
@@ -30,7 +30,7 @@ const Support = () => {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [ticketsLoading, setTicketsLoading] = useState(true);
   const { toast } = useToast();
-  const { isOnline, showOfflineToast } = useOnline();
+  
 
   // Hämta befintliga ärenden
   useEffect(() => {
@@ -235,15 +235,10 @@ const Support = () => {
               <Button 
                 type="submit" 
                 variant="glass"
-                className={`h-11 !min-h-0 px-6 text-sm ${!isOnline ? 'bg-gray-500/50 cursor-not-allowed' : ''}`}
-                disabled={loading || !isOnline}
+                className="h-11 !min-h-0 px-6 text-sm"
+                disabled={loading}
               >
-                {loading ? 'Skickar...' : !isOnline ? (
-                  <>
-                    <WifiOff className="mr-2 h-4 w-4" />
-                    Offline
-                  </>
-                ) : 'Skicka meddelande'}
+                {loading ? 'Skickar...' : 'Skicka meddelande'}
               </Button>
             </div>
           </form>
