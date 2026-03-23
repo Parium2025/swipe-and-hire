@@ -53,7 +53,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
 
   return (
     <div className="space-y-2">
-      <p className="text-white text-xs">Dra bilden för att välja fokuspunkt</p>
+      <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt</p>
       <div
         ref={containerRef}
         className={`relative w-full rounded-xl overflow-hidden border-2 transition-colors select-none ${
@@ -92,7 +92,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
           style={{ top: `${focusPercent}%`, opacity: isDragging ? 1 : 0 }}
         />
       </div>
-      <p className="text-white/50 text-[10px] text-center">
+      <p className="text-white text-[10px] text-center">
         Så här kommer bilden att klippas i jobbkorten
       </p>
     </div>
