@@ -758,6 +758,29 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     loadDesktopJobImage();
   }, [(job as any)?.job_image_desktop_url, open]);
 
+  // Load card job image if exists
+  useEffect(() => {
+    const loadCardJobImage = async () => {
+      const cardUrl = (job as any)?.job_image_card_url;
+      if (cardUrl && open) {
+        if (!cardUrl.startsWith('http')) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('job-images')
+            .getPublicUrl(cardUrl);
+          if (publicUrl) {
+            setJobImageCardDisplayUrl(publicUrl);
+            setOriginalCardImageUrl(cardUrl);
+            return;
+          }
+        }
+        setJobImageCardDisplayUrl(cardUrl);
+        setOriginalCardImageUrl(cardUrl);
+      }
+    };
+    
+    loadCardJobImage();
+  }, [(job as any)?.job_image_card_url, open]);
+
   // Preload image when user reaches step 2 (jobbild section) to make preview faster
   useEffect(() => {
     if (jobImageDisplayUrl && currentStep >= 2 && open) {
