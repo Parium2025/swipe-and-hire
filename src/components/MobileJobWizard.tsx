@@ -401,7 +401,7 @@ const MobileJobWizard = ({
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
-  const { isInteractionLocked: isWizardCloseTouchLocked, lockInteraction: lockWizardCloseTouch } = useTouchInteractionLock(680);
+  const [closeGuardKey, setCloseGuardKey] = useState(0);
 
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
