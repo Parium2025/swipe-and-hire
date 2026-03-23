@@ -22,6 +22,7 @@ interface ReadOnlyMobileJobCardProps {
     created_at: string;
     expires_at?: string;
     job_image_url?: string;
+    job_image_card_url?: string;
     image_focus_position?: string;
     company_name?: string;
     positions_count?: number;
@@ -94,13 +95,14 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const isSaved = isSavedExternal !== undefined ? isSavedExternal : isJobSaved(job.id);
   const doToggle = onToggleSave || toggleSaveJob;
 
-  // Resolve the raw storage path to a public URL
+  // Resolve the raw storage path to a public URL — prefer card image over mobile image
   const resolvedUrl = useMemo(() => {
-    if (!job.job_image_url) return null;
-    if (job.job_image_url.startsWith('http')) return job.job_image_url;
-    const { data } = supabase.storage.from('job-images').getPublicUrl(job.job_image_url);
+    const imageUrl = job.job_image_card_url || job.job_image_url;
+    if (!imageUrl) return null;
+    if (imageUrl.startsWith('http')) return imageUrl;
+    const { data } = supabase.storage.from('job-images').getPublicUrl(imageUrl);
     return data?.publicUrl || null;
-  }, [job.job_image_url]);
+  }, [job.job_image_card_url, job.job_image_url]);
 
   // Use imageCache for blob caching
   const [displayUrl, setDisplayUrl] = useState<string | null>(() => {

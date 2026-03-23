@@ -93,6 +93,7 @@ interface JobPosting {
   pitch?: string;
   job_image_url?: string;
   job_image_desktop_url?: string;
+  job_image_card_url?: string;
 }
 
 interface JobFormData {
@@ -124,6 +125,7 @@ interface JobFormData {
   pitch: string;
   job_image_url: string;
   job_image_desktop_url: string;
+  job_image_card_url: string;
   image_focus_position: string;
 }
 
@@ -152,8 +154,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
+  const [jobImageCardDisplayUrl, setJobImageCardDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [originalDesktopImageUrl, setOriginalDesktopImageUrl] = useState<string | null>(null);
+  const [originalCardImageUrl, setOriginalCardImageUrl] = useState<string | null>(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
   const [editingImageType, setEditingImageType] = useState<'mobile' | 'desktop'>('mobile');
@@ -224,6 +228,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     pitch: '',
     job_image_url: '',
     job_image_desktop_url: '',
+    job_image_card_url: '',
     image_focus_position: 'center'
   });
 
@@ -753,6 +758,29 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     loadDesktopJobImage();
   }, [(job as any)?.job_image_desktop_url, open]);
 
+  // Load card job image if exists
+  useEffect(() => {
+    const loadCardJobImage = async () => {
+      const cardUrl = (job as any)?.job_image_card_url;
+      if (cardUrl && open) {
+        if (!cardUrl.startsWith('http')) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('job-images')
+            .getPublicUrl(cardUrl);
+          if (publicUrl) {
+            setJobImageCardDisplayUrl(publicUrl);
+            setOriginalCardImageUrl(cardUrl);
+            return;
+          }
+        }
+        setJobImageCardDisplayUrl(cardUrl);
+        setOriginalCardImageUrl(cardUrl);
+      }
+    };
+    
+    loadCardJobImage();
+  }, [(job as any)?.job_image_card_url, open]);
+
   // Preload image when user reaches step 2 (jobbild section) to make preview faster
   useEffect(() => {
     if (jobImageDisplayUrl && currentStep >= 2 && open) {
@@ -837,6 +865,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         pitch: job.pitch || '',
         job_image_url: job.job_image_url || '',
         job_image_desktop_url: job.job_image_desktop_url || '',
+        job_image_card_url: (job as any).job_image_card_url || '',
         image_focus_position: (job as any).image_focus_position || 'center'
       };
       setFormData(newFormData);
@@ -1452,6 +1481,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_card_url: formData.job_image_card_url || null,
         image_focus_position: formData.image_focus_position || 'center'
       };
 
@@ -3662,6 +3692,32 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               </div>
                             </>
                           )}
+                          
+                          {/* "Use same image for all" button - only when mobile image exists */}
+                          {jobImageDisplayUrl && (
+                            <div className="mt-3">
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  const mobilePath = formData.job_image_url;
+                                  if (!mobilePath) return;
+                                  
+                                  // Set desktop image
+                                  handleInputChange('job_image_desktop_url', mobilePath);
+                                  setOriginalDesktopImageUrl(mobilePath);
+                                  setJobImageDesktopDisplayUrl(jobImageDisplayUrl);
+                                  
+                                  // Set card image
+                                  handleInputChange('job_image_card_url', mobilePath);
+                                  setOriginalCardImageUrl(mobilePath);
+                                  setJobImageCardDisplayUrl(jobImageDisplayUrl);
+                                }}
+                                className="w-full py-2.5 px-4 rounded-lg bg-white/10 border border-white/20 text-white text-sm font-medium transition-all duration-200 md:hover:bg-white/20 active:scale-[0.98]"
+                              >
+                                Använd samma bild på alla
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         {/* Desktop image section */}
@@ -3730,6 +3786,81 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                     <Trash2 className="w-4 h-4" />
                                   </button>
                                 </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Card image section */}
+                        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Bookmark className="h-4 w-4 text-white" />
+                            <span className="text-white font-medium text-sm sm:text-base">Jobbkortsbild (valfritt)</span>
+                          </div>
+                          <p className="text-white text-xs sm:text-sm mb-3">
+                            Bild som visas i jobbkorten i sökning och dashboard. Om ingen laddas upp används mobilbilden.
+                          </p>
+                          
+                          {!jobImageCardDisplayUrl && (
+                            <FileUpload
+                              mediaType="job-image"
+                              uploadType="image"
+                              onFileUploaded={async (storagePath, fileName) => {
+                                handleInputChange('job_image_card_url', storagePath);
+                                setOriginalCardImageUrl(storagePath);
+                                
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('job-images')
+                                  .getPublicUrl(storagePath);
+                                  
+                                if (publicUrl) {
+                                  setJobImageCardDisplayUrl(publicUrl);
+                                  const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+                                  await preloadSingleFile(publicUrl);
+                                }
+                              }}
+                              acceptedFileTypes={['image/*']}
+                              maxFileSize={5 * 1024 * 1024}
+                            />
+                          )}
+                          
+                          {jobImageCardDisplayUrl && (
+                            <>
+                              <div className="mt-3 flex justify-center">
+                                <div className="w-full max-w-md aspect-[16/9] rounded-lg overflow-hidden">
+                                  <img 
+                                    src={jobImageCardDisplayUrl} 
+                                    alt="Jobbkortsbild förhandsvisning" 
+                                    className="w-full h-full object-cover"
+                                    style={{ objectPosition: `center ${parseFocusPosition(formData.image_focus_position)}%` }}
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="mt-4 space-y-3">
+                                <div className="flex justify-center items-center gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleInputChange('job_image_card_url', '');
+                                      setOriginalCardImageUrl(null);
+                                      setJobImageCardDisplayUrl(null);
+                                    }}
+                                    className="premium-edit-icon-action inline-flex items-center justify-center border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                                    aria-label="Ta bort jobbkortsbild"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Drag-based focus position picker for card */}
+                              <div className="mt-3">
+                                <JobImagePositioner
+                                  imageUrl={jobImageCardDisplayUrl}
+                                  focusPercent={parseFocusPosition(formData.image_focus_position)}
+                                  onFocusChange={(pct) => handleInputChange('image_focus_position', String(pct))}
+                                />
                               </div>
                             </>
                           )}
