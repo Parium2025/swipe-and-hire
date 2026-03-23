@@ -31,14 +31,14 @@ export const JobSeekerDashboardGrid = memo(() => {
   );
 
   return (
-    <div className="space-y-2 sm:space-y-4">
+    <div className="dashboard-page-stack">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="flex items-center gap-2"
       >
-        <h2 className="text-base sm:text-lg font-semibold text-white">Din översikt</h2>
+        <h2 className="dashboard-section-heading font-semibold text-white">Din översikt</h2>
         <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
       </motion.div>
       

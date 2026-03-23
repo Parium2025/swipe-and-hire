@@ -131,7 +131,7 @@ const Dashboard = memo(() => {
 
   if (isLoading || !showContent) {
     return (
-      <div className="space-y-4 responsive-container-wide opacity-0">
+      <div className="dashboard-page-stack responsive-container-wide opacity-0">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
@@ -140,9 +140,9 @@ const Dashboard = memo(() => {
   const tabTitle = `${activeTab === 'active' ? 'Aktiva jobb' : 'Utgångna jobb'} av ${profile?.company_name || 'ditt företag'}`;
 
   return (
-    <div className="space-y-4 responsive-container-wide animate-fade-in">
+    <div className="dashboard-page-stack responsive-container-wide animate-fade-in">
       <div className="text-center mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Dashboard</h1>
+        <h1 className="text-page-title font-semibold tracking-tight">Dashboard</h1>
       </div>
 
       <StatsGrid stats={statsCards} />
@@ -161,14 +161,14 @@ const Dashboard = memo(() => {
       />
 
       {searchTerm && (
-        <div className="text-sm text-white">
+        <div className="text-body-sm">
           Visar {filteredAndSortedJobs.length} av {jobs.length} annonser
         </div>
       )}
 
       {/* Mobile: Title + Tabs without card wrapper */}
       <div className="md:hidden flex flex-col items-center space-y-3">
-        <h3 className="text-sm text-white font-medium text-center">{tabTitle}</h3>
+        <h3 className="dashboard-section-heading text-white font-medium text-center">{tabTitle}</h3>
         <div className="flex justify-center">
           <JobStatusTabs
             activeTab={activeTab}
