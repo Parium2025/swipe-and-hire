@@ -61,7 +61,7 @@ export function SelectionCriteriaDialog({
 }: SelectionCriteriaDialogProps) {
   const isMobile = useIsMobile();
   const { user } = useAuth();
-  const { isOnline, showOfflineToast } = useOnline();
+  
   const [criteria, setCriteria] = useState<JobCriterion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
