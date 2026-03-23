@@ -13,8 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileText, Video, CheckSquare, List, Heart, WifiOff, X } from 'lucide-react';
-import { useOnline } from '@/hooks/useOnlineStatus';
+import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileText, Video, CheckSquare, List, Heart, X } from 'lucide-react';
 
 // Draft key for localStorage
 const JOB_DIALOG_DRAFT_PREFIX = 'parium_draft_job-dialog-';
@@ -70,7 +69,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const { isOnline, showOfflineToast } = useOnline();
+  
 
   // Standard questions that are auto-filled from profile
   const standardQuestions = [
