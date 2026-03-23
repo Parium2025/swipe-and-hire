@@ -1156,7 +1156,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   }, []);
 
   const createNewQuestion = useCallback(() => {
-    lockWizardCloseTouch(420);
     const newQuestion: JobQuestion = {
       question_text: '',
       question_type: 'text',
@@ -1167,7 +1166,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     setEditingQuestion(newQuestion);
     setShowQuestionTemplates(false);
     setShowQuestionForm(true);
-  }, [customQuestions.length, lockWizardCloseTouch]);
+  }, [customQuestions.length]);
 
   const useQuestionTemplate = async (template: any) => {
     const filteredOptions = template.options?.filter((opt: string) => opt.trim() !== '') || [];
@@ -1313,10 +1312,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   }, []);
 
   const editCustomQuestion = useCallback((question: JobQuestion) => {
-    lockWizardCloseTouch(420);
     setEditingQuestion(question);
     setShowQuestionForm(true);
-  }, [lockWizardCloseTouch]);
+  }, []);
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
@@ -2162,17 +2160,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                             <Button
                               onPointerDown={(e) => {
+                                e.preventDefault();
                                 e.stopPropagation();
-                                lockWizardCloseTouch(320);
                               }}
                               onTouchStart={(e) => {
+                                e.preventDefault();
                                 e.stopPropagation();
-                                lockWizardCloseTouch(320);
                               }}
-                              onClick={() => {
-                                lockWizardCloseTouch(320);
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 setShowQuestionTemplates(false);
                                 setQuestionSearchTerm('');
+                                lockWizardCloseTouch(280);
                               }}
                               onMouseDown={(e) => e.currentTarget.blur()}
                               onMouseUp={(e) => e.currentTarget.blur()}
@@ -2260,7 +2260,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               <button
                                                 type="button"
                                                 onClick={() => {
-                                                  lockWizardCloseTouch(420);
                                                   setEditingQuestion({
                                                     ...(template as JobQuestion),
                                                     template_id: (template as any).id
@@ -2364,20 +2363,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             </h3>
                           <Button
                             onPointerDown={(e) => {
+                              e.preventDefault();
                               e.stopPropagation();
-                              lockWizardCloseTouch(420);
                             }}
                             onTouchStart={(e) => {
+                              e.preventDefault();
                               e.stopPropagation();
-                              lockWizardCloseTouch(420);
                             }}
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              lockWizardCloseTouch(420);
                               setShowQuestionForm(false);
                               setEditingQuestion(null);
                               setShowQuestionTemplates(true);
+                              lockWizardCloseTouch(280);
                             }}
                             onMouseDown={(e) => e.currentTarget.blur()}
                             onMouseUp={(e) => e.currentTarget.blur()}
