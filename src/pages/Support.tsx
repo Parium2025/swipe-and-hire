@@ -56,10 +56,6 @@ const Support = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
     
     if (!category || !message) {
       toast({

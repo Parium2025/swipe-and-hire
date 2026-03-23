@@ -940,10 +940,6 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   const handleSubmit = async () => {
     if (!user || !validateCurrentStep()) return;
     
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
 
     setLoading(true);
 

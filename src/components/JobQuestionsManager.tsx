@@ -389,10 +389,6 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
   const saveQuestions = async () => {
     if (!jobId) return;
     
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
 
     setLoading(true);
     try {

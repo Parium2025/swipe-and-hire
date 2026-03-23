@@ -163,10 +163,6 @@ export const useSavedSearches = () => {
       return null;
     }
 
-    if (!isOnline) {
-      showOfflineToast();
-      return null;
-    }
 
     try {
       const { data, error } = await supabase
@@ -200,10 +196,6 @@ export const useSavedSearches = () => {
   const deleteSearch = useCallback(async (searchId: string) => {
     if (!user) return false;
 
-    if (!isOnline) {
-      showOfflineToast();
-      return false;
-    }
 
     try {
       const { error } = await supabase

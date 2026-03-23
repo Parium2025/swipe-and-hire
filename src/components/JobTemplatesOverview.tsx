@@ -113,10 +113,6 @@ const JobTemplatesOverview = () => {
   const handleCreate = async () => {
     if (!user) return;
     
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
 
     setIsSubmitting(true);
     try {
@@ -171,10 +167,6 @@ const JobTemplatesOverview = () => {
   const handleEdit = async () => {
     if (!user || !editingTemplate) return;
     
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
 
     setIsSubmitting(true);
     try {
@@ -227,10 +219,6 @@ const JobTemplatesOverview = () => {
   const handleDelete = async (templateId: string, templateName: string) => {
     if (!confirm(`Är du säker på att du vill ta bort mallen "${templateName}"?`)) return;
     
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
 
     try {
       const { error } = await supabase
@@ -263,10 +251,6 @@ const JobTemplatesOverview = () => {
   };
 
   const toggleDefault = async (templateId: string) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
     
     try {
       // First, remove default status from all templates

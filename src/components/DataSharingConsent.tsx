@@ -47,10 +47,6 @@ export const DataSharingConsent = () => {
   const updateConsent = async (newConsentValue: boolean) => {
     if (!user?.id) return;
     
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
     
     setUpdating(true);
     try {

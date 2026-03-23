@@ -166,10 +166,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const { isOnline, showOfflineToast } = useOnline();
 
   const handleSubmit = async () => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
 
     setIsSubmitting(true);
     try {

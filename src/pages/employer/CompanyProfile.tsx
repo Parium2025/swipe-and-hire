@@ -638,10 +638,6 @@ const CompanyProfile = () => {
   };
 
   const handleSave = async () => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
     // Validate organization number before saving
     if (formData.org_number && formData.org_number.replace(/-/g, '').length !== 10) {
       toast({

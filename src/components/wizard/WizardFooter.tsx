@@ -90,10 +90,6 @@ export const WizardFooter = ({
 
   const handleSubmitClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.blur();
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
     onSubmit();
   };
 

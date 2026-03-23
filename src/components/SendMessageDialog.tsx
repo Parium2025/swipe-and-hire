@@ -7,8 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2, Mail, MessageSquare, Send, Smartphone, WifiOff, X } from 'lucide-react';
-import { useOnline } from '@/hooks/useOnlineStatus';
+import { Loader2, Mail, MessageSquare, Send, Smartphone, X } from 'lucide-react';
 import { useFieldDraft } from '@/hooks/useFormDraft';
 import { useCreateConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
@@ -63,7 +62,6 @@ export function SendMessageDialog({
 }: SendMessageDialogProps) {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const { isOnline, showOfflineToast } = useOnline();
   const createConversation = useCreateConversation();
   
   // Auto-save message draft to localStorage (unique per recipient + application)
@@ -150,11 +148,6 @@ export function SendMessageDialog({
   };
 
   const handleSend = async () => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
-    
     if (!user) return;
 
     const chatSelected = selectedChannels.includes('chat');
@@ -239,7 +232,7 @@ export function SendMessageDialog({
     onOpenChange(false);
   };
 
-  const isDisabled = sending || !isOnline;
+  const isDisabled = sending;
 
   return (
     <>
@@ -339,7 +332,6 @@ export function SendMessageDialog({
                 onChange={(e) => setMessage(e.target.value)}
                   placeholder="Skriv ditt meddelande..."
                   className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 hover:border-white/30 focus:border-white/40 text-white placeholder:text-white/50 resize-y transition-all duration-150 text-base"
-                disabled={!isOnline}
               />
               </div>
 
@@ -349,17 +341,15 @@ export function SendMessageDialog({
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isDisabled}
                 className={`w-full h-11 !min-h-0 rounded-full border transition-[border-color,transform] duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
-                  !sending && message.trim() && isOnline ? 'border-white/30' : 'border-transparent'
+                  !sending && message.trim() ? 'border-white/30' : 'border-transparent'
                 }`}
               >
                 {sending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-                ) : !isOnline ? (
-                  <WifiOff className="h-4 w-4 mr-1.5" />
                 ) : (
                   <Send className="h-4 w-4 mr-1.5" />
                 )}
-                {!isOnline ? 'Offline' : 'Skicka'}
+                Skicka
               </Button>
             </div>
           </div>

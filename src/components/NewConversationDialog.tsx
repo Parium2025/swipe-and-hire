@@ -144,11 +144,6 @@ export function NewConversationDialog({
   };
 
   const handleCreate = async () => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
-    
     if (selectedContacts.length === 0) return;
 
     try {
@@ -371,17 +366,15 @@ export function NewConversationDialog({
               <Button
                 variant="glass"
                 onClick={handleCreate}
-                disabled={createConversation.isPending || !isOnline}
-                className={`bg-blue-500/20 border-blue-500/40 ${!isOnline ? 'opacity-50' : ''}`}
+                disabled={createConversation.isPending}
+                className="bg-blue-500/20 border-blue-500/40"
               >
                 {createConversation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-                ) : !isOnline ? (
-                  <WifiOff className="h-4 w-4 mr-1.5" />
                 ) : (
                   <Send className="h-4 w-4 mr-1.5" />
                 )}
-                {!isOnline ? 'Offline' : isGroup ? 'Skapa grupp' : 'Starta chatt'}
+                {isGroup ? 'Skapa grupp' : 'Starta chatt'}
               </Button>
             </div>
           </>

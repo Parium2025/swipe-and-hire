@@ -123,10 +123,6 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
   const { isOnline, showOfflineToast } = useOnline();
 
   const handleSubmit = async () => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
 
     setIsSubmitting(true);
     try {
