@@ -144,7 +144,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
-  const [closeGuardKey, setCloseGuardKey] = useState(0);
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
   const [isScrolledTop, setIsScrolledTop] = useState(true);
@@ -2117,8 +2116,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
                             <h3 className="text-white font-medium text-lg">Välj fråga</h3>
-                            <Button
-                              key={`close-templates-${closeGuardKey}`}
+                            <button
+                              type="button"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -2126,12 +2125,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 setQuestionSearchTerm('');
                               }}
                               onTouchEnd={(e) => e.currentTarget.blur()}
-                              variant="ghost"
-                              size="icon"
-                              className="close-guard-animated h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-none focus:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
+                              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                             >
-                              <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
-                            </Button>
+                              <X className="h-4 w-4" />
+                            </button>
                           </div>
 
                           <div className="relative">
@@ -2311,23 +2308,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             <h3 className="text-white font-medium text-lg">
                               {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
                             </h3>
-                          <Button
-                            key={`close-form-${closeGuardKey}`}
+                          <button
+                            type="button"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setCloseGuardKey(k => k + 1);
                               setShowQuestionForm(false);
                               setEditingQuestion(null);
                               setShowQuestionTemplates(true);
                             }}
                             onTouchEnd={(e) => e.currentTarget.blur()}
-                            variant="ghost"
-                            size="icon"
-                            className="close-guard-animated h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-none focus:ring-0 touch-manipulation [-webkit-tap-highlight-color:transparent]"
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                           >
-                            <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
-                          </Button>
+                            <X className="h-4 w-4" />
+                          </button>
                           </div>
 
                           <div className="space-y-4">
