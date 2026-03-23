@@ -191,8 +191,8 @@ All colors MUST be HSL.
      --dashboard-panel-padding: clamp(0.75rem, 0.68rem + 0.4vw, 1rem);
      --dashboard-heading-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
      --dashboard-label-size: clamp(0.75rem, 0.72rem + 0.18vw, 0.875rem);
-     --dashboard-value-size: clamp(1.0625rem, 0.98rem + 0.45vw, 1.375rem);
-     --dashboard-stat-min-height: clamp(5.25rem, 4.85rem + 2vw, 6.5rem);
+    --dashboard-value-size: clamp(1.125rem, 1.02rem + 0.62vw, 1.5rem);
+    --dashboard-stat-min-height: clamp(5.5rem, 5.05rem + 2.2vw, 6.875rem);
      --dashboard-tab-height: clamp(2.25rem, 2.12rem + 0.45vw, 2.625rem);
      --dashboard-icon-control-size: clamp(2.5rem, 2.36rem + 0.55vw, 2.875rem);
 
@@ -674,9 +674,9 @@ All colors MUST be HSL.
   }
 
   .dashboard-control-compact {
-    height: clamp(2.875rem, 2.78rem + 0.45vw, 3rem);
-    min-height: clamp(2.875rem, 2.78rem + 0.45vw, 3rem);
-    font-size: clamp(0.875rem, 0.84rem + 0.18vw, 0.95rem);
+    height: clamp(3rem, 2.92rem + 0.52vw, 3.125rem);
+    min-height: clamp(3rem, 2.92rem + 0.52vw, 3.125rem);
+    font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
   }
 
   .dashboard-icon-control {
@@ -689,7 +689,7 @@ All colors MUST be HSL.
   .dashboard-mobile-controls {
     display: flex;
     align-items: center;
-    gap: clamp(0.5rem, 0.42rem + 0.35vw, 0.75rem);
+    gap: clamp(0.625rem, 0.54rem + 0.4vw, 0.875rem);
   }
 
   .dashboard-tabs-viewport {
