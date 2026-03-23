@@ -234,10 +234,6 @@ const JobSwipe = () => {
   const { isOnline, showOfflineToast } = useOnline();
 
   const handleApplicationSubmit = async (answers: Record<string, any>) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
     
     try {
       // Fetch user profile to get contact info

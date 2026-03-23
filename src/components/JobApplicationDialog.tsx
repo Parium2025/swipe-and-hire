@@ -207,10 +207,6 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   };
 
   const handleSubmit = async () => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
     
     // Validate required questions
     const requiredQuestions = questions.filter(q => q.is_required);

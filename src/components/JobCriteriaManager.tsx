@@ -146,10 +146,6 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
       return;
     }
     
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
 
     setIsSaving(true);
     try {
@@ -202,10 +198,6 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
   };
 
   const handleDelete = async (criterionId: string) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
     
     try {
       const { error } = await supabase

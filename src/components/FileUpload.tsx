@@ -115,10 +115,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
     
     const file = acceptedFiles[0];
     if (file) {
@@ -295,16 +291,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
         className={`border-2 border-dashed rounded-lg p-3 sm:p-4 text-center cursor-pointer transition-all duration-300 ${
           isDragActive
             ? 'border-primary bg-primary/5'
-            : !isOnline
-              ? 'border-white/10 bg-white/5 opacity-50'
               : 'border-white/20 md:hover:border-white/40 md:hover:bg-white/10 bg-white/5 backdrop-blur-sm'
-        } ${uploading || !isOnline ? 'pointer-events-none' : ''}`}
+        } ${uploading ? 'pointer-events-none' : ''}`}
         onClick={(e) => {
           e.preventDefault();
-          if (!isOnline) {
-            showOfflineToast();
-            return;
-          }
           open(); // Explicitly open file dialog
         }}
       >

@@ -212,7 +212,7 @@ export const useSavedJobs = () => {
   // Explicit unsave - always deletes, no toggle logic
   const unsaveJob = useCallback(async (jobId: string) => {
     if (!user) return;
-    if (!isOnline) { showOfflineToast(); return; }
+    
 
     // Optimistic update
     setSavedJobIds(prev => {

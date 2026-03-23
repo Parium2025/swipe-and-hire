@@ -319,10 +319,6 @@ const JobView = () => {
       return;
     }
 
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
 
     const missingRequired = jobQuestions
       .filter(q => q.is_required)

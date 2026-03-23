@@ -515,11 +515,6 @@ const EmployerProfile = () => {
   const { isOnline, showOfflineToast } = useOnline();
 
   const handleSave = async () => {
-    // Check if online before saving
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
 
     // Validate all social media URLs
     for (const link of formData.social_media_links) {
