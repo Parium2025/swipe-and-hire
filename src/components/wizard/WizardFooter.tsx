@@ -49,7 +49,6 @@ export const WizardFooter = ({
   className = '',
 }: WizardFooterProps) => {
   const showBackButton = hideBackOnFirstStep ? currentStep > 0 : true;
-  const showBackButton = hideBackOnFirstStep ? currentStep > 0 : true;
   const backDisabled = currentStep === 0;
   
   // Blur active element when clicking empty space between buttons
