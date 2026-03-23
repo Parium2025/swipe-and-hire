@@ -37,11 +37,13 @@ import { createSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
   DndContext,
   closestCenter,
   KeyboardSensor,
+  MeasuringStrategy,
   PointerSensor,
   TouchSensor,
   useSensor,
@@ -190,6 +192,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const workEndTimeRef = useRef<HTMLInputElement>(null);
   const wizardCloseTouchLockTimeoutRef = useRef<number | null>(null);
   const isMobile = useIsMobile();
+  const isTouchCapable = useTouchCapable();
 
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
@@ -287,19 +290,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   // Drag and drop sensors
   const touchSensor = useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 180,
-      tolerance: 12,
+      delay: 120,
+      tolerance: 8,
     },
   });
   const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: {
-      distance: 10,
+      distance: 6,
     },
   });
   const keyboardSensor = useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates,
   });
-  const sensors = useSensors(...(isMobile ? [touchSensor, keyboardSensor] : [pointerSensor, keyboardSensor]));
+  const sensors = useSensors(...(isTouchCapable ? [touchSensor, keyboardSensor] : [pointerSensor, keyboardSensor]));
 
   const lockWizardCloseTouch = useCallback((duration = 320) => {
     setIsWizardCloseTouchLocked(true);
@@ -1547,7 +1550,25 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <AnimatedBackground showBubbles={false} variant="card" />
-          <div className="premium-edit-shell">
+          <div className="premium-edit-shell relative">
+            {isWizardCloseTouchLocked && (
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 z-[120] touch-manipulation"
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onPointerUp={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              />
+            )}
             {/* Header */}
             <div className="premium-edit-header">
               <DialogHeader className="text-center sm:text-center">
@@ -1560,14 +1581,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               </DialogHeader>
               <button
                 onPointerDown={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   lockWizardCloseTouch(420);
                 }}
                 onTouchStart={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   lockWizardCloseTouch(420);
                 }}
-                onClick={handleClose}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleClose();
+                }}
                 onTouchEnd={(e) => e.currentTarget.blur()}
                 className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
               >
@@ -2106,6 +2133,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               <DndContext
                                 sensors={sensors}
                                 collisionDetection={closestCenter}
+                                autoScroll={false}
+                                measuring={{
+                                  droppable: {
+                                    strategy: MeasuringStrategy.Optimized,
+                                  },
+                                }}
                                 onDragEnd={handleDragEnd}
                               >
                                 <SortableContext
@@ -2132,6 +2165,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <div className="flex items-center justify-between">
                             <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                             <Button
+                              onPointerDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                lockWizardCloseTouch(320);
+                              }}
+                              onTouchStart={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                lockWizardCloseTouch(320);
+                              }}
                               onClick={() => {
                                 lockWizardCloseTouch(320);
                                 setShowQuestionTemplates(false);
@@ -2327,14 +2370,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             </h3>
                           <Button
                             onPointerDown={(e) => {
+                              e.preventDefault();
                               e.stopPropagation();
                               lockWizardCloseTouch(420);
                             }}
                             onTouchStart={(e) => {
+                              e.preventDefault();
                               e.stopPropagation();
                               lockWizardCloseTouch(420);
                             }}
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               lockWizardCloseTouch(420);
                               setShowQuestionForm(false);
                               setEditingQuestion(null);
