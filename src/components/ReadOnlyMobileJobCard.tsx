@@ -151,7 +151,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             <img
               src={displayUrl}
               alt={`${job.title} hos ${companyName}`}
-              className="w-full h-full object-cover object-top"
+              className={`w-full h-full object-cover ${
+                job.image_focus_position === 'top' ? 'object-top' : 
+                job.image_focus_position === 'bottom' ? 'object-bottom' : 'object-center'
+              }`}
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

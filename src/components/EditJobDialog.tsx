@@ -123,6 +123,7 @@ interface JobFormData {
   pitch: string;
   job_image_url: string;
   job_image_desktop_url: string;
+  image_focus_position: string;
 }
 
 interface EditJobDialogProps {
@@ -221,7 +222,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     application_instructions: '',
     pitch: '',
     job_image_url: '',
-    job_image_desktop_url: ''
+    job_image_desktop_url: '',
+    image_focus_position: 'center'
   });
 
   const { user } = useAuth();
@@ -833,7 +835,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         application_instructions: job.application_instructions || '',
         pitch: job.pitch || '',
         job_image_url: job.job_image_url || '',
-        job_image_desktop_url: job.job_image_desktop_url || ''
+        job_image_desktop_url: job.job_image_desktop_url || '',
+        image_focus_position: (job as any).image_focus_position || 'center'
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
@@ -1447,7 +1450,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         application_instructions: formData.application_instructions || null,
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
-        job_image_desktop_url: formData.job_image_desktop_url || null
+        job_image_desktop_url: formData.job_image_desktop_url || null,
+        image_focus_position: formData.image_focus_position || 'center'
       };
 
       const { error } = await supabase
@@ -3644,6 +3648,31 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
+                                </div>
+                              </div>
+
+                              {/* Focus position picker */}
+                              <div className="mt-3">
+                                <p className="text-white text-xs mb-2">Bildfokus (var bilden centreras i korten)</p>
+                                <div className="flex gap-2 justify-center">
+                                  {[
+                                    { value: 'top', label: 'Topp' },
+                                    { value: 'center', label: 'Mitten' },
+                                    { value: 'bottom', label: 'Botten' },
+                                  ].map((opt) => (
+                                    <button
+                                      key={opt.value}
+                                      type="button"
+                                      onClick={() => handleInputChange('image_focus_position', opt.value)}
+                                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                        formData.image_focus_position === opt.value
+                                          ? 'bg-white/30 text-white border border-white/50'
+                                          : 'bg-white/10 text-white/70 border border-white/20 hover:bg-white/20'
+                                      }`}
+                                    >
+                                      {opt.label}
+                                    </button>
+                                  ))}
                                 </div>
                               </div>
                             </>
