@@ -195,6 +195,10 @@ All colors MUST be HSL.
     --dashboard-stat-min-height: clamp(5.5rem, 5.05rem + 2.2vw, 6.875rem);
      --dashboard-tab-height: clamp(2.25rem, 2.12rem + 0.45vw, 2.625rem);
      --dashboard-icon-control-size: clamp(2.5rem, 2.36rem + 0.55vw, 2.875rem);
+      --job-card-mobile-max-width: clamp(19.5rem, 94vw, 24.5rem);
+      --job-card-mobile-media-height: clamp(11.5rem, 10.7rem + 4.2vw, 13.5rem);
+      --job-card-mobile-content-padding: clamp(0.95rem, 0.88rem + 0.35vw, 1.125rem);
+      --job-card-desktop-min-height: clamp(8.5rem, 8.15rem + 0.9vw, 9.5rem);
 
     /* Pure colors tokens */
     --pure-white: 0 0% 100%;
@@ -690,6 +694,23 @@ All colors MUST be HSL.
     display: flex;
     align-items: center;
     gap: clamp(0.625rem, 0.54rem + 0.4vw, 0.875rem);
+  }
+
+  .job-card-mobile-shell {
+    width: min(100%, var(--job-card-mobile-max-width));
+    margin-inline: auto;
+  }
+
+  .job-card-mobile-media {
+    height: var(--job-card-mobile-media-height);
+  }
+
+  .job-card-mobile-body {
+    padding: var(--job-card-mobile-content-padding);
+  }
+
+  .job-card-desktop-body {
+    min-height: var(--job-card-desktop-min-height);
   }
 
   .dashboard-tabs-viewport {

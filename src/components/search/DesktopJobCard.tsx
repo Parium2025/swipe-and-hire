@@ -40,7 +40,7 @@ export const DesktopJobCard = memo(function DesktopJobCard({
       onClick={() => navigate(`/job-view/${job.id}`)}
       className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
     >
-      <CardContent className="p-4 min-h-[120px] relative">
+      <CardContent className="job-card-desktop-body p-5 relative">
         {hasApplied && (
           <Badge variant="glass" className="absolute top-3 right-3 bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2.5 py-1">
             <CheckCircle className="h-3 w-3 mr-1" />
@@ -70,7 +70,7 @@ export const DesktopJobCard = memo(function DesktopJobCard({
               </span>
             </button>
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm text-white">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2.5 text-sm text-white">
               {job.location && (
                 <div className="flex items-center gap-1">
                   <MapPin className="h-3.5 w-3.5" />

@@ -141,11 +141,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
   return (
     <Card 
-      className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98]"
+      className="job-card-mobile-shell group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98]"
       onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`)}
     >
       {/* Visual header — image or gradient placeholder */}
-      <div className="relative w-full h-40 overflow-hidden">
+      <div className="job-card-mobile-media relative w-full overflow-hidden">
         {displayUrl ? (
           <>
             <img
@@ -210,11 +210,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       </div>
 
       {/* Content */}
-      <div className="p-3.5 space-y-2">
+       <div className="job-card-mobile-body space-y-2.5">
         {/* Title */}
         <TruncatedText
           text={job.title}
-          className="text-[15px] font-bold text-white leading-snug line-clamp-2 text-center"
+          className="text-base font-bold text-white leading-snug line-clamp-2 text-center"
         />
 
         {/* Company + Location — glass badges, centered, truncation-safe */}
