@@ -53,6 +53,10 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
   const typeLabel = getQuestionTypeLabel(question.question_type);
   const displayText = `${questionText} (${typeLabel})`;
 
+  const stopPropagation = (event: React.SyntheticEvent<HTMLElement>) => {
+    event.stopPropagation();
+  };
+
   return (
     <>
       <div
@@ -66,7 +70,7 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
             <div
               {...attributes}
               {...listeners}
-              className="text-white hover:text-white cursor-grab active:cursor-grabbing touch-none flex-shrink-0 transition-colors"
+               className="-m-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white transition-colors touch-none cursor-grab active:cursor-grabbing md:hover:bg-white/10"
             >
               <GripVertical className="h-4 w-4" />
             </div>
@@ -83,14 +87,24 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
           <div className="flex items-center gap-0.5 flex-shrink-0 transition-opacity">
             <button
               type="button"
-              onClick={() => onEdit(question)}
+              onPointerDown={stopPropagation}
+              onTouchStart={stopPropagation}
+              onClick={(event) => {
+                event.stopPropagation();
+                onEdit(question);
+              }}
               className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
             <button
               type="button"
-              onClick={() => setShowDeleteConfirm(true)}
+              onPointerDown={stopPropagation}
+              onTouchStart={stopPropagation}
+              onClick={(event) => {
+                event.stopPropagation();
+                setShowDeleteConfirm(true);
+              }}
               className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -101,6 +115,7 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
 
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContentNoFocus
+          elevated
           className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
@@ -125,7 +140,10 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => onDelete(question.id!)}
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                onDelete(question.id!);
+              }}
               variant="destructiveSoft"
               style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
               className="rounded-full"

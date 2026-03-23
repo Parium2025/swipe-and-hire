@@ -52,6 +52,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -135,6 +136,12 @@ const MobileJobWizard = ({
   
   // Drag and drop sensors
   const sensors = useSensors(
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 120,
+        tolerance: 10,
+      },
+    }),
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
@@ -2473,6 +2480,14 @@ const MobileJobWizard = ({
             </DialogHeader>
             {!showQuestionTemplates && !showQuestionForm && (
               <button
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  lockWizardCloseTouch(420);
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  lockWizardCloseTouch(420);
+                }}
                 onClick={handleClose}
                 onTouchEnd={(e) => { e.currentTarget.blur(); }}
                 className={`${dialogCloseButtonClassName} touch-manipulation [-webkit-tap-highlight-color:transparent] ${isWizardCloseTouchLocked ? 'pointer-events-none' : ''}`}
@@ -3285,15 +3300,23 @@ const MobileJobWizard = ({
                         {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
                       </h3>
                       <Button
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          lockWizardCloseTouch(420);
+                        }}
                         onMouseDown={(e) => {
                           e.currentTarget.blur();
                           const activeEl = document.activeElement as HTMLElement;
                           if (activeEl?.blur) activeEl.blur();
                         }}
+                        onTouchStart={(e) => {
+                          e.stopPropagation();
+                          lockWizardCloseTouch(420);
+                        }}
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onTouchEnd={(e) => { e.currentTarget.blur(); }}
                         onClick={() => {
-                          lockWizardCloseTouch();
+                          lockWizardCloseTouch(420);
                           setShowQuestionForm(false);
                           setEditingQuestion(null);
                           setShowQuestionTemplates(true);
