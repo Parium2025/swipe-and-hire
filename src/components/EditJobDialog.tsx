@@ -3651,29 +3651,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 </div>
                               </div>
 
-                              {/* Focus position picker */}
+                              {/* Drag-based focus position picker */}
                               <div className="mt-3">
-                                <p className="text-white text-xs mb-2">Bildfokus (var bilden centreras i korten)</p>
-                                <div className="flex gap-2 justify-center">
-                                  {[
-                                    { value: 'top', label: 'Topp' },
-                                    { value: 'center', label: 'Mitten' },
-                                    { value: 'bottom', label: 'Botten' },
-                                  ].map((opt) => (
-                                    <button
-                                      key={opt.value}
-                                      type="button"
-                                      onClick={() => handleInputChange('image_focus_position', opt.value)}
-                                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                                        formData.image_focus_position === opt.value
-                                          ? 'bg-white/30 text-white border border-white/50'
-                                          : 'bg-white/10 text-white/70 border border-white/20 hover:bg-white/20'
-                                      }`}
-                                    >
-                                      {opt.label}
-                                    </button>
-                                  ))}
-                                </div>
+                                <JobImagePositioner
+                                  imageUrl={jobImageDisplayUrl}
+                                  focusPercent={parseFocusPosition(formData.image_focus_position)}
+                                  onFocusChange={(pct) => handleInputChange('image_focus_position', String(pct))}
+                                />
                               </div>
                             </>
                           )}
