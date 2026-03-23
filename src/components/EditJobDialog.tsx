@@ -3692,6 +3692,32 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               </div>
                             </>
                           )}
+                          
+                          {/* "Use same image for all" button - only when mobile image exists */}
+                          {jobImageDisplayUrl && (
+                            <div className="mt-3">
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  const mobilePath = formData.job_image_url;
+                                  if (!mobilePath) return;
+                                  
+                                  // Set desktop image
+                                  handleInputChange('job_image_desktop_url', mobilePath);
+                                  setOriginalDesktopImageUrl(mobilePath);
+                                  setJobImageDesktopDisplayUrl(jobImageDisplayUrl);
+                                  
+                                  // Set card image
+                                  handleInputChange('job_image_card_url', mobilePath);
+                                  setOriginalCardImageUrl(mobilePath);
+                                  setJobImageCardDisplayUrl(jobImageDisplayUrl);
+                                }}
+                                className="w-full py-2.5 px-4 rounded-lg bg-white/10 border border-white/20 text-white text-sm font-medium transition-all duration-200 md:hover:bg-white/20 active:scale-[0.98]"
+                              >
+                                Använd samma bild på alla
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         {/* Desktop image section */}
