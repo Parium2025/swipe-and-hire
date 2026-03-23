@@ -100,19 +100,15 @@ export const WizardFooter = ({
   const nextButtonClasses = 
     'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
 
-  const submitButtonClasses = `rounded-full text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${
-    isOnline 
-      ? 'bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600' 
-      : 'bg-gray-500/50 cursor-not-allowed'
-  }`;
+  const submitButtonClasses = 'rounded-full text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600';
 
   // Justify: if back button hidden on first step, center the next/submit button
   const justifyClass = (hideBackOnFirstStep && currentStep === 0) 
     ? 'justify-center' 
     : 'justify-between';
 
-  // Submit is disabled if offline, loading, or externally disabled
-  const submitDisabled = loading || disabled || !isOnline;
+  // Submit is disabled if loading or externally disabled
+  const submitDisabled = loading || disabled;
 
   return (
     <div

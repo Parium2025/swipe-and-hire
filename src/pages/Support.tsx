@@ -235,15 +235,10 @@ const Support = () => {
               <Button 
                 type="submit" 
                 variant="glass"
-                className={`h-11 !min-h-0 px-6 text-sm ${!isOnline ? 'bg-gray-500/50 cursor-not-allowed' : ''}`}
-                disabled={loading || !isOnline}
+                className="h-11 !min-h-0 px-6 text-sm"
+                disabled={loading}
               >
-                {loading ? 'Skickar...' : !isOnline ? (
-                  <>
-                    <WifiOff className="mr-2 h-4 w-4" />
-                    Offline
-                  </>
-                ) : 'Skicka meddelande'}
+                {loading ? 'Skickar...' : 'Skicka meddelande'}
               </Button>
             </div>
           </form>
