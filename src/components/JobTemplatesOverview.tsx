@@ -690,7 +690,6 @@ const JobTemplatesOverview = () => {
         </DialogContentNoFocus>
       </Dialog>
     </div>
-
       {/* Delete confirmation dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContentNoFocus
