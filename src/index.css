@@ -376,8 +376,8 @@ All colors MUST be HSL.
     padding-bottom: 0.75rem !important;
   }
 
-  .premium-edit-shell div.h-11.cursor-pointer,
-  .premium-edit-shell button.h-11 {
+  .premium-edit-shell div.h-11.cursor-pointer:not(.aspect-square),
+  .premium-edit-shell button.h-11:not(.aspect-square) {
     height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
   }
