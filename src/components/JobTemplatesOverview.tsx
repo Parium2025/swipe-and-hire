@@ -226,8 +226,12 @@ const JobTemplatesOverview = () => {
     }
   };
 
-  const handleDelete = async (templateId: string, templateName: string) => {
-    if (!confirm(`Är du säker på att du vill ta bort mallen "${templateName}"?`)) return;
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const { id: templateId, name: templateName } = deleteTarget;
+    setDeleteTarget(null);
     
 
     try {
