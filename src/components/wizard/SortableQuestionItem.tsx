@@ -121,7 +121,7 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
           </div>
           
           {/* Mobile: buttons on own row, larger touch targets */}
-          <div className="flex md:hidden items-center gap-2 pl-8">
+          <div className="flex md:hidden items-center justify-center gap-2">
             <button
               type="button"
               onPointerDown={stopPropagation}
