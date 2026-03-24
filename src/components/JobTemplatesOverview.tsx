@@ -12,7 +12,17 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { useToast } from '@/hooks/use-toast';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
-import { Plus, Edit, Trash2, Calendar, Loader2, Star, StarOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar, Loader2, Star, StarOff, AlertTriangle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 
 interface JobTemplate {
   id: string;

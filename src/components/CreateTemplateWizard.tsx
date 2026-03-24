@@ -11,7 +11,17 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Search, Pencil, Heart, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Search, Pencil, Heart, CheckCircle, AlertTriangle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
@@ -2133,37 +2143,76 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                             <Pencil className="h-3.5 w-3.5" />
                                             <span>Redigera</span>
                                           </button>
-                                          <button
-                                            type="button"
-                                            onClick={async () => {
-                                              if (!template.id) return;
-                                              try {
-                                                const { error } = await supabase
-                                                  .from('job_question_templates')
-                                                  .delete()
-                                                  .eq('id', template.id);
-                                                
-                                                if (error) throw error;
-                                                
-                                                setQuestionTemplates(prev => prev.filter(t => t.id !== template.id));
-                                                toast({
-                                                  title: "Fråga borttagen"
-                                                });
-                                              } catch (error) {
-                                                console.error('Error deleting template:', error);
-                                                toast({
-                                                  title: "Kunde inte ta bort frågan",
-                                                  variant: "destructive"
-                                                });
-                                              }
-                                            }}
-                                            onMouseDown={(e) => e.currentTarget.blur()}
-                                            onMouseUp={(e) => e.currentTarget.blur()}
-                                            className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97] focus:outline-none focus:ring-0"
-                                          >
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                            <span>Ta bort</span>
-                                          </button>
+                                          {(() => {
+                                            const [showConfirm, setShowConfirm] = useState(false);
+                                            return (
+                                              <>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => setShowConfirm(true)}
+                                                  onMouseDown={(e) => e.currentTarget.blur()}
+                                                  onMouseUp={(e) => e.currentTarget.blur()}
+                                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97] focus:outline-none focus:ring-0"
+                                                >
+                                                  <Trash2 className="h-3.5 w-3.5" />
+                                                  <span>Ta bort</span>
+                                                </button>
+                                                <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+                                                  <AlertDialogContentNoFocus
+                                                    elevated
+                                                    className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+                                                  >
+                                                    <AlertDialogHeader className="space-y-4 text-center">
+                                                      <div className="flex items-center justify-center gap-2.5">
+                                                        <div className="bg-red-500/20 p-2 rounded-full">
+                                                          <AlertTriangle className="h-4 w-4 text-white" />
+                                                        </div>
+                                                        <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                                                          Ta bort frågemall
+                                                        </AlertDialogTitle>
+                                                      </div>
+                                                      <AlertDialogDescription className="text-white text-sm leading-relaxed">
+                                                        Är du säker på att du vill ta bort denna frågemall? Denna åtgärd går inte att ångra.
+                                                      </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter className="flex-row justify-center gap-2 mt-4">
+                                                      <AlertDialogCancel
+                                                        onClick={() => setShowConfirm(false)}
+                                                        style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+                                                        className="mt-0 rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
+                                                      >
+                                                        Avbryt
+                                                      </AlertDialogCancel>
+                                                      <AlertDialogAction
+                                                        onClick={async () => {
+                                                          setShowConfirm(false);
+                                                          if (!template.id) return;
+                                                          try {
+                                                            const { error } = await supabase
+                                                              .from('job_question_templates')
+                                                              .delete()
+                                                              .eq('id', template.id);
+                                                            if (error) throw error;
+                                                            setQuestionTemplates(prev => prev.filter(t => t.id !== template.id));
+                                                            toast({ title: "Fråga borttagen" });
+                                                          } catch (error) {
+                                                            console.error('Error deleting template:', error);
+                                                            toast({ title: "Kunde inte ta bort frågan", variant: "destructive" });
+                                                          }
+                                                        }}
+                                                        variant="destructiveSoft"
+                                                        style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+                                                        className="rounded-full"
+                                                      >
+                                                        <Trash2 className="h-4 w-4 mr-1.5" />
+                                                        Ta bort
+                                                      </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                  </AlertDialogContentNoFocus>
+                                                </AlertDialog>
+                                              </>
+                                            );
+                                          })()}
                                         </div>
                                       </div>
                                     </div>
