@@ -54,12 +54,18 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
   return (
     <div className="space-y-2">
       <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt</p>
+      {/* Use the same width/height ratio as the actual job card for a true preview */}
       <div
         ref={containerRef}
         className={`relative w-full rounded-xl overflow-hidden border-2 transition-colors select-none ${
           isDragging ? 'border-white/60' : 'border-white/20'
         }`}
-        style={{ aspectRatio: '3 / 4', cursor: isDragging ? 'grabbing' : 'grab', touchAction: 'none' }}
+        style={{
+          /* Match job card media proportions from CSS variables */
+          height: 'var(--job-card-mobile-media-height, 13rem)',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          touchAction: 'none',
+        }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
