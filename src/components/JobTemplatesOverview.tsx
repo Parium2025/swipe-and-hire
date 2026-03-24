@@ -730,7 +730,7 @@ const JobTemplatesOverview = () => {
           </AlertDialogFooter>
         </AlertDialogContentNoFocus>
       </AlertDialog>
-    </div>
+    </>
   );
 };
 
