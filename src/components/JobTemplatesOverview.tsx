@@ -433,7 +433,7 @@ const JobTemplatesOverview = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(template.id, template.name)}
+                      onClick={() => setDeleteTarget({ id: template.id, name: template.name })}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
                       className="border-destructive/40 bg-destructive/20 text-white transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
@@ -689,6 +689,47 @@ const JobTemplatesOverview = () => {
           </div>
         </DialogContentNoFocus>
       </Dialog>
+    </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContentNoFocus
+          elevated
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+        >
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-white" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort mall
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-white text-sm leading-relaxed">
+              Är du säker på att du vill ta bort mallen "{deleteTarget?.name}"? Denna åtgärd går inte att ångra.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row justify-center gap-2 mt-4">
+            <AlertDialogCancel
+              onClick={() => setDeleteTarget(null)}
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="mt-0 rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              variant="destructiveSoft"
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="rounded-full"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
     </div>
   );
 };
