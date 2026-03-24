@@ -1064,7 +1064,6 @@ export type Database = {
           id: string
           image_focus_position: string
           is_active: boolean | null
-          job_image_card_url: string | null
           job_image_desktop_url: string | null
           job_image_url: string | null
           location: string | null
@@ -1108,7 +1107,6 @@ export type Database = {
           id?: string
           image_focus_position?: string
           is_active?: boolean | null
-          job_image_card_url?: string | null
           job_image_desktop_url?: string | null
           job_image_url?: string | null
           location?: string | null
@@ -1152,7 +1150,6 @@ export type Database = {
           id?: string
           image_focus_position?: string
           is_active?: boolean | null
-          job_image_card_url?: string | null
           job_image_desktop_url?: string | null
           job_image_url?: string | null
           location?: string | null

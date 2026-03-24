@@ -1,1 +1,0 @@
-ALTER TABLE public.job_postings ADD COLUMN IF NOT EXISTS job_image_card_url text;
