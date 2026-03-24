@@ -2690,7 +2690,7 @@ const MobileJobWizard = ({
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="bg-white/10 border border-white/20 text-white hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-full cursor-pointer transition-all duration-300"
+                      className="bg-white/10 border border-white/20 text-white hover:border-white/40 h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center rounded-full cursor-pointer transition-all duration-300"
                     >
                       <Plus className="w-4 h-4" />
                     </div>
@@ -2816,14 +2816,14 @@ const MobileJobWizard = ({
                     <button
                       type="button"
                       onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
-                      className="h-11 w-11 flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
+                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
-                      className="h-11 w-11 flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
+                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
