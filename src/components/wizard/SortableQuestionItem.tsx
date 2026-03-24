@@ -70,14 +70,15 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
             : 'border-white/10 bg-white/5 md:hover:border-white/20 md:hover:bg-white/8'
         }`}
       >
-        <div className="flex items-center justify-between gap-2">
+        {/* Desktop: single row | Mobile: stacked */}
+        <div className="flex flex-col gap-1.5 md:flex-row md:items-center md:justify-between md:gap-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {/* Drag handle */}
             <div
               data-dnd-draggable="true"
               {...attributes}
               {...listeners}
-                className="-m-1 flex h-9 w-9 flex-shrink-0 cursor-grab touch-none select-none items-center justify-center rounded-full text-white transition-colors active:cursor-grabbing md:hover:bg-white/10"
+              className="-m-1 flex h-9 w-9 flex-shrink-0 cursor-grab touch-none select-none items-center justify-center rounded-full text-white transition-colors active:cursor-grabbing md:hover:bg-white/10"
             >
               <GripVertical className="h-4 w-4" />
             </div>
@@ -89,9 +90,38 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
               {questionText}
               <span className="text-white font-normal ml-1">({typeLabel})</span>
             </TruncatedText>
+
+            {/* Desktop: inline buttons */}
+            <div className="hidden md:flex items-center gap-0.5 flex-shrink-0">
+              <button
+                type="button"
+                onPointerDown={stopPropagation}
+                onTouchStart={stopPropagation}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onEdit(question);
+                }}
+                className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onPointerDown={stopPropagation}
+                onTouchStart={stopPropagation}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setShowDeleteConfirm(true);
+                }}
+                className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
           
-          <div className="flex items-center gap-0.5 flex-shrink-0 transition-opacity">
+          {/* Mobile: buttons on own row, larger touch targets */}
+          <div className="flex md:hidden items-center gap-2 pl-8">
             <button
               type="button"
               onPointerDown={stopPropagation}
@@ -100,9 +130,10 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
                 event.stopPropagation();
                 onEdit(question);
               }}
-              className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+              className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] text-white text-xs bg-white/10 hover:bg-white/15 rounded-full transition-all duration-300 active:scale-[0.97]"
             >
               <Pencil className="h-3.5 w-3.5" />
+              <span>Redigera</span>
             </button>
             <button
               type="button"
@@ -112,9 +143,10 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
                 event.stopPropagation();
                 setShowDeleteConfirm(true);
               }}
-              className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+              className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97]"
             >
               <Trash2 className="h-3.5 w-3.5" />
+              <span>Ta bort</span>
             </button>
           </div>
         </div>
