@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import { GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { JobQuestion } from '@/types/jobWizard';
 import { TruncatedText } from '@/components/TruncatedText';
 import {
@@ -160,7 +160,7 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full">
-                <AlertTriangle className="h-4 w-4 text-red-400" />
+                <Trash2 className="h-4 w-4 text-white" />
               </div>
               <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
                 Ta bort fråga
