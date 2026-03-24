@@ -83,12 +83,13 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
               <GripVertical className="h-4 w-4" />
             </div>
             
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <span className="text-white font-medium text-sm leading-tight truncate min-w-0">
-                {questionText}
-              </span>
-              <span className="text-white font-normal text-sm leading-tight flex-shrink-0">({typeLabel})</span>
-            </div>
+            <TruncatedText 
+              text={displayText}
+              className="flex-1 min-w-0 text-white font-medium text-sm leading-tight truncate"
+            >
+              {questionText}
+              <span className="text-white font-normal ml-1">({typeLabel})</span>
+            </TruncatedText>
 
             {/* Desktop: inline buttons */}
             <div className="hidden md:flex items-center gap-0.5 flex-shrink-0">
