@@ -713,16 +713,14 @@ const JobTemplatesOverview = () => {
           <AlertDialogFooter className="flex-row justify-center gap-2 mt-4">
             <AlertDialogCancel
               onClick={() => setDeleteTarget(null)}
-              className="btn-dialog-action"
-              className="mt-0 rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
+              className="btn-dialog-action mt-0 rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               variant="destructiveSoft"
-              className="btn-dialog-action"
-              className="rounded-full"
+              className="btn-dialog-action rounded-full"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort

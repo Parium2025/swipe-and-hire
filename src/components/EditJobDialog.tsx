@@ -2266,8 +2266,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               <AlertDialogFooter className="mt-4 flex-row justify-center gap-2">
                                 <AlertDialogCancel
                                   onClick={() => setDeleteTemplateId(null)}
-                                  className="btn-dialog-action"
-                                  className="mt-0 rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
+                                  className="btn-dialog-action mt-0 rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
                                 >
                                   Avbryt
                                 </AlertDialogCancel>
@@ -2294,8 +2293,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                     setDeleteTemplateId(null);
                                   }}
                                   variant="destructiveSoft"
-                                  className="btn-dialog-action"
-                                  className="rounded-full"
+                                  className="btn-dialog-action rounded-full"
                                 >
                                   <Trash2 className="mr-1.5 h-4 w-4" />
                                   Ta bort
