@@ -395,6 +395,13 @@ All colors MUST be HSL.
     font-weight: 600;
   }
 
+  /* Standard dialog action button — replaces inline style={{ height: 44px, minHeight: 44px, padding: 0 1rem }} */
+  .btn-dialog-action {
+    height: 2.75rem; /* 44px */
+    min-height: 2.75rem;
+    padding-inline: 1rem;
+  }
+
   .premium-edit-icon-action {
     width: var(--icon-button-size-sm);
     height: var(--icon-button-size-sm);

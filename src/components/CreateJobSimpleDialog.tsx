@@ -674,8 +674,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                 // Öppna dropdown-menyn igen efter att avbryt tryckts
                 setTimeout(() => setTemplateMenuOpen(true), 100);
               }}
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
-              className="flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+              className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
               Avbryt
             </AlertDialogCancel>
@@ -712,8 +711,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                 setTemplateToDelete(null);
               }}
               variant="destructiveSoft"
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
-              className="flex-1 text-sm flex items-center justify-center rounded-full"
+              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort
