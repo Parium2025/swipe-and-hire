@@ -89,7 +89,7 @@ const TemplateDeleteButton = ({ templateId, onDelete }: { templateId?: string; o
           <AlertDialogFooter className="flex-row justify-center gap-2 mt-4">
             <AlertDialogCancel
               onClick={() => setShowConfirm(false)}
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="btn-dialog-action"
               className="mt-0 rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
             >
               Avbryt
@@ -97,7 +97,7 @@ const TemplateDeleteButton = ({ templateId, onDelete }: { templateId?: string; o
             <AlertDialogAction
               onClick={() => { setShowConfirm(false); onDelete(); }}
               variant="destructiveSoft"
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="btn-dialog-action"
               className="rounded-full"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />

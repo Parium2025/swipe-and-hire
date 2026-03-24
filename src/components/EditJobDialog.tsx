@@ -2266,7 +2266,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               <AlertDialogFooter className="mt-4 flex-row justify-center gap-2">
                                 <AlertDialogCancel
                                   onClick={() => setDeleteTemplateId(null)}
-                                  style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+                                  className="btn-dialog-action"
                                   className="mt-0 rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
                                 >
                                   Avbryt
@@ -2294,7 +2294,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                     setDeleteTemplateId(null);
                                   }}
                                   variant="destructiveSoft"
-                                  style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+                                  className="btn-dialog-action"
                                   className="rounded-full"
                                 >
                                   <Trash2 className="mr-1.5 h-4 w-4" />

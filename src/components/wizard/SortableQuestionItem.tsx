@@ -173,7 +173,7 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
           <AlertDialogFooter className="flex-row justify-center gap-2 mt-4">
             <AlertDialogCancel
               onClick={() => setShowDeleteConfirm(false)}
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="btn-dialog-action"
               className="mt-0 rounded-full border-white/30 text-white bg-white/10 hover:bg-white/20"
             >
               Avbryt
@@ -184,7 +184,7 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
                 onDelete(question.id!);
               }}
               variant="destructiveSoft"
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="btn-dialog-action"
               className="rounded-full"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
