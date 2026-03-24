@@ -415,10 +415,12 @@ const MyCandidates = () => {
       
       if (isViewingColleague) {
         await removeCandidateFromColleagueList(idToRemove);
+        setSwipeViewerOpen(false);
         setCandidateToRemove(null);
         return;
       }
       
+      setSwipeViewerOpen(false);
       setCandidateToRemove(null);
       hookRemoveCandidate.mutate(idToRemove);
     }
