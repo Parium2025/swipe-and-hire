@@ -188,7 +188,7 @@ const SortableQuestionCard = ({
         <AlertDialogHeader className="space-y-4 text-center">
           <div className="flex items-center justify-center gap-2.5">
             <div className="bg-red-500/20 p-2 rounded-full">
-              <AlertTriangle className="h-4 w-4 text-red-400" />
+              <AlertTriangle className="h-4 w-4 text-white" />
             </div>
             <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
               Ta bort fråga
