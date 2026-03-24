@@ -3648,10 +3648,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       setJobImageDisplayUrl(null);
                                       setManualFocus(null);
                                     }}
-                                    className="premium-edit-icon-action inline-flex items-center justify-center border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
-                                    aria-label="Ta bort mobilbild"
+                                    className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                                   >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>Ta bort bild</span>
                                   </button>
                                 </div>
                               </div>
@@ -3728,10 +3728,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       setOriginalDesktopImageUrl(null);
                                       setJobImageDesktopDisplayUrl(null);
                                     }}
-                                    className="premium-edit-icon-action inline-flex items-center justify-center border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
-                                    aria-label="Ta bort datorbild"
+                                    className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                                   >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>Ta bort bild</span>
                                   </button>
                                 </div>
                               </div>
