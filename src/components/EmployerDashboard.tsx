@@ -570,7 +570,7 @@ const EmployerDashboard = memo(() => {
                               }
                             }}
                             footer={
-                              <div className="flex items-center gap-2 pt-0.5">
+                              <div className={`flex items-center gap-2 pt-0.5 ${isExpired && !isDraft ? 'justify-center' : ''}`}>
                                 {(!isExpired || isDraft) && (
                                   <button
                                     className={`flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-[transform,opacity,background-color] duration-200 active:scale-[0.97] md:hover:bg-white/10 ${pendingEditJobId === job.id ? 'pointer-events-none opacity-70' : ''}`}
@@ -584,7 +584,7 @@ const EmployerDashboard = memo(() => {
                                   </button>
                                 )}
                                 <button
-                                  className="flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/20 px-4 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                                  className={`${isExpired && !isDraft ? 'px-8' : 'flex-1 px-4'} inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/20 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white`}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteClick(jobPosting);
