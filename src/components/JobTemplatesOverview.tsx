@@ -692,7 +692,7 @@ const JobTemplatesOverview = () => {
     </div>
 
       {/* Delete confirmation dialog */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContentNoFocus
           elevated
           className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
@@ -707,7 +707,7 @@ const JobTemplatesOverview = () => {
               </AlertDialogTitle>
             </div>
             <AlertDialogDescription className="text-white text-sm leading-relaxed">
-              Är du säker på att du vill ta bort mallen "{deleteTarget?.name}"? Denna åtgärd går inte att ångra.
+              Är du säker på att du vill ta bort mallen &quot;{deleteTarget?.name}&quot;? Denna åtgärd går inte att ångra.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row justify-center gap-2 mt-4">
