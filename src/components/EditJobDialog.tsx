@@ -2195,42 +2195,46 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         {templates.map((template) => (
                                            <div
                                             key={template.id}
-                                            className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 flex items-center justify-between gap-2 transition-all duration-200 group"
+                                            className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group"
                                           >
-                                            <TruncatedText 
-                                              text={template.question_text}
-                                              className="flex-1 text-white font-medium text-sm leading-tight truncate cursor-pointer hover:opacity-80 transition-opacity min-w-0"
-                                              onClick={() => useQuestionTemplate(template)}
-                                            />
-                                            <div className="flex items-center gap-0.5 transition-opacity">
-                                              <button
-                                                type="button"
-                                                onClick={() => {
-                                                  setEditingQuestion({
-                                                    ...(template as JobQuestion),
-                                                    template_id: (template as any).id
-                                                  });
-                                                  setShowQuestionTemplates(false);
-                                                  setShowQuestionForm(true);
-                                                }}
-                                                onMouseDown={(e) => e.currentTarget.blur()}
-                                                onMouseUp={(e) => e.currentTarget.blur()}
-                                                className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-colors duration-300 flex-shrink-0 focus:outline-none focus:ring-0"
-                                              >
-                                                <Pencil className="h-3.5 w-3.5" />
-                                              </button>
-                                              <button
-                                                type="button"
-                                                onClick={() => {
-                                                  if (!(template as any).id) return;
-                                                  setDeleteTemplateId((template as any).id);
-                                                }}
-                                                onMouseDown={(e) => e.currentTarget.blur()}
-                                                onMouseUp={(e) => e.currentTarget.blur()}
-                                                className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors duration-300 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
-                                              >
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                              </button>
+                                            <div className="flex flex-col gap-1.5">
+                                              <TruncatedText 
+                                                text={template.question_text}
+                                                className="text-white font-medium text-sm leading-tight truncate cursor-pointer hover:opacity-80 transition-opacity min-w-0"
+                                                onClick={() => useQuestionTemplate(template)}
+                                              />
+                                              <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                  type="button"
+                                                  onClick={() => {
+                                                    setEditingQuestion({
+                                                      ...(template as JobQuestion),
+                                                      template_id: (template as any).id
+                                                    });
+                                                    setShowQuestionTemplates(false);
+                                                    setShowQuestionForm(true);
+                                                  }}
+                                                  onMouseDown={(e) => e.currentTarget.blur()}
+                                                  onMouseUp={(e) => e.currentTarget.blur()}
+                                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] text-white text-xs bg-white/10 hover:bg-white/15 rounded-full transition-all duration-300 active:scale-[0.97] focus:outline-none focus:ring-0"
+                                                >
+                                                  <Pencil className="h-3.5 w-3.5" />
+                                                  <span>Redigera</span>
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => {
+                                                    if (!(template as any).id) return;
+                                                    setDeleteTemplateId((template as any).id);
+                                                  }}
+                                                  onMouseDown={(e) => e.currentTarget.blur()}
+                                                  onMouseUp={(e) => e.currentTarget.blur()}
+                                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97] focus:outline-none focus:ring-0"
+                                                >
+                                                  <Trash2 className="h-3.5 w-3.5" />
+                                                  <span>Ta bort</span>
+                                                </button>
+                                              </div>
                                             </div>
                                           </div>
                                         ))}
