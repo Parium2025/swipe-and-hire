@@ -149,7 +149,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         </div>
 
         {/* Action Buttons - Hide edit button for expired jobs */}
-        <div className="flex gap-2 pt-1">
+        <div className={`flex gap-2 pt-1 ${jobIsExpired ? 'justify-center' : ''}`}>
           {!jobIsExpired && (
             <Button 
               variant="glass" 
