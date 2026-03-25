@@ -76,6 +76,8 @@ import { CandidateCardContent } from '@/components/candidates/KanbanCandidateCar
 import { StageColumn } from '@/components/candidates/StageColumn';
 import { MobileMyCandidatesView } from '@/components/candidates/MobileMyCandidatesView';
 import { useDevice } from '@/hooks/use-device';
+import { MyCandidatesHeader } from '@/pages/myCandidates/MyCandidatesHeader';
+import { MyCandidatesDesktopActionBar } from '@/pages/myCandidates/MyCandidatesDesktopActionBar';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 
 const MyCandidates = () => {
