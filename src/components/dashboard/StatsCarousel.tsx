@@ -3,56 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
+import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { GRADIENTS } from './dashboardConstants';
-
-export type StatData = {
-  icon: React.ElementType;
-  label: string;
-  value: number;
-  description: string;
-  link?: string;
-  emptyHint?: string;
-};
-
-interface StatsCarouselProps {
-  stats: StatData[];
-  isPaused: boolean;
-  setIsPaused: (v: boolean) => void;
-  /** Whether fresh data has loaded (enables emptyHint display) */
-  dataReady?: boolean;
-  /** Cached stats exist (enables emptyHint display as fallback) */
-  hasCachedData?: boolean;
-}
-
-export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = false, hasCachedData = false }: StatsCarouselProps) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const navigate = useNavigate();
-  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
-
-  // Defensive index guard
-  useEffect(() => {
-    if (currentIndex >= stats.length && stats.length > 0) {
-      setCurrentIndex(0);
-    }
-  }, [stats.length, currentIndex]);
-
+...
   const goNext = useCallback(() => { setCurrentIndex(prev => (prev + 1) % stats.length); }, [stats.length]);
   const goPrev = useCallback(() => { setCurrentIndex(prev => (prev - 1 + stats.length) % stats.length); }, [stats.length]);
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: goNext, onSwipeRight: goPrev });
 
-  // Auto-rotation every 10s, offset by 5s from news/tips card
-  useEffect(() => {
-    if (isPaused || stats.length <= 1) return;
-    const delayTimer = setTimeout(() => {
-      setCurrentIndex(prev => (prev + 1) % stats.length);
-    }, 5000);
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % stats.length);
-    }, 10000);
-    return () => { clearTimeout(delayTimer); clearInterval(interval); };
-  }, [isPaused, stats.length]);
+  useSynchronizedRotation({
+    enabled: !isPaused && stats.length > 1,
+    intervalMs: 10000,
+    offsetMs: 5000,
+    onTick: goNext,
+  });
 
   const currentStat = stats[currentIndex];
   if (!currentStat) return null;
