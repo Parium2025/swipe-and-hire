@@ -17,32 +17,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMyCandidateApplications } from '@/hooks/useMyCandidateApplications';
 import { useSelectionMode } from '@/hooks/useSelectionMode';
 import { useBulkCandidateOps } from '@/hooks/useBulkCandidateOps';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { 
-  Trash2, 
   UserCheck,
-  ArrowDown,
   Plus,
-  AlertTriangle,
-  CheckSquare,
-  Square
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DndContext,
   DragOverlay,
