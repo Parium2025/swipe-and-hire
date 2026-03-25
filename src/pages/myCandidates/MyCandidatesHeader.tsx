@@ -148,18 +148,18 @@ export const MyCandidatesHeader = ({
       {totalCount > 0 && (
         <div className="space-y-3">
           {/* Search input */}
-          <div className="relative max-w-sm mx-auto">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/60" />
+          <div className="relative mx-auto">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
             <Input
               placeholder="Sök på namn, jobb eller anteckning"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="!min-h-0 pl-9 pr-9 py-2 h-10 text-sm bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white/30 rounded-full ring-1 ring-white/10 focus:ring-white/20 transition-all"
+              className="dashboard-control-compact pl-11 pr-12 text-base font-medium bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:font-normal rounded-full"
             />
             {searchQuery && (
               <button
                 onClick={() => onSearchChange('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/60 active:scale-90 transition-transform"
+                className="dashboard-icon-control absolute right-1.5 top-1/2 flex !min-h-0 !min-w-0 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full text-white bg-white/10 transition-colors focus:outline-none"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -171,7 +171,7 @@ export const MyCandidatesHeader = ({
             <button
               onClick={() => displayedCandidatesCount > 0 ? onToggleSelectionMode() : undefined}
               onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-full px-5 py-2 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation ${
+              className={`rounded-full px-6 py-2.5 flex items-center justify-center gap-2 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation ${
                 isSelectionMode 
                   ? 'bg-white/15 ring-white/60' 
                   : displayedCandidatesCount > 0 
@@ -179,8 +179,8 @@ export const MyCandidatesHeader = ({
                     : 'bg-white/5 ring-white/10 opacity-40 cursor-default'
               }`}
             >
-              <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-              <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
+              <CheckSquare className="h-4 w-4 text-white flex-shrink-0" />
+              <span className="text-white text-sm font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
             </button>
           </div>
           {/* Desktop Välj button */}
