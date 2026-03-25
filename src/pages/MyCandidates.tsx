@@ -631,78 +631,16 @@ const MyCandidates = () => {
           onPrefetch={handlePrefetchCandidate}
           onMarkAsViewed={markApplicationAsViewed}
           renderActionBar={isSelectionMode ? (
-            <TooltipProvider delayDuration={300}>
-            <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mt-2">
-              <div className="flex items-center gap-1 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-2.5 py-1.5 shadow-xl overflow-hidden min-w-0 max-w-full">
-                <span className="text-white text-[11px] font-medium whitespace-nowrap flex-shrink-0">
-                  {selectedCandidateIds.size}/{allVisibleCandidateIds.length}
-                </span>
-                <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
-                <button
-                  onClick={toggleAllVisible}
-                  onMouseDown={(e) => e.preventDefault()}
-                  className="flex items-center justify-center px-1.5 h-7 text-[11px] whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
-                >
-                  {allVisibleSelected ? <Square className="h-3 w-3 mr-1" /> : <CheckSquare className="h-3 w-3 mr-1" />}
-                  {allVisibleSelected ? 'Avmarkera' : 'Välj alla'}
-                </button>
-                <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
-
-
-
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      disabled={selectedCandidateIds.size === 0}
-                      onMouseDown={(e) => e.preventDefault()}
-                      className={`flex items-center px-1.5 h-7 text-[11px] whitespace-nowrap flex-shrink-0 outline-none focus:outline-none transition-all duration-200 rounded-md ${
-                        selectedCandidateIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-white'
-                      }`}
-                    >
-                      <ArrowDown className="h-3 w-3 mr-1" />
-                      Flytta
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
-                    {activeStageOrder.map(stage => {
-                      const settings = activeStageConfig[stage];
-                      const Icon = getIconByName(settings?.iconName || 'flag');
-                      return (
-                        <DropdownMenuItem 
-                          key={stage}
-                          onClick={() => bulkMoveToStage(stage)}
-                          className="text-white hover:text-white cursor-pointer"
-                        >
-                          <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: settings?.color || '#6366F1' }} />
-                          <Icon className="h-4 w-4 mr-2 text-white/70" />
-                          <span className="truncate">{settings?.label || stage}</span>
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      disabled={selectedCandidateIds.size === 0}
-                      onClick={() => setShowBulkDeleteConfirm(true)}
-                      onMouseDown={(e) => e.preventDefault()}
-                      className={`flex h-7 items-center justify-center rounded-md px-1.5 outline-none focus:outline-none transition-all duration-200 ${
-                        selectedCandidateIds.size === 0 ? 'cursor-not-allowed border border-destructive/20 bg-destructive/10 text-white/30' : 'border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
-                      }`}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" sideOffset={8}>
-                    <p>Ta bort</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-            </TooltipProvider>
+            <MyCandidatesMobileActionBar
+              selectedCount={selectedCandidateIds.size}
+              totalVisibleCount={allVisibleCandidateIds.length}
+              allVisibleSelected={allVisibleSelected}
+              onToggleAllVisible={toggleAllVisible}
+              stageOrder={activeStageOrder}
+              stageConfig={activeStageConfig}
+              onBulkMoveToStage={bulkMoveToStage}
+              onBulkDeleteClick={() => setShowBulkDeleteConfirm(true)}
+            />
           ) : undefined}
         />
       ) : (
