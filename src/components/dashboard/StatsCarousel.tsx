@@ -81,12 +81,11 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentIndex}
-              initial={hasMountedRef.current ? { opacity: 0, y: 10 } : false}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
               className="flex flex-col items-center"
-              onAnimationComplete={() => { hasMountedRef.current = true; }}
             >
               <h3 className="text-sm sm:text-base font-semibold text-white leading-snug mb-1">{currentStat.label}</h3>
               <div className="text-3xl font-bold text-white">{currentStat.value}</div>
