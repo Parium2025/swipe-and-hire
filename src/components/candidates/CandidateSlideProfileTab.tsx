@@ -258,7 +258,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
             className="min-w-0 flex-1"
           >
             <MessageSquare className="h-4 w-4 mr-1 shrink-0" />
-            <span className="truncate">Chatta</span>
+            <span className="whitespace-nowrap text-[clamp(9px,2.5vw,14px)]">Chatta</span>
           </Button>
           <Button
             onClick={() => setBookInterviewOpen(true)}
@@ -267,7 +267,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
             className="min-w-0 flex-1"
           >
             <CalendarPlus className="h-4 w-4 mr-1 shrink-0" />
-            <span className="truncate">Boka möte</span>
+            <span className="whitespace-nowrap text-[clamp(9px,2.5vw,14px)]">Boka möte</span>
           </Button>
           {onRemoveFromList && (
             <Button
@@ -277,7 +277,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
               className="min-w-0 flex-1"
             >
               <Trash2 className="h-4 w-4 mr-1 shrink-0" />
-              <span className="truncate">Ta bort</span>
+              <span className="whitespace-nowrap text-[clamp(9px,2.5vw,14px)]">Ta bort</span>
             </Button>
           )}
         </div>
