@@ -445,6 +445,9 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
           )}
         </div>
 
+        {/* Inline action bar for selection mode */}
+        {renderActionBar}
+
         {/* Candidate list */}
         <ScrollArea className="overscroll-contain" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
           <div className="flex flex-col gap-2">
@@ -473,8 +476,6 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
           </div>
         </ScrollArea>
 
-        {/* Inline action bar for selection mode */}
-        {renderActionBar}
       </div>
     </TooltipProvider>
   );
