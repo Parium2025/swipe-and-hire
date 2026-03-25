@@ -2,8 +2,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Send, Pencil, Trash2, Check, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type { CandidateNote } from './candidateProfileCache';
+
+function useAutoExpand(value: string) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+  return ref;
+}
 
 interface CandidateNotesPanelProps {
   notes: CandidateNote[];
