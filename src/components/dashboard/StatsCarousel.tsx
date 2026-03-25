@@ -62,9 +62,9 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={() => setIsPaused(true)}
-      onTouchEnd={() => setTimeout(() => setIsPaused(false), 3000)}
-      {...swipeHandlers}
+      onTouchStart={(e) => { setIsPaused(true); swipeHandlers.onTouchStart(e); }}
+      onTouchMove={swipeHandlers.onTouchMove}
+      onTouchEnd={() => { swipeHandlers.onTouchEnd(); setTimeout(() => setIsPaused(false), 3000); }}
     >
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
