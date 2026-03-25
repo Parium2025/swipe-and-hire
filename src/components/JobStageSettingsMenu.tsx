@@ -46,6 +46,11 @@ interface JobStageSettingsMenuProps {
   onLiveColorChange?: (color: string | null) => void;
   /** Index of this stage in the ordered list (0-based) */
   stageIndex?: number;
+  /** Externally controlled open state */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Disable touch trigger (used when double-tap opens menu instead) */
+  disableTouchTrigger?: boolean;
 }
 
 export function JobStageSettingsMenu({ 
