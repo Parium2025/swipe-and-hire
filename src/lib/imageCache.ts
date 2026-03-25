@@ -27,6 +27,32 @@ class ImageCache {
   }
 
   /**
+   * Skapa stabil cache-nyckel för storage-objekt.
+   * Viktigt för signerade URL:er där query/token kan ändras mellan renders.
+   */
+  private getCacheKey(url: string): string {
+    if (!url || url.startsWith('blob:')) return url;
+
+    try {
+      const parsed = new URL(
+        url,
+        typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+      );
+      const isStorageObject = parsed.pathname.includes('/storage/v1/object/');
+
+      // För storage-bilder ignorerar vi query/hash så samma fil får samma cache-nyckel
+      if (isStorageObject) {
+        return `${parsed.origin}${parsed.pathname}`;
+      }
+
+      // För andra URL:er behåll full URL (inkl query) för säkerhet
+      return parsed.toString();
+    } catch {
+      return url;
+    }
+  }
+
+  /**
    * Ladda och cacha en bild permanent
    * Hoppar över videofiler för att undvika onödiga fetch-fel
    */
@@ -35,9 +61,11 @@ class ImageCache {
     if (this.isVideoUrl(url)) {
       return url; // Returnera original-URL för videor
     }
+
+    const cacheKey = this.getCacheKey(url);
     
     // Om bilden redan är cachad, returnera direkt
-    const cached = this.cache.get(url);
+    const cached = this.cache.get(cacheKey);
     if (cached) {
       // Kontrollera om cachen fortfarande är giltig
       if (Date.now() - cached.timestamp < this.CACHE_DURATION) {
@@ -45,30 +73,30 @@ class ImageCache {
       } else {
         // Cache utgången, rensa
         URL.revokeObjectURL(cached.objectUrl);
-        this.cache.delete(url);
+        this.cache.delete(cacheKey);
       }
     }
 
     // Om bilden redan laddas, vänta på den
-    const loadingPromise = this.loading.get(url);
+    const loadingPromise = this.loading.get(cacheKey);
     if (loadingPromise) {
       const result = await loadingPromise;
       return result.objectUrl;
     }
 
     // Starta ny laddning
-    const promise = this.fetchAndCache(url);
-    this.loading.set(url, promise);
+    const promise = this.fetchAndCache(url, cacheKey);
+    this.loading.set(cacheKey, promise);
 
     try {
       const result = await promise;
       return result.objectUrl;
     } finally {
-      this.loading.delete(url);
+      this.loading.delete(cacheKey);
     }
   }
 
-  private async fetchAndCache(url: string): Promise<CachedImage> {
+  private async fetchAndCache(url: string, cacheKey: string): Promise<CachedImage> {
     try {
       // Fetch utan credentials för cross-origin storage URLs (undviker CORS-fel)
       const isStorageUrl = url.includes('/storage/v1/object/');
@@ -92,7 +120,7 @@ class ImageCache {
         timestamp: Date.now()
       };
 
-      this.cache.set(url, cached);
+      this.cache.set(cacheKey, cached);
       
       return cached;
     } catch (error) {
