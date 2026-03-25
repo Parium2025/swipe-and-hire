@@ -102,20 +102,29 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
     return data?.publicUrl || null;
   }, [job.job_image_url]);
 
-  // Use imageCache for blob caching
-  const [displayUrl, setDisplayUrl] = useState<string | null>(() => {
+  // Synchronous cache check — computed every render, zero-delay on remount
+  const cachedBlobUrl = useMemo(() => {
     if (!resolvedUrl) return null;
-    return imageCache.getCachedUrl(resolvedUrl) || resolvedUrl;
-  });
+    return imageCache.getCachedUrl(resolvedUrl);
+  }, [resolvedUrl]);
+
+  // If not blob-cached yet, load in background
+  const [loadedBlobUrl, setLoadedBlobUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!resolvedUrl) { setDisplayUrl(null); return; }
-    const cached = imageCache.getCachedUrl(resolvedUrl);
-    if (cached) { setDisplayUrl(cached); return; }
+    if (!resolvedUrl || cachedBlobUrl) {
+      setLoadedBlobUrl(null);
+      return;
+    }
+    let cancelled = false;
     imageCache.loadImage(resolvedUrl)
-      .then(blobUrl => setDisplayUrl(blobUrl))
-      .catch(() => setDisplayUrl(resolvedUrl));
-  }, [resolvedUrl]);
+      .then(blobUrl => { if (!cancelled) setLoadedBlobUrl(blobUrl); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [resolvedUrl, cachedBlobUrl]);
+
+  // Priority: blob from cache (instant) → blob from load → raw URL
+  const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
 
   const companyName = job.company_name || job.employer_profile?.company_name || job.profiles?.company_name || 'Okänt företag';
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
