@@ -103,7 +103,7 @@ export const SelectionActionBar = ({
                       }}
                       className="text-white hover:text-white cursor-pointer min-h-[44px]"
                     >
-                      <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: s?.color || '#0EA5E9' }} />
+                      <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: s?.color || 'hsl(var(--primary))' }} />
                       <StageIcon className="h-4 w-4 mr-2 text-white flex-shrink-0" />
                       <span className="truncate min-w-0">{label}</span>
                     </DropdownMenuItem>
