@@ -71,9 +71,8 @@ export const SelectionActionBar = ({
           side="bottom"
           align="center"
           sideOffset={8}
-          alignOffset={isTouchMobile ? -56 : 0}
-          collisionPadding={12}
-          className="border-white/20 min-w-[180px] w-[min(86vw,300px)]"
+          collisionPadding={16}
+          className="border-white/20 min-w-[180px] w-[min(86vw,300px)] mx-auto"
         >
           <TooltipProvider delayDuration={120}>
             {stages.map((stage) => {
