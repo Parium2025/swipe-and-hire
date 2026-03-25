@@ -1,9 +1,10 @@
 import { useCallback, useRef } from 'react';
-import { preloadImages } from './useImagePreloader';
+import { imageCache } from '@/lib/imageCache';
 
 /**
  * Hook för att förladdda bilder när användaren hovrar över ett element
- * Perfekt för jobbkort - ladda bilden innan användaren klickar
+ * Använder imageCache (blob-based) istället för native Image() för att
+ * seeda samma cache som resten av systemet.
  */
 export const useHoverPreload = () => {
   const preloadedRef = useRef(new Set<string>());
@@ -18,9 +19,9 @@ export const useHoverPreload = () => {
     // Markera som påbörjad så vi inte laddar flera gånger
     validUrls.forEach(url => preloadedRef.current.add(url));
 
-    // Starta preloading med hög prioritet vid hover
-    preloadImages(validUrls, 'high').catch(() => {
-      // Om det misslyckas, ta bort från cache så vi kan försöka igen
+    // Starta preloading via imageCache (seedar blob-cache)
+    imageCache.preloadImages(validUrls).catch(() => {
+      // Om det misslyckas, ta bort från set så vi kan försöka igen
       validUrls.forEach(url => preloadedRef.current.delete(url));
     });
   }, []);

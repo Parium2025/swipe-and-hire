@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { preloadImages, waitForServiceWorker } from '@/lib/serviceWorkerManager';
+import { waitForServiceWorker } from '@/lib/serviceWorkerManager';
 import { getMediaUrl } from '@/lib/mediaManager';
+import { imageCache } from '@/lib/imageCache';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 // Import logo directly so it's bundled and we get the hashed URL
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
@@ -19,9 +21,34 @@ const preloadImageNative = (src: string): Promise<void> => {
 };
 
 /**
+ * Batch-fetch all rows from a table (handles >1000 row limit)
+ */
+async function fetchAllRows<T>(
+  query: () => ReturnType<ReturnType<typeof supabase.from>['select']>,
+  pageSize = 1000
+): Promise<T[]> {
+  const all: T[] = [];
+  let from = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await (query() as any).range(from, from + pageSize - 1);
+    if (error || !data) break;
+    all.push(...data);
+    hasMore = data.length === pageSize;
+    from += pageSize;
+  }
+
+  return all;
+}
+
+/**
  * Global hook som förladddar alla kritiska bilder vid app-start
  * Körs en gång när appen startar
  * PRIORITERAR inloggad användares media FÖRST för omedelbar sidebar-visning
+ * 
+ * Använder prefetchMediaUrl för att seeda BOTH signed-url-cache OCH blob-cache
+ * så att bilder renderas instant vid navigation.
  */
 export const useGlobalImagePreloader = (enabled: boolean = true) => {
   const startedRef = useRef(false);
@@ -34,7 +61,6 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
     const preloadCriticalImages = async () => {
       try {
         // 🔥 PRIORITET 0: Ladda Parium-logotypen OMEDELBART med native Image()
-        // Detta körs INNAN service worker-väntan för att garantera att loggan alltid finns i cache
         console.log('🚀 HIGHEST PRIORITY: Preloading Parium logo (native)...');
         await preloadImageNative(pariumLogoRings);
         console.log('✅ Parium logo preloaded and ready!');
@@ -44,8 +70,6 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
           await waitForServiceWorker();
         }
 
-        const imagesToPreload: string[] = [];
-        
         // 🔥 PRIORITET 1: Ladda inloggad användares profilmedia FÖRST
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -56,98 +80,104 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
             .single();
           
           if (currentProfile) {
-            // Generera signed URLs för användarens media och förladdda OMEDELBART
-            const userMedia: string[] = [];
+            const tasks: Promise<void>[] = [];
             
             if (currentProfile.profile_image_url) {
-              const url = await getMediaUrl(currentProfile.profile_image_url, 'profile-image', 86400);
-              if (url) userMedia.push(url);
+              tasks.push(prefetchMediaUrl(currentProfile.profile_image_url, 'profile-image'));
             }
-            
             if (currentProfile.cover_image_url) {
-              const url = await getMediaUrl(currentProfile.cover_image_url, 'cover-image', 86400);
-              if (url) userMedia.push(url);
+              tasks.push(prefetchMediaUrl(currentProfile.cover_image_url, 'cover-image'));
             }
-            
             if (currentProfile.video_url) {
-              const url = await getMediaUrl(currentProfile.video_url, 'profile-video', 86400);
-              if (url) userMedia.push(url);
+              tasks.push(prefetchMediaUrl(currentProfile.video_url, 'profile-video'));
             }
             
-            // Förladdda användarens media FÖRST med högsta prioritet
-            if (userMedia.length > 0) {
-              console.log(`🚀 PRIORITY: Preloading current user's media (${userMedia.length} items)...`);
-              await preloadImages(userMedia);
+            if (tasks.length > 0) {
+              console.log(`🚀 PRIORITY: Preloading current user's media (${tasks.length} items)...`);
+              await Promise.allSettled(tasks);
               console.log('✅ User media preloaded and ready!');
             }
           }
         }
 
-        // 1. Hämta ALLA jobbbilder
-        const { data: jobs } = await supabase
-          .from('job_postings')
-          .select('job_image_url')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false });
+        // 🔥 PRIORITET 2: Alla jobbbilder (public bucket - ingen signering behövs)
+        const allJobs = await fetchAllRows<{ job_image_url: string | null }>(() =>
+          supabase
+            .from('job_postings')
+            .select('job_image_url')
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+        );
 
-        if (jobs) {
-          jobs.forEach(job => {
+        const jobImageUrls: string[] = [];
+        if (allJobs) {
+          allJobs.forEach(job => {
             if (job.job_image_url) {
               if (job.job_image_url.includes('/storage/v1/object/public/')) {
-                imagesToPreload.push(job.job_image_url);
+                jobImageUrls.push(job.job_image_url.split('?')[0]);
               } else {
                 const publicUrl = supabase.storage
                   .from('job-images')
                   .getPublicUrl(job.job_image_url).data.publicUrl;
-                if (publicUrl) imagesToPreload.push(publicUrl);
+                if (publicUrl) jobImageUrls.push(publicUrl);
               }
             }
           });
         }
 
-        // 2. Hämta ALLA profilbilder, cover images, videos och company logos
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('profile_image_url, cover_image_url, video_url, company_logo_url');
-
-        if (profiles) {
-          profiles.forEach(profile => {
-            // Profile/Cover/Video media kan ligga i private bucket (job-applications) och kräver signed URL.
-            // Vi förladdar därför bara media som redan är publika URLs här (för att undvika felaktiga fetches).
-            if (profile.profile_image_url?.includes('/storage/v1/object/public/')) {
-              imagesToPreload.push(profile.profile_image_url.split('?')[0]);
+        // Preload jobbbilder till blob-cache (public URLs, kan laddas direkt)
+        if (jobImageUrls.length > 0) {
+          console.log(`🚀 Preloading ${jobImageUrls.length} job images into blob cache...`);
+          const preloadInBatches = async (urls: string[], batchSize: number) => {
+            for (let i = 0; i < urls.length; i += batchSize) {
+              const batch = urls.slice(i, i + batchSize);
+              await Promise.allSettled(batch.map(url => imageCache.loadImage(url).catch(() => {})));
             }
+          };
+          
+          // Kör i idle callback för att inte blockera UI
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => {
+              preloadInBatches(jobImageUrls, 10);
+            });
+          } else {
+            setTimeout(() => {
+              preloadInBatches(jobImageUrls, 10);
+            }, 100);
+          }
+        }
 
-            if (profile.cover_image_url?.includes('/storage/v1/object/public/')) {
-              imagesToPreload.push(profile.cover_image_url.split('?')[0]);
-            }
+        // 🔥 PRIORITET 3: Företagslogotyper (public bucket)
+        const allProfiles = await fetchAllRows<{
+          company_logo_url: string | null;
+        }>(() =>
+          supabase
+            .from('profiles')
+            .select('company_logo_url')
+        );
 
-            if (profile.video_url?.includes('/storage/v1/object/public/')) {
-              imagesToPreload.push(profile.video_url.split('?')[0]);
-            }
-            
-            // Company logos - redan publika URLs i profiles-tabellen
+        const logoUrls: string[] = [];
+        if (allProfiles) {
+          allProfiles.forEach(profile => {
             if (profile.company_logo_url) {
-              const cleanUrl = profile.company_logo_url.split('?')[0];
-              imagesToPreload.push(cleanUrl);
+              logoUrls.push(profile.company_logo_url.split('?')[0]);
             }
           });
         }
 
-        // 3. Starta förladdning av ÖVRIG media i bakgrunden (lägre prioritet)
-        if (imagesToPreload.length > 0) {
-          console.log(`🚀 Preloading ${imagesToPreload.length} additional assets (jobs, other profiles) in background...`);
-          // Använd requestIdleCallback för att inte blockera huvudtråden
+        if (logoUrls.length > 0) {
+          console.log(`🚀 Preloading ${logoUrls.length} company logos...`);
           if ('requestIdleCallback' in window) {
             requestIdleCallback(() => {
-              preloadImages(imagesToPreload);
+              imageCache.preloadImages(logoUrls);
             });
           } else {
             setTimeout(() => {
-              preloadImages(imagesToPreload);
-            }, 100);
+              imageCache.preloadImages(logoUrls);
+            }, 200);
           }
         }
+
       } catch (error) {
         console.error('Failed to preload assets:', error);
       }
