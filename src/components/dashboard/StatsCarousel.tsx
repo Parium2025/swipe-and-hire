@@ -2,6 +2,7 @@ import { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { GRADIENTS } from './dashboardConstants';
@@ -28,6 +29,7 @@ interface StatsCarouselProps {
 export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = false, hasCachedData = false }: StatsCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const navigate = useNavigate();
+  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
 
   // Defensive index guard
   useEffect(() => {
@@ -57,11 +59,12 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
   return (
     <Card
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height touch-pan-y`}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={(e) => { setIsPaused(true); swipeHandlers.onTouchStart(e); }}
+      onMouseEnter={pauseNow}
+      onMouseLeave={resumeNow}
+      onTouchStart={(e) => { pauseNow(); swipeHandlers.onTouchStart(e); }}
       onTouchMove={swipeHandlers.onTouchMove}
-      onTouchEnd={() => { swipeHandlers.onTouchEnd(); setTimeout(() => setIsPaused(false), 3000); }}
+      onTouchEnd={() => { swipeHandlers.onTouchEnd(); resumeWithDelay(); }}
+      onTouchCancel={resumeWithDelay}
     >
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
