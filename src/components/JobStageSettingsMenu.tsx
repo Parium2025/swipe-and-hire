@@ -189,9 +189,13 @@ export function JobStageSettingsMenu({
         <DropdownMenuTrigger asChild>
           <button 
             type="button"
-            className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] pointer-fine:min-h-0 pointer-fine:min-w-0 pointer-fine:h-7 pointer-fine:w-7 pointer-fine:p-1 pointer-fine:-m-0.5 flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
+            className={`p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] pointer-fine:min-h-0 pointer-fine:min-w-0 pointer-fine:h-7 pointer-fine:w-7 pointer-fine:p-1 pointer-fine:-m-0.5 flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]${disableTouchTrigger ? ' pointer-events-none' : ''}`}
             style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
-            onMouseDown={(e) => e.preventDefault()}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onClick={(e) => e.stopPropagation()}
+            tabIndex={disableTouchTrigger ? -1 : undefined}
+            aria-hidden={disableTouchTrigger ? true : undefined}
             onFocus={(e) => {
               if (!menuOpen) {
                 e.currentTarget.blur();
