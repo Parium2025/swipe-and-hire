@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Newspaper, Clock, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useHrNews } from '@/hooks/useHrNews';
+import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { GRADIENTS } from './dashboardConstants';
 
 // Format relative time for news
@@ -34,6 +35,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
   const { data: news, isLoading } = useHrNews();
   const [currentIndex, setCurrentIndex] = useState(0);
   const newsItems = news?.slice(0, 4) || [];
+  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
 
   // Guard against stale index after data refetch
   useEffect(() => {
@@ -80,11 +82,12 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
   return (
     <Card
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height touch-pan-y`}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={(e) => { setIsPaused(true); swipeHandlers.onTouchStart(e); }}
+      onMouseEnter={pauseNow}
+      onMouseLeave={resumeNow}
+      onTouchStart={(e) => { pauseNow(); swipeHandlers.onTouchStart(e); }}
       onTouchMove={swipeHandlers.onTouchMove}
-      onTouchEnd={() => { swipeHandlers.onTouchEnd(); setTimeout(() => setIsPaused(false), 3000); }}
+      onTouchEnd={() => { swipeHandlers.onTouchEnd(); resumeWithDelay(); }}
+      onTouchCancel={resumeWithDelay}
     >
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
