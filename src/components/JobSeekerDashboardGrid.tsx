@@ -9,22 +9,23 @@ import { JobSeekerInterviewsCard } from '@/components/dashboard/JobSeekerIntervi
 
 // Main Dashboard Grid for Job Seekers
 export const JobSeekerDashboardGrid = memo(() => {
-  const [isCardsPaused, setIsCardsPaused] = useState(false);
+  const [isTipsPaused, setIsTipsPaused] = useState(false);
+  const [isStatsPaused, setIsStatsPaused] = useState(false);
   const isMobile = useIsMobile();
 
   const mobileOrder = (
     <>
-      <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <JobSeekerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
       <JobSeekerInterviewsCard />
-      <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <CareerTipsCard isPaused={isTipsPaused} setIsPaused={setIsTipsPaused} />
       <JobSeekerNotesCard />
     </>
   );
 
   const desktopOrder = (
     <>
-      <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-      <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <CareerTipsCard isPaused={isTipsPaused} setIsPaused={setIsTipsPaused} />
+      <JobSeekerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
       <JobSeekerNotesCard />
       <JobSeekerInterviewsCard />
     </>
