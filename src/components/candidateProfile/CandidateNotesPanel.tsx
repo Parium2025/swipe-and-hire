@@ -137,7 +137,7 @@ export const CandidateNotesPanel = ({
                         </div>
                       ) : (
                         <>
-                          <p className="text-sm text-white whitespace-pre-wrap pr-10 leading-relaxed break-all">{note.note}</p>
+                          <p className="text-sm text-white whitespace-pre-wrap md:pr-10 leading-relaxed break-all">{note.note}</p>
                           <p className="text-xs text-white mt-1">
                             {new Date(note.updated_at || note.created_at).toLocaleTimeString('sv-SE', {
                               hour: '2-digit',
