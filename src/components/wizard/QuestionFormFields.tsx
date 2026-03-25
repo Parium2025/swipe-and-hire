@@ -2,7 +2,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Minus, X } from 'lucide-react';
+import { Plus, Minus, Trash2 } from 'lucide-react';
 import { JobQuestion, QUESTION_TYPES, getQuestionTypeLabel } from '@/types/jobWizard';
 import DropdownField from './DropdownField';
 
