@@ -68,7 +68,7 @@ export const SelectionActionBar = ({
     }
 
     setTruncatedStages(nextTruncated);
-  }, []);
+  }, [isMenuOpen, stages]);
 
   useEffect(() => {
     recalculateMenuCentering();
