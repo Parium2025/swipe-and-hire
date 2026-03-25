@@ -187,7 +187,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
           <button
             onClick={() => applicationsCount > 0 ? (isSelectionMode ? onExitSelectionMode() : onToggleSelectionMode()) : undefined}
             onMouseDown={(e) => e.preventDefault()}
-            className={`rounded-lg px-2 py-2 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation ${
+            className={`rounded-lg px-3 py-2.5 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation ${
               isSelectionMode 
                 ? 'bg-white/[0.08] ring-white/70' 
                 : applicationsCount > 0 
@@ -195,8 +195,8 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
                   : 'bg-white/[0.04] ring-white/20 opacity-40 cursor-default'
             }`}
           >
-            <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-            <span className="text-white text-xs font-medium">Välj</span>
+            <CheckSquare className="h-4 w-4 text-white flex-shrink-0" />
+            <span className="text-white text-sm font-medium">Välj</span>
           </button>
 
           <JobQrCodeButton jobId={jobId} jobTitle={job.title} />

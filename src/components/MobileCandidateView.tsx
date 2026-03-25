@@ -456,6 +456,9 @@ export const MobileCandidateView = memo(function MobileCandidateView({
         </button>
       )}
 
+      {/* Inline action bar for selection mode — placed above candidate list */}
+      {renderActionBar}
+
       {/* Candidate list — internally scrollable so action bar stays visible */}
       <div className="relative">
         {/* Scroll position indicator — fades in on scroll, fades out after 2s */}
@@ -501,9 +504,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           </div>
         </ScrollArea>
       </div>
-
-      {/* Inline action bar for selection mode */}
-      {renderActionBar}
     </div>
   );
 });
