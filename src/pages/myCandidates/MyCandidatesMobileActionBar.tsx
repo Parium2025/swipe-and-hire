@@ -95,6 +95,7 @@ export const MyCandidatesMobileActionBar = ({
                 }`}
               >
                 <Trash2 className="h-5 w-5" />
+              </button>
             </TooltipTrigger>
             <TooltipContent side="top" sideOffset={8}>
               <p>Ta bort</p>
