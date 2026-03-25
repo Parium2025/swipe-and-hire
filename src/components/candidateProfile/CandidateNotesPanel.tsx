@@ -2,8 +2,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Send, Pencil, Trash2, Check, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type { CandidateNote } from './candidateProfileCache';
+
+function useAutoExpand(value: string) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+  return ref;
+}
 
 interface CandidateNotesPanelProps {
   notes: CandidateNote[];
@@ -41,15 +52,18 @@ export const CandidateNotesPanel = ({
   onCancelEditing,
 }: CandidateNotesPanelProps) => {
   const hasChanged = editingNoteText.trim() !== originalNoteText.trim();
+  const newNoteRef = useAutoExpand(newNote);
+  const editNoteRef = useAutoExpand(editingNoteText);
   return (
     <div className="space-y-3">
       {/* Add new note */}
       <div className="space-y-3">
         <Textarea
+          ref={newNoteRef}
           value={newNote}
           onChange={(e) => onNewNoteChange(e.target.value)}
           placeholder="Skriv en anteckning..."
-          className="w-full min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none text-xs"
+          className="w-full min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none text-xs overflow-hidden"
         />
         <div className="flex justify-center">
           <Button
@@ -109,9 +123,10 @@ export const CandidateNotesPanel = ({
                       {editingNoteId === note.id ? (
                         <div className="space-y-2">
                           <Textarea
+                            ref={editNoteRef}
                             value={editingNoteText}
                             onChange={(e) => onEditingNoteTextChange(e.target.value)}
-                            className="min-h-[60px] text-xs bg-white/10 border-white/20 text-white resize-none"
+                            className="min-h-[60px] text-xs bg-white/10 border-white/20 text-white resize-none overflow-hidden"
                             placeholder="Skriv din anteckning..."
                           />
                           <div className="flex justify-center gap-1.5 pt-1">
