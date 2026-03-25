@@ -539,31 +539,37 @@ export function CandidatesTable({
     <>
       {/* Bulk actions bar */}
       {selectionMode && (
-        <div className="mb-3 px-3 py-2 rounded-lg bg-white/[0.08] border border-white/15 flex items-center justify-between">
-          <span className="text-xs text-[#FFFFFF] font-medium">
-            {selectedIds.size > 0 
-              ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
-              : 'Välj kandidater'
-            }
-          </span>
-          <div className="flex items-center gap-1.5">
+        <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mb-3">
+          <div className="flex items-center gap-2.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-5 py-3 shadow-xl overflow-hidden min-w-0 max-w-full">
+            <span className="text-white text-sm font-semibold whitespace-nowrap flex-shrink-0">
+              {selectedIds.size > 0 
+                ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
+                : 'Välj kandidater'
+              }
+            </span>
             {selectedIds.size > 0 && (
               <>
+                <div className="w-px h-6 bg-white/20 flex-shrink-0" />
                 <button
-                  className="h-7 px-2.5 rounded-lg text-[#FFFFFF] hover:bg-white/10 border border-white/15 text-xs font-medium transition-colors"
+                  className="flex items-center justify-center px-3 h-11 text-sm font-medium whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation"
                   onClick={() => setSelectedIds(new Set())}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   Avmarkera
                 </button>
+                <div className="w-px h-6 bg-white/20 flex-shrink-0" />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="h-7 px-2.5 rounded-lg text-[#FFFFFF] hover:bg-white/10 border border-white/15 text-xs font-medium transition-colors">
+                    <button
+                      className="flex items-center px-3 h-11 text-sm font-medium whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation"
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
                       Åtgärder
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-[hsl(222,47%,11%)] border-white/10 min-w-[180px]">
+                  <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
                     <DropdownMenuItem 
-                      className="text-[#FFFFFF] cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-[#FFFFFF]"
+                      className="text-white hover:text-white cursor-pointer"
                       onClick={handleBulkAddToMyCandidates}
                       disabled={addCandidates.isPending}
                     >
@@ -571,7 +577,7 @@ export function CandidatesTable({
                       {addCandidates.isPending ? 'Lägger till...' : 'Lägg till i Mina kandidater'}
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="text-[#FFFFFF] cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-[#FFFFFF]"
+                      className="text-white hover:text-white cursor-pointer"
                       onClick={() => {
                         if (selectedRecipientCount === 0) {
                           toast.error('Inga giltiga kandidater valda');
@@ -587,11 +593,13 @@ export function CandidatesTable({
                 </DropdownMenu>
               </>
             )}
+            <div className="w-px h-6 bg-white/20 flex-shrink-0" />
             <button
-              className="flex h-7 w-7 items-center justify-center rounded-full text-[#FFFFFF] bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-white outline-none focus:outline-none transition-all duration-200 active:scale-[0.97] touch-manipulation"
               onClick={clearSelection}
+              onMouseDown={(e) => e.preventDefault()}
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>
