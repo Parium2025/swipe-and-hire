@@ -149,19 +149,19 @@ export const MyCandidatesHeader = ({
         <div className="space-y-3">
           {/* Search input */}
           <div className="relative max-w-sm mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-white" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/60" />
             <Input
               placeholder="Sök på namn, jobb eller anteckning"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="!min-h-0 pl-8 pr-8 py-1.5 h-9 text-xs bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40 rounded-lg"
+              className="!min-h-0 pl-9 pr-9 py-2 h-10 text-sm bg-white/5 border-white/15 text-white placeholder:text-white/40 focus:border-white/30 rounded-full ring-1 ring-white/10 focus:ring-white/20 transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => onSearchChange('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/60 active:scale-90 transition-transform"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
@@ -171,12 +171,12 @@ export const MyCandidatesHeader = ({
             <button
               onClick={() => displayedCandidatesCount > 0 ? onToggleSelectionMode() : undefined}
               onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-full px-4 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
+              className={`rounded-full px-5 py-2 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation ${
                 isSelectionMode 
-                  ? 'bg-white/10 ring-white' 
+                  ? 'bg-white/15 ring-white/60' 
                   : displayedCandidatesCount > 0 
-                    ? 'bg-white/5 ring-white/30' 
-                    : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
+                    ? 'bg-white/5 ring-white/20' 
+                    : 'bg-white/5 ring-white/10 opacity-40 cursor-default'
               }`}
             >
               <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
