@@ -2,7 +2,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Minus, X } from 'lucide-react';
+import { Plus, Minus, Trash2 } from 'lucide-react';
 import { JobQuestion, QUESTION_TYPES, getQuestionTypeLabel } from '@/types/jobWizard';
 import DropdownField from './DropdownField';
 
@@ -72,14 +72,14 @@ export const QuestionFormFields = ({
                   value={option}
                   onChange={(e) => onUpdateOption(index, e.target.value)}
                   placeholder={`Alternativ ${index + 1}`}
-                  className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white h-8 text-sm"
+                  className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => onRemoveOption(index)}
-                  className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:text-red-400 hover:bg-red-500/20 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-colors duration-150 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             ))}

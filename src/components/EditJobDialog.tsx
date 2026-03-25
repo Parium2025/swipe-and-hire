@@ -2439,16 +2439,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         value={option}
                                         onChange={(e) => updateOption(index, e.target.value)}
                                         placeholder={`Alternativ ${index + 1}`}
-                                        className="bg-white/10 border-white/20 text-white placeholder:text-white h-8 text-sm flex-1"
+                                        className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm flex-1"
                                       />
                                       <button
                                         type="button"
                                         onClick={() => removeOption(index)}
                                         onMouseDown={(e) => e.currentTarget.blur()}
                                         onMouseUp={(e) => e.currentTarget.blur()}
-                                        className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors duration-300 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
+                                        className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors duration-150 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
                                       >
-                                        <Trash2 className="h-3.5 w-3.5" />
+                                        <Trash2 className="h-4 w-4" />
                                       </button>
                                     </div>
                                   ))}
