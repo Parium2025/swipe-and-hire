@@ -15,15 +15,15 @@ class ImageCache {
   private loading = new Map<string, Promise<CachedImage>>();
   private readonly CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 dagar
   
-  // Video extensions som inte ska cachas som bilder
-  private readonly VIDEO_EXTENSIONS = ['.mp4', '.mov', '.webm', '.avi', '.mkv', '.m4v'];
+  // Filändelser som aldrig ska blob-cachas (stora/binära dokument)
+  private readonly SKIP_EXTENSIONS = ['.avi', '.mkv'];
 
   /**
-   * Kontrollera om URL:en pekar på en videofil
+   * Kontrollera om URL:en pekar på en fil som inte ska cachas
    */
-  private isVideoUrl(url: string): boolean {
+  private shouldSkip(url: string): boolean {
     const lowerUrl = url.toLowerCase();
-    return this.VIDEO_EXTENSIONS.some(ext => lowerUrl.includes(ext));
+    return this.SKIP_EXTENSIONS.some(ext => lowerUrl.includes(ext));
   }
 
   /**
