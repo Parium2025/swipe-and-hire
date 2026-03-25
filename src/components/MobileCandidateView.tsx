@@ -12,6 +12,7 @@ import { Star, Sparkles, ChevronRight, Plus, Square, CheckSquare, Check, X } fro
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDragScroll } from '@/hooks/useDragScroll';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -277,11 +278,32 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   renderActionBar,
 }: MobileCandidateViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
+  const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
+  const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
+  const isTouchCapable = useTouchCapable();
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
+    if (pointerType === 'mouse') return;
+    setActiveTab(stage);
+    setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
+
+    const now = Date.now();
+    const lastTap = lastTouchTapRef.current;
+    const isDoubleTap = !!lastTap && lastTap.stage === stage && now - lastTap.time <= 320;
+
+    if (isDoubleTap) {
+      setOpenStageMenu(stage);
+      lastTouchTapRef.current = null;
+      return;
+    }
+
+    lastTouchTapRef.current = { stage, time: now };
+  }, []);
 
   const appsByStage = useMemo(() => {
     const result: Record<string, JobApplication[]> = {};
