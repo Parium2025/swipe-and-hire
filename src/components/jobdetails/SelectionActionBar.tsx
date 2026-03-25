@@ -4,6 +4,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
 import { ArrowDown, CheckSquare, Square } from 'lucide-react';
 
@@ -55,22 +56,33 @@ export const SelectionActionBar = ({
           Flytta till
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
-        {stages.map(stage => {
-          const s = settings[stage];
-          const StageIcon = getJobStageIconByName(s?.iconName || 'inbox');
-          return (
-            <DropdownMenuItem 
-              key={stage}
-              onClick={() => onMoveToStage(stage)}
-              className="text-white hover:text-white cursor-pointer"
-            >
-              <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: s?.color || '#0EA5E9' }} />
-              <StageIcon className="h-4 w-4 mr-2 text-white/70" />
-              <span className="truncate">{s?.label || stage}</span>
-            </DropdownMenuItem>
-          );
-        })}
+      <DropdownMenuContent align="center" className="border-white/20 min-w-[180px] max-w-[280px]">
+        <TooltipProvider delayDuration={300}>
+          {stages.map(stage => {
+            const s = settings[stage];
+            const StageIcon = getJobStageIconByName(s?.iconName || 'inbox');
+            const label = s?.label || stage;
+            return (
+              <Tooltip key={stage}>
+                <TooltipTrigger asChild>
+                  <DropdownMenuItem 
+                    onClick={() => onMoveToStage(stage)}
+                    className="text-white hover:text-white cursor-pointer min-h-[44px]"
+                  >
+                    <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: s?.color || '#0EA5E9' }} />
+                    <StageIcon className="h-4 w-4 mr-2 text-white flex-shrink-0" />
+                    <span className="truncate">{label}</span>
+                  </DropdownMenuItem>
+                </TooltipTrigger>
+                {label.length > 20 && (
+                  <TooltipContent side="left" className="max-w-[280px] z-[999999]">
+                    <p>{label}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            );
+          })}
+        </TooltipProvider>
       </DropdownMenuContent>
     </DropdownMenu>
   </div>
