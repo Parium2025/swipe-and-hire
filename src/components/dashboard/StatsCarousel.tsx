@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
@@ -27,7 +27,6 @@ interface StatsCarouselProps {
 
 export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = false, hasCachedData = false }: StatsCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const hasMountedRef = useRef(false);
   const navigate = useNavigate();
 
   // Defensive index guard
@@ -41,15 +40,13 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
   const goPrev = useCallback(() => { setCurrentIndex(prev => (prev - 1 + stats.length) % stats.length); }, [stats.length]);
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: goNext, onSwipeRight: goPrev });
 
-  // Auto-rotation with 5s offset
+  // Auto-rotation every 10s — identical to news card
   useEffect(() => {
     if (isPaused || stats.length <= 1) return;
-    let interval: ReturnType<typeof setInterval>;
-    const initialDelay = setTimeout(() => {
+    const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % stats.length);
-      interval = setInterval(() => { setCurrentIndex(prev => (prev + 1) % stats.length); }, 10000);
-    }, 5000);
-    return () => { clearTimeout(initialDelay); if (interval) clearInterval(interval); };
+    }, 10000);
+    return () => clearInterval(interval);
   }, [isPaused, stats.length]);
 
   const currentStat = stats[currentIndex];
@@ -84,12 +81,11 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentIndex}
-              initial={hasMountedRef.current ? { opacity: 0, y: 10 } : false}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
               className="flex flex-col items-center"
-              onAnimationComplete={() => { hasMountedRef.current = true; }}
             >
               <h3 className="text-sm sm:text-base font-semibold text-white leading-snug mb-1">{currentStat.label}</h3>
               <div className="text-3xl font-bold text-white">{currentStat.value}</div>
