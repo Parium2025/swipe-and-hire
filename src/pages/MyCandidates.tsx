@@ -3,8 +3,6 @@ import { MyCandidateData, useMyCandidatesData } from '@/hooks/useMyCandidatesDat
 import { useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -32,25 +30,18 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { 
   Trash2, 
   UserCheck,
-  Search,
-  X,
   ArrowDown,
   Plus,
-  ChevronDown,
-  Eye,
   AlertTriangle,
   CheckSquare,
   Square
 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DndContext,
@@ -69,7 +60,6 @@ import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 import { useStageSettings, getIconByName, CandidateStage } from '@/hooks/useStageSettings';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
 import { smartSearchCandidates } from '@/lib/smartSearch';
-
 
 // ── Extracted components ─────────────────────────────
 import { CandidateCardContent } from '@/components/candidates/KanbanCandidateCard';
