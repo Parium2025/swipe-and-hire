@@ -27,7 +27,6 @@ interface StatsCarouselProps {
 
 export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = false, hasCachedData = false }: StatsCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const hasMountedRef = useRef(false);
   const navigate = useNavigate();
 
   // Defensive index guard
@@ -41,15 +40,13 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
   const goPrev = useCallback(() => { setCurrentIndex(prev => (prev - 1 + stats.length) % stats.length); }, [stats.length]);
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: goNext, onSwipeRight: goPrev });
 
-  // Auto-rotation with 5s offset
+  // Auto-rotation every 10s — identical to news card
   useEffect(() => {
     if (isPaused || stats.length <= 1) return;
-    let interval: ReturnType<typeof setInterval>;
-    const initialDelay = setTimeout(() => {
+    const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % stats.length);
-      interval = setInterval(() => { setCurrentIndex(prev => (prev + 1) % stats.length); }, 10000);
-    }, 5000);
-    return () => { clearTimeout(initialDelay); if (interval) clearInterval(interval); };
+    }, 10000);
+    return () => clearInterval(interval);
   }, [isPaused, stats.length]);
 
   const currentStat = stats[currentIndex];
