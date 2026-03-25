@@ -12,21 +12,20 @@ export const JobSeekerDashboardGrid = memo(() => {
   const [isTipsPaused, setIsTipsPaused] = useState(false);
   const [isStatsPaused, setIsStatsPaused] = useState(false);
   const isMobile = useIsMobile();
-  const isDashboardCardsPaused = isTipsPaused || isStatsPaused;
 
   const mobileOrder = (
     <>
-      <JobSeekerStatsCard isPaused={isDashboardCardsPaused} setIsPaused={setIsStatsPaused} />
+      <JobSeekerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
       <JobSeekerInterviewsCard />
-      <CareerTipsCard isPaused={isDashboardCardsPaused} setIsPaused={setIsTipsPaused} />
+      <CareerTipsCard isPaused={isTipsPaused} setIsPaused={setIsTipsPaused} />
       <JobSeekerNotesCard />
     </>
   );
 
   const desktopOrder = (
     <>
-      <CareerTipsCard isPaused={isDashboardCardsPaused} setIsPaused={setIsTipsPaused} />
-      <JobSeekerStatsCard isPaused={isDashboardCardsPaused} setIsPaused={setIsStatsPaused} />
+      <CareerTipsCard isPaused={isTipsPaused} setIsPaused={setIsTipsPaused} />
+      <JobSeekerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
       <JobSeekerNotesCard />
       <JobSeekerInterviewsCard />
     </>
