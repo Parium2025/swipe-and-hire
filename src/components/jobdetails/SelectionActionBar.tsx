@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,9 +36,32 @@ export const SelectionActionBar = ({
   const touchCapable = useTouchCapable();
   const isTouchMobile = device === 'mobile' && touchCapable;
   const [openTooltipStage, setOpenTooltipStage] = useState<string | null>(null);
+  const [menuAlignOffset, setMenuAlignOffset] = useState(0);
+  const barRef = useRef<HTMLDivElement>(null);
+  const moveButtonRef = useRef<HTMLButtonElement>(null);
+
+  const recalculateMenuCentering = useCallback(() => {
+    const bar = barRef.current;
+    const trigger = moveButtonRef.current;
+    if (!bar || !trigger) return;
+
+    const barRect = bar.getBoundingClientRect();
+    const triggerRect = trigger.getBoundingClientRect();
+
+    const barCenterX = barRect.left + barRect.width / 2;
+    const triggerCenterX = triggerRect.left + triggerRect.width / 2;
+
+    setMenuAlignOffset(barCenterX - triggerCenterX);
+  }, []);
+
+  useEffect(() => {
+    recalculateMenuCentering();
+    window.addEventListener('resize', recalculateMenuCentering);
+    return () => window.removeEventListener('resize', recalculateMenuCentering);
+  }, [recalculateMenuCentering]);
 
   return (
-    <div className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
+    <div ref={barRef} className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
       <span className="text-white text-xs font-medium whitespace-nowrap flex-shrink-0">
         {selectedCount}/{totalCount} valda
       </span>
@@ -53,9 +76,18 @@ export const SelectionActionBar = ({
       </button>
       <div className="w-px h-4 bg-white/20 flex-shrink-0" />
 
-      <DropdownMenu onOpenChange={(open) => !open && setOpenTooltipStage(null)}>
+      <DropdownMenu
+        onOpenChange={(open) => {
+          if (open) {
+            requestAnimationFrame(recalculateMenuCentering);
+            return;
+          }
+          setOpenTooltipStage(null);
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <button
+            ref={moveButtonRef}
             disabled={disabled}
             onMouseDown={(e) => e.preventDefault()}
             className={`flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 outline-none focus:outline-none md:hover:bg-white/10 md:hover:text-white transition-all duration-200 rounded-md ${
@@ -70,9 +102,10 @@ export const SelectionActionBar = ({
         <DropdownMenuContent
           side="bottom"
           align="center"
+          alignOffset={menuAlignOffset}
           sideOffset={8}
           collisionPadding={16}
-          className="border-white/20 min-w-[180px] w-[min(86vw,300px)] mx-auto"
+          className="border-white/20 min-w-[180px] w-[min(86vw,300px)]"
         >
           <TooltipProvider delayDuration={120}>
             {stages.map((stage) => {
