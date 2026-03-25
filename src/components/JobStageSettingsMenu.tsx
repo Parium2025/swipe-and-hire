@@ -46,6 +46,11 @@ interface JobStageSettingsMenuProps {
   onLiveColorChange?: (color: string | null) => void;
   /** Index of this stage in the ordered list (0-based) */
   stageIndex?: number;
+  /** Externally controlled open state */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Disable touch trigger (used when double-tap opens menu instead) */
+  disableTouchTrigger?: boolean;
 }
 
 export function JobStageSettingsMenu({ 
@@ -58,12 +63,21 @@ export function JobStageSettingsMenu({
   onMoveCandidatesAndDelete,
   onLiveColorChange,
   stageIndex = 0,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
+  disableTouchTrigger = false,
 }: JobStageSettingsMenuProps) {
   const { stageSettings, updateStage, deleteStage, moveStageToPosition, orderedStages } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
   const isMobile = useIsMobile();
   
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [internalMenuOpen, setInternalMenuOpen] = useState(false);
+
+  const menuOpen = externalOpen ?? internalMenuOpen;
+  const handleMenuOpenChange = (next: boolean) => {
+    if (externalOpen === undefined) setInternalMenuOpen(next);
+    externalOnOpenChange?.(next);
+  };
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [colorDialogOpen, setColorDialogOpen] = useState(false);
   const [iconDialogOpen, setIconDialogOpen] = useState(false);
@@ -165,19 +179,23 @@ export function JobStageSettingsMenu({
   const handleMoveStage = (targetPosition: number) => {
     moveStageToPosition({ stageKey, targetPosition });
     setMoveDialogOpen(false);
-    setMenuOpen(false);
+    handleMenuOpenChange(false);
     toast.success('Steg flyttat');
   };
 
   return (
     <>
-      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu modal={false} open={menuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button 
             type="button"
-            className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] pointer-fine:min-h-0 pointer-fine:min-w-0 pointer-fine:h-7 pointer-fine:w-7 pointer-fine:p-1 pointer-fine:-m-0.5 flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
+            className={`p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] pointer-fine:min-h-0 pointer-fine:min-w-0 pointer-fine:h-7 pointer-fine:w-7 pointer-fine:p-1 pointer-fine:-m-0.5 flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]${disableTouchTrigger ? ' pointer-events-none' : ''}`}
             style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
-            onMouseDown={(e) => e.preventDefault()}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onClick={(e) => e.stopPropagation()}
+            tabIndex={disableTouchTrigger ? -1 : undefined}
+            aria-hidden={disableTouchTrigger ? true : undefined}
             onFocus={(e) => {
               if (!menuOpen) {
                 e.currentTarget.blur();
