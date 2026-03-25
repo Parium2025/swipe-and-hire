@@ -68,6 +68,8 @@ import { MobileMyCandidatesView } from '@/components/candidates/MobileMyCandidat
 import { useDevice } from '@/hooks/use-device';
 import { MyCandidatesHeader } from '@/pages/myCandidates/MyCandidatesHeader';
 import { MyCandidatesDesktopActionBar } from '@/pages/myCandidates/MyCandidatesDesktopActionBar';
+import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMobileActionBar';
+import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 
 const MyCandidates = () => {
