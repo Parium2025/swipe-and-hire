@@ -137,7 +137,7 @@ export const CandidateNotesPanel = ({
                         </div>
                       ) : (
                         <>
-                          <p className="text-sm text-white whitespace-pre-wrap pr-10 leading-relaxed break-all">{note.note}</p>
+                          <p className="text-sm text-white whitespace-pre-wrap md:pr-10 leading-relaxed break-all">{note.note}</p>
                           <p className="text-xs text-white mt-1">
                             {new Date(note.updated_at || note.created_at).toLocaleTimeString('sv-SE', {
                               hour: '2-digit',
@@ -145,20 +145,40 @@ export const CandidateNotesPanel = ({
                             })}
                           </p>
                           {note.employer_id === currentUserId && (
-                            <div className="absolute top-2 right-2 flex items-center gap-0.5">
-                              <button
-                                onClick={() => onStartEditing(note)}
-                                className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                              </button>
-                              <button
-                                onClick={() => onConfirmDelete(note.id)}
-                                className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
+                            <>
+                              {/* Desktop: compact icon buttons */}
+                              <div className="absolute top-2 right-2 hidden md:flex items-center gap-0.5">
+                                <button
+                                  onClick={() => onStartEditing(note)}
+                                  className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => onConfirmDelete(note.id)}
+                                  className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                              {/* Mobile: full-width action row */}
+                              <div className="flex md:hidden items-center justify-center gap-2 mt-2 pt-2 border-t border-white/10">
+                                <button
+                                  onClick={() => onStartEditing(note)}
+                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] text-white text-xs bg-white/10 hover:bg-white/15 rounded-full transition-all duration-300 active:scale-[0.97]"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                  <span>Redigera</span>
+                                </button>
+                                <button
+                                  onClick={() => onConfirmDelete(note.id)}
+                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97]"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <span>Ta bort</span>
+                                </button>
+                              </div>
+                            </>
                           )}
                         </>
                       )}
