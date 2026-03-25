@@ -88,11 +88,6 @@ function getCompanyInitials(name: string): string {
 
 export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, onDeleteClick, isSavedExternal, onToggleSave, statusBadge, hideSaveButton = false, onCardClick, footer }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
-  const { isJobSaved, toggleSaveJob } = useSavedJobs();
-
-  // Use external state if provided, otherwise fall back to internal hook
-  const isSaved = isSavedExternal !== undefined ? isSavedExternal : isJobSaved(job.id);
-  const doToggle = onToggleSave || toggleSaveJob;
 
   // Resolve the raw storage path to a public URL
   const resolvedUrl = useMemo(() => {
@@ -131,15 +126,6 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 
-  const handleSaveClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isSaved && onUnsaveClick) {
-      onUnsaveClick(job.id, job.title);
-    } else {
-      doToggle(job.id);
-    }
-  };
-
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDeleteClick?.(job.id, job.title);
@@ -148,6 +134,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   // Determine which action button to show
   const showDeleteButton = !!onDeleteClick;
   const showSaveButton = !hideSaveButton && !showDeleteButton;
+  const canUseExternalSaveOnly = isSavedExternal !== undefined && !!onToggleSave;
 
   return (
     <Card 
@@ -193,13 +180,23 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           </button>
         )}
         {showSaveButton && (
-          <button
-            onClick={handleSaveClick}
-            aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
-            className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90"
-          >
-            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
-          </button>
+          canUseExternalSaveOnly ? (
+            <ExternalSaveButton
+              jobId={job.id}
+              jobTitle={job.title}
+              isSaved={!!isSavedExternal}
+              onToggleSave={onToggleSave!}
+              onUnsaveClick={onUnsaveClick}
+            />
+          ) : (
+            <InternalSaveButton
+              jobId={job.id}
+              jobTitle={job.title}
+              forcedIsSaved={isSavedExternal}
+              onToggleSave={onToggleSave}
+              onUnsaveClick={onUnsaveClick}
+            />
+          )
         )}
 
         {/* Views count badge — top-left when save button is hidden */}
@@ -267,6 +264,79 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         {footer && footer}
       </div>
     </Card>
+  );
+});
+
+interface SaveButtonProps {
+  jobId: string;
+  jobTitle: string;
+  isSaved: boolean;
+  onToggle: (jobId: string) => void;
+  onUnsaveClick?: (jobId: string, jobTitle: string) => void;
+}
+
+const SaveButton = memo(({ jobId, jobTitle, isSaved, onToggle, onUnsaveClick }: SaveButtonProps) => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isSaved && onUnsaveClick) {
+      onUnsaveClick(jobId, jobTitle);
+      return;
+    }
+    onToggle(jobId);
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      aria-label={isSaved ? 'Ta bort från sparade' : 'Spara jobb'}
+      className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90"
+    >
+      <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
+    </button>
+  );
+});
+
+interface InternalSaveButtonProps {
+  jobId: string;
+  jobTitle: string;
+  forcedIsSaved?: boolean;
+  onToggleSave?: (jobId: string) => void;
+  onUnsaveClick?: (jobId: string, jobTitle: string) => void;
+}
+
+const InternalSaveButton = memo(({ jobId, jobTitle, forcedIsSaved, onToggleSave, onUnsaveClick }: InternalSaveButtonProps) => {
+  const { isJobSaved, toggleSaveJob } = useSavedJobs();
+  const isSaved = forcedIsSaved !== undefined ? forcedIsSaved : isJobSaved(jobId);
+  const onToggle = onToggleSave || toggleSaveJob;
+
+  return (
+    <SaveButton
+      jobId={jobId}
+      jobTitle={jobTitle}
+      isSaved={isSaved}
+      onToggle={onToggle}
+      onUnsaveClick={onUnsaveClick}
+    />
+  );
+});
+
+interface ExternalSaveButtonProps {
+  jobId: string;
+  jobTitle: string;
+  isSaved: boolean;
+  onToggleSave: (jobId: string) => void;
+  onUnsaveClick?: (jobId: string, jobTitle: string) => void;
+}
+
+const ExternalSaveButton = memo(({ jobId, jobTitle, isSaved, onToggleSave, onUnsaveClick }: ExternalSaveButtonProps) => {
+  return (
+    <SaveButton
+      jobId={jobId}
+      jobTitle={jobTitle}
+      isSaved={isSaved}
+      onToggle={onToggleSave}
+      onUnsaveClick={onUnsaveClick}
+    />
   );
 });
 
