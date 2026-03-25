@@ -16,7 +16,8 @@ const shouldWarmBlobCache = (mediaType: MediaType) =>
   mediaType === 'profile-image' ||
   mediaType === 'cover-image' ||
   mediaType === 'company-logo' ||
-  mediaType === 'job-image';
+  mediaType === 'job-image' ||
+  mediaType === 'profile-video';
 
 function storeSignedUrlCache(
   cacheKey: string,

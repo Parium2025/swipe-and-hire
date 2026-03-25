@@ -15,15 +15,15 @@ class ImageCache {
   private loading = new Map<string, Promise<CachedImage>>();
   private readonly CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 dagar
   
-  // Video extensions som inte ska cachas som bilder
-  private readonly VIDEO_EXTENSIONS = ['.mp4', '.mov', '.webm', '.avi', '.mkv', '.m4v'];
+  // Filändelser som aldrig ska blob-cachas (stora/binära dokument)
+  private readonly SKIP_EXTENSIONS = ['.avi', '.mkv'];
 
   /**
-   * Kontrollera om URL:en pekar på en videofil
+   * Kontrollera om URL:en pekar på en fil som inte ska cachas
    */
-  private isVideoUrl(url: string): boolean {
+  private shouldSkip(url: string): boolean {
     const lowerUrl = url.toLowerCase();
-    return this.VIDEO_EXTENSIONS.some(ext => lowerUrl.includes(ext));
+    return this.SKIP_EXTENSIONS.some(ext => lowerUrl.includes(ext));
   }
 
   /**
@@ -53,13 +53,12 @@ class ImageCache {
   }
 
   /**
-   * Ladda och cacha en bild permanent
-   * Hoppar över videofiler för att undvika onödiga fetch-fel
+   * Ladda och cacha media permanent (bilder + videor)
+   * Hoppar över filer som inte ska cachas
    */
   async loadImage(url: string): Promise<string> {
-    // Hoppa över videofiler - de ska inte cachas som bilder
-    if (this.isVideoUrl(url)) {
-      return url; // Returnera original-URL för videor
+    if (this.shouldSkip(url)) {
+      return url;
     }
 
     const cacheKey = this.getCacheKey(url);
@@ -130,12 +129,11 @@ class ImageCache {
   }
 
   /**
-   * Förladdda flera bilder samtidigt
-   * Filtrerar automatiskt bort videofiler
+   * Förladdda flera media samtidigt
    */
   async preloadImages(urls: string[]): Promise<void> {
     const uniqueUrls = [...new Set(urls.filter(url => 
-      url && url.trim() !== '' && !this.isVideoUrl(url)
+      url && url.trim() !== '' && !this.shouldSkip(url)
     ))];
     
     // Ladda alla bilder parallellt
@@ -145,12 +143,10 @@ class ImageCache {
   }
 
   /**
-   * Hämta en cachad bild URL (synkron)
-   * Returnerar null för videofiler
+   * Hämta en cachad URL (synkron)
    */
   getCachedUrl(url: string): string | null {
-    // Videor cachas inte
-    if (this.isVideoUrl(url)) {
+    if (this.shouldSkip(url)) {
       return null;
     }
 
