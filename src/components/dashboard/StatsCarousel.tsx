@@ -45,7 +45,7 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
     if (isPaused || stats.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % stats.length);
-    }, 10000);
+    }, 5000);
     return () => clearInterval(interval);
   }, [isPaused, stats.length]);
 
