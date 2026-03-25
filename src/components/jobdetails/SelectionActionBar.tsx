@@ -37,8 +37,11 @@ export const SelectionActionBar = ({
   const isTouchMobile = device === 'mobile' && touchCapable;
   const [openTooltipStage, setOpenTooltipStage] = useState<string | null>(null);
   const [menuAlignOffset, setMenuAlignOffset] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [truncatedStages, setTruncatedStages] = useState<Record<string, boolean>>({});
   const barRef = useRef<HTMLDivElement>(null);
   const moveButtonRef = useRef<HTMLButtonElement>(null);
+  const stageLabelRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
   const recalculateMenuCentering = useCallback(() => {
     const bar = barRef.current;
@@ -51,14 +54,48 @@ export const SelectionActionBar = ({
     const barCenterX = barRect.left + barRect.width / 2;
     const triggerCenterX = triggerRect.left + triggerRect.width / 2;
 
-    setMenuAlignOffset(barCenterX - triggerCenterX);
+    setMenuAlignOffset(triggerCenterX - barCenterX);
+  }, []);
+
+  const recalculateTruncatedStages = useCallback(() => {
+    if (!isMenuOpen) return;
+
+    const nextTruncated: Record<string, boolean> = {};
+    for (const stage of stages) {
+      const labelElement = stageLabelRefs.current[stage];
+      nextTruncated[stage] =
+        !!labelElement && Math.ceil(labelElement.scrollWidth) > Math.ceil(labelElement.clientWidth) + 1;
+    }
+
+    setTruncatedStages(nextTruncated);
   }, []);
 
   useEffect(() => {
     recalculateMenuCentering();
-    window.addEventListener('resize', recalculateMenuCentering);
-    return () => window.removeEventListener('resize', recalculateMenuCentering);
-  }, [recalculateMenuCentering]);
+    recalculateTruncatedStages();
+
+    const handleResize = () => {
+      recalculateMenuCentering();
+      recalculateTruncatedStages();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [recalculateMenuCentering, recalculateTruncatedStages]);
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      setOpenTooltipStage(null);
+      return;
+    }
+
+    const raf = requestAnimationFrame(() => {
+      recalculateMenuCentering();
+      recalculateTruncatedStages();
+    });
+
+    return () => cancelAnimationFrame(raf);
+  }, [isMenuOpen, recalculateMenuCentering, recalculateTruncatedStages]);
 
   return (
     <div ref={barRef} className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
@@ -78,11 +115,11 @@ export const SelectionActionBar = ({
 
       <DropdownMenu
         onOpenChange={(open) => {
-          if (open) {
-            requestAnimationFrame(recalculateMenuCentering);
-            return;
+          setIsMenuOpen(open);
+
+          if (!open) {
+            setOpenTooltipStage(null);
           }
-          setOpenTooltipStage(null);
         }}
       >
         <DropdownMenuTrigger asChild>
@@ -112,8 +149,8 @@ export const SelectionActionBar = ({
               const s = settings[stage];
               const StageIcon = getJobStageIconByName(s?.iconName || 'inbox');
               const label = s?.label || stage;
-              const isLong = label.length > 20;
-              const usesTapTooltip = isTouchMobile && isLong;
+              const isTruncated = truncatedStages[stage] ?? label.length > 20;
+              const usesTapTooltip = isTouchMobile && isTruncated;
 
               return (
                 <Tooltip
@@ -137,13 +174,20 @@ export const SelectionActionBar = ({
                     >
                       <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: s?.color || 'hsl(var(--primary))' }} />
                       <StageIcon className="h-4 w-4 mr-2 text-white flex-shrink-0" />
-                      <span className="truncate min-w-0">{label}</span>
+                      <span
+                        ref={(node) => {
+                          stageLabelRefs.current[stage] = node;
+                        }}
+                        className="truncate min-w-0"
+                      >
+                        {label}
+                      </span>
                     </DropdownMenuItem>
                   </TooltipTrigger>
 
-                  {isLong && (
-                    <TooltipContent side="top" align="center" sideOffset={8} className="max-w-[260px] z-[999999]">
-                      <p className="text-xs leading-relaxed break-all whitespace-normal">{label}</p>
+                  {isTruncated && (
+                    <TooltipContent side="top" align="center" sideOffset={8} className="max-w-[260px] z-[999999] pointer-events-none">
+                      <p className="text-xs leading-relaxed break-words whitespace-normal">{label}</p>
                     </TooltipContent>
                   )}
                 </Tooltip>
