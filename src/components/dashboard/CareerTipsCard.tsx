@@ -7,6 +7,7 @@ import { Lightbulb, Newspaper, Clock, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCareerTips } from '@/hooks/useCareerTips';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
+import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS, formatTipPublishedTime } from './dashboardConstants';
 
 interface CareerTipsCardProps {
@@ -40,14 +41,12 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
     }
   }, [tipsItems.length]);
 
-  // Auto-rotation every 10s (pauses on hover)
-  useEffect(() => {
-    if (tipsItems.length <= 1 || isPaused) return;
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % tipsItems.length);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [tipsItems.length, isPaused]);
+  useSynchronizedRotation({
+    enabled: tipsItems.length > 1 && !isPaused,
+    intervalMs: 10000,
+    offsetMs: 0,
+    onTick: goNext,
+  });
 
   const swipeHandlers = useSwipeGesture({
     onSwipeLeft: goNext,

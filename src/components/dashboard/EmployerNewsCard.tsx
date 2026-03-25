@@ -7,6 +7,7 @@ import { Newspaper, Clock, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useHrNews } from '@/hooks/useHrNews';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
+import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS } from './dashboardConstants';
 
 // Format relative time for news
@@ -52,13 +53,12 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
     if (newsItems.length > 1) setCurrentIndex(prev => (prev - 1 + newsItems.length) % newsItems.length);
   }, [newsItems.length]);
 
-  useEffect(() => {
-    if (newsItems.length <= 1 || isPaused) return;
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % newsItems.length);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [newsItems.length, isPaused]);
+  useSynchronizedRotation({
+    enabled: newsItems.length > 1 && !isPaused,
+    intervalMs: 10000,
+    offsetMs: 0,
+    onTick: goNext,
+  });
 
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: goNext, onSwipeRight: goPrev });
 
