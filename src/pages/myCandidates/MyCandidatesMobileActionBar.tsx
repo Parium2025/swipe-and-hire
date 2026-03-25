@@ -90,7 +90,7 @@ export const MyCandidatesMobileActionBar = ({
                 disabled={selectedCount === 0}
                 onClick={onBulkDeleteClick}
                 onMouseDown={(e) => e.preventDefault()}
-                className={`flex h-11 items-center justify-center rounded-md px-3 outline-none focus:outline-none transition-all duration-200 active:scale-[0.97] touch-manipulation ${
+                className={`flex h-11 w-11 items-center justify-center rounded-full outline-none focus:outline-none transition-all duration-200 active:scale-[0.97] touch-manipulation ${
                   selectedCount === 0 ? 'cursor-not-allowed border border-destructive/20 bg-destructive/10 text-white/30' : 'border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
                 }`}
               >
