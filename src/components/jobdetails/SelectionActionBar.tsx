@@ -56,7 +56,7 @@ export const SelectionActionBar = ({
           Flytta till
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="border-white/20 min-w-[180px] max-w-[280px]">
+      <DropdownMenuContent align="center" side="top" sideOffset={8} className="border-white/20 min-w-[180px] max-w-[280px]">
         <TooltipProvider delayDuration={300}>
           {stages.map(stage => {
             const s = settings[stage];
@@ -75,8 +75,8 @@ export const SelectionActionBar = ({
                   </DropdownMenuItem>
                 </TooltipTrigger>
                 {label.length > 20 && (
-                  <TooltipContent side="left" className="max-w-[280px] z-[999999]">
-                    <p>{label}</p>
+                  <TooltipContent side="top" sideOffset={4} className="max-w-[280px] z-[999999]">
+                    <p className="break-words">{label}</p>
                   </TooltipContent>
                 )}
               </Tooltip>
