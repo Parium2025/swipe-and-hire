@@ -44,7 +44,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
     
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % tipsItems.length);
-    }, 10000);
+    }, 5000);
     
     return () => clearInterval(interval);
   }, [tipsItems.length, isPaused]);
