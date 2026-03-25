@@ -179,13 +179,13 @@ export function JobStageSettingsMenu({
   const handleMoveStage = (targetPosition: number) => {
     moveStageToPosition({ stageKey, targetPosition });
     setMoveDialogOpen(false);
-    setMenuOpen(false);
+    handleMenuOpenChange(false);
     toast.success('Steg flyttat');
   };
 
   return (
     <>
-      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu modal={false} open={menuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button 
             type="button"
