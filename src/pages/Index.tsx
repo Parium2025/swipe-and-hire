@@ -170,13 +170,13 @@ const CandidatesContent = () => {
         {!isLoading && (
           <div className="mb-6 space-y-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
+              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
               <Input
                 type="text"
                 placeholder="Sök på namn, email, telefon, plats, jobb..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white transition-colors"
+                className="dashboard-control-compact pl-11 pr-4 text-base font-medium bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:font-normal transition-colors"
               />
             </div>
             <div className="space-y-2">
@@ -188,9 +188,10 @@ const CandidatesContent = () => {
                 />
                 <button
                   onClick={() => setSelectionMode(prev => !prev)}
+                  onMouseDown={(e) => e.preventDefault()}
                   className={`
-                    flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all
-                    border whitespace-nowrap
+                    flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-sm font-medium transition-all
+                    border whitespace-nowrap active:scale-[0.97] touch-manipulation outline-none focus:outline-none
                     ${selectionMode 
                       ? 'bg-white/20 border-white/30 text-white' 
                       : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
