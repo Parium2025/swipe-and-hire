@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
@@ -7,11 +7,43 @@ import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { GRADIENTS } from './dashboardConstants';
-...
+
+export type StatData = {
+  icon: React.ElementType;
+  label: string;
+  value: number;
+  description: string;
+  link?: string;
+  emptyHint?: string;
+};
+
+interface StatsCarouselProps {
+  stats: StatData[];
+  isPaused: boolean;
+  setIsPaused: (v: boolean) => void;
+  /** Whether fresh data has loaded (enables emptyHint display) */
+  dataReady?: boolean;
+  /** Cached stats exist (enables emptyHint display as fallback) */
+  hasCachedData?: boolean;
+}
+
+export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = false, hasCachedData = false }: StatsCarouselProps) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate();
+  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
+
+  // Defensive index guard
+  useEffect(() => {
+    if (currentIndex >= stats.length && stats.length > 0) {
+      setCurrentIndex(0);
+    }
+  }, [stats.length, currentIndex]);
+
   const goNext = useCallback(() => { setCurrentIndex(prev => (prev + 1) % stats.length); }, [stats.length]);
   const goPrev = useCallback(() => { setCurrentIndex(prev => (prev - 1 + stats.length) % stats.length); }, [stats.length]);
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: goNext, onSwipeRight: goPrev });
 
+  // Aligned rotation: stats switches on the +5s beat between news/tips switches
   useSynchronizedRotation({
     enabled: !isPaused && stats.length > 1,
     intervalMs: 10000,

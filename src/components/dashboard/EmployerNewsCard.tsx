@@ -9,14 +9,56 @@ import { useHrNews } from '@/hooks/useHrNews';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS } from './dashboardConstants';
-...
+
+// Format relative time for news
+const formatNewsTime = (publishedAt: string | null): string => {
+  if (!publishedAt) return '';
+  try {
+    const date = new Date(publishedAt);
+    if (isNaN(date.getTime())) return '';
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    const newsDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const timeStr = date.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    if (newsDay.getTime() === today.getTime()) return `idag ${timeStr}`;
+    if (newsDay.getTime() === yesterday.getTime()) return `igår ${timeStr}`;
+    return date.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+  } catch { return ''; }
+};
+
+interface EmployerNewsCardProps {
+  isPaused: boolean;
+  setIsPaused: (v: boolean) => void;
+}
+
+export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCardProps) => {
+  const { data: news, isLoading } = useHrNews();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const newsItems = news?.slice(0, 4) || [];
+  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
+
+  // Guard against stale index after data refetch
+  useEffect(() => {
+    if (newsItems.length > 0 && currentIndex >= newsItems.length) {
+      setCurrentIndex(0);
+    }
+  }, [newsItems.length, currentIndex]);
+
+  const goNext = useCallback(() => {
+    if (newsItems.length > 1) setCurrentIndex(prev => (prev + 1) % newsItems.length);
+  }, [newsItems.length]);
+
+  const goPrev = useCallback(() => {
+    if (newsItems.length > 1) setCurrentIndex(prev => (prev - 1 + newsItems.length) % newsItems.length);
+  }, [newsItems.length]);
+
   useSynchronizedRotation({
     enabled: newsItems.length > 1 && !isPaused,
     intervalMs: 10000,
     offsetMs: 0,
     onTick: goNext,
   });
-  }, [newsItems.length, isPaused]);
 
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: goNext, onSwipeRight: goPrev });
 

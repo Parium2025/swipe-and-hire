@@ -9,7 +9,38 @@ import { useCareerTips } from '@/hooks/useCareerTips';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS, formatTipPublishedTime } from './dashboardConstants';
-...
+
+interface CareerTipsCardProps {
+  isPaused: boolean;
+  setIsPaused: (v: boolean) => void;
+}
+
+export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardProps) => {
+  const { data: tips, isLoading, error } = useCareerTips();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
+  
+  const tipsItems = tips?.slice(0, 4) || [];
+
+  // Guard against stale index after data refetch
+  useEffect(() => {
+    if (tipsItems.length > 0 && currentIndex >= tipsItems.length) {
+      setCurrentIndex(0);
+    }
+  }, [tipsItems.length, currentIndex]);
+
+  const goNext = useCallback(() => {
+    if (tipsItems.length > 1) {
+      setCurrentIndex(prev => (prev + 1) % tipsItems.length);
+    }
+  }, [tipsItems.length]);
+
+  const goPrev = useCallback(() => {
+    if (tipsItems.length > 1) {
+      setCurrentIndex(prev => (prev - 1 + tipsItems.length) % tipsItems.length);
+    }
+  }, [tipsItems.length]);
+
   useSynchronizedRotation({
     enabled: tipsItems.length > 1 && !isPaused,
     intervalMs: 10000,
