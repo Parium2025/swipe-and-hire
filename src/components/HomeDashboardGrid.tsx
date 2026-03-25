@@ -12,23 +12,20 @@ export const HomeDashboardGrid = memo(() => {
   const [isNewsPaused, setIsNewsPaused] = useState(false);
   const [isStatsPaused, setIsStatsPaused] = useState(false);
   const isMobile = useIsMobile();
-  const isDashboardCardsPaused = isNewsPaused || isStatsPaused;
-
-  // Mobile: Statistik → Intervjuer → Nyheter → Anteckningar
-  // Desktop: behåll 2x2 grid (Nyheter/Stats top, Notes/Interviews bottom)
+  // Each card pauses independently
   const mobileOrder = (
     <>
-      <EmployerStatsCard isPaused={isDashboardCardsPaused} setIsPaused={setIsStatsPaused} />
+      <EmployerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
       <EmployerInterviewsCard />
-      <EmployerNewsCard isPaused={isDashboardCardsPaused} setIsPaused={setIsNewsPaused} />
+      <EmployerNewsCard isPaused={isNewsPaused} setIsPaused={setIsNewsPaused} />
       <EmployerNotesCard />
     </>
   );
 
   const desktopOrder = (
     <>
-      <EmployerNewsCard isPaused={isDashboardCardsPaused} setIsPaused={setIsNewsPaused} />
-      <EmployerStatsCard isPaused={isDashboardCardsPaused} setIsPaused={setIsStatsPaused} />
+      <EmployerNewsCard isPaused={isNewsPaused} setIsPaused={setIsNewsPaused} />
+      <EmployerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
       <EmployerNotesCard />
       <EmployerInterviewsCard />
     </>
