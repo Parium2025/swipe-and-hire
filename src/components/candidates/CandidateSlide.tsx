@@ -69,6 +69,7 @@ export const CandidateSlide = memo(function CandidateSlide({
     }
 
     if (swipeLockedRef.current === 'horizontal') {
+      e.preventDefault();
       e.stopPropagation();
     }
   }, []);
