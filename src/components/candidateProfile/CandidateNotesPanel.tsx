@@ -52,15 +52,18 @@ export const CandidateNotesPanel = ({
   onCancelEditing,
 }: CandidateNotesPanelProps) => {
   const hasChanged = editingNoteText.trim() !== originalNoteText.trim();
+  const newNoteRef = useAutoExpand(newNote);
+  const editNoteRef = useAutoExpand(editingNoteText);
   return (
     <div className="space-y-3">
       {/* Add new note */}
       <div className="space-y-3">
         <Textarea
+          ref={newNoteRef}
           value={newNote}
           onChange={(e) => onNewNoteChange(e.target.value)}
           placeholder="Skriv en anteckning..."
-          className="w-full min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none text-xs"
+          className="w-full min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none text-xs overflow-hidden"
         />
         <div className="flex justify-center">
           <Button
