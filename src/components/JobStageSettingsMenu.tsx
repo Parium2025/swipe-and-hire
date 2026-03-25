@@ -175,17 +175,16 @@ export function JobStageSettingsMenu({
         <DropdownMenuTrigger asChild>
           <button 
             type="button"
-            className="h-6 w-6 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation flex items-center justify-center p-0 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
+            className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] pointer-fine:min-h-0 pointer-fine:min-w-0 pointer-fine:h-7 pointer-fine:w-7 pointer-fine:p-1 pointer-fine:-m-0.5 flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
             style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
             onMouseDown={(e) => e.preventDefault()}
             onFocus={(e) => {
-              // When dropdown closes, Radix returns focus to trigger — blur immediately to prevent visual circle
               if (!menuOpen) {
                 e.currentTarget.blur();
               }
             }}
           >
-            <MoreVertical className="h-3 w-3" />
+            <MoreVertical className="h-4 w-4" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
