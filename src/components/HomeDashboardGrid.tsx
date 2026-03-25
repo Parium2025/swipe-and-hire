@@ -9,24 +9,25 @@ import { EmployerInterviewsCard } from '@/components/dashboard/EmployerInterview
 
 // Main Dashboard Grid
 export const HomeDashboardGrid = memo(() => {
-  const [isCardsPaused, setIsCardsPaused] = useState(false);
+  const [isNewsPaused, setIsNewsPaused] = useState(false);
+  const [isStatsPaused, setIsStatsPaused] = useState(false);
   const isMobile = useIsMobile();
 
   // Mobile: Statistik → Intervjuer → Nyheter → Anteckningar
   // Desktop: behåll 2x2 grid (Nyheter/Stats top, Notes/Interviews bottom)
   const mobileOrder = (
     <>
-      <EmployerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <EmployerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
       <EmployerInterviewsCard />
-      <EmployerNewsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <EmployerNewsCard isPaused={isNewsPaused} setIsPaused={setIsNewsPaused} />
       <EmployerNotesCard />
     </>
   );
 
   const desktopOrder = (
     <>
-      <EmployerNewsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-      <EmployerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <EmployerNewsCard isPaused={isNewsPaused} setIsPaused={setIsNewsPaused} />
+      <EmployerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
       <EmployerNotesCard />
       <EmployerInterviewsCard />
     </>
