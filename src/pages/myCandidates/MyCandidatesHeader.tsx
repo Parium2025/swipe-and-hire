@@ -154,7 +154,7 @@ export const MyCandidatesHeader = ({
               placeholder="Sök på namn, jobb eller anteckning"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="dashboard-control-compact pl-11 pr-12 text-base font-medium bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:font-normal rounded-full"
+              className="dashboard-control-compact pl-11 pr-12 text-base font-medium bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:font-normal"
             />
             {searchQuery && (
               <button
