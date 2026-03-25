@@ -40,14 +40,12 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
     }
   }, [tipsItems.length]);
 
-  // Auto-rotation every 10 seconds (pauses on hover)
+  // Auto-rotation every 10s (pauses on hover)
   useEffect(() => {
     if (tipsItems.length <= 1 || isPaused) return;
-    
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % tipsItems.length);
-    }, 5000);
-    
+    }, 10000);
     return () => clearInterval(interval);
   }, [tipsItems.length, isPaused]);
 
