@@ -540,8 +540,8 @@ export function CandidatesTable({
       {/* Bulk actions bar */}
       {selectionMode && (
         <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mb-3">
-          <div className="flex items-center gap-2.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-5 py-3 shadow-xl overflow-hidden min-w-0 max-w-full">
-            <span className="text-white text-sm font-semibold whitespace-nowrap flex-shrink-0">
+          <div className="flex items-center gap-2 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
+            <span className="text-white text-xs font-semibold whitespace-nowrap flex-shrink-0">
               {selectedIds.size > 0 
                 ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
                 : 'Välj kandidater'
@@ -549,19 +549,19 @@ export function CandidatesTable({
             </span>
             {selectedIds.size > 0 && (
               <>
-                <div className="w-px h-6 bg-white/20 flex-shrink-0" />
+                <div className="w-px h-5 bg-white/20 flex-shrink-0" />
                 <button
-                  className="flex items-center justify-center px-3 h-11 text-sm font-medium whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation"
+                  className="flex items-center justify-center px-2.5 h-9 text-xs font-medium whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation"
                   onClick={() => setSelectedIds(new Set())}
                   onMouseDown={(e) => e.preventDefault()}
                 >
                   Avmarkera
                 </button>
-                <div className="w-px h-6 bg-white/20 flex-shrink-0" />
+                <div className="w-px h-5 bg-white/20 flex-shrink-0" />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className="flex items-center px-3 h-11 text-sm font-medium whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation"
+                      className="flex items-center px-2.5 h-9 text-xs font-medium whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation"
                       onMouseDown={(e) => e.preventDefault()}
                     >
                       Åtgärder
@@ -593,13 +593,13 @@ export function CandidatesTable({
                 </DropdownMenu>
               </>
             )}
-            <div className="w-px h-6 bg-white/20 flex-shrink-0" />
+            <div className="w-px h-5 bg-white/20 flex-shrink-0" />
             <button
-              className="flex h-11 w-11 items-center justify-center rounded-full text-white outline-none focus:outline-none transition-all duration-200 active:scale-[0.97] touch-manipulation"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-white outline-none focus:outline-none transition-all duration-200 active:scale-[0.97] touch-manipulation"
               onClick={clearSelection}
               onMouseDown={(e) => e.preventDefault()}
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
