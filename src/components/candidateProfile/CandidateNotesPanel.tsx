@@ -123,9 +123,10 @@ export const CandidateNotesPanel = ({
                       {editingNoteId === note.id ? (
                         <div className="space-y-2">
                           <Textarea
+                            ref={editNoteRef}
                             value={editingNoteText}
                             onChange={(e) => onEditingNoteTextChange(e.target.value)}
-                            className="min-h-[60px] text-xs bg-white/10 border-white/20 text-white resize-none"
+                            className="min-h-[60px] text-xs bg-white/10 border-white/20 text-white resize-none overflow-hidden"
                             placeholder="Skriv din anteckning..."
                           />
                           <div className="flex justify-center gap-1.5 pt-1">
