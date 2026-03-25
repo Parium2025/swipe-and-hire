@@ -63,12 +63,21 @@ export function JobStageSettingsMenu({
   onMoveCandidatesAndDelete,
   onLiveColorChange,
   stageIndex = 0,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
+  disableTouchTrigger = false,
 }: JobStageSettingsMenuProps) {
   const { stageSettings, updateStage, deleteStage, moveStageToPosition, orderedStages } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
   const isMobile = useIsMobile();
   
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [internalMenuOpen, setInternalMenuOpen] = useState(false);
+
+  const menuOpen = externalOpen ?? internalMenuOpen;
+  const handleMenuOpenChange = (next: boolean) => {
+    if (externalOpen === undefined) setInternalMenuOpen(next);
+    externalOnOpenChange?.(next);
+  };
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [colorDialogOpen, setColorDialogOpen] = useState(false);
   const [iconDialogOpen, setIconDialogOpen] = useState(false);
