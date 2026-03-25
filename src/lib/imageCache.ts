@@ -153,8 +153,9 @@ class ImageCache {
     if (this.isVideoUrl(url)) {
       return null;
     }
-    
-    const cached = this.cache.get(url);
+
+    const cacheKey = this.getCacheKey(url);
+    const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
       return cached.objectUrl;
     }
@@ -165,7 +166,7 @@ class ImageCache {
    * Kontrollera om en bild är cachad
    */
   isCached(url: string): boolean {
-    return this.cache.has(url);
+    return this.cache.has(this.getCacheKey(url));
   }
 
   /**
