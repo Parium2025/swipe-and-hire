@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Lightbulb, Newspaper, Clock, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCareerTips } from '@/hooks/useCareerTips';
+import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { GRADIENTS, formatTipPublishedTime } from './dashboardConstants';
 
 interface CareerTipsCardProps {
@@ -16,6 +17,7 @@ interface CareerTipsCardProps {
 export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardProps) => {
   const { data: tips, isLoading, error } = useCareerTips();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
   
   const tipsItems = tips?.slice(0, 4) || [];
 
@@ -88,11 +90,12 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
   return (
     <Card 
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height touch-pan-y`}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={(e) => { setIsPaused(true); swipeHandlers.onTouchStart(e); }}
+      onMouseEnter={pauseNow}
+      onMouseLeave={resumeNow}
+      onTouchStart={(e) => { pauseNow(); swipeHandlers.onTouchStart(e); }}
       onTouchMove={swipeHandlers.onTouchMove}
-      onTouchEnd={() => { swipeHandlers.onTouchEnd(); setTimeout(() => setIsPaused(false), 3000); }}
+      onTouchEnd={() => { swipeHandlers.onTouchEnd(); resumeWithDelay(); }}
+      onTouchCancel={resumeWithDelay}
     >
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
