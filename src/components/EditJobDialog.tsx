@@ -192,6 +192,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const occupationRef = useRef<HTMLDivElement>(null);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
+  const previewSwipeRef = useRef<{ x: number; y: number } | null>(null);
   const isMobile = useIsMobile();
   const isTouchCapable = useTouchCapable();
 
@@ -2543,6 +2544,27 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         </h3>
                       </div>
 
+                      {/* Swipeable preview area */}
+                      <div
+                        onTouchStart={(e) => {
+                          const t = e.targetTouches[0];
+                          previewSwipeRef.current = { x: t.clientX, y: t.clientY };
+                        }}
+                        onTouchEnd={(e) => {
+                          const start = previewSwipeRef.current;
+                          if (!start) return;
+                          const end = e.changedTouches[0];
+                          const dx = end.clientX - start.x;
+                          const dy = end.clientY - start.y;
+                          previewSwipeRef.current = null;
+                          if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                            if (dx < 0 && previewMode === 'mobile') setPreviewMode('desktop');
+                            if (dx > 0 && previewMode === 'desktop') setPreviewMode('mobile');
+                          }
+                        }}
+                        onTouchCancel={() => { previewSwipeRef.current = null; }}
+                      >
+
                       {/* Mobile Preview */}
                       {previewMode === 'mobile' && (
                       <div className="flex flex-col items-center space-y-4">
@@ -3583,6 +3605,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           </div>
                         </div>
                       )}
+                      </div>
                       {/* Image upload section - separate for mobile and desktop */}
                       <div className="space-y-4">
                         {/* Mobile image section */}
