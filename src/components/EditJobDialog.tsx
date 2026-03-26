@@ -294,9 +294,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const clearEditJobDraft = () => {
     if (draftKey) {
       localStorage.removeItem(draftKey);
+      sessionStorage.removeItem('parium-editing-job');
       console.log('🗑️ Edit job draft cleared');
     }
   };
+  
+  // Clear session marker when dialog closes
+  useEffect(() => {
+    if (!open) {
+      sessionStorage.removeItem('parium-editing-job');
+    }
+  }, [open]);
 
   // Drag and drop sensors
   const touchSensor = useSensor(TouchSensor, {
