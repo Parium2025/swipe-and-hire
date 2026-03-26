@@ -3541,24 +3541,24 @@ const MobileJobWizard = ({
 
                 {/* Swipeable preview area */}
                 <div
+                  ref={(el) => { (el as any)?.__swipeRef = true; }}
                   onTouchStart={(e) => {
                     const t = e.targetTouches[0];
-                    (e.currentTarget as any).__swipeStartX = t.clientX;
-                    (e.currentTarget as any).__swipeStartY = t.clientY;
+                    previewSwipeRef.current = { x: t.clientX, y: t.clientY };
                   }}
                   onTouchEnd={(e) => {
-                    const startX = (e.currentTarget as any).__swipeStartX;
-                    const startY = (e.currentTarget as any).__swipeStartY;
-                    if (startX == null || startY == null) return;
-                    const endTouch = e.changedTouches[0];
-                    const dx = endTouch.clientX - startX;
-                    const dy = endTouch.clientY - startY;
-                    // Only trigger if horizontal movement > 60px and dominant over vertical
+                    const start = previewSwipeRef.current;
+                    if (!start) return;
+                    const end = e.changedTouches[0];
+                    const dx = end.clientX - start.x;
+                    const dy = end.clientY - start.y;
+                    previewSwipeRef.current = null;
                     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
                       if (dx < 0 && previewMode === 'mobile') setPreviewMode('desktop');
                       if (dx > 0 && previewMode === 'desktop') setPreviewMode('mobile');
                     }
                   }}
+                  onTouchCancel={() => { previewSwipeRef.current = null; }}
                 >
 
                 {/* Mobile Preview */}
