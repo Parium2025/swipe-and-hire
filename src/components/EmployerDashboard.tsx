@@ -101,7 +101,7 @@ const EmployerDashboard = memo(() => {
           const job = jobs.find(j => j.id === parsed.jobId);
           if (job) {
             console.log('🔄 Auto-restoring edit job dialog');
-            sessionStorage.removeItem('parium-editing-job');
+            // Don't remove session marker here — EditJobDialog will manage it
             setEditingJob(job);
             setEditDialogOpen(true);
           } else {
