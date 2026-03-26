@@ -3539,6 +3539,28 @@ const MobileJobWizard = ({
                   </h3>
                 </div>
 
+                {/* Swipeable preview area */}
+                <div
+                  onTouchStart={(e) => {
+                    const t = e.targetTouches[0];
+                    (e.currentTarget as any).__swipeStartX = t.clientX;
+                    (e.currentTarget as any).__swipeStartY = t.clientY;
+                  }}
+                  onTouchEnd={(e) => {
+                    const startX = (e.currentTarget as any).__swipeStartX;
+                    const startY = (e.currentTarget as any).__swipeStartY;
+                    if (startX == null || startY == null) return;
+                    const endTouch = e.changedTouches[0];
+                    const dx = endTouch.clientX - startX;
+                    const dy = endTouch.clientY - startY;
+                    // Only trigger if horizontal movement > 60px and dominant over vertical
+                    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                      if (dx < 0 && previewMode === 'mobile') setPreviewMode('desktop');
+                      if (dx > 0 && previewMode === 'desktop') setPreviewMode('mobile');
+                    }
+                  }}
+                >
+
                 {/* Mobile Preview */}
                 {previewMode === 'mobile' && (
                 <div className="flex flex-col items-center space-y-4">
@@ -4683,6 +4705,7 @@ const MobileJobWizard = ({
                     </div>
                   </div>
                 )}
+                </div>
                 {/* Image upload section - separate for mobile and desktop */}
                 <div className="space-y-4">
                   {/* Mobile image section */}
