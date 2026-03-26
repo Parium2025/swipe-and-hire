@@ -157,11 +157,15 @@ const MobileJobWizard = ({
   });
   const sensors = useSensors(...(isTouchCapable ? [touchSensor, keyboardSensor] : [pointerSensor, keyboardSensor]));
   
+  // Track whether we've already restored draft for this open cycle
+  const hasRestoredDraftRef = useRef(false);
+  
   // Reset state when dialog closes
   useEffect(() => {
     if (!open) {
       setCurrentStep(0);
       setIsInitializing(true);
+      hasRestoredDraftRef.current = false;
     }
   }, [open]);
   
