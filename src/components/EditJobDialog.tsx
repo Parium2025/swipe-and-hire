@@ -245,7 +245,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         localStorage.setItem(draftKey, JSON.stringify({
           formData,
           customQuestions,
+          currentStep,
           savedAt: Date.now()
+        }));
+        // Also save active editing session marker
+        sessionStorage.setItem('parium-editing-job', JSON.stringify({
+          jobId: job.id,
+          currentStep,
         }));
         console.log('💾 Edit job draft saved');
       } catch (e) {
@@ -269,6 +275,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             setFormData(parsed.formData);
             if (parsed.customQuestions) {
               setCustomQuestions(parsed.customQuestions);
+            }
+            if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
+              setCurrentStep(parsed.currentStep);
             }
           }
         } else {
