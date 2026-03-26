@@ -30,6 +30,8 @@ interface CreateJobSimpleDialogProps {
   triggerClassName?: string;
 }
 
+const CREATE_JOB_SESSION_KEY = 'parium-creating-job';
+
 const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: CreateJobSimpleDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isWarmedUp, setIsWarmedUp] = useState(false);
@@ -57,10 +59,26 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
   const hasPrefetched = useRef(false);
   const hasAutoRestoredDraft = useRef(false);
 
+  const clearCreateJobSession = useCallback(() => {
+    try {
+      sessionStorage.removeItem(CREATE_JOB_SESSION_KEY);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   // Auto-restore: if there's a create-job draft in localStorage, skip straight to wizard
   useEffect(() => {
     if (hasAutoRestoredDraft.current || !user) return;
     hasAutoRestoredDraft.current = true;
+
+    const openWizardFromState = (title: string) => {
+      if (!title?.trim()) return false;
+      setJobTitle(title);
+      setSelectedTemplate(null);
+      setTimeout(() => setShowDetailDialog(true), 300);
+      return true;
+    };
     
     try {
       const savedDraft = localStorage.getItem('parium_draft_job-wizard');
@@ -69,15 +87,37 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
         // Only auto-open if saved recently (within 1 hour) and has meaningful content
         if (parsed.savedAt && Date.now() - parsed.savedAt < 60 * 60 * 1000 && parsed.formData?.title) {
           console.log('🔄 Auto-restoring create job wizard from draft');
-          setJobTitle(parsed.formData.title);
-          // Go straight to wizard, skip template dialog
-          setTimeout(() => setShowDetailDialog(true), 300);
+          if (openWizardFromState(parsed.formData.title)) {
+            return;
+          }
+        }
+      }
+
+      const savedSession = sessionStorage.getItem(CREATE_JOB_SESSION_KEY);
+      if (savedSession) {
+        const parsedSession = JSON.parse(savedSession);
+        if (openWizardFromState(parsedSession?.jobTitle || '')) {
+          console.log('🔄 Auto-restoring create job wizard from session');
         }
       }
     } catch (e) {
       console.warn('Failed to check for job wizard draft');
     }
   }, [user]);
+
+  // Keep a lightweight session marker while wizard is open
+  useEffect(() => {
+    if (!showDetailDialog) return;
+
+    try {
+      sessionStorage.setItem(CREATE_JOB_SESSION_KEY, JSON.stringify({
+        jobTitle,
+        savedAt: Date.now(),
+      }));
+    } catch {
+      // ignore
+    }
+  }, [showDetailDialog, jobTitle]);
 
   // Warmup with hard hide via CSS to prevent any flash on iOS
   useEffect(() => {
@@ -236,6 +276,15 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       jobTitle,
       selectedTemplateId: selectedTemplate?.id,
     });
+
+    try {
+      sessionStorage.setItem(CREATE_JOB_SESSION_KEY, JSON.stringify({
+        jobTitle,
+        savedAt: Date.now(),
+      }));
+    } catch {
+      // ignore
+    }
     
     // Kort delay för smidig övergång
     setOpen(false);
@@ -269,7 +318,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     setTemplateMenuOpen(false);
     setTitleInputKey((k) => k + 1);
     setMenuInstanceKey((k) => k + 1);
-  }, []);
+    clearCreateJobSession();
+  }, [clearCreateJobSession]);
 
   const handleCancelClose = useCallback(() => {
     setShowUnsavedDialog(false);
@@ -279,12 +329,14 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     setShowDetailDialog(false);
     setJobTitle('');
     setSelectedTemplate(null);
+    clearCreateJobSession();
     onJobCreated(job);
-  }, [onJobCreated]);
+  }, [clearCreateJobSession, onJobCreated]);
 
   const handleWizardBack = useCallback(() => {
     isNavigatingBack.current = true;
     setShowDetailDialog(false);
+    clearCreateJobSession();
     
     // Om en mall är vald, öppna dropdown igen
     // Annars stäng helt och gå till dashboard
@@ -300,7 +352,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       setSelectedTemplate(null);
       isNavigatingBack.current = false;
     }
-  }, [selectedTemplate]);
+  }, [clearCreateJobSession, selectedTemplate]);
 
   const handleTemplateWizardBack = useCallback(() => {
     setShowTemplateWizard(false);
@@ -322,6 +374,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           setSearchTerm('');
           setTemplateMenuOpen(false);
           setTitleInputKey((k) => k + 1);
+          clearCreateJobSession();
         }
       }}>
         <DialogTrigger asChild>
@@ -637,6 +690,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           if (!isOpen && !isNavigatingBack.current) {
             setJobTitle('');
             setSelectedTemplate(null);
+            clearCreateJobSession();
           }
         }}
         jobTitle={jobTitle}
