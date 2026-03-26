@@ -237,7 +237,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   useEffect(() => {
     if (!open || !draftKey || !job) return;
     
-    // Check if there's meaningful content that differs from original
+    // Always save the session marker so refresh can re-open the dialog
+    try {
+      sessionStorage.setItem('parium-editing-job', JSON.stringify({
+        jobId: job.id,
+        currentStep,
+      }));
+    } catch {
+      // ignore
+    }
+    
+    // Save full draft only when there are actual changes
     const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
     
     if (hasChanges && hasUnsavedChanges) {
@@ -248,17 +258,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
           currentStep,
           savedAt: Date.now()
         }));
-        // Also save active editing session marker
-        sessionStorage.setItem('parium-editing-job', JSON.stringify({
-          jobId: job.id,
-          currentStep,
-        }));
         console.log('💾 Edit job draft saved');
       } catch (e) {
         console.warn('Failed to save edit job draft');
       }
     }
-  }, [formData, customQuestions, open, draftKey, hasUnsavedChanges, initialFormData, job]);
+  }, [formData, customQuestions, currentStep, open, draftKey, hasUnsavedChanges, initialFormData, job]);
   
   // Restore draft from localStorage when opening
   useEffect(() => {
