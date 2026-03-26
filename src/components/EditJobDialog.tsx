@@ -229,6 +229,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
   const { user } = useAuth();
   const { toast } = useToast();
+  const hasOpenedEditDialogRef = useRef(false);
   
   // localStorage draft key for this specific job
   const draftKey = job?.id ? `parium_draft_edit-job-${job.id}` : null;
@@ -315,11 +316,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   };
   
-  // Clear session marker when dialog closes
+  // Clear session marker only after a real close (not on initial mount)
   useEffect(() => {
-    if (!open) {
-      sessionStorage.removeItem('parium-editing-job');
+    if (open) {
+      hasOpenedEditDialogRef.current = true;
+      return;
     }
+
+    if (!hasOpenedEditDialogRef.current) return;
+
+    sessionStorage.removeItem('parium-editing-job');
+    hasOpenedEditDialogRef.current = false;
   }, [open]);
 
   // Drag and drop sensors
