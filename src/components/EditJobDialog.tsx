@@ -265,7 +265,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   }, [formData, customQuestions, currentStep, open, draftKey, hasUnsavedChanges, initialFormData, job]);
   
-  // Restore draft from localStorage when opening
+  // Restore draft from localStorage when opening, or at least restore currentStep from sessionStorage
   useEffect(() => {
     if (!open || !draftKey || !job) return;
     
@@ -284,10 +284,21 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
               setCurrentStep(parsed.currentStep);
             }
+            return;
           }
         } else {
           // Clear old draft
           localStorage.removeItem(draftKey);
+        }
+      }
+      
+      // No localStorage draft — check sessionStorage for currentStep only
+      const editSession = sessionStorage.getItem('parium-editing-job');
+      if (editSession) {
+        const parsed = JSON.parse(editSession);
+        if (parsed.jobId === job.id && typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
+          console.log('📝 Restoring edit job step from sessionStorage');
+          setCurrentStep(parsed.currentStep);
         }
       }
     } catch (e) {
