@@ -4705,6 +4705,7 @@ const MobileJobWizard = ({
                     </div>
                   </div>
                 )}
+                </div>
                 {/* Image upload section - separate for mobile and desktop */}
                 <div className="space-y-4">
                   {/* Mobile image section */}
