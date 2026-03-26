@@ -245,7 +245,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         localStorage.setItem(draftKey, JSON.stringify({
           formData,
           customQuestions,
+          currentStep,
           savedAt: Date.now()
+        }));
+        // Also save active editing session marker
+        sessionStorage.setItem('parium-editing-job', JSON.stringify({
+          jobId: job.id,
+          currentStep,
         }));
         console.log('💾 Edit job draft saved');
       } catch (e) {
@@ -270,6 +276,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             if (parsed.customQuestions) {
               setCustomQuestions(parsed.customQuestions);
             }
+            if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
+              setCurrentStep(parsed.currentStep);
+            }
           }
         } else {
           // Clear old draft
@@ -285,9 +294,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const clearEditJobDraft = () => {
     if (draftKey) {
       localStorage.removeItem(draftKey);
+      sessionStorage.removeItem('parium-editing-job');
       console.log('🗑️ Edit job draft cleared');
     }
   };
+  
+  // Clear session marker when dialog closes
+  useEffect(() => {
+    if (!open) {
+      sessionStorage.removeItem('parium-editing-job');
+    }
+  }, [open]);
 
   // Drag and drop sensors
   const touchSensor = useSensor(TouchSensor, {

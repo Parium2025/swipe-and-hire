@@ -86,6 +86,33 @@ const EmployerDashboard = memo(() => {
   // State for editing drafts in wizard
   const [draftToEdit, setDraftToEdit] = useState<JobPosting | null>(null);
   const [draftWizardOpen, setDraftWizardOpen] = useState(false);
+  const hasAutoRestoredEdit = useRef(false);
+
+  // Auto-restore: if there was an active edit session, re-open the edit dialog
+  useEffect(() => {
+    if (hasAutoRestoredEdit.current || !jobs || jobs.length === 0) return;
+    hasAutoRestoredEdit.current = true;
+    
+    try {
+      const editSession = sessionStorage.getItem('parium-editing-job');
+      if (editSession) {
+        const parsed = JSON.parse(editSession);
+        if (parsed.jobId) {
+          const job = jobs.find(j => j.id === parsed.jobId);
+          if (job) {
+            console.log('🔄 Auto-restoring edit job dialog');
+            sessionStorage.removeItem('parium-editing-job');
+            setEditingJob(job);
+            setEditDialogOpen(true);
+          } else {
+            sessionStorage.removeItem('parium-editing-job');
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to check for editing job session');
+    }
+  }, [jobs]);
   
   // Skip fade-in animation when data is already cached (instant render on re-navigation)
   // Only show fade-in on first load when we actually waited for data

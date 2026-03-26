@@ -193,6 +193,10 @@ const MobileJobWizard = ({
               setInitialFormData(parsed.formData);
               setInitialCustomQuestions(parsed.customQuestions || []);
               setHasUnsavedChanges(false);
+              // Restore the step the user was on
+              if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
+                setCurrentStep(parsed.currentStep);
+              }
               return; // Don't continue to empty form initialization
             } else if (jobTitle !== '' && savedTitle !== jobTitle) {
               // User entered a different title - clear old draft and start fresh

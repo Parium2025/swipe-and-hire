@@ -55,6 +55,29 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
   const hasPrefetched = useRef(false);
+  const hasAutoRestoredDraft = useRef(false);
+
+  // Auto-restore: if there's a create-job draft in localStorage, skip straight to wizard
+  useEffect(() => {
+    if (hasAutoRestoredDraft.current || !user) return;
+    hasAutoRestoredDraft.current = true;
+    
+    try {
+      const savedDraft = localStorage.getItem('parium_draft_job-wizard');
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        // Only auto-open if saved recently (within 1 hour) and has meaningful content
+        if (parsed.savedAt && Date.now() - parsed.savedAt < 60 * 60 * 1000 && parsed.formData?.title) {
+          console.log('🔄 Auto-restoring create job wizard from draft');
+          setJobTitle(parsed.formData.title);
+          // Go straight to wizard, skip template dialog
+          setTimeout(() => setShowDetailDialog(true), 300);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to check for job wizard draft');
+    }
+  }, [user]);
 
   // Warmup with hard hide via CSS to prevent any flash on iOS
   useEffect(() => {
