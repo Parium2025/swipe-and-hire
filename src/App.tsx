@@ -116,6 +116,7 @@ const AnimatedRoutes = () => {
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/home" element={<Index />} />
+          <Route path="/index" element={<Index />} />
           <Route path="/consent" element={<Index />} />
           <Route path="/verify" element={<EmailVerification />} />
           <Route path="/email-redirect" element={<EmailRedirect />} />
