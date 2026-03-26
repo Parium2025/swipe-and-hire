@@ -651,10 +651,33 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   };
 
-  // Always start from step 0 when opening and reset question form states
+  // Initialize dialog state on open, but preserve step when persisted draft/session exists
   useEffect(() => {
     if (open) {
-      setCurrentStep(0);
+      let hasPersistedStep = false;
+      try {
+        if (draftKey) {
+          const savedDraft = localStorage.getItem(draftKey);
+          if (savedDraft) {
+            const parsedDraft = JSON.parse(savedDraft);
+            hasPersistedStep = typeof parsedDraft?.currentStep === 'number' && parsedDraft.currentStep >= 0;
+          }
+        }
+
+        if (!hasPersistedStep && job?.id) {
+          const editSession = sessionStorage.getItem('parium-editing-job');
+          if (editSession) {
+            const parsedSession = JSON.parse(editSession);
+            hasPersistedStep = parsedSession?.jobId === job.id && typeof parsedSession?.currentStep === 'number' && parsedSession.currentStep >= 0;
+          }
+        }
+      } catch {
+        hasPersistedStep = false;
+      }
+
+      if (!hasPersistedStep) {
+        setCurrentStep(0);
+      }
       setIsInitializing(false);
       // Reset question form states so navigation buttons are visible
       setShowQuestionForm(false);
@@ -663,7 +686,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     } else {
       setIsInitializing(true);
     }
-  }, [open]);
+  }, [open, draftKey, job?.id]);
 
   // Fetch profile
   useEffect(() => {
