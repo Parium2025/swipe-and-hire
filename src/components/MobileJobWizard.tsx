@@ -177,6 +177,8 @@ const MobileJobWizard = ({
       hasRestoredDraftRef.current = true;
       
       setIsInitializing(false);
+
+      const restoreDraftState = (rawDraft: string | null): boolean => {
         if (!rawDraft) return false;
 
         try {
