@@ -729,8 +729,11 @@ const MobileJobWizard = ({
     // Don't save drafts when editing existing jobs (they're already saved in DB)
     if (existingJob) return;
     
+    // Always save if user has progressed past step 0, even without content changes
+    const hasProgressedPastStart = currentStep > 0;
+    
     // Check if there's meaningful content to save
-    const hasContent = Object.entries(formData).some(([key, value]) => {
+    const hasContent = hasProgressedPastStart || Object.entries(formData).some(([key, value]) => {
       if (key === 'title' && value === jobTitle) return false; // Ignore default title
       if (key === 'positions_count' && value === '1') return false; // Ignore default
       if (key === 'work_location_type' && value === 'på-plats') return false; // Ignore default
