@@ -165,50 +165,57 @@ const MobileJobWizard = ({
     }
   }, [open]);
   
-  // Start from step 0 when opening
+  // Initialize and restore draft state when opening
   useEffect(() => {
     if (open) {
-      setCurrentStep(0);
       setIsInitializing(false);
-      
-      // Clear sessionStorage to prevent false unsaved changes detection
-      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
-      
-      // Check for localStorage draft ONLY if not editing an existing job AND no template selected
-      // Only restore draft if the saved title MATCHES the new jobTitle (same session continuation)
-      // If jobTitle is different, user is creating a NEW job from scratch - clear old draft
-      if (!existingJob && !selectedTemplate) {
+
+      const restoreDraftState = (rawDraft: string | null): boolean => {
+        if (!rawDraft) return false;
+
         try {
-          const savedDraft = localStorage.getItem(JOB_WIZARD_DRAFT_KEY);
-          if (savedDraft) {
-            const parsed = JSON.parse(savedDraft);
-            const savedTitle = parsed.formData?.title || '';
-            
-            // Only restore if the title matches (user is continuing the same job)
-            // OR if no jobTitle was provided (user just opened dialog without entering a name)
-            if (parsed.formData && savedTitle === jobTitle && jobTitle !== '') {
-              console.log('📝 Restoring job wizard draft from localStorage (same title)');
-              setFormData(parsed.formData);
-              setCustomQuestions(parsed.customQuestions || []);
-              setInitialFormData(parsed.formData);
-              setInitialCustomQuestions(parsed.customQuestions || []);
-              setHasUnsavedChanges(false);
-              // Restore the step the user was on
-              if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
-                setCurrentStep(parsed.currentStep);
-              }
-              return; // Don't continue to empty form initialization
-            } else if (jobTitle !== '' && savedTitle !== jobTitle) {
-              // User entered a different title - clear old draft and start fresh
-              console.log('🗑️ Clearing old draft - new job title entered');
-              localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
-              sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
-            }
+          const parsed = JSON.parse(rawDraft);
+          if (!parsed?.formData) return false;
+
+          // Only restore if saved recently (within 24 hours)
+          if (!parsed.savedAt || Date.now() - parsed.savedAt >= 24 * 60 * 60 * 1000) {
+            return false;
           }
-        } catch (e) {
-          console.warn('Failed to restore job wizard draft');
+
+          setFormData(parsed.formData);
+          setCustomQuestions(parsed.customQuestions || []);
+          setInitialFormData(parsed.formData);
+          setInitialCustomQuestions(parsed.customQuestions || []);
+          setHasUnsavedChanges(false);
+
+          if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
+            setCurrentStep(parsed.currentStep);
+          } else {
+            setCurrentStep(0);
+          }
+
+          return true;
+        } catch {
+          return false;
+        }
+      };
+
+      // Restore draft only for create flow (not when editing existing job or creating from template)
+      if (!existingJob && !selectedTemplate) {
+        const restoredFromSession = restoreDraftState(sessionStorage.getItem(JOB_WIZARD_SESSION_KEY));
+        if (restoredFromSession) {
+          console.log('📝 Restoring job wizard draft from sessionStorage');
+          return;
+        }
+
+        const restoredFromLocal = restoreDraftState(localStorage.getItem(JOB_WIZARD_DRAFT_KEY));
+        if (restoredFromLocal) {
+          console.log('📝 Restoring job wizard draft from localStorage');
+          return;
         }
       }
+
+      setCurrentStep(0);
       
       // Reset form state for fresh load
       setInitialFormData(null);
@@ -394,7 +401,7 @@ const MobileJobWizard = ({
         setHasUnsavedChanges(false);
       }
     }
-  }, [open, selectedTemplate, jobTitle, existingJob]);
+  }, [open, selectedTemplate, existingJob]);
   
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
