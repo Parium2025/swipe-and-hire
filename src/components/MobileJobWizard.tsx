@@ -157,15 +157,18 @@ const MobileJobWizard = ({
   });
   const sensors = useSensors(...(isTouchCapable ? [touchSensor, keyboardSensor] : [pointerSensor, keyboardSensor]));
   
-  // Track whether we've already restored draft for this open cycle
-  const hasRestoredDraftRef = useRef(false);
+  // Track whether we've opened at least once (to distinguish initial mount from real close)
+  const hasBeenOpenRef = useRef(false);
   
-  // Reset state when dialog closes
+  // Reset state when dialog ACTUALLY closes (not on initial mount)
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      hasBeenOpenRef.current = true;
+    } else if (hasBeenOpenRef.current) {
+      // Only reset on a real close, not on initial mount
       setCurrentStep(0);
       setIsInitializing(true);
-      hasRestoredDraftRef.current = false;
+      hasBeenOpenRef.current = false;
     }
   }, [open]);
   
