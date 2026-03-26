@@ -648,6 +648,7 @@ const MobileJobWizard = ({
   const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
   const screenRef = useRef<HTMLDivElement>(null);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
+  const previewSwipeRef = useRef<{ x: number; y: number } | null>(null);
   const [scale, setScale] = useState(1);
   const BASE_WIDTH = 360;
   const BASE_HEIGHT = 720;
@@ -3543,22 +3544,21 @@ const MobileJobWizard = ({
                 <div
                   onTouchStart={(e) => {
                     const t = e.targetTouches[0];
-                    (e.currentTarget as any).__swipeStartX = t.clientX;
-                    (e.currentTarget as any).__swipeStartY = t.clientY;
+                    previewSwipeRef.current = { x: t.clientX, y: t.clientY };
                   }}
                   onTouchEnd={(e) => {
-                    const startX = (e.currentTarget as any).__swipeStartX;
-                    const startY = (e.currentTarget as any).__swipeStartY;
-                    if (startX == null || startY == null) return;
-                    const endTouch = e.changedTouches[0];
-                    const dx = endTouch.clientX - startX;
-                    const dy = endTouch.clientY - startY;
-                    // Only trigger if horizontal movement > 60px and dominant over vertical
+                    const start = previewSwipeRef.current;
+                    if (!start) return;
+                    const end = e.changedTouches[0];
+                    const dx = end.clientX - start.x;
+                    const dy = end.clientY - start.y;
+                    previewSwipeRef.current = null;
                     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
                       if (dx < 0 && previewMode === 'mobile') setPreviewMode('desktop');
                       if (dx > 0 && previewMode === 'desktop') setPreviewMode('mobile');
                     }
                   }}
+                  onTouchCancel={() => { previewSwipeRef.current = null; }}
                 >
 
                 {/* Mobile Preview */}
