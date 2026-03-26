@@ -3542,7 +3542,6 @@ const MobileJobWizard = ({
 
                 {/* Swipeable preview area */}
                 <div
-                  ref={(el) => { (el as any)?.__swipeRef = true; }}
                   onTouchStart={(e) => {
                     const t = e.targetTouches[0];
                     previewSwipeRef.current = { x: t.clientX, y: t.clientY };
