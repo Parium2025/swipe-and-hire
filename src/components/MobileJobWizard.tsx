@@ -172,9 +172,11 @@ const MobileJobWizard = ({
   // Initialize and restore draft state when opening
   useEffect(() => {
     if (open) {
+      // Prevent double-restoration in the same open cycle
+      if (hasRestoredDraftRef.current) return;
+      hasRestoredDraftRef.current = true;
+      
       setIsInitializing(false);
-
-      const restoreDraftState = (rawDraft: string | null): boolean => {
         if (!rawDraft) return false;
 
         try {
