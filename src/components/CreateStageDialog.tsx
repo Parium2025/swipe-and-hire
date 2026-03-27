@@ -164,6 +164,15 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
         </div>
         <DialogFooter className="flex gap-2 pt-2">
           <Button
+            onClick={handleCreate}
+            onMouseDown={(e) => e.currentTarget.blur()}
+            onMouseUp={(e) => e.currentTarget.blur()}
+            disabled={!label.trim() || createCustomStage.isPending}
+            className="flex-1 min-h-[44px] rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white transition-colors duration-150 active:scale-[0.97]"
+          >
+            Skapa steg
+          </Button>
+          <Button
             variant="glass"
             onClick={() => setOpen(false)}
             onMouseDown={(e) => e.currentTarget.blur()}
@@ -171,18 +180,6 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
             className="min-h-[44px] rounded-full"
           >
             Avbryt
-          </Button>
-          <Button
-            variant="glass"
-            onClick={handleCreate}
-            onMouseDown={(e) => e.currentTarget.blur()}
-            onMouseUp={(e) => e.currentTarget.blur()}
-            disabled={!label.trim() || createCustomStage.isPending}
-            className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 ${
-              !createCustomStage.isPending && label.trim() ? 'border border-white/30' : 'border border-transparent'
-            }`}
-          >
-            Skapa steg
           </Button>
         </DialogFooter>
       </DialogContentNoFocus>
