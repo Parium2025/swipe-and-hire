@@ -33,6 +33,7 @@ import { useJobFiltering } from '@/hooks/useJobFiltering';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
