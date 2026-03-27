@@ -360,115 +360,15 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="flex flex-col gap-3 flex-1 min-h-0" onTouchStart={stageSwipeHandlers.onTouchStart} onTouchMove={stageSwipeHandlers.onTouchMove} onTouchEnd={stageSwipeHandlers.onTouchEnd}>
-        {/* Horizontal scrollable stage tabs — input-aware:
-            Touch: native momentum scroll, no grab cursor, instant tab switch via touchStart
-            Mouse: drag-to-scroll with grab cursor, tab switch via click (suppressed after drag) */}
-        <div
-          ref={dragScrollRef}
-          className={`flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 overscroll-x-contain ${
-            isTouchCapable
-              ? '[touch-action:pan-x] [-webkit-overflow-scrolling:touch]'
-              : 'cursor-grab active:cursor-grabbing select-none'
-          }`}
-        >
-          {stages.map((stage, stageIdx) => {
-            const cfg = stageConfig[stage];
-            if (!cfg) return null;
-            const Icon = getIconByName(cfg.iconName);
-            const count = (candidatesByStage[stage] || []).length;
-            const isActive = stage === activeTab;
-
-            const targetIdx = stageIdx === 0 ? 1 : 0;
-            const targetStageKey = stages[targetIdx];
-            const targetStageLabel = stageConfig[targetStageKey]?.label;
-
-            return (
-              <div
-                key={stage}
-                ref={(el) => { tabRefs.current[stage] = el; }}
-                tabIndex={0}
-                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
-                onClick={() => handleStageClick(stage)}
-                onDoubleClick={() => {
-                  if (!isReadOnly) setOpenStageMenu(stage);
-                }}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 backdrop-blur-sm cursor-pointer max-w-[180px] border outline-none focus:outline-none focus-visible:outline-none [outline:none!important] ${
-                  isActive ? 'shadow-lg border-white/50' : 'border-transparent'
-                }`}
-                style={{ backgroundColor: `${cfg.color}55` }}
-              >
-                <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                {cfg.label.length > 10 ? (
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="truncate cursor-default min-w-0">{cfg.label}</span>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
-                        <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <span className="truncate min-w-0">{cfg.label}</span>
-                )}
-                <span
-                  className="text-[10px] leading-none h-[18px] w-[18px] flex items-center justify-center rounded-full text-white flex-shrink-0 text-center"
-                  style={{ backgroundColor: `${cfg.color}88` }}
-                >
-                  {count}
-                </span>
-                {/* Stage settings menu (3-dot) — visual-only on touch, functional on mouse */}
-                {!isReadOnly && (
-                  <span
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <StageSettingsMenu
-                      stageKey={stage}
-                      candidateCount={count}
-                      totalStageCount={stages.length}
-                      targetStageKey={targetStageKey}
-                      targetStageLabel={targetStageLabel}
-                      onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
-                      useJobDetailsTriggerStyle
-                      disableTouchTrigger={isTouchCapable}
-                      onTriggerPointerDown={() => setActiveTab(stage)}
-                      open={openStageMenu === stage}
-                      onOpenChange={(nextOpen) => {
-                        setOpenStageMenu((prev) => {
-                          if (nextOpen) return stage;
-                          return prev === stage ? null : prev;
-                        });
-                      }}
-                    />
-                  </span>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Add new stage button */}
-          {!isReadOnly && stages.length < 8 && (
-            <CreateStageDialog
-              trigger={
-                <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap bg-white/5 text-white ring-1 ring-inset ring-white/10 active:scale-95 transition-all shrink-0 backdrop-blur-sm">
-                  <Plus className="h-3.5 w-3.5" />
-                  Nytt steg
-                </button>
-              }
-            />
-          )}
-        </div>
-
-        {/* Inline action bar for selection mode */}
-        {renderActionBar}
-
+      <div className="flex flex-col gap-3 flex-1 min-h-0">
+...
         {/* Candidate list — fills remaining space so swipe works on empty area too */}
-        <div className="flex-1 min-h-[40vh]">
+        <div
+          className="flex-1 min-h-[40vh]"
+          onTouchStart={stageSwipeHandlers.onTouchStart}
+          onTouchMove={stageSwipeHandlers.onTouchMove}
+          onTouchEnd={stageSwipeHandlers.onTouchEnd}
+        >
           <ScrollArea className="overscroll-contain touch-pan-y h-full" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
             <div className="flex flex-col gap-2">
               {currentCandidates.length === 0 ? (
