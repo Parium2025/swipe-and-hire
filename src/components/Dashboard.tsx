@@ -48,7 +48,7 @@ const Dashboard = memo(() => {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as JobStatusTab | null;
   const activeTab: JobStatusTab = tabParam === 'expired' ? 'expired' : 'active';
-  const setActiveTab = (tab: JobStatusTab) => {
+  const setActiveTab = useCallback((tab: JobStatusTab) => {
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       if (tab === 'active') {
@@ -58,7 +58,19 @@ const Dashboard = memo(() => {
       }
       return next;
     }, { replace: true });
-  };
+  }, [setSearchParams]);
+
+  // Swipe between tabs on mobile
+  const tabOrder: JobStatusTab[] = ['active', 'expired'];
+  const swipeToNextTab = useCallback(() => {
+    const idx = tabOrder.indexOf(activeTab);
+    if (idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
+  }, [activeTab, setActiveTab]);
+  const swipeToPrevTab = useCallback(() => {
+    const idx = tabOrder.indexOf(activeTab);
+    if (idx > 0) setActiveTab(tabOrder[idx - 1]);
+  }, [activeTab, setActiveTab]);
+  const tabSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextTab, onSwipeRight: swipeToPrevTab, threshold: 50 });
 
   const activeJobs = useMemo(() => allJobs.filter(job => 
     job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)
