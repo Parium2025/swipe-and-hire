@@ -309,15 +309,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         // Only restore if saved recently (within 24 hours)
         if (parsed.savedAt && Date.now() - parsed.savedAt < 24 * 60 * 60 * 1000) {
           if (parsed.formData) {
-            console.log('📝 Restoring edit job draft from localStorage');
-            setFormData(parsed.formData);
-            if (parsed.customQuestions) {
-              setCustomQuestions(parsed.customQuestions);
-            }
-            if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
-              setCurrentStep(parsed.currentStep);
-            }
-            return;
+311:             console.log('📝 Restoring edit job draft from localStorage');
+312:             setFormData(parsed.formData);
+313:             if (parsed.customQuestions) {
+314:               setCustomQuestions(parsed.customQuestions);
+315:             }
+316:             if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
+317:               setCurrentStep(parsed.currentStep);
+318:             }
+319:             hasCompletedRestoreRef.current = true;
+320:             return;
           }
         } else {
           // Clear old draft
