@@ -185,6 +185,21 @@ const EmployerDashboard = memo(() => {
         return filteredAndSortedJobs;
     }
   }, [filteredAndSortedJobs, activeTab]);
+
+  // Ordered tabs for swipe navigation
+  const tabOrder: JobStatusTab[] = useMemo(() => hasDrafts ? ['active', 'expired', 'draft'] : ['active', 'expired'], [hasDrafts]);
+  
+  const swipeToNextTab = useCallback(() => {
+    const idx = tabOrder.indexOf(activeTab);
+    if (idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
+  }, [activeTab, tabOrder, setActiveTab]);
+  
+  const swipeToPrevTab = useCallback(() => {
+    const idx = tabOrder.indexOf(activeTab);
+    if (idx > 0) setActiveTab(tabOrder[idx - 1]);
+  }, [activeTab, tabOrder, setActiveTab]);
+  
+  const tabSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextTab, onSwipeRight: swipeToPrevTab, threshold: 50 });
   
   // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
