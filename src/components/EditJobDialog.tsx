@@ -342,26 +342,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       console.warn('Failed to restore edit job draft');
     }
   }, [open, draftKey, job?.id]);
-          }
-        } else {
-          // Clear old draft
-          localStorage.removeItem(draftKey);
-        }
-      }
-      
-      // No localStorage draft — check sessionStorage for currentStep only
-      const editSession = sessionStorage.getItem(EDIT_JOB_SESSION_KEY);
-      if (editSession) {
-        const parsed = JSON.parse(editSession);
-        if (parsed.jobId === job.id && typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
-          console.log('📝 Restoring edit job step from sessionStorage');
-          setCurrentStep(parsed.currentStep);
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to restore edit job draft');
-    }
-  }, [open, draftKey, job?.id]);
+  
   
   // Clear draft after successful save
   const clearEditJobDraft = () => {
