@@ -104,7 +104,7 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
           {/* Color picker — full width */}
           <div className="space-y-2">
             <Label className="text-white">Färg</Label>
-            <div className="[&_.react-colorful]:!w-full [&_.react-colorful]:!h-[180px]">
+            <div className="[&_.react-colorful]:!w-full [&_.react-colorful]:!h-[220px]">
               <HexColorPicker 
                 color={selectedColor} 
                 onChange={setSelectedColor}
@@ -164,22 +164,22 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
         </div>
         <DialogFooter className="flex gap-2 pt-2">
           <Button
-            onClick={handleCreate}
-            onMouseDown={(e) => e.currentTarget.blur()}
-            onMouseUp={(e) => e.currentTarget.blur()}
-            disabled={!label.trim() || createCustomStage.isPending}
-            className="flex-1 min-h-[44px] rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white transition-colors duration-150 active:scale-[0.97]"
-          >
-            Skapa steg
-          </Button>
-          <Button
             variant="glass"
             onClick={() => setOpen(false)}
             onMouseDown={(e) => e.currentTarget.blur()}
             onMouseUp={(e) => e.currentTarget.blur()}
-            className="min-h-[44px] rounded-full"
+            className="min-h-[40px] h-10 rounded-full text-sm"
           >
             Avbryt
+          </Button>
+          <Button
+            onClick={handleCreate}
+            onMouseDown={(e) => e.currentTarget.blur()}
+            onMouseUp={(e) => e.currentTarget.blur()}
+            disabled={!label.trim() || createCustomStage.isPending}
+            className="flex-1 min-h-[40px] h-10 rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white border border-white/20 transition-colors duration-150 active:scale-[0.97] text-sm"
+          >
+            Skapa steg
           </Button>
         </DialogFooter>
       </DialogContentNoFocus>
