@@ -289,6 +289,15 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
+  const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Auto-scroll the tab strip to keep the active tab visible
+  useEffect(() => {
+    const el = tabRefs.current[activeTab];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [activeTab]);
 
   // Swipe between stage tabs
   const swipeToNextStage = useCallback(() => {
@@ -380,6 +389,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
             return (
               <div
                 key={stage}
+                ref={(el) => { tabRefs.current[stage] = el; }}
                 tabIndex={0}
                 onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
                 onClick={() => handleStageClick(stage)}
