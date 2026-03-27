@@ -181,48 +181,49 @@ const MobileJobWizard = ({
     if (open) {
       setIsInitializing(false);
 
-      const restoreDraftState = (rawDraft: string | null): boolean => {
-        if (!rawDraft) return false;
+      const parseDraftState = (rawDraft: string | null) => {
+        if (!rawDraft) return null;
 
         try {
           const parsed = JSON.parse(rawDraft);
-          if (!parsed?.formData) return false;
+          if (!parsed?.formData) return null;
 
-          // Only restore if saved recently (within 24 hours)
-          if (!parsed.savedAt || Date.now() - parsed.savedAt >= 24 * 60 * 60 * 1000) {
-            return false;
+          const savedAt = typeof parsed.savedAt === 'number' ? parsed.savedAt : 0;
+          if (!savedAt || Date.now() - savedAt >= 24 * 60 * 60 * 1000) {
+            return null;
           }
 
-          setFormData(parsed.formData);
-          setCustomQuestions(parsed.customQuestions || []);
-          setInitialFormData(parsed.formData);
-          setInitialCustomQuestions(parsed.customQuestions || []);
-          setHasUnsavedChanges(false);
+          const rawStep = Number(parsed.currentStep);
+          const restoredStep = Number.isFinite(rawStep) && rawStep >= 0 ? Math.floor(rawStep) : 0;
 
-          if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
-            setCurrentStep(parsed.currentStep);
-          } else {
-            setCurrentStep(0);
-          }
-
-          return true;
+          return {
+            formData: parsed.formData as JobFormData,
+            customQuestions: Array.isArray(parsed.customQuestions) ? parsed.customQuestions : [],
+            currentStep: restoredStep,
+            savedAt,
+          };
         } catch {
-          return false;
+          return null;
         }
       };
 
       // Restore draft only for create flow (not when editing existing job or creating from template)
       if (!existingJob && !selectedTemplate) {
-        const restoredFromSession = restoreDraftState(sessionStorage.getItem(JOB_WIZARD_SESSION_KEY));
-        if (restoredFromSession) {
-          console.log('📝 Restoring job wizard draft from sessionStorage');
-          hasCompletedRestoreRef.current = true;
-          return;
-        }
+        const sessionDraft = parseDraftState(sessionStorage.getItem(JOB_WIZARD_SESSION_KEY));
+        const localDraft = parseDraftState(localStorage.getItem(JOB_WIZARD_DRAFT_KEY));
+        const bestDraft = [sessionDraft, localDraft]
+          .filter((draft): draft is NonNullable<typeof draft> => !!draft)
+          .sort((a, b) => b.savedAt - a.savedAt)[0];
 
-        const restoredFromLocal = restoreDraftState(localStorage.getItem(JOB_WIZARD_DRAFT_KEY));
-        if (restoredFromLocal) {
-          console.log('📝 Restoring job wizard draft from localStorage');
+        if (bestDraft) {
+          setFormData(bestDraft.formData);
+          setCustomQuestions(bestDraft.customQuestions);
+          setInitialFormData(bestDraft.formData);
+          setInitialCustomQuestions(bestDraft.customQuestions);
+          setHasUnsavedChanges(false);
+          setCurrentStep(bestDraft.currentStep);
+
+          console.log('📝 Restoring job wizard draft from latest storage snapshot');
           hasCompletedRestoreRef.current = true;
           return;
         }
