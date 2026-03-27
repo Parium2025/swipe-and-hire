@@ -232,7 +232,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
                         }}
                         className="gap-2 min-h-[44px] min-w-0"
                       >
-                        <Icon className="h-4 w-4 shrink-0" style={{ color: cfg.color }} />
+                        <Icon className="h-4 w-4 shrink-0 text-white" />
                         <span className="truncate min-w-0">{cfg.label}</span>
                       </DropdownMenuItem>
                     </TooltipTrigger>
