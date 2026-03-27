@@ -1,4 +1,5 @@
 import { memo, useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
@@ -289,6 +290,17 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
 
+  // Swipe between stage tabs
+  const swipeToNextStage = useCallback(() => {
+    const idx = stages.indexOf(activeTab);
+    if (idx < stages.length - 1) setActiveTab(stages[idx + 1]);
+  }, [activeTab, stages]);
+  const swipeToPrevStage = useCallback(() => {
+    const idx = stages.indexOf(activeTab);
+    if (idx > 0) setActiveTab(stages[idx - 1]);
+  }, [activeTab, stages]);
+  const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
+
   const handleStageClick = useCallback((stage: string) => {
     setActiveTab(stage);
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
@@ -449,11 +461,11 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
         {renderActionBar}
 
         {/* Candidate list */}
-        <ScrollArea className="overscroll-contain" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
+        <ScrollArea className="overscroll-contain touch-pan-y" style={{ maxHeight: 'calc(100dvh - 340px)' }} onTouchStart={stageSwipeHandlers.onTouchStart} onTouchMove={stageSwipeHandlers.onTouchMove} onTouchEnd={stageSwipeHandlers.onTouchEnd}>
           <div className="flex flex-col gap-2">
             {currentCandidates.length === 0 ? (
-              <div className="text-center py-12 text-sm text-white">
-                Inga kandidater i detta steg
+              <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center">
+                <span>Inga kandidater i detta steg</span>
               </div>
             ) : (
               currentCandidates.map((candidate) => (
