@@ -290,6 +290,17 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
 
+  // Swipe between stage tabs
+  const swipeToNextStage = useCallback(() => {
+    const idx = stages.indexOf(activeTab);
+    if (idx < stages.length - 1) setActiveTab(stages[idx + 1]);
+  }, [activeTab, stages]);
+  const swipeToPrevStage = useCallback(() => {
+    const idx = stages.indexOf(activeTab);
+    if (idx > 0) setActiveTab(stages[idx - 1]);
+  }, [activeTab, stages]);
+  const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
+
   const handleStageClick = useCallback((stage: string) => {
     setActiveTab(stage);
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
