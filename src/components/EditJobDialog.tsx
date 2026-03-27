@@ -305,39 +305,47 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     if (!open || !draftKey || !job) return;
     
     try {
-      const savedDraft = localStorage.getItem(draftKey);
-      if (savedDraft) {
-        const parsed = JSON.parse(savedDraft);
-        // Only restore if saved recently (within 24 hours)
-        if (parsed.savedAt && Date.now() - parsed.savedAt < 24 * 60 * 60 * 1000) {
-          if (parsed.formData) {
-            console.log('📝 Restoring edit job draft from localStorage');
-            setFormData(parsed.formData);
-            if (parsed.customQuestions) {
-              setCustomQuestions(parsed.customQuestions);
-            }
-            if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
-              setCurrentStep(parsed.currentStep);
-            }
-            hasCompletedRestoreRef.current = true;
-            return;
-          }
-        } else {
-          // Clear old draft
-          localStorage.removeItem(draftKey);
+      const parseEditDraft = (raw: string | null) => {
+        if (!raw) return null;
+        try {
+          const parsed = JSON.parse(raw);
+          const savedAt = typeof parsed?.savedAt === 'number' ? parsed.savedAt : 0;
+          const rawStep = Number(parsed?.currentStep);
+          const restoredStep = Number.isFinite(rawStep) && rawStep >= 0 ? Math.floor(rawStep) : 0;
+          return {
+            savedAt,
+            step: restoredStep,
+            formData: parsed?.formData,
+            customQuestions: Array.isArray(parsed?.customQuestions) ? parsed.customQuestions : undefined,
+          };
+        } catch {
+          return null;
         }
-      }
-      
-      // No localStorage draft — check sessionStorage for currentStep only
-      const editSession = sessionStorage.getItem(EDIT_JOB_SESSION_KEY);
-      if (editSession) {
-        const parsed = JSON.parse(editSession);
-        if (parsed.jobId === job.id && typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
-          console.log('📝 Restoring edit job step from sessionStorage');
-          setCurrentStep(parsed.currentStep);
+      };
+
+      const localDraft = parseEditDraft(localStorage.getItem(draftKey));
+      const sessionDraft = parseEditDraft(sessionStorage.getItem(EDIT_JOB_SESSION_KEY));
+      const isLocalFresh = !!localDraft?.savedAt && Date.now() - localDraft.savedAt < 24 * 60 * 60 * 1000;
+      const bestStepSource = [localDraft, sessionDraft]
+        .filter((draft): draft is NonNullable<typeof draft> => !!draft)
+        .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))[0];
+
+      if (isLocalFresh && localDraft?.formData) {
+        console.log('📝 Restoring edit job draft from localStorage');
+        setFormData(localDraft.formData);
+        if (localDraft.customQuestions) {
+          setCustomQuestions(localDraft.customQuestions);
         }
+      } else if (localDraft && !isLocalFresh) {
+        localStorage.removeItem(draftKey);
       }
-      // Mark restore complete even without draft
+
+      if (bestStepSource) {
+        console.log('📝 Restoring edit job step from latest storage snapshot');
+        setCurrentStep(bestStepSource.step);
+      }
+
+      // Mark restore complete (with or without found draft)
       hasCompletedRestoreRef.current = true;
     } catch (e) {
       hasCompletedRestoreRef.current = true;
