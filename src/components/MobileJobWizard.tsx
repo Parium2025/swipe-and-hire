@@ -744,7 +744,7 @@ const MobileJobWizard = ({
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
-    if (!open || existingJob) return;
+    if (!open || existingJob || !hasCompletedRestoreRef.current) return;
 
     // Always save if user has progressed past step 0, even without content changes
     const hasProgressedPastStart = currentStep > 0;
