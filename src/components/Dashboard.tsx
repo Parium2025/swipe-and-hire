@@ -343,7 +343,7 @@ const Dashboard = memo(() => {
       </Card>
 
       {/* Mobile: Card list view */}
-      <div className="block md:hidden">
+      <div className="block md:hidden touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -363,8 +363,8 @@ const Dashboard = memo(() => {
             ))}
           </div>
         ) : filteredAndSortedJobs.length === 0 ? (
-          <div className="text-center text-white py-8 font-medium text-sm">
-            {getEmptyMessage(searchTerm, activeTab)}
+          <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
+            <span>{getEmptyMessage(searchTerm, activeTab)}</span>
           </div>
         ) : (
           <div className="space-y-2">
