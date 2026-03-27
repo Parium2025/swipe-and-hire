@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useRef, useEffect } from 'react';
+import { memo, useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Briefcase, Users, Eye, TrendingUp, MapPin, Calendar } from 'lucide-react';
@@ -17,6 +17,7 @@ import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -47,7 +48,7 @@ const Dashboard = memo(() => {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as JobStatusTab | null;
   const activeTab: JobStatusTab = tabParam === 'expired' ? 'expired' : 'active';
-  const setActiveTab = (tab: JobStatusTab) => {
+  const setActiveTab = useCallback((tab: JobStatusTab) => {
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       if (tab === 'active') {
@@ -57,7 +58,19 @@ const Dashboard = memo(() => {
       }
       return next;
     }, { replace: true });
-  };
+  }, [setSearchParams]);
+
+  // Swipe between tabs on mobile
+  const tabOrder: JobStatusTab[] = ['active', 'expired'];
+  const swipeToNextTab = useCallback(() => {
+    const idx = tabOrder.indexOf(activeTab);
+    if (idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
+  }, [activeTab, setActiveTab]);
+  const swipeToPrevTab = useCallback(() => {
+    const idx = tabOrder.indexOf(activeTab);
+    if (idx > 0) setActiveTab(tabOrder[idx - 1]);
+  }, [activeTab, setActiveTab]);
+  const tabSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextTab, onSwipeRight: swipeToPrevTab, threshold: 50 });
 
   const activeJobs = useMemo(() => allJobs.filter(job => 
     job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)
@@ -330,7 +343,7 @@ const Dashboard = memo(() => {
       </Card>
 
       {/* Mobile: Card list view */}
-      <div className="block md:hidden">
+      <div className="block md:hidden touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -350,8 +363,8 @@ const Dashboard = memo(() => {
             ))}
           </div>
         ) : filteredAndSortedJobs.length === 0 ? (
-          <div className="text-center text-white py-8 font-medium text-sm">
-            {getEmptyMessage(searchTerm, activeTab)}
+          <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
+            <span>{getEmptyMessage(searchTerm, activeTab)}</span>
           </div>
         ) : (
           <div className="space-y-2">
