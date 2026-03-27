@@ -82,11 +82,11 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
           </Button>
         )}
       </DialogTrigger>
-      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg">
+      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain">
         <DialogHeader>
           <DialogTitle className="text-white">Skapa nytt steg</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-2">
+        <div className="space-y-5 py-2">
           {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="new-stage-label" className="text-white">Namn</Label>
@@ -95,51 +95,48 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="T.ex. Referenskontroll"
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
+              className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40 h-12 text-base"
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               autoFocus
             />
           </div>
 
-          {/* Color picker and Icon picker side by side */}
-          <div className="flex gap-3">
-            {/* Color picker */}
-            <div className="space-y-2">
-              <Label className="text-white">Färg</Label>
-              <div className="[&_.react-colorful]:w-[170px] [&_.react-colorful]:h-[170px]">
-                <HexColorPicker 
-                  color={selectedColor} 
-                  onChange={setSelectedColor}
-                />
-              </div>
+          {/* Color picker — full width */}
+          <div className="space-y-2">
+            <Label className="text-white">Färg</Label>
+            <div className="[&_.react-colorful]:!w-full [&_.react-colorful]:!h-[180px]">
+              <HexColorPicker 
+                color={selectedColor} 
+                onChange={setSelectedColor}
+              />
             </div>
+          </div>
 
-            {/* Icon picker */}
-            <div className="flex-1 space-y-2">
-              <Label className="text-white">Ikon</Label>
-              <div className="grid grid-cols-5 gap-0">
-                {AVAILABLE_ICONS.map(({ name, Icon, label: iconLabel }) => (
-                  <button
-                    key={name}
-                    onClick={() => setSelectedIcon(name)}
-                    onMouseDown={(e) => e.currentTarget.blur()}
-                    onMouseUp={(e) => e.currentTarget.blur()}
-                    className={`w-7 h-7 rounded flex items-center justify-center transition-colors duration-300 focus:outline-none focus:ring-0 ${
-                      selectedIcon === name 
-                        ? 'bg-white/30 text-white' 
-                        : 'hover:bg-white/20 text-white'
-                    }`}
-                    title={iconLabel}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                  </button>
-                ))}
-              </div>
+          {/* Icon picker — full width, below color */}
+          <div className="space-y-2">
+            <Label className="text-white">Ikon</Label>
+            <div className="grid grid-cols-8 gap-1">
+              {AVAILABLE_ICONS.map(({ name, Icon, label: iconLabel }) => (
+                <button
+                  key={name}
+                  onClick={() => setSelectedIcon(name)}
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  onMouseUp={(e) => e.currentTarget.blur()}
+                  className={`h-11 w-full rounded-lg flex items-center justify-center transition-colors duration-150 focus:outline-none focus:ring-0 active:scale-95 touch-manipulation ${
+                    selectedIcon === name 
+                      ? 'bg-white/30 text-white ring-1 ring-white/40' 
+                      : 'bg-white/5 hover:bg-white/15 text-white/70'
+                  }`}
+                  title={iconLabel}
+                >
+                  <Icon className="h-5 w-5" />
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Preview - centered */}
-          <div className="space-y-2 pt-2 flex flex-col items-center">
+          <div className="space-y-2 pt-1 flex flex-col items-center">
             <Label className="text-white self-start">Förhandsvisning</Label>
             <TooltipProvider delayDuration={300}>
               <Tooltip>
@@ -168,6 +165,15 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
         <DialogFooter className="flex gap-2 pt-2">
           <Button
             variant="glass"
+            onClick={() => setOpen(false)}
+            onMouseDown={(e) => e.currentTarget.blur()}
+            onMouseUp={(e) => e.currentTarget.blur()}
+            className="min-h-[44px] rounded-full"
+          >
+            Avbryt
+          </Button>
+          <Button
+            variant="glass"
             onClick={handleCreate}
             onMouseDown={(e) => e.currentTarget.blur()}
             onMouseUp={(e) => e.currentTarget.blur()}
@@ -177,15 +183,6 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
             }`}
           >
             Skapa steg
-          </Button>
-          <Button
-            variant="glass"
-            onClick={() => setOpen(false)}
-            onMouseDown={(e) => e.currentTarget.blur()}
-            onMouseUp={(e) => e.currentTarget.blur()}
-            className="min-h-[44px] rounded-full"
-          >
-            Avbryt
           </Button>
         </DialogFooter>
       </DialogContentNoFocus>
