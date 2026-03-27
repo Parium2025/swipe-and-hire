@@ -461,11 +461,11 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
         {renderActionBar}
 
         {/* Candidate list */}
-        <ScrollArea className="overscroll-contain" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
+        <ScrollArea className="overscroll-contain touch-pan-y" style={{ maxHeight: 'calc(100dvh - 340px)' }} onTouchStart={stageSwipeHandlers.onTouchStart} onTouchMove={stageSwipeHandlers.onTouchMove} onTouchEnd={stageSwipeHandlers.onTouchEnd}>
           <div className="flex flex-col gap-2">
             {currentCandidates.length === 0 ? (
-              <div className="text-center py-12 text-sm text-white">
-                Inga kandidater i detta steg
+              <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center">
+                <span>Inga kandidater i detta steg</span>
               </div>
             ) : (
               currentCandidates.map((candidate) => (
