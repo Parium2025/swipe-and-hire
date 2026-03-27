@@ -7,10 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
 import {
   Dialog,
@@ -73,6 +69,8 @@ export function StageSettingsMenu({
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [colorDialogOpen, setColorDialogOpen] = useState(false);
+  const [iconDialogOpen, setIconDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [newLabel, setNewLabel] = useState('');
@@ -218,56 +216,27 @@ export function StageSettingsMenu({
             Byt namn
           </DropdownMenuItem>
           
-          {/* Color picker as submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <Palette className="h-4 w-4 mr-2" />
-              <span className="flex-1">Välj färg</span>
-              <div 
-                className="w-5 h-5 rounded-full border border-white/30 ml-2"
-                style={{ backgroundColor: `${displayColor}99` }}
-              />
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent 
-                className="p-3"
-                sideOffset={8}
-              >
-                <HexColorPicker 
-                  color={displayColor} 
-                  onChange={handleColorPickerChange}
-                />
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+          {/* Color picker - opens dialog */}
+          <DropdownMenuItem 
+            onClick={() => setColorDialogOpen(true)}
+            className="cursor-pointer"
+          >
+            <Palette className="h-4 w-4 mr-2" />
+            <span className="flex-1">Välj färg</span>
+            <div 
+              className="w-5 h-5 rounded-full border border-white/30 ml-2"
+              style={{ backgroundColor: `${displayColor}99` }}
+            />
+          </DropdownMenuItem>
 
-          {/* Icon submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <Image className="h-4 w-4 mr-2" />
-              Välj ikon
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent className="w-56">
-                <div className="grid grid-cols-5 gap-1 p-2">
-                  {AVAILABLE_ICONS.map(({ name, Icon, label }) => (
-                    <button
-                      key={name}
-                      onClick={() => handleIconChange(name)}
-                      className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
-                        currentConfig.iconName === name 
-                          ? 'bg-white/30 text-white' 
-                          : 'hover:bg-white/20 text-white'
-                      }`}
-                      title={label}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </button>
-                  ))}
-                </div>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+          {/* Icon picker - opens dialog */}
+          <DropdownMenuItem 
+            onClick={() => setIconDialogOpen(true)}
+            className="cursor-pointer"
+          >
+            <Image className="h-4 w-4 mr-2" />
+            Välj ikon
+          </DropdownMenuItem>
 
           <DropdownMenuSeparator />
           
@@ -340,7 +309,64 @@ export function StageSettingsMenu({
         </DialogContentNoFocus>
       </Dialog>
 
-      {/* Delete confirmation dialog */}
+      {/* Color picker dialog */}
+      <Dialog open={colorDialogOpen} onOpenChange={setColorDialogOpen}>
+        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain">
+          <DialogHeader>
+            <DialogTitle className="text-white">Välj färg</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="[&_.react-colorful]:!w-full [&_.react-colorful]:!h-[220px]">
+              <HexColorPicker 
+                color={displayColor} 
+                onChange={handleColorPickerChange}
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2 pt-2">
+            <Button
+              variant="glass"
+              onClick={() => setColorDialogOpen(false)}
+              onMouseDown={(e) => e.currentTarget.blur()}
+              onMouseUp={(e) => e.currentTarget.blur()}
+              className="min-h-[40px] h-10 rounded-full text-sm flex-1"
+            >
+              Klar
+            </Button>
+          </DialogFooter>
+        </DialogContentNoFocus>
+      </Dialog>
+
+      {/* Icon picker dialog */}
+      <Dialog open={iconDialogOpen} onOpenChange={setIconDialogOpen}>
+        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain">
+          <DialogHeader>
+            <DialogTitle className="text-white">Välj ikon</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <div className="grid grid-cols-8 gap-1">
+              {AVAILABLE_ICONS.map(({ name, Icon, label }) => (
+                <button
+                  key={name}
+                  onClick={async () => {
+                    await handleIconChange(name);
+                    setIconDialogOpen(false);
+                  }}
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  className={`h-11 w-full rounded-lg flex items-center justify-center transition-colors duration-150 focus:outline-none focus:ring-0 active:scale-95 touch-manipulation ${
+                    currentConfig.iconName === name 
+                      ? 'bg-white/30 text-white ring-1 ring-white/40' 
+                      : 'bg-white/5 hover:bg-white/15 text-white/70'
+                  }`}
+                  title={label}
+                >
+                  <Icon className="h-5 w-5" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </DialogContentNoFocus>
+      </Dialog>
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus 
           className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
