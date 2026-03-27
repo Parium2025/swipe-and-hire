@@ -73,6 +73,8 @@ export function StageSettingsMenu({
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [colorDialogOpen, setColorDialogOpen] = useState(false);
+  const [iconDialogOpen, setIconDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [newLabel, setNewLabel] = useState('');
