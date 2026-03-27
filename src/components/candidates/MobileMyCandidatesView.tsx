@@ -316,12 +316,9 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   }, []);
 
   const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
-    // Only touch/pen should trigger immediate tab switch on pointer down.
-    // Mouse should switch on click to avoid drag-scroll conflicts.
+    // Mouse: handled by onClick. Touch/pen: only track double-tap for settings menu.
+    // Do NOT switch activeTab here — let onClick handle it after scroll gesture resolves.
     if (pointerType === 'mouse') return;
-
-    setActiveTab(stage);
-    setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
 
     if (isReadOnly) return;
 
