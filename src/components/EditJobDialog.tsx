@@ -39,6 +39,7 @@ import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
+import { safeSetItem } from '@/lib/safeStorage';
 
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
@@ -133,6 +134,8 @@ interface EditJobDialogProps {
   onOpenChange: (open: boolean) => void;
   onJobUpdated: () => void;
 }
+
+const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
 
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -233,38 +236,66 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   
   // localStorage draft key for this specific job
   const draftKey = job?.id ? `parium_draft_edit-job-${job.id}` : null;
-  
-  // Save form state to localStorage for persistence across page refreshes
-  useEffect(() => {
+
+  const persistEditDraftSnapshot = useCallback(() => {
     if (!open || !draftKey || !job) return;
-    
-    // Always save the session marker so refresh can re-open the dialog
+
+    // Always save session marker so refresh can re-open dialog at same step
     try {
-      sessionStorage.setItem('parium-editing-job', JSON.stringify({
+      sessionStorage.setItem(EDIT_JOB_SESSION_KEY, JSON.stringify({
         jobId: job.id,
         currentStep,
       }));
     } catch {
       // ignore
     }
-    
-    // Save full draft only when there are actual changes
+
     const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
-    
-    if (hasChanges && hasUnsavedChanges) {
-      try {
-        localStorage.setItem(draftKey, JSON.stringify({
-          formData,
-          customQuestions,
-          currentStep,
-          savedAt: Date.now()
-        }));
-        console.log('💾 Edit job draft saved');
-      } catch (e) {
+    if (!hasChanges) return;
+
+    try {
+      const draftPayload = JSON.stringify({
+        formData,
+        customQuestions,
+        currentStep,
+        savedAt: Date.now(),
+      });
+
+      const saved = safeSetItem(draftKey, draftPayload);
+      if (!saved) {
         console.warn('Failed to save edit job draft');
       }
+    } catch {
+      console.warn('Failed to save edit job draft');
     }
-  }, [formData, customQuestions, currentStep, open, draftKey, hasUnsavedChanges, initialFormData, job]);
+  }, [open, draftKey, job, currentStep, formData, initialFormData, customQuestions]);
+
+  // Save on every relevant state change
+  useEffect(() => {
+    persistEditDraftSnapshot();
+  }, [persistEditDraftSnapshot]);
+
+  // Extra crash/refresh safety
+  useEffect(() => {
+    if (!open || !draftKey || !job) return;
+
+    const flushDraft = () => persistEditDraftSnapshot();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        flushDraft();
+      }
+    };
+
+    window.addEventListener('beforeunload', flushDraft);
+    window.addEventListener('pagehide', flushDraft);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', flushDraft);
+      window.removeEventListener('pagehide', flushDraft);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, [open, draftKey, job, persistEditDraftSnapshot]);
   
   // Restore draft from localStorage when opening, or at least restore currentStep from sessionStorage
   useEffect(() => {
@@ -294,7 +325,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       }
       
       // No localStorage draft — check sessionStorage for currentStep only
-      const editSession = sessionStorage.getItem('parium-editing-job');
+      const editSession = sessionStorage.getItem(EDIT_JOB_SESSION_KEY);
       if (editSession) {
         const parsed = JSON.parse(editSession);
         if (parsed.jobId === job.id && typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
@@ -311,7 +342,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const clearEditJobDraft = () => {
     if (draftKey) {
       localStorage.removeItem(draftKey);
-      sessionStorage.removeItem('parium-editing-job');
+      sessionStorage.removeItem(EDIT_JOB_SESSION_KEY);
       console.log('🗑️ Edit job draft cleared');
     }
   };
@@ -325,7 +356,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
     if (!hasOpenedEditDialogRef.current) return;
 
-    sessionStorage.removeItem('parium-editing-job');
+    sessionStorage.removeItem(EDIT_JOB_SESSION_KEY);
     hasOpenedEditDialogRef.current = false;
   }, [open]);
 
@@ -665,7 +696,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         }
 
         if (!hasPersistedStep && job?.id) {
-          const editSession = sessionStorage.getItem('parium-editing-job');
+          const editSession = sessionStorage.getItem(EDIT_JOB_SESSION_KEY);
           if (editSession) {
             const parsedSession = JSON.parse(editSession);
             hasPersistedStep = parsedSession?.jobId === job.id && typeof parsedSession?.currentStep === 'number' && parsedSession.currentStep >= 0;
