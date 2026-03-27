@@ -354,7 +354,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 flex-1 min-h-0" onTouchStart={stageSwipeHandlers.onTouchStart} onTouchMove={stageSwipeHandlers.onTouchMove} onTouchEnd={stageSwipeHandlers.onTouchEnd}>
         {/* Horizontal scrollable stage tabs — input-aware:
             Touch: native momentum scroll, no grab cursor, instant tab switch via touchStart
             Mouse: drag-to-scroll with grab cursor, tab switch via click (suppressed after drag) */}
@@ -460,33 +460,35 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
         {/* Inline action bar for selection mode */}
         {renderActionBar}
 
-        {/* Candidate list */}
-        <ScrollArea className="overscroll-contain touch-pan-y" style={{ maxHeight: 'calc(100dvh - 340px)' }} onTouchStart={stageSwipeHandlers.onTouchStart} onTouchMove={stageSwipeHandlers.onTouchMove} onTouchEnd={stageSwipeHandlers.onTouchEnd}>
-          <div className="flex flex-col gap-2">
-            {currentCandidates.length === 0 ? (
-              <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center">
-                <span>Inga kandidater i detta steg</span>
-              </div>
-            ) : (
-              currentCandidates.map((candidate) => (
-                <MyCandidateRow
-                  key={candidate.id}
-                  candidate={candidate}
-                  onOpen={() => onOpenProfile(candidate)}
-                  onMoveToStage={onMoveToStage}
-                  stages={stages}
-                  stageConfig={stageConfig}
-                  isSelectionMode={isSelectionMode}
-                  isSelected={selectedCandidateIds?.has(candidate.id)}
-                  onToggleSelect={() => onToggleSelect?.(candidate.id)}
-                  onPrefetch={() => onPrefetch?.(candidate)}
-                  onMarkAsViewed={() => onMarkAsViewed?.(candidate.application_id)}
-                />
-              ))
-            )}
-            {isSelectionMode && currentCandidates.length > 0 && <div className="h-2" />}
-          </div>
-        </ScrollArea>
+        {/* Candidate list — fills remaining space so swipe works on empty area too */}
+        <div className="flex-1 min-h-[40vh]">
+          <ScrollArea className="overscroll-contain touch-pan-y h-full" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
+            <div className="flex flex-col gap-2">
+              {currentCandidates.length === 0 ? (
+                <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center">
+                  <span>Inga kandidater i detta steg</span>
+                </div>
+              ) : (
+                currentCandidates.map((candidate) => (
+                  <MyCandidateRow
+                    key={candidate.id}
+                    candidate={candidate}
+                    onOpen={() => onOpenProfile(candidate)}
+                    onMoveToStage={onMoveToStage}
+                    stages={stages}
+                    stageConfig={stageConfig}
+                    isSelectionMode={isSelectionMode}
+                    isSelected={selectedCandidateIds?.has(candidate.id)}
+                    onToggleSelect={() => onToggleSelect?.(candidate.id)}
+                    onPrefetch={() => onPrefetch?.(candidate)}
+                    onMarkAsViewed={() => onMarkAsViewed?.(candidate.application_id)}
+                  />
+                ))
+              )}
+              {isSelectionMode && currentCandidates.length > 0 && <div className="h-2" />}
+            </div>
+          </ScrollArea>
+        </div>
 
       </div>
     </TooltipProvider>
