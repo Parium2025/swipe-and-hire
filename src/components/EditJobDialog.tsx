@@ -233,12 +233,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const { user } = useAuth();
   const { toast } = useToast();
   const hasOpenedEditDialogRef = useRef(false);
+  const hasCompletedRestoreRef = useRef(false);
   
   // localStorage draft key for this specific job
   const draftKey = job?.id ? `parium_draft_edit-job-${job.id}` : null;
 
   const persistEditDraftSnapshot = useCallback(() => {
-    if (!open || !draftKey || !job) return;
+    if (!open || !draftKey || !job || !hasCompletedRestoreRef.current) return;
 
     // Always save session marker so refresh can re-open dialog at same step
     try {
@@ -316,6 +317,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
               setCurrentStep(parsed.currentStep);
             }
+            hasCompletedRestoreRef.current = true;
             return;
           }
         } else {
@@ -333,10 +335,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
           setCurrentStep(parsed.currentStep);
         }
       }
+      // Mark restore complete even without draft
+      hasCompletedRestoreRef.current = true;
     } catch (e) {
+      hasCompletedRestoreRef.current = true;
       console.warn('Failed to restore edit job draft');
     }
   }, [open, draftKey, job?.id]);
+  
   
   // Clear draft after successful save
   const clearEditJobDraft = () => {
@@ -358,6 +364,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
     sessionStorage.removeItem(EDIT_JOB_SESSION_KEY);
     hasOpenedEditDialogRef.current = false;
+    hasCompletedRestoreRef.current = false;
   }, [open]);
 
   // Drag and drop sensors

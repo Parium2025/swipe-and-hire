@@ -160,6 +160,8 @@ const MobileJobWizard = ({
   
   // Track whether we've opened at least once (to distinguish initial mount from real close)
   const hasBeenOpenRef = useRef(false);
+  // Guard: don't persist draft until restore has completed (prevents overwriting saved draft with empty data)
+  const hasCompletedRestoreRef = useRef(false);
   
   // Reset state when dialog ACTUALLY closes (not on initial mount)
   useEffect(() => {
@@ -170,6 +172,7 @@ const MobileJobWizard = ({
       setCurrentStep(0);
       setIsInitializing(true);
       hasBeenOpenRef.current = false;
+      hasCompletedRestoreRef.current = false;
     }
   }, [open]);
   
@@ -213,16 +216,20 @@ const MobileJobWizard = ({
         const restoredFromSession = restoreDraftState(sessionStorage.getItem(JOB_WIZARD_SESSION_KEY));
         if (restoredFromSession) {
           console.log('📝 Restoring job wizard draft from sessionStorage');
+          hasCompletedRestoreRef.current = true;
           return;
         }
 
         const restoredFromLocal = restoreDraftState(localStorage.getItem(JOB_WIZARD_DRAFT_KEY));
         if (restoredFromLocal) {
           console.log('📝 Restoring job wizard draft from localStorage');
+          hasCompletedRestoreRef.current = true;
           return;
         }
       }
 
+      // No draft to restore — mark restore as complete so persist can start
+      hasCompletedRestoreRef.current = true;
       setCurrentStep(0);
       
       // Reset form state for fresh load
@@ -737,7 +744,7 @@ const MobileJobWizard = ({
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
-    if (!open || existingJob) return;
+    if (!open || existingJob || !hasCompletedRestoreRef.current) return;
 
     // Always save if user has progressed past step 0, even without content changes
     const hasProgressedPastStart = currentStep > 0;
