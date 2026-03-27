@@ -172,6 +172,7 @@ const MobileJobWizard = ({
       setCurrentStep(0);
       setIsInitializing(true);
       hasBeenOpenRef.current = false;
+      hasCompletedRestoreRef.current = false;
     }
   }, [open]);
   
