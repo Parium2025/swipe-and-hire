@@ -364,6 +364,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
     sessionStorage.removeItem(EDIT_JOB_SESSION_KEY);
     hasOpenedEditDialogRef.current = false;
+    hasCompletedRestoreRef.current = false;
   }, [open]);
 
   // Drag and drop sensors
