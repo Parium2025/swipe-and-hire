@@ -216,16 +216,20 @@ const MobileJobWizard = ({
         const restoredFromSession = restoreDraftState(sessionStorage.getItem(JOB_WIZARD_SESSION_KEY));
         if (restoredFromSession) {
           console.log('📝 Restoring job wizard draft from sessionStorage');
+          hasCompletedRestoreRef.current = true;
           return;
         }
 
         const restoredFromLocal = restoreDraftState(localStorage.getItem(JOB_WIZARD_DRAFT_KEY));
         if (restoredFromLocal) {
           console.log('📝 Restoring job wizard draft from localStorage');
+          hasCompletedRestoreRef.current = true;
           return;
         }
       }
 
+      // No draft to restore — mark restore as complete so persist can start
+      hasCompletedRestoreRef.current = true;
       setCurrentStep(0);
       
       // Reset form state for fresh load
