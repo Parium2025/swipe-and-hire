@@ -220,56 +220,27 @@ export function StageSettingsMenu({
             Byt namn
           </DropdownMenuItem>
           
-          {/* Color picker as submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <Palette className="h-4 w-4 mr-2" />
-              <span className="flex-1">Välj färg</span>
-              <div 
-                className="w-5 h-5 rounded-full border border-white/30 ml-2"
-                style={{ backgroundColor: `${displayColor}99` }}
-              />
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent 
-                className="p-3"
-                sideOffset={8}
-              >
-                <HexColorPicker 
-                  color={displayColor} 
-                  onChange={handleColorPickerChange}
-                />
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+          {/* Color picker - opens dialog */}
+          <DropdownMenuItem 
+            onClick={() => setColorDialogOpen(true)}
+            className="cursor-pointer"
+          >
+            <Palette className="h-4 w-4 mr-2" />
+            <span className="flex-1">Välj färg</span>
+            <div 
+              className="w-5 h-5 rounded-full border border-white/30 ml-2"
+              style={{ backgroundColor: `${displayColor}99` }}
+            />
+          </DropdownMenuItem>
 
-          {/* Icon submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <Image className="h-4 w-4 mr-2" />
-              Välj ikon
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent className="w-56">
-                <div className="grid grid-cols-5 gap-1 p-2">
-                  {AVAILABLE_ICONS.map(({ name, Icon, label }) => (
-                    <button
-                      key={name}
-                      onClick={() => handleIconChange(name)}
-                      className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
-                        currentConfig.iconName === name 
-                          ? 'bg-white/30 text-white' 
-                          : 'hover:bg-white/20 text-white'
-                      }`}
-                      title={label}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </button>
-                  ))}
-                </div>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+          {/* Icon picker - opens dialog */}
+          <DropdownMenuItem 
+            onClick={() => setIconDialogOpen(true)}
+            className="cursor-pointer"
+          >
+            <Image className="h-4 w-4 mr-2" />
+            Välj ikon
+          </DropdownMenuItem>
 
           <DropdownMenuSeparator />
           
