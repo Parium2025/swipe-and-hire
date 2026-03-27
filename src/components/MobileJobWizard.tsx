@@ -160,6 +160,8 @@ const MobileJobWizard = ({
   
   // Track whether we've opened at least once (to distinguish initial mount from real close)
   const hasBeenOpenRef = useRef(false);
+  // Guard: don't persist draft until restore has completed (prevents overwriting saved draft with empty data)
+  const hasCompletedRestoreRef = useRef(false);
   
   // Reset state when dialog ACTUALLY closes (not on initial mount)
   useEffect(() => {
