@@ -46,6 +46,7 @@ import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
+import { safeSetItem } from '@/lib/safeStorage';
 
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
@@ -175,8 +176,6 @@ const MobileJobWizard = ({
   // Initialize and restore draft state when opening
   useEffect(() => {
     if (open) {
-      setIsInitializing(false);
-      
       setIsInitializing(false);
 
       const restoreDraftState = (rawDraft: string | null): boolean => {
@@ -737,18 +736,12 @@ const MobileJobWizard = ({
     job_image_desktop_url: ''
   });
   
-  // Save form state to localStorage for persistence across page refreshes
-  // AND sessionStorage for tab switching
-  useEffect(() => {
-    if (!open) return;
-    
-    // Don't save drafts when editing existing jobs (they're already saved in DB)
-    if (existingJob) return;
-    
+  const persistCreateDraftSnapshot = useCallback(() => {
+    if (!open || existingJob) return;
+
     // Always save if user has progressed past step 0, even without content changes
     const hasProgressedPastStart = currentStep > 0;
-    
-    // Check if there's meaningful content to save
+
     const hasContent = hasProgressedPastStart || Object.entries(formData).some(([key, value]) => {
       if (key === 'title' && value === jobTitle) return false; // Ignore default title
       if (key === 'positions_count' && value === '1') return false; // Ignore default
@@ -758,25 +751,53 @@ const MobileJobWizard = ({
       if (Array.isArray(value)) return value.length > 0;
       return false;
     });
-    
-    if (hasContent) {
-      try {
-        const draftData = JSON.stringify({
-          formData,
-          currentStep,
-          customQuestions,
-          savedAt: Date.now()
-        });
-        
-        // Save to both storages
-        sessionStorage.setItem(JOB_WIZARD_SESSION_KEY, draftData);
-        localStorage.setItem(JOB_WIZARD_DRAFT_KEY, draftData);
-        console.log('💾 Job wizard draft saved');
-      } catch (e) {
-        console.warn('Failed to save job wizard state');
+
+    if (!hasContent) return;
+
+    try {
+      const draftData = JSON.stringify({
+        formData,
+        currentStep,
+        customQuestions,
+        savedAt: Date.now(),
+      });
+
+      sessionStorage.setItem(JOB_WIZARD_SESSION_KEY, draftData);
+      const localSaved = safeSetItem(JOB_WIZARD_DRAFT_KEY, draftData);
+      if (!localSaved) {
+        console.warn('Failed to persist job wizard draft to localStorage');
       }
+    } catch {
+      console.warn('Failed to save job wizard state');
     }
-  }, [formData, currentStep, customQuestions, open, existingJob, jobTitle]);
+  }, [open, existingJob, currentStep, formData, customQuestions, jobTitle]);
+
+  // Save on every relevant state change
+  useEffect(() => {
+    persistCreateDraftSnapshot();
+  }, [persistCreateDraftSnapshot]);
+
+  // Extra safety for refresh/crash/backgrounding
+  useEffect(() => {
+    if (!open || existingJob) return;
+
+    const flushDraft = () => persistCreateDraftSnapshot();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        flushDraft();
+      }
+    };
+
+    window.addEventListener('beforeunload', flushDraft);
+    window.addEventListener('pagehide', flushDraft);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', flushDraft);
+      window.removeEventListener('pagehide', flushDraft);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, [open, existingJob, persistCreateDraftSnapshot]);
   
   // NOTE: localStorage restoration is now handled in the main 'open' useEffect at the top
   // to prevent race conditions with initialization.
@@ -2464,13 +2485,7 @@ const MobileJobWizard = ({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        setCurrentStep(0);
-        setIsInitializing(true);
-      }
-      onOpenChange(isOpen);
-    }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContentNoFocus 
         className="premium-modal-motion premium-edit-dialog parium-panel max-w-none h-auto bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         onInteractOutside={(e) => e.preventDefault()}
