@@ -309,16 +309,39 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         // Only restore if saved recently (within 24 hours)
         if (parsed.savedAt && Date.now() - parsed.savedAt < 24 * 60 * 60 * 1000) {
           if (parsed.formData) {
-311:             console.log('📝 Restoring edit job draft from localStorage');
-312:             setFormData(parsed.formData);
-313:             if (parsed.customQuestions) {
-314:               setCustomQuestions(parsed.customQuestions);
-315:             }
-316:             if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
-317:               setCurrentStep(parsed.currentStep);
-318:             }
-319:             hasCompletedRestoreRef.current = true;
-320:             return;
+            console.log('📝 Restoring edit job draft from localStorage');
+            setFormData(parsed.formData);
+            if (parsed.customQuestions) {
+              setCustomQuestions(parsed.customQuestions);
+            }
+            if (typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
+              setCurrentStep(parsed.currentStep);
+            }
+            hasCompletedRestoreRef.current = true;
+            return;
+          }
+        } else {
+          // Clear old draft
+          localStorage.removeItem(draftKey);
+        }
+      }
+      
+      // No localStorage draft — check sessionStorage for currentStep only
+      const editSession = sessionStorage.getItem(EDIT_JOB_SESSION_KEY);
+      if (editSession) {
+        const parsed = JSON.parse(editSession);
+        if (parsed.jobId === job.id && typeof parsed.currentStep === 'number' && parsed.currentStep >= 0) {
+          console.log('📝 Restoring edit job step from sessionStorage');
+          setCurrentStep(parsed.currentStep);
+        }
+      }
+      // Mark restore complete even without draft
+      hasCompletedRestoreRef.current = true;
+    } catch (e) {
+      hasCompletedRestoreRef.current = true;
+      console.warn('Failed to restore edit job draft');
+    }
+  }, [open, draftKey, job?.id]);
           }
         } else {
           // Clear old draft
