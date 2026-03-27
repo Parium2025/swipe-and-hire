@@ -313,7 +313,64 @@ export function StageSettingsMenu({
         </DialogContentNoFocus>
       </Dialog>
 
-      {/* Delete confirmation dialog */}
+      {/* Color picker dialog */}
+      <Dialog open={colorDialogOpen} onOpenChange={setColorDialogOpen}>
+        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain">
+          <DialogHeader>
+            <DialogTitle className="text-white">Välj färg</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="[&_.react-colorful]:!w-full [&_.react-colorful]:!h-[220px]">
+              <HexColorPicker 
+                color={displayColor} 
+                onChange={handleColorPickerChange}
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2 pt-2">
+            <Button
+              variant="glass"
+              onClick={() => setColorDialogOpen(false)}
+              onMouseDown={(e) => e.currentTarget.blur()}
+              onMouseUp={(e) => e.currentTarget.blur()}
+              className="min-h-[40px] h-10 rounded-full text-sm flex-1"
+            >
+              Klar
+            </Button>
+          </DialogFooter>
+        </DialogContentNoFocus>
+      </Dialog>
+
+      {/* Icon picker dialog */}
+      <Dialog open={iconDialogOpen} onOpenChange={setIconDialogOpen}>
+        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain">
+          <DialogHeader>
+            <DialogTitle className="text-white">Välj ikon</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <div className="grid grid-cols-8 gap-1">
+              {AVAILABLE_ICONS.map(({ name, Icon, label }) => (
+                <button
+                  key={name}
+                  onClick={async () => {
+                    await handleIconChange(name);
+                    setIconDialogOpen(false);
+                  }}
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  className={`h-11 w-full rounded-lg flex items-center justify-center transition-colors duration-150 focus:outline-none focus:ring-0 active:scale-95 touch-manipulation ${
+                    currentConfig.iconName === name 
+                      ? 'bg-white/30 text-white ring-1 ring-white/40' 
+                      : 'bg-white/5 hover:bg-white/15 text-white/70'
+                  }`}
+                  title={label}
+                >
+                  <Icon className="h-5 w-5" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </DialogContentNoFocus>
+      </Dialog>
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus 
           className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
