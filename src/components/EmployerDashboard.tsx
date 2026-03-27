@@ -585,12 +585,14 @@ const EmployerDashboard = memo(() => {
                 ))}
               </div>
             ) : tabFilteredJobs.length === 0 ? (
-              <div className="text-center text-white py-8 font-medium text-sm">
+              <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh]  flex items-center justify-center">
+                <span>
                 {searchTerm.trim() 
                   ? 'Inga annonser matchar din sökning' 
                   : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
                   : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
                   : 'Inga utkast.'}
+                </span>
               </div>
             ) : (
               <>
