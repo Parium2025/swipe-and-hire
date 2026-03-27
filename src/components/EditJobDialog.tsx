@@ -233,12 +233,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const { user } = useAuth();
   const { toast } = useToast();
   const hasOpenedEditDialogRef = useRef(false);
+  const hasCompletedRestoreRef = useRef(false);
   
   // localStorage draft key for this specific job
   const draftKey = job?.id ? `parium_draft_edit-job-${job.id}` : null;
 
   const persistEditDraftSnapshot = useCallback(() => {
-    if (!open || !draftKey || !job) return;
+    if (!open || !draftKey || !job || !hasCompletedRestoreRef.current) return;
 
     // Always save session marker so refresh can re-open dialog at same step
     try {
