@@ -565,7 +565,7 @@ const EmployerDashboard = memo(() => {
       </Card>
 
       {/* Mobile: Card view — outside Card wrapper for edge-to-edge layout */}
-      <div className="md:hidden">
+      <div className="md:hidden touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
             {loading ? (
               <div className="space-y-3 px-2">
                 {Array.from({ length: 4 }).map((_, i) => (
