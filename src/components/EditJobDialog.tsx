@@ -246,13 +246,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       sessionStorage.setItem(EDIT_JOB_SESSION_KEY, JSON.stringify({
         jobId: job.id,
         currentStep,
+        savedAt: Date.now(),
       }));
     } catch {
       // ignore
     }
 
     const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
-    if (!hasChanges) return;
+    const hasProgressedPastStart = currentStep > 0;
+    if (!hasChanges && !hasProgressedPastStart) return;
 
     try {
       const draftPayload = JSON.stringify({
