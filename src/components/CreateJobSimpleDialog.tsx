@@ -67,14 +67,13 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     }
   }, []);
 
-  // Auto-restore: if there's a create-job draft in localStorage, skip straight to wizard
+  // Auto-restore: if there's a create-job draft/session, re-open wizard directly
   useEffect(() => {
     if (hasAutoRestoredDraft.current || !user) return;
     hasAutoRestoredDraft.current = true;
 
-    const openWizardFromState = (title: string) => {
-      if (!title?.trim()) return false;
-      setJobTitle(title);
+    const openWizardFromState = (title?: string) => {
+      setJobTitle(typeof title === 'string' ? title : '');
       setSelectedTemplate(null);
       setTimeout(() => setShowDetailDialog(true), 300);
       return true;
@@ -84,8 +83,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       const savedDraft = localStorage.getItem('parium_draft_job-wizard');
       if (savedDraft) {
         const parsed = JSON.parse(savedDraft);
-        // Only auto-open if saved recently (within 1 hour) and has meaningful content
-        if (parsed.savedAt && Date.now() - parsed.savedAt < 60 * 60 * 1000 && parsed.formData?.title) {
+        // Match wizard TTL (24h) and allow restore even if title is empty
+        if (parsed?.savedAt && Date.now() - parsed.savedAt < 24 * 60 * 60 * 1000 && parsed?.formData) {
           console.log('🔄 Auto-restoring create job wizard from draft');
           if (openWizardFromState(parsed.formData.title)) {
             return;
@@ -96,7 +95,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       const savedSession = sessionStorage.getItem(CREATE_JOB_SESSION_KEY);
       if (savedSession) {
         const parsedSession = JSON.parse(savedSession);
-        if (openWizardFromState(parsedSession?.jobTitle || '')) {
+        if (openWizardFromState(parsedSession?.jobTitle)) {
           console.log('🔄 Auto-restoring create job wizard from session');
         }
       }
