@@ -255,7 +255,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
 
   // Dropdown styling matching nav dropdowns - left aligned
   const dropdownContentClass = "min-w-[280px] glass-panel shadow-xl z-[10000] rounded-lg p-0";
-  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/15  focus-visible:bg-white/15 focus:outline-none rounded-md px-2.5 py-2 text-sm transition-colors";
+  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/15  focus-visible:bg-white/15 focus:outline-none rounded-md px-3 py-3 text-sm transition-colors min-h-[44px]";
 
   // chipsOnly mode: only render the filter chips
   if (chipsOnly) {
@@ -358,7 +358,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             <div 
               ref={scrollContainerRef}
               onScroll={updateScrollIndicator}
-              className="max-h-[220px] overflow-y-auto scrollbar-none"
+              className="max-h-[320px] overflow-y-auto scrollbar-none"
             >
               {isLoading ? (
                 <div className="p-4 text-center text-white text-sm">
@@ -405,9 +405,9 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
                           {isExpanded && (
                             <div className="space-y-0.5 pl-2">
                               {/* Alla option */}
-                              <button
+                                <button
                                 onClick={() => setAllAnswers(question.question_text)}
-                                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors focus:outline-none ${
+                                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-left text-sm transition-colors focus:outline-none min-h-[40px] ${
                                   allSelected
                                     ? 'bg-white/15 text-white'
                                     : 'hover:bg-white/15  focus-visible:bg-white/15 text-white'
@@ -427,7 +427,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
                                   <button
                                     key={option}
                                     onClick={() => toggleAnswer(question.question_text, option, options)}
-                                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors focus:outline-none ${
+                                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-left text-sm transition-colors focus:outline-none min-h-[40px] ${
                                       isOptionSelected
                                         ? 'bg-white/15 text-white'
                                         : 'hover:bg-white/15  focus-visible:bg-white/15 text-white'
