@@ -9,6 +9,7 @@ import { CandidateNotesPanel } from '@/components/candidateProfile/CandidateNote
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
 import { TABS, type TabKey } from './CandidateSlideConstants';
+import { useRef as useRefAlias, useEffect as useEffectAlias, useState as useStateAlias, useCallback as useCallbackAlias } from 'react';
 import { CandidateSlideProfileTab } from './CandidateSlideProfileTab';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
