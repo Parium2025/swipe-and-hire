@@ -100,7 +100,7 @@ export const ExpandedNotesDialog = memo(({
           </div>
 
           <div className="mb-3 pb-2 border-b border-white/10 shrink-0">
-            <NotesToolbar editor={editor} />
+            <NotesToolbar editor={editor} large />
           </div>
 
           <div className="flex-1 min-h-0 relative bg-white/10 rounded-lg overflow-hidden">
