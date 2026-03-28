@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback, memo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Filter, Search, X, ChevronDown, MessageSquare } from 'lucide-react';
 import { useOrganizationQuestions, OrganizationQuestion } from '@/hooks/useOrganizationQuestions';
 
 // Component for question item with smart tooltip + tap-to-preview on touch
-const QuestionItem = ({ 
+const QuestionItem = memo(({ 
   question, 
   isSelected, 
   isExpanded, 
@@ -34,18 +34,13 @@ const QuestionItem = ({
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const checkTruncation = useCallback(() => {
+  // Check truncation once on mount and when text changes
+  useEffect(() => {
     const el = textRef.current;
     if (el) {
       setIsTruncated(el.scrollWidth > el.clientWidth);
     }
-  }, []);
-
-  useEffect(() => {
-    checkTruncation();
-    window.addEventListener('resize', checkTruncation);
-    return () => window.removeEventListener('resize', checkTruncation);
-  }, [checkTruncation, question.question_text]);
+  }, [question.question_text]);
 
   // Clean up tooltip timeout on unmount
   useEffect(() => {
@@ -55,15 +50,12 @@ const QuestionItem = ({
   }, []);
 
   const handleClick = useCallback(() => {
-    // If truncated and tooltip not yet shown → first tap shows tooltip, don't toggle
     if (isTruncated && !showTooltip) {
       setShowTooltip(true);
-      // Auto-hide tooltip after 2.5s
       if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
       tooltipTimeoutRef.current = setTimeout(() => setShowTooltip(false), 2500);
       return;
     }
-    // Second tap (or non-truncated): actually toggle
     setShowTooltip(false);
     onToggle();
   }, [isTruncated, showTooltip, onToggle]);
@@ -104,7 +96,7 @@ const QuestionItem = ({
   }
 
   return buttonContent;
-};
+});
 
 export interface QuestionFilterValue {
   question: string;
@@ -129,13 +121,18 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
   const [canScrollDown, setCanScrollDown] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Check if there's more content to scroll
+  // Throttled scroll indicator to avoid excessive re-renders on touch
+  const scrollRAF = useRef<number | null>(null);
   const updateScrollIndicator = useCallback(() => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      const hasMoreToScroll = container.scrollHeight - container.scrollTop - container.clientHeight > 5;
-      setCanScrollDown(hasMoreToScroll);
-    }
+    if (scrollRAF.current) return;
+    scrollRAF.current = requestAnimationFrame(() => {
+      scrollRAF.current = null;
+      const container = scrollContainerRef.current;
+      if (container) {
+        const hasMoreToScroll = container.scrollHeight - container.scrollTop - container.clientHeight > 5;
+        setCanScrollDown(hasMoreToScroll);
+      }
+    });
   }, []);
 
   // Filter questions by search term AND only show filterable types
@@ -381,7 +378,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             <div 
               ref={scrollContainerRef}
               onScroll={updateScrollIndicator}
-              className="max-h-[320px] overflow-y-auto scrollbar-none"
+              className="max-h-[320px] overflow-y-auto scrollbar-none overscroll-contain [-webkit-overflow-scrolling:touch]"
             >
               {isLoading ? (
                 <div className="p-4 text-center text-white text-sm">
