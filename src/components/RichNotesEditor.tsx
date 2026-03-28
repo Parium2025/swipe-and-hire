@@ -91,7 +91,8 @@ export const NotesToolbar = ({ editor, className, compact = false, large = false
     if (!editor) return;
     const handler = () => setTick(t => t + 1);
     editor.on('transaction', handler);
-    return () => { editor.off('transaction', handler); };
+    editor.on('selectionUpdate', handler);
+    return () => { editor.off('transaction', handler); editor.off('selectionUpdate', handler); };
   }, [editor]);
   const handleBold = useCallback(() => {
     editor?.chain().focus().toggleBold().run();
