@@ -502,7 +502,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
             className="flex flex-col gap-2"
           >
             {currentApps.length === 0 ? (
-              <div className="text-center py-12 text-sm text-white">
+              <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center" style={{ touchAction: 'pan-y' }}>
                 Inga kandidater i detta steg
               </div>
             ) : (
