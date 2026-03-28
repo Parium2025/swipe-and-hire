@@ -1,4 +1,5 @@
 import { memo, useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
@@ -283,9 +284,29 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
   const listRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Auto-scroll the tab strip to keep the active tab visible
+  useEffect(() => {
+    const el = tabRefs.current[activeTab];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [activeTab]);
+
+  // Swipe between stage tabs on candidate list area
+  const swipeToNextStage = useCallback(() => {
+    const idx = stages.indexOf(activeTab);
+    if (idx < stages.length - 1) setActiveTab(stages[idx + 1]);
+  }, [activeTab, stages]);
+  const swipeToPrevStage = useCallback(() => {
+    const idx = stages.indexOf(activeTab);
+    if (idx > 0) setActiveTab(stages[idx - 1]);
+  }, [activeTab, stages]);
+  const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
 
   const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
     if (pointerType === 'mouse') return;
@@ -365,6 +386,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           return (
             <div
               key={stage}
+               ref={(el) => { tabRefs.current[stage] = el; }}
                data-stage-tab
                tabIndex={0}
                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
@@ -460,7 +482,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
       {renderActionBar}
 
       {/* Candidate list — internally scrollable so action bar stays visible */}
-      <div className="relative">
+      <div className="relative" onTouchStart={stageSwipeHandlers.onTouchStart} onTouchMove={stageSwipeHandlers.onTouchMove} onTouchEnd={stageSwipeHandlers.onTouchEnd}>
         {/* Scroll position indicator — fades in on scroll, fades out after 2s */}
         {currentApps.length > 6 && (
           <div
@@ -480,7 +502,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
             className="flex flex-col gap-2"
           >
             {currentApps.length === 0 ? (
-              <div className="text-center py-12 text-sm text-white">
+              <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center" style={{ touchAction: 'pan-y' }}>
                 Inga kandidater i detta steg
               </div>
             ) : (
