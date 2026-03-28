@@ -362,7 +362,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   }, [currentApps.length]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 flex-1 min-h-0">
       {/* Horizontal scrollable stage tabs — native momentum on touch, drag on desktop */}
       <div
         ref={dragScrollRef}
@@ -481,8 +481,13 @@ export const MobileCandidateView = memo(function MobileCandidateView({
       {/* Inline action bar for selection mode — placed above candidate list */}
       {renderActionBar}
 
-      {/* Candidate list — internally scrollable so action bar stays visible */}
-      <div className="relative flex-1" onTouchStart={stageSwipeHandlers.onTouchStart} onTouchMove={stageSwipeHandlers.onTouchMove} onTouchEnd={stageSwipeHandlers.onTouchEnd}>
+      {/* Candidate list — swipe here switches stages step by step */}
+      <div
+        className="relative flex-1 min-h-[40vh]"
+        onTouchStart={stageSwipeHandlers.onTouchStart}
+        onTouchMove={stageSwipeHandlers.onTouchMove}
+        onTouchEnd={stageSwipeHandlers.onTouchEnd}
+      >
         {/* Scroll position indicator — fades in on scroll, fades out after 2s */}
         {currentApps.length > 6 && (
           <div
@@ -495,14 +500,14 @@ export const MobileCandidateView = memo(function MobileCandidateView({
             </span>
           </div>
         )}
-        <ScrollArea className="overscroll-contain" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
+        <ScrollArea className="overscroll-contain touch-pan-y h-full" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
           <div
             ref={listRef}
             onScroll={handleListScroll}
             className="flex flex-col gap-2"
           >
             {currentApps.length === 0 ? (
-              <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center" style={{ touchAction: 'pan-y' }}>
+              <div className="text-center py-12 text-sm text-white min-h-[40vh] flex items-center justify-center">
                 Inga kandidater i detta steg
               </div>
             ) : (
