@@ -1,4 +1,4 @@
-import { useState, useCallback, TouchEvent } from 'react';
+import { useCallback, useRef, TouchEvent } from 'react';
 
 interface UseSwipeGestureOptions {
   onSwipeLeft?: () => void;
@@ -11,32 +11,34 @@ export function useSwipeGesture({
   onSwipeRight,
   threshold = 50,
 }: UseSwipeGestureOptions) {
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const touchStartRef = useRef<number | null>(null);
+  const touchEndRef = useRef<number | null>(null);
 
   const onTouchStart = useCallback((e: TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    touchEndRef.current = null;
+    touchStartRef.current = e.targetTouches[0].clientX;
   }, []);
 
   const onTouchMove = useCallback((e: TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    touchEndRef.current = e.targetTouches[0].clientX;
   }, []);
 
   const onTouchEnd = useCallback(() => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > threshold;
-    const isRightSwipe = distance < -threshold;
+    const start = touchStartRef.current;
+    const end = touchEndRef.current;
+    if (start === null || end === null) return;
 
-    if (isLeftSwipe && onSwipeLeft) {
+    const distance = start - end;
+    if (distance > threshold && onSwipeLeft) {
       onSwipeLeft();
     }
-    if (isRightSwipe && onSwipeRight) {
+    if (distance < -threshold && onSwipeRight) {
       onSwipeRight();
     }
-  }, [touchStart, touchEnd, threshold, onSwipeLeft, onSwipeRight]);
+
+    touchStartRef.current = null;
+    touchEndRef.current = null;
+  }, [threshold, onSwipeLeft, onSwipeRight]);
 
   return {
     onTouchStart,
