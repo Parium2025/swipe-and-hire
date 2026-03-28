@@ -154,13 +154,13 @@ export const CandidateSlide = memo(function CandidateSlide({
                   setSwipeDirection(toIdx > fromIdx ? 1 : -1);
                   setActiveTab(tab.key);
                 }}
-                className={`flex-1 px-1.5 py-2.5 text-sm font-medium transition-colors min-w-0 ${
+                className={`flex-1 px-1 py-2.5 text-xs font-medium transition-colors min-w-0 ${
                   isActive ? 'text-white' : 'text-white/50'
                 }`}
               >
-                <div className="flex items-center justify-center gap-1.5 truncate">
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate leading-none">{tab.label}</span>
+                <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="leading-none">{tab.label}</span>
                 </div>
               </button>
             );
