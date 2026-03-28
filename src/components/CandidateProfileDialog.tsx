@@ -96,51 +96,6 @@ export const CandidateProfileDialog = ({
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'comments'>('activity');
   const [mobileTab, setMobileTab] = useState<'profile' | 'activity' | 'comments'>('profile');
-  const MOBILE_TABS: ('profile' | 'activity' | 'comments')[] = ['profile', 'activity', 'comments'];
-  const mobileTouchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
-  const mobileSwipeLockRef = useRef<'horizontal' | 'vertical' | null>(null);
-
-  const onMobileTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    mobileTouchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
-    mobileSwipeLockRef.current = null;
-  }, []);
-
-  const onMobileTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!mobileTouchStartRef.current) return;
-    const touch = e.touches[0];
-    const dx = Math.abs(touch.clientX - mobileTouchStartRef.current.x);
-    const dy = Math.abs(touch.clientY - mobileTouchStartRef.current.y);
-    if (!mobileSwipeLockRef.current && (dx > 10 || dy > 10)) {
-      mobileSwipeLockRef.current = dx > dy * 1.5 ? 'horizontal' : 'vertical';
-    }
-    if (mobileSwipeLockRef.current === 'horizontal') {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }, []);
-
-  const onMobileTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!mobileTouchStartRef.current || mobileSwipeLockRef.current !== 'horizontal') {
-      mobileTouchStartRef.current = null;
-      mobileSwipeLockRef.current = null;
-      return;
-    }
-    const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - mobileTouchStartRef.current.x;
-    const elapsed = Date.now() - mobileTouchStartRef.current.time;
-    const velocity = Math.abs(deltaX) / elapsed;
-    if (Math.abs(deltaX) > 30 || (velocity > 0.3 && Math.abs(deltaX) > 20)) {
-      const currentIdx = MOBILE_TABS.indexOf(mobileTab);
-      if (deltaX < 0 && currentIdx < MOBILE_TABS.length - 1) {
-        setMobileTab(MOBILE_TABS[currentIdx + 1]);
-      } else if (deltaX > 0 && currentIdx > 0) {
-        setMobileTab(MOBILE_TABS[currentIdx - 1]);
-      }
-    }
-    mobileTouchStartRef.current = null;
-    mobileSwipeLockRef.current = null;
-  }, [mobileTab]);
   const [newNote, setNewNote, clearNoteDraft] = useFieldDraft(
     `candidate-note-${application?.applicant_id || 'unknown'}`
   );
@@ -357,7 +312,7 @@ export const CandidateProfileDialog = ({
 
         <div className="flex flex-1 min-h-0 min-w-0 overflow-x-hidden md:max-h-[85vh]">
           {/* Main content - left side */}
-          <div className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 pt-2 md:p-5 space-y-4 [overflow-wrap:anywhere] [&_a]:break-all [&_p]:break-words [&_span]:break-words ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)} onTouchStart={onMobileTouchStart} onTouchMove={onMobileTouchMove} onTouchEnd={onMobileTouchEnd}>
+          <div className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 pt-2 md:p-5 space-y-4 [overflow-wrap:anywhere] [&_a]:break-all [&_p]:break-words [&_span]:break-words ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
 
           {/* Candidate navigation bar */}
           {candidateTotal != null && candidateTotal >= 1 && (
@@ -561,14 +516,14 @@ export const CandidateProfileDialog = ({
 
           {/* Mobile Activity/Comments tab content */}
           {mobileTab === 'activity' && (
-            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4" onTouchStart={onMobileTouchStart} onTouchMove={onMobileTouchMove} onTouchEnd={onMobileTouchEnd}>
+            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4">
               <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
                 <CandidateActivityLog applicantId={application?.applicant_id || null} />
               </SectionErrorBoundary>
             </div>
           )}
           {mobileTab === 'comments' && (
-            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4" onTouchStart={onMobileTouchStart} onTouchMove={onMobileTouchMove} onTouchEnd={onMobileTouchEnd}>
+            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4">
               <SectionErrorBoundary fallbackLabel="Anteckningar">
                 <CandidateNotesPanel {...notesPanelProps} />
               </SectionErrorBoundary>
