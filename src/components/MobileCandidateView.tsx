@@ -309,9 +309,9 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
 
   const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
+    // Mouse: handled by onClick. Touch/pen: only track double-tap for settings menu.
+    // Do NOT switch activeTab here — let onClick handle it after scroll gesture resolves.
     if (pointerType === 'mouse') return;
-    setActiveTab(stage);
-    setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
 
     const now = Date.now();
     const lastTap = lastTouchTapRef.current;
