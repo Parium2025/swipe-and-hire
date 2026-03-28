@@ -28,6 +28,9 @@ import {
   SectionErrorBoundary,
   InteractiveStarRating,
   ProfileInfoSections,
+} from '@/components/candidateProfile';
+import { MobileProfileTabs } from '@/components/candidateProfile/MobileProfileTabs';
+import {
   ProfileActions,
   DeleteNoteDialog,
   RemoveCandidateDialog,
@@ -294,43 +297,18 @@ export const CandidateProfileDialog = ({
         </DialogHeader>
 
         {/* Mobile tabs header */}
-        <div className="md:hidden flex shrink-0 items-center border-b border-white/20 relative">
-          <motion.div
-            className="absolute bottom-0 h-0.5 bg-white"
-            initial={false}
-            animate={{
-              left: `calc(${mobileTab === 'profile' ? 0 : mobileTab === 'activity' ? 1 : 2} * ((100% - 44px) / 3))`,
-              width: `calc((100% - 44px) / 3)`,
-            }}
-            transition={{ type: "spring", stiffness: 300, damping: 35, mass: 0.8 }}
-          />
-          {[
-            { key: 'profile' as const, label: 'Profil', icon: User },
-            { key: 'activity' as const, label: 'Aktivitet', icon: Activity },
-            { key: 'comments' as const, label: 'Anteckningar', icon: StickyNote },
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setMobileTab(tab.key)}
-              className={`flex-1 px-1 py-2.5 text-xs font-medium transition-colors min-w-0 ${
-                mobileTab === tab.key ? 'text-white' : 'text-white/50'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-1 whitespace-nowrap min-w-0">
-                <tab.icon className="h-3.5 w-3.5 shrink-0" />
-                <span className="leading-none">{tab.label}</span>
-              </div>
-            </button>
-          ))}
-          <button
+        <MobileProfileTabs
+          mobileTab={mobileTab}
+          setMobileTab={setMobileTab}
+          closeButton={<button
             style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
             onClick={() => onOpenChange(false)}
             aria-label="Stäng"
             className={cn(dialogCloseButtonClassName, 'static')}
           >
             <X className={dialogCloseIconClassName} />
-          </button>
-        </div>
+          </button>}
+        />
 
         <div className="flex flex-1 min-h-0 min-w-0 overflow-x-hidden md:max-h-[85vh]">
           {/* Main content - left side */}

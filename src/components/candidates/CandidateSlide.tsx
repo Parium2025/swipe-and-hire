@@ -39,6 +39,27 @@ export const CandidateSlide = memo(function CandidateSlide({
   const [swipeDirection, setSwipeDirection] = useState<1 | -1>(1);
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const swipeLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
+  const slideTabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [slideIndicator, setSlideIndicator] = useState({ left: 0, width: 0 });
+
+  const measureSlideIndicator = useCallback(() => {
+    const idx = TABS.findIndex(t => t.key === activeTab);
+    const el = slideTabRefs.current[idx];
+    if (!el) return;
+    const inner = el.querySelector('[data-tab-content]') as HTMLElement | null;
+    const target = inner || el;
+    const parent = el.parentElement;
+    if (!parent) return;
+    const parentRect = parent.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    setSlideIndicator({ left: targetRect.left - parentRect.left, width: targetRect.width });
+  }, [activeTab]);
+
+  useEffect(() => {
+    measureSlideIndicator();
+    window.addEventListener('resize', measureSlideIndicator);
+    return () => window.removeEventListener('resize', measureSlideIndicator);
+  }, [measureSlideIndicator]);
 
   const handleTabSwipe = useCallback((deltaX: number) => {
     const currentIdx = TABS.findIndex(t => t.key === activeTab);
@@ -136,10 +157,7 @@ export const CandidateSlide = memo(function CandidateSlide({
           <motion.div
             className="absolute bottom-0 h-0.5 bg-white"
             initial={false}
-            animate={{
-              left: `calc(${TABS.findIndex(t => t.key === activeTab)} * (100% / 3))`,
-              width: `calc(100% / 3)`,
-            }}
+            animate={{ left: slideIndicator.left, width: slideIndicator.width }}
             transition={{ type: "spring", stiffness: 300, damping: 35, mass: 0.8 }}
           />
           {TABS.map((tab) => {
@@ -148,6 +166,7 @@ export const CandidateSlide = memo(function CandidateSlide({
             return (
               <button
                 key={tab.key}
+                ref={(el) => { slideTabRefs.current[TABS.indexOf(tab)] = el; }}
                 onClick={() => {
                   const fromIdx = TABS.findIndex(t => t.key === activeTab);
                   const toIdx = TABS.findIndex(t => t.key === tab.key);
@@ -158,7 +177,7 @@ export const CandidateSlide = memo(function CandidateSlide({
                   isActive ? 'text-white' : 'text-white/50'
                 }`}
               >
-                <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                <div data-tab-content className="flex items-center justify-center gap-1 whitespace-nowrap w-fit mx-auto">
                   <Icon className="h-3.5 w-3.5 shrink-0" />
                   <span className="leading-none">{tab.label}</span>
                 </div>
