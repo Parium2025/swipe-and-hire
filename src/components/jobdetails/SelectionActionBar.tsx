@@ -97,6 +97,13 @@ export const SelectionActionBar = ({
     return () => cancelAnimationFrame(raf);
   }, [isMenuOpen, recalculateMenuCentering, recalculateTruncatedStages]);
 
+  // Auto-dismiss tooltip after 2.5s
+  useEffect(() => {
+    if (!openTooltipStage) return;
+    const timer = setTimeout(() => setOpenTooltipStage(null), 2500);
+    return () => clearTimeout(timer);
+  }, [openTooltipStage]);
+
   return (
     <div ref={barRef} className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
       <span className="text-white text-xs font-medium whitespace-nowrap flex-shrink-0">
