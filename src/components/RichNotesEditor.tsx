@@ -29,7 +29,8 @@ const ToolbarButton = memo(({
   title,
   isActive = false,
   disabled = false,
-  compact = false
+  compact = false,
+  large = false
 }: { 
   onClick: () => void; 
   icon: React.ComponentType<{ className?: string }>; 
@@ -37,6 +38,7 @@ const ToolbarButton = memo(({
   isActive?: boolean;
   disabled?: boolean;
   compact?: boolean;
+  large?: boolean;
 }) => (
   <TooltipProvider delayDuration={300}>
     <Tooltip>
@@ -54,14 +56,14 @@ const ToolbarButton = memo(({
           disabled={disabled}
           className={cn(
             "flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-150 caret-transparent",
-            compact ? "w-7 h-7" : "w-8 h-8",
+            large ? "w-11 h-11" : compact ? "w-7 h-7" : "w-8 h-8",
             "hover:bg-white/20",
             "active:scale-90",
             "disabled:opacity-30 disabled:cursor-not-allowed",
             isActive && "bg-white/25 shadow-sm"
           )}
         >
-          <Icon className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4", "text-pure-white")} />
+          <Icon className={cn(large ? "h-5 w-5" : compact ? "h-3.5 w-3.5" : "h-4 w-4", "text-pure-white")} />
         </button>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -78,10 +80,11 @@ interface NotesToolbarProps {
   editor: Editor | null;
   className?: string;
   compact?: boolean;
+  large?: boolean;
   showUndoRedo?: boolean;
 }
 
-export const NotesToolbar = ({ editor, className, compact = false, showUndoRedo = true }: NotesToolbarProps) => {
+export const NotesToolbar = ({ editor, className, compact = false, large = false, showUndoRedo = true }: NotesToolbarProps) => {
   // Force re-render on every editor transaction so undo/redo disabled state updates in real-time
   const [, setTick] = useState(0);
   useEffect(() => {
@@ -122,17 +125,17 @@ export const NotesToolbar = ({ editor, className, compact = false, showUndoRedo 
 
   return (
     <div className={cn("flex items-center gap-0.5 flex-wrap", compact ? "gap-0" : "gap-1", className)}>
-      <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} />
-      <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} />
-      <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} />
-      <div className={cn("w-px bg-white/20 flex-shrink-0", compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
-      <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" isActive={editor.isActive('bulletList')} compact={compact} />
-      <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" isActive={editor.isActive('taskList')} compact={compact} />
+      <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} large={large} />
+      <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} large={large} />
+      <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} large={large} />
+      <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
+      <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" isActive={editor.isActive('bulletList')} compact={compact} large={large} />
+      <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" isActive={editor.isActive('taskList')} compact={compact} large={large} />
       {showUndoRedo && (
         <>
-          <div className={cn("w-px bg-white/20 flex-shrink-0", compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
-          <ToolbarButton onClick={handleUndo} icon={Undo} title="Ångra" disabled={!editor.can().undo()} compact={compact} />
-          <ToolbarButton onClick={handleRedo} icon={Redo} title="Gör om" disabled={!editor.can().redo()} compact={compact} />
+          <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
+          <ToolbarButton onClick={handleUndo} icon={Undo} title="Ångra" disabled={!editor.can().undo()} compact={compact} large={large} />
+          <ToolbarButton onClick={handleRedo} icon={Redo} title="Gör om" disabled={!editor.can().redo()} compact={compact} large={large} />
         </>
       )}
     </div>
