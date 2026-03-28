@@ -96,7 +96,7 @@ export const BenefitsDropdown = ({
                   key={option.value}
                   type="button"
                   onClick={() => toggleBenefit(option.value)}
-                  className="w-full px-3 py-2 text-left text-sm transition-all duration-300 hover:bg-white/20 flex items-center justify-between"
+                  className="w-full px-3 py-2.5 text-left text-sm transition-all duration-300 hover:bg-white/20 flex items-center justify-between"
                 >
                   <div className="flex items-center gap-2">
                     <div className={`w-4 h-4 rounded border ${selectedBenefits.includes(option.value) ? 'bg-white border-white' : 'border-white/30 bg-white/10'} flex items-center justify-center`}>
