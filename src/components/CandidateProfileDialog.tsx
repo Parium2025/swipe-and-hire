@@ -294,16 +294,18 @@ export const CandidateProfileDialog = ({
         </DialogHeader>
 
         {/* Mobile tabs header */}
-        <MobileProfileTabs mobileTab={mobileTab} setMobileTab={setMobileTab} />
-          <button
+        <MobileProfileTabs
+          mobileTab={mobileTab}
+          setMobileTab={setMobileTab}
+          closeButton={<button
             style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
             onClick={() => onOpenChange(false)}
             aria-label="Stäng"
             className={cn(dialogCloseButtonClassName, 'static')}
           >
             <X className={dialogCloseIconClassName} />
-          </button>
-        </div>
+          </button>}
+        />
 
         <div className="flex flex-1 min-h-0 min-w-0 overflow-x-hidden md:max-h-[85vh]">
           {/* Main content - left side */}
