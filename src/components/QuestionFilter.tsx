@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { Filter, Search, X, ChevronDown, MessageSquare } from 'lucide-react';
 import { useOrganizationQuestions, OrganizationQuestion } from '@/hooks/useOrganizationQuestions';
 
-// Component for question item with smart tooltip
+// Component for question item with smart tooltip + tap-to-preview on touch
 const QuestionItem = ({ 
   question, 
   isSelected, 
@@ -31,6 +31,8 @@ const QuestionItem = ({
 }) => {
   const textRef = useRef<HTMLParagraphElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const checkTruncation = useCallback(() => {
     const el = textRef.current;
@@ -45,9 +47,30 @@ const QuestionItem = ({
     return () => window.removeEventListener('resize', checkTruncation);
   }, [checkTruncation, question.question_text]);
 
+  // Clean up tooltip timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
+    };
+  }, []);
+
+  const handleClick = useCallback(() => {
+    // If truncated and tooltip not yet shown → first tap shows tooltip, don't toggle
+    if (isTruncated && !showTooltip) {
+      setShowTooltip(true);
+      // Auto-hide tooltip after 2.5s
+      if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
+      tooltipTimeoutRef.current = setTimeout(() => setShowTooltip(false), 2500);
+      return;
+    }
+    // Second tap (or non-truncated): actually toggle
+    setShowTooltip(false);
+    onToggle();
+  }, [isTruncated, showTooltip, onToggle]);
+
   const buttonContent = (
     <button
-      onClick={onToggle}
+      onClick={handleClick}
       className={`${dropdownItemClass} w-full text-left ${
         isSelected 
           ? 'bg-white/15 text-white' 
@@ -69,7 +92,7 @@ const QuestionItem = ({
 
   if (isTruncated) {
     return (
-      <Tooltip>
+      <Tooltip open={showTooltip} onOpenChange={setShowTooltip}>
         <TooltipTrigger asChild>
           {buttonContent}
         </TooltipTrigger>
