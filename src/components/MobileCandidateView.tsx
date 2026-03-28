@@ -482,7 +482,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
       {renderActionBar}
 
       {/* Candidate list — internally scrollable so action bar stays visible */}
-      <div className="relative" onTouchStart={stageSwipeHandlers.onTouchStart} onTouchMove={stageSwipeHandlers.onTouchMove} onTouchEnd={stageSwipeHandlers.onTouchEnd}>
+      <div className="relative flex-1" onTouchStart={stageSwipeHandlers.onTouchStart} onTouchMove={stageSwipeHandlers.onTouchMove} onTouchEnd={stageSwipeHandlers.onTouchEnd}>
         {/* Scroll position indicator — fades in on scroll, fades out after 2s */}
         {currentApps.length > 6 && (
           <div
