@@ -1712,7 +1712,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   key={`${occupation}-${index}`}
                                   type="button"
                                   onClick={() => handleOccupationSelect(occupation)}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                                 >
                                   <div className="font-medium">{occupation}</div>
                                 </button>
@@ -1723,7 +1723,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 <button
                                   type="button"
                                   onClick={() => handleOccupationSelect(occupationSearchTerm)}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-t border-white/10 transition-colors"
+                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-t border-white/10 transition-colors"
                                 >
                                   <span className="font-medium">Använd "{occupationSearchTerm}"</span>
                                 </button>
@@ -1780,7 +1780,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       setFormData(prev => ({ ...prev, benefits: [...prev.benefits, benefit.value] }));
                                     }
                                   }}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 flex items-center gap-2 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 flex items-center gap-2 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                                 >
                                   <div className={`w-4 h-4 rounded border ${formData.benefits.includes(benefit.value) ? 'bg-white border-white' : 'border-white/30 bg-white/10'} flex items-center justify-center`}>
                                     {formData.benefits.includes(benefit.value) && (
@@ -1868,7 +1868,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   key={type.value}
                                   type="button"
                                   onClick={() => handleEmploymentTypeSelect(type)}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                                 >
                                   <div className="font-medium">{type.label}</div>
                                 </button>
@@ -1898,7 +1898,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   key={type.value}
                                   type="button"
                                   onClick={() => handleSalaryTypeSelect(type)}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                                 >
                                   <div className="font-medium">{type.label}</div>
                                 </button>
@@ -1928,7 +1928,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   key={option.value}
                                   type="button"
                                   onClick={() => handleSalaryTransparencySelect(option)}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                                 >
                                   <div className="font-medium">{option.label}</div>
                                 </button>
@@ -2068,7 +2068,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   key={type.value}
                                   type="button"
                                   onClick={() => handleWorkLocationSelect(type)}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                                 >
                                   <div className="font-medium">{type.label}</div>
                                 </button>
@@ -2098,7 +2098,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   key={type.value}
                                   type="button"
                                   onClick={() => handleRemoteWorkSelect(type)}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                  className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                                 >
                                   <div className="font-medium">{type.label}</div>
                                 </button>
@@ -2457,7 +2457,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         key={type.value}
                                         type="button"
                                         onClick={() => handleQuestionTypeSelect(type)}
-                                        className="w-full px-3 py-2 text-left hover:bg-white/15 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                        className="w-full px-3 py-2.5 text-left hover:bg-white/15 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                                       >
                                         <span className="font-medium">{type.label}</span>
                                       </button>
