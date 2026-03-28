@@ -284,9 +284,29 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
   const listRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Auto-scroll the tab strip to keep the active tab visible
+  useEffect(() => {
+    const el = tabRefs.current[activeTab];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [activeTab]);
+
+  // Swipe between stage tabs on candidate list area
+  const swipeToNextStage = useCallback(() => {
+    const idx = stages.indexOf(activeTab);
+    if (idx < stages.length - 1) setActiveTab(stages[idx + 1]);
+  }, [activeTab, stages]);
+  const swipeToPrevStage = useCallback(() => {
+    const idx = stages.indexOf(activeTab);
+    if (idx > 0) setActiveTab(stages[idx - 1]);
+  }, [activeTab, stages]);
+  const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
 
   const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
     if (pointerType === 'mouse') return;
