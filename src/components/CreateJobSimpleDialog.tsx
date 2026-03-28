@@ -545,7 +545,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                         <div className="flex-1 pb-2">
                           <DropdownMenuItem
                             onSelect={() => handleTemplateSelect('none', '')}
-                            className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
+                            className="px-4 py-2.5 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
                           >
                             <span className="font-medium text-white">Ingen mall (valfritt)</span>
                           </DropdownMenuItem>
@@ -558,7 +558,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                 setShowTemplateWizard(true);
                               }, 150);
                             }}
-                            className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
+                            className="px-4 py-2.5 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
                           >
                             <div className="flex flex-col min-w-0 w-full">
                               <span className="font-medium text-white">+ Skapa en ny mall</span>
@@ -570,7 +570,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                             <DropdownMenuItem
                               key={template.id}
                               onSelect={() => handleTemplateSelect(template.id, template.name)}
-                              className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20 last:border-b-0"
+                              className="px-4 py-2.5 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20 last:border-b-0"
                             >
                               <div className="flex items-center w-full gap-3 min-w-0">
                                 <div className="flex-1 min-w-0">

@@ -97,7 +97,7 @@ export const DropdownField = ({
                     key={option.value}
                     type="button"
                     onClick={() => onSelect(option.value)}
-                    className={`w-full px-3 py-2 text-left text-sm transition-all duration-300 hover:bg-white/20 ${
+                    className={`w-full px-3 py-2.5 text-left text-sm transition-all duration-300 hover:bg-white/20 ${
                       value === option.value 
                         ? 'bg-white/10 text-white' 
                         : 'text-white'
