@@ -58,7 +58,7 @@ export const EmployerNotesCard = memo(() => {
           </div>
 
           <div className="mb-2 pb-1.5 border-b border-white/10">
-            <NotesToolbar editor={notesEditor} compact showUndoRedo={false} />
+            <NotesToolbar editor={notesEditor} showUndoRedo={false} />
           </div>
 
           <div className="flex-1 min-h-0 relative">
