@@ -567,55 +567,58 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           </DropdownMenuItem>
                           
                           {filteredTemplates.map((template) => (
-                            <DropdownMenuItem
-                              key={template.id}
-                              onSelect={() => handleTemplateSelect(template.id, template.name)}
-                              className="px-4 py-2.5 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20 last:border-b-0"
-                            >
-                              <div className="flex items-center w-full gap-3 min-w-0">
-                                <div className="flex-1 min-w-0">
-                                  <span className="font-medium text-white truncate block" title={template.name}>{template.name}</span>
+                            <div key={template.id} className="border-b border-white/20 last:border-b-0">
+                              <DropdownMenuItem
+                                onSelect={() => handleTemplateSelect(template.id, template.name)}
+                                className="px-4 py-3 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors"
+                              >
+                                <div className="flex items-center w-full gap-3 min-w-0">
+                                  <div className="flex-1 min-w-0">
+                                    <span className="font-medium text-white truncate block" title={template.name}>{template.name}</span>
+                                  </div>
+                                  {template.is_default && (
+                                    <span className="text-xs text-white/80 shrink-0">Standard</span>
+                                  )}
                                 </div>
-                                {template.is_default && (
-                                  <span className="text-xs text-white/80 shrink-0">Standard</span>
-                                )}
-                                <div className="flex gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      setTemplateToEdit(template);
-                                      setTemplateMenuOpen(false);
-                                      setOpen(false);
-                                      setTimeout(() => {
-                                        setShowTemplateWizard(true);
-                                      }, 150);
-                                    }}
-                                    onMouseDown={(e) => e.currentTarget.blur()}
-                                    onMouseUp={(e) => e.currentTarget.blur()}
-                                    className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-colors duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95 focus:outline-none focus:ring-0"
-                                    aria-label={`Redigera mall ${template.name}`}
-                                  >
-                                    <Edit size={14} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      setTemplateToDelete(template);
-                                    }}
-                                    onMouseDown={(e) => e.currentTarget.blur()}
-                                    onMouseUp={(e) => e.currentTarget.blur()}
-                                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 backdrop-blur-[2px] text-white transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-95 focus:outline-none focus:ring-0"
-                                    aria-label={`Ta bort mall ${template.name}`}
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </div>
+                              </DropdownMenuItem>
+                              <div className="flex gap-2 px-4 pb-2.5" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setTemplateToEdit(template);
+                                    setTemplateMenuOpen(false);
+                                    setOpen(false);
+                                    setTimeout(() => {
+                                      setShowTemplateWizard(true);
+                                    }, 150);
+                                  }}
+                                  onMouseDown={(e) => e.currentTarget.blur()}
+                                  onMouseUp={(e) => e.currentTarget.blur()}
+                                  className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 bg-white/5 backdrop-blur-[2px] border-white/20 text-white text-xs transition-colors duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95 focus:outline-none focus:ring-0"
+                                  aria-label={`Redigera mall ${template.name}`}
+                                >
+                                  <Edit size={13} />
+                                  <span>Redigera</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setTemplateToDelete(template);
+                                  }}
+                                  onMouseDown={(e) => e.currentTarget.blur()}
+                                  onMouseUp={(e) => e.currentTarget.blur()}
+                                  className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 border-destructive/40 bg-destructive/20 backdrop-blur-[2px] text-white text-xs transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-95 focus:outline-none focus:ring-0"
+                                  aria-label={`Ta bort mall ${template.name}`}
+                                >
+                                  <Trash2 size={13} />
+                                  <span>Ta bort</span>
+                                </button>
                               </div>
-                            </DropdownMenuItem>
+                            </div>
                           ))}
                           
                           {filteredTemplates.length === 0 && searchTerm && (
