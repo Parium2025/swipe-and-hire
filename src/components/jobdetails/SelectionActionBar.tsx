@@ -151,31 +151,40 @@ export const SelectionActionBar = ({
           collisionPadding={16}
           className="border-white/20 min-w-[180px] w-[min(86vw,300px)]"
         >
-          <TooltipProvider delayDuration={120}>
+          <TooltipProvider delayDuration={0} skipDelayDuration={0}>
             {stages.map((stage) => {
               const s = settings[stage];
               const StageIcon = getJobStageIconByName(s?.iconName || 'inbox');
               const label = s?.label || stage;
-              const isTruncated = truncatedStages[stage] ?? label.length > 20;
+              const isTruncated = truncatedStages[stage] ?? label.length > 18;
               const usesTapTooltip = isTouchMobile && isTruncated;
+              const isTooltipVisible = openTooltipStage === stage;
 
               return (
                 <Tooltip
                   key={stage}
-                  open={usesTapTooltip ? openTooltipStage === stage : undefined}
-                  onOpenChange={usesTapTooltip ? (open) => setOpenTooltipStage(open ? stage : null) : undefined}
+                  open={usesTapTooltip ? isTooltipVisible : undefined}
+                  onOpenChange={() => {/* controlled manually */}}
                 >
                   <TooltipTrigger asChild>
                     <DropdownMenuItem
                       onSelect={(e) => {
-                        if (usesTapTooltip && openTooltipStage !== stage) {
+                        // Truncated + touch: first tap shows tooltip, second tap selects
+                        if (usesTapTooltip && !isTooltipVisible) {
                           e.preventDefault();
                           setOpenTooltipStage(stage);
                           return;
                         }
 
+                        // Non-truncated or second tap: select immediately
                         setOpenTooltipStage(null);
                         onMoveToStage(stage);
+                      }}
+                      onPointerDown={(e) => {
+                        // On touch, prevent Radix from closing menu on first tap when truncated
+                        if (usesTapTooltip && !isTooltipVisible && e.pointerType === 'touch') {
+                          e.preventDefault();
+                        }
                       }}
                       className="text-white hover:text-white cursor-pointer min-h-[44px]"
                     >
