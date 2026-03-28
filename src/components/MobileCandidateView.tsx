@@ -1,4 +1,5 @@
 import { memo, useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
