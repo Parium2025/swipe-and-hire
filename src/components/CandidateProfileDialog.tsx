@@ -28,6 +28,9 @@ import {
   SectionErrorBoundary,
   InteractiveStarRating,
   ProfileInfoSections,
+} from '@/components/candidateProfile';
+import { MobileProfileTabs } from '@/components/candidateProfile/MobileProfileTabs';
+import {
   ProfileActions,
   DeleteNoteDialog,
   RemoveCandidateDialog,
