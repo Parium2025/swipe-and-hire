@@ -9,7 +9,6 @@ import { CandidateNotesPanel } from '@/components/candidateProfile/CandidateNote
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
 import { TABS, type TabKey } from './CandidateSlideConstants';
-import { useRef as useRefAlias, useEffect as useEffectAlias, useState as useStateAlias, useCallback as useCallbackAlias } from 'react';
 import { CandidateSlideProfileTab } from './CandidateSlideProfileTab';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
@@ -134,21 +133,14 @@ export const CandidateSlide = memo(function CandidateSlide({
 
         {/* ── Tabs — sliding indicator ── */}
         <div className="w-full flex items-center border-b border-white/20 relative">
-          <motion.div
-            className="absolute bottom-0 h-0.5 bg-white"
-            initial={false}
-            animate={{
-              left: `calc(${TABS.findIndex(t => t.key === activeTab)} * (100% / 3))`,
-              width: `calc(100% / 3)`,
-            }}
-            transition={{ type: "spring", stiffness: 300, damping: 35, mass: 0.8 }}
-          />
+          <SlideTabIndicator activeTab={activeTab} tabsContainerRef={tabsContainerRef} />
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
             return (
               <button
                 key={tab.key}
+                ref={(el) => { if (tabsContainerRef.current && el) tabsContainerRef.current[TABS.indexOf(tab)] = el; }}
                 onClick={() => {
                   const fromIdx = TABS.findIndex(t => t.key === activeTab);
                   const toIdx = TABS.findIndex(t => t.key === tab.key);
@@ -159,7 +151,7 @@ export const CandidateSlide = memo(function CandidateSlide({
                   isActive ? 'text-white' : 'text-white/50'
                 }`}
               >
-                <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                <div data-tab-content className="flex items-center justify-center gap-1 whitespace-nowrap w-fit mx-auto">
                   <Icon className="h-3.5 w-3.5 shrink-0" />
                   <span className="leading-none">{tab.label}</span>
                 </div>
