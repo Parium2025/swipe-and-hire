@@ -2442,6 +2442,10 @@ export type Database = {
         Args: { p_job_ids: string[] }
         Returns: number
       }
+      count_distinct_my_candidates: {
+        Args: { p_recruiter_id: string }
+        Returns: number
+      }
       count_search_jobs: {
         Args: {
           p_category?: string
