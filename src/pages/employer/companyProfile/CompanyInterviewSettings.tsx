@@ -7,6 +7,7 @@ import { CalendarDays, Video, MapPin, MessageSquare, HelpCircle, ChevronDown, Al
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { InterviewTypeTabs, type InterviewType } from './InterviewTypeTabs';
 import { isValidMeetingLink } from './meetingLinkValidation';
+import { normalizeMeetingLink } from '@/lib/meetingLink';
 import type { CompanyFormData } from './types';
 
 interface CompanyInterviewSettingsProps {
@@ -54,6 +55,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange }: Company
                   id="interview_video_link"
                   value={formData.interview_video_link}
                   onChange={(e) => onFormDataChange({ interview_video_link: e.target.value })}
+                  onBlur={(e) => onFormDataChange({ interview_video_link: normalizeMeetingLink(e.target.value) })}
                   placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
                   className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white flex-1"
                 />
