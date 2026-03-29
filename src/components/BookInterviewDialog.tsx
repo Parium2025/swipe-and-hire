@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { normalizeMeetingLink } from '@/lib/meetingLink';
 
 interface BookInterviewDialogProps {
   open: boolean;
@@ -66,7 +67,7 @@ export const BookInterviewDialog = ({
   const savedOfficeAddress = (profile as any)?.interview_office_address || profile?.address || '';
   const officeDefaultMessage = (profile as any)?.interview_default_message || FALLBACK_MESSAGE;
   const videoDefaultMessage = (profile as any)?.interview_video_default_message || FALLBACK_MESSAGE;
-  const savedVideoLink = (profile as any)?.interview_video_link || '';
+  const savedVideoLink = normalizeMeetingLink((profile as any)?.interview_video_link || '');
   const officeInstructions = (profile as any)?.interview_office_instructions || '';
   const companyName = profile?.company_name || '';
   
@@ -135,8 +136,9 @@ export const BookInterviewDialog = ({
         : editableAddress;
       setLocationDetails(details);
     } else if (locationType === 'video') {
+      const normalizedVideoLink = normalizeMeetingLink(editableVideoLink);
       // Use video link if available, otherwise show generic message
-      setLocationDetails(editableVideoLink || 'Videosamtal via Parium');
+      setLocationDetails(normalizedVideoLink || 'Videosamtal via Parium');
     }
   }, [locationType, editableAddress, officeInstructions, editableVideoLink]);
 
@@ -153,6 +155,10 @@ export const BookInterviewDialog = ({
       const [hours, minutes] = time.split(':').map(Number);
       const scheduledAt = new Date(date);
       scheduledAt.setHours(hours, minutes, 0, 0);
+      const normalizedVideoLocationDetails =
+        locationType === 'video'
+          ? normalizeMeetingLink(editableVideoLink || locationDetails || '')
+          : locationDetails || '';
 
       // Create interview
       const { data: interviewRow, error } = await supabase.from('interviews').insert({
@@ -163,7 +169,7 @@ export const BookInterviewDialog = ({
         scheduled_at: scheduledAt.toISOString(),
         duration_minutes: parseInt(duration),
         location_type: locationType,
-        location_details: locationDetails || null,
+        location_details: normalizedVideoLocationDetails || null,
         subject: subject || null,
         message: message || null,
         status: 'pending',
@@ -193,7 +199,7 @@ export const BookInterviewDialog = ({
               scheduledAt: scheduledAt.toISOString(),
               durationMinutes: parseInt(duration),
               locationType,
-              locationDetails: locationDetails || undefined,
+              locationDetails: normalizedVideoLocationDetails || undefined,
               message: message || undefined,
             },
           });
