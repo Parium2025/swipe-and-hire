@@ -23,6 +23,7 @@ import type { JobPosting } from '@/hooks/useJobsData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { JobTemplate } from '@/types/jobWizard';
 import { cn } from '@/lib/utils';
+import { useTapToPreview } from '@/hooks/useTapToPreview';
 
 interface CreateJobSimpleDialogProps {
   onJobCreated: (job: JobPosting) => void;
@@ -58,6 +59,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
   const hasPrefetched = useRef(false);
   const hasAutoRestoredDraft = useRef(false);
+  const { handleTap, isPreview, resetPreview } = useTapToPreview();
+  const templateTextRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
   const clearCreateJobSession = useCallback(() => {
     try {
@@ -460,6 +463,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                         setTemplateMenuOpen(isOpen);
                         if (isOpen) {
                           setSearchTerm('');
+                        } else {
+                          resetPreview();
                         }
                       }}
                     >
@@ -567,20 +572,40 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           </DropdownMenuItem>
                           
                           {filteredTemplates.map((template) => (
-                            <div key={template.id} className="border-b border-white/20 last:border-b-0">
+                            <div key={template.id} className="border-b border-white/20 last:border-b-0 relative">
                               <DropdownMenuItem
-                                onSelect={() => handleTemplateSelect(template.id, template.name)}
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  handleTap(
+                                    template.id,
+                                    templateTextRefs.current[template.id] ?? null,
+                                    () => handleTemplateSelect(template.id, template.name)
+                                  );
+                                }}
                                 className="px-4 py-3 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors"
                               >
                                 <div className="flex items-center w-full gap-3 min-w-0">
                                   <div className="flex-1 min-w-0">
-                                    <span className="font-medium text-white truncate block" title={template.name}>{template.name}</span>
+                                    <span
+                                      ref={(el) => { templateTextRefs.current[template.id] = el; }}
+                                      className="font-medium text-white truncate block"
+                                      title={template.name}
+                                    >
+                                      {template.name}
+                                    </span>
                                   </div>
                                   {template.is_default && (
                                     <span className="text-xs text-white/80 shrink-0">Standard</span>
                                   )}
                                 </div>
                               </DropdownMenuItem>
+
+                              {/* Tap-to-preview tooltip */}
+                              {isPreview(template.id) && (
+                                <div className="absolute left-3 right-3 top-0 -translate-y-full z-[60] px-3 py-2 rounded-lg bg-slate-900/95 border border-white/20 shadow-2xl text-sm text-white leading-relaxed whitespace-pre-wrap break-words animate-in fade-in-0 zoom-in-95 duration-150 pointer-events-none">
+                                  {template.name}
+                                </div>
+                              )}
                               <div className="flex justify-center gap-2 px-4 pb-2.5" onClick={(e) => e.stopPropagation()}>
                                 <button
                                   type="button"
