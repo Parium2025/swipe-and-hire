@@ -120,8 +120,13 @@ const getInterviewTemplate = (
   const dateStr = formatDate(scheduledAt);
   const timeStr = formatTime(scheduledAt);
   const locationLabel = locationType === 'video' ? 'Videointervju' : 'På plats';
+  const mapsUrl = locationType === 'office' && locationDetails
+    ? `https://maps.google.com/?q=${encodeURIComponent(locationDetails)}`
+    : null;
   const locationValue = locationType === 'video' && locationDetails?.startsWith('http')
     ? `<a href="${locationDetails}" style="color:#1E3A8A;text-decoration:underline;word-break:break-all;">${locationDetails}</a>`
+    : mapsUrl
+    ? `<a href="${mapsUrl}" style="color:#1E3A8A;text-decoration:underline;">${locationDetails}</a>`
     : locationDetails || 'Information meddelas';
 
   const videoButton = locationType === 'video' && locationDetails?.startsWith('http') ? `
@@ -152,8 +157,8 @@ const getInterviewTemplate = (
             <td style="background-color:#1E3A8A;height:5px;font-size:0;line-height:0;">&nbsp;</td>
           </tr>
           <tr>
-            <td style="padding:28px;">
-              <p style="margin:0 0 14px;font-size:15px;color:#1E3A8A;line-height:1.5;font-weight:600;">
+            <td style="padding:24px 28px;">
+              <p style="margin:0 0 8px;font-size:15px;color:#1E3A8A;line-height:1.5;font-weight:600;">
                 Hej ${candidateName}, du är kallad till intervju för ${jobTitle}.
               </p>
               <p style="margin:0;font-size:14px;color:#111827;line-height:1.8;">
