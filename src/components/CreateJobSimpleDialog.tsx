@@ -508,11 +508,6 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
                             <Input
-                              ref={(el) => {
-                                if (el && templateMenuOpen) {
-                                  setTimeout(() => el.focus(), 0);
-                                }
-                              }}
                               placeholder="Sök mall..."
                               value={searchTerm}
                               onChange={(e) => setSearchTerm(e.target.value)}
@@ -521,7 +516,6 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                               }}
                               className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40 rounded-lg"
                               autoComplete="off"
-                              autoFocus
                             />
                             {searchTerm && (
                               <button
