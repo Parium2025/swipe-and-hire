@@ -46,12 +46,12 @@ const normalizeLocationDetails = (locationType: string, locationDetails: string)
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('sv-SE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  return date.toLocaleDateString('sv-SE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Europe/Stockholm' });
 };
 
 const formatTime = (dateString: string): string => {
   const date = new Date(dateString);
-  return date.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' });
 };
 
 const generateGoogleCalendarUrl = (

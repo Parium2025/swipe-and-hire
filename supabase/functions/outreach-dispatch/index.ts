@@ -57,8 +57,8 @@ const getToken = (request: Request) => {
   return authHeader.replace('Bearer ', '').trim();
 };
 
-const formatDate = (iso?: string | null) => iso ? new Date(iso).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
-const formatTime = (iso?: string | null) => iso ? new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }) : '';
+const formatDate = (iso?: string | null) => iso ? new Date(iso).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Stockholm' }) : '';
+const formatTime = (iso?: string | null) => iso ? new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' }) : '';
 
 async function getUserFromRequest(request: Request) {
   const token = getToken(request);
