@@ -201,6 +201,8 @@ export const BookInterviewDialog = ({
               locationType,
               locationDetails: normalizedVideoLocationDetails || undefined,
               message: message || undefined,
+              employerEmail: user?.email || undefined,
+              employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
             },
           });
         }
