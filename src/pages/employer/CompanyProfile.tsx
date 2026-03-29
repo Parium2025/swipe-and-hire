@@ -11,6 +11,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { ChevronDown, Search, Check } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
+import { normalizeMeetingLink } from '@/lib/meetingLink';
 import { supabase } from '@/integrations/supabase/client';
 
 // Extracted sub-components
@@ -92,7 +93,7 @@ const CompanyProfile = () => {
       social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
       interview_default_message: (profile as any)?.interview_default_message || '',
       interview_video_default_message: (profile as any)?.interview_video_default_message || '',
-      interview_video_link: (profile as any)?.interview_video_link || '',
+      interview_video_link: normalizeMeetingLink((profile as any)?.interview_video_link || ''),
       interview_office_address: (profile as any)?.interview_office_address || '',
       interview_office_instructions: (profile as any)?.interview_office_instructions || '',
     };
@@ -151,7 +152,7 @@ const CompanyProfile = () => {
         social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
         interview_default_message: (profile as any)?.interview_default_message || '',
         interview_video_default_message: (profile as any)?.interview_video_default_message || '',
-        interview_video_link: (profile as any)?.interview_video_link || '',
+        interview_video_link: normalizeMeetingLink((profile as any)?.interview_video_link || ''),
         interview_office_address: (profile as any)?.interview_office_address || '',
         interview_office_instructions: (profile as any)?.interview_office_instructions || '',
       };
@@ -410,6 +411,11 @@ const CompanyProfile = () => {
   };
 
   const handleSave = async () => {
+    const sanitizedFormData: CompanyFormData = {
+      ...formData,
+      interview_video_link: normalizeMeetingLink(formData.interview_video_link || ''),
+    };
+
     if (formData.org_number && formData.org_number.replace(/-/g, '').length !== 10) {
       toast({
         title: "Valideringsfel",
@@ -419,7 +425,7 @@ const CompanyProfile = () => {
       return;
     }
 
-    for (const link of formData.social_media_links) {
+    for (const link of sanitizedFormData.social_media_links) {
       if (!validateUrl(link.url, link.platform)) {
         toast({
           title: "Ogiltig URL",
@@ -432,11 +438,11 @@ const CompanyProfile = () => {
 
     try {
       setLoading(true);
-      await updateProfile(formData as any);
+      await updateProfile(sanitizedFormData as any);
 
       const updatedValues = {
-        ...formData,
-        social_media_links: JSON.parse(JSON.stringify(formData.social_media_links)),
+        ...sanitizedFormData,
+        social_media_links: JSON.parse(JSON.stringify(sanitizedFormData.social_media_links)),
       };
 
       setFormData(updatedValues);
