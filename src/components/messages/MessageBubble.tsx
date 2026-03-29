@@ -291,8 +291,10 @@ export function MessageBubble({
               {format(new Date(message.created_at), 'HH:mm')}
             </span>
             {/* Edited indicator */}
-            {edited && (
-              <span className="text-pure-white text-[10px] italic">redigerat</span>
+            {edited && message.edited_at && (
+              <span className="text-pure-white text-[10px] italic">
+                redigerat {format(new Date(message.edited_at), 'HH:mm')}
+              </span>
             )}
             {/* Read receipt for own messages */}
             {isOwn && !isTemp && (
