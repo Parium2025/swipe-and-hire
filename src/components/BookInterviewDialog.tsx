@@ -172,6 +172,38 @@ export const BookInterviewDialog = ({
       if (error) throw error;
 
       let description = 'Intervjun är bokad.';
+
+      // 1. Send the interview invitation email with .ics calendar attachment
+      try {
+        // Get candidate email from application
+        const { data: appData } = await supabase
+          .from('job_applications')
+          .select('email, first_name')
+          .eq('id', applicationId)
+          .single();
+
+        const candidateEmail = appData?.email;
+        if (candidateEmail) {
+          await supabase.functions.invoke('send-interview-invitation', {
+            body: {
+              candidateEmail,
+              candidateName,
+              companyName: companyName || 'Företag',
+              jobTitle,
+              scheduledAt: scheduledAt.toISOString(),
+              durationMinutes: parseInt(duration),
+              locationType,
+              locationDetails: locationDetails || undefined,
+              message: message || undefined,
+            },
+          });
+        }
+      } catch (emailErr) {
+        console.error('Error sending interview email:', emailErr);
+        // Non-blocking — interview is already created
+      }
+
+      // 2. Trigger outreach automations (chat, push, etc.)
       try {
         const { data: dispatchData, error: dispatchError } = await supabase.functions.invoke('outreach-dispatch', {
           body: {
@@ -183,11 +215,11 @@ export const BookInterviewDialog = ({
         if (dispatchError) throw dispatchError;
         const processedCount = Number((dispatchData as { processedCount?: number } | null)?.processedCount ?? 0);
         description = processedCount > 0
-          ? `Automationerna gick ut i ${processedCount} kanal${processedCount > 1 ? 'er' : ''}.`
-          : 'Intervjun är bokad och väntar på nästa utskickskörning.';
+          ? `Intervjukallelse skickad med kalenderinbjudan + ${processedCount} automation${processedCount > 1 ? 'er' : ''}.`
+          : 'Intervjukallelse med kalenderinbjudan skickad!';
       } catch (dispatchErr) {
         console.error('Error invoking outreach-dispatch:', dispatchErr);
-        description = 'Intervjun är bokad. Automationerna kan köras från Outreach Studio.';
+        description = 'Intervjukallelse med kalenderinbjudan skickad!';
       }
 
       toast.success(`Intervju bokad för ${candidateName}`, { description });
