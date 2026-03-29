@@ -52,10 +52,10 @@ const generateGoogleCalendarUrl = (
   const endDate = new Date(startDate.getTime() + durationMinutes * 60 * 1000);
   const formatGoogleDate = (date: Date): string => date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   
-  const title = `Intervju: ${jobTitle} – ${companyName}`;
-  let details = `Intervju för tjänsten ${jobTitle} hos ${companyName}.`;
-  if (locationType === 'video' && locationDetails?.startsWith('http')) details += `\n\nMöteslänk: ${locationDetails}`;
-  if (message) details += `\n\nMeddelande från arbetsgivaren:\n${message}`;
+  const title = `Intervju – ${jobTitle}`;
+  const locationLabel = locationType === 'video' ? 'Videointervju' : 'På plats';
+  let details = `${jobTitle} hos ${companyName}\n\n${locationLabel}: ${locationDetails || 'Information meddelas'}`;
+  if (message) details += `\n\n${message}`;
   
   const location = locationType === 'video' && locationDetails?.startsWith('http')
     ? locationDetails
@@ -89,14 +89,13 @@ const generateIcsContent = (
   const endDate = new Date(startDate.getTime() + durationMinutes * 60 * 1000);
   const now = new Date();
   const uid = generateUid();
-  const summary = escapeIcsText(`Intervju: ${jobTitle} – ${companyName}`);
+  const summary = escapeIcsText(`Intervju – ${jobTitle}`);
   const location = locationType === 'video' && locationDetails?.startsWith('http')
     ? escapeIcsText(locationDetails) : locationType === 'office' && locationDetails
-    ? escapeIcsText(locationDetails) : escapeIcsText(getLocationTypeText(locationType));
-  let description = escapeIcsText(`Intervju för tjänsten ${jobTitle} hos ${companyName}.`);
-  if (locationType === 'video' && locationDetails?.startsWith('http'))
-    description += escapeIcsText(`\n\nMöteslänk: ${locationDetails}`);
-  if (message) description += escapeIcsText(`\n\nMeddelande från arbetsgivaren:\n${message}`);
+    ? escapeIcsText(locationDetails) : escapeIcsText(locationType === 'video' ? 'Videointervju' : 'På plats');
+  const locationLabel = locationType === 'video' ? 'Videointervju' : 'På plats';
+  let description = escapeIcsText(`${jobTitle} hos ${companyName}\n\n${locationLabel}: ${locationDetails || 'Information meddelas'}`);
+  if (message) description += escapeIcsText(`\n\n${message}`);
 
   return [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Parium//Interview Invitation//SV',
