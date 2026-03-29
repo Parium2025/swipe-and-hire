@@ -203,7 +203,10 @@ export class AuthStorageAdapter implements Storage {
 
       // If "remember me" is OFF, check session sentinel.
       // Missing sentinel = tab/app was closed → log out.
-      if (!shouldRememberUser() && !isSessionSentinelAlive()) {
+      // Skip this check inside iframes (Lovable preview) — the iframe reload
+      // destroys sessionStorage, which would falsely trigger a logout.
+      const isInsideIframe = typeof window !== 'undefined' && window.self !== window.top;
+      if (!isInsideIframe && !shouldRememberUser() && !isSessionSentinelAlive()) {
         // Check if there's actually auth data stored (i.e. user was logged in before)
         const hasStoredAuth = (() => {
           try { return !!localStorage.getItem(key); } catch { return false; }
