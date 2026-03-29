@@ -435,7 +435,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 hover:border-white/30 focus:border-white/40 text-white placeholder:text-white transition-colors duration-150 text-sm h-11 !min-h-0 font-normal outline-none ring-0 focus:ring-0 focus:outline-none"
+                  className="bg-white/10 border-white/20 hover:border-white/30 focus:border-white/40 text-white placeholder:text-white transition-colors duration-150 text-base h-12 !min-h-0 font-normal outline-none ring-0 focus:ring-0 focus:outline-none"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
@@ -474,11 +474,11 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           size="sm"
                           onMouseDown={(e) => e.currentTarget.blur()}
                           onMouseUp={(e) => e.currentTarget.blur()}
-                          className="w-full bg-white/10 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/15 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white h-11 md:h-11 !min-h-0 py-2 px-3 font-normal focus:outline-none focus:ring-0 rounded-md overflow-hidden min-w-0"
+                          className="w-full bg-white/10 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/15 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white h-12 md:h-12 !min-h-0 py-2 px-3 font-normal focus:outline-none focus:ring-0 rounded-md overflow-hidden min-w-0"
                           title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
                         >
                           <div className="flex items-center gap-2 w-full min-w-0">
-                            <span className="text-sm truncate font-normal text-white flex-1 min-w-0 text-left" title={selectedTemplate?.name || 'Ingen mall (valfritt)'}>
+                            <span className="text-base truncate font-normal text-white flex-1 min-w-0 text-left" title={selectedTemplate?.name || 'Ingen mall (valfritt)'}>
                               {selectedTemplate?.name || 'Ingen mall (valfritt)'}
                             </span>
                             <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
