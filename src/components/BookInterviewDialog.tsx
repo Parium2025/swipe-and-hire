@@ -108,17 +108,18 @@ export const BookInterviewDialog = ({
     onOpenChange(newOpen);
   };
 
-  // Set default values when dialog opens
+  // Set default values when dialog opens — always sync from latest profile
   useEffect(() => {
     if (open) {
       setSubject(`Intervju för ${jobTitle}`);
-      // Set date to today
       setDate(new Date());
-      // Ensure video is selected (should already be from close reset, but be safe)
       setLocationType('video');
       setMessage(videoDefaultMessage);
+      // Sync editable fields from latest profile values
+      setEditableAddress(savedOfficeAddress);
+      setEditableVideoLink(savedVideoLink);
     }
-  }, [open, jobTitle, videoDefaultMessage]);
+  }, [open, jobTitle, videoDefaultMessage, savedOfficeAddress, savedVideoLink]);
 
   // Update message when location type changes
   useEffect(() => {
