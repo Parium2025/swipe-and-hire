@@ -1360,17 +1360,6 @@ export function MessageTemplatesSettings() {
 
             <div className="flex flex-wrap items-center justify-center gap-2">
               <Button variant="glassBlue" size="sm" className="px-3 text-xs" onClick={handleSaveTemplate} disabled={savingTemplate}>{savingTemplate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}{templateForm.id ? 'Uppdatera mall' : 'Spara mall'}</Button>
-              <Button
-                variant="glass"
-                size="sm"
-                className="px-3 text-xs"
-                onClick={() => {
-                  setTemplateForm(EMPTY_TEMPLATE_FORM);
-                  setActiveTemplateChannel('push');
-                }}
-              >
-                Rensa
-              </Button>
             </div>
           </div>
         </TabsContent>
