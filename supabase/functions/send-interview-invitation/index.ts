@@ -147,20 +147,24 @@ const getInterviewTemplate = (
     <tr>
       <td align="center" style="padding:32px 16px;">
         <table border="0" cellpadding="0" cellspacing="0" width="520" style="background-color:#ffffff;border-radius:16px;max-width:520px;overflow:hidden;">
+          <!-- Blue accent bar -->
+          <tr>
+            <td style="background-color:#1E3A8A;height:5px;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
           <tr>
             <td style="padding:28px;">
-              <p style="margin:0 0 14px;font-size:15px;color:#111827;line-height:1.5;">
-                Hej ${candidateName}, du är kallad till intervju för <strong>${jobTitle}</strong>.
+              <p style="margin:0 0 14px;font-size:15px;color:#1E3A8A;line-height:1.5;font-weight:600;">
+                Hej ${candidateName}, du är kallad till intervju för ${jobTitle}.
               </p>
               <p style="margin:0;font-size:14px;color:#111827;line-height:1.8;">
-                <strong>Datum:</strong> ${dateStr}<br/>
-                <strong>Tid:</strong> ${timeStr} · ${durationMinutes} min<br/>
-                <strong>${locationLabel}:</strong> ${locationValue}
+                <strong style="color:#1E3A8A;">Datum:</strong> ${dateStr}<br/>
+                <strong style="color:#1E3A8A;">Tid:</strong> ${timeStr} · ${durationMinutes} min<br/>
+                <strong style="color:#1E3A8A;">${locationLabel}:</strong> ${locationValue}
               </p>
               ${messageBlock}
               ${videoButton}
               <p style="margin:16px 0 0;font-size:12px;color:#9CA3AF;line-height:1.4;text-align:center;">
-                📅 Kalenderhändelse bifogad · <a href="${googleCalendarUrl}" style="color:#6B7280;text-decoration:underline;">Google Kalender</a>
+                📅 Kalenderhändelse bifogad · <a href="${googleCalendarUrl}" style="color:#1E3A8A;text-decoration:underline;">Google Kalender</a>
               </p>
             </td>
           </tr>
