@@ -2438,6 +2438,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      count_distinct_candidates: {
+        Args: { p_job_ids: string[] }
+        Returns: number
+      }
       count_search_jobs: {
         Args: {
           p_category?: string
