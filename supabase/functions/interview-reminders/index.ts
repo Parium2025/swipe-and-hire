@@ -30,7 +30,7 @@ interface InterviewTimelineAutomation {
   filters: Record<string, unknown> | null;
 }
 
-const WINDOW_PADDING_MS = 60 * 1000;
+const WINDOW_PADDING_MS = 90 * 1000;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
         const rangeStart = new Date(targetTime.getTime() - WINDOW_PADDING_MS).toISOString();
         const rangeEnd = new Date(targetTime.getTime() + WINDOW_PADDING_MS).toISOString();
 
-        const interviewStatuses = trigger === "interview_before" ? ["confirmed"] : ["confirmed", "completed"];
+        const interviewStatuses = trigger === "interview_before" ? ["pending", "confirmed"] : ["pending", "confirmed", "completed"];
 
         const { data: interviews, error: interviewsError } = await supabase
           .from("interviews")
