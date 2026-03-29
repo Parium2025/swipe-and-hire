@@ -250,8 +250,9 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Interview invitation sent to candidate:", emailResponse);
 
     // --- Employer email (calendar confirmation) ---
+    // Skip if employer email is the same as candidate email (avoids confusing duplicate)
     let employerEmailResponse = null;
-    if (employerEmail) {
+    if (employerEmail && employerEmail.toLowerCase() !== candidateEmail.toLowerCase()) {
       try {
         const empName = employerName || companyName;
 
