@@ -72,6 +72,7 @@ export const BookInterviewDialog = ({
 
   // State for editable video link
   const [editableVideoLink, setEditableVideoLink] = useState(savedVideoLink);
+  const [videoLinkEditing, setVideoLinkEditing] = useState(false);
 
   // Get the correct default message based on location type
   const getDefaultMessageForType = (type: 'video' | 'office') => {
