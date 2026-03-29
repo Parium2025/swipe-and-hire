@@ -980,6 +980,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       setPendingClose(true);
       setShowUnsavedDialog(true);
     } else {
+      // User explicitly closed via X with no changes — clear all drafts
+      clearEditJobDraft();
       onOpenChange(false);
     }
   };
