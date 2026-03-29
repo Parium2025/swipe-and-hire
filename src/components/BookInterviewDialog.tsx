@@ -378,13 +378,26 @@ export const BookInterviewDialog = ({
           {locationType === 'video' && (
             <div className="space-y-2">
               <Label className="text-white">Videolänk</Label>
-              <Input
-                value={editableVideoLink}
-                onChange={(e) => setEditableVideoLink(e.target.value)}
-                placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              />
-              <p className="text-white/50 text-xs">Din Teams, Zoom eller Google Meet-länk</p>
+              {editableVideoLink && !videoLinkEditing ? (
+                <button
+                  type="button"
+                  onClick={() => setVideoLinkEditing(true)}
+                  className="w-full flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 h-11 text-left text-white text-sm transition-colors hover:bg-white/15"
+                >
+                  <Video className="h-4 w-4 shrink-0 text-white" />
+                  <span className="truncate">{getVideoLinkLabel(editableVideoLink)}</span>
+                </button>
+              ) : (
+                <Input
+                  value={editableVideoLink}
+                  onChange={(e) => setEditableVideoLink(e.target.value)}
+                  onBlur={() => { if (editableVideoLink) setVideoLinkEditing(false); }}
+                  autoFocus={videoLinkEditing}
+                  placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                />
+              )}
+              <p className="text-white text-xs">Din Teams, Zoom eller Google Meet-länk</p>
             </div>
           )}
 
