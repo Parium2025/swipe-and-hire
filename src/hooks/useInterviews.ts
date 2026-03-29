@@ -251,15 +251,10 @@ export const useCandidateInterviews = () => {
     },
     enabled: !!user?.id,
     retry: 0,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
-    gcTime: Infinity, // Keep in cache permanently during session
-    initialData: getInitialData, // Använd initialData istället för placeholderData
-    initialDataUpdatedAt: () => {
-      // Om vi har cache, sätt "gammalt" timestamp för att trigga bakgrunds-refetch
-      const cached = getInitialData();
-      return cached ? Date.now() - 60000 : undefined;
-    },
-    refetchOnMount: false,
+    staleTime: 0, // Always consider stale so invalidateQueries triggers refetch
+    gcTime: Infinity,
+    placeholderData: getInitialData, // Show cached data while fetching
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 
