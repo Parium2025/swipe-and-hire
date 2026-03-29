@@ -718,6 +718,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
             setJobTitle('');
             setSelectedTemplate(null);
             clearCreateJobSession();
+            try { localStorage.removeItem('parium_draft_job-wizard'); } catch {}
           }
         }}
         jobTitle={jobTitle}
