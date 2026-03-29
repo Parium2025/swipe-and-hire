@@ -8,6 +8,10 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    headers: {
+      // Prevent stale module/deps caching in preview/dev that can cause black screen
+      "Cache-Control": "no-store",
+    },
     // Lovable preview kör appen bakom en HTTPS-proxy.
     // Utan dessa inställningar kan Vite-klienten försöka ansluta HMR till
     // `localhost:8080` (som inte är nåbart från webbläsaren) och då får man
@@ -37,6 +41,8 @@ export default defineConfig(({ mode }) => ({
     ],
   },
   optimizeDeps: {
+    // Rebuild pre-bundled deps from scratch to avoid stale/missing chunk refs
+    force: true,
     include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
   },
 }));
