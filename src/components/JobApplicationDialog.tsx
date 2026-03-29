@@ -175,11 +175,8 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
 
   // Handle close with unsaved changes check
   const handleClose = () => {
-    if (hasUnsavedChanges) {
-      setShowUnsavedDialog(true);
-    } else {
-      onOpenChange(false);
-    }
+    // X should always close and fully clear — no unsaved dialog
+    handleConfirmClose();
   };
 
   const handleConfirmClose = () => {
