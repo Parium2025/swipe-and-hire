@@ -20,20 +20,19 @@ import NotFound from "./pages/NotFound";
 // imported module" errors from freezing the app on a dark Suspense fallback.
 function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
   return lazy(() => {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const importPromise = factory();
     const timeoutPromise = new Promise<never>((_, reject) => {
-      const timeout = setTimeout(() => {
+      timeout = setTimeout(() => {
         reject(new Error('Lazy import timed out after 12s'));
       }, 12000);
-
-      // Avoid timer leak if import resolves/rejects before timeout
-      factory()
-        .finally(() => clearTimeout(timeout))
-        .catch(() => {
-          // Handled below in Promise.race
-        });
     });
 
-    return Promise.race([factory(), timeoutPromise]).catch((err) => {
+    return Promise.race([importPromise, timeoutPromise])
+      .finally(() => {
+        if (timeout) clearTimeout(timeout);
+      })
+      .catch((err) => {
       const key = 'chunk-reload-' + factory.toString().slice(0, 60);
       const alreadyRetried = sessionStorage.getItem(key);
 
