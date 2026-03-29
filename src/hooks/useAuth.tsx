@@ -1671,7 +1671,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Hämta antal UNIKA kandidater i "Mina kandidater" (distinct applicant_id)
       const { data: myCandidatesDistinct } = await supabase.rpc('count_distinct_my_candidates', { p_recruiter_id: user.id });
       
-      const myCandidates = myCandidatesDistinct || 0;
+      const myCandidates = (typeof myCandidatesDistinct === 'number' ? myCandidatesDistinct : 0);
       setPreloadedMyCandidates(myCandidates);
       try { sessionStorage.setItem(MY_CANDIDATES_CACHE_KEY, String(myCandidates)); } catch {}
     } catch (err) {
