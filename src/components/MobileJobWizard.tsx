@@ -1958,13 +1958,6 @@ const MobileJobWizard = ({
     handleConfirmClose();
   };
 
-  const _originalHandleCloseBody = () => {
-    // This block is kept as reference for handleConfirmClose
-    {
-      setCurrentStep(0);
-    }
-  };
-
   const handleConfirmClose = () => {
     // Reset everything completely and close - set isInitializing FIRST to prevent button flash
     setIsInitializing(true);
