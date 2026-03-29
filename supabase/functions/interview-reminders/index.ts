@@ -30,7 +30,7 @@ interface InterviewTimelineAutomation {
   filters: Record<string, unknown> | null;
 }
 
-const WINDOW_PADDING_MS = 90 * 1000;
+const WINDOW_PADDING_MS = 150 * 1000;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
