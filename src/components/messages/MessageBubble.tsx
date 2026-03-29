@@ -290,7 +290,7 @@ export function MessageBubble({
           <div className={cn("flex items-center gap-1 mt-1 px-1", isOwn && "flex-row-reverse")}>
             {edited && message.edited_at ? (
               <span className="text-pure-white text-[10px] italic">
-                redigerat {format(new Date(message.edited_at), 'd MMM HH:mm', { locale: sv })}
+                redigerat {format(new Date(message.edited_at), 'd MMM yyyy HH:mm', { locale: sv })}
               </span>
             ) : (
               <span className="text-pure-white text-[10px]">
