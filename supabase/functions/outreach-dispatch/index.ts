@@ -168,7 +168,11 @@ async function dispatchLog(log: OutreachLog) {
 
     if (log.channel === 'email') {
       if (!context.recipientEmail) throw new Error('Kandidaten saknar e-postadress');
-      if (!resend) throw new Error('RESEND_API_KEY saknas');
+      if (!resend) {
+        console.warn(`[outreach-dispatch] E-postkanal hoppad för logg ${log.id} — RESEND_API_KEY är inte konfigurerad.`);
+        await admin.from('outreach_dispatch_logs').update({ status: 'failed', error_message: 'E-post ej konfigurerad: RESEND_API_KEY saknas. Kontakta support.' }).eq('id', log.id);
+        return { error: 'RESEND_API_KEY saknas' };
+      }
       const trackingUrl = `${supabaseUrl}/functions/v1/outreach-open-track?logId=${encodeURIComponent(log.id)}`;
       const result = await resend.emails.send({
         from: `${context.companyName} via Parium <noreply@parium.se>`,
