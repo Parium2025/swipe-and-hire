@@ -55,7 +55,7 @@ export const QuestionFormFields = ({
           value={question.question_text}
           onChange={(e) => onUpdateField('question_text', e.target.value)}
           placeholder="T.ex. Antal års erfarenhet inom..."
-          className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
+          className="bg-white/5 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
         />
       </div>
 
@@ -72,7 +72,7 @@ export const QuestionFormFields = ({
                   value={option}
                   onChange={(e) => onUpdateOption(index, e.target.value)}
                   placeholder={`Alternativ ${index + 1}`}
-                  className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm"
+                  className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white h-11 !min-h-0 text-sm"
                 />
                 <button
                   type="button"
@@ -104,7 +104,7 @@ export const QuestionFormFields = ({
               type="number"
               value={question.min_value ?? 0}
               onChange={(e) => onUpdateField('min_value', parseInt(e.target.value) || 0)}
-              className="bg-white/10 border-white/20 text-white h-9 text-sm"
+              className="bg-white/5 border-white/20 text-white h-9 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -113,7 +113,7 @@ export const QuestionFormFields = ({
               type="number"
               value={question.max_value ?? 100}
               onChange={(e) => onUpdateField('max_value', parseInt(e.target.value) || 100)}
-              className="bg-white/10 border-white/20 text-white h-9 text-sm"
+              className="bg-white/5 border-white/20 text-white h-9 text-sm"
             />
           </div>
         </div>
