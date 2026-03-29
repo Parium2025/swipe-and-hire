@@ -125,6 +125,7 @@ interface MobileJobWizardProps {
 // Storage keys for persisting unsaved job form state
 const JOB_WIZARD_SESSION_KEY = 'job-wizard-unsaved-state';
 const JOB_WIZARD_DRAFT_KEY = 'parium_draft_job-wizard';
+const JOB_WIZARD_INTENTIONAL_CLOSE_KEY = 'parium_job_wizard_intentional_close';
 
 const MobileJobWizard = ({
   open, 
@@ -2051,6 +2052,10 @@ const MobileJobWizard = ({
     try {
       localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
     } catch {}
+    try {
+      sessionStorage.setItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY, '1');
+      localStorage.setItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY, '1');
+    } catch {}
     if (onBack) {
       onBack();
     } else {
@@ -2189,6 +2194,10 @@ const MobileJobWizard = ({
       // Clear both sessionStorage and localStorage drafts after successful save
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
       localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
+      try {
+        sessionStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
+        localStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
+      } catch {}
 
       // Reset and close
       setIsSavingDraft(false);
@@ -2368,6 +2377,10 @@ const MobileJobWizard = ({
       // This prevents the unsaved changes dialog from appearing
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
       localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
+      try {
+        sessionStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
+        localStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
+      } catch {}
       setHasUnsavedChanges(false);
       setInitialFormData(null);
       setInitialCustomQuestions([]);
