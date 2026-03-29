@@ -1616,15 +1616,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPreloadedEmployerTotalApplications(totalApplications);
       try { sessionStorage.setItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, String(totalApplications)); } catch {}
       
-      // Hämta antal unika kandidater (baserat på job_applications för organisationens jobb)
+      // Hämta antal unika kandidater (distinct applicant_id)
       const jobIds = orgJobs.map(j => j.id);
       if (jobIds.length > 0) {
-        const { count } = await supabase
-          .from('job_applications')
-          .select('id', { count: 'exact', head: true })
-          .in('job_id', jobIds);
+        const { data: distinctCount } = await supabase.rpc('count_distinct_candidates', { p_job_ids: jobIds });
         
-        const candidatesCount = count || 0;
+        const candidatesCount = distinctCount || 0;
         setPreloadedEmployerCandidates(candidatesCount);
         try { sessionStorage.setItem(EMPLOYER_CANDIDATES_CACHE_KEY, String(candidatesCount)); } catch {}
       } else {
