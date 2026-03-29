@@ -287,13 +287,13 @@ export function MessageBubble({
           )}
 
           <div className={cn("flex items-center gap-1 mt-1 px-1", isOwn && "flex-row-reverse")}>
-            <span className="text-pure-white text-[10px]">
-              {format(new Date(message.created_at), 'HH:mm')}
-            </span>
-            {/* Edited indicator */}
-            {edited && message.edited_at && (
+            {edited && message.edited_at ? (
               <span className="text-pure-white text-[10px] italic">
-                redigerat {format(new Date(message.edited_at), 'HH:mm')}
+                redigerat {format(new Date(message.edited_at), 'd MMM HH:mm', { locale: sv })}
+              </span>
+            ) : (
+              <span className="text-pure-white text-[10px]">
+                {format(new Date(message.created_at), 'HH:mm')}
               </span>
             )}
             {/* Read receipt for own messages */}
