@@ -126,19 +126,14 @@ const getInterviewTemplate = (
     : locationDetails || 'Information meddelas';
 
   const videoButton = locationType === 'video' && locationDetails?.startsWith('http') ? `
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top:20px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top:16px;">
                 <tr><td align="center">
-                  <a href="${locationDetails}" style="background-color:#1E3A8A;border-radius:8px;color:#fff;display:inline-block;font-size:14px;font-weight:600;line-height:44px;text-align:center;text-decoration:none;width:220px;">Anslut till videomötet</a>
+                  <a href="${locationDetails}" style="background-color:#1E3A8A;border-radius:8px;color:#fff;display:inline-block;font-size:14px;font-weight:600;line-height:42px;text-align:center;text-decoration:none;width:200px;">Anslut till videomötet</a>
                 </td></tr>
               </table>` : '';
 
   const messageBlock = message ? `
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top:16px;">
-                <tr><td style="padding:14px 16px;background-color:#F9FAFB;border-radius:8px;">
-                  <p style="margin:0;font-size:13px;color:#6B7280;font-weight:500;">Meddelande</p>
-                  <p style="margin:6px 0 0;font-size:14px;color:#374151;line-height:1.5;white-space:pre-line;">${message}</p>
-                </td></tr>
-              </table>` : '';
+              <p style="margin:12px 0 0;font-size:14px;color:#374151;line-height:1.5;white-space:pre-line;">${message}</p>` : '';
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -152,60 +147,32 @@ const getInterviewTemplate = (
     <tr>
       <td align="center" style="padding:32px 16px;">
         <table border="0" cellpadding="0" cellspacing="0" width="520" style="background-color:#ffffff;border-radius:16px;max-width:520px;overflow:hidden;">
-          <!-- Header -->
           <tr>
-            <td style="background-color:#1E3A8A;padding:24px 28px;text-align:center;">
-              <p style="margin:0;font-size:20px;font-weight:700;color:#fff;letter-spacing:-0.3px;">Intervjukallelse</p>
-              <p style="margin:4px 0 0;font-size:13px;color:rgba(255,255,255,0.75);">${companyName}</p>
+            <td style="background-color:#1E3A8A;padding:20px 28px;text-align:center;">
+              <p style="margin:0;font-size:18px;font-weight:700;color:#fff;">Intervjukallelse</p>
+              <p style="margin:2px 0 0;font-size:13px;color:rgba(255,255,255,0.75);">${companyName}</p>
             </td>
           </tr>
-
-          <!-- Body -->
           <tr>
-            <td style="padding:28px;">
-              <p style="margin:0 0 16px;font-size:15px;color:#111827;line-height:1.5;">
+            <td style="padding:24px 28px;">
+              <p style="margin:0 0 14px;font-size:15px;color:#111827;line-height:1.5;">
                 Hej ${candidateName}, du är kallad till intervju för <strong>${jobTitle}</strong>.
               </p>
-
-              <!-- Details card -->
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#F0F4FF;border-radius:10px;">
-                <tr>
-                  <td style="padding:18px 20px;">
-                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                      <tr>
-                        <td width="50%" style="padding-bottom:10px;vertical-align:top;">
-                          <p style="margin:0;font-size:11px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Datum</p>
-                          <p style="margin:3px 0 0;font-size:14px;color:#111827;font-weight:600;">${dateStr}</p>
-                        </td>
-                        <td width="50%" style="padding-bottom:10px;vertical-align:top;">
-                          <p style="margin:0;font-size:11px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Tid</p>
-                          <p style="margin:3px 0 0;font-size:14px;color:#111827;font-weight:600;">${timeStr} · ${durationMinutes} min</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colspan="2" style="vertical-align:top;">
-                          <p style="margin:0;font-size:11px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${locationLabel}</p>
-                          <p style="margin:3px 0 0;font-size:14px;color:#111827;font-weight:600;">${locationValue}</p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
+              <p style="margin:0;font-size:14px;color:#111827;line-height:1.8;">
+                <strong>Datum:</strong> ${dateStr}<br/>
+                <strong>Tid:</strong> ${timeStr} · ${durationMinutes} min<br/>
+                <strong>${locationLabel}:</strong> ${locationValue}
+              </p>
               ${messageBlock}
               ${videoButton}
-
-              <!-- Calendar hint -->
-              <p style="margin:20px 0 0;font-size:12px;color:#9CA3AF;line-height:1.5;text-align:center;">
-                📅 Kalenderhändelse bifogad · <a href="${googleCalendarUrl}" style="color:#6B7280;text-decoration:underline;">Lägg till i Google Kalender</a>
+              <p style="margin:16px 0 0;font-size:12px;color:#9CA3AF;line-height:1.4;text-align:center;">
+                📅 Kalenderhändelse bifogad · <a href="${googleCalendarUrl}" style="color:#6B7280;text-decoration:underline;">Google Kalender</a>
               </p>
             </td>
           </tr>
-
-          <!-- Footer -->
           <tr>
-            <td style="padding:16px 28px;text-align:center;border-top:1px solid #E5E7EB;">
-              <p style="margin:0;font-size:12px;color:#9CA3AF;">Parium AB · Stockholm</p>
+            <td style="padding:12px 28px;text-align:center;border-top:1px solid #E5E7EB;">
+              <p style="margin:0;font-size:11px;color:#9CA3AF;">Parium AB · Stockholm</p>
             </td>
           </tr>
         </table>
