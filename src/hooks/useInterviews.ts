@@ -100,20 +100,14 @@ export const useInterviews = () => {
       return result;
     },
     enabled: !!user?.id,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    staleTime: 0, // Always consider stale so invalidateQueries triggers refetch
     gcTime: Infinity,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
-    // 🔥 Instant-load from localStorage cache
-    initialData: () => {
+    // 🔥 Instant-load from localStorage cache (prevents loading flash)
+    placeholderData: () => {
       if (!user?.id) return undefined;
-      const cached = readEmployerInterviewsCache(user.id);
-      return cached ?? undefined;
-    },
-    initialDataUpdatedAt: () => {
-      if (!user?.id) return undefined;
-      const cached = readEmployerInterviewsCache(user.id);
-      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+      return readEmployerInterviewsCache(user.id) ?? undefined;
     },
   });
 
