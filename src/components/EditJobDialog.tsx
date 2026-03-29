@@ -976,14 +976,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   }, [formData, initialFormData, customQuestions, initialCustomQuestions, open]);
 
   const handleClose = () => {
-    if (hasUnsavedChanges) {
-      setPendingClose(true);
-      setShowUnsavedDialog(true);
-    } else {
-      // User explicitly closed via X with no changes — clear all drafts
-      clearEditJobDraft();
-      onOpenChange(false);
-    }
+    // X should always discard and clear draft state directly
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+    setHasUnsavedChanges(false);
+    clearEditJobDraft();
+    onOpenChange(false);
   };
 
   const handleConfirmClose = () => {
