@@ -20,6 +20,24 @@ interface InterviewInvitationRequest {
   message?: string;
 }
 
+const getSecondProtocolIndex = (value: string): number => {
+  const lower = value.toLowerCase();
+  const secondHttps = lower.indexOf('https://', 8);
+  const secondHttp = lower.indexOf('http://', 7);
+  const candidates = [secondHttps, secondHttp].filter((idx) => idx > 0);
+  return candidates.length > 0 ? Math.min(...candidates) : -1;
+};
+
+const normalizeLocationDetails = (locationType: string, locationDetails: string): string => {
+  const trimmed = (locationDetails || '').trim().replace(/^<+|>+$/g, '');
+  if (!trimmed || locationType !== 'video') return trimmed;
+
+  const secondProtocolIndex = getSecondProtocolIndex(trimmed);
+  const deduped = secondProtocolIndex > 0 ? trimmed.slice(0, secondProtocolIndex) : trimmed;
+
+  return deduped.trim();
+};
+
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString('sv-SE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -165,20 +183,33 @@ const handler = async (req: Request): Promise<Response> => {
       scheduledAt, durationMinutes, locationType, locationDetails, message,
     }: InterviewInvitationRequest = await req.json();
 
+    const normalizedLocationDetails = normalizeLocationDetails(locationType, locationDetails || '');
+
     console.log(`Sending interview invitation to ${candidateEmail} for ${jobTitle} at ${companyName}`);
 
     const googleCalendarUrl = generateGoogleCalendarUrl(
-      companyName, jobTitle, scheduledAt, durationMinutes, locationType, locationDetails || '', message || ''
+      companyName,
+      jobTitle,
+      scheduledAt,
+      durationMinutes,
+      locationType,
+      normalizedLocationDetails,
+      message || ''
     );
 
     const { text, html } = buildEmail(
       candidateName, companyName, jobTitle, scheduledAt, durationMinutes,
-      locationType, locationDetails || '', message || '', googleCalendarUrl
+      locationType,
+      normalizedLocationDetails,
+      message || '',
+      googleCalendarUrl
     );
 
     const icsContent = generateIcsContent(
       candidateName, companyName, jobTitle, scheduledAt, durationMinutes,
-      locationType, locationDetails || '', message || ''
+      locationType,
+      normalizedLocationDetails,
+      message || ''
     );
     const icsBase64 = btoa(unescape(encodeURIComponent(icsContent)));
 
