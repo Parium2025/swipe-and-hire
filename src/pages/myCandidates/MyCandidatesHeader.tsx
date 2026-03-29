@@ -136,7 +136,7 @@ export const MyCandidatesHeader = ({
             </h1>
           )}
         </div>
-        <p className="text-sm text-white/90 mt-1">
+        <p className="text-sm text-white mt-1">
           {isViewingColleague 
             ? `Visar ${viewingColleague?.firstName}s rekryteringspipeline - du kan flytta och ta bort kandidater`
             : 'Din personliga rekryteringspipeline - dra kandidater mellan steg'
