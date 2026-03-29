@@ -43,6 +43,9 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: {
     // Rebuild pre-bundled deps from scratch to avoid stale/missing chunk refs
     force: true,
+    // Preview stability: avoid auto-optimizing a large dep graph that can create
+    // stale/missing chunk references in proxied preview sessions.
+    noDiscovery: true,
     include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
   },
 }));
