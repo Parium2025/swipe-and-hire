@@ -1,4 +1,4 @@
-import { memo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { memo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle, type TouchEvent } from 'react';
 import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -7,6 +7,7 @@ import StarterKit from '@tiptap/starter-kit';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 
 interface RichNotesEditorProps {
   value: string;
@@ -30,7 +31,11 @@ const ToolbarButton = memo(({
   isActive = false,
   disabled = false,
   compact = false,
-  large = false
+  large = false,
+  tapToPreview = false,
+  previewingId,
+  buttonId,
+  onTapPreview
 }: { 
   onClick: () => void; 
   icon: React.ComponentType<{ className?: string }>; 
@@ -39,39 +44,62 @@ const ToolbarButton = memo(({
   disabled?: boolean;
   compact?: boolean;
   large?: boolean;
-}) => (
-  <TooltipProvider delayDuration={300}>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          tabIndex={-1}
-          onMouseDown={(e) => {
-            e.preventDefault();
-          }}
-          onFocus={(e) => {
-            e.currentTarget.blur();
-          }}
-          onClick={onClick}
-          disabled={disabled}
-          className={cn(
-            "flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-150 caret-transparent",
-            large ? "w-11 h-11" : compact ? "w-7 h-7" : "w-8 h-8",
-            "bg-transparent md:hover:bg-white/20",
-            "active:scale-90",
-            "disabled:opacity-30 disabled:cursor-not-allowed",
-            isActive ? "bg-white/30 ring-1 ring-white/40 shadow-sm" : "border border-transparent"
-          )}
-        >
-          <Icon className={cn(large ? "h-5 w-5" : compact ? "h-3.5 w-3.5" : "h-4 w-4", "text-pure-white")} />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="top">
-        <p>{title}</p>
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
-));
+  tapToPreview?: boolean;
+  previewingId?: string | null;
+  buttonId?: string;
+  onTapPreview?: (id: string) => void;
+}) => {
+  const isShowingPreview = tapToPreview && previewingId === buttonId;
+
+  const handleClick = () => {
+    if (tapToPreview && buttonId && onTapPreview) {
+      if (previewingId === buttonId) {
+        // Second tap → activate
+        onClick();
+      } else {
+        // First tap → show tooltip
+        onTapPreview(buttonId);
+        return;
+      }
+    } else {
+      onClick();
+    }
+  };
+
+  return (
+    <TooltipProvider delayDuration={300}>
+      <Tooltip open={isShowingPreview || undefined}>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            tabIndex={-1}
+            onMouseDown={(e) => {
+              e.preventDefault();
+            }}
+            onFocus={(e) => {
+              e.currentTarget.blur();
+            }}
+            onClick={handleClick}
+            disabled={disabled}
+            className={cn(
+              "flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-150 caret-transparent",
+              large ? "w-11 h-11" : compact ? "w-7 h-7" : "w-8 h-8",
+              "bg-transparent md:hover:bg-white/20",
+              "active:scale-90",
+              "disabled:opacity-30 disabled:cursor-not-allowed",
+              isActive ? "bg-white/30 ring-1 ring-white/40 shadow-sm" : "border border-transparent"
+            )}
+          >
+            <Icon className={cn(large ? "h-5 w-5" : compact ? "h-3.5 w-3.5" : "h-4 w-4", "text-pure-white")} />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <p>{title}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+});
 
 ToolbarButton.displayName = 'ToolbarButton';
 
@@ -85,6 +113,28 @@ interface NotesToolbarProps {
 }
 
 export const NotesToolbar = ({ editor, className, compact = false, large = false, showUndoRedo = true }: NotesToolbarProps) => {
+  const isTouch = useTouchCapable();
+  const [previewingId, setPreviewingId] = useState<string | null>(null);
+  const previewTimeout = useRef<ReturnType<typeof setTimeout>>();
+
+  const handleTapPreview = useCallback((id: string) => {
+    if (previewTimeout.current) clearTimeout(previewTimeout.current);
+    setPreviewingId(id);
+    previewTimeout.current = setTimeout(() => setPreviewingId(null), 2500);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (previewTimeout.current) clearTimeout(previewTimeout.current);
+    };
+  }, []);
+
+  const tapProps = isTouch ? {
+    tapToPreview: true,
+    previewingId,
+    onTapPreview: handleTapPreview,
+  } : {};
+
   // Force re-render on every editor transaction so undo/redo disabled state updates in real-time
   const [, setTick] = useState(0);
   useEffect(() => {
@@ -126,17 +176,17 @@ export const NotesToolbar = ({ editor, className, compact = false, large = false
 
   return (
     <div className={cn("flex items-center gap-0.5 flex-wrap", compact ? "gap-0" : "gap-1", className)}>
-      <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} large={large} />
-      <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} large={large} />
-      <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} large={large} />
+      <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} large={large} buttonId="bold" {...tapProps} />
+      <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} large={large} buttonId="italic" {...tapProps} />
+      <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} large={large} buttonId="strike" {...tapProps} />
       <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
-      <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" isActive={editor.isActive('bulletList')} compact={compact} large={large} />
-      <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" isActive={editor.isActive('taskList')} compact={compact} large={large} />
+      <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" isActive={editor.isActive('bulletList')} compact={compact} large={large} buttonId="bulletList" {...tapProps} />
+      <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" isActive={editor.isActive('taskList')} compact={compact} large={large} buttonId="taskList" {...tapProps} />
       {showUndoRedo && (
         <>
           <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
-          <ToolbarButton onClick={handleUndo} icon={Undo} title="Ångra" disabled={!editor.can().undo()} compact={compact} large={large} />
-          <ToolbarButton onClick={handleRedo} icon={Redo} title="Gör om" disabled={!editor.can().redo()} compact={compact} large={large} />
+          <ToolbarButton onClick={handleUndo} icon={Undo} title="Ångra" disabled={!editor.can().undo()} compact={compact} large={large} buttonId="undo" {...tapProps} />
+          <ToolbarButton onClick={handleRedo} icon={Redo} title="Gör om" disabled={!editor.can().redo()} compact={compact} large={large} buttonId="redo" {...tapProps} />
         </>
       )}
     </div>
