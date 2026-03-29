@@ -32,6 +32,9 @@ interface CreateJobSimpleDialogProps {
 }
 
 const CREATE_JOB_SESSION_KEY = 'parium-creating-job';
+const JOB_WIZARD_SESSION_KEY = 'job-wizard-unsaved-state';
+const JOB_WIZARD_DRAFT_KEY = 'parium_draft_job-wizard';
+const JOB_WIZARD_INTENTIONAL_CLOSE_KEY = 'parium_job_wizard_intentional_close';
 
 const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: CreateJobSimpleDialogProps) => {
   const [open, setOpen] = useState(false);
@@ -70,10 +73,54 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     }
   }, []);
 
+  const setIntentionalCloseMarker = useCallback((isClosed: boolean) => {
+    try {
+      if (isClosed) {
+        sessionStorage.setItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY, '1');
+        localStorage.setItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY, '1');
+      } else {
+        sessionStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
+        localStorage.removeItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const clearCreateAndWizardDrafts = useCallback(() => {
+    clearCreateJobSession();
+    try {
+      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+    } catch {
+      // ignore
+    }
+    try {
+      localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
+    } catch {
+      // ignore
+    }
+  }, [clearCreateJobSession]);
+
   // Auto-restore: if there's a create-job draft/session, re-open wizard directly
   useEffect(() => {
     if (hasAutoRestoredDraft.current || !user) return;
     hasAutoRestoredDraft.current = true;
+
+    const wasIntentionallyClosed = (() => {
+      try {
+        return (
+          sessionStorage.getItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY) === '1' ||
+          localStorage.getItem(JOB_WIZARD_INTENTIONAL_CLOSE_KEY) === '1'
+        );
+      } catch {
+        return false;
+      }
+    })();
+
+    if (wasIntentionallyClosed) {
+      clearCreateAndWizardDrafts();
+      return;
+    }
 
     const openWizardFromState = (title?: string) => {
       setJobTitle(typeof title === 'string' ? title : '');
@@ -83,7 +130,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     };
     
     try {
-      const savedDraft = localStorage.getItem('parium_draft_job-wizard');
+      const savedDraft = localStorage.getItem(JOB_WIZARD_DRAFT_KEY);
       if (savedDraft) {
         const parsed = JSON.parse(savedDraft);
         // Match wizard TTL (24h) and allow restore even if title is empty
@@ -105,7 +152,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     } catch (e) {
       console.warn('Failed to check for job wizard draft');
     }
-  }, [user]);
+  }, [user, clearCreateAndWizardDrafts]);
 
   // Keep a lightweight session marker while wizard is open
   useEffect(() => {
@@ -274,6 +321,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       return;
     }
 
+    setIntentionalCloseMarker(false);
+
     console.log('CreateJobSimpleDialog: opening MobileJobWizard', {
       jobTitle,
       selectedTemplateId: selectedTemplate?.id,
@@ -293,7 +342,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     setTimeout(() => {
       setShowDetailDialog(true);
     }, 150);
-  }, [jobTitle, selectedTemplate, toast]);
+  }, [jobTitle, selectedTemplate, toast, setIntentionalCloseMarker]);
 
   const handleClose = useCallback(() => {
     // X should always close and fully clear — no unsaved dialog
@@ -305,8 +354,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     setTemplateMenuOpen(false);
     setTitleInputKey((k) => k + 1);
     setMenuInstanceKey((k) => k + 1);
-    clearCreateJobSession();
-  }, [clearCreateJobSession]);
+    setIntentionalCloseMarker(true);
+    clearCreateAndWizardDrafts();
+  }, [clearCreateAndWizardDrafts, setIntentionalCloseMarker]);
 
   const handleConfirmClose = useCallback(() => {
     setShowUnsavedDialog(false);
@@ -317,8 +367,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     setTemplateMenuOpen(false);
     setTitleInputKey((k) => k + 1);
     setMenuInstanceKey((k) => k + 1);
-    clearCreateJobSession();
-  }, [clearCreateJobSession]);
+    setIntentionalCloseMarker(true);
+    clearCreateAndWizardDrafts();
+  }, [clearCreateAndWizardDrafts, setIntentionalCloseMarker]);
 
   const handleCancelClose = useCallback(() => {
     setShowUnsavedDialog(false);
@@ -328,9 +379,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     setShowDetailDialog(false);
     setJobTitle('');
     setSelectedTemplate(null);
-    clearCreateJobSession();
+    setIntentionalCloseMarker(false);
+    clearCreateAndWizardDrafts();
     onJobCreated(job);
-  }, [clearCreateJobSession, onJobCreated]);
+  }, [clearCreateAndWizardDrafts, onJobCreated, setIntentionalCloseMarker]);
 
   const handleWizardBack = useCallback(() => {
     isNavigatingBack.current = true;
@@ -373,7 +425,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           setSearchTerm('');
           setTemplateMenuOpen(false);
           setTitleInputKey((k) => k + 1);
-          clearCreateJobSession();
+          setIntentionalCloseMarker(true);
+          clearCreateAndWizardDrafts();
         }
       }}>
         <DialogTrigger asChild>
@@ -708,8 +761,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           if (!isOpen && !isNavigatingBack.current) {
             setJobTitle('');
             setSelectedTemplate(null);
-            clearCreateJobSession();
-            try { localStorage.removeItem('parium_draft_job-wizard'); } catch {}
+            clearCreateAndWizardDrafts();
+            setIntentionalCloseMarker(false);
           }
         }}
         jobTitle={jobTitle}
