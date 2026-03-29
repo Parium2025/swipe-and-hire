@@ -37,6 +37,16 @@ Tack för din ansökan. Vi skulle gärna vilja träffa dig på en intervju.
 
 Vänliga hälsningar`;
 
+function getVideoLinkLabel(url: string): string {
+  const lower = url.toLowerCase();
+  if (lower.includes('meet.google.com')) return 'Din Google Meet-länk';
+  if (lower.includes('teams.microsoft.com') || lower.includes('teams.live.com')) return 'Din Teams-länk';
+  if (lower.includes('zoom.us') || lower.includes('zoom.com')) return 'Din Zoom-länk';
+  if (lower.includes('whereby.com')) return 'Din Whereby-länk';
+  if (lower.includes('webex.com')) return 'Din Webex-länk';
+  return 'Din videolänk';
+}
+
 export const BookInterviewDialog = ({
   open,
   onOpenChange,
@@ -72,6 +82,7 @@ export const BookInterviewDialog = ({
 
   // State for editable video link
   const [editableVideoLink, setEditableVideoLink] = useState(savedVideoLink);
+  const [videoLinkEditing, setVideoLinkEditing] = useState(false);
 
   // Get the correct default message based on location type
   const getDefaultMessageForType = (type: 'video' | 'office') => {
@@ -378,13 +389,26 @@ export const BookInterviewDialog = ({
           {locationType === 'video' && (
             <div className="space-y-2">
               <Label className="text-white">Videolänk</Label>
-              <Input
-                value={editableVideoLink}
-                onChange={(e) => setEditableVideoLink(e.target.value)}
-                placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              />
-              <p className="text-white/50 text-xs">Din Teams, Zoom eller Google Meet-länk</p>
+              {editableVideoLink && !videoLinkEditing ? (
+                <button
+                  type="button"
+                  onClick={() => setVideoLinkEditing(true)}
+                  className="w-full flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 h-11 text-left text-white text-sm transition-colors hover:bg-white/15"
+                >
+                  <Video className="h-4 w-4 shrink-0 text-white" />
+                  <span className="truncate">{getVideoLinkLabel(editableVideoLink)}</span>
+                </button>
+              ) : (
+                <Input
+                  value={editableVideoLink}
+                  onChange={(e) => setEditableVideoLink(e.target.value)}
+                  onBlur={() => { if (editableVideoLink) setVideoLinkEditing(false); }}
+                  autoFocus={videoLinkEditing}
+                  placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                />
+              )}
+              <p className="text-white text-xs">Din Teams, Zoom eller Google Meet-länk</p>
             </div>
           )}
 
