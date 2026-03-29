@@ -103,7 +103,13 @@ export const JobSeekerInterviewsCard = memo(() => {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-white/10 rounded-lg p-2 cursor-pointer hover:bg-white/15 transition-colors"
-                    onClick={() => navigate('/my-applications')}
+                    onClick={() => {
+                      if (interview.location_type === 'video' && interview.location_details) {
+                        window.open(interview.location_details, '_blank', 'noopener');
+                      } else {
+                        navigate('/my-applications');
+                      }
+                    }}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
