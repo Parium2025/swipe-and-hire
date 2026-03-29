@@ -4,6 +4,7 @@ import { EmojiReactionPicker } from '@/components/messages/EmojiReactionPicker';
 import { getMessageSenderName } from '@/lib/conversationDisplayUtils';
 import { Briefcase, Check, CheckCheck, Paperclip, FileText, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import type { ConversationMessage } from '@/hooks/useConversations';
@@ -287,13 +288,13 @@ export function MessageBubble({
           )}
 
           <div className={cn("flex items-center gap-1 mt-1 px-1", isOwn && "flex-row-reverse")}>
-            <span className="text-pure-white text-[10px]">
-              {format(new Date(message.created_at), 'HH:mm')}
-            </span>
-            {/* Edited indicator */}
-            {edited && message.edited_at && (
+            {edited && message.edited_at ? (
               <span className="text-pure-white text-[10px] italic">
-                redigerat {format(new Date(message.edited_at), 'HH:mm')}
+                redigerat {format(new Date(message.edited_at), 'd MMM HH:mm', { locale: sv })}
+              </span>
+            ) : (
+              <span className="text-pure-white text-[10px]">
+                {format(new Date(message.created_at), 'HH:mm')}
               </span>
             )}
             {/* Read receipt for own messages */}
