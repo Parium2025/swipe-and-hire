@@ -143,15 +143,15 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   };
 
   const getDashboardCount = () => {
-    const dashboardCount = preloadedEmployerDashboardJobs || 0;
-    const jobsCount = preloadedEmployerMyJobs || 0;
-    return dashboardCount + jobsCount > 0 ? dashboardCount + jobsCount : null;
+    // Show total unique job count (myJobs already includes all jobs)
+    const total = preloadedEmployerMyJobs || 0;
+    return total > 0 ? total : null;
   };
 
   const getCandidatesCount = () => {
-    const candidates = preloadedEmployerCandidates || 0;
-    const myCandidates = preloadedMyCandidates || 0;
-    return candidates + myCandidates > 0 ? candidates + myCandidates : null;
+    // Show total unique candidates (allCandidates already covers everyone)
+    const total = preloadedEmployerCandidates || 0;
+    return total > 0 ? total : null;
   };
 
   return (

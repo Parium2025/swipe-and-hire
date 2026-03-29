@@ -1568,7 +1568,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data } = await supabase
           .from('job_postings')
           .select('id, is_active, views_count, applications_count, employer_id, created_at, expires_at')
-          .in('employer_id', userIds);
+          .in('employer_id', userIds)
+          .is('deleted_at', null);
         
         orgJobs = data || [];
       } else {
@@ -1576,7 +1577,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data } = await supabase
           .from('job_postings')
           .select('id, is_active, views_count, applications_count, employer_id, created_at, expires_at')
-          .eq('employer_id', user.id);
+          .eq('employer_id', user.id)
+          .is('deleted_at', null);
         
         orgJobs = data || [];
       }
