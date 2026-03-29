@@ -23,6 +23,7 @@ import type { JobPosting } from '@/hooks/useJobsData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { JobTemplate } from '@/types/jobWizard';
 import { cn } from '@/lib/utils';
+import { useTapToPreview } from '@/hooks/useTapToPreview';
 
 interface CreateJobSimpleDialogProps {
   onJobCreated: (job: JobPosting) => void;
