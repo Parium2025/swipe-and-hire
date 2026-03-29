@@ -59,6 +59,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
   const hasPrefetched = useRef(false);
   const hasAutoRestoredDraft = useRef(false);
+  const { handleTap, isPreview, resetPreview } = useTapToPreview();
+  const templateTextRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
   const clearCreateJobSession = useCallback(() => {
     try {
