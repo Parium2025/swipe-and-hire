@@ -581,7 +581,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                   )}
                                 </div>
                               </DropdownMenuItem>
-                              <div className="flex gap-2 px-4 pb-2.5" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex justify-center gap-2 px-4 pb-2.5" onClick={(e) => e.stopPropagation()}>
                                 <button
                                   type="button"
                                   onClick={(e) => {
