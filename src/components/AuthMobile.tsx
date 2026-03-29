@@ -678,18 +678,18 @@ const AuthMobile = ({
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
                     <form key="login-form" onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
                   <div className="relative overflow-anchor-none">
-                        <Label htmlFor="email" className="text-white">
+                        <Label htmlFor="login-email" className="text-white">
                           <Mail className="h-4 w-4 inline mr-2" />
                           E-post
                         </Label>
                         <Input
-                          id="email"
+                          id="login-email"
                           type="email"
                           value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
                           onChange={(e) => handleEmailChange(e.target.value)}
                           required
-                            name={`email-${role}`}
-                            autoComplete={`${role}-email`}
+                          name="auth-email"
+                          autoComplete="email"
                           inputMode="email"
                           spellCheck={false}
                           autoCapitalize="none"
@@ -698,19 +698,19 @@ const AuthMobile = ({
                         {/* email suggestions removed for simpler UX */}
                       </div>
                       <div>
-                        <Label htmlFor="password" className="text-white">
+                        <Label htmlFor="login-password" className="text-white">
                           <Key className="h-4 w-4 inline mr-2" />
                           Lösenord
                         </Label>
                         <div className="relative mt-1">
                           <Input
-                            id="password"
+                            id="login-password"
                             type={showPassword ? 'text' : 'password'}
                             value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
-                            name={`password-${role}`}
-                            autoComplete={`${role}-current-password`}
+                            name="auth-password"
+                            autoComplete="current-password"
                             className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 !min-h-0"
                           />
                           <button
