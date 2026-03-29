@@ -463,6 +463,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                         setTemplateMenuOpen(isOpen);
                         if (isOpen) {
                           setSearchTerm('');
+                        } else {
+                          resetPreview();
                         }
                       }}
                     >
