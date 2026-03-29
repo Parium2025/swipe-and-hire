@@ -19,8 +19,20 @@ import NotFound from "./pages/NotFound";
 // 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
 // imported module" errors from freezing the app on a dark Suspense fallback.
 function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
-  return lazy(() =>
-    factory().catch((err) => {
+  return lazy(() => {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const importPromise = factory();
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeout = setTimeout(() => {
+        reject(new Error('Lazy import timed out after 12s'));
+      }, 12000);
+    });
+
+    return Promise.race([importPromise, timeoutPromise])
+      .finally(() => {
+        if (timeout) clearTimeout(timeout);
+      })
+      .catch((err) => {
       const key = 'chunk-reload-' + factory.toString().slice(0, 60);
       const alreadyRetried = sessionStorage.getItem(key);
 
@@ -42,8 +54,8 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
       }
 
       throw err;
-    })
-  );
+    });
+  });
 }
 
 // Heavy pages - lazy loaded to reduce initial bundle by ~60%
