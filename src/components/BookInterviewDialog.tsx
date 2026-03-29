@@ -37,6 +37,16 @@ Tack för din ansökan. Vi skulle gärna vilja träffa dig på en intervju.
 
 Vänliga hälsningar`;
 
+function getVideoLinkLabel(url: string): string {
+  const lower = url.toLowerCase();
+  if (lower.includes('meet.google.com')) return 'Din Google Meet-länk';
+  if (lower.includes('teams.microsoft.com') || lower.includes('teams.live.com')) return 'Din Teams-länk';
+  if (lower.includes('zoom.us') || lower.includes('zoom.com')) return 'Din Zoom-länk';
+  if (lower.includes('whereby.com')) return 'Din Whereby-länk';
+  if (lower.includes('webex.com')) return 'Din Webex-länk';
+  return 'Din videolänk';
+}
+
 export const BookInterviewDialog = ({
   open,
   onOpenChange,
