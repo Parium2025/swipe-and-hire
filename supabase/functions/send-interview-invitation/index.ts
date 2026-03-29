@@ -117,97 +117,95 @@ const getInterviewTemplate = (
   candidateName: string, companyName: string, jobTitle: string, scheduledAt: string,
   durationMinutes: number, locationType: string, locationDetails: string, message: string,
   googleCalendarUrl: string
-) => `
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+) => {
+  const dateStr = formatDate(scheduledAt);
+  const timeStr = formatTime(scheduledAt);
+  const locationLabel = locationType === 'video' ? 'Videointervju' : 'På plats';
+  const locationValue = locationType === 'video' && locationDetails?.startsWith('http')
+    ? `<a href="${locationDetails}" style="color:#1E3A8A;text-decoration:underline;word-break:break-all;">${locationDetails}</a>`
+    : locationDetails || 'Information meddelas';
+
+  const videoButton = locationType === 'video' && locationDetails?.startsWith('http') ? `
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top:20px;">
+                <tr><td align="center">
+                  <a href="${locationDetails}" style="background-color:#1E3A8A;border-radius:8px;color:#fff;display:inline-block;font-size:14px;font-weight:600;line-height:44px;text-align:center;text-decoration:none;width:220px;">Anslut till videomötet</a>
+                </td></tr>
+              </table>` : '';
+
+  const messageBlock = message ? `
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top:16px;">
+                <tr><td style="padding:14px 16px;background-color:#F9FAFB;border-radius:8px;">
+                  <p style="margin:0;font-size:13px;color:#6B7280;font-weight:500;">Meddelande</p>
+                  <p style="margin:6px 0 0;font-size:14px;color:#374151;line-height:1.5;white-space:pre-line;">${message}</p>
+                </td></tr>
+              </table>` : '';
+
+  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Intervjukallelse – ${companyName}</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
-  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
+<body style="margin:0;padding:0;background-color:#F4F4F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#F4F4F5;">
     <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
+      <td align="center" style="padding:32px 16px;">
+        <table border="0" cellpadding="0" cellspacing="0" width="520" style="background-color:#ffffff;border-radius:16px;max-width:520px;overflow:hidden;">
+          <!-- Header -->
           <tr>
-            <td style="background-color: #1E3A8A; padding: 32px 30px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="margin: 0 0 4px 0; font-size: 24px; font-weight: bold; color: #ffffff;">Parium</h1>
-              <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.8);">Du är kallad till intervju</p>
+            <td style="background-color:#1E3A8A;padding:24px 28px;text-align:center;">
+              <p style="margin:0;font-size:20px;font-weight:700;color:#fff;letter-spacing:-0.3px;">Intervjukallelse</p>
+              <p style="margin:4px 0 0;font-size:13px;color:rgba(255,255,255,0.75);">${companyName}</p>
             </td>
           </tr>
+
+          <!-- Body -->
           <tr>
-            <td style="padding: 36px 30px;">
-              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
-                Hej ${candidateName}!
+            <td style="padding:28px;">
+              <p style="margin:0 0 16px;font-size:15px;color:#111827;line-height:1.5;">
+                Hej ${candidateName}, du är kallad till intervju för <strong>${jobTitle}</strong>.
               </p>
-              <p style="margin: 0 0 24px 0; font-size: 16px; color: #333; line-height: 1.6;">
-                Vi vill gärna träffa dig för en intervju gällande tjänsten <strong>${jobTitle}</strong> hos <strong>${companyName}</strong>.
-              </p>
-              
-              <!-- Calendar notification -->
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #ECFDF5; border-radius: 8px; margin-bottom: 20px;">
+
+              <!-- Details card -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#F0F4FF;border-radius:10px;">
                 <tr>
-                  <td style="padding: 16px;">
-                    <p style="margin: 0; font-size: 14px; color: #065F46; line-height: 1.5;">
-                      En kalenderhändelse har bifogats till detta mejl. Öppna den för att lägga till intervjun i din kalender.
-                    </p>
-                    <p style="margin: 8px 0 0 0; font-size: 13px; color: #065F46;">
-                      Ser du inte bilagan? <a href="${googleCalendarUrl}" style="color: #059669; font-weight: 600; text-decoration: underline;">Lägg till i Google Kalender</a>
-                    </p>
+                  <td style="padding:18px 20px;">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td width="50%" style="padding-bottom:10px;vertical-align:top;">
+                          <p style="margin:0;font-size:11px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Datum</p>
+                          <p style="margin:3px 0 0;font-size:14px;color:#111827;font-weight:600;">${dateStr}</p>
+                        </td>
+                        <td width="50%" style="padding-bottom:10px;vertical-align:top;">
+                          <p style="margin:0;font-size:11px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Tid</p>
+                          <p style="margin:3px 0 0;font-size:14px;color:#111827;font-weight:600;">${timeStr} · ${durationMinutes} min</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colspan="2" style="vertical-align:top;">
+                          <p style="margin:0;font-size:11px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${locationLabel}</p>
+                          <p style="margin:3px 0 0;font-size:14px;color:#111827;font-weight:600;">${locationValue}</p>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
-              
-              <!-- Interview Details Card -->
-              <div style="background-color: #F0F9FF; border-left: 4px solid #1E3A8A; padding: 20px; border-radius: 0 8px 8px 0; margin-bottom: 24px;">
-                <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                  <tr>
-                    <td style="padding-bottom: 12px;">
-                      <p style="margin: 0; font-size: 13px; color: #6B7280; font-weight: 500;">DATUM</p>
-                      <p style="margin: 4px 0 0 0; font-size: 16px; color: #111827; font-weight: 600;">${formatDate(scheduledAt)}</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding-bottom: 12px;">
-                      <p style="margin: 0; font-size: 13px; color: #6B7280; font-weight: 500;">TID</p>
-                      <p style="margin: 4px 0 0 0; font-size: 16px; color: #111827; font-weight: 600;">${formatTime(scheduledAt)} (${durationMinutes} min)</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <p style="margin: 0; font-size: 13px; color: #6B7280; font-weight: 500;">${getLocationTypeText(locationType).toUpperCase()}</p>
-                      <p style="margin: 4px 0 0 0; font-size: 16px; color: #111827; font-weight: 600; word-break: break-word;">${locationDetails || 'Information kommer'}</p>
-                    </td>
-                  </tr>
-                </table>
-              </div>
-              
-              ${message ? `
-              <div style="background-color: #F9FAFB; border-left: 4px solid #3B82F6; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 24px;">
-                <p style="margin: 0 0 8px 0; font-size: 14px; color: #6B7280; font-weight: 500;">Meddelande från ${companyName}:</p>
-                <p style="margin: 0; font-size: 15px; color: #374151; line-height: 1.6; white-space: pre-line;">${message}</p>
-              </div>
-              ` : ''}
-              
-              ${locationType === 'video' && locationDetails && locationDetails.startsWith('http') ? `
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0;">
-                <tr>
-                  <td align="center">
-                    <a href="${locationDetails}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 15px; font-weight: bold; line-height: 46px; text-align: center; text-decoration: none; width: 240px;">Anslut till videomötet</a>
-                  </td>
-                </tr>
-              </table>
-              ` : ''}
-              
-              <p style="margin: 24px 0 0 0; font-size: 15px; color: #333; line-height: 1.6;">
-                Vi ser fram emot att träffa dig!
+              ${messageBlock}
+              ${videoButton}
+
+              <!-- Calendar hint -->
+              <p style="margin:20px 0 0;font-size:12px;color:#9CA3AF;line-height:1.5;text-align:center;">
+                📅 Kalenderhändelse bifogad · <a href="${googleCalendarUrl}" style="color:#6B7280;text-decoration:underline;">Lägg till i Google Kalender</a>
               </p>
             </td>
           </tr>
+
+          <!-- Footer -->
           <tr>
-            <td style="background-color: #F9FAFB; padding: 20px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
-              <p style="margin: 0; font-size: 13px; color: #9CA3AF;">Parium AB · Stockholm</p>
+            <td style="padding:16px 28px;text-align:center;border-top:1px solid #E5E7EB;">
+              <p style="margin:0;font-size:12px;color:#9CA3AF;">Parium AB · Stockholm</p>
             </td>
           </tr>
         </table>
@@ -215,8 +213,8 @@ const getInterviewTemplate = (
     </tr>
   </table>
 </body>
-</html>
-`;
+</html>`;
+};
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
