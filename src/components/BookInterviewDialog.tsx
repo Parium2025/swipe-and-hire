@@ -440,7 +440,11 @@ export const BookInterviewDialog = ({
                 <Input
                   value={editableVideoLink}
                   onChange={(e) => setEditableVideoLink(e.target.value)}
-                  onBlur={() => { if (editableVideoLink) setVideoLinkEditing(false); }}
+                  onBlur={() => {
+                    const normalized = normalizeMeetingLink(editableVideoLink);
+                    setEditableVideoLink(normalized);
+                    if (normalized) setVideoLinkEditing(false);
+                  }}
                   autoFocus={videoLinkEditing}
                   placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
