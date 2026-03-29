@@ -17,21 +17,30 @@ import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
 
 // 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
-// imported module" errors from showing the error boundary. On failure it reloads
-// the page once (guarded by sessionStorage flag to avoid infinite loops).
+// imported module" errors from freezing the app on a dark Suspense fallback.
 function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
   return lazy(() =>
     factory().catch((err) => {
       const key = 'chunk-reload-' + factory.toString().slice(0, 60);
       const alreadyRetried = sessionStorage.getItem(key);
+
       if (!alreadyRetried) {
         sessionStorage.setItem(key, '1');
-        window.location.reload();
-        // Return a never-resolving promise so React doesn't try to render while reloading
-        return new Promise(() => {});
+
+        // Force a cache-busted reload once. If browser blocks reload for any reason,
+        // we still throw so GlobalErrorBoundary can render instead of hanging forever.
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.set('chunk_retry', Date.now().toString());
+          window.location.replace(url.toString());
+        } catch {
+          window.location.reload();
+        }
+      } else {
+        // Already retried once — clear flag for next attempts.
+        sessionStorage.removeItem(key);
       }
-      // Already retried once — clear flag for next time and let error propagate
-      sessionStorage.removeItem(key);
+
       throw err;
     })
   );
