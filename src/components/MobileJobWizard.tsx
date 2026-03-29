@@ -2041,8 +2041,9 @@ const MobileJobWizard = ({
       setShowCompanyProfile(false);
       setShowCompanyTooltip(false);
       
-      // Clear sessionStorage when closing without changes
+      // Clear both sessionStorage AND localStorage drafts when closing via X
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+      try { localStorage.removeItem(JOB_WIZARD_DRAFT_KEY); } catch {}
       
       // Om onBack finns, använd den för att gå tillbaka till mallvalet
       // Annars stäng helt (default beteende)
