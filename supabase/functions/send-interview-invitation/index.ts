@@ -189,6 +189,7 @@ const handler = async (req: Request): Promise<Response> => {
     const {
       candidateEmail, candidateName, companyName, jobTitle,
       scheduledAt, durationMinutes, locationType, locationDetails, message,
+      employerEmail, employerName,
     }: InterviewInvitationRequest = await req.json();
 
     const normalizedLocationDetails = normalizeLocationDetails(locationType, locationDetails || '');
@@ -196,28 +197,20 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending interview invitation to ${candidateEmail} for ${jobTitle} at ${companyName}`);
 
     const googleCalendarUrl = generateGoogleCalendarUrl(
-      companyName,
-      jobTitle,
-      scheduledAt,
-      durationMinutes,
-      locationType,
-      normalizedLocationDetails,
-      message || ''
+      companyName, jobTitle, scheduledAt, durationMinutes,
+      locationType, normalizedLocationDetails, message || ''
     );
 
+    // --- Candidate email ---
     const { text, html } = buildEmail(
       candidateName, companyName, jobTitle, scheduledAt, durationMinutes,
-      locationType,
-      normalizedLocationDetails,
-      message || '',
-      googleCalendarUrl
+      locationType, normalizedLocationDetails, message || '',
+      googleCalendarUrl, false
     );
 
     const icsContent = generateIcsContent(
       candidateName, companyName, jobTitle, scheduledAt, durationMinutes,
-      locationType,
-      normalizedLocationDetails,
-      message || ''
+      locationType, normalizedLocationDetails, message || ''
     );
     const icsBase64 = btoa(unescape(encodeURIComponent(icsContent)));
 
@@ -225,8 +218,7 @@ const handler = async (req: Request): Promise<Response> => {
       from: `${companyName} via Parium <noreply@parium.se>`,
       to: [candidateEmail],
       subject: `Intervjukallelse: ${jobTitle} – ${companyName}`,
-      text,
-      html,
+      text, html,
       attachments: [{
         filename: 'intervju.ics',
         content: icsBase64,
@@ -234,7 +226,41 @@ const handler = async (req: Request): Promise<Response> => {
       }],
     });
 
-    console.log("Interview invitation sent:", emailResponse);
+    console.log("Interview invitation sent to candidate:", emailResponse);
+
+    // --- Employer email (calendar confirmation) ---
+    let employerEmailResponse = null;
+    if (employerEmail && employerName) {
+      try {
+        const { text: empText, html: empHtml } = buildEmail(
+          employerName, companyName, jobTitle, scheduledAt, durationMinutes,
+          locationType, normalizedLocationDetails, message || '',
+          googleCalendarUrl, true
+        );
+
+        const empIcsContent = generateIcsContent(
+          employerName, companyName, jobTitle, scheduledAt, durationMinutes,
+          locationType, normalizedLocationDetails, message || ''
+        );
+        const empIcsBase64 = btoa(unescape(encodeURIComponent(empIcsContent)));
+
+        employerEmailResponse = await resend.emails.send({
+          from: `Parium <noreply@parium.se>`,
+          to: [employerEmail],
+          subject: `Intervju bokad: ${jobTitle} – ${candidateName}`,
+          text: empText, html: empHtml,
+          attachments: [{
+            filename: 'intervju.ics',
+            content: empIcsBase64,
+            content_type: 'text/calendar; method=REQUEST',
+          }],
+        });
+
+        console.log("Interview confirmation sent to employer:", employerEmailResponse);
+      } catch (empErr) {
+        console.error("Error sending employer confirmation:", empErr);
+      }
+    }
 
     return new Response(JSON.stringify({ success: true, ...emailResponse }), {
       status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
