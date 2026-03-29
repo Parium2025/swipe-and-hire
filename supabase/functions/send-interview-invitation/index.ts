@@ -132,7 +132,8 @@ const getInterviewTemplate = (
               </table>` : '';
 
   const messageBlock = message ? `
-              <p style="margin:12px 0 0;font-size:14px;color:#374151;line-height:1.5;white-space:pre-line;">${message}</p>` : '';
+              <p style="margin:14px 0 4px;font-size:14px;color:#6B7280;font-weight:600;">Meddelande från ${companyName} inför intervjun:</p>
+              <p style="margin:0;font-size:14px;color:#374151;line-height:1.5;white-space:pre-line;">${message}</p>` : '';
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -147,13 +148,7 @@ const getInterviewTemplate = (
       <td align="center" style="padding:32px 16px;">
         <table border="0" cellpadding="0" cellspacing="0" width="520" style="background-color:#ffffff;border-radius:16px;max-width:520px;overflow:hidden;">
           <tr>
-            <td style="background-color:#1E3A8A;padding:20px 28px;text-align:center;">
-              <p style="margin:0;font-size:18px;font-weight:700;color:#fff;">Intervjukallelse</p>
-              <p style="margin:2px 0 0;font-size:13px;color:rgba(255,255,255,0.75);">${companyName}</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:24px 28px;">
+            <td style="padding:28px;">
               <p style="margin:0 0 14px;font-size:15px;color:#111827;line-height:1.5;">
                 Hej ${candidateName}, du är kallad till intervju för <strong>${jobTitle}</strong>.
               </p>
