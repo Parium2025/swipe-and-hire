@@ -18,6 +18,8 @@ interface InterviewInvitationRequest {
   locationType: 'video' | 'office';
   locationDetails?: string;
   message?: string;
+  employerEmail?: string;
+  employerName?: string;
 }
 
 const getSecondProtocolIndex = (value: string): number => {
@@ -108,9 +110,9 @@ const generateIcsContent = (
 };
 
 const buildEmail = (
-  candidateName: string, companyName: string, jobTitle: string, scheduledAt: string,
+  recipientName: string, companyName: string, jobTitle: string, scheduledAt: string,
   durationMinutes: number, locationType: string, locationDetails: string, message: string,
-  googleCalendarUrl: string
+  googleCalendarUrl: string, isEmployer: boolean = false
 ) => {
   const dateStr = formatDate(scheduledAt);
   const timeStr = formatTime(scheduledAt);
@@ -120,8 +122,12 @@ const buildEmail = (
     ? `https://maps.google.com/?q=${encodeURIComponent(addressFirstLine)}`
     : null;
 
-  // === PLAIN TEXT VERSION (iOS Mail, Android, etc.) ===
-  let text = `Hej ${candidateName}, du är kallad till intervju för ${jobTitle}.
+  const greeting = isEmployer
+    ? `Hej ${recipientName}, du har bokat en intervju för ${jobTitle}.`
+    : `Hej ${recipientName}, du är kallad till intervju för ${jobTitle}.`;
+
+  // === PLAIN TEXT VERSION ===
+  let text = `${greeting}
 
 Datum: ${dateStr}
 Tid: ${timeStr} · ${durationMinutes} min
@@ -129,10 +135,11 @@ ${locationLabel}: ${locationDetails || 'Information meddelas'}`;
 
   if (mapsUrl) text += `\nÖppna i karta: ${mapsUrl}`;
   if (locationType === 'video' && locationDetails?.startsWith('http')) text += `\n\nAnslut till videomötet: ${locationDetails}`;
-  if (message) text += `\n\nMeddelande från ${companyName} inför intervjun:\n${message}`;
+  if (message && !isEmployer) text += `\n\nMeddelande inför intervjun:\n${message}`;
+  if (message && isEmployer) text += `\n\nDitt meddelande till kandidaten:\n${message}`;
   text += `\n\n📅 Kalenderhändelse bifogad\nLägg till i Google Kalender: ${googleCalendarUrl}`;
 
-  // === HTML VERSION (Gmail, Outlook web, etc.) ===
+  // === HTML VERSION ===
   const locationValueHtml = locationType === 'video' && locationDetails?.startsWith('http')
     ? `<a href="${locationDetails}" style="color:#1E3A8A;text-decoration:underline;word-break:break-all;">${locationDetails}</a>`
     : mapsUrl
@@ -146,8 +153,9 @@ ${locationLabel}: ${locationDetails || 'Information meddelas'}`;
                 </td></tr>
               </table>` : '';
 
+  const messageLabel = isEmployer ? 'Ditt meddelande till kandidaten:' : `Meddelande från ${companyName} inför intervjun:`;
   const messageHtml = message ? `
-              <p style="margin:10px 0 2px;font-size:14px;color:#6B7280;font-weight:600;">Meddelande från ${companyName} inför intervjun:</p>
+              <p style="margin:10px 0 2px;font-size:14px;color:#6B7280;font-weight:600;">${messageLabel}</p>
               <p style="margin:0;font-size:14px;color:#374151;line-height:1.5;white-space:pre-line;">${message}</p>` : '';
 
   const html = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -158,7 +166,7 @@ ${locationLabel}: ${locationDetails || 'Information meddelas'}`;
 <tr><td align="center" style="padding:24px 16px;">
 <table border="0" cellpadding="0" cellspacing="0" width="520" style="background-color:#ffffff;border-radius:12px;max-width:520px;">
 <tr><td style="padding:20px 24px;">
-<p style="margin:0 0 6px;font-size:15px;color:#111827;line-height:1.4;">Hej ${candidateName}, du är kallad till intervju för <strong>${jobTitle}</strong>.</p>
+<p style="margin:0 0 6px;font-size:15px;color:#111827;line-height:1.4;">${greeting.replace(jobTitle, `<strong>${jobTitle}</strong>`)}</p>
 <p style="margin:0;font-size:14px;color:#111827;line-height:1.7;"><strong>Datum:</strong> ${dateStr}<br/><strong>Tid:</strong> ${timeStr} · ${durationMinutes} min<br/><strong>${locationLabel}:</strong> ${locationValueHtml}</p>
 ${messageHtml}${videoButtonHtml}
 <p style="margin:12px 0 0;font-size:12px;color:#9CA3AF;line-height:1.4;text-align:center;">📅 Kalenderhändelse bifogad · <a href="${googleCalendarUrl}" style="color:#6B7280;text-decoration:underline;">Google Kalender</a></p>
