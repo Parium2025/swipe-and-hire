@@ -155,8 +155,12 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
   }, [user, clearCreateAndWizardDrafts]);
 
   // Keep a lightweight session marker while wizard is open
+  // Also clear intentional-close marker so auto-restore works again if user refreshes
   useEffect(() => {
     if (!showDetailDialog) return;
+
+    // Clear the "intentionally closed" marker — user is opening the wizard again
+    setIntentionalCloseMarker(false);
 
     try {
       sessionStorage.setItem(CREATE_JOB_SESSION_KEY, JSON.stringify({
@@ -166,7 +170,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     } catch {
       // ignore
     }
-  }, [showDetailDialog, jobTitle]);
+  }, [showDetailDialog, jobTitle, setIntentionalCloseMarker]);
 
   // Warmup with hard hide via CSS to prevent any flash on iOS
   useEffect(() => {
