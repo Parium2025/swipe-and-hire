@@ -251,12 +251,17 @@ const AuthTablet = ({
 
     try {
       const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
-      const currentEmail = currentData.email;
-      const currentPassword = currentData.password;
+      const fallbackEmail = currentData.email.trim();
+      const fallbackPassword = currentData.password;
+      const submittedForm = new FormData(e.currentTarget as HTMLFormElement);
+      const submittedEmail = String(submittedForm.get('auth-email') ?? '').trim();
+      const submittedPassword = String(submittedForm.get('auth-password') ?? '');
+      const currentEmail = isLogin ? (submittedEmail || fallbackEmail) : fallbackEmail;
+      const currentPassword = isLogin ? (submittedPassword || fallbackPassword) : fallbackPassword;
       
        if (isLogin) {
-         // 🎬 Splash triggas nu CENTRALT i signIn (useAuth.tsx) - ingen dubblering här
-         const result = await signIn(currentEmail, currentPassword);
+          // 🎬 Splash triggas nu CENTRALT i signIn (useAuth.tsx) - ingen dubblering här
+          const result = await signIn(currentEmail, currentPassword);
 
          if (result?.error) {
            if (result.error.code === 'email_not_confirmed') {
