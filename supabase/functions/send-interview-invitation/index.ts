@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -8,19 +9,22 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface InterviewInvitationRequest {
-  candidateEmail: string;
-  candidateName: string;
-  companyName: string;
-  jobTitle: string;
-  scheduledAt: string;
-  durationMinutes: number;
-  locationType: 'video' | 'office';
-  locationDetails?: string;
-  message?: string;
-  employerEmail?: string;
-  employerName?: string;
-}
+// ── Input validation ──────────────────────────────────────
+const RequestSchema = z.object({
+  candidateEmail: z.string().email().max(320),
+  candidateName: z.string().min(1).max(200),
+  companyName: z.string().min(1).max(200),
+  jobTitle: z.string().min(1).max(300),
+  scheduledAt: z.string().refine((v) => !isNaN(Date.parse(v)), "Invalid date"),
+  durationMinutes: z.number().int().min(5).max(480),
+  locationType: z.enum(["video", "office"]),
+  locationDetails: z.string().max(2000).optional(),
+  message: z.string().max(5000).optional(),
+  employerEmail: z.string().email().max(320).optional(),
+  employerName: z.string().max(200).optional(),
+});
+
+// ── Helpers ───────────────────────────────────────────────
 
 const getSecondProtocolIndex = (value: string): number => {
   const lower = value.toLowerCase();
@@ -72,6 +76,8 @@ const generateGoogleCalendarUrl = (
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 };
 
+// ── ICS generation ────────────────────────────────────────
+
 const formatIcsDate = (date: Date): string => {
   const p = (n: number) => String(n).padStart(2, '0');
   return `${date.getUTCFullYear()}${p(date.getUTCMonth() + 1)}${p(date.getUTCDate())}T${p(date.getUTCHours())}${p(date.getUTCMinutes())}${p(date.getUTCSeconds())}Z`;
@@ -81,12 +87,12 @@ const escapeIcsText = (text: string): string =>
   text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 
 const generateIcsContent = (
-  candidateName: string, companyName: string, jobTitle: string, scheduledAt: string,
+  recipientName: string, companyName: string, jobTitle: string, scheduledAt: string,
   durationMinutes: number, locationType: string, locationDetails: string, message: string
 ): string => {
   const startDate = new Date(scheduledAt);
   const endDate = new Date(startDate.getTime() + durationMinutes * 60 * 1000);
-  const uid = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@parium.se`;
+  const uid = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}@parium.se`;
   const summary = escapeIcsText(`Intervju – ${jobTitle}`);
   const locationLabel = locationType === 'video' ? 'Videointervju' : 'På plats';
   const location = locationType === 'video' && locationDetails?.startsWith('http')
@@ -108,6 +114,8 @@ const generateIcsContent = (
     'END:VEVENT', 'END:VCALENDAR'
   ].join('\r\n');
 };
+
+// ── Email builder ─────────────────────────────────────────
 
 const buildEmail = (
   recipientName: string, companyName: string, jobTitle: string, scheduledAt: string,
@@ -180,17 +188,30 @@ ${messageHtml}${videoButtonHtml}
   return { text, html };
 };
 
+// ── Handler ───────────────────────────────────────────────
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const rawBody = await req.json();
+    const parsed = RequestSchema.safeParse(rawBody);
+
+    if (!parsed.success) {
+      console.error("Validation error:", parsed.error.flatten().fieldErrors);
+      return new Response(
+        JSON.stringify({ error: "Invalid request", details: parsed.error.flatten().fieldErrors }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const {
       candidateEmail, candidateName, companyName, jobTitle,
       scheduledAt, durationMinutes, locationType, locationDetails, message,
       employerEmail, employerName,
-    }: InterviewInvitationRequest = await req.json();
+    } = parsed.data;
 
     const normalizedLocationDetails = normalizeLocationDetails(locationType, locationDetails || '');
 
@@ -230,16 +251,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     // --- Employer email (calendar confirmation) ---
     let employerEmailResponse = null;
-    if (employerEmail && employerName) {
+    if (employerEmail) {
       try {
+        const empName = employerName || companyName;
+
         const { text: empText, html: empHtml } = buildEmail(
-          employerName, companyName, jobTitle, scheduledAt, durationMinutes,
+          empName, companyName, jobTitle, scheduledAt, durationMinutes,
           locationType, normalizedLocationDetails, message || '',
           googleCalendarUrl, true
         );
 
         const empIcsContent = generateIcsContent(
-          employerName, companyName, jobTitle, scheduledAt, durationMinutes,
+          empName, companyName, jobTitle, scheduledAt, durationMinutes,
           locationType, normalizedLocationDetails, message || ''
         );
         const empIcsBase64 = btoa(unescape(encodeURIComponent(empIcsContent)));
