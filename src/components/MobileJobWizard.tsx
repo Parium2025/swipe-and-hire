@@ -1954,104 +1954,14 @@ const MobileJobWizard = ({
   }, [currentStep]);
 
   const handleClose = () => {
-    if (hasUnsavedChanges) {
-      setPendingClose(true);
-      setShowUnsavedDialog(true);
-    } else {
-      // Reset everything completely - set isInitializing FIRST to prevent button flash
-      setIsInitializing(true);
+    // X should always close and fully clear — no unsaved dialog
+    handleConfirmClose();
+  };
+
+  const _originalHandleCloseBody = () => {
+    // This block is kept as reference for handleConfirmClose
+    {
       setCurrentStep(0);
-      setFormData({
-        title: '',
-        description: '',
-        requirements: '',
-        location: '',
-        occupation: '',
-        salary_min: '',
-        salary_max: '',
-        employment_type: '',
-        salary_type: '',
-        salary_transparency: '',
-        benefits: [],
-        positions_count: '1',
-        work_start_time: '',
-        work_end_time: '',
-        work_location_type: 'på-plats',
-        remote_work_possible: 'nej',
-        workplace_name: '',
-        workplace_address: '',
-        workplace_postal_code: '',
-        workplace_city: '',
-        workplace_county: '',
-        workplace_municipality: '',
-        work_schedule: '',
-        contact_email: '',
-        application_instructions: '',
-        pitch: '',
-        job_image_url: '',
-        job_image_desktop_url: ''
-      });
-      setCustomQuestions([]);
-      setInitialCustomQuestions([]);
-      setJobImageDisplayUrl(null);
-      setJobImageDesktopDisplayUrl(null);
-      setOriginalImageUrl(null);
-      setOriginalDesktopImageUrl(null);
-      setOriginalStoragePath(null);
-      setOriginalDesktopStoragePath(null);
-      setImageIsEdited(false);
-      setDesktopImageIsEdited(false);
-      setCachedPostalCodeInfo(null);
-      setInitialFormData(null);
-      setHasUnsavedChanges(false);
-      // Reset dropdown search terms
-      setEmploymentTypeSearchTerm('');
-      setSalaryTypeSearchTerm('');
-      setSalaryTransparencySearchTerm('');
-      setCitySearchTerm('');
-      setOccupationSearchTerm('');
-      setWorkLocationSearchTerm('');
-      setRemoteWorkSearchTerm('');
-      setQuestionSearchTerm('');
-      setQuestionTypeSearchTerm('');
-      setCustomBenefitInput('');
-      // Reset dropdown visibility states
-      setShowCityDropdown(false);
-      setShowOccupationDropdown(false);
-      setShowQuestionTypeDropdown(false);
-      setShowEmploymentTypeDropdown(false);
-      setShowSalaryTypeDropdown(false);
-      setShowSalaryTransparencyDropdown(false);
-      setShowBenefitsDropdown(false);
-      setShowWorkLocationDropdown(false);
-      setShowRemoteWorkDropdown(false);
-      // Reset question form states
-      setShowQuestionForm(false);
-      setShowQuestionTemplates(false);
-      setEditingQuestion(null);
-      // Reset preview states
-      setPreviewMode('mobile');
-      setShowHingePreview(false);
-      setShowApplicationForm(false);
-      setShowDesktopApplicationForm(false);
-      setPreviewAnswers({});
-      setDesktopPreviewAnswers({});
-      setHingeMode('ad');
-      // Reset company profile states
-      setShowCompanyProfile(false);
-      setShowCompanyTooltip(false);
-      
-      // Clear both sessionStorage AND localStorage drafts when closing via X
-      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
-      try { localStorage.removeItem(JOB_WIZARD_DRAFT_KEY); } catch {}
-      
-      // Om onBack finns, använd den för att gå tillbaka till mallvalet
-      // Annars stäng helt (default beteende)
-      if (onBack) {
-        onBack();
-      } else {
-        onOpenChange(false);
-      }
     }
   };
 

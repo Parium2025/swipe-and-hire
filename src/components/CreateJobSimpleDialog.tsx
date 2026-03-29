@@ -296,20 +296,17 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
   }, [jobTitle, selectedTemplate, toast]);
 
   const handleClose = useCallback(() => {
-    if (hasUnsavedChanges) {
-      setShowUnsavedDialog(true);
-      // Stäng dropdown om den är öppen för att undvika felaktig position nästa gång
-      setTemplateMenuOpen(false);
-    } else {
-      setOpen(false);
-      setJobTitle('');
-      setSelectedTemplate(null);
-      setHasUnsavedChanges(false);
-      setTemplateMenuOpen(false);
-      setTitleInputKey((k) => k + 1);
-      setMenuInstanceKey((k) => k + 1);
-    }
-  }, [hasUnsavedChanges]);
+    // X should always close and fully clear — no unsaved dialog
+    setShowUnsavedDialog(false);
+    setOpen(false);
+    setJobTitle('');
+    setSelectedTemplate(null);
+    setHasUnsavedChanges(false);
+    setTemplateMenuOpen(false);
+    setTitleInputKey((k) => k + 1);
+    setMenuInstanceKey((k) => k + 1);
+    clearCreateJobSession();
+  }, [clearCreateJobSession]);
 
   const handleConfirmClose = useCallback(() => {
     setShowUnsavedDialog(false);
