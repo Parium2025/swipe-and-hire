@@ -386,17 +386,17 @@ const LocationSearchInput = ({
                             setOpen(false);
                           }}
                           className={cn(
-                            "text-white hover:bg-white/10 cursor-pointer py-3 md:py-2 touch-manipulation",
+                            "text-white [@media(hover:hover)]:hover:bg-white/10 cursor-pointer py-3 md:py-2 touch-manipulation active:bg-white/10",
                             searchInput?.toLowerCase() === item.municipality.toLowerCase() && "bg-white/5"
                           )}
                         >
-                          <MapPin className="mr-2 h-4 w-4" />
-                          <span>{item.municipality}</span>
                           {searchInput?.toLowerCase() === item.municipality.toLowerCase() ? (
-                            <Check className="ml-auto h-4 w-4 text-green-400 flex-shrink-0" />
+                            <Check className="mr-2 h-4 w-4 text-green-400 flex-shrink-0" />
                           ) : (
-                            <span className="ml-auto text-xs text-white">{item.county}</span>
+                            <MapPin className="mr-2 h-4 w-4" />
                           )}
+                          <span>{item.municipality}</span>
+                          <span className="ml-auto text-xs text-white">{item.county}</span>
                         </CommandItem>
                         {index < array.length - 1 && (
                           <div className="h-px bg-white/20 mx-2" />
