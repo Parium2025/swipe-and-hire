@@ -307,18 +307,39 @@ const LocationSearchInput = ({
             <div className="flex items-center px-3">
               <Search className="mr-2 h-4 w-4 shrink-0 text-white" />
               <input
+                ref={(el) => {
+                  // Prevent any auto-focus from cmdk/Radix by blurring on mount
+                  if (el) {
+                    requestAnimationFrame(() => {
+                      if (document.activeElement === el && !el.dataset.userTapped) {
+                        el.blur();
+                      }
+                    });
+                  }
+                }}
                 value={dropdownSearch}
                 onChange={(e) => setDropdownSearch(e.target.value)}
                 placeholder="Sök län eller stad/postnummer"
                 autoFocus={false}
                 inputMode="none"
-                onFocus={(e) => {
-                  // Allow keyboard only on explicit user tap – remove inputMode restriction
+                onPointerDown={(e) => {
+                  // Mark as user-initiated tap
+                  e.currentTarget.dataset.userTapped = 'true';
                   e.currentTarget.inputMode = 'text';
                 }}
+                onFocus={(e) => {
+                  // Only allow keyboard if user explicitly tapped
+                  if (e.currentTarget.dataset.userTapped === 'true') {
+                    e.currentTarget.inputMode = 'text';
+                  } else {
+                    // Programmatic focus – don't open keyboard
+                    e.currentTarget.inputMode = 'none';
+                    e.currentTarget.blur();
+                  }
+                }}
                 onBlur={(e) => {
-                  // Reset so next programmatic focus won't open keyboard
                   e.currentTarget.inputMode = 'none';
+                  delete e.currentTarget.dataset.userTapped;
                 }}
                 className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none text-white placeholder:text-white"
               />
