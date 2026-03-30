@@ -159,8 +159,6 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
 
       if (postalCode) {
         setDropdownSearch(postalCode);
-      } else {
-        setDropdownSearch('');
       }
 
       setPostalCodeCity(null);
@@ -235,24 +233,19 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
           side="bottom"
           sideOffset={4}
           avoidCollisions={false}
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <Command className="bg-transparent border-none" shouldFilter={false} loop={false} value="">
             <div className="flex items-center px-3 border-b border-white/10">
               <Search className="mr-2 h-4 w-4 shrink-0 text-white" />
-              <input
+               <input
                 value={dropdownSearch}
                 onChange={(event) => setDropdownSearch(event.target.value)}
                 placeholder="Sök län eller stad/postnummer"
-                autoFocus={false}
-                readOnly
-                onPointerDown={(event) => {
-                  const input = event.currentTarget;
-                  input.readOnly = false;
-                  requestAnimationFrame(() => input.focus());
-                }}
-                onBlur={(event) => {
-                  event.currentTarget.readOnly = true;
-                }}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="search"
                 className="flex h-11 w-full rounded-md bg-transparent py-3 text-[16px] leading-tight outline-none text-white placeholder:text-white/70"
               />
             </div>
