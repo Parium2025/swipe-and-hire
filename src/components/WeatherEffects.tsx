@@ -194,10 +194,9 @@ const RainEffect = memo(() => {
             top: -40,
             width: 2,
             height: drop.height,
-            opacity: 0,
+            opacity: drop.opacity,
             animationDuration: `${drop.duration}s`,
             animationDelay: `${drop.delay}s`,
-            animationFillMode: 'forwards',
           }}
         />
       ))}
