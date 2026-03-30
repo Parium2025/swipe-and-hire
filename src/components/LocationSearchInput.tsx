@@ -304,12 +304,22 @@ const LocationSearchInput = ({
             loop={false}
             value=""
           >
-            <div className="flex items-center px-3" cmdk-input-wrapper="">
+            <div className="flex items-center px-3">
               <Search className="mr-2 h-4 w-4 shrink-0 text-white" />
               <input
                 value={dropdownSearch}
                 onChange={(e) => setDropdownSearch(e.target.value)}
                 placeholder="Sök län eller stad/postnummer"
+                autoFocus={false}
+                inputMode="none"
+                onFocus={(e) => {
+                  // Allow keyboard only on explicit user tap – remove inputMode restriction
+                  e.currentTarget.inputMode = 'text';
+                }}
+                onBlur={(e) => {
+                  // Reset so next programmatic focus won't open keyboard
+                  e.currentTarget.inputMode = 'none';
+                }}
                 className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none text-white placeholder:text-white"
               />
             </div>
