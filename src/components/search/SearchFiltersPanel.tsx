@@ -392,7 +392,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[200px] z-[10000] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white">
+                    <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] z-[10000] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white">
                       <DropdownMenuItem 
                         onClick={() => onSortChange('newest')}
                         className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-2.5 md:py-1.5"
