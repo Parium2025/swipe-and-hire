@@ -34,14 +34,9 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
   const isApp = (typeof isAppOverride === 'boolean') ? isAppOverride : isMobileApp;
 
   const handleUpgrade = () => {
-    if (isApp) {
-      // Mobile app: Show info about visiting website
-      // No action needed - just show the message
-      return;
-    } else {
-      // Web: Could implement Stripe checkout here or also redirect to website
-      console.log('Web upgrade - implement Stripe or redirect to parium.se');
-      // For now, same behavior as mobile
+    if (!isApp) {
+      // Web: Stripe checkout will be integrated here
+      window.open('https://parium.se', '_blank', 'noopener,noreferrer');
     }
   };
 
