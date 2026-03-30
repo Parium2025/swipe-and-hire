@@ -191,11 +191,13 @@ const RainEffect = memo(() => {
           className="absolute bg-blue-300/50 rounded-full animate-[rainFall_linear_infinite]"
           style={{
             left: `${drop.left}%`,
+            top: -40,
             width: 2,
             height: drop.height,
-            opacity: drop.opacity,
+            opacity: 0,
             animationDuration: `${drop.duration}s`,
             animationDelay: `${drop.delay}s`,
+            animationFillMode: 'forwards',
           }}
         />
       ))}
