@@ -323,7 +323,7 @@ const LocationSearchInput = ({
                 className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none text-white placeholder:text-white"
               />
             </div>
-            <CommandList className="max-h-[300px] overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
+            <CommandList className="max-h-[50vh] md:max-h-[300px] overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
               {/* Only show "no results" for text searches when there are no matching results */}
               {!(/^\d+$/.test(dropdownSearch.trim())) && !hasMatchingResults() && (
                 <CommandEmpty className="text-white py-4 text-center text-sm">Ingen plats hittades.</CommandEmpty>
@@ -352,7 +352,7 @@ const LocationSearchInput = ({
                       displayedPostalCode.postalCode,
                       displayedPostalCode.county
                     )}
-                    className="cursor-pointer text-white hover:bg-white/10 flex items-center justify-between transition-opacity duration-300"
+                    className="cursor-pointer text-white hover:bg-white/10 flex items-center justify-between transition-opacity duration-300 py-3 md:py-2 touch-manipulation"
                   >
                     <div className="flex flex-col">
                       <span className="font-medium text-white">{displayedPostalCode.city}</span>
@@ -389,7 +389,7 @@ const LocationSearchInput = ({
                             handleMunicipalitySelect(item.municipality);
                             setOpen(false);
                           }}
-                          className="text-white hover:bg-white/10 cursor-pointer"
+                          className="text-white hover:bg-white/10 cursor-pointer py-3 md:py-2 touch-manipulation"
                         >
                           <MapPin className="mr-2 h-4 w-4" />
                           <span>{item.municipality}</span>
@@ -424,7 +424,7 @@ const LocationSearchInput = ({
                           onSelect={() => {
                             handleCountyClick(county);
                           }}
-                          className="text-white hover:bg-white/10 cursor-pointer flex items-center"
+                          className="text-white hover:bg-white/10 cursor-pointer flex items-center py-3 md:py-2 touch-manipulation"
                         >
                           <MapPin className="mr-2 h-4 w-4" />
                           <span>{county}</span>
@@ -443,7 +443,7 @@ const LocationSearchInput = ({
                                     handleMunicipalitySelect(municipality);
                                     setOpen(false);
                                   }}
-                                  className="pl-8 py-2 text-sm text-white hover:bg-white/10 cursor-pointer"
+                                  className="pl-8 py-3 md:py-2 text-sm text-white hover:bg-white/10 cursor-pointer touch-manipulation"
                                 >
                                   {municipality}
                                 </div>
