@@ -122,13 +122,15 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
           </div>
           
           {/* Saved Searches Dropdown */}
-          <SavedSearchesDropdown
-            savedSearches={savedSearches}
-            totalNewMatches={totalNewMatches}
-            onApplySearch={onApplySavedSearch}
-            onDeleteSearch={onDeleteSearch}
-            onClearNewMatches={onClearNewMatches}
-          />
+          <div className="flex justify-center">
+            <SavedSearchesDropdown
+              savedSearches={savedSearches}
+              totalNewMatches={totalNewMatches}
+              onApplySearch={onApplySavedSearch}
+              onDeleteSearch={onDeleteSearch}
+              onClearNewMatches={onClearNewMatches}
+            />
+          </div>
         </div>
 
         {/* Expand/Collapse Filters Button */}
