@@ -97,7 +97,7 @@ export function SavedSearchesDropdown({
           <button
             className="relative w-full flex items-center justify-center gap-2 text-xs text-white rounded-md px-2 py-1.5 transition-all duration-200 md:hover:bg-white/10 active:scale-95"
           >
-            <Bell className="h-3 w-3 text-white" />
+            <Bell className="h-3 w-3 text-white brightness-125" />
             <span>{savedSearches.length} sparad{savedSearches.length !== 1 ? 'e' : ''} sökning{savedSearches.length !== 1 ? 'ar' : ''}</span>
             {totalNewMatches > 0 && (
               <Badge 
