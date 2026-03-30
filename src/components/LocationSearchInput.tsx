@@ -159,8 +159,6 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
 
       if (postalCode) {
         setDropdownSearch(postalCode);
-      } else {
-        setDropdownSearch('');
       }
 
       setPostalCodeCity(null);
