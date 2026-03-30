@@ -308,11 +308,11 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                               selectedRowRefs.current[item.municipality] = element;
                             }}
                           >
-                            {renderSelectionIndicator(isSelected)}
                             <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">
                               {item.municipality}
                             </span>
                             <span className="text-xs text-white/80 leading-tight">{item.county}</span>
+                            {renderSelectionIndicator(isSelected)}
                           </button>
                           {index < array.length - 1 && <div className="h-px bg-white/20 mx-2" />}
                         </React.Fragment>
