@@ -95,9 +95,9 @@ export function SavedSearchesDropdown({
       }}>
         <PopoverTrigger asChild>
           <button
-            className="relative w-full flex items-center justify-center gap-2 text-xs text-white rounded-md px-2 py-1.5 transition-all duration-200 md:hover:bg-white/10 active:scale-95"
+            className="relative h-11 px-6 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"
           >
-            <Bell className="h-3 w-3 text-white brightness-125" />
+            <Bell className="h-4 w-4 text-white brightness-125" />
             <span>{savedSearches.length} sparad{savedSearches.length !== 1 ? 'e' : ''} sökning{savedSearches.length !== 1 ? 'ar' : ''}</span>
             {totalNewMatches > 0 && (
               <Badge 
