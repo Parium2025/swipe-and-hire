@@ -458,13 +458,20 @@ const LocationSearchInput = ({
                             {swedishCountiesWithMunicipalities[county].map((municipality, mIndex, mArray) => (
                               <React.Fragment key={municipality}>
                                 <div
+                                  data-selected={searchInput?.toLowerCase() === municipality.toLowerCase() ? 'true' : undefined}
                                   onClick={() => {
                                     handleMunicipalitySelect(municipality);
                                     setOpen(false);
                                   }}
-                                  className="pl-8 py-3 md:py-2 text-sm text-white hover:bg-white/10 cursor-pointer touch-manipulation"
+                                  className={cn(
+                                    "pl-8 py-3 md:py-2 text-sm text-white hover:bg-white/10 cursor-pointer touch-manipulation flex items-center justify-between pr-3",
+                                    searchInput?.toLowerCase() === municipality.toLowerCase() && "bg-white/5"
+                                  )}
                                 >
-                                  {municipality}
+                                  <span>{municipality}</span>
+                                  {searchInput?.toLowerCase() === municipality.toLowerCase() && (
+                                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                                  )}
                                 </div>
                                 {mIndex < mArray.length - 1 && (
                                   <div className="h-px bg-white/20 mx-2" />
