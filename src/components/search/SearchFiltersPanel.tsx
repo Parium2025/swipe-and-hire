@@ -173,7 +173,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     aria-label="Välj yrkesområde"
                   >
                     <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
-                    <span className="text-sm text-white flex-1 truncate leading-none">
+                    <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
                       {selectedCategory === 'all-categories'
                         ? 'Alla yrkesområden'
                         : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
@@ -245,7 +245,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     aria-label="Välj specifik roll"
                   >
                     <Users className="h-4 w-4 text-white flex-shrink-0" />
-                    <span className="text-sm text-white flex-1 truncate leading-none">
+                    <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
                       {selectedSubcategories.length === 0
                         ? 'Alla roller'
                         : selectedSubcategories.length === 1
@@ -329,7 +329,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         aria-label="Välj anställningstyp"
                       >
                         <Clock className="h-4 w-4 text-white flex-shrink-0" />
-                        <span className="text-sm text-white flex-1 truncate leading-none">
+                        <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
                           {selectedEmploymentTypes.length === 0 
                             ? 'Alla anställningar' 
                             : selectedEmploymentTypes.length === 1
@@ -388,7 +388,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         aria-label="Välj sortering"
                       >
                         <ArrowUpDown className="h-4 w-4 text-white flex-shrink-0" />
-                        <span className="text-sm text-white flex-1 truncate leading-none">{sortLabels[sortBy]}</span>
+                        <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">{sortLabels[sortBy]}</span>
                         <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
                       </button>
                     </DropdownMenuTrigger>
