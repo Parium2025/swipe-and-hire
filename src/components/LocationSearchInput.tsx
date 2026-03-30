@@ -49,6 +49,7 @@ const LocationSearchInput = ({
     county?: string;
   } | null>(null);
   const skipSearchRef = useRef(false);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Sync with external value changes
   useEffect(() => {
@@ -238,27 +239,42 @@ const LocationSearchInput = ({
   return (
     <div className={`space-y-2 ${className}`}>
       <Popover open={open} onOpenChange={(isOpen) => {
-        setOpen(isOpen);
+       setOpen(isOpen);
         if (isOpen) {
-          // If there's a selected location, find its county and expand it
-          if (searchInput && foundLocation) {
-            if (foundLocation.county) {
-              setExpandedCounty(foundLocation.county as CountyName);
-            } else if (foundLocation.municipality || foundLocation.city) {
-              // Find county by searching through all counties
-              const cityToFind = foundLocation.municipality || foundLocation.city;
-              const foundCounty = Object.entries(swedishCountiesWithMunicipalities).find(([_, municipalities]) =>
-                municipalities.includes(cityToFind)
+          // Find and expand the county containing the currently selected location
+          let countyToExpand: CountyName | null = null;
+          const currentValue = searchInput?.trim();
+          
+          if (currentValue) {
+            // Try foundLocation first
+            if (foundLocation?.county) {
+              countyToExpand = foundLocation.county as CountyName;
+            } else {
+              // Search through all counties to find which one contains the selected municipality
+              const found = Object.entries(swedishCountiesWithMunicipalities).find(([_, municipalities]) =>
+                municipalities.some(m => m.toLowerCase() === currentValue.toLowerCase())
               );
-              if (foundCounty) {
-                setExpandedCounty(foundCounty[0] as CountyName);
+              if (found) {
+                countyToExpand = found[0] as CountyName;
               }
             }
-          } else {
-            setExpandedCounty(null);
           }
+          
+          setExpandedCounty(countyToExpand);
           setDropdownSearch('');
           setPostalCodeCity(null);
+          
+          // Scroll to the selected municipality after DOM updates
+          if (countyToExpand) {
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                const selected = listRef.current?.querySelector('[data-selected="true"]');
+                if (selected) {
+                  selected.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                }
+              }, 100);
+            });
+          }
         }
       }}>
         <PopoverTrigger asChild>
@@ -326,7 +342,7 @@ const LocationSearchInput = ({
                 className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none text-white placeholder:text-white"
               />
             </div>
-            <CommandList className="max-h-[50vh] md:max-h-[300px] overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
+            <CommandList ref={listRef} className="max-h-[50vh] md:max-h-[300px] overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
               {/* Only show "no results" for text searches when there are no matching results */}
               {!(/^\d+$/.test(dropdownSearch.trim())) && !hasMatchingResults() && (
                 <CommandEmpty className="text-white py-4 text-center text-sm">Ingen plats hittades.</CommandEmpty>
@@ -392,11 +408,18 @@ const LocationSearchInput = ({
                             handleMunicipalitySelect(item.municipality);
                             setOpen(false);
                           }}
-                          className="text-white hover:bg-white/10 cursor-pointer py-3 md:py-2 touch-manipulation"
+                          className={cn(
+                            "text-white hover:bg-white/10 cursor-pointer py-3 md:py-2 touch-manipulation",
+                            searchInput?.toLowerCase() === item.municipality.toLowerCase() && "bg-white/5"
+                          )}
                         >
                           <MapPin className="mr-2 h-4 w-4" />
                           <span>{item.municipality}</span>
-                          <span className="ml-auto text-xs text-white">{item.county}</span>
+                          {searchInput?.toLowerCase() === item.municipality.toLowerCase() ? (
+                            <Check className="ml-auto h-4 w-4 text-green-400 flex-shrink-0" />
+                          ) : (
+                            <span className="ml-auto text-xs text-white">{item.county}</span>
+                          )}
                         </CommandItem>
                         {index < array.length - 1 && (
                           <div className="h-px bg-white/20 mx-2" />
@@ -442,13 +465,20 @@ const LocationSearchInput = ({
                             {swedishCountiesWithMunicipalities[county].map((municipality, mIndex, mArray) => (
                               <React.Fragment key={municipality}>
                                 <div
+                                  data-selected={searchInput?.toLowerCase() === municipality.toLowerCase() ? 'true' : undefined}
                                   onClick={() => {
                                     handleMunicipalitySelect(municipality);
                                     setOpen(false);
                                   }}
-                                  className="pl-8 py-3 md:py-2 text-sm text-white hover:bg-white/10 cursor-pointer touch-manipulation"
+                                  className={cn(
+                                    "pl-8 py-3 md:py-2 text-sm text-white hover:bg-white/10 cursor-pointer touch-manipulation flex items-center justify-between pr-3",
+                                    searchInput?.toLowerCase() === municipality.toLowerCase() && "bg-white/5"
+                                  )}
                                 >
-                                  {municipality}
+                                  <span>{municipality}</span>
+                                  {searchInput?.toLowerCase() === municipality.toLowerCase() && (
+                                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                                  )}
                                 </div>
                                 {mIndex < mArray.length - 1 && (
                                   <div className="h-px bg-white/20 mx-2" />
