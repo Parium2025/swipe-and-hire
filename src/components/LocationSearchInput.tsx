@@ -130,17 +130,16 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
           behavior: 'smooth',
         });
       });
-
-      return;
+    } else if (values.length === 0) {
+      setExpandedCounty(null);
+      requestAnimationFrame(() => {
+        if (listRef.current) {
+          listRef.current.scrollTop = 0;
+        }
+      });
     }
-
-    setExpandedCounty(null);
-    requestAnimationFrame(() => {
-      if (listRef.current) {
-        listRef.current.scrollTop = 0;
-      }
-    });
-  }, [open, values]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const toggleLocation = useCallback(
     async (location: string, postalCode?: string, county?: string) => {
