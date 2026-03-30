@@ -173,7 +173,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     aria-label="Välj yrkesområde"
                   >
                     <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
-                    <span className="text-sm text-white flex-1 truncate leading-none">
+                    <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
                       {selectedCategory === 'all-categories'
                         ? 'Alla yrkesområden'
                         : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
@@ -202,7 +202,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       onCategoryChange('all-categories');
                       onSubcategoriesChange([]);
                     }}
-                    className="cursor-pointer hover:bg-white/10 text-white font-medium"
+                    className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white font-medium touch-manipulation py-2.5 md:py-1.5"
                   >
                     Alla yrkesområden
                   </DropdownMenuItem>
@@ -214,7 +214,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                           onCategoryChange(category.value);
                           onSubcategoriesChange([]);
                         }}
-                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-2.5 md:py-1.5"
                       >
                         <span>{category.label}</span>
                         {selectedCategory === category.value && (
@@ -245,7 +245,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     aria-label="Välj specifik roll"
                   >
                     <Users className="h-4 w-4 text-white flex-shrink-0" />
-                    <span className="text-sm text-white flex-1 truncate leading-none">
+                    <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
                       {selectedSubcategories.length === 0
                         ? 'Alla roller'
                         : selectedSubcategories.length === 1
@@ -259,7 +259,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
                   <DropdownMenuItem
                     onClick={() => onSubcategoriesChange([])}
-                    className="cursor-pointer hover:bg-white/10 text-white font-medium"
+                    className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white font-medium touch-manipulation py-2.5 md:py-1.5"
                   >
                     Alla roller
                   </DropdownMenuItem>
@@ -274,7 +274,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                               : [...selectedSubcategories, subcat]
                           );
                         }}
-                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-2.5 md:py-1.5"
                       >
                         <span>{subcat}</span>
                         {selectedSubcategories.includes(subcat) && (
@@ -329,7 +329,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         aria-label="Välj anställningstyp"
                       >
                         <Clock className="h-4 w-4 text-white flex-shrink-0" />
-                        <span className="text-sm text-white flex-1 truncate leading-none">
+                        <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
                           {selectedEmploymentTypes.length === 0 
                             ? 'Alla anställningar' 
                             : selectedEmploymentTypes.length === 1
@@ -343,7 +343,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
                       <DropdownMenuItem
                         onClick={() => onEmploymentTypesChange([])}
-                        className="cursor-pointer hover:bg-white/10 text-white font-medium"
+                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white font-medium touch-manipulation py-2.5 md:py-1.5"
                       >
                         Alla anställningar
                       </DropdownMenuItem>
@@ -359,7 +359,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                                 onEmploymentTypesChange([...selectedEmploymentTypes, type.value]);
                               }
                             }}
-                            className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                            className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-2.5 md:py-1.5"
                           >
                             <span>{type.label}</span>
                             {selectedEmploymentTypes.includes(type.value) && (
@@ -388,14 +388,14 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         aria-label="Välj sortering"
                       >
                         <ArrowUpDown className="h-4 w-4 text-white flex-shrink-0" />
-                        <span className="text-sm text-white flex-1 truncate leading-none">{sortLabels[sortBy]}</span>
+                        <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">{sortLabels[sortBy]}</span>
                         <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[200px] z-[10000] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white">
                       <DropdownMenuItem 
                         onClick={() => onSortChange('newest')}
-                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-2.5 md:py-1.5"
                       >
                         <span>{sortLabels.newest}</span>
                         {sortBy === 'newest' && <Check className="h-4 w-4 text-white" />}
@@ -403,7 +403,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       <DropdownMenuSeparator className="bg-white/20" />
                       <DropdownMenuItem 
                         onClick={() => onSortChange('oldest')}
-                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-2.5 md:py-1.5"
                       >
                         <span>{sortLabels.oldest}</span>
                         {sortBy === 'oldest' && <Check className="h-4 w-4 text-white" />}
@@ -411,7 +411,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       <DropdownMenuSeparator className="bg-white/20" />
                       <DropdownMenuItem 
                         onClick={() => onSortChange('most-views')}
-                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                        className="cursor-pointer [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 text-white flex items-center justify-between touch-manipulation py-2.5 md:py-1.5"
                       >
                         <span>{sortLabels['most-views']}</span>
                         {sortBy === 'most-views' && <Check className="h-4 w-4 text-white" />}

@@ -519,6 +519,12 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       return jobs;
     }
 
+    // Single location: DB already filtered via cityFilter/countyFilter — skip client filter
+    if (selectedLocations.length === 1) {
+      return jobs;
+    }
+
+    // Multiple locations: DB only filters on primary, client-filter the rest
     return jobs.filter((job) => {
       const searchableFields = [
         job.location,
