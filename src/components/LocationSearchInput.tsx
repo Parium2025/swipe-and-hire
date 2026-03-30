@@ -264,7 +264,7 @@ const LocationSearchInput = ({
         <PopoverTrigger asChild>
           <button
             className={cn(
-              "w-full h-11 md:h-12 flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50",
+              "w-full h-[var(--control-height)] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50",
               "focus:outline-none focus:ring-2 focus:ring-white/20"
             )}
             aria-label="Välj plats"
