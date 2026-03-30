@@ -49,6 +49,7 @@ const LocationSearchInput = ({
     county?: string;
   } | null>(null);
   const skipSearchRef = useRef(false);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Sync with external value changes
   useEffect(() => {
