@@ -188,7 +188,7 @@ serve(async (req) => {
  * Legacy full-scan mode (for cron-based checks)
  */
 async function fullScan(supabase: any) {
-  console.log('[check-saved-searches] Running full scan (cron mode)...');
+  console.log('[check-saved-searches] Running full scan (cron mode) - recounting active matches...');
 
   let offset = 0;
   let totalUpdates = 0;
@@ -202,12 +202,16 @@ async function fullScan(supabase: any) {
     if (error || !searches || searches.length === 0) break;
 
     for (const search of searches) {
+      // Count ALL active jobs that match this search's criteria
+      // and were created after last_notified_at (or last_checked_at as fallback)
+      const sinceDate = search.last_notified_at || search.last_checked_at;
+      
       let query = supabase
         .from('job_postings')
-        .select('id, title, workplace_city', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('is_active', true)
         .is('deleted_at', null)
-        .gt('created_at', search.last_checked_at);
+        .gt('created_at', sinceDate);
 
       if (search.search_query) {
         query = query.or(`title.ilike.%${search.search_query}%,workplace_city.ilike.%${search.search_query}%`);
@@ -232,32 +236,34 @@ async function fullScan(supabase: any) {
       }
 
       const { count } = await query;
+      const newCount = count || 0;
 
-      if (count && count > 0) {
+      // SET the count (not accumulate) — this ensures expired/deleted jobs
+      // are no longer counted, fixing stale badge notifications
+      if (newCount !== (search.new_matches_count || 0)) {
         totalUpdates++;
         await supabase
           .from('saved_searches')
           .update({
-            new_matches_count: (search.new_matches_count || 0) + count,
+            new_matches_count: newCount,
             last_checked_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           })
           .eq('id', search.id);
+      } else {
+        // Just update last_checked_at
+        await supabase
+          .from('saved_searches')
+          .update({ last_checked_at: new Date().toISOString() })
+          .eq('id', search.id);
       }
     }
-
-    // Update last_checked_at even for non-matching
-    const ids = searches.map((s: any) => s.id);
-    await supabase
-      .from('saved_searches')
-      .update({ last_checked_at: new Date().toISOString() })
-      .in('id', ids);
 
     if (searches.length < BATCH_SIZE) break;
     offset += BATCH_SIZE;
   }
 
-  console.log(`[check-saved-searches] Full scan done. ${totalUpdates} searches updated.`);
+  console.log(`[check-saved-searches] Full scan done. ${totalUpdates} searches recounted.`);
 
   return new Response(
     JSON.stringify({ success: true, mode: 'full_scan', updatedSearches: totalUpdates }),
