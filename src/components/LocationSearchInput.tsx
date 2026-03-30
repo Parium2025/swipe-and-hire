@@ -392,8 +392,8 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                 primarySelection ? 'justify-start' : 'justify-start'
               )}
             >
-              <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
               <span className="font-medium leading-tight">{location}</span>
+              <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
             </div>
           ))}
         </div>
