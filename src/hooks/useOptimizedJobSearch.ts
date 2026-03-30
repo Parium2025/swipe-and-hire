@@ -208,12 +208,18 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   const { searchQuery, city, employmentTypes, category, subcategories, enabled = true } = options;
   const queryClient = useQueryClient();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const selectedLocations = useMemo(
+    () => city.split(' | ').map((value) => value.trim()).filter(Boolean),
+    [city]
+  );
+  const hasMultipleLocations = selectedLocations.length > 1;
+  const primaryLocation = selectedLocations[0] || '';
 
   // Determine if city is a county (län) for optimized query
   // detectedLocationSearch is computed below but we need it here — use a ref pattern
-  const isCounty = city.endsWith(' län');
-  const baseCityFilter = isCounty ? '' : city;
-  const baseCountyFilter = isCounty ? city : '';
+  const isCounty = primaryLocation.endsWith(' län');
+  const baseCityFilter = hasMultipleLocations ? '' : isCounty ? '' : primaryLocation;
+  const baseCountyFilter = hasMultipleLocations ? '' : isCounty ? primaryLocation : '';
 
   // Detect if the search query is purely a location search
   // Uses the comprehensive set of ALL known Swedish locations from smartSearch
@@ -497,7 +503,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
 
   // Enrich jobs with company data and filter expired
   const enrichedJobs = useMemo(() => {
-    return rawJobs
+    const jobs = rawJobs
       .map(job => ({
         ...job,
         company_name: companyData[job.employer_id]?.name || 'Okänt företag',
@@ -508,7 +514,31 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         applications_count: job.applications_count || 0,
       }))
       .filter(job => !getTimeRemaining(job.created_at, job.expires_at).isExpired);
-  }, [rawJobs, companyData]);
+
+    if (selectedLocations.length === 0) {
+      return jobs;
+    }
+
+    return jobs.filter((job) => {
+      const searchableFields = [
+        job.location,
+        job.workplace_city,
+        job.workplace_county,
+        job.workplace_municipality,
+        job.workplace_address,
+        job.workplace_name,
+      ]
+        .filter(Boolean)
+        .map((value) => value!.toLowerCase());
+
+      return selectedLocations.some((selectedLocation) => {
+        const normalizedSelection = selectedLocation.toLowerCase();
+        return searchableFields.some(
+          (field) => field === normalizedSelection || field.includes(normalizedSelection)
+        );
+      });
+    });
+  }, [rawJobs, companyData, selectedLocations]);
 
   // Real-time subscription for job updates
   useEffect(() => {

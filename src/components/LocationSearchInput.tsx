@@ -1,29 +1,34 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Input } from '@/components/ui/input';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { MapPin, Loader2, Check, X, ChevronDown, ChevronRight, Search } from 'lucide-react';
-import { getAllCities } from '@/lib/swedishCities';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { swedishCountiesWithMunicipalities, CountyName } from '@/lib/swedishCountiesWithMunicipalities';
 
 const swedishCounties = Object.keys(swedishCountiesWithMunicipalities) as CountyName[];
 
 interface LocationSearchInputProps {
-  value: string;
-  onLocationChange: (location: string, postalCode?: string, municipality?: string, county?: string) => void;
-  onPostalCodeChange?: (postalCode: string) => void;
+  values: string[];
+  onLocationsChange: (locations: string[]) => void;
   className?: string;
 }
 
-const LocationSearchInput = ({ 
-  value,
-  onLocationChange,
-  onPostalCodeChange,
-  className = ""
-}: LocationSearchInputProps) => {
-  const [searchInput, setSearchInput] = useState(value);
+const resolveCountyForLocation = (location: string): CountyName | null => {
+  if (swedishCounties.includes(location as CountyName)) {
+    return location as CountyName;
+  }
+
+  for (const county of swedishCounties) {
+    if (swedishCountiesWithMunicipalities[county].includes(location)) {
+      return county;
+    }
+  }
+
+  return null;
+};
+
+const LocationSearchInput = ({ values, onLocationsChange, className = '' }: LocationSearchInputProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [expandedCounty, setExpandedCounty] = useState<CountyName | null>(null);
@@ -34,77 +39,75 @@ const LocationSearchInput = ({
     municipality?: string;
     county?: string;
   } | null>(null);
-  const [isFadingOut, setIsFadingOut] = useState(false);
-  const [displayedPostalCode, setDisplayedPostalCode] = useState<{
-    city: string;
-    postalCode: string;
-    municipality?: string;
-    county?: string;
-  } | null>(null);
-  const [foundLocation, setFoundLocation] = useState<{
-    type: 'postal' | 'city';
-    city: string;
-    postalCode?: string;
-    municipality?: string;
-    county?: string;
-  } | null>(null);
-  const skipSearchRef = useRef(false);
+
   const listRef = useRef<HTMLDivElement>(null);
+  const selectedRowRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  // Sync with external value changes
-  useEffect(() => {
-    if (value !== searchInput) {
-      setSearchInput(value);
-    }
-  }, [value]);
+  const triggerLabel = useMemo(() => {
+    if (values.length === 0) return 'Län, stad eller postnummer';
+    if (values.length === 1) return values[0];
+    return `${values.length} platser valda`;
+  }, [values]);
 
-  // Handle fade out animation for postal code
-  useEffect(() => {
-    if (postalCodeCity) {
-      setIsFadingOut(false);
-      setDisplayedPostalCode(postalCodeCity);
-    } else if (displayedPostalCode && !postalCodeCity) {
-      setIsFadingOut(true);
-      const timer = setTimeout(() => {
-        setDisplayedPostalCode(null);
-        setIsFadingOut(false);
-      }, 300); // Match animation duration
-      return () => clearTimeout(timer);
-    }
-  }, [postalCodeCity, displayedPostalCode]);
+  const primarySelection = values.length === 1 ? values[0] : null;
 
-  // Check if dropdown search is a postal code and fetch city
+  const matchingMunicipalities = useMemo(() => {
+    if (!dropdownSearch || /^\d+$/.test(dropdownSearch.trim())) return [];
+
+    return Object.entries(swedishCountiesWithMunicipalities)
+      .flatMap(([county, municipalities]) =>
+        municipalities
+          .filter((municipality) => municipality.toLowerCase().includes(dropdownSearch.toLowerCase()))
+          .map((municipality) => ({ municipality, county }))
+      )
+      .slice(0, 50);
+  }, [dropdownSearch]);
+
+  const filteredCounties = useMemo(() => {
+    if (/^\d+$/.test(dropdownSearch.trim())) return [];
+
+    return swedishCounties.filter(
+      (county) =>
+        county.toLowerCase().includes(dropdownSearch.toLowerCase()) ||
+        swedishCountiesWithMunicipalities[county].some((municipality) =>
+          municipality.toLowerCase().includes(dropdownSearch.toLowerCase())
+        )
+    );
+  }, [dropdownSearch]);
+
+  const hasMatchingResults = filteredCounties.length > 0 || matchingMunicipalities.length > 0;
+
   useEffect(() => {
     const trimmed = dropdownSearch.trim();
     const isNumeric = /^\d+\s?\d*$/.test(trimmed);
     const cleanedCode = trimmed.replace(/\s+/g, '');
-    
-    // Immediately clear if not 5 digits
+
     if (!isNumeric || cleanedCode.length !== 5) {
       setPostalCodeCity(null);
       return;
     }
-    
-    // Only fetch if exactly 5 digits
+
     const checkPostalCode = async () => {
-      if (isValidSwedishPostalCode(cleanedCode)) {
-        try {
-          const location = await getCachedPostalCodeInfo(cleanedCode);
-          if (location) {
-            setPostalCodeCity({
-              city: location.city,
-              postalCode: cleanedCode,
-              municipality: location.municipality,
-              county: location.county
-            });
-          } else {
-            setPostalCodeCity(null);
-          }
-        } catch (error) {
-          console.error('Error fetching postal code:', error);
+      if (!isValidSwedishPostalCode(cleanedCode)) {
+        setPostalCodeCity(null);
+        return;
+      }
+
+      try {
+        const location = await getCachedPostalCodeInfo(cleanedCode);
+        if (!location) {
           setPostalCodeCity(null);
+          return;
         }
-      } else {
+
+        setPostalCodeCity({
+          city: location.city,
+          postalCode: cleanedCode,
+          municipality: location.municipality,
+          county: location.county,
+        });
+      } catch (error) {
+        console.error('Error fetching postal code:', error);
         setPostalCodeCity(null);
       }
     };
@@ -114,168 +117,109 @@ const LocationSearchInput = ({
   }, [dropdownSearch]);
 
   useEffect(() => {
-    const searchLocation = async () => {
-      // Skip search if we just selected from dropdown
-      if (skipSearchRef.current) {
-        skipSearchRef.current = false;
-        setIsLoading(false);
-        return;
-      }
+    if (!open) return;
 
-      const trimmed = searchInput.trim();
-      
-      if (!trimmed) {
-        setFoundLocation(null);
-        setIsLoading(false);
-        onLocationChange('');
-        return;
-      }
+    if (values.length === 1) {
+      const selectedLocation = values[0];
+      const county = resolveCountyForLocation(selectedLocation);
+      setExpandedCounty(county);
 
+      requestAnimationFrame(() => {
+        selectedRowRefs.current[selectedLocation]?.scrollIntoView({
+          block: 'center',
+          behavior: 'smooth',
+        });
+      });
+
+      return;
+    }
+
+    setExpandedCounty(null);
+    requestAnimationFrame(() => {
+      if (listRef.current) {
+        listRef.current.scrollTop = 0;
+      }
+    });
+  }, [open, values]);
+
+  const toggleLocation = useCallback(
+    async (location: string, postalCode?: string, county?: string) => {
       setIsLoading(true);
-      
-      // Check if input is numbers (postal code)
-      const isNumeric = /^\d+\s?\d*$/.test(trimmed);
-      
-      if (isNumeric) {
-        const cleanedCode = trimmed.replace(/\s+/g, '');
-        
-        if (cleanedCode.length === 5 && isValidSwedishPostalCode(cleanedCode)) {
-          try {
-            const location = await getCachedPostalCodeInfo(cleanedCode);
-            if (location) {
-              setFoundLocation({
-                type: 'postal',
-                city: location.city,
-                postalCode: cleanedCode,
-                municipality: location.municipality,
-                county: location.county
-              });
-              onLocationChange(location.city, cleanedCode, location.municipality, location.county || '');
-              onPostalCodeChange?.(cleanedCode);
-            } else {
-              setFoundLocation(null);
-            }
-          } catch (error) {
-            console.error('Error fetching postal code:', error);
-            setFoundLocation(null);
-          }
-        }
-      } else {
-        // Search by city name
-        const cities = getAllCities();
-        const normalizedInput = trimmed.toLowerCase();
-        const matchedCity = cities.find(city => 
-          city.toLowerCase() === normalizedInput ||
-          city.toLowerCase().startsWith(normalizedInput)
-        );
-        
-        if (matchedCity) {
-          setFoundLocation({
-            type: 'city',
-            city: matchedCity
-          });
-          onLocationChange(matchedCity);
-        } else {
-          // Still allow the search even if city not found
-          onLocationChange(trimmed);
-          setFoundLocation(null);
-        }
-      }
-      
-      setIsLoading(false);
-    };
 
-    const timeoutId = setTimeout(searchLocation, 300);
-    return () => clearTimeout(timeoutId);
-  }, [searchInput, onLocationChange, onPostalCodeChange]);
+      const alreadySelected = values.includes(location);
+      const nextLocations = alreadySelected
+        ? values.filter((value) => value !== location)
+        : [...values, location];
+
+      onLocationsChange(nextLocations);
+
+      if (!alreadySelected) {
+        setExpandedCounty((county as CountyName | undefined) ?? resolveCountyForLocation(location));
+      }
+
+      if (postalCode) {
+        setDropdownSearch(postalCode);
+      } else {
+        setDropdownSearch('');
+      }
+
+      setPostalCodeCity(null);
+      setIsLoading(false);
+    },
+    [onLocationsChange, values]
+  );
 
   const handleClear = useCallback(() => {
-    setSearchInput('');
-    setFoundLocation(null);
-    onLocationChange('');
-    onPostalCodeChange?.('');
-  }, [onLocationChange, onPostalCodeChange]);
-
-  const handleCountyClick = useCallback((county: CountyName) => {
-    // Toggle expansion instead of selecting
-    setExpandedCounty(expandedCounty === county ? null : county);
-  }, [expandedCounty]);
-
-  const handleMunicipalitySelect = useCallback((municipality: string, postalCode?: string, county?: string) => {
-    skipSearchRef.current = true;
-    setSearchInput(municipality);
+    onLocationsChange([]);
     setDropdownSearch('');
     setPostalCodeCity(null);
-    setFoundLocation({
-      type: 'city',
-      city: municipality
-    });
-    onLocationChange(municipality, postalCode, municipality, county);
-    if (postalCode) {
-      onPostalCodeChange?.(postalCode);
-    }
-    setOpen(false);
-  }, [onLocationChange, onPostalCodeChange]);
+    setExpandedCounty(null);
+  }, [onLocationsChange]);
 
-  // Check if there are any matching municipalities or counties for the search
-  const hasMatchingResults = useCallback(() => {
-    if (!dropdownSearch || /^\d+$/.test(dropdownSearch.trim())) return true;
-    
-    const normalizedSearch = dropdownSearch.toLowerCase();
-    
-    // Check if any municipality matches
-    const hasMunicipalities = Object.values(swedishCountiesWithMunicipalities)
-      .flat()
-      .some(m => m.toLowerCase().includes(normalizedSearch));
-    
-    // Check if any county matches
-    const hasCounties = swedishCounties.some(county => 
-      county.toLowerCase().includes(normalizedSearch)
-    );
-    
-    return hasMunicipalities || hasCounties;
-  }, [dropdownSearch]);
+  const renderSelectionIndicator = (selected: boolean) => {
+    if (selected) {
+      return <Check className="h-4 w-4 text-green-400 flex-shrink-0" />;
+    }
+
+    return <div className="h-4 w-4 flex-shrink-0" />;
+  };
 
   return (
-    <div className={`space-y-2 ${className}`}>
-      <Popover open={open} onOpenChange={(isOpen) => {
-        setOpen(isOpen);
-        if (isOpen) {
-          // Always start fresh at the top – user can scroll to find/add more locations
-          setExpandedCounty(null);
-          setDropdownSearch('');
-          setPostalCodeCity(null);
-          
-          // Scroll to top
-          requestAnimationFrame(() => {
-            if (listRef.current) {
-              listRef.current.scrollTop = 0;
-            }
-          });
-        }
-      }}>
+    <div className={cn('space-y-2', className)}>
+      <Popover
+        open={open}
+        onOpenChange={(isOpen) => {
+          setOpen(isOpen);
+          if (isOpen) {
+            setDropdownSearch('');
+            setPostalCodeCity(null);
+          }
+        }}
+      >
         <PopoverTrigger asChild>
           <button
             className={cn(
-              "w-full h-12 flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50",
-              "focus:outline-none focus:ring-2 focus:ring-white/20"
+              'w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation',
+              values.length > 0 && 'border-white/20'
             )}
             aria-label="Välj plats"
+            type="button"
           >
             <MapPin className="h-4 w-4 text-white flex-shrink-0" />
-            <span className="text-sm text-white flex-1 truncate leading-none">
-              {searchInput || "Län, stad eller postnummer"}
+            <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
+              {triggerLabel}
             </span>
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-white flex-shrink-0" />
-            ) : searchInput ? (
+            ) : values.length > 0 ? (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={(event) => {
+                  event.stopPropagation();
                   handleClear();
                 }}
                 className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
-                aria-label="Rensa"
+                aria-label="Rensa plats"
+                type="button"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -284,194 +228,161 @@ const LocationSearchInput = ({
             )}
           </button>
         </PopoverTrigger>
-        <PopoverContent 
-          className="z-50 w-[var(--radix-popover-trigger-width)] p-0 bg-slate-900 border border-white/20 pointer-events-auto" 
+
+        <PopoverContent
+          className="z-50 w-[var(--radix-popover-trigger-width)] p-0 bg-slate-900 border border-white/20 pointer-events-auto"
           align="start"
           side="bottom"
           sideOffset={4}
           avoidCollisions={false}
         >
-          <Command 
-            className="bg-transparent border-none" 
-            shouldFilter={false}
-            loop={false}
-            value=""
-          >
-            <div className="flex items-center px-3">
+          <Command className="bg-transparent border-none" shouldFilter={false} loop={false} value="">
+            <div className="flex items-center px-3 border-b border-white/10">
               <Search className="mr-2 h-4 w-4 shrink-0 text-white" />
               <input
                 value={dropdownSearch}
-                onChange={(e) => setDropdownSearch(e.target.value)}
+                onChange={(event) => setDropdownSearch(event.target.value)}
                 placeholder="Sök län eller stad/postnummer"
                 autoFocus={false}
                 readOnly
-                onPointerDown={(e) => {
-                  // User explicitly tapped – make editable and focus
-                  const input = e.currentTarget;
+                onPointerDown={(event) => {
+                  const input = event.currentTarget;
                   input.readOnly = false;
-                  // Small delay to ensure readOnly is removed before focus triggers keyboard
                   requestAnimationFrame(() => input.focus());
                 }}
-                onBlur={(e) => {
-                  // Reset to readOnly so next popover open won't trigger keyboard
-                  e.currentTarget.readOnly = true;
+                onBlur={(event) => {
+                  event.currentTarget.readOnly = true;
                 }}
-                className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none text-white placeholder:text-white"
+                className="flex h-11 w-full rounded-md bg-transparent py-3 text-[16px] leading-tight outline-none text-white placeholder:text-white/70"
               />
             </div>
-            <CommandList ref={listRef} className="max-h-[50vh] md:max-h-[300px] overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
-              {/* Only show "no results" for text searches when there are no matching results */}
-              {!(/^\d+$/.test(dropdownSearch.trim())) && !hasMatchingResults() && (
+
+            <CommandList
+              ref={listRef}
+              className="max-h-[50vh] md:max-h-[320px] overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]"
+            >
+              {!/^\d+$/.test(dropdownSearch.trim()) && dropdownSearch && !hasMatchingResults && (
                 <CommandEmpty className="text-white py-4 text-center text-sm">Ingen plats hittades.</CommandEmpty>
               )}
-              
-              {/* Show postal code validation hint */}
+
               {dropdownSearch && /^\d+$/.test(dropdownSearch.trim()) && dropdownSearch.trim().length < 5 && (
                 <div className="py-2 px-3 text-white text-xs text-center">
                   {dropdownSearch.trim().length} av 5 siffror - Postnummer måste innehålla 5 siffror
                 </div>
               )}
-              
-              {/* Show postal code result if found */}
-              {displayedPostalCode && (
-                <CommandGroup 
-                  heading="Postnummer" 
-                  className={cn(
-                    "text-white [&_[cmdk-group-heading]]:text-white transition-opacity duration-300",
-                    isFadingOut ? "animate-fade-out opacity-0" : "animate-fade-in opacity-100"
-                  )}
-                >
-                  <CommandItem
-                    value={displayedPostalCode.city}
-                    onSelect={() => handleMunicipalitySelect(
-                      displayedPostalCode.city, 
-                      displayedPostalCode.postalCode,
-                      displayedPostalCode.county
-                    )}
-                    className="cursor-pointer text-white [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 flex items-center justify-between transition-opacity duration-300 py-3 md:py-2 touch-manipulation"
+
+              {postalCodeCity && (
+                <CommandGroup heading="Postnummer" className="text-white">
+                  <button
+                    type="button"
+                    onClick={() => toggleLocation(postalCodeCity.city, postalCodeCity.postalCode, postalCodeCity.county)}
+                    className="w-full flex items-center justify-between gap-3 rounded-sm px-2 py-3 md:py-2 text-left text-white active:bg-white/10 [@media(hover:hover)]:hover:bg-white/10 touch-manipulation"
+                    ref={(element) => {
+                      selectedRowRefs.current[postalCodeCity.city] = element;
+                    }}
                   >
-                    <div className="flex flex-col">
-                      <span className="font-medium text-white">{displayedPostalCode.city}</span>
-                      <span className="text-white text-xs">
-                        {displayedPostalCode.postalCode}
-                        {displayedPostalCode.municipality && ` · ${displayedPostalCode.municipality}`}
-                        {displayedPostalCode.county && ` · ${displayedPostalCode.county}`}
-                      </span>
+                    <div className="flex min-w-0 items-start gap-3">
+                      {renderSelectionIndicator(values.includes(postalCodeCity.city))}
+                      <div className="min-w-0">
+                        <span className="block font-medium text-white leading-tight">{postalCodeCity.city}</span>
+                        <span className="block text-xs text-white/80 leading-tight mt-0.5">
+                          {postalCodeCity.postalCode}
+                          {postalCodeCity.municipality && ` · ${postalCodeCity.municipality}`}
+                          {postalCodeCity.county && ` · ${postalCodeCity.county}`}
+                        </span>
+                      </div>
                     </div>
-                    {searchInput === displayedPostalCode.city && (
-                      <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    )}
-                  </CommandItem>
+                  </button>
                 </CommandGroup>
               )}
-              
-              {/* Show matching municipalities directly if there's a search - hide when searching with numbers or no results */}
-              {dropdownSearch && !postalCodeCity && !(/^\d+$/.test(dropdownSearch.trim())) && hasMatchingResults() && (
+
+              {matchingMunicipalities.length > 0 && !postalCodeCity && (
                 <>
                   <div className="h-px bg-white/20 my-1" />
-                  <CommandGroup heading="Kommuner" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5">
-                    {Object.entries(swedishCountiesWithMunicipalities)
-                    .flatMap(([county, municipalities]) => 
-                      municipalities
-                        .filter(m => m.toLowerCase().includes(dropdownSearch.toLowerCase()))
-                        .map(m => ({ municipality: m, county }))
-                    )
-                    .slice(0, 50)
-                    .map((item, index, array) => (
-                      <React.Fragment key={`${item.county}-${item.municipality}`}>
-                        <CommandItem
-                          value={item.municipality}
-                          onSelect={() => {
-                            handleMunicipalitySelect(item.municipality);
-                            setOpen(false);
-                          }}
-                          className={cn(
-                            "text-white [@media(hover:hover)]:hover:bg-white/10 cursor-pointer py-3 md:py-2 touch-manipulation active:bg-white/10",
-                            searchInput?.toLowerCase() === item.municipality.toLowerCase() && "bg-white/5"
-                          )}
-                        >
-                          {searchInput?.toLowerCase() === item.municipality.toLowerCase() ? (
-                            <Check className="mr-2 h-4 w-4 text-green-400 flex-shrink-0" />
-                          ) : (
-                            <MapPin className="mr-2 h-4 w-4" />
-                          )}
-                          <span>{item.municipality}</span>
-                          <span className="ml-auto text-xs text-white">{item.county}</span>
-                        </CommandItem>
-                        {index < array.length - 1 && (
-                          <div className="h-px bg-white/20 mx-2" />
-                        )}
-                      </React.Fragment>
-                    ))
-                   }
-                </CommandGroup>
+                  <CommandGroup heading="Kommuner" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium">
+                    {matchingMunicipalities.map((item, index, array) => {
+                      const isSelected = values.includes(item.municipality);
+
+                      return (
+                        <React.Fragment key={`${item.county}-${item.municipality}`}>
+                          <button
+                            type="button"
+                            onClick={() => toggleLocation(item.municipality, undefined, item.county)}
+                            className={cn(
+                              'w-full flex items-center gap-3 px-2 py-3 md:py-2 text-left text-white active:bg-white/10 [@media(hover:hover)]:hover:bg-white/10 touch-manipulation',
+                              isSelected && 'bg-white/5'
+                            )}
+                            ref={(element) => {
+                              selectedRowRefs.current[item.municipality] = element;
+                            }}
+                          >
+                            {renderSelectionIndicator(isSelected)}
+                            <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">
+                              {item.municipality}
+                            </span>
+                            <span className="text-xs text-white/80 leading-tight">{item.county}</span>
+                          </button>
+                          {index < array.length - 1 && <div className="h-px bg-white/20 mx-2" />}
+                        </React.Fragment>
+                      );
+                    })}
+                  </CommandGroup>
                 </>
               )}
-              
-              {/* Show counties - hide when searching with numbers or no results */}
-              {!(/^\d+$/.test(dropdownSearch.trim())) && hasMatchingResults() && (
+
+              {!/^\d+$/.test(dropdownSearch.trim()) && filteredCounties.length > 0 && (
                 <>
                   <div className="h-px bg-white/20 my-1" />
-                  <CommandGroup heading="Län" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5">
-                    {swedishCounties
-                    .filter(county => 
-                      county.toLowerCase().includes(dropdownSearch.toLowerCase()) ||
-                      swedishCountiesWithMunicipalities[county].some(m => 
-                        m.toLowerCase().includes(dropdownSearch.toLowerCase())
-                      )
-                    )
-                    .map((county, index, array) => (
+                  <CommandGroup heading="Län" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium">
+                    {filteredCounties.map((county, index, array) => (
                       <React.Fragment key={county}>
-                        <CommandItem
-                          value={county}
-                          onSelect={() => {
-                            handleCountyClick(county);
-                          }}
-                          className="text-white [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 cursor-pointer flex items-center py-3 md:py-2 touch-manipulation"
+                        <button
+                          type="button"
+                          onClick={() => setExpandedCounty(expandedCounty === county ? null : county)}
+                          className="w-full flex items-center gap-3 px-2 py-3 md:py-2 text-left text-white active:bg-white/10 [@media(hover:hover)]:hover:bg-white/10 touch-manipulation"
                         >
-                          <MapPin className="mr-2 h-4 w-4" />
-                          <span>{county}</span>
+                          <MapPin className="h-4 w-4 flex-shrink-0" />
+                          <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">{county}</span>
                           {expandedCounty === county ? (
-                            <ChevronDown className="ml-auto h-4 w-4" />
+                            <ChevronDown className="h-4 w-4 flex-shrink-0" />
                           ) : (
-                            <ChevronRight className="ml-auto h-4 w-4" />
+                            <ChevronRight className="h-4 w-4 flex-shrink-0" />
                           )}
-                        </CommandItem>
-                        {expandedCounty === county && (
-                          <>
-                            {swedishCountiesWithMunicipalities[county].map((municipality, mIndex, mArray) => (
+                        </button>
+
+                        {expandedCounty === county &&
+                          swedishCountiesWithMunicipalities[county].map((municipality, municipalityIndex, municipalityArray) => {
+                            const isSelected = values.includes(municipality);
+
+                            return (
                               <React.Fragment key={municipality}>
-                                <div
-                                  data-selected={searchInput?.toLowerCase() === municipality.toLowerCase() ? 'true' : undefined}
-                                  onClick={() => {
-                                    handleMunicipalitySelect(municipality);
-                                    setOpen(false);
-                                  }}
+                                <button
+                                  type="button"
+                                  onClick={() => toggleLocation(municipality, undefined, county)}
                                   className={cn(
-                                    "pl-3 py-3 md:py-2 text-sm text-white [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 cursor-pointer touch-manipulation flex items-center pr-3",
-                                    searchInput?.toLowerCase() === municipality.toLowerCase() && "bg-white/5"
+                                    'w-full flex items-center gap-3 pl-3 pr-3 py-3 md:py-2 text-left text-white active:bg-white/10 [@media(hover:hover)]:hover:bg-white/10 touch-manipulation',
+                                    isSelected && 'bg-white/5'
                                   )}
+                                  ref={(element) => {
+                                    selectedRowRefs.current[municipality] = element;
+                                  }}
                                 >
-                                  {searchInput?.toLowerCase() === municipality.toLowerCase() ? (
-                                    <Check className="mr-2 h-4 w-4 text-green-400 flex-shrink-0" />
-                                  ) : (
-                                    <div className="mr-2 w-4" />
-                                  )}
-                                  <span>{municipality}</span>
-                                </div>
-                                {mIndex < mArray.length - 1 && (
+                                  {renderSelectionIndicator(isSelected)}
+                                  <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">
+                                    {municipality}
+                                  </span>
+                                </button>
+                                {municipalityIndex < municipalityArray.length - 1 && (
                                   <div className="h-px bg-white/20 mx-2" />
                                 )}
                               </React.Fragment>
-                            ))}
-                          </>
-                        )}
-                        {index < array.length - 1 && (
-                          <div className="h-px bg-white/20 mx-2" />
-                        )}
+                            );
+                          })}
+
+                        {index < array.length - 1 && <div className="h-px bg-white/20 mx-2" />}
                       </React.Fragment>
-                ))}
-                </CommandGroup>
+                    ))}
+                  </CommandGroup>
                 </>
               )}
             </CommandList>
@@ -479,22 +390,20 @@ const LocationSearchInput = ({
         </PopoverContent>
       </Popover>
 
-      {/* Success indicator */}
-      {foundLocation && !isLoading && (
-        <div className="flex items-center gap-3 text-sm pl-3">
-          <div className="w-4 h-4 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-            <Check className="w-2.5 h-2.5 text-green-400" />
-          </div>
-          <p className="text-white">
-            {foundLocation.type === 'postal' ? (
-              <>
-                <span className="font-medium">{foundLocation.city}</span>
-                {foundLocation.county && <span className="text-white"> ({foundLocation.county})</span>}
-              </>
-            ) : (
-              <span className="font-medium">{foundLocation.city}</span>
-            )}
-          </p>
+      {values.length > 0 && (
+        <div className="space-y-1 pl-3">
+          {values.map((location) => (
+            <div
+              key={location}
+              className={cn(
+                'flex items-center gap-2 text-sm text-white',
+                primarySelection ? 'justify-start' : 'justify-start'
+              )}
+            >
+              <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+              <span className="font-medium leading-tight">{location}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>
