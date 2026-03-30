@@ -443,7 +443,7 @@ const LocationSearchInput = ({
                                     handleMunicipalitySelect(municipality);
                                     setOpen(false);
                                   }}
-                                  className="pl-8 py-2 text-sm text-white hover:bg-white/10 cursor-pointer"
+                                  className="pl-8 py-3 md:py-2 text-sm text-white hover:bg-white/10 cursor-pointer touch-manipulation"
                                 >
                                   {municipality}
                                 </div>
