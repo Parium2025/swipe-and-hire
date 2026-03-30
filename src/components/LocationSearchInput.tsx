@@ -239,42 +239,19 @@ const LocationSearchInput = ({
   return (
     <div className={`space-y-2 ${className}`}>
       <Popover open={open} onOpenChange={(isOpen) => {
-       setOpen(isOpen);
+        setOpen(isOpen);
         if (isOpen) {
-          // Find and expand the county containing the currently selected location
-          let countyToExpand: CountyName | null = null;
-          const currentValue = searchInput?.trim();
-          
-          if (currentValue) {
-            // Try foundLocation first
-            if (foundLocation?.county) {
-              countyToExpand = foundLocation.county as CountyName;
-            } else {
-              // Search through all counties to find which one contains the selected municipality
-              const found = Object.entries(swedishCountiesWithMunicipalities).find(([_, municipalities]) =>
-                municipalities.some(m => m.toLowerCase() === currentValue.toLowerCase())
-              );
-              if (found) {
-                countyToExpand = found[0] as CountyName;
-              }
-            }
-          }
-          
-          setExpandedCounty(countyToExpand);
+          // Always start fresh at the top – user can scroll to find/add more locations
+          setExpandedCounty(null);
           setDropdownSearch('');
           setPostalCodeCity(null);
           
-          // Scroll to the selected municipality after DOM updates
-          if (countyToExpand) {
-            requestAnimationFrame(() => {
-              setTimeout(() => {
-                const selected = listRef.current?.querySelector('[data-selected="true"]');
-                if (selected) {
-                  selected.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                }
-              }, 100);
-            });
-          }
+          // Scroll to top
+          requestAnimationFrame(() => {
+            if (listRef.current) {
+              listRef.current.scrollTop = 0;
+            }
+          });
         }
       }}>
         <PopoverTrigger asChild>
@@ -371,7 +348,7 @@ const LocationSearchInput = ({
                       displayedPostalCode.postalCode,
                       displayedPostalCode.county
                     )}
-                    className="cursor-pointer text-white hover:bg-white/10 flex items-center justify-between transition-opacity duration-300 py-3 md:py-2 touch-manipulation"
+                    className="cursor-pointer text-white [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 flex items-center justify-between transition-opacity duration-300 py-3 md:py-2 touch-manipulation"
                   >
                     <div className="flex flex-col">
                       <span className="font-medium text-white">{displayedPostalCode.city}</span>
@@ -409,17 +386,17 @@ const LocationSearchInput = ({
                             setOpen(false);
                           }}
                           className={cn(
-                            "text-white hover:bg-white/10 cursor-pointer py-3 md:py-2 touch-manipulation",
+                            "text-white [@media(hover:hover)]:hover:bg-white/10 cursor-pointer py-3 md:py-2 touch-manipulation active:bg-white/10",
                             searchInput?.toLowerCase() === item.municipality.toLowerCase() && "bg-white/5"
                           )}
                         >
-                          <MapPin className="mr-2 h-4 w-4" />
-                          <span>{item.municipality}</span>
                           {searchInput?.toLowerCase() === item.municipality.toLowerCase() ? (
-                            <Check className="ml-auto h-4 w-4 text-green-400 flex-shrink-0" />
+                            <Check className="mr-2 h-4 w-4 text-green-400 flex-shrink-0" />
                           ) : (
-                            <span className="ml-auto text-xs text-white">{item.county}</span>
+                            <MapPin className="mr-2 h-4 w-4" />
                           )}
+                          <span>{item.municipality}</span>
+                          <span className="ml-auto text-xs text-white">{item.county}</span>
                         </CommandItem>
                         {index < array.length - 1 && (
                           <div className="h-px bg-white/20 mx-2" />
@@ -450,7 +427,7 @@ const LocationSearchInput = ({
                           onSelect={() => {
                             handleCountyClick(county);
                           }}
-                          className="text-white hover:bg-white/10 cursor-pointer flex items-center py-3 md:py-2 touch-manipulation"
+                          className="text-white [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 cursor-pointer flex items-center py-3 md:py-2 touch-manipulation"
                         >
                           <MapPin className="mr-2 h-4 w-4" />
                           <span>{county}</span>
@@ -471,14 +448,16 @@ const LocationSearchInput = ({
                                     setOpen(false);
                                   }}
                                   className={cn(
-                                    "pl-8 py-3 md:py-2 text-sm text-white hover:bg-white/10 cursor-pointer touch-manipulation flex items-center justify-between pr-3",
+                                    "pl-3 py-3 md:py-2 text-sm text-white [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 cursor-pointer touch-manipulation flex items-center pr-3",
                                     searchInput?.toLowerCase() === municipality.toLowerCase() && "bg-white/5"
                                   )}
                                 >
-                                  <span>{municipality}</span>
-                                  {searchInput?.toLowerCase() === municipality.toLowerCase() && (
-                                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                                  {searchInput?.toLowerCase() === municipality.toLowerCase() ? (
+                                    <Check className="mr-2 h-4 w-4 text-green-400 flex-shrink-0" />
+                                  ) : (
+                                    <div className="mr-2 w-4" />
                                   )}
+                                  <span>{municipality}</span>
                                 </div>
                                 {mIndex < mArray.length - 1 && (
                                   <div className="h-px bg-white/20 mx-2" />
