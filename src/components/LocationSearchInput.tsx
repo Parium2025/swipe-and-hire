@@ -239,27 +239,42 @@ const LocationSearchInput = ({
   return (
     <div className={`space-y-2 ${className}`}>
       <Popover open={open} onOpenChange={(isOpen) => {
-        setOpen(isOpen);
+       setOpen(isOpen);
         if (isOpen) {
-          // If there's a selected location, find its county and expand it
-          if (searchInput && foundLocation) {
-            if (foundLocation.county) {
-              setExpandedCounty(foundLocation.county as CountyName);
-            } else if (foundLocation.municipality || foundLocation.city) {
-              // Find county by searching through all counties
-              const cityToFind = foundLocation.municipality || foundLocation.city;
-              const foundCounty = Object.entries(swedishCountiesWithMunicipalities).find(([_, municipalities]) =>
-                municipalities.includes(cityToFind)
+          // Find and expand the county containing the currently selected location
+          let countyToExpand: CountyName | null = null;
+          const currentValue = searchInput?.trim();
+          
+          if (currentValue) {
+            // Try foundLocation first
+            if (foundLocation?.county) {
+              countyToExpand = foundLocation.county as CountyName;
+            } else {
+              // Search through all counties to find which one contains the selected municipality
+              const found = Object.entries(swedishCountiesWithMunicipalities).find(([_, municipalities]) =>
+                municipalities.some(m => m.toLowerCase() === currentValue.toLowerCase())
               );
-              if (foundCounty) {
-                setExpandedCounty(foundCounty[0] as CountyName);
+              if (found) {
+                countyToExpand = found[0] as CountyName;
               }
             }
-          } else {
-            setExpandedCounty(null);
           }
+          
+          setExpandedCounty(countyToExpand);
           setDropdownSearch('');
           setPostalCodeCity(null);
+          
+          // Scroll to the selected municipality after DOM updates
+          if (countyToExpand) {
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                const selected = listRef.current?.querySelector('[data-selected="true"]');
+                if (selected) {
+                  selected.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                }
+              }, 100);
+            });
+          }
         }
       }}>
         <PopoverTrigger asChild>
