@@ -49,6 +49,13 @@ DateTimeDisplay.displayName = 'DateTimeDisplay';
 
 const JobSeekerHome = memo(() => {
   const { profile } = useAuth();
+  
+  const [showContent, setShowContent] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowContent(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const firstName = profile?.first_name || 'du';
   
