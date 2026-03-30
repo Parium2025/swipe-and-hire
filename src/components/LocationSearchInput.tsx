@@ -273,8 +273,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                       selectedRowRefs.current[postalCodeCity.city] = element;
                     }}
                   >
-                    <div className="flex min-w-0 items-start gap-3">
-                      {renderSelectionIndicator(values.includes(postalCodeCity.city))}
+                    <div className="flex min-w-0 items-start gap-3 flex-1">
                       <div className="min-w-0">
                         <span className="block font-medium text-white leading-tight">{postalCodeCity.city}</span>
                         <span className="block text-xs text-white/80 leading-tight mt-0.5">
@@ -284,6 +283,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                         </span>
                       </div>
                     </div>
+                    {renderSelectionIndicator(values.includes(postalCodeCity.city))}
                   </button>
                 </CommandGroup>
               )}
@@ -308,11 +308,11 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                               selectedRowRefs.current[item.municipality] = element;
                             }}
                           >
-                            {renderSelectionIndicator(isSelected)}
                             <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">
                               {item.municipality}
                             </span>
                             <span className="text-xs text-white/80 leading-tight">{item.county}</span>
+                            {renderSelectionIndicator(isSelected)}
                           </button>
                           {index < array.length - 1 && <div className="h-px bg-white/20 mx-2" />}
                         </React.Fragment>
@@ -359,10 +359,10 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                                     selectedRowRefs.current[municipality] = element;
                                   }}
                                 >
-                                  {renderSelectionIndicator(isSelected)}
                                   <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">
                                     {municipality}
                                   </span>
+                                  {renderSelectionIndicator(isSelected)}
                                 </button>
                                 {municipalityIndex < municipalityArray.length - 1 && (
                                   <div className="h-px bg-white/20 mx-2" />
@@ -392,8 +392,8 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                 primarySelection ? 'justify-start' : 'justify-start'
               )}
             >
-              <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
               <span className="font-medium leading-tight">{location}</span>
+              <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
             </div>
           ))}
         </div>
