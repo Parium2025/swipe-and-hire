@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Video, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
@@ -57,15 +58,30 @@ const getLocationLabel = (type: LocationType) => {
 };
 
 export const JobSeekerInterviewsCard = memo(() => {
-  const { interviews } = useCandidateInterviews();
+  const { interviews, isLoading } = useCandidateInterviews();
   const navigate = useNavigate();
   
   const upcomingInterviews = interviews.slice(0, 5);
   const hasMore = interviews.length > 5;
 
+  if (isLoading) {
+    return (
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <CardContent className="relative p-4 h-full">
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
+            <Skeleton className="h-4 w-24 bg-white/20" />
+          </div>
+          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
-      <div className="absolute inset-0 bg-white/5" />
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
       <CardContent className="relative p-3 h-full flex flex-col">
