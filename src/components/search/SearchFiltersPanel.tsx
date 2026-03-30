@@ -107,7 +107,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
               placeholder="Jobbtitel, Företag, Plats..."
               value={searchInput}
               onChange={(e) => onSearchInputChange(e.target.value)}
-              className="pl-9 pr-10 !h-10 !min-h-[40px] md:!h-11 md:!min-h-[44px] text-sm bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/60 placeholder:text-center"
+              className="pl-9 pr-10 !h-11 !min-h-[44px] md:!h-12 md:!min-h-[48px] text-sm bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/60 placeholder:text-center"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
             {searchInput && (
@@ -165,7 +165,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="w-full h-10 md:h-[44px] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full h-11 md:h-12 flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                     aria-label="Välj yrkesområde"
                   >
                     <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
@@ -237,7 +237,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="w-full h-10 md:h-[44px] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full h-11 md:h-12 flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                     aria-label="Välj specifik roll"
                   >
                     <Users className="h-4 w-4 text-white flex-shrink-0" />
@@ -321,7 +321,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                       <button
-                        className="w-full h-10 md:h-[44px] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                        className="w-full h-11 md:h-12 flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                         aria-label="Välj anställningstyp"
                       >
                         <Clock className="h-4 w-4 text-white flex-shrink-0" />
@@ -380,7 +380,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
-                        className="w-full h-10 md:h-[44px] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                        className="w-full h-11 md:h-12 flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                         aria-label="Välj sortering"
                       >
                         <ArrowUpDown className="h-4 w-4 text-white flex-shrink-0" />
