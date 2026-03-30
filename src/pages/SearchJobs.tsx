@@ -378,9 +378,7 @@ const SearchJobs = memo(() => {
 
   const handleLocationChange = (location: string, postalCode?: string) => {
     setSelectedCity(location);
-    if (postalCode) {
-      setSelectedPostalCode(postalCode);
-    }
+    setSelectedPostalCode(postalCode || '');
   };
 
   return (

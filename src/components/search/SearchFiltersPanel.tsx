@@ -152,9 +152,11 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 <span className="leading-none">Plats</span>
               </Label>
               <LocationSearchInput
-                value={selectedPostalCode || selectedCity}
-                onLocationChange={onLocationChange}
-                onPostalCodeChange={onPostalCodeChange}
+                values={selectedCity ? selectedCity.split(' | ').filter(Boolean) : []}
+                onLocationsChange={(locations) => {
+                  onPostalCodeChange('');
+                  onLocationChange(locations.join(' | '));
+                }}
               />
             </div>
 
