@@ -56,7 +56,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
   if (isLoading) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height`}>
-        <div className="absolute inset-0 bg-white/5" />
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-6 h-full">
           <div className="flex items-center gap-2 mb-4">
             <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
@@ -121,10 +121,10 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
                 className={currentTip.source_url ? 'cursor-pointer group' : ''}
               >
-                <h3 className="text-xs sm:text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
+                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
                   {currentTip.title}
                 </h3>
-                <p className="text-xs text-white line-clamp-1 mb-1">
+                <p className="text-sm text-white line-clamp-1 mb-1">
                   {currentTip.summary || currentTip.title}
                 </p>
                 {currentTip.published_at && (
