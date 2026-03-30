@@ -28,7 +28,6 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
                   navigator.userAgent && 
                   navigator.userAgent.includes('CapacitorWebView'));
     
-    console.log('Platform detection:', { isCapacitor, isCordova, isApp });
     setIsMobileApp(isApp);
   }, []);
 
