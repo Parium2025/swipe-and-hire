@@ -196,7 +196,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                     )}
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
+                <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
                   <DropdownMenuItem
                     onClick={() => {
                       onCategoryChange('all-categories');
