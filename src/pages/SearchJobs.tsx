@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -79,7 +79,7 @@ const formatSalary = (min?: number, max?: number) => {
   return 'Enligt överenskommelse';
 };
 
-const SearchJobs = () => {
+const SearchJobs = memo(() => {
   const navigate = useNavigate();
   // toast and blurHandlers removed — no longer needed after filter extraction
   const queryClient = useQueryClient();
@@ -434,12 +434,6 @@ const SearchJobs = () => {
       )}
 
 
-      {/* Result indicator — only shown when no results */}
-      {searchInput && filteredAndSortedJobs.length === 0 && !isLoading && (
-        <div className="text-sm text-white mb-4 text-center">
-          <span>Inga jobb matchar din sökning</span>
-        </div>
-      )}
 
       <div ref={listTopRef} />
 
@@ -640,6 +634,8 @@ const SearchJobs = () => {
       </AlertDialog>
     </div>
   );
-};
+});
+
+SearchJobs.displayName = 'SearchJobs';
 
 export default SearchJobs;
