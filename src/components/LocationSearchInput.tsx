@@ -389,7 +389,7 @@ const LocationSearchInput = ({
                             handleMunicipalitySelect(item.municipality);
                             setOpen(false);
                           }}
-                          className="text-white hover:bg-white/10 cursor-pointer"
+                          className="text-white hover:bg-white/10 cursor-pointer py-3 md:py-2 touch-manipulation"
                         >
                           <MapPin className="mr-2 h-4 w-4" />
                           <span>{item.municipality}</span>
