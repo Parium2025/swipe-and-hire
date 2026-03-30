@@ -427,7 +427,7 @@ const LocationSearchInput = ({
                           onSelect={() => {
                             handleCountyClick(county);
                           }}
-                          className="text-white hover:bg-white/10 cursor-pointer flex items-center py-3 md:py-2 touch-manipulation"
+                          className="text-white [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 cursor-pointer flex items-center py-3 md:py-2 touch-manipulation"
                         >
                           <MapPin className="mr-2 h-4 w-4" />
                           <span>{county}</span>
