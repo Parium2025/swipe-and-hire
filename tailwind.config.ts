@@ -166,8 +166,10 @@ export default {
 					'100%': { transform: 'translateX(120vw)' },
 				},
 				'rainFall': {
-					'0%': { transform: 'translateY(-5vh)' },
-					'100%': { transform: 'translateY(115vh)' },
+					'0%': { transform: 'translateY(-5vh)', opacity: '0' },
+					'5%': { opacity: '1' },
+					'95%': { opacity: '1' },
+					'100%': { transform: 'translateY(115vh)', opacity: '0' },
 				},
 				'snowFall': {
 					'0%': { transform: 'translateY(-5vh) translateX(0)' },
