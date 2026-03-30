@@ -40,7 +40,10 @@ export function SavedSearchesDropdown({
 
   if (savedSearches.length === 0) return null;
 
-  const handleApplySearch = async (search: SavedSearch) => {
+  const handleApplySearch = (search: SavedSearch) => {
+    // Close popover FIRST for instant UI response
+    setOpen(false);
+    
     // Build criteria from saved search
     const criteria: SearchCriteria = {
       search_query: search.search_query || undefined,
@@ -52,13 +55,12 @@ export function SavedSearchesDropdown({
       salary_max: search.salary_max || undefined,
     };
     
-    // Clear new matches for this search
-    if (search.new_matches_count > 0) {
-      await onClearNewMatches(search.id);
-    }
-    
     onApplySearch(criteria);
-    setOpen(false);
+    
+    // Clear new matches in background (non-blocking)
+    if (search.new_matches_count > 0) {
+      onClearNewMatches(search.id).catch(() => {});
+    }
   };
 
   const handleDeleteClick = (e: React.MouseEvent, search: SavedSearch) => {
