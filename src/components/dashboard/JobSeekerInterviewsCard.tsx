@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Video, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
