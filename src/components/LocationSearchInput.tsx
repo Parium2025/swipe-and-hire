@@ -352,7 +352,7 @@ const LocationSearchInput = ({
                       displayedPostalCode.postalCode,
                       displayedPostalCode.county
                     )}
-                    className="cursor-pointer text-white hover:bg-white/10 flex items-center justify-between transition-opacity duration-300"
+                    className="cursor-pointer text-white hover:bg-white/10 flex items-center justify-between transition-opacity duration-300 py-3 md:py-2 touch-manipulation"
                   >
                     <div className="flex flex-col">
                       <span className="font-medium text-white">{displayedPostalCode.city}</span>
