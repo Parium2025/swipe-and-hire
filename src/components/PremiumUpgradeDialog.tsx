@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
-import { Crown, ExternalLink, Info } from 'lucide-react';
+import { Crown } from 'lucide-react';
 
 interface PremiumUpgradeDialogProps {
   open: boolean;

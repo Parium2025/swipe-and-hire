@@ -78,11 +78,12 @@ export function SavedSearchesDropdown({
 
   // Build a summary of the search criteria for display
   const getCriteriaSummary = (search: SavedSearch): string => {
+    if (!search) return 'Alla jobb';
     const parts: string[] = [];
     if (search.search_query) parts.push(`"${search.search_query}"`);
     if (search.city) parts.push(search.city);
     if (search.category) parts.push(search.category);
-    if (search.employment_types?.length) {
+    if (Array.isArray(search.employment_types) && search.employment_types.length) {
       parts.push(search.employment_types.slice(0, 2).join(', '));
     }
     return parts.length > 0 ? parts.join(' • ') : 'Alla jobb';
