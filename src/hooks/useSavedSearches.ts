@@ -110,13 +110,63 @@ export const useSavedSearches = () => {
       if (error) throw error;
 
       const searches = (data || []) as SavedSearch[];
-      setSavedSearches(searches);
+      
+      // Validate stale matches: if a search has new_matches_count > 0,
+      // check if there are still active jobs matching. If the count was
+      // set long ago and jobs have since expired/been deleted, clear it.
+      const searchesWithStaleCheck = await Promise.all(
+        searches.map(async (search) => {
+          if ((search.new_matches_count || 0) === 0) return search;
+          
+          // Quick check: are there any active jobs created since last_notified_at?
+          const sinceDate = search.last_notified_at || search.last_checked_at;
+          let query = supabase
+            .from('job_postings')
+            .select('id', { count: 'exact', head: true })
+            .eq('is_active', true)
+            .is('deleted_at', null)
+            .gt('created_at', sinceDate);
+
+          if (search.search_query) {
+            query = query.or(`title.ilike.%${search.search_query}%,workplace_city.ilike.%${search.search_query}%`);
+          }
+          if (search.city) {
+            query = query.or(`workplace_city.ilike.%${search.city}%,workplace_municipality.ilike.%${search.city}%`);
+          }
+          if (search.county) {
+            query = query.eq('workplace_county', search.county);
+          }
+          if (search.employment_types && search.employment_types.length > 0) {
+            query = query.in('employment_type', search.employment_types);
+          }
+          if (search.category) {
+            query = query.eq('category', search.category);
+          }
+
+          const { count } = await query;
+          const actualCount = count || 0;
+
+          // If actual active matches differ from stored count, update DB
+          if (actualCount !== search.new_matches_count) {
+            supabase
+              .from('saved_searches')
+              .update({ new_matches_count: actualCount })
+              .eq('id', search.id)
+              .then(() => {}); // fire-and-forget
+            return { ...search, new_matches_count: actualCount };
+          }
+
+          return search;
+        })
+      );
+
+      setSavedSearches(searchesWithStaleCheck);
       
       // Spara till cache för instant-load vid nästa navigation
-      setCachedSearches(user.id, searches);
+      setCachedSearches(user.id, searchesWithStaleCheck);
       
       // Calculate total new matches
-      const total = searches.reduce((sum, s) => sum + (s.new_matches_count || 0), 0);
+      const total = searchesWithStaleCheck.reduce((sum, s) => sum + (s.new_matches_count || 0), 0);
       setTotalNewMatches(total);
     } catch (err) {
       console.error('Error fetching saved searches:', err);
