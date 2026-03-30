@@ -49,6 +49,13 @@ DateTimeDisplay.displayName = 'DateTimeDisplay';
 
 const JobSeekerHome = memo(() => {
   const { profile } = useAuth();
+  
+  const [showContent, setShowContent] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowContent(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const firstName = profile?.first_name || 'du';
   
@@ -154,6 +161,14 @@ const JobSeekerHome = memo(() => {
     return getEmojiForCode(weatherCode);
   }, [weather.weatherCode, isEvening, gpsGranted, isDaytime]);
 
+
+  if (!showContent) {
+    return (
+      <div className="space-y-6 responsive-container-wide py-8 opacity-0">
+        {/* Invisible placeholder */}
+      </div>
+    );
+  }
 
   return (
     <>
