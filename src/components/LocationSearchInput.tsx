@@ -235,7 +235,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <Command className="bg-transparent border-none" shouldFilter={false} loop={false} value="">
-            <div className="flex items-center px-3 border-b border-white/10">
+            <div className="flex items-center h-12 px-3">
               <Search className="mr-2 h-4 w-4 shrink-0 text-white" />
                <input
                 value={dropdownSearch}
@@ -245,7 +245,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                 autoCorrect="off"
                 spellCheck={false}
                 enterKeyHint="search"
-                className="flex h-11 w-full rounded-md bg-transparent py-3 text-[16px] leading-tight outline-none text-white placeholder:text-white/70"
+                className="flex h-full w-full bg-transparent text-[16px] leading-tight outline-none text-white placeholder:text-white/70"
               />
             </div>
 
