@@ -235,6 +235,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
           side="bottom"
           sideOffset={4}
           avoidCollisions={false}
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <Command className="bg-transparent border-none" shouldFilter={false} loop={false} value="">
             <div className="flex items-center px-3 border-b border-white/10">
