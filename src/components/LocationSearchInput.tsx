@@ -273,8 +273,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                       selectedRowRefs.current[postalCodeCity.city] = element;
                     }}
                   >
-                    <div className="flex min-w-0 items-start gap-3">
-                      {renderSelectionIndicator(values.includes(postalCodeCity.city))}
+                    <div className="flex min-w-0 items-start gap-3 flex-1">
                       <div className="min-w-0">
                         <span className="block font-medium text-white leading-tight">{postalCodeCity.city}</span>
                         <span className="block text-xs text-white/80 leading-tight mt-0.5">
@@ -284,6 +283,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                         </span>
                       </div>
                     </div>
+                    {renderSelectionIndicator(values.includes(postalCodeCity.city))}
                   </button>
                 </CommandGroup>
               )}
