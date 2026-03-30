@@ -359,10 +359,10 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                                     selectedRowRefs.current[municipality] = element;
                                   }}
                                 >
-                                  {renderSelectionIndicator(isSelected)}
                                   <span className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5">
                                     {municipality}
                                   </span>
+                                  {renderSelectionIndicator(isSelected)}
                                 </button>
                                 {municipalityIndex < municipalityArray.length - 1 && (
                                   <div className="h-px bg-white/20 mx-2" />
