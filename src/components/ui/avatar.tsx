@@ -146,9 +146,14 @@ const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarFallbackProps>(
       return null;
     }
     
-    // Don't show fallback until delay has passed
+    // Show skeleton shimmer while waiting for image (before delayMs expires)
     if (!showFallback) {
-      return null;
+      return (
+        <span
+          className="flex h-full w-full rounded-full animate-pulse bg-white/10"
+          aria-hidden="true"
+        />
+      );
     }
 
     return (
