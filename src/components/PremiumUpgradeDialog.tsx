@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
-import { Crown, ExternalLink, Info } from 'lucide-react';
+import { Crown } from 'lucide-react';
 
 interface PremiumUpgradeDialogProps {
   open: boolean;
@@ -28,21 +28,15 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
                   navigator.userAgent && 
                   navigator.userAgent.includes('CapacitorWebView'));
     
-    console.log('Platform detection:', { isCapacitor, isCordova, isApp });
     setIsMobileApp(isApp);
   }, []);
 
   const isApp = (typeof isAppOverride === 'boolean') ? isAppOverride : isMobileApp;
 
   const handleUpgrade = () => {
-    if (isApp) {
-      // Mobile app: Show info about visiting website
-      // No action needed - just show the message
-      return;
-    } else {
-      // Web: Could implement Stripe checkout here or also redirect to website
-      console.log('Web upgrade - implement Stripe or redirect to parium.se');
-      // For now, same behavior as mobile
+    if (!isApp) {
+      // Web: Stripe checkout will be integrated here
+      window.open('https://parium.se', '_blank', 'noopener,noreferrer');
     }
   };
 
