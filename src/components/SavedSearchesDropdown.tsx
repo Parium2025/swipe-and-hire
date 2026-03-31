@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Bell, X, Trash2, Search, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -6,6 +6,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { SavedSearch, SearchCriteria } from '@/hooks/useSavedSearches';
+import { useTapToPreview } from '@/hooks/useTapToPreview';
 import { cn } from '@/lib/utils';
 
 interface SavedSearchesDropdownProps {
