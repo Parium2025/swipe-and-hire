@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Briefcase, Users, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Bookmark } from 'lucide-react';
+import { MapPin, Briefcase, Users, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Heart } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import LocationSearchInput from '@/components/LocationSearchInput';
 import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
