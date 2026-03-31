@@ -188,6 +188,13 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
 
 const Profile = () => {
   const { profile, userRole, updateProfile, refreshProfile, user, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
+
+  // Delayed fade-in (employer-side parity)
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowContent(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -1571,7 +1578,11 @@ const Profile = () => {
     }
   };
 
-  return (
+  if (!showContent) {
+    return <div className="responsive-container-wide space-y-6 opacity-0" aria-hidden="true" />;
+  }
+
+   return (
      <div className="responsive-container-wide space-y-6 animate-fade-in">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Min Profil</h1>

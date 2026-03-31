@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
@@ -128,6 +128,13 @@ const MyApplications = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [applicationToRemove, setApplicationToRemove] = useState<{ id: string; title: string } | null>(null);
+
+  // Delayed fade-in (employer-side parity)
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowContent(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
   
   // Get candidate's interviews
   const { interviews, isLoading: interviewsLoading } = useCandidateInterviews();
@@ -159,9 +166,9 @@ const MyApplications = () => {
     }
   };
 
-  if (isLoading) {
+  if (!showContent || isLoading) {
     return (
-       <div className="responsive-container-wide animate-fade-in">
+       <div className="responsive-container-wide opacity-0" aria-hidden="true">
         <div className="text-center mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
           <p className="text-sm text-white">Dina inskickade jobbansökningar</p>

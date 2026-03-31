@@ -83,6 +83,13 @@ const SearchJobs = memo(() => {
   const navigate = useNavigate();
   // toast and blurHandlers removed — no longer needed after filter extraction
   const queryClient = useQueryClient();
+
+  // Delayed fade-in (employer-side parity)
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowContent(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob, unsaveJob } = useSavedJobs();
   const { seedJobsFromSearch } = useJobPrefetchCache();
@@ -381,7 +388,11 @@ const SearchJobs = memo(() => {
     setSelectedPostalCode(postalCode || '');
   };
 
-  return (
+  if (!showContent) {
+    return <div className="space-y-3 md:space-y-4 responsive-container-wide opacity-0" aria-hidden="true" />;
+  }
+
+   return (
      <div className="space-y-3 md:space-y-4 responsive-container-wide animate-fade-in">
       {/* Compact header: title centered + stats inline on mobile */}
       <div className="flex items-center justify-center mb-1 md:mb-4">
