@@ -43,9 +43,17 @@ export const JobSeekerDashboardGrid = memo(() => {
         <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
       </motion.div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: { transition: { staggerChildren: 0.08 } },
+        }}
+      >
         {isMobile ? mobileOrder : desktopOrder}
-      </div>
+      </motion.div>
     </div>
   );
 });
