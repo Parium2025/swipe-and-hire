@@ -13,21 +13,26 @@ export const JobSeekerDashboardGrid = memo(() => {
   const [isStatsPaused, setIsStatsPaused] = useState(false);
   const isMobile = useIsMobile();
 
+  const cardVariants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } },
+  };
+
   const mobileOrder = (
     <>
-      <JobSeekerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
-      <JobSeekerInterviewsCard />
-      <CareerTipsCard isPaused={isTipsPaused} setIsPaused={setIsTipsPaused} />
-      <JobSeekerNotesCard />
+      <motion.div variants={cardVariants}><JobSeekerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} /></motion.div>
+      <motion.div variants={cardVariants}><JobSeekerInterviewsCard /></motion.div>
+      <motion.div variants={cardVariants}><CareerTipsCard isPaused={isTipsPaused} setIsPaused={setIsTipsPaused} /></motion.div>
+      <motion.div variants={cardVariants}><JobSeekerNotesCard /></motion.div>
     </>
   );
 
   const desktopOrder = (
     <>
-      <CareerTipsCard isPaused={isTipsPaused} setIsPaused={setIsTipsPaused} />
-      <JobSeekerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
-      <JobSeekerNotesCard />
-      <JobSeekerInterviewsCard />
+      <motion.div variants={cardVariants}><CareerTipsCard isPaused={isTipsPaused} setIsPaused={setIsTipsPaused} /></motion.div>
+      <motion.div variants={cardVariants}><JobSeekerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} /></motion.div>
+      <motion.div variants={cardVariants}><JobSeekerNotesCard /></motion.div>
+      <motion.div variants={cardVariants}><JobSeekerInterviewsCard /></motion.div>
     </>
   );
 
