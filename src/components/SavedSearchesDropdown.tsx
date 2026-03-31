@@ -107,11 +107,7 @@ export function SavedSearchesDropdown({
 
   return (
     <>
-      <Popover open={open} onOpenChange={(isOpen) => {
-        // Don't close popover if confirmation dialog is open
-        if (!isOpen && confirmDeleteSearch) return;
-        setOpen(isOpen);
-      }}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <button
             className="relative h-11 px-6 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"
@@ -134,40 +130,57 @@ export function SavedSearchesDropdown({
         >
           <div className="p-3 border-b border-white/10">
             <h4 className="text-sm font-medium text-white">Sparade sökningar</h4>
-            <p className="text-xs text-white mt-0.5">Klicka för att aktivera sökningen</p>
+            <p className="text-xs text-white mt-0.5">
+              {isTouch ? 'Tryck för att förhandsgranska, tryck igen för att välja' : 'Klicka för att aktivera sökningen'}
+            </p>
           </div>
           
+          <TooltipProvider delayDuration={0} skipDelayDuration={0}>
           <div className="max-h-64 overflow-y-auto">
-            {savedSearches.map((search) => (
-              <div
-                key={search.id}
-                onClick={() => handleApplySearch(search)}
-                className={cn(
-                  "flex items-start gap-3 p-3 cursor-pointer transition-colors",
-                  "hover:bg-white/5 border-b border-white/5 last:border-b-0",
-                  deletingId === search.id && "opacity-50 pointer-events-none"
-                )}
-              >
-                <Search className="h-4 w-4 text-white mt-0.5 shrink-0" />
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-white truncate">
-                      {search.name}
-                    </span>
-                    {search.new_matches_count > 0 && (
-                      <Badge 
-                        variant="glass" 
-                        className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-4 px-1 shrink-0"
-                      >
-                        +{search.new_matches_count}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-white truncate mt-0.5">
-                    {getCriteriaSummary(search)}
-                  </p>
-                </div>
+            {savedSearches.map((search) => {
+              const showingPreview = isPreview(search.id);
+              const fullText = `${search.name}\n${getCriteriaSummary(search)}`;
+              return (
+                <Tooltip key={search.id} open={showingPreview}>
+                  <TooltipTrigger asChild>
+                    <div
+                      onClick={() => {
+                        handleTap(
+                          search.id,
+                          nameRefs.current[search.id] ?? null,
+                          () => handleApplySearch(search)
+                        );
+                      }}
+                      className={cn(
+                        "flex items-start gap-3 p-3 cursor-pointer transition-colors",
+                        "hover:bg-white/5 border-b border-white/5 last:border-b-0",
+                        deletingId === search.id && "opacity-50 pointer-events-none",
+                        showingPreview && "bg-white/5"
+                      )}
+                    >
+                      <Search className="h-4 w-4 text-white mt-0.5 shrink-0" />
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span 
+                            ref={(el) => { nameRefs.current[search.id] = el; }}
+                            className="text-sm font-medium text-white truncate"
+                          >
+                            {search.name}
+                          </span>
+                          {search.new_matches_count > 0 && (
+                            <Badge 
+                              variant="glass" 
+                              className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-4 px-1 shrink-0"
+                            >
+                              +{search.new_matches_count}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-white truncate mt-0.5">
+                          {getCriteriaSummary(search)}
+                        </p>
+                      </div>
                 
                 <button
                   onClick={(e) => handleDeleteClick(e, search)}
