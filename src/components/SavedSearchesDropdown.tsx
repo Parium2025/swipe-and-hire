@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Heart, X, Trash2, Search, AlertTriangle } from 'lucide-react';
+import { Bell, X, Trash2, Search, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Popover,
