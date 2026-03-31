@@ -44,6 +44,15 @@ export function SavedSearchesDropdown({
   const [open, setOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteSearch, setConfirmDeleteSearch] = useState<SavedSearch | null>(null);
+  const { handleTap, isPreview, resetPreview, isTouch } = useTapToPreview();
+  const nameRefs = useRef<Record<string, HTMLSpanElement | null>>({});
+
+  // Reset preview state when popover closes
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen && confirmDeleteSearch) return;
+    if (!isOpen) resetPreview();
+    setOpen(isOpen);
+  };
 
   if (savedSearches.length === 0) return null;
 
