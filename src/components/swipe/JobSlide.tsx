@@ -1,6 +1,7 @@
 import { memo, useCallback, useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import { Building2, MapPin, CheckCircle, Briefcase } from 'lucide-react';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { supabase } from '@/integrations/supabase/client';
 import type { SwipeJob } from './SwipeCard';
 
@@ -157,10 +158,10 @@ export const JobSlide = memo(function JobSlide({
               <span className="text-white/80 text-sm">{job.location}</span>
             </div>
           )}
-          {job.employment_type && (
+        {job.employment_type && (
             <div className="flex items-center gap-2 mt-1">
               <Briefcase className="w-4 h-4 text-white/70 shrink-0" />
-              <span className="text-white/80 text-sm">{job.employment_type}</span>
+              <span className="text-white/80 text-sm">{getEmploymentTypeLabel(job.employment_type)}</span>
             </div>
           )}
 
