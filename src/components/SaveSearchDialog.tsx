@@ -83,8 +83,8 @@ export function SaveSearchDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px] bg-slate-900/95 backdrop-blur-xl border-white/20">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white">
+        <DialogHeader className="items-center text-center">
+          <DialogTitle className="flex items-center justify-center gap-2 text-white">
             <Heart className="h-5 w-5 text-white" />
             Spara sökning
           </DialogTitle>
@@ -128,12 +128,10 @@ export function SaveSearchDialog({
             </div>
           )}
 
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-            <Bell className="h-5 w-5 text-white mt-0.5 shrink-0" />
-            <div className="text-sm text-white">
-              <p className="font-medium text-white mb-1">Realtidsnotiser</p>
-              <p>Du får en notis direkt när nya jobb publiceras som matchar din sökning.</p>
-            </div>
+          <div className="flex flex-col items-center gap-1 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
+            <Bell className="h-5 w-5 text-white shrink-0" />
+            <p className="font-medium text-sm text-white">Realtidsnotiser</p>
+            <p className="text-sm text-white">Du får en notis direkt när nya jobb publiceras som matchar din sökning.</p>
           </div>
         </div>
 
