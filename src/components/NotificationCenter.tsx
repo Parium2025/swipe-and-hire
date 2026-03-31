@@ -1,5 +1,6 @@
 import { memo, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle } from 'lucide-react';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -41,7 +42,12 @@ function NotificationItem({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button
+        <motion.button
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.15 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => {
             if (!notification.is_read) onRead(notification.id);
             if (route) onNavigate(route);
@@ -67,7 +73,7 @@ function NotificationItem({
             )}
             <span className="text-[10px] text-white mt-1 block">{timeAgo}</span>
           </div>
-        </button>
+        </motion.button>
       </TooltipTrigger>
       <TooltipContent side="left" className="max-w-[240px] text-xs">
         <p className="font-medium">{notification.title}</p>
@@ -120,14 +126,19 @@ function NotificationCenter() {
         )}
       </button>
 
+      <AnimatePresence>
       {open && (
-        <div
+        <motion.div
           ref={panelRef}
+          initial={{ opacity: 0, scale: 0.95, y: -8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -8 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           className="fixed z-[10000] w-[280px] max-h-[min(70vh,600px)] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-xl p-0 overflow-hidden flex flex-col"
           style={{
             top: '60px',
             left: '50%',
-            transform: 'translateX(-50%)',
+            x: '-50%',
           }}
         >
           {/* Header */}
@@ -187,8 +198,9 @@ function NotificationCenter() {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 }
