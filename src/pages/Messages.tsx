@@ -141,7 +141,7 @@ export default function Messages() {
   // Only show loading if there's no cached data at all
   const hasData = conversations.length > 0;
 
-  if (isLoading && !hasData) {
+  if (!showContentFade || (isLoading && !hasData)) {
     return (
       <div className="flex-1 min-h-0 flex flex-col opacity-0 responsive-container-wide">
         {/* Invisible placeholder to prevent layout shift */}
