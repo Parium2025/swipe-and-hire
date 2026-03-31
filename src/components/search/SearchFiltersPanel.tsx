@@ -97,7 +97,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 onClick={onOpenSaveDialog}
                 className="inline-flex items-center gap-1.5 h-7 px-2 text-xs text-white rounded-md transition-all duration-200 md:hover:bg-white/10 active:scale-95 ml-auto"
               >
-                <Bookmark className="h-3.5 w-3.5 text-white" />
+                <Heart className="h-3.5 w-3.5 text-white" />
                 <span className="hidden sm:inline">Spara sökning</span>
               </button>
             ) : <span />}
