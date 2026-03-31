@@ -83,6 +83,13 @@ const SearchJobs = memo(() => {
   const navigate = useNavigate();
   // toast and blurHandlers removed — no longer needed after filter extraction
   const queryClient = useQueryClient();
+
+  // Delayed fade-in (employer-side parity)
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowContent(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob, unsaveJob } = useSavedJobs();
   const { seedJobsFromSearch } = useJobPrefetchCache();
