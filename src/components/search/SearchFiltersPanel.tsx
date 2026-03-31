@@ -106,6 +106,13 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
           
           {/* Saved Searches Dropdown with Save button */}
           <div className="flex justify-center items-center gap-2">
+            <SavedSearchesDropdown
+              savedSearches={savedSearches}
+              totalNewMatches={totalNewMatches}
+              onApplySearch={onApplySavedSearch}
+              onDeleteSearch={onDeleteSearch}
+              onClearNewMatches={onClearNewMatches}
+            />
             {hasActiveFilters({
               search_query: searchInput,
               city: selectedCity,
@@ -121,13 +128,6 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 Spara
               </button>
             )}
-            <SavedSearchesDropdown
-              savedSearches={savedSearches}
-              totalNewMatches={totalNewMatches}
-              onApplySearch={onApplySavedSearch}
-              onDeleteSearch={onDeleteSearch}
-              onClearNewMatches={onClearNewMatches}
-            />
           </div>
         </div>
 
