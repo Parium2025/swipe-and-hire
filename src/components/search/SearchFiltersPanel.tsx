@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Briefcase, Users, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Bookmark } from 'lucide-react';
+import { MapPin, Briefcase, Users, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Heart } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import LocationSearchInput from '@/components/LocationSearchInput';
 import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
@@ -97,7 +97,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 onClick={onOpenSaveDialog}
                 className="inline-flex items-center gap-1.5 h-7 px-2 text-xs text-white rounded-md transition-all duration-200 md:hover:bg-white/10 active:scale-95 ml-auto"
               >
-                <Bookmark className="h-3.5 w-3.5 text-white" />
+                <Heart className="h-3.5 w-3.5 text-white" />
                 <span className="hidden sm:inline">Spara sökning</span>
               </button>
             ) : <span />}
