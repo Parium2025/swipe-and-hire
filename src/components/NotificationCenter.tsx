@@ -1,5 +1,6 @@
 import { memo, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle } from 'lucide-react';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
