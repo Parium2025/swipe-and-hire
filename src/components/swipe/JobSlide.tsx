@@ -1,6 +1,7 @@
 import { memo, useCallback, useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import { Building2, MapPin, CheckCircle, Briefcase } from 'lucide-react';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { supabase } from '@/integrations/supabase/client';
 import type { SwipeJob } from './SwipeCard';
 
