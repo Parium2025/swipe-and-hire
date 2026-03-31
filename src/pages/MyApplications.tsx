@@ -128,6 +128,13 @@ const MyApplications = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [applicationToRemove, setApplicationToRemove] = useState<{ id: string; title: string } | null>(null);
+
+  // Delayed fade-in (employer-side parity)
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowContent(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
   
   // Get candidate's interviews
   const { interviews, isLoading: interviewsLoading } = useCandidateInterviews();
