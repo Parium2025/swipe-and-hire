@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Bookmark, Bell, Loader2 } from 'lucide-react';
+import { Heart, Bell, Loader2 } from 'lucide-react';
 import { SearchCriteria } from '@/hooks/useSavedSearches';
 
 interface SaveSearchDialogProps {
