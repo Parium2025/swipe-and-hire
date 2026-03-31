@@ -23,6 +23,13 @@ type ConversationTab = 'all' | 'candidates' | 'colleagues';
 
 export default function Messages() {
   const { user, userRole } = useAuth();
+
+  // Delayed fade-in (employer-side parity)
+  const [showContentFade, setShowContentFade] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowContentFade(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
   const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
   const { hasTeam } = useTeamMembers();
   const [searchParams, setSearchParams] = useSearchParams();
