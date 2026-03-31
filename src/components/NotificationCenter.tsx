@@ -73,7 +73,7 @@ function NotificationItem({
             )}
             <span className="text-[10px] text-white mt-1 block">{timeAgo}</span>
           </div>
-        </button>
+        </motion.button>
       </TooltipTrigger>
       <TooltipContent side="left" className="max-w-[240px] text-xs">
         <p className="font-medium">{notification.title}</p>
