@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Bookmark, Bell, Loader2 } from 'lucide-react';
+import { Heart, Bell, Loader2 } from 'lucide-react';
 import { SearchCriteria } from '@/hooks/useSavedSearches';
 
 interface SaveSearchDialogProps {
@@ -85,7 +85,7 @@ export function SaveSearchDialog({
       <DialogContent className="sm:max-w-[425px] bg-slate-900/95 backdrop-blur-xl border-white/20">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
-            <Bookmark className="h-5 w-5 text-white" />
+            <Heart className="h-5 w-5 text-white" />
             Spara sökning
           </DialogTitle>
           <DialogDescription className="text-white">
@@ -137,18 +137,12 @@ export function SaveSearchDialog({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button 
-            variant="ghost" 
-            onClick={() => onOpenChange(false)}
-            className="text-white/70 hover:text-white hover:bg-white/10"
-          >
-            Avbryt
-          </Button>
+        <DialogFooter className="flex-col gap-2 sm:flex-col">
           <Button 
             onClick={handleSave}
             disabled={!name.trim() || isSaving}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            variant="glassBlue"
+            className="w-full h-12 text-sm"
           >
             {isSaving ? (
               <>
@@ -157,10 +151,17 @@ export function SaveSearchDialog({
               </>
             ) : (
               <>
-                <Bookmark className="h-4 w-4 mr-2" />
+                <Heart className="h-4 w-4 mr-2" />
                 Spara sökning
               </>
             )}
+          </Button>
+          <Button 
+            variant="ghost" 
+            onClick={() => onOpenChange(false)}
+            className="w-full rounded-full text-white/70 hover:text-white hover:bg-white/10"
+          >
+            Avbryt
           </Button>
         </DialogFooter>
       </DialogContent>
