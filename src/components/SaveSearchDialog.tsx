@@ -82,7 +82,7 @@ export function SaveSearchDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-slate-900/95 backdrop-blur-xl border-white/20">
+      <DialogContent className="sm:max-w-[425px] bg-card-parium backdrop-blur-xl border-white/20">
         <DialogHeader className="items-center text-center">
           <DialogTitle className="flex items-center justify-center gap-2 text-white">
             <Heart className="h-5 w-5 text-white" />
