@@ -150,10 +150,7 @@ export function SaveSearchDialog({
                 Sparar...
               </>
             ) : (
-              <>
-                <Heart className="h-4 w-4 mr-2" />
-                Spara sökning
-              </>
+              'Spara sökning'
             )}
           </Button>
           <Button 
