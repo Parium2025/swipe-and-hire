@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Bell, X, Trash2, Search, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -6,6 +6,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { SavedSearch, SearchCriteria } from '@/hooks/useSavedSearches';
+import { useTapToPreview } from '@/hooks/useTapToPreview';
 import { cn } from '@/lib/utils';
 
 interface SavedSearchesDropdownProps {
@@ -37,6 +44,15 @@ export function SavedSearchesDropdown({
   const [open, setOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteSearch, setConfirmDeleteSearch] = useState<SavedSearch | null>(null);
+  const { handleTap, isPreview, resetPreview, isTouch } = useTapToPreview();
+  const nameRefs = useRef<Record<string, HTMLSpanElement | null>>({});
+
+  // Reset preview state when popover closes
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen && confirmDeleteSearch) return;
+    if (!isOpen) resetPreview();
+    setOpen(isOpen);
+  };
 
   if (savedSearches.length === 0) return null;
 
@@ -91,11 +107,7 @@ export function SavedSearchesDropdown({
 
   return (
     <>
-      <Popover open={open} onOpenChange={(isOpen) => {
-        // Don't close popover if confirmation dialog is open
-        if (!isOpen && confirmDeleteSearch) return;
-        setOpen(isOpen);
-      }}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <button
             className="relative h-11 px-6 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"
@@ -118,51 +130,80 @@ export function SavedSearchesDropdown({
         >
           <div className="p-3 border-b border-white/10">
             <h4 className="text-sm font-medium text-white">Sparade sökningar</h4>
-            <p className="text-xs text-white mt-0.5">Klicka för att aktivera sökningen</p>
+            <p className="text-xs text-white mt-0.5">
+              {isTouch ? 'Tryck för att förhandsgranska, tryck igen för att välja' : 'Klicka för att aktivera sökningen'}
+            </p>
           </div>
           
+          <TooltipProvider delayDuration={0} skipDelayDuration={0}>
           <div className="max-h-64 overflow-y-auto">
-            {savedSearches.map((search) => (
-              <div
-                key={search.id}
-                onClick={() => handleApplySearch(search)}
-                className={cn(
-                  "flex items-start gap-3 p-3 cursor-pointer transition-colors",
-                  "hover:bg-white/5 border-b border-white/5 last:border-b-0",
-                  deletingId === search.id && "opacity-50 pointer-events-none"
-                )}
-              >
-                <Search className="h-4 w-4 text-white mt-0.5 shrink-0" />
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-white truncate">
-                      {search.name}
-                    </span>
-                    {search.new_matches_count > 0 && (
-                      <Badge 
-                        variant="glass" 
-                        className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-4 px-1 shrink-0"
+            {savedSearches.map((search) => {
+              const showingPreview = isPreview(search.id);
+              const fullText = `${search.name}\n${getCriteriaSummary(search)}`;
+              return (
+                <Tooltip key={search.id} open={showingPreview}>
+                  <TooltipTrigger asChild>
+                    <div
+                      onClick={() => {
+                        handleTap(
+                          search.id,
+                          nameRefs.current[search.id] ?? null,
+                          () => handleApplySearch(search)
+                        );
+                      }}
+                      className={cn(
+                        "flex items-start gap-3 p-3 cursor-pointer transition-colors",
+                        "hover:bg-white/5 border-b border-white/5 last:border-b-0",
+                        deletingId === search.id && "opacity-50 pointer-events-none",
+                        showingPreview && "bg-white/5"
+                      )}
+                    >
+                      <Search className="h-4 w-4 text-white mt-0.5 shrink-0" />
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span 
+                            ref={(el) => { nameRefs.current[search.id] = el; }}
+                            className="text-sm font-medium text-white truncate"
+                          >
+                            {search.name}
+                          </span>
+                          {search.new_matches_count > 0 && (
+                            <Badge 
+                              variant="glass" 
+                              className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-4 px-1 shrink-0"
+                            >
+                              +{search.new_matches_count}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-white truncate mt-0.5">
+                          {getCriteriaSummary(search)}
+                        </p>
+                      </div>
+                      
+                      <button
+                        onClick={(e) => handleDeleteClick(e, search)}
+                        className="shrink-0 rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                        aria-label="Ta bort sparad sökning"
                       >
-                        +{search.new_matches_count}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-white truncate mt-0.5">
-                    {getCriteriaSummary(search)}
-                  </p>
-                </div>
-                
-                <button
-                  onClick={(e) => handleDeleteClick(e, search)}
-                  className="shrink-0 rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
-                  aria-label="Ta bort sparad sökning"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            ))}
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    sideOffset={6}
+                    className="z-[999999] max-w-[280px] bg-slate-900/95 border border-white/20 shadow-2xl p-2.5 pointer-events-none rounded-lg"
+                  >
+                    <p className="text-sm text-white font-medium break-words">{search.name}</p>
+                    <p className="text-xs text-white/70 break-words mt-0.5">{getCriteriaSummary(search)}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
           </div>
+          </TooltipProvider>
           
           {totalNewMatches > 0 && (
             <div className="p-2 border-t border-white/10">
