@@ -126,14 +126,19 @@ function NotificationCenter() {
         )}
       </button>
 
+      <AnimatePresence>
       {open && (
-        <div
+        <motion.div
           ref={panelRef}
+          initial={{ opacity: 0, scale: 0.95, y: -8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -8 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           className="fixed z-[10000] w-[280px] max-h-[min(70vh,600px)] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-xl p-0 overflow-hidden flex flex-col"
           style={{
             top: '60px',
             left: '50%',
-            transform: 'translateX(-50%)',
+            x: '-50%',
           }}
         >
           {/* Header */}
