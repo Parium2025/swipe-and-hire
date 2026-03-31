@@ -85,23 +85,6 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
       <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
         {/* Search Field with Save Search Button */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            {hasActiveFilters({
-              search_query: searchInput,
-              city: selectedCity,
-              county: selectedPostalCode,
-              employment_types: selectedEmploymentTypes,
-              category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
-            }) ? (
-              <button
-                onClick={onOpenSaveDialog}
-                className="inline-flex items-center gap-1.5 h-7 px-2 text-xs text-white rounded-md transition-all duration-200 md:hover:bg-white/10 active:scale-95 ml-auto"
-              >
-                <Heart className="h-3 w-3 text-white" />
-                <span className="hidden sm:inline">Spara sökning</span>
-              </button>
-            ) : <span />}
-          </div>
           <div className="relative">
             <Input
               placeholder="Jobbtitel, Företag, Plats..."
@@ -121,8 +104,23 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             )}
           </div>
           
-          {/* Saved Searches Dropdown */}
-          <div className="flex justify-center">
+          {/* Saved Searches Dropdown with Save button */}
+          <div className="flex justify-center items-center gap-2">
+            {hasActiveFilters({
+              search_query: searchInput,
+              city: selectedCity,
+              county: selectedPostalCode,
+              employment_types: selectedEmploymentTypes,
+              category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
+            }) && (
+              <button
+                onClick={onOpenSaveDialog}
+                className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"
+              >
+                <Heart className="h-3.5 w-3.5 text-white" />
+                Spara
+              </button>
+            )}
             <SavedSearchesDropdown
               savedSearches={savedSearches}
               totalNewMatches={totalNewMatches}
