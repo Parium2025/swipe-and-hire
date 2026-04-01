@@ -262,11 +262,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             <div className="py-3">
               <button
                 onClick={() => setShowFilter(true)}
-                className="pointer-events-auto relative flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 border border-white/20 [@media(hover:hover)]:hover:bg-white/20 transition-colors active:scale-[0.97] touch-manipulation"
+                className="pointer-events-auto relative flex items-center gap-2 h-12 px-6 rounded-full bg-white/10 border border-white/20 [@media(hover:hover)]:hover:bg-white/20 transition-colors active:scale-[0.97] touch-manipulation"
                 aria-label="Visa filter"
               >
-                <SlidersHorizontal className="h-4 w-4 text-white" />
-                <span className="text-sm text-white font-medium">Visa filter</span>
+                <SlidersHorizontal className="h-4.5 w-4.5 text-white" />
+                <span className="text-[15px] text-white font-medium">Visa filter</span>
                 {filterState.activeFilterCount > 0 && (
                   <span className="flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-secondary text-white text-[11px] font-bold leading-none">
                     {filterState.activeFilterCount}
