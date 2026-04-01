@@ -59,15 +59,17 @@ export function SwipeFilterSheet({
   const scrollRef = useRef<HTMLDivElement>(null);
   const backdropOpacity = useTransform(dragY, [0, 400], [1, 0]);
   const [dismissing, setDismissing] = useState(false);
+  const [isAnimatingIn, setIsAnimatingIn] = useState(true);
 
   // Start animation on open
   useEffect(() => {
     if (open) {
+      setIsAnimatingIn(true);
       dragY.set(0);
       void sheetControls.start({
         y: 0,
         transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
-      });
+      }).then(() => setIsAnimatingIn(false));
     }
   }, [open, dragY, sheetControls]);
 
