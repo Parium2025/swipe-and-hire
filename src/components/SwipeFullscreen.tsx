@@ -181,7 +181,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         {/* TikTok scroll container */}
         <div
           ref={scrollRef}
-          className="h-full w-full overflow-y-auto overscroll-contain snap-y snap-mandatory pt-12"
+          className="h-full w-full overflow-y-auto overscroll-contain pt-12"
           style={{ WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', contain: 'layout style' }}
         >
           {jobs.map((job, idx) => (

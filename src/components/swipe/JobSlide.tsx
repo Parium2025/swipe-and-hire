@@ -74,7 +74,7 @@ export const JobSlide = memo(function JobSlide({
   }, [x, onSwipeRight, onSwipeLeft]);
 
   return (
-    <div className="min-h-[calc(100dvh-3rem)] w-full flex flex-col snap-start snap-always">
+    <div className="min-h-[calc(100dvh-3rem)] w-full flex flex-col">
       {/* Card area with swipe */}
       <motion.div
         className="flex-1 relative mx-3 my-2 rounded-2xl overflow-hidden shadow-2xl"
@@ -82,7 +82,7 @@ export const JobSlide = memo(function JobSlide({
           x,
           rotate: cardRotate,
           scale: cardScale,
-          touchAction: 'pan-y',
+          touchAction: 'none',
         }}
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
