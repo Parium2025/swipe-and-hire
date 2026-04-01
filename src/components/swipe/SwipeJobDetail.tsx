@@ -169,11 +169,12 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   useEffect(() => {
     if (open) {
       openedAtRef.current = Date.now();
+      setIsAnimatingIn(true);
       dragY.set(0);
       void sheetControls.start({
         y: 0,
         transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
-      });
+      }).then(() => setIsAnimatingIn(false));
     }
   }, [open, job.id, dragY, sheetControls]);
 
