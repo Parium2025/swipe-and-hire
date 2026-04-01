@@ -241,14 +241,14 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           </button>
         </div>
 
-        {/* Filter button — pill style matching "Visa filter" */}
+        {/* Sticky centered filter button */}
         {filterState && (
-          <div className="absolute top-0 left-0 z-20 px-4 pt-[env(safe-area-inset-top,0px)]">
+          <div className="absolute top-0 left-1/2 z-20 -translate-x-1/2 pt-[env(safe-area-inset-top,0px)] pointer-events-none">
             <div className="py-3">
               <button
                 onClick={() => setShowFilter(true)}
-                className="relative flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 border border-white/20 [@media(hover:hover)]:hover:bg-white/20 transition-colors active:scale-[0.97] touch-manipulation"
-                aria-label="Filter"
+                className="pointer-events-auto relative flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 border border-white/20 [@media(hover:hover)]:hover:bg-white/20 transition-colors active:scale-[0.97] touch-manipulation"
+                aria-label="Visa filter"
               >
                 <SlidersHorizontal className="h-4 w-4 text-white" />
                 <span className="text-sm text-white font-medium">Visa filter</span>
