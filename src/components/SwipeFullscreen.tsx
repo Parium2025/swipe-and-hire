@@ -40,6 +40,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   const [showApply, setShowApply] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [localAppliedIds, setLocalAppliedIds] = useState<Set<string>>(new Set());
+  const [showEndBounce, setShowEndBounce] = useState(false);
 
   const isApplied = useCallback(
     (jobId: string) => appliedJobIds.has(jobId) || localAppliedIds.has(jobId),
@@ -128,13 +129,27 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     }
   }, [currentIndex, jobs.length]);
 
+  // Bounce-back when swiping on last job
+  const triggerEndBounce = useCallback(() => {
+    setShowEndBounce(true);
+    setTimeout(() => {
+      setShowEndBounce(false);
+      // Scroll back to current (last) card
+      slideRefs.current[currentIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 1200);
+  }, [currentIndex]);
+
   const handleSwipeRight = useCallback((job: SwipeJob) => {
     setShowApply(true);
   }, []);
 
   const handleSwipeLeft = useCallback(() => {
-    scrollToNext();
-  }, [scrollToNext]);
+    if (currentIndex >= jobs.length - 1) {
+      triggerEndBounce();
+    } else {
+      scrollToNext();
+    }
+  }, [scrollToNext, currentIndex, jobs.length, triggerEndBounce]);
 
   const handleTap = useCallback(() => {
     setShowDetail(true);
@@ -247,11 +262,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             <div className="py-3">
               <button
                 onClick={() => setShowFilter(true)}
-                className="pointer-events-auto relative flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 border border-white/20 [@media(hover:hover)]:hover:bg-white/20 transition-colors active:scale-[0.97] touch-manipulation"
+                className="pointer-events-auto relative flex items-center gap-2 h-12 px-6 rounded-full bg-white/10 border border-white/20 [@media(hover:hover)]:hover:bg-white/20 transition-colors active:scale-[0.97] touch-manipulation"
                 aria-label="Visa filter"
               >
-                <SlidersHorizontal className="h-4 w-4 text-white" />
-                <span className="text-sm text-white font-medium">Visa filter</span>
+                <SlidersHorizontal className="h-4.5 w-4.5 text-white" />
+                <span className="text-[15px] text-white font-medium">Visa filter</span>
                 {filterState.activeFilterCount > 0 && (
                   <span className="flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-secondary text-white text-[11px] font-bold leading-none">
                     {filterState.activeFilterCount}
@@ -276,10 +291,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           </div>
         )}
 
-        {/* TikTok scroll container */}
+        {/* TikTok scroll container — extra top padding for filter button clearance */}
         <div
           ref={scrollRef}
-          className="h-full w-full overflow-y-auto overscroll-contain pt-12"
+          className="h-full w-full overflow-y-auto overscroll-contain pt-16"
           style={{ WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', contain: 'layout style' }}
         >
           {jobs.map((job, idx) => (
@@ -302,6 +317,29 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           ))}
           <div className="h-[env(safe-area-inset-bottom,2rem)]" />
         </div>
+
+        {/* End bounce overlay — shows briefly then snaps back */}
+        <AnimatePresence>
+          {showEndBounce && (
+            <motion.div
+              className="fixed inset-0 z-[9998] flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.div
+                className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+              >
+                <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Job detail sheet */}
         {currentJob && showDetail && (
