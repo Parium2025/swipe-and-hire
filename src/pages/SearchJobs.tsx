@@ -598,6 +598,33 @@ const SearchJobs = memo(() => {
           jobs={swipeJobs}
           appliedJobIds={appliedJobIds}
           onClose={() => setSwipeModeActive(false)}
+          filterState={{
+            searchInput,
+            onSearchInputChange: setSearchInput,
+            selectedCity,
+            onLocationChange: (loc) => { setSelectedPostalCode(''); setSelectedCity(loc); },
+            selectedCategory,
+            onCategoryChange: (val) => { setSelectedCategory(val); setSelectedSubcategories([]); },
+            selectedEmploymentTypes,
+            onEmploymentTypesChange: setSelectedEmploymentTypes,
+            sortBy,
+            onSortChange: setSortBy,
+            onClearAll: () => {
+              setSearchInput('');
+              setSelectedCity('');
+              setSelectedPostalCode('');
+              setSelectedCategory('all-categories');
+              setSelectedSubcategories([]);
+              setSelectedEmploymentTypes([]);
+              setSortBy('newest');
+            },
+            activeFilterCount:
+              (searchInput ? 1 : 0) +
+              (selectedCity ? 1 : 0) +
+              (selectedCategory !== 'all-categories' ? 1 : 0) +
+              (selectedEmploymentTypes.length > 0 ? 1 : 0) +
+              (sortBy !== 'newest' ? 1 : 0),
+          }}
         />
       )}
 
