@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle } from 'lucide-react';
-import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
 import { SwipeApplySheet } from '@/components/swipe/SwipeApplySheet';
@@ -17,7 +16,6 @@ interface SwipeFullscreenProps {
 }
 
 export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose }: SwipeFullscreenProps) {
-  const { isJobSaved } = useSavedJobs();
   const scrollRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -229,7 +227,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         </div>
 
         {/* Job detail sheet */}
-        {currentJob && (
+        {currentJob && showDetail && (
           <div className="fixed inset-0 z-[10000] pointer-events-none">
             <div className="relative w-full h-full pointer-events-auto">
               <SwipeJobDetail
@@ -244,7 +242,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         )}
 
         {/* Apply sheet */}
-        {currentJob && (
+        {currentJob && showApply && (
           <div className="fixed inset-0 z-[10001] pointer-events-none">
             <div className="relative w-full h-full pointer-events-auto">
               <SwipeApplySheet
