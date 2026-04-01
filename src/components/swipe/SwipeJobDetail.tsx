@@ -222,13 +222,13 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop — instant appear, no flash */}
+          {/* Backdrop — smooth fade in synced with sheet slide */}
           <motion.div
             className="absolute inset-0 z-30 bg-black/60"
-            initial={{ opacity: 1 }}
+            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: 0.25 }}
             style={{ opacity: backdropOpacity }}
             onPointerDown={handleBackdropDismiss}
             onClick={handleBackdropDismiss}
