@@ -32,15 +32,17 @@ interface SwipeFullscreenProps {
   filterState?: SwipeFilterState;
 }
 
-const SCROLL_SNAP_DELAY = 90;
-const END_BOUNCE_DELAY = 840;
-const END_BOUNCE_HIDE_DELAY = 320;
-const END_BOUNCE_TRIGGER_OFFSET = 24;
+const SCROLL_SNAP_DELAY = 70;
+const END_BOUNCE_DELAY = 680;
+const END_BOUNCE_HIDE_DELAY = 360;
+const END_BOUNCE_TRIGGER_OFFSET = 12;
 const END_STATE_HEIGHT = 'calc(100dvh - 4rem - env(safe-area-inset-top, 0px))';
+const SNAP_REVEAL_OFFSET = 96;
 
 export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose, filterState }: SwipeFullscreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const endSectionRef = useRef<HTMLDivElement | null>(null);
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceReturnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -91,6 +93,18 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
 
     return Math.min(Math.max(slide.offsetTop - paddingTop, 0), maxScrollTop);
+  }, []);
+
+  const getEndStateScrollTop = useCallback(() => {
+    const container = scrollRef.current;
+    const endSection = endSectionRef.current;
+
+    if (!container || !endSection) return null;
+
+    const paddingTop = Number.parseFloat(window.getComputedStyle(container).paddingTop) || 0;
+    const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+
+    return Math.min(Math.max(endSection.offsetTop - paddingTop, 0), maxScrollTop);
   }, []);
 
   const scrollToSlide = useCallback((index: number) => {
@@ -167,11 +181,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     if (!container || showEndBounce) return;
 
     const scrollTop = container.scrollTop;
-    const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
-    const lastSlideTop = getSlideScrollTop(jobs.length - 1) ?? 0;
-    const hasReachedLastCardZone = currentIndex === jobs.length - 1 || scrollTop >= Math.max(0, lastSlideTop - 32);
+    const endStateTop = getEndStateScrollTop();
+    const hasReachedEndState = endStateTop !== null && scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
 
-    setEndStateVisible(hasReachedLastCardZone && scrollTop >= maxScrollTop - 140);
+    setEndStateVisible(hasReachedEndState);
 
     let bestIdx = 0;
     let bestDist = Infinity;
@@ -189,7 +202,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     });
 
     setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
-  }, [currentIndex, getSlideScrollTop, jobs.length, showEndBounce]);
+  }, [getEndStateScrollTop, getSlideScrollTop, showEndBounce]);
 
   const handleScrollWithSnap = useCallback(() => {
     handleScroll();
@@ -204,22 +217,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       if (!container || jobs.length === 0) return;
 
       const scrollTop = container.scrollTop;
-      const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
-      let nearestIdx = 0;
-      let nearestDist = Infinity;
-
-      slideRefs.current.forEach((_, idx) => {
-        const slideScrollTop = getSlideScrollTop(idx);
-        if (slideScrollTop === null) return;
-
-        const dist = Math.abs(slideScrollTop - scrollTop);
-        if (dist < nearestDist) {
-          nearestDist = dist;
-          nearestIdx = idx;
-        }
-      });
-
-      const hasScrolledIntoEndState = currentIndex === jobs.length - 1 && scrollTop >= maxScrollTop - END_BOUNCE_TRIGGER_OFFSET;
+      const endStateTop = getEndStateScrollTop();
+      const hasScrolledIntoEndState =
+        currentIndex === jobs.length - 1 &&
+        endStateTop !== null &&
+        scrollTop >= endStateTop - END_BOUNCE_TRIGGER_OFFSET;
 
       if (hasScrolledIntoEndState) {
         triggerEndBounce();
@@ -227,10 +229,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         return;
       }
 
-      scrollToSlide(nearestIdx);
       scrollEndTimerRef.current = null;
     }, SCROLL_SNAP_DELAY);
-  }, [currentIndex, getSlideScrollTop, handleScroll, jobs.length, scrollToSlide, showEndBounce, triggerEndBounce]);
+  }, [currentIndex, getEndStateScrollTop, handleScroll, jobs.length, showEndBounce, triggerEndBounce]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -436,8 +437,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
         <div
           ref={scrollRef}
-          className="h-full w-full overflow-y-auto overscroll-contain pt-16"
-          style={{ WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', contain: 'layout style' }}
+          className="h-full w-full overflow-y-auto overflow-x-hidden overscroll-contain snap-y snap-mandatory pt-16"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            willChange: 'scroll-position',
+            contain: 'layout style',
+            scrollPaddingTop: '4rem',
+          }}
         >
           {jobs.map((job, idx) => (
             <div
@@ -446,9 +452,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
                 slideRefs.current[idx] = el;
               }}
               data-index={idx}
-              className="w-full"
+              className="w-full snap-start snap-always"
+              style={{ minHeight: END_STATE_HEIGHT, height: END_STATE_HEIGHT }}
             >
               <motion.div
+                className="h-full"
                 initial={false}
                 animate={
                   idx === jobs.length - 1 && isReturningFromEnd
@@ -462,6 +470,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
                   applied={isApplied(job.id)}
                   isVisible={Math.abs(idx - currentIndex) <= 1}
                   isLast={idx === jobs.length - 1}
+                  sectionHeight={END_STATE_HEIGHT}
                   onSwipeRight={handleSwipeRight}
                   onSwipeLeft={handleSwipeLeft}
                   onTap={handleTap}
@@ -471,9 +480,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           ))}
 
           <div
+            ref={endSectionRef}
             aria-hidden="true"
-            className="w-full flex items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]"
-            style={{ minHeight: END_STATE_HEIGHT }}
+            className="w-full snap-start snap-always flex items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]"
+            style={{ minHeight: END_STATE_HEIGHT, height: END_STATE_HEIGHT }}
           >
             <motion.div
               initial={false}

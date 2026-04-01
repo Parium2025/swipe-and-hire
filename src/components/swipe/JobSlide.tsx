@@ -18,6 +18,7 @@ interface JobSlideProps {
   applied: boolean;
   isVisible: boolean;
   isLast: boolean;
+  sectionHeight?: string;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onTap: () => void;
@@ -54,6 +55,7 @@ export const JobSlide = memo(function JobSlide({
   applied,
   isVisible,
   isLast,
+  sectionHeight,
   onSwipeRight,
   onSwipeLeft,
   onTap,
@@ -215,10 +217,10 @@ export const JobSlide = memo(function JobSlide({
   }, [x]);
 
   return (
-    <div className="min-h-[calc(100dvh-3rem)] w-full flex flex-col">
+    <div className="h-full w-full flex flex-col" style={sectionHeight ? { height: sectionHeight } : undefined}>
       {/* Card area with swipe */}
       <motion.div
-        className="flex-1 relative mx-3 my-2 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
+        className="relative mx-3 my-2 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
         style={{
           x,
           rotate: cardRotate,
