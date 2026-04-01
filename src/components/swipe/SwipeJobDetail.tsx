@@ -243,7 +243,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             animate={sheetControls}
             exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
             transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
-            style={{ y: dragY }}
+            style={isAnimatingIn ? undefined : { y: dragY }}
             onPointerDown={stopSheetPropagation}
             onClick={stopSheetPropagation}
             onTouchMove={handleTouchMove}
