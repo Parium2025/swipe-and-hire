@@ -75,8 +75,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
   }, []);
 
-  // Manual snap on scroll end
+  // Manual snap on scroll end — bounce back from end slide
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const endBounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const handleScrollWithSnap = useCallback(() => {
     handleScroll();
     if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
@@ -94,9 +96,30 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           bestIdx = idx;
         }
       });
+
+      // If scrolled past the last real slide into the end-bounce zone
+      if (bestIdx === jobs.length - 1) {
+        const lastSlide = slideRefs.current[bestIdx];
+        if (lastSlide) {
+          const lastBottom = lastSlide.getBoundingClientRect().bottom;
+          const containerBottom = container.getBoundingClientRect().bottom;
+          // If the last slide is mostly scrolled past (user scrolled into end zone)
+          if (lastBottom < containerTop + container.clientHeight * 0.4) {
+            // Show end bounce then snap back
+            setShowEndBounce(true);
+            if (endBounceTimerRef.current) clearTimeout(endBounceTimerRef.current);
+            endBounceTimerRef.current = setTimeout(() => {
+              setShowEndBounce(false);
+              slideRefs.current[bestIdx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 1200);
+            return;
+          }
+        }
+      }
+
       slideRefs.current[bestIdx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 150);
-  }, [handleScroll]);
+  }, [handleScroll, jobs.length]);
 
   useEffect(() => {
     const container = scrollRef.current;
