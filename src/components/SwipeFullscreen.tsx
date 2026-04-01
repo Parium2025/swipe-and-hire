@@ -32,10 +32,18 @@ interface SwipeFullscreenProps {
   filterState?: SwipeFilterState;
 }
 
+const SCROLL_SNAP_DELAY = 90;
+const END_BOUNCE_DELAY = 900;
+const END_BOUNCE_HIDE_DELAY = 320;
+const END_BOUNCE_THRESHOLD = 20;
+
 export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose, filterState }: SwipeFullscreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const endSlideRef = useRef<HTMLDivElement>(null);
+  const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bounceReturnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
   const [showApply, setShowApply] = useState(false);
@@ -50,115 +58,161 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
   const currentJob = jobs[currentIndex];
 
-  const triggerEndBounce = useCallback((scrollToEnd = false) => {
+  const clearTimers = useCallback(() => {
+    if (scrollEndTimerRef.current) {
+      clearTimeout(scrollEndTimerRef.current);
+      scrollEndTimerRef.current = null;
+    }
+
+    if (bounceReturnTimerRef.current) {
+      clearTimeout(bounceReturnTimerRef.current);
+      bounceReturnTimerRef.current = null;
+    }
+
+    if (bounceHideTimerRef.current) {
+      clearTimeout(bounceHideTimerRef.current);
+      bounceHideTimerRef.current = null;
+    }
+  }, []);
+
+  const scrollToSlide = useCallback((index: number) => {
+    const container = scrollRef.current;
+    const slide = slideRefs.current[index];
+
+    if (!container || !slide) return;
+
+    container.scrollTo({
+      top: slide.offsetTop,
+      behavior: 'smooth',
+    });
+  }, []);
+
+  const triggerEndBounce = useCallback(() => {
     if (jobs.length === 0 || showEndBounce) return;
 
+    clearTimers();
     setShowEndBounce(true);
 
-    // Scroll back to the last real job card after a short pause
-    setTimeout(() => {
-      slideRefs.current[jobs.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setTimeout(() => setShowEndBounce(false), 350);
-    }, 800);
-  }, [jobs.length, showEndBounce]);
+    const lastIndex = jobs.length - 1;
 
-  // Reset index when jobs change (filter applied)
+    bounceReturnTimerRef.current = setTimeout(() => {
+      scrollToSlide(lastIndex);
+      bounceReturnTimerRef.current = null;
+
+      bounceHideTimerRef.current = setTimeout(() => {
+        setShowEndBounce(false);
+        bounceHideTimerRef.current = null;
+      }, END_BOUNCE_HIDE_DELAY);
+    }, END_BOUNCE_DELAY);
+  }, [clearTimers, jobs.length, scrollToSlide, showEndBounce]);
+
   useEffect(() => {
     setCurrentIndex(0);
     setShowEndBounce(false);
+    clearTimers();
+    slideRefs.current = slideRefs.current.slice(0, jobs.length);
+
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: 0 });
     }
-  }, [jobs.length]);
+  }, [jobs.length, clearTimers]);
 
-  // Track current slide via scroll position
+  useEffect(() => {
+    return () => {
+      clearTimers();
+    };
+  }, [clearTimers]);
+
   const handleScroll = useCallback(() => {
     const container = scrollRef.current;
     if (!container || showEndBounce) return;
-    const containerTop = container.getBoundingClientRect().top;
+
+    const scrollTop = container.scrollTop;
     let bestIdx = 0;
     let bestDist = Infinity;
+
     slideRefs.current.forEach((el, idx) => {
       if (!el) return;
-      const dist = Math.abs(el.getBoundingClientRect().top - containerTop);
+      const dist = Math.abs(el.offsetTop - scrollTop);
       if (dist < bestDist) {
         bestDist = dist;
         bestIdx = idx;
       }
     });
-    setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
+
+    setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
   }, [showEndBounce]);
 
-  // Manual snap on scroll end — show end card immediately and bounce back
-  const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleScrollWithSnap = useCallback(() => {
     handleScroll();
     if (showEndBounce) return;
 
-    if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
+    if (scrollEndTimerRef.current) {
+      clearTimeout(scrollEndTimerRef.current);
+    }
+
     scrollEndTimerRef.current = setTimeout(() => {
       const container = scrollRef.current;
-      if (!container) return;
+      if (!container || jobs.length === 0) return;
 
-      const containerTop = container.getBoundingClientRect().top;
-      const containerBottom = containerTop + container.clientHeight;
-      let bestIdx = 0;
-      let bestDist = Infinity;
+      const scrollTop = container.scrollTop;
+      const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+      let nearestIdx = 0;
+      let nearestDist = Infinity;
 
       slideRefs.current.forEach((el, idx) => {
         if (!el) return;
-        const dist = Math.abs(el.getBoundingClientRect().top - containerTop);
-        if (dist < bestDist) {
-          bestDist = dist;
-          bestIdx = idx;
+        const dist = Math.abs(el.offsetTop - scrollTop);
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearestIdx = idx;
         }
       });
 
-      if (bestIdx === jobs.length - 1) {
-        const lastSlide = slideRefs.current[bestIdx];
-        if (lastSlide) {
-          const lastBottom = lastSlide.getBoundingClientRect().bottom;
-          if (lastBottom < containerBottom - 24) {
-            triggerEndBounce(false);
-            return;
-          }
-        }
+      const isAtEnd = nearestIdx === jobs.length - 1 && scrollTop >= maxScrollTop - END_BOUNCE_THRESHOLD;
+
+      if (isAtEnd) {
+        triggerEndBounce();
+        scrollEndTimerRef.current = null;
+        return;
       }
 
-      slideRefs.current[bestIdx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 90);
-  }, [handleScroll, jobs.length, showEndBounce, triggerEndBounce]);
+      scrollToSlide(nearestIdx);
+      scrollEndTimerRef.current = null;
+    }, SCROLL_SNAP_DELAY);
+  }, [handleScroll, jobs.length, scrollToSlide, showEndBounce, triggerEndBounce]);
 
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
+
     container.addEventListener('scroll', handleScrollWithSnap, { passive: true });
     return () => container.removeEventListener('scroll', handleScrollWithSnap);
   }, [handleScrollWithSnap]);
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (showDetail || showApply || showFilter) return;
       if (e.key === 'Escape') onClose();
     };
+
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [showDetail, showApply, showFilter, onClose]);
 
-  // Scroll to next slide helper
   const scrollToNext = useCallback(() => {
     const nextIdx = currentIndex + 1;
-    if (nextIdx < jobs.length && slideRefs.current[nextIdx]) {
-      slideRefs.current[nextIdx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (nextIdx < jobs.length) {
+      scrollToSlide(nextIdx);
     }
-  }, [currentIndex, jobs.length]);
+  }, [currentIndex, jobs.length, scrollToSlide]);
 
   const handleSwipeRight = useCallback(() => {
     setShowApply(true);
@@ -166,7 +220,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
   const handleSwipeLeft = useCallback(() => {
     if (currentIndex >= jobs.length - 1) {
-      triggerEndBounce(true);
+      triggerEndBounce();
     } else {
       scrollToNext();
     }
@@ -189,7 +243,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setShowApply(false);
 
     if (currentIndex >= jobs.length - 1) {
-      setTimeout(() => triggerEndBounce(true), 180);
+      setTimeout(() => triggerEndBounce(), 180);
       return;
     }
 
@@ -200,11 +254,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setShowApply(false);
   }, []);
 
-  // Empty state — no jobs at all
   if (jobs.length === 0) {
     return createPortal(
       <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col">
-        {/* Header */}
         <div className="flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
           <div className="py-3">
             <span className="text-xs text-white font-medium tabular-nums">0 / 0</span>
@@ -229,14 +281,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           </button>
         </div>
 
-        {/* Centered message */}
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20">
             <p className="text-white text-base font-medium text-center">Inga jobb hittades</p>
           </div>
         </div>
 
-        {/* Filter sheet */}
         {filterState && (
           <SwipeFilterSheet
             open={showFilter}
@@ -270,7 +320,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         transition={{ duration: 0.2 }}
         className="fixed inset-0 z-[9999] bg-parium-gradient"
       >
-        {/* Header — counter + close */}
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
           <div className="py-3">
             <span className="text-xs text-white font-medium tabular-nums">
@@ -288,7 +337,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           </button>
         </div>
 
-        {/* Sticky centered filter button */}
         {filterState && (
           <div className="absolute top-0 left-1/2 z-20 -translate-x-1/2 pt-[env(safe-area-inset-top,0px)] pointer-events-none">
             <div className="py-3">
@@ -309,7 +357,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           </div>
         )}
 
-        {/* Dot indicator */}
         {jobs.length <= 30 && (
           <div className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1">
             {jobs.map((_, idx) => (
@@ -323,7 +370,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           </div>
         )}
 
-        {/* TikTok scroll container — extra top padding for filter button clearance */}
         <div
           ref={scrollRef}
           className="h-full w-full overflow-y-auto overscroll-contain pt-16"
@@ -332,7 +378,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           {jobs.map((job, idx) => (
             <div
               key={job.id}
-              ref={(el) => { slideRefs.current[idx] = el; }}
+              ref={(el) => {
+                slideRefs.current[idx] = el;
+              }}
               data-index={idx}
               className="w-full"
             >
@@ -348,28 +396,26 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             </div>
           ))}
 
-          {/* Invisible overscroll zone — triggers bounce */}
-          <div ref={endSlideRef} className="w-full h-[30vh]" />
-
-          {/* Bounce message overlay */}
-          <AnimatePresence>
-            {showEndBounce && (
-              <motion.div
-                className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none"
-                initial={{ opacity: 0, scale: 0.92 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.92 }}
-                transition={{ type: 'spring', damping: 26, stiffness: 300 }}
-              >
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20">
-                  <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div className="h-[env(safe-area-inset-bottom,2rem)]" />
         </div>
 
-        {/* Job detail sheet */}
+        <AnimatePresence>
+          {showEndBounce && (
+            <motion.div
+              className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none px-6"
+              initial={{ opacity: 0, scale: 0.94, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ type: 'spring', stiffness: 340, damping: 32 }}
+            >
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20">
+                <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
+                <p className="text-white/80 text-sm text-center mt-1">Tar dig tillbaka till startsidan</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {currentJob && showDetail && (
           <div className="fixed inset-0 z-[10000] pointer-events-none">
             <div className="relative w-full h-full pointer-events-auto">
@@ -384,7 +430,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           </div>
         )}
 
-        {/* Apply sheet */}
         {currentJob && showApply && (
           <div className="fixed inset-0 z-[10001] pointer-events-none">
             <div className="relative w-full h-full pointer-events-auto">
@@ -400,7 +445,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           </div>
         )}
 
-        {/* Filter sheet */}
         {filterState && (
           <SwipeFilterSheet
             open={showFilter}
