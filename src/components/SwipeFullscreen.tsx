@@ -129,13 +129,27 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     }
   }, [currentIndex, jobs.length]);
 
+  // Bounce-back when swiping on last job
+  const triggerEndBounce = useCallback(() => {
+    setShowEndBounce(true);
+    setTimeout(() => {
+      setShowEndBounce(false);
+      // Scroll back to current (last) card
+      slideRefs.current[currentIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 1200);
+  }, [currentIndex]);
+
   const handleSwipeRight = useCallback((job: SwipeJob) => {
     setShowApply(true);
   }, []);
 
   const handleSwipeLeft = useCallback(() => {
-    scrollToNext();
-  }, [scrollToNext]);
+    if (currentIndex >= jobs.length - 1) {
+      triggerEndBounce();
+    } else {
+      scrollToNext();
+    }
+  }, [scrollToNext, currentIndex, jobs.length, triggerEndBounce]);
 
   const handleTap = useCallback(() => {
     setShowDetail(true);
