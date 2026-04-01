@@ -59,15 +59,17 @@ export function SwipeFilterSheet({
   const scrollRef = useRef<HTMLDivElement>(null);
   const backdropOpacity = useTransform(dragY, [0, 400], [1, 0]);
   const [dismissing, setDismissing] = useState(false);
+  const [isAnimatingIn, setIsAnimatingIn] = useState(true);
 
   // Start animation on open
   useEffect(() => {
     if (open) {
+      setIsAnimatingIn(true);
       dragY.set(0);
       void sheetControls.start({
         y: 0,
         transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
-      });
+      }).then(() => setIsAnimatingIn(false));
     }
   }, [open, dragY, sheetControls]);
 
@@ -131,7 +133,7 @@ export function SwipeFilterSheet({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            style={{ opacity: backdropOpacity }}
+            style={isAnimatingIn ? undefined : { opacity: backdropOpacity }}
             onClick={animatedClose}
           />
 
@@ -142,7 +144,7 @@ export function SwipeFilterSheet({
             animate={sheetControls}
             exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
             transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
-            style={{ y: dragY }}
+            style={isAnimatingIn ? undefined : { y: dragY }}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchEnd}
