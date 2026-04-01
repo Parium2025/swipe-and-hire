@@ -67,9 +67,19 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   }, [open, job.id, user?.id]);
 
   useEffect(() => {
-    if (open && !detail) {
-      setLoading(true);
-      supabase
+    if (!open) {
+      setDetail(null);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    setDetail(null);
+    setLoading(true);
+
+    void (async () => {
+      const { data } = await supabase
         .from('job_postings')
         .select(`
           description, requirements, pitch, benefits, employment_type,
@@ -82,13 +92,21 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
           contact_email
         `)
         .eq('id', job.id)
-        .single()
-        .then(({ data }) => {
-          if (data) setDetail(data);
-          setLoading(false);
-        });
-    }
-  }, [open, job.id, detail]);
+        .single();
+
+      if (cancelled) return;
+      setDetail(data ?? null);
+      setLoading(false);
+    })().catch(() => {
+      if (cancelled) return;
+      setDetail(null);
+      setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, job.id]);
 
   return (
     <AnimatePresence>
