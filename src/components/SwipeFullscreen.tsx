@@ -1,26 +1,44 @@
 import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle } from 'lucide-react';
+import { X, CheckCircle, SlidersHorizontal } from 'lucide-react';
 import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
 import { SwipeApplySheet } from '@/components/swipe/SwipeApplySheet';
+import { SwipeFilterSheet } from '@/components/swipe/SwipeFilterSheet';
 import type { SwipeJob } from '@/components/swipe/SwipeCard';
 
 export type { SwipeJob };
+
+export interface SwipeFilterState {
+  searchInput: string;
+  onSearchInputChange: (value: string) => void;
+  selectedCity: string;
+  onLocationChange: (location: string) => void;
+  selectedCategory: string;
+  onCategoryChange: (value: string) => void;
+  selectedEmploymentTypes: string[];
+  onEmploymentTypesChange: (value: string[]) => void;
+  sortBy: 'newest' | 'oldest' | 'most-views';
+  onSortChange: (value: 'newest' | 'oldest' | 'most-views') => void;
+  onClearAll: () => void;
+  activeFilterCount: number;
+}
 
 interface SwipeFullscreenProps {
   jobs: SwipeJob[];
   appliedJobIds: Set<string>;
   onClose: () => void;
+  filterState?: SwipeFilterState;
 }
 
-export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose }: SwipeFullscreenProps) {
+export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose, filterState }: SwipeFullscreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
   const [showApply, setShowApply] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [localAppliedIds, setLocalAppliedIds] = useState<Set<string>>(new Set());
 
   const isApplied = useCallback(
@@ -29,6 +47,14 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   );
 
   const currentJob = jobs[currentIndex];
+
+  // Reset index when jobs change (filter applied)
+  useEffect(() => {
+    setCurrentIndex(0);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ top: 0 });
+    }
+  }, [jobs.length]);
 
   // Track current slide via scroll position
   const handleScroll = useCallback(() => {
@@ -48,7 +74,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
   }, []);
 
-  // Manual snap on scroll end (since we removed CSS snap to avoid touch conflicts)
+  // Manual snap on scroll end
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleScrollWithSnap = useCallback(() => {
     handleScroll();
@@ -87,12 +113,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   // Keyboard shortcuts
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (showDetail || showApply) return;
+      if (showDetail || showApply || showFilter) return;
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [showDetail, showApply, onClose]);
+  }, [showDetail, showApply, showFilter, onClose]);
 
   // Scroll to next slide helper
   const scrollToNext = useCallback(() => {
@@ -124,7 +150,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       setLocalAppliedIds(prev => new Set(prev).add(currentJob.id));
     }
     setShowApply(false);
-    // Scroll to next after applying
     setTimeout(scrollToNext, 300);
   }, [currentJob, scrollToNext]);
 
@@ -146,13 +171,44 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           </div>
           <h2 className="text-2xl font-bold text-white">Inga jobb att visa!</h2>
           <p className="text-white/60 max-w-xs">Försök ändra dina filter för att hitta fler jobb.</p>
-          <button
-            onClick={onClose}
-            className="h-12 px-8 bg-white/10 border border-white/20 rounded-full text-white font-medium active:scale-95 transition-transform min-h-[44px]"
-          >
-            Tillbaka till sökning
-          </button>
+          <div className="flex gap-3 justify-center">
+            {filterState && (
+              <button
+                onClick={() => setShowFilter(true)}
+                className="h-12 px-6 bg-secondary text-white rounded-full font-medium active:scale-95 transition-transform min-h-[44px]"
+              >
+                Ändra filter
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="h-12 px-8 bg-white/10 border border-white/20 rounded-full text-white font-medium active:scale-95 transition-transform min-h-[44px]"
+            >
+              Tillbaka
+            </button>
+          </div>
         </motion.div>
+
+        {/* Filter sheet in empty state */}
+        {filterState && (
+          <SwipeFilterSheet
+            open={showFilter}
+            onClose={() => setShowFilter(false)}
+            searchInput={filterState.searchInput}
+            onSearchInputChange={filterState.onSearchInputChange}
+            selectedCity={filterState.selectedCity}
+            onLocationChange={filterState.onLocationChange}
+            selectedCategory={filterState.selectedCategory}
+            onCategoryChange={filterState.onCategoryChange}
+            selectedEmploymentTypes={filterState.selectedEmploymentTypes}
+            onEmploymentTypesChange={filterState.onEmploymentTypesChange}
+            sortBy={filterState.sortBy}
+            onSortChange={filterState.onSortChange}
+            onClearAll={filterState.onClearAll}
+            jobCount={0}
+            activeFilterCount={filterState.activeFilterCount}
+          />
+        )}
       </div>,
       document.body
     );
@@ -169,10 +225,25 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       >
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
-          <div className="py-3">
+          <div className="flex items-center gap-3 py-3">
             <span className="text-xs text-white font-medium tabular-nums">
               {currentIndex + 1} / {jobs.length}
             </span>
+            {/* Filter button */}
+            {filterState && (
+              <button
+                onClick={() => setShowFilter(true)}
+                className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 transition-colors active:scale-90 touch-manipulation"
+                aria-label="Filter"
+              >
+                <SlidersHorizontal className="h-4 w-4 text-white" />
+                {filterState.activeFilterCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-secondary text-white text-[10px] font-bold leading-none">
+                    {filterState.activeFilterCount}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -255,6 +326,27 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
               />
             </div>
           </div>
+        )}
+
+        {/* Filter sheet */}
+        {filterState && (
+          <SwipeFilterSheet
+            open={showFilter}
+            onClose={() => setShowFilter(false)}
+            searchInput={filterState.searchInput}
+            onSearchInputChange={filterState.onSearchInputChange}
+            selectedCity={filterState.selectedCity}
+            onLocationChange={filterState.onLocationChange}
+            selectedCategory={filterState.selectedCategory}
+            onCategoryChange={filterState.onCategoryChange}
+            selectedEmploymentTypes={filterState.selectedEmploymentTypes}
+            onEmploymentTypesChange={filterState.onEmploymentTypesChange}
+            sortBy={filterState.sortBy}
+            onSortChange={filterState.onSortChange}
+            onClearAll={filterState.onClearAll}
+            jobCount={jobs.length}
+            activeFilterCount={filterState.activeFilterCount}
+          />
         )}
       </motion.div>
     </AnimatePresence>,

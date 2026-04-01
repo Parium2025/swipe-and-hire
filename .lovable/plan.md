@@ -1,36 +1,30 @@
+## Swipe Mode Filter — Fristående söktunnel
 
+### Arkitektur
+Swipe mode använder redan de filtrerade jobben från SearchJobs. Vi behöver:
 
-## Backlog / Kommande features
+1. **Ny komponent: `SwipeFilterSheet.tsx`** — en bottom sheet med sökfält, plats, yrkesområde, anställningstyp och sortering. Stilmässigt anpassad till swipe mode (mörk, glasmorfism, samma premium-känsla).
 
-### 🔴 Personliga möteslänkar per teammedlem
-**Prioritet:** Hög — krävs för team med flera rekryterare
+2. **Uppdatera `SwipeFullscreen.tsx`** — lägg till en filter-ikon uppe till vänster (bredvid jobbräknaren). Klick öppnar SwipeFilterSheet. Visa en aktiv-filter-badge om filter är satta.
 
-**Problem:** Just nu sparas bara en möteslänk per företag (i företagsprofilen). Om ett team har 20 medarbetare som alla bokar intervjuer behöver varje person sin egen möteslänk (Zoom, Meet, Teams etc.).
+3. **Uppdatera `SearchJobs.tsx`** — skicka ner filterstaten (searchInput, selectedCity, selectedCategory, selectedEmploymentTypes, sortBy) och deras setters till SwipeFullscreen.
 
-**Lösning:**
-1. Lägg till fält `interview_video_link` och `interview_office_address` på varje teammedlems profil (profiles-tabellen har redan dessa fält)
-2. I `BookInterviewDialog` — hämta länken från den **inloggade rekryterarens** profil istället för företagsprofilen
-3. Fallback: om rekryteraren inte har en egen länk, använd företagets generella länk
-4. I arbetsgivarens profilsida — lägg till UI för att varje teammedlem ska kunna spara sin egen möteslänk
+### SwipeFilterSheet innehåll
+- Sökfält (jobbtitel/företag)
+- Plats (LocationSearchInput)
+- Yrkesområde (dropdown)
+- Anställningstyp (dropdown)
+- Sortering (dropdown)
+- "Rensa filter" + "Visa X jobb" knapp
 
-**Berörda filer:**
-- `src/components/BookInterviewDialog.tsx`
-- `src/pages/employer/EmployerProfile.tsx` (eller settings)
-- `src/pages/employer/CompanyProfile.tsx` (befintlig företagslänk blir fallback)
+### UX
+- Filter-ikon i headern bredvid "1/N"
+- Öppnas som smooth bottom sheet (samma animation som SwipeJobDetail)
+- Aktiv badge på ikonen om filter är aktiva
+- Jobb-listan uppdateras live när filter ändras
+- Stängs via drag-ner, X eller "Visa jobb"-knapp
 
----
-
-### Tidigare plan (arkiverad)
-
-## Problem
-The action buttons (Chatta, Boka möte, Ta bort) use `truncate` on their text labels, causing "Boka möte" to show as "Boka m..." on small screens. The user wants the full text always visible — it's okay if the buttons shrink, but no truncation.
-
-## Solution
-Remove `truncate` from all three button text spans and replace with `whitespace-nowrap text-[clamp(9px,2.5vw,14px)]` so the text shrinks fluidly on tiny screens instead of being cut off. This keeps all labels fully readable at any viewport width.
-
-### File: `src/components/candidates/CandidateSlideProfileTab.tsx`
-
-1. On all three action button `<span>` elements (lines 261, 270, ~279), replace `className="truncate"` with `className="whitespace-nowrap text-[clamp(9px,2.5vw,14px)]"`
-2. This allows the font to scale down on the smallest screens rather than truncating
-
-No other files need changes.
+### Filer som ändras
+- `src/components/swipe/SwipeFilterSheet.tsx` (NY)
+- `src/components/SwipeFullscreen.tsx` (lägg till filter-knapp + state)
+- `src/pages/SearchJobs.tsx` (skicka ner filter-props)
