@@ -246,7 +246,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           <div className="absolute top-12 left-0 right-0 z-20 flex justify-center pt-[env(safe-area-inset-top,0px)]">
             <button
               onClick={() => setShowFilter(true)}
-              className="relative flex items-center gap-2 h-11 px-5 rounded-full bg-white/12 backdrop-blur-md border border-white/15 [@media(hover:hover)]:hover:bg-white/20 transition-all active:scale-[0.95] touch-manipulation"
+              className="relative flex items-center gap-2 h-11 px-5 rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 [@media(hover:hover)]:hover:bg-white/15 [@media(hover:hover)]:hover:backdrop-blur-sm [@media(hover:hover)]:hover:border-white/40 transition-all active:scale-[0.97] touch-manipulation"
               aria-label="Filter"
             >
               <SlidersHorizontal className="h-4 w-4 text-white" />
