@@ -71,6 +71,7 @@ export function SwipeFilterSheet({
     }
   }, [open, dragY, sheetControls]);
 
+  const animatedClose = useCallback(() => {
     setDismissing(true);
     void sheetControls.start({
       y: '110%', scale: 0.92, opacity: 0.3,
