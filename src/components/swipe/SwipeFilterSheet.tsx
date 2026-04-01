@@ -74,10 +74,10 @@ export function SwipeFilterSheet({
   const animatedClose = useCallback(() => {
     setDismissing(true);
     void sheetControls.start({
-      y: '110%', scale: 0.92, opacity: 0.3,
-      transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+      y: '100%',
+      transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
     });
-    setTimeout(() => { onClose(); setDismissing(false); }, 280);
+    setTimeout(() => { onClose(); setDismissing(false); }, 180);
   }, [onClose, sheetControls]);
 
   // Drag to dismiss
