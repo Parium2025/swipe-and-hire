@@ -133,7 +133,7 @@ export function SwipeFilterSheet({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            style={{ opacity: backdropOpacity }}
+            style={isAnimatingIn ? undefined : { opacity: backdropOpacity }}
             onClick={animatedClose}
           />
 
@@ -144,7 +144,7 @@ export function SwipeFilterSheet({
             animate={sheetControls}
             exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
             transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
-            style={{ y: dragY }}
+            style={isAnimatingIn ? undefined : { y: dragY }}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchEnd}
