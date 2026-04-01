@@ -69,14 +69,29 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   const scrollRef = useRef<HTMLDivElement>(null);
   const backdropOpacity = useTransform(dragY, [0, 400], [1, 0]);
 
+  // Animated close helper — used by X button and backdrop
+  const animatedClose = useCallback(() => {
+    setDismissing(true);
+    void sheetControls.start({
+      y: '110%',
+      scale: 0.92,
+      opacity: 0.3,
+      transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+    });
+    setTimeout(() => {
+      onClose();
+      setDismissing(false);
+    }, 280);
+  }, [onClose, sheetControls]);
+
   const handleBackdropDismiss = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
     if (Date.now() - openedAtRef.current < 420) {
       event.preventDefault();
       event.stopPropagation();
       return;
     }
-    onClose();
-  }, [onClose]);
+    animatedClose();
+  }, [animatedClose]);
 
   const stopSheetPropagation = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -108,18 +123,34 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     }
   }, [dragY]);
 
+  const [dismissing, setDismissing] = useState(false);
+
   const handleTouchEnd = useCallback(() => {
     if (!isDraggingSheet.current) return;
     isDraggingSheet.current = false;
     const currentY = dragY.get();
     if (currentY > DISMISS_THRESHOLD) {
-      // Dismiss
-      void sheetControls.start({ y: '100%', transition: { type: 'spring', damping: 30, stiffness: 300 } });
-      setTimeout(onClose, 200);
+      // Smooth dismiss with scale + fade
+      setDismissing(true);
+      void sheetControls.start({
+        y: '110%',
+        scale: 0.92,
+        opacity: 0.3,
+        transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+      });
+      setTimeout(() => {
+        onClose();
+        setDismissing(false);
+      }, 280);
     } else {
-      // Snap back
+      // Snap back with a satisfying bounce
       dragY.set(0);
-      void sheetControls.start({ y: 0, transition: { type: 'spring', damping: 30, stiffness: 400 } });
+      void sheetControls.start({
+        y: 0,
+        scale: 1,
+        opacity: 1,
+        transition: { type: 'spring', damping: 24, stiffness: 400 },
+      });
     }
   }, [dragY, onClose, sheetControls]);
 
@@ -143,7 +174,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     if (open) {
       openedAtRef.current = Date.now();
       dragY.set(0);
-      void sheetControls.start({ y: 0 });
+      void sheetControls.start({ y: 0, scale: 1, opacity: 1, transition: { type: 'spring', damping: 32, stiffness: 350, mass: 0.8 } });
     }
   }, [open, job.id, dragY, sheetControls]);
 
@@ -208,9 +239,9 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
           {/* Sheet */}
           <motion.div
             className="absolute inset-x-0 bottom-0 z-40 max-h-[88vh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
-            initial={{ y: '100%' }}
+            initial={{ y: '100%', scale: 0.95, opacity: 0 }}
             animate={sheetControls}
-            exit={{ y: '100%' }}
+            exit={{ y: '110%', scale: 0.92, opacity: 0, transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 } }}
             transition={{ type: 'spring', damping: 32, stiffness: 350, mass: 0.8 }}
             style={{ y: dragY }}
             onPointerDown={stopSheetPropagation}
@@ -231,7 +262,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
 
             {/* Close */}
             <button
-              onClick={onClose}
+              onClick={animatedClose}
               className="absolute top-3 right-4 z-10 flex h-7 w-7 !min-h-0 !min-w-0 items-center justify-center overflow-hidden rounded-full bg-white/10 transition-all active:scale-90 md:hover:bg-white/20"
               aria-label="Stäng"
             >
