@@ -68,6 +68,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   const isDraggingSheet = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const backdropOpacity = useTransform(dragY, [0, 300], [1, 0]);
+  const [isAnimatingIn, setIsAnimatingIn] = useState(true);
 
   // Animated close helper — used by X button and backdrop
   const animatedClose = useCallback(() => {
@@ -168,11 +169,12 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   useEffect(() => {
     if (open) {
       openedAtRef.current = Date.now();
+      setIsAnimatingIn(true);
       dragY.set(0);
       void sheetControls.start({
         y: 0,
         transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
-      });
+      }).then(() => setIsAnimatingIn(false));
     }
   }, [open, job.id, dragY, sheetControls]);
 
@@ -229,7 +231,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            style={{ opacity: backdropOpacity }}
+            style={isAnimatingIn ? undefined : { opacity: backdropOpacity }}
             onPointerDown={handleBackdropDismiss}
             onClick={handleBackdropDismiss}
           />
@@ -241,7 +243,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             animate={sheetControls}
             exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
             transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
-            style={{ y: dragY }}
+            style={isAnimatingIn ? undefined : { y: dragY }}
             onPointerDown={stopSheetPropagation}
             onClick={stopSheetPropagation}
             onTouchMove={handleTouchMove}
