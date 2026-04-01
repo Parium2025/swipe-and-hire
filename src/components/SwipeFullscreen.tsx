@@ -353,26 +353,25 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             </div>
           ))}
 
-          <div
-            ref={endSlideRef}
-            className="w-full flex justify-center pt-10 pb-6"
-            style={{ minHeight: '56vh' }}
-          >
-            <motion.div
-              className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20"
-              initial={false}
-              animate={{
-                opacity: 1,
-                scale: showEndBounce ? 1 : 0.985,
-                y: showEndBounce ? 0 : 8,
-              }}
-              transition={{ type: 'spring', damping: 22, stiffness: 260 }}
-            >
-              <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
-            </motion.div>
-          </div>
+          {/* Invisible overscroll zone — triggers bounce */}
+          <div ref={endSlideRef} className="w-full h-[30vh]" />
 
-          <div className="h-[env(safe-area-inset-bottom,2rem)]" />
+          {/* Bounce message overlay */}
+          <AnimatePresence>
+            {showEndBounce && (
+              <motion.div
+                className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none"
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.92 }}
+                transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+              >
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20">
+                  <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Job detail sheet */}
