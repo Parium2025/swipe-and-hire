@@ -40,6 +40,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   const [showApply, setShowApply] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [localAppliedIds, setLocalAppliedIds] = useState<Set<string>>(new Set());
+  const [showEndBounce, setShowEndBounce] = useState(false);
 
   const isApplied = useCallback(
     (jobId: string) => appliedJobIds.has(jobId) || localAppliedIds.has(jobId),
