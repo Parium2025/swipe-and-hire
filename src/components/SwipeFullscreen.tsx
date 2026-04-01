@@ -33,19 +33,19 @@ interface SwipeFullscreenProps {
 }
 
 const SCROLL_SNAP_DELAY = 90;
-const END_BOUNCE_DELAY = 900;
-const END_BOUNCE_HIDE_DELAY = 320;
-const END_BOUNCE_TRIGGER_OFFSET = 24;
-const END_SCROLL_BUFFER = 96;
+const END_BOUNCE_DELAY = 650;
+const END_BOUNCE_HIDE_DELAY = 260;
+const END_BOUNCE_TRIGGER_OFFSET = 28;
+const END_SCROLL_BUFFER = 12;
 
 export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose, filterState }: SwipeFullscreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const endBufferRef = useRef<HTMLDivElement | null>(null);
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceReturnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasUserScrolledRef = useRef(false);
+  const endBounceActiveRef = useRef(false);
+  const containerTouchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
@@ -103,29 +103,42 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   }, [getSlideScrollTop]);
 
   const triggerEndBounce = useCallback(() => {
-    if (jobs.length === 0 || showEndBounce) return;
+    if (jobs.length === 0 || showEndBounce || endBounceActiveRef.current) return;
 
+    endBounceActiveRef.current = true;
     clearTimers();
     setShowEndBounce(true);
+    setCurrentIndex(jobs.length - 1);
 
     const lastIndex = jobs.length - 1;
 
     bounceReturnTimerRef.current = setTimeout(() => {
-      scrollToSlide(lastIndex);
+      const container = scrollRef.current;
+      const targetTop = getSlideScrollTop(lastIndex);
+
+      if (container && targetTop !== null) {
+        container.scrollTo({ top: targetTop, behavior: 'auto' });
+        requestAnimationFrame(() => {
+          container.scrollTo({ top: targetTop, behavior: 'auto' });
+        });
+      }
+
       bounceReturnTimerRef.current = null;
 
       bounceHideTimerRef.current = setTimeout(() => {
         setShowEndBounce(false);
+        endBounceActiveRef.current = false;
         bounceHideTimerRef.current = null;
       }, END_BOUNCE_HIDE_DELAY);
     }, END_BOUNCE_DELAY);
-  }, [clearTimers, jobs.length, scrollToSlide, showEndBounce]);
+  }, [clearTimers, getSlideScrollTop, jobs.length, showEndBounce]);
 
   useEffect(() => {
     setCurrentIndex(0);
     setShowEndBounce(false);
     clearTimers();
-    hasUserScrolledRef.current = false;
+    endBounceActiveRef.current = false;
+    containerTouchStartRef.current = null;
     slideRefs.current = slideRefs.current.slice(0, jobs.length);
 
     if (scrollRef.current) {
@@ -144,10 +157,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     if (!container || showEndBounce) return;
 
     const scrollTop = container.scrollTop;
-    if (scrollTop > 12) {
-      hasUserScrolledRef.current = true;
-    }
-
     let bestIdx = 0;
     let bestDist = Infinity;
 
@@ -207,33 +216,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   }, [handleScrollWithSnap]);
 
   useEffect(() => {
-    const container = scrollRef.current;
-    const endBuffer = endBufferRef.current;
-
-    if (!container || !endBuffer || jobs.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry?.isIntersecting) return;
-        if (!hasUserScrolledRef.current || showEndBounce || currentIndex !== jobs.length - 1) return;
-
-        triggerEndBounce();
-      },
-      {
-        root: container,
-        threshold: 0.35,
-      }
-    );
-
-    observer.observe(endBuffer);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [currentIndex, jobs.length, showEndBounce, triggerEndBounce]);
-
-  useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = '';
@@ -291,6 +273,40 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
   const handleCloseApply = useCallback(() => {
     setShowApply(false);
+  }, []);
+
+  const handleContainerTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length !== 1 || showDetail || showApply || showFilter) return;
+
+    const touch = event.touches[0];
+    containerTouchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  }, [showApply, showDetail, showFilter]);
+
+  const handleContainerTouchMove = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    const container = scrollRef.current;
+    const touchStart = containerTouchStartRef.current;
+
+    if (!container || !touchStart || showDetail || showApply || showFilter || showEndBounce) return;
+    if (currentIndex !== jobs.length - 1 || event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+    const deltaY = touchStart.y - touch.clientY;
+    const deltaX = Math.abs(touch.clientX - touchStart.x);
+    const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+    const isAtBottom = container.scrollTop >= maxScrollTop - 2;
+
+    if (!isAtBottom || deltaY < END_BOUNCE_TRIGGER_OFFSET || deltaY <= deltaX) return;
+
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    containerTouchStartRef.current = null;
+    triggerEndBounce();
+  }, [currentIndex, jobs.length, showApply, showDetail, showEndBounce, showFilter, triggerEndBounce]);
+
+  const clearContainerTouch = useCallback(() => {
+    containerTouchStartRef.current = null;
   }, []);
 
   if (jobs.length === 0) {
@@ -413,6 +429,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           ref={scrollRef}
           className="h-full w-full overflow-y-auto overscroll-contain pt-16"
           style={{ WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', contain: 'layout style' }}
+          onTouchStartCapture={handleContainerTouchStart}
+          onTouchMoveCapture={handleContainerTouchMove}
+          onTouchEndCapture={clearContainerTouch}
+          onTouchCancelCapture={clearContainerTouch}
         >
           {jobs.map((job, idx) => (
             <div
@@ -437,7 +457,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
           <div
             aria-hidden="true"
-            ref={endBufferRef}
             className="w-full pointer-events-none"
             style={{ height: `calc(${END_SCROLL_BUFFER}px + env(safe-area-inset-bottom, 2rem))` }}
           />
