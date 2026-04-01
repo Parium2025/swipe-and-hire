@@ -57,6 +57,7 @@ interface Job {
   views_count: number;
   applications_count: number;
   job_image_url?: string;
+  image_focus_position?: string;
   employer_id?: string;
   employer_profile?: {
     first_name: string;
