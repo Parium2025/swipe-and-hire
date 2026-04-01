@@ -65,8 +65,8 @@ export function SwipeFilterSheet({
     if (open) {
       dragY.set(0);
       void sheetControls.start({
-        y: 0, scale: 1, opacity: 1,
-        transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+        y: 0,
+        transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
       });
     }
   }, [open, dragY, sheetControls]);
