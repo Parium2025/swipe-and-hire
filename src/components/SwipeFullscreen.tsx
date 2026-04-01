@@ -35,7 +35,8 @@ interface SwipeFullscreenProps {
 const SCROLL_SNAP_DELAY = 90;
 const END_BOUNCE_DELAY = 900;
 const END_BOUNCE_HIDE_DELAY = 320;
-const END_BOUNCE_THRESHOLD = 20;
+const END_BOUNCE_TRIGGER_OFFSET = 24;
+const END_SCROLL_BUFFER = 96;
 
 export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose, filterState }: SwipeFullscreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
