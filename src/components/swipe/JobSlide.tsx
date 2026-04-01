@@ -313,11 +313,6 @@ export const JobSlide = memo(function JobSlide({
       </motion.div>
 
       {/* Scroll hint on last card */}
-      {isLast && (
-        <div className="text-center py-4">
-          <span className="text-white/30 text-xs">Inga fler jobb</span>
-        </div>
-      )}
     </div>
   );
 });
