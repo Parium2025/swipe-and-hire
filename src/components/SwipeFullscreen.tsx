@@ -41,9 +41,11 @@ const END_SCROLL_BUFFER = 96;
 export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose, filterState }: SwipeFullscreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const endBufferRef = useRef<HTMLDivElement | null>(null);
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceReturnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasUserScrolledRef = useRef(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
@@ -123,6 +125,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setCurrentIndex(0);
     setShowEndBounce(false);
     clearTimers();
+    hasUserScrolledRef.current = false;
     slideRefs.current = slideRefs.current.slice(0, jobs.length);
 
     if (scrollRef.current) {
@@ -141,6 +144,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     if (!container || showEndBounce) return;
 
     const scrollTop = container.scrollTop;
+    if (scrollTop > 12) {
+      hasUserScrolledRef.current = true;
+    }
+
     let bestIdx = 0;
     let bestDist = Infinity;
 
@@ -172,7 +179,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       if (!container || jobs.length === 0) return;
 
       const scrollTop = container.scrollTop;
-      const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
       let nearestIdx = 0;
       let nearestDist = Infinity;
 
@@ -187,18 +193,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         }
       });
 
-      const hasScrolledPastLastCard = scrollTop >= Math.max(0, maxScrollTop - END_BOUNCE_TRIGGER_OFFSET);
-
-      if (hasScrolledPastLastCard) {
-        triggerEndBounce();
-        scrollEndTimerRef.current = null;
-        return;
-      }
-
       scrollToSlide(nearestIdx);
       scrollEndTimerRef.current = null;
     }, SCROLL_SNAP_DELAY);
-  }, [getSlideScrollTop, handleScroll, jobs.length, scrollToSlide, showEndBounce, triggerEndBounce]);
+  }, [getSlideScrollTop, handleScroll, jobs.length, scrollToSlide, showEndBounce]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -207,6 +205,33 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     container.addEventListener('scroll', handleScrollWithSnap, { passive: true });
     return () => container.removeEventListener('scroll', handleScrollWithSnap);
   }, [handleScrollWithSnap]);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    const endBuffer = endBufferRef.current;
+
+    if (!container || !endBuffer || jobs.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry?.isIntersecting) return;
+        if (!hasUserScrolledRef.current || showEndBounce || currentIndex !== jobs.length - 1) return;
+
+        triggerEndBounce();
+      },
+      {
+        root: container,
+        threshold: 0.35,
+      }
+    );
+
+    observer.observe(endBuffer);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [currentIndex, jobs.length, showEndBounce, triggerEndBounce]);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -412,6 +437,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
           <div
             aria-hidden="true"
+            ref={endBufferRef}
             className="w-full pointer-events-none"
             style={{ height: `calc(${END_SCROLL_BUFFER}px + env(safe-area-inset-bottom, 2rem))` }}
           />
