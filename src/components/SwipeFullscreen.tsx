@@ -33,10 +33,10 @@ interface SwipeFullscreenProps {
 }
 
 const SCROLL_SNAP_DELAY = 90;
-const END_BOUNCE_DELAY = 650;
+const END_BOUNCE_DELAY = 720;
 const END_BOUNCE_HIDE_DELAY = 260;
-const END_BOUNCE_TRIGGER_OFFSET = 28;
-const END_SCROLL_BUFFER = 12;
+const END_BOUNCE_TRIGGER_OFFSET = 24;
+const END_STATE_HEIGHT = 'calc(100dvh - 4rem - env(safe-area-inset-top, 0px))';
 
 export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose, filterState }: SwipeFullscreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -45,7 +45,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   const bounceReturnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const endBounceActiveRef = useRef(false);
-  const containerTouchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
@@ -138,7 +137,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setShowEndBounce(false);
     clearTimers();
     endBounceActiveRef.current = false;
-    containerTouchStartRef.current = null;
     slideRefs.current = slideRefs.current.slice(0, jobs.length);
 
     if (scrollRef.current) {
@@ -275,40 +273,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setShowApply(false);
   }, []);
 
-  const handleContainerTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
-    if (event.touches.length !== 1 || showDetail || showApply || showFilter) return;
-
-    const touch = event.touches[0];
-    containerTouchStartRef.current = { x: touch.clientX, y: touch.clientY };
-  }, [showApply, showDetail, showFilter]);
-
-  const handleContainerTouchMove = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
-    const container = scrollRef.current;
-    const touchStart = containerTouchStartRef.current;
-
-    if (!container || !touchStart || showDetail || showApply || showFilter || showEndBounce) return;
-    if (currentIndex !== jobs.length - 1 || event.touches.length !== 1) return;
-
-    const touch = event.touches[0];
-    const deltaY = touchStart.y - touch.clientY;
-    const deltaX = Math.abs(touch.clientX - touchStart.x);
-    const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
-    const isAtBottom = container.scrollTop >= maxScrollTop - 2;
-
-    if (!isAtBottom || deltaY < END_BOUNCE_TRIGGER_OFFSET || deltaY <= deltaX) return;
-
-    if (event.cancelable) {
-      event.preventDefault();
-    }
-
-    containerTouchStartRef.current = null;
-    triggerEndBounce();
-  }, [currentIndex, jobs.length, showApply, showDetail, showEndBounce, showFilter, triggerEndBounce]);
-
-  const clearContainerTouch = useCallback(() => {
-    containerTouchStartRef.current = null;
-  }, []);
-
   if (jobs.length === 0) {
     return createPortal(
       <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col">
@@ -429,10 +393,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           ref={scrollRef}
           className="h-full w-full overflow-y-auto overscroll-contain pt-16"
           style={{ WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', contain: 'layout style' }}
-          onTouchStartCapture={handleContainerTouchStart}
-          onTouchMoveCapture={handleContainerTouchMove}
-          onTouchEndCapture={clearContainerTouch}
-          onTouchCancelCapture={clearContainerTouch}
         >
           {jobs.map((job, idx) => (
             <div
@@ -457,26 +417,18 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
           <div
             aria-hidden="true"
-            className="w-full pointer-events-none"
-            style={{ height: `calc(${END_SCROLL_BUFFER}px + env(safe-area-inset-bottom, 2rem))` }}
-          />
-        </div>
-
-        <AnimatePresence>
-          {showEndBounce && (
+            className="w-full flex items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]"
+            style={{ minHeight: END_STATE_HEIGHT }}
+          >
             <motion.div
-              className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none px-6"
-              initial={{ opacity: 0, scale: 0.94, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={showEndBounce ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0.92, scale: 0.98, y: 0 }}
               transition={{ type: 'spring', stiffness: 340, damping: 32 }}
+              className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-white/10 px-8 py-6 backdrop-blur-sm"
             >
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20">
-                <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
-              </div>
+              <p className="text-center text-[15px] font-medium text-white sm:text-base">Inga fler jobb just nu</p>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        </div>
 
         {currentJob && showDetail && (
           <div className="fixed inset-0 z-[10000] pointer-events-none">
