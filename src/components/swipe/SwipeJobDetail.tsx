@@ -108,18 +108,34 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     }
   }, [dragY]);
 
+  const [dismissing, setDismissing] = useState(false);
+
   const handleTouchEnd = useCallback(() => {
     if (!isDraggingSheet.current) return;
     isDraggingSheet.current = false;
     const currentY = dragY.get();
     if (currentY > DISMISS_THRESHOLD) {
-      // Dismiss
-      void sheetControls.start({ y: '100%', transition: { type: 'spring', damping: 30, stiffness: 300 } });
-      setTimeout(onClose, 200);
+      // Smooth dismiss with scale + fade
+      setDismissing(true);
+      void sheetControls.start({
+        y: '110%',
+        scale: 0.92,
+        opacity: 0.3,
+        transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+      });
+      setTimeout(() => {
+        onClose();
+        setDismissing(false);
+      }, 280);
     } else {
-      // Snap back
+      // Snap back with a satisfying bounce
       dragY.set(0);
-      void sheetControls.start({ y: 0, transition: { type: 'spring', damping: 30, stiffness: 400 } });
+      void sheetControls.start({
+        y: 0,
+        scale: 1,
+        opacity: 1,
+        transition: { type: 'spring', damping: 24, stiffness: 400 },
+      });
     }
   }, [dragY, onClose, sheetControls]);
 
