@@ -186,6 +186,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       if (!container || jobs.length === 0) return;
 
       const scrollTop = container.scrollTop;
+      const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
       let nearestIdx = 0;
       let nearestDist = Infinity;
 
@@ -200,10 +201,18 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         }
       });
 
+      const hasScrolledIntoEndState = currentIndex === jobs.length - 1 && scrollTop >= maxScrollTop - END_BOUNCE_TRIGGER_OFFSET;
+
+      if (hasScrolledIntoEndState) {
+        triggerEndBounce();
+        scrollEndTimerRef.current = null;
+        return;
+      }
+
       scrollToSlide(nearestIdx);
       scrollEndTimerRef.current = null;
     }, SCROLL_SNAP_DELAY);
-  }, [getSlideScrollTop, handleScroll, jobs.length, scrollToSlide, showEndBounce]);
+  }, [currentIndex, getSlideScrollTop, handleScroll, jobs.length, scrollToSlide, showEndBounce, triggerEndBounce]);
 
   useEffect(() => {
     const container = scrollRef.current;
