@@ -174,7 +174,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     if (open) {
       openedAtRef.current = Date.now();
       dragY.set(0);
-      void sheetControls.start({ y: 0 });
+      void sheetControls.start({ y: 0, scale: 1, opacity: 1, transition: { type: 'spring', damping: 32, stiffness: 350, mass: 0.8 } });
     }
   }, [open, job.id, dragY, sheetControls]);
 
