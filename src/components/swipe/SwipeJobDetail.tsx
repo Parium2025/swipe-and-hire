@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, type MouseEvent, type PointerEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { recordJobView } from '@/lib/recordJobView';
 import { useAuth } from '@/hooks/useAuth';
@@ -57,6 +57,21 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   const [detail, setDetail] = useState<FullJobData | null>(null);
   const [loading, setLoading] = useState(false);
   const viewRecorded = useRef<string | null>(null);
+  const openedAtRef = useRef(0);
+
+  const handleBackdropDismiss = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
+    if (Date.now() - openedAtRef.current < 420) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    onClose();
+  }, [onClose]);
+
+  const stopSheetPropagation = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
+    event.stopPropagation();
+  }, []);
 
   // Track view when swipe detail is opened
   useEffect(() => {
@@ -65,6 +80,12 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
       recordJobView(job.id, user.id);
     }
   }, [open, job.id, user?.id]);
+
+  useEffect(() => {
+    if (open) {
+      openedAtRef.current = Date.now();
+    }
+  }, [open, job.id]);
 
   useEffect(() => {
     if (!open) {
@@ -118,7 +139,8 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onPointerDown={handleBackdropDismiss}
+            onClick={handleBackdropDismiss}
           />
 
           {/* Sheet */}
@@ -128,6 +150,8 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+            onPointerDown={stopSheetPropagation}
+            onClick={stopSheetPropagation}
           >
             {/* Drag handle */}
             <div className="flex justify-center pt-3 pb-2 shrink-0">
