@@ -171,9 +171,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
       dragY.set(0);
       void sheetControls.start({
         y: 0,
-        scale: 1,
-        opacity: 1,
-        transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+        transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
       });
     }
   }, [open, job.id, dragY, sheetControls]);
