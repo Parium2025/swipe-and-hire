@@ -128,18 +128,15 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     isDraggingSheet.current = false;
     const currentY = dragY.get();
     if (currentY > DISMISS_THRESHOLD) {
-      // Smooth dismiss with scale + fade
       setDismissing(true);
       void sheetControls.start({
-        y: '110%',
-        scale: 0.92,
-        opacity: 0.3,
-        transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+        y: '100%',
+        transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
       });
       setTimeout(() => {
         onClose();
         setDismissing(false);
-      }, 280);
+      }, 220);
     } else {
       // Snap back with a satisfying bounce
       dragY.set(0);
