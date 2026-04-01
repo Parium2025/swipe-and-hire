@@ -52,7 +52,7 @@ interface SwipeJobDetailProps {
   hasApplied: boolean;
 }
 
-const DISMISS_THRESHOLD = 120;
+const DISMISS_THRESHOLD = 100;
 
 export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: SwipeJobDetailProps) {
   const { user } = useAuth();
@@ -67,21 +67,19 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   const dragStartY = useRef(0);
   const isDraggingSheet = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const backdropOpacity = useTransform(dragY, [0, 400], [1, 0]);
+  const backdropOpacity = useTransform(dragY, [0, 300], [1, 0]);
 
   // Animated close helper — used by X button and backdrop
   const animatedClose = useCallback(() => {
     setDismissing(true);
     void sheetControls.start({
-      y: '110%',
-      scale: 0.92,
-      opacity: 0.3,
-      transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+      y: '100%',
+      transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
     });
     setTimeout(() => {
       onClose();
       setDismissing(false);
-    }, 280);
+    }, 220);
   }, [onClose, sheetControls]);
 
   const handleBackdropDismiss = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
