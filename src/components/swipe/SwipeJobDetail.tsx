@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback, type MouseEvent, type PointerEvent } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef, useCallback, type MouseEvent, type PointerEvent, type TouchEvent } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, useAnimation } from 'framer-motion';
 import { recordJobView } from '@/lib/recordJobView';
 import { useAuth } from '@/hooks/useAuth';
 import { X } from 'lucide-react';
@@ -52,6 +52,8 @@ interface SwipeJobDetailProps {
   hasApplied: boolean;
 }
 
+const DISMISS_THRESHOLD = 120;
+
 export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: SwipeJobDetailProps) {
   const { user } = useAuth();
   const [detail, setDetail] = useState<FullJobData | null>(null);
@@ -59,19 +61,75 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   const viewRecorded = useRef<string | null>(null);
   const openedAtRef = useRef(0);
 
+  // Drag-to-dismiss state
+  const dragY = useMotionValue(0);
+  const sheetControls = useAnimation();
+  const dragStartY = useRef(0);
+  const isDraggingSheet = useRef(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const backdropOpacity = useTransform(dragY, [0, 400], [1, 0]);
+
   const handleBackdropDismiss = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
     if (Date.now() - openedAtRef.current < 420) {
       event.preventDefault();
       event.stopPropagation();
       return;
     }
-
     onClose();
   }, [onClose]);
 
   const stopSheetPropagation = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
     event.stopPropagation();
   }, []);
+
+  // Handle drag-to-dismiss via touch on the handle area + when scrolled to top
+  const handleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
+    const scrollTop = scrollRef.current?.scrollTop ?? 0;
+    // Only allow drag-dismiss when content is scrolled to top
+    if (scrollTop <= 0) {
+      isDraggingSheet.current = true;
+      dragStartY.current = e.touches[0].clientY;
+      dragY.set(0);
+    }
+  }, [dragY]);
+
+  const handleTouchMove = useCallback((e: TouchEvent<HTMLDivElement>) => {
+    if (!isDraggingSheet.current) return;
+    const dy = e.touches[0].clientY - dragStartY.current;
+    if (dy > 0) {
+      // Dragging down — apply with resistance
+      dragY.set(dy * 0.8);
+      // Prevent scroll while dragging sheet
+      e.preventDefault();
+    } else {
+      // Dragging up — cancel sheet drag, let scroll take over
+      isDraggingSheet.current = false;
+      dragY.set(0);
+    }
+  }, [dragY]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isDraggingSheet.current) return;
+    isDraggingSheet.current = false;
+    const currentY = dragY.get();
+    if (currentY > DISMISS_THRESHOLD) {
+      // Dismiss
+      void sheetControls.start({ y: '100%', transition: { type: 'spring', damping: 30, stiffness: 300 } });
+      setTimeout(onClose, 200);
+    } else {
+      // Snap back
+      dragY.set(0);
+      void sheetControls.start({ y: 0, transition: { type: 'spring', damping: 30, stiffness: 400 } });
+    }
+  }, [dragY, onClose, sheetControls]);
+
+  // Handle-specific drag (always draggable regardless of scroll)
+  const handleHandleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
+    isDraggingSheet.current = true;
+    dragStartY.current = e.touches[0].clientY;
+    dragY.set(0);
+    e.stopPropagation();
+  }, [dragY]);
 
   // Track view when swipe detail is opened
   useEffect(() => {
@@ -84,8 +142,10 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   useEffect(() => {
     if (open) {
       openedAtRef.current = Date.now();
+      dragY.set(0);
+      void sheetControls.start({ y: 0 });
     }
-  }, [open, job.id]);
+  }, [open, job.id, dragY, sheetControls]);
 
   useEffect(() => {
     if (!open) {
@@ -139,23 +199,34 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            style={{ opacity: backdropOpacity }}
             onPointerDown={handleBackdropDismiss}
             onClick={handleBackdropDismiss}
           />
 
           {/* Sheet */}
           <motion.div
-            className="absolute inset-x-0 bottom-0 z-40 max-h-[88vh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col"
+            className="absolute inset-x-0 bottom-0 z-40 max-h-[88vh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
             initial={{ y: '100%' }}
-            animate={{ y: 0 }}
+            animate={sheetControls}
             exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+            transition={{ type: 'spring', damping: 32, stiffness: 350, mass: 0.8 }}
+            style={{ y: dragY }}
             onPointerDown={stopSheetPropagation}
             onClick={stopSheetPropagation}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
           >
-            {/* Drag handle */}
-            <div className="flex justify-center pt-3 pb-2 shrink-0">
-              <div className="w-10 h-1 rounded-full bg-white/20" />
+            {/* Drag handle — always draggable */}
+            <div
+              className="flex justify-center pt-3 pb-2 shrink-0 cursor-grab active:cursor-grabbing"
+              onTouchStart={handleHandleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div className="w-10 h-1.5 rounded-full bg-white/30" />
             </div>
 
             {/* Close */}
@@ -181,8 +252,13 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
               </div>
             </div>
 
-            {/* Content — mirrors desktop JobView sections */}
-            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-3" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {/* Content */}
+            <div
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto px-4 pb-6 space-y-3"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+              onTouchStart={handleTouchStart}
+            >
               {loading ? (
                 <div className="space-y-3">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 space-y-3">
@@ -207,7 +283,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                     </div>
                   )}
 
-                  {/* 2. Detaljer om tjänsten — kompakt faktaruta */}
+                  {/* 2. Detaljer om tjänsten */}
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
                     <h3 className="text-section-title mb-3">Detaljer om tjänsten</h3>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
