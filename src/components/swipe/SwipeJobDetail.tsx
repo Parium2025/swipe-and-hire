@@ -231,7 +231,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            style={{ opacity: backdropOpacity }}
+            style={isAnimatingIn ? undefined : { opacity: backdropOpacity }}
             onPointerDown={handleBackdropDismiss}
             onClick={handleBackdropDismiss}
           />
