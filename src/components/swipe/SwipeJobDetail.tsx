@@ -68,6 +68,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   const isDraggingSheet = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const backdropOpacity = useTransform(dragY, [0, 300], [1, 0]);
+  const [isAnimatingIn, setIsAnimatingIn] = useState(true);
 
   // Animated close helper — used by X button and backdrop
   const animatedClose = useCallback(() => {
