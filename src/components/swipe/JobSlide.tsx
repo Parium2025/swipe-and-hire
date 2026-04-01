@@ -41,6 +41,7 @@ export const JobSlide = memo(function JobSlide({
   const cardRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
   const cardScale = useTransform(x, [-200, 0, 200], [0.97, 1, 0.97]);
   const swipedRef = useRef(false);
+  const lastTapTimestampRef = useRef(0);
 
   const imageUrl = resolveImageUrl(job.job_image_url);
 
@@ -73,6 +74,18 @@ export const JobSlide = memo(function JobSlide({
     animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
   }, [x, onSwipeRight, onSwipeLeft]);
 
+  const handleCardTap = useCallback(() => {
+    const now = Date.now();
+
+    if (now - lastTapTimestampRef.current <= 280) {
+      lastTapTimestampRef.current = 0;
+      onTap();
+      return;
+    }
+
+    lastTapTimestampRef.current = now;
+  }, [onTap]);
+
   return (
     <div className="min-h-[calc(100dvh-3rem)] w-full flex flex-col">
       {/* Card area with swipe */}
@@ -88,7 +101,7 @@ export const JobSlide = memo(function JobSlide({
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.7}
         onDragEnd={handleDragEnd}
-        onTap={onTap}
+        onTap={handleCardTap}
       >
         {/* Background image */}
         <div className="absolute inset-0">
@@ -167,7 +180,7 @@ export const JobSlide = memo(function JobSlide({
 
           {/* Hint */}
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-white/40 text-xs">← Skippa · Tryck för mer · Gilla →</span>
+            <span className="text-white/40 text-xs">← Skippa · Dubbeltryck för mer · Gilla →</span>
           </div>
         </div>
       </motion.div>
