@@ -35,6 +35,7 @@ interface SwipeFullscreenProps {
 export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose, filterState }: SwipeFullscreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const endSlideRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
   const [showApply, setShowApply] = useState(false);
@@ -49,9 +50,27 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
   const currentJob = jobs[currentIndex];
 
+  const triggerEndBounce = useCallback((scrollToEnd = false) => {
+    if (jobs.length === 0 || showEndBounce) return;
+
+    setShowEndBounce(true);
+
+    if (scrollToEnd) {
+      endSlideRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    const timeoutId = setTimeout(() => {
+      slideRefs.current[jobs.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => setShowEndBounce(false), 280);
+    }, 950);
+
+    return () => clearTimeout(timeoutId);
+  }, [jobs.length, showEndBounce]);
+
   // Reset index when jobs change (filter applied)
   useEffect(() => {
     setCurrentIndex(0);
+    setShowEndBounce(false);
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: 0 });
     }
@@ -60,7 +79,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   // Track current slide via scroll position
   const handleScroll = useCallback(() => {
     const container = scrollRef.current;
-    if (!container) return;
+    if (!container || showEndBounce) return;
     const containerTop = container.getBoundingClientRect().top;
     let bestIdx = 0;
     let bestDist = Infinity;
@@ -73,21 +92,24 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       }
     });
     setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
-  }, []);
+  }, [showEndBounce]);
 
-  // Manual snap on scroll end — bounce back from end slide
+  // Manual snap on scroll end — show end card immediately and bounce back
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const endBounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const handleScrollWithSnap = useCallback(() => {
     handleScroll();
+    if (showEndBounce) return;
+
     if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
     scrollEndTimerRef.current = setTimeout(() => {
       const container = scrollRef.current;
       if (!container) return;
+
       const containerTop = container.getBoundingClientRect().top;
+      const containerBottom = containerTop + container.clientHeight;
       let bestIdx = 0;
       let bestDist = Infinity;
+
       slideRefs.current.forEach((el, idx) => {
         if (!el) return;
         const dist = Math.abs(el.getBoundingClientRect().top - containerTop);
@@ -97,29 +119,20 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         }
       });
 
-      // If scrolled past the last real slide into the end-bounce zone
       if (bestIdx === jobs.length - 1) {
         const lastSlide = slideRefs.current[bestIdx];
         if (lastSlide) {
           const lastBottom = lastSlide.getBoundingClientRect().bottom;
-          const containerBottom = container.getBoundingClientRect().bottom;
-          // If the last slide is mostly scrolled past (user scrolled into end zone)
-          if (lastBottom < containerTop + container.clientHeight * 0.4) {
-            // Show end bounce then snap back
-            setShowEndBounce(true);
-            if (endBounceTimerRef.current) clearTimeout(endBounceTimerRef.current);
-            endBounceTimerRef.current = setTimeout(() => {
-              setShowEndBounce(false);
-              slideRefs.current[bestIdx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 1200);
+          if (lastBottom < containerBottom - 24) {
+            triggerEndBounce(false);
             return;
           }
         }
       }
 
       slideRefs.current[bestIdx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 150);
-  }, [handleScroll, jobs.length]);
+    }, 90);
+  }, [handleScroll, jobs.length, showEndBounce, triggerEndBounce]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -152,27 +165,17 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     }
   }, [currentIndex, jobs.length]);
 
-  // Bounce-back when swiping on last job
-  const triggerEndBounce = useCallback(() => {
-    setShowEndBounce(true);
-    setTimeout(() => {
-      setShowEndBounce(false);
-      // Scroll back to current (last) card
-      slideRefs.current[currentIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 1200);
-  }, [currentIndex]);
-
-  const handleSwipeRight = useCallback((job: SwipeJob) => {
+  const handleSwipeRight = useCallback(() => {
     setShowApply(true);
   }, []);
 
   const handleSwipeLeft = useCallback(() => {
     if (currentIndex >= jobs.length - 1) {
-      triggerEndBounce();
+      triggerEndBounce(true);
     } else {
       scrollToNext();
     }
-  }, [scrollToNext, currentIndex, jobs.length, triggerEndBounce]);
+  }, [currentIndex, jobs.length, scrollToNext, triggerEndBounce]);
 
   const handleTap = useCallback(() => {
     setShowDetail(true);
@@ -187,9 +190,16 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     if (currentJob) {
       setLocalAppliedIds(prev => new Set(prev).add(currentJob.id));
     }
+
     setShowApply(false);
+
+    if (currentIndex >= jobs.length - 1) {
+      setTimeout(() => triggerEndBounce(true), 180);
+      return;
+    }
+
     setTimeout(scrollToNext, 300);
-  }, [currentJob, scrollToNext]);
+  }, [currentIndex, currentJob, jobs.length, scrollToNext, triggerEndBounce]);
 
   const handleCloseApply = useCallback(() => {
     setShowApply(false);
@@ -336,28 +346,32 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
                 applied={isApplied(job.id)}
                 isVisible={Math.abs(idx - currentIndex) <= 1}
                 isLast={idx === jobs.length - 1}
-                onSwipeRight={() => handleSwipeRight(job)}
+                onSwipeRight={handleSwipeRight}
                 onSwipeLeft={handleSwipeLeft}
                 onTap={handleTap}
               />
             </div>
           ))}
-          {/* End bounce zone — scrollable area past last job */}
-          <div className="w-full flex items-center justify-center" style={{ minHeight: '70vh' }}>
-            <AnimatePresence>
-              {showEndBounce && (
-                <motion.div
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20"
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0 }}
-                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                >
-                  <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+
+          <div
+            ref={endSlideRef}
+            className="w-full flex justify-center pt-10 pb-6"
+            style={{ minHeight: '56vh' }}
+          >
+            <motion.div
+              className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20"
+              initial={false}
+              animate={{
+                opacity: 1,
+                scale: showEndBounce ? 1 : 0.985,
+                y: showEndBounce ? 0 : 8,
+              }}
+              transition={{ type: 'spring', damping: 22, stiffness: 260 }}
+            >
+              <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
+            </motion.div>
           </div>
+
           <div className="h-[env(safe-area-inset-bottom,2rem)]" />
         </div>
 
