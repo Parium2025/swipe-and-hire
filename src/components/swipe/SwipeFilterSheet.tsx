@@ -60,7 +60,17 @@ export function SwipeFilterSheet({
   const backdropOpacity = useTransform(dragY, [0, 400], [1, 0]);
   const [dismissing, setDismissing] = useState(false);
 
-  const animatedClose = useCallback(() => {
+  // Start animation on open
+  useEffect(() => {
+    if (open) {
+      dragY.set(0);
+      void sheetControls.start({
+        y: 0, scale: 1, opacity: 1,
+        transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+      });
+    }
+  }, [open, dragY, sheetControls]);
+
     setDismissing(true);
     void sheetControls.start({
       y: '110%', scale: 0.92, opacity: 0.3,
