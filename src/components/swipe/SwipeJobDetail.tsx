@@ -262,7 +262,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
 
             {/* Close */}
             <button
-              onClick={onClose}
+              onClick={animatedClose}
               className="absolute top-3 right-4 z-10 flex h-7 w-7 !min-h-0 !min-w-0 items-center justify-center overflow-hidden rounded-full bg-white/10 transition-all active:scale-90 md:hover:bg-white/20"
               aria-label="Stäng"
             >
