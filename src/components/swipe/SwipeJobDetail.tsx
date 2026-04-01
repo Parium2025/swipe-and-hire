@@ -67,28 +67,46 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   }, [open, job.id, user?.id]);
 
   useEffect(() => {
-    if (open && !detail) {
-      setLoading(true);
-      supabase
-        .from('job_postings')
-        .select(`
-          description, requirements, pitch, benefits, employment_type,
-          work_schedule, work_start_time, work_end_time,
-          work_location_type, remote_work_possible,
-          salary_min, salary_max, salary_type, salary_transparency,
-          positions_count, occupation,
-          workplace_name, workplace_city, workplace_county,
-          workplace_municipality, workplace_address, workplace_postal_code,
-          contact_email
-        `)
-        .eq('id', job.id)
-        .single()
-        .then(({ data }) => {
-          if (data) setDetail(data);
-          setLoading(false);
-        });
+    if (!open) {
+      setDetail(null);
+      setLoading(false);
+      return;
     }
-  }, [open, job.id, detail]);
+
+    let cancelled = false;
+
+    setDetail(null);
+    setLoading(true);
+
+    supabase
+      .from('job_postings')
+      .select(`
+        description, requirements, pitch, benefits, employment_type,
+        work_schedule, work_start_time, work_end_time,
+        work_location_type, remote_work_possible,
+        salary_min, salary_max, salary_type, salary_transparency,
+        positions_count, occupation,
+        workplace_name, workplace_city, workplace_county,
+        workplace_municipality, workplace_address, workplace_postal_code,
+        contact_email
+      `)
+      .eq('id', job.id)
+      .single()
+      .then(({ data }) => {
+        if (cancelled) return;
+        setDetail(data ?? null);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setDetail(null);
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, job.id]);
 
   return (
     <AnimatePresence>

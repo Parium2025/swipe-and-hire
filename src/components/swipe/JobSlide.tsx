@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef } from 'react';
+import { memo, useCallback, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import { Building2, MapPin, CheckCircle, Briefcase } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
@@ -25,6 +25,9 @@ interface JobSlideProps {
 const SWIPE_THRESHOLD = 100;
 const VELOCITY_THRESHOLD = 400;
 const EXIT_X = typeof window !== 'undefined' ? window.innerWidth * 1.2 : 500;
+const DOUBLE_TAP_DELAY = 280;
+const TAP_MAX_DURATION = 250;
+const TAP_MOVE_THRESHOLD = 18;
 
 export const JobSlide = memo(function JobSlide({
   job,
@@ -42,10 +45,14 @@ export const JobSlide = memo(function JobSlide({
   const cardScale = useTransform(x, [-200, 0, 200], [0.97, 1, 0.97]);
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
+  const tapStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const imageUrl = resolveImageUrl(job.job_image_url);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
+    tapStartRef.current = null;
+    lastTapTimestampRef.current = 0;
+
     if (swipedRef.current) return;
     const { offset, velocity } = info;
 
@@ -74,10 +81,35 @@ export const JobSlide = memo(function JobSlide({
     animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
   }, [x, onSwipeRight, onSwipeLeft]);
 
-  const handleCardTap = useCallback(() => {
+  const handlePointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    tapStartRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      time: Date.now(),
+    };
+  }, []);
+
+  const handlePointerCancel = useCallback(() => {
+    tapStartRef.current = null;
+  }, []);
+
+  const handlePointerUp = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    const tapStart = tapStartRef.current;
+    tapStartRef.current = null;
+
+    if (!tapStart || swipedRef.current) return;
+
+    const movedDistance = Math.hypot(event.clientX - tapStart.x, event.clientY - tapStart.y);
+    const pressDuration = Date.now() - tapStart.time;
+
+    if (movedDistance > TAP_MOVE_THRESHOLD || pressDuration > TAP_MAX_DURATION) {
+      lastTapTimestampRef.current = 0;
+      return;
+    }
+
     const now = Date.now();
 
-    if (now - lastTapTimestampRef.current <= 280) {
+    if (now - lastTapTimestampRef.current <= DOUBLE_TAP_DELAY) {
       lastTapTimestampRef.current = 0;
       onTap();
       return;
@@ -101,7 +133,9 @@ export const JobSlide = memo(function JobSlide({
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.7}
         onDragEnd={handleDragEnd}
-        onTap={handleCardTap}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
       >
         {/* Background image */}
         <div className="absolute inset-0">
