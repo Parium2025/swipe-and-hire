@@ -237,10 +237,10 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
           {/* Sheet */}
           <motion.div
             className="absolute inset-x-0 bottom-0 z-40 max-h-[88vh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
-            initial={{ y: '100%', scale: 0.95, opacity: 0 }}
+            initial={{ y: '100%' }}
             animate={sheetControls}
-            exit={{ y: '110%', scale: 0.92, opacity: 0, transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 } }}
-            transition={{ type: 'spring', damping: 32, stiffness: 350, mass: 0.8 }}
+            exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
+            transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
             style={{ y: dragY }}
             onPointerDown={stopSheetPropagation}
             onClick={stopSheetPropagation}

@@ -233,12 +233,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             {filterState && (
               <button
                 onClick={() => setShowFilter(true)}
-                className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 transition-colors active:scale-90 touch-manipulation"
+                className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/15 [@media(hover:hover)]:hover:bg-white/25 transition-colors active:scale-[0.92] touch-manipulation"
                 aria-label="Filter"
               >
-                <SlidersHorizontal className="h-4 w-4 text-white" />
+                <SlidersHorizontal className="h-5 w-5 text-white" />
                 {filterState.activeFilterCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-secondary text-white text-[10px] font-bold leading-none">
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-secondary text-white text-[11px] font-bold leading-none">
                     {filterState.activeFilterCount}
                   </span>
                 )}
