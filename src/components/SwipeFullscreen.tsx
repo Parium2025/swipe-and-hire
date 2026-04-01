@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, SlidersHorizontal } from 'lucide-react';
+import { X, SlidersHorizontal } from 'lucide-react';
 import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
 import { SwipeApplySheet } from '@/components/swipe/SwipeApplySheet';
@@ -75,8 +75,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
   }, []);
 
-  // Manual snap on scroll end
+  // Manual snap on scroll end — bounce back from end slide
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const endBounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const handleScrollWithSnap = useCallback(() => {
     handleScroll();
     if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
@@ -94,9 +96,30 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           bestIdx = idx;
         }
       });
+
+      // If scrolled past the last real slide into the end-bounce zone
+      if (bestIdx === jobs.length - 1) {
+        const lastSlide = slideRefs.current[bestIdx];
+        if (lastSlide) {
+          const lastBottom = lastSlide.getBoundingClientRect().bottom;
+          const containerBottom = container.getBoundingClientRect().bottom;
+          // If the last slide is mostly scrolled past (user scrolled into end zone)
+          if (lastBottom < containerTop + container.clientHeight * 0.4) {
+            // Show end bounce then snap back
+            setShowEndBounce(true);
+            if (endBounceTimerRef.current) clearTimeout(endBounceTimerRef.current);
+            endBounceTimerRef.current = setTimeout(() => {
+              setShowEndBounce(false);
+              slideRefs.current[bestIdx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 1200);
+            return;
+          }
+        }
+      }
+
       slideRefs.current[bestIdx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 150);
-  }, [handleScroll]);
+  }, [handleScroll, jobs.length]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -172,39 +195,43 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setShowApply(false);
   }, []);
 
-  // Empty state
+  // Empty state — no jobs at all
   if (jobs.length === 0) {
     return createPortal(
-      <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col items-center justify-center p-6">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="text-center space-y-6"
-        >
-          <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-10 h-10 text-white" />
+      <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
+          <div className="py-3">
+            <span className="text-xs text-white font-medium tabular-nums">0 / 0</span>
           </div>
-          <h2 className="text-2xl font-bold text-white">Inga jobb att visa!</h2>
-          <p className="text-white/60 max-w-xs">Försök ändra dina filter för att hitta fler jobb.</p>
-          <div className="flex gap-3 justify-center">
-            {filterState && (
-              <button
-                onClick={() => setShowFilter(true)}
-                className="h-12 px-6 bg-secondary text-white rounded-full font-medium active:scale-95 transition-transform min-h-[44px]"
-              >
-                Ändra filter
-              </button>
-            )}
+          {filterState && (
             <button
-              onClick={onClose}
-              className="h-12 px-8 bg-white/10 border border-white/20 rounded-full text-white font-medium active:scale-95 transition-transform min-h-[44px]"
+              onClick={() => setShowFilter(true)}
+              className="flex items-center gap-2 h-12 px-6 rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-colors touch-manipulation"
             >
-              Tillbaka
+              <SlidersHorizontal className="h-4.5 w-4.5 text-white" />
+              <span className="text-[15px] text-white font-medium">Visa filter</span>
             </button>
-          </div>
-        </motion.div>
+          )}
+          <button
+            onClick={onClose}
+            className="flex h-11 w-11 items-center justify-center touch-manipulation"
+            aria-label="Stäng"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors">
+              <X className="h-5 w-5 text-white" />
+            </div>
+          </button>
+        </div>
 
-        {/* Filter sheet in empty state */}
+        {/* Centered message */}
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20">
+            <p className="text-white text-base font-medium text-center">Inga jobb hittades</p>
+          </div>
+        </div>
+
+        {/* Filter sheet */}
         {filterState && (
           <SwipeFilterSheet
             open={showFilter}
@@ -315,31 +342,24 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
               />
             </div>
           ))}
+          {/* End bounce zone — scrollable area past last job */}
+          <div className="w-full flex items-center justify-center" style={{ minHeight: '70vh' }}>
+            <AnimatePresence>
+              {showEndBounce && (
+                <motion.div
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                >
+                  <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           <div className="h-[env(safe-area-inset-bottom,2rem)]" />
         </div>
-
-        {/* End bounce overlay — shows briefly then snaps back */}
-        <AnimatePresence>
-          {showEndBounce && (
-            <motion.div
-              className="fixed inset-0 z-[9998] flex items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <motion.div
-                className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              >
-                <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Job detail sheet */}
         {currentJob && showDetail && (
