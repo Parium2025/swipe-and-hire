@@ -223,27 +223,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         transition={{ duration: 0.2 }}
         className="fixed inset-0 z-[9999] bg-parium-gradient"
       >
-        {/* Header */}
+        {/* Header — counter + close */}
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
-          <div className="flex items-center gap-3 py-3">
+          <div className="py-3">
             <span className="text-xs text-white font-medium tabular-nums">
               {currentIndex + 1} / {jobs.length}
             </span>
-            {/* Filter button */}
-            {filterState && (
-              <button
-                onClick={() => setShowFilter(true)}
-                className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/15 [@media(hover:hover)]:hover:bg-white/25 transition-colors active:scale-[0.92] touch-manipulation"
-                aria-label="Filter"
-              >
-                <SlidersHorizontal className="h-5 w-5 text-white" />
-                {filterState.activeFilterCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-secondary text-white text-[11px] font-bold leading-none">
-                    {filterState.activeFilterCount}
-                  </span>
-                )}
-              </button>
-            )}
           </div>
           <button
             onClick={onClose}
@@ -255,6 +240,25 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             </div>
           </button>
         </div>
+
+        {/* Sticky filter button — always visible, positioned below header */}
+        {filterState && (
+          <div className="absolute top-12 left-0 right-0 z-20 flex justify-center pt-[env(safe-area-inset-top,0px)]">
+            <button
+              onClick={() => setShowFilter(true)}
+              className="relative flex items-center gap-2 h-11 px-5 rounded-full bg-white/12 backdrop-blur-md border border-white/15 [@media(hover:hover)]:hover:bg-white/20 transition-all active:scale-[0.95] touch-manipulation"
+              aria-label="Filter"
+            >
+              <SlidersHorizontal className="h-4 w-4 text-white" />
+              <span className="text-sm text-white font-medium">Filter</span>
+              {filterState.activeFilterCount > 0 && (
+                <span className="flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-secondary text-white text-[11px] font-bold leading-none">
+                  {filterState.activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Dot indicator */}
         {jobs.length <= 30 && (
