@@ -50,12 +50,35 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
   }, []);
 
+  // Manual snap on scroll end (since we removed CSS snap to avoid touch conflicts)
+  const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleScrollWithSnap = useCallback(() => {
+    handleScroll();
+    if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
+    scrollEndTimerRef.current = setTimeout(() => {
+      const container = scrollRef.current;
+      if (!container) return;
+      const containerTop = container.getBoundingClientRect().top;
+      let bestIdx = 0;
+      let bestDist = Infinity;
+      slideRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const dist = Math.abs(el.getBoundingClientRect().top - containerTop);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestIdx = idx;
+        }
+      });
+      slideRefs.current[bestIdx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+  }, [handleScroll]);
+
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+    container.addEventListener('scroll', handleScrollWithSnap, { passive: true });
+    return () => container.removeEventListener('scroll', handleScrollWithSnap);
+  }, [handleScrollWithSnap]);
 
   // Lock body scroll
   useEffect(() => {
@@ -181,7 +204,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         {/* TikTok scroll container */}
         <div
           ref={scrollRef}
-          className="h-full w-full overflow-y-auto overscroll-contain snap-y snap-mandatory pt-12"
+          className="h-full w-full overflow-y-auto overscroll-contain pt-12"
           style={{ WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', contain: 'layout style' }}
         >
           {jobs.map((job, idx) => (
