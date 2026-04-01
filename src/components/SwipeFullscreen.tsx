@@ -55,16 +55,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
     setShowEndBounce(true);
 
-    if (scrollToEnd) {
-      endSlideRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    const timeoutId = setTimeout(() => {
+    // Scroll back to the last real job card after a short pause
+    setTimeout(() => {
       slideRefs.current[jobs.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setTimeout(() => setShowEndBounce(false), 280);
-    }, 950);
-
-    return () => clearTimeout(timeoutId);
+      setTimeout(() => setShowEndBounce(false), 350);
+    }, 800);
   }, [jobs.length, showEndBounce]);
 
   // Reset index when jobs change (filter applied)
