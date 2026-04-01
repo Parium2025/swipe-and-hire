@@ -53,6 +53,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   const [localAppliedIds, setLocalAppliedIds] = useState<Set<string>>(new Set());
   const [showEndBounce, setShowEndBounce] = useState(false);
   const [endStateVisible, setEndStateVisible] = useState(false);
+  const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
 
   const isApplied = useCallback(
     (jobId: string) => appliedJobIds.has(jobId) || localAppliedIds.has(jobId),
@@ -60,6 +61,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   );
 
   const currentJob = jobs[currentIndex];
+  const isEndStateActive = endStateVisible || showEndBounce;
+  const displayIndex = isEndStateActive ? jobs.length + 1 : Math.min(currentIndex + 1, jobs.length);
 
   const clearTimers = useCallback(() => {
     if (scrollEndTimerRef.current) {
@@ -107,6 +110,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
     endBounceActiveRef.current = true;
     clearTimers();
+    setIsReturningFromEnd(false);
     setShowEndBounce(true);
     setEndStateVisible(true);
     setCurrentIndex(jobs.length - 1);
@@ -124,11 +128,14 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         });
       }
 
+      setShowEndBounce(false);
+      setEndStateVisible(false);
+      setIsReturningFromEnd(true);
+
       bounceReturnTimerRef.current = null;
 
       bounceHideTimerRef.current = setTimeout(() => {
-        setShowEndBounce(false);
-        setEndStateVisible(false);
+        setIsReturningFromEnd(false);
         endBounceActiveRef.current = false;
         bounceHideTimerRef.current = null;
       }, END_BOUNCE_HIDE_DELAY);
@@ -139,6 +146,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setCurrentIndex(0);
     setShowEndBounce(false);
     setEndStateVisible(false);
+    setIsReturningFromEnd(false);
     clearTimers();
     endBounceActiveRef.current = false;
     slideRefs.current = slideRefs.current.slice(0, jobs.length);
@@ -361,7 +369,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
           <div className="py-3">
             <span className="text-xs text-white font-medium tabular-nums">
-              {currentIndex + 1} / {jobs.length}
+              {displayIndex} / {jobs.length}
             </span>
           </div>
           <button
@@ -397,16 +405,34 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
         {jobs.length <= 30 && (
           <div className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1">
-            {jobs.map((_, idx) => (
-              <div
-                key={idx}
-                className={`rounded-full transition-all duration-300 ${
-                  idx === currentIndex ? 'w-2 h-2 bg-white' : 'w-1.5 h-1.5 bg-white/30'
-                }`}
-              />
-            ))}
+            {Array.from({ length: jobs.length + (isEndStateActive ? 1 : 0) }).map((_, idx) => {
+              const isEndDot = idx === jobs.length;
+              const isActive = isEndDot ? isEndStateActive : idx === currentIndex && !isEndStateActive;
+
+              return (
+                <div
+                  key={idx}
+                  className={`rounded-full transition-all duration-300 ${
+                    isActive ? 'w-2 h-2 bg-white' : 'w-1.5 h-1.5 bg-white/30'
+                  }`}
+                />
+              );
+            })}
           </div>
         )}
+
+        <AnimatePresence>
+          {isReturningFromEnd && (
+            <motion.div
+              aria-hidden="true"
+              initial={{ opacity: 0.2 }}
+              animate={{ opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+              className="pointer-events-none absolute inset-x-0 top-16 bottom-0 z-10 bg-parium-gradient"
+            />
+          )}
+        </AnimatePresence>
 
         <div
           ref={scrollRef}
@@ -422,15 +448,25 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
               data-index={idx}
               className="w-full"
             >
-              <JobSlide
-                job={job}
-                applied={isApplied(job.id)}
-                isVisible={Math.abs(idx - currentIndex) <= 1}
-                isLast={idx === jobs.length - 1}
-                onSwipeRight={handleSwipeRight}
-                onSwipeLeft={handleSwipeLeft}
-                onTap={handleTap}
-              />
+              <motion.div
+                initial={false}
+                animate={
+                  idx === jobs.length - 1 && isReturningFromEnd
+                    ? { opacity: [0.82, 1], scale: [0.985, 1] }
+                    : { opacity: 1, scale: 1 }
+                }
+                transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <JobSlide
+                  job={job}
+                  applied={isApplied(job.id)}
+                  isVisible={Math.abs(idx - currentIndex) <= 1}
+                  isLast={idx === jobs.length - 1}
+                  onSwipeRight={handleSwipeRight}
+                  onSwipeLeft={handleSwipeLeft}
+                  onTap={handleTap}
+                />
+              </motion.div>
             </div>
           ))}
 
