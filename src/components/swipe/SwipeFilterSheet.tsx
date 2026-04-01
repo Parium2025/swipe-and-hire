@@ -141,7 +141,7 @@ export function SwipeFilterSheet({
             initial={{ y: '100%' }}
             animate={sheetControls}
             exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
-            transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }
+            transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
             style={{ y: dragY }}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
