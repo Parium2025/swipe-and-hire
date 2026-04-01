@@ -28,6 +28,7 @@ const EXIT_X = typeof window !== 'undefined' ? window.innerWidth * 1.2 : 500;
 const DOUBLE_TAP_DELAY = 280;
 const TAP_MAX_DURATION = 250;
 const TAP_MOVE_THRESHOLD = 18;
+const TAP_RESET_VELOCITY_THRESHOLD = 120;
 
 export const JobSlide = memo(function JobSlide({
   job,
@@ -50,13 +51,15 @@ export const JobSlide = memo(function JobSlide({
   const imageUrl = resolveImageUrl(job.job_image_url);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
-    tapStartRef.current = null;
-    lastTapTimestampRef.current = 0;
-
     if (swipedRef.current) return;
     const { offset, velocity } = info;
+    const dragDistance = Math.abs(offset.x);
+    const dragVelocity = Math.abs(velocity.x);
+
+    tapStartRef.current = null;
 
     if (offset.x > SWIPE_THRESHOLD || velocity.x > VELOCITY_THRESHOLD) {
+      lastTapTimestampRef.current = 0;
       swipedRef.current = true;
       animate(x, EXIT_X, { type: 'spring', stiffness: 500, damping: 30 });
       setTimeout(() => {
@@ -68,6 +71,7 @@ export const JobSlide = memo(function JobSlide({
     }
 
     if (offset.x < -SWIPE_THRESHOLD || velocity.x < -VELOCITY_THRESHOLD) {
+      lastTapTimestampRef.current = 0;
       swipedRef.current = true;
       animate(x, -EXIT_X, { type: 'spring', stiffness: 500, damping: 30 });
       setTimeout(() => {
@@ -76,6 +80,10 @@ export const JobSlide = memo(function JobSlide({
         x.set(0);
       }, 250);
       return;
+    }
+
+    if (dragDistance > TAP_MOVE_THRESHOLD || dragVelocity > TAP_RESET_VELOCITY_THRESHOLD) {
+      lastTapTimestampRef.current = 0;
     }
 
     animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
@@ -127,15 +135,16 @@ export const JobSlide = memo(function JobSlide({
           x,
           rotate: cardRotate,
           scale: cardScale,
-          touchAction: 'none',
+          touchAction: 'pan-y',
         }}
         drag="x"
+        dragDirectionLock
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.7}
         onDragEnd={handleDragEnd}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerCancel}
+        onPointerDownCapture={handlePointerDown}
+        onPointerUpCapture={handlePointerUp}
+        onPointerCancelCapture={handlePointerCancel}
       >
         {/* Background image */}
         <div className="absolute inset-0">
