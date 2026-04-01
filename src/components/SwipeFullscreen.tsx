@@ -33,8 +33,8 @@ interface SwipeFullscreenProps {
 }
 
 const SCROLL_SNAP_DELAY = 90;
-const END_BOUNCE_DELAY = 720;
-const END_BOUNCE_HIDE_DELAY = 260;
+const END_BOUNCE_DELAY = 840;
+const END_BOUNCE_HIDE_DELAY = 320;
 const END_BOUNCE_TRIGGER_OFFSET = 24;
 const END_STATE_HEIGHT = 'calc(100dvh - 4rem - env(safe-area-inset-top, 0px))';
 
@@ -52,6 +52,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   const [showFilter, setShowFilter] = useState(false);
   const [localAppliedIds, setLocalAppliedIds] = useState<Set<string>>(new Set());
   const [showEndBounce, setShowEndBounce] = useState(false);
+  const [endStateVisible, setEndStateVisible] = useState(false);
 
   const isApplied = useCallback(
     (jobId: string) => appliedJobIds.has(jobId) || localAppliedIds.has(jobId),
@@ -107,6 +108,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     endBounceActiveRef.current = true;
     clearTimers();
     setShowEndBounce(true);
+    setEndStateVisible(true);
     setCurrentIndex(jobs.length - 1);
 
     const lastIndex = jobs.length - 1;
@@ -126,6 +128,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
       bounceHideTimerRef.current = setTimeout(() => {
         setShowEndBounce(false);
+        setEndStateVisible(false);
         endBounceActiveRef.current = false;
         bounceHideTimerRef.current = null;
       }, END_BOUNCE_HIDE_DELAY);
@@ -135,6 +138,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   useEffect(() => {
     setCurrentIndex(0);
     setShowEndBounce(false);
+    setEndStateVisible(false);
     clearTimers();
     endBounceActiveRef.current = false;
     slideRefs.current = slideRefs.current.slice(0, jobs.length);
@@ -155,6 +159,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     if (!container || showEndBounce) return;
 
     const scrollTop = container.scrollTop;
+    const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+    const lastSlideTop = getSlideScrollTop(jobs.length - 1) ?? 0;
+    const hasReachedLastCardZone = currentIndex === jobs.length - 1 || scrollTop >= Math.max(0, lastSlideTop - 32);
+
+    setEndStateVisible(hasReachedLastCardZone && scrollTop >= maxScrollTop - 140);
+
     let bestIdx = 0;
     let bestDist = Infinity;
 
@@ -171,7 +181,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     });
 
     setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
-  }, [getSlideScrollTop, showEndBounce]);
+  }, [currentIndex, getSlideScrollTop, jobs.length, showEndBounce]);
 
   const handleScrollWithSnap = useCallback(() => {
     handleScroll();
@@ -430,11 +440,30 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             style={{ minHeight: END_STATE_HEIGHT }}
           >
             <motion.div
-              animate={showEndBounce ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0.92, scale: 0.98, y: 0 }}
-              transition={{ type: 'spring', stiffness: 340, damping: 32 }}
+              initial={false}
+              animate={
+                showEndBounce
+                  ? { opacity: 1, scale: 1, y: -8, filter: 'blur(0px)' }
+                  : endStateVisible
+                    ? { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }
+                    : { opacity: 0, scale: 0.94, y: 30, filter: 'blur(10px)' }
+              }
+              transition={{
+                opacity: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
+                scale: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
+                y: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
+                filter: { duration: 0.28, ease: 'easeOut' },
+              }}
               className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-white/10 px-8 py-6 backdrop-blur-sm"
             >
-              <p className="text-center text-[15px] font-medium text-white sm:text-base">Inga fler jobb just nu</p>
+              <motion.p
+                initial={false}
+                animate={endStateVisible || showEndBounce ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1], delay: endStateVisible || showEndBounce ? 0.05 : 0 }}
+                className="text-center text-[15px] font-medium text-white sm:text-base"
+              >
+                Inga fler jobb just nu
+              </motion.p>
             </motion.div>
           </div>
         </div>
