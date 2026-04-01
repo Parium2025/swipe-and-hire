@@ -1,7 +1,8 @@
-import { memo, useCallback, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { memo, useCallback, useRef, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import { Building2, MapPin, CheckCircle, Briefcase } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { useInputCapability } from '@/hooks/useInputCapability';
 import { supabase } from '@/integrations/supabase/client';
 import type { SwipeJob } from './SwipeCard';
 
@@ -22,6 +23,16 @@ interface JobSlideProps {
   onTap: () => void;
 }
 
+interface TouchGestureState {
+  startX: number;
+  startY: number;
+  startTime: number;
+  isDragging: boolean;
+  cancelled: boolean;
+}
+
+type SwipeDirection = 'left' | 'right';
+
 const SWIPE_THRESHOLD = 100;
 const VELOCITY_THRESHOLD = 400;
 const EXIT_X = typeof window !== 'undefined' ? window.innerWidth * 1.2 : 500;
@@ -29,6 +40,14 @@ const DOUBLE_TAP_DELAY = 280;
 const TAP_MAX_DURATION = 250;
 const TAP_MOVE_THRESHOLD = 18;
 const TAP_RESET_VELOCITY_THRESHOLD = 120;
+const TOUCH_DRAG_INTENT_THRESHOLD = 12;
+
+function getImageObjectPosition(value?: string): string {
+  if (!value || value === 'center') return 'center 50%';
+  if (value === 'top') return 'center 20%';
+  if (value === 'bottom') return 'center 80%';
+  return `center ${value}%`;
+}
 
 export const JobSlide = memo(function JobSlide({
   job,
@@ -39,6 +58,8 @@ export const JobSlide = memo(function JobSlide({
   onSwipeLeft,
   onTap,
 }: JobSlideProps) {
+  const inputCapability = useInputCapability();
+  const useTouchTunnel = inputCapability !== 'mouse';
   const x = useMotionValue(0);
   const likeOpacity = useTransform(x, [0, 60, 140], [0, 0.4, 1]);
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
@@ -46,9 +67,31 @@ export const JobSlide = memo(function JobSlide({
   const cardScale = useTransform(x, [-200, 0, 200], [0.97, 1, 0.97]);
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
-  const tapStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const touchGestureRef = useRef<TouchGestureState | null>(null);
 
   const imageUrl = resolveImageUrl(job.job_image_url);
+
+  const triggerSwipe = useCallback((direction: SwipeDirection) => {
+    lastTapTimestampRef.current = 0;
+    swipedRef.current = true;
+
+    animate(x, direction === 'right' ? EXIT_X : -EXIT_X, {
+      type: 'spring',
+      stiffness: 500,
+      damping: 30,
+    });
+
+    setTimeout(() => {
+      if (direction === 'right') {
+        onSwipeRight();
+      } else {
+        onSwipeLeft();
+      }
+
+      swipedRef.current = false;
+      x.set(0);
+    }, 250);
+  }, [onSwipeLeft, onSwipeRight, x]);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
     if (swipedRef.current) return;
@@ -56,29 +99,13 @@ export const JobSlide = memo(function JobSlide({
     const dragDistance = Math.abs(offset.x);
     const dragVelocity = Math.abs(velocity.x);
 
-    tapStartRef.current = null;
-
     if (offset.x > SWIPE_THRESHOLD || velocity.x > VELOCITY_THRESHOLD) {
-      lastTapTimestampRef.current = 0;
-      swipedRef.current = true;
-      animate(x, EXIT_X, { type: 'spring', stiffness: 500, damping: 30 });
-      setTimeout(() => {
-        onSwipeRight();
-        swipedRef.current = false;
-        x.set(0);
-      }, 250);
+      triggerSwipe('right');
       return;
     }
 
     if (offset.x < -SWIPE_THRESHOLD || velocity.x < -VELOCITY_THRESHOLD) {
-      lastTapTimestampRef.current = 0;
-      swipedRef.current = true;
-      animate(x, -EXIT_X, { type: 'spring', stiffness: 500, damping: 30 });
-      setTimeout(() => {
-        onSwipeLeft();
-        swipedRef.current = false;
-        x.set(0);
-      }, 250);
+      triggerSwipe('left');
       return;
     }
 
@@ -87,28 +114,82 @@ export const JobSlide = memo(function JobSlide({
     }
 
     animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
-  }, [x, onSwipeRight, onSwipeLeft]);
+  }, [triggerSwipe, x]);
 
-  const handlePointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
-    tapStartRef.current = {
-      x: event.clientX,
-      y: event.clientY,
-      time: Date.now(),
+  const handleTouchStartCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+    touchGestureRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      startTime: Date.now(),
+      isDragging: false,
+      cancelled: false,
     };
-  }, []);
+  }, [useTouchTunnel]);
 
-  const handlePointerCancel = useCallback(() => {
-    tapStartRef.current = null;
-  }, []);
+  const handleTouchMoveCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1) return;
 
-  const handlePointerUp = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
-    const tapStart = tapStartRef.current;
-    tapStartRef.current = null;
+    const gesture = touchGestureRef.current;
+    if (!gesture || gesture.cancelled) return;
 
-    if (!tapStart || swipedRef.current) return;
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - gesture.startX;
+    const deltaY = touch.clientY - gesture.startY;
 
-    const movedDistance = Math.hypot(event.clientX - tapStart.x, event.clientY - tapStart.y);
-    const pressDuration = Date.now() - tapStart.time;
+    if (!gesture.isDragging) {
+      if (Math.abs(deltaX) < TOUCH_DRAG_INTENT_THRESHOLD && Math.abs(deltaY) < TOUCH_DRAG_INTENT_THRESHOLD) {
+        return;
+      }
+
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        gesture.cancelled = true;
+        lastTapTimestampRef.current = 0;
+        return;
+      }
+
+      gesture.isDragging = true;
+      lastTapTimestampRef.current = 0;
+    }
+
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    x.set(deltaX);
+  }, [useTouchTunnel, x]);
+
+  const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    if (!useTouchTunnel) return;
+
+    const gesture = touchGestureRef.current;
+    touchGestureRef.current = null;
+
+    if (!gesture || swipedRef.current || gesture.cancelled) return;
+
+    const touch = event.changedTouches[0];
+    const offsetX = touch.clientX - gesture.startX;
+    const offsetY = touch.clientY - gesture.startY;
+    const movedDistance = Math.hypot(offsetX, offsetY);
+    const pressDuration = Date.now() - gesture.startTime;
+    const velocityX = pressDuration > 0 ? (offsetX / pressDuration) * 1000 : 0;
+
+    if (gesture.isDragging) {
+      if (offsetX > SWIPE_THRESHOLD || velocityX > VELOCITY_THRESHOLD) {
+        triggerSwipe('right');
+        return;
+      }
+
+      if (offsetX < -SWIPE_THRESHOLD || velocityX < -VELOCITY_THRESHOLD) {
+        triggerSwipe('left');
+        return;
+      }
+
+      animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+      return;
+    }
 
     if (movedDistance > TAP_MOVE_THRESHOLD || pressDuration > TAP_MAX_DURATION) {
       lastTapTimestampRef.current = 0;
@@ -124,27 +205,36 @@ export const JobSlide = memo(function JobSlide({
     }
 
     lastTapTimestampRef.current = now;
-  }, [onTap]);
+  }, [onTap, triggerSwipe, useTouchTunnel, x]);
+
+  const handleTouchCancelCapture = useCallback(() => {
+    touchGestureRef.current = null;
+    if (!swipedRef.current) {
+      animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+    }
+  }, [x]);
 
   return (
     <div className="min-h-[calc(100dvh-3rem)] w-full flex flex-col">
       {/* Card area with swipe */}
       <motion.div
-        className="flex-1 relative mx-3 my-2 rounded-2xl overflow-hidden shadow-2xl"
+        className="flex-1 relative mx-3 my-2 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
         style={{
           x,
           rotate: cardRotate,
           scale: cardScale,
-          touchAction: 'pan-y',
+          touchAction: useTouchTunnel ? 'pan-y' : 'auto',
         }}
-        drag="x"
-        dragDirectionLock
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.7}
-        onDragEnd={handleDragEnd}
-        onPointerDownCapture={handlePointerDown}
-        onPointerUpCapture={handlePointerUp}
-        onPointerCancelCapture={handlePointerCancel}
+        drag={useTouchTunnel ? false : 'x'}
+        dragDirectionLock={!useTouchTunnel}
+        dragConstraints={useTouchTunnel ? undefined : { left: 0, right: 0 }}
+        dragElastic={useTouchTunnel ? undefined : 0.7}
+        onDragEnd={useTouchTunnel ? undefined : handleDragEnd}
+        onTouchStartCapture={handleTouchStartCapture}
+        onTouchMoveCapture={handleTouchMoveCapture}
+        onTouchEndCapture={handleTouchEndCapture}
+        onTouchCancelCapture={handleTouchCancelCapture}
+        onDoubleClick={useTouchTunnel ? undefined : onTap}
       >
         {/* Background image */}
         <div className="absolute inset-0">
@@ -154,13 +244,7 @@ export const JobSlide = memo(function JobSlide({
               alt={job.title}
               className="w-full h-full object-cover"
               style={{
-                objectPosition: `center ${(() => {
-                  const v = job.image_focus_position;
-                  if (!v || v === 'center') return '50%';
-                  if (v === 'top') return '20%';
-                  if (v === 'bottom') return '80%';
-                  return `${v}%`;
-                })()}`,
+                objectPosition: getImageObjectPosition(job.image_focus_position),
               }}
               loading={isVisible ? 'eager' : 'lazy'}
               draggable={false}
