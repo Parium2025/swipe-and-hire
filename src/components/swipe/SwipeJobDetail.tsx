@@ -52,7 +52,7 @@ interface SwipeJobDetailProps {
   hasApplied: boolean;
 }
 
-const DISMISS_THRESHOLD = 120;
+const DISMISS_THRESHOLD = 100;
 
 export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: SwipeJobDetailProps) {
   const { user } = useAuth();
@@ -67,21 +67,19 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   const dragStartY = useRef(0);
   const isDraggingSheet = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const backdropOpacity = useTransform(dragY, [0, 400], [1, 0]);
+  const backdropOpacity = useTransform(dragY, [0, 300], [1, 0]);
 
   // Animated close helper — used by X button and backdrop
   const animatedClose = useCallback(() => {
     setDismissing(true);
     void sheetControls.start({
-      y: '110%',
-      scale: 0.92,
-      opacity: 0.3,
-      transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+      y: '100%',
+      transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
     });
     setTimeout(() => {
       onClose();
       setDismissing(false);
-    }, 280);
+    }, 220);
   }, [onClose, sheetControls]);
 
   const handleBackdropDismiss = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
@@ -130,18 +128,15 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     isDraggingSheet.current = false;
     const currentY = dragY.get();
     if (currentY > DISMISS_THRESHOLD) {
-      // Smooth dismiss with scale + fade
       setDismissing(true);
       void sheetControls.start({
-        y: '110%',
-        scale: 0.92,
-        opacity: 0.3,
-        transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+        y: '100%',
+        transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
       });
       setTimeout(() => {
         onClose();
         setDismissing(false);
-      }, 280);
+      }, 220);
     } else {
       // Snap back with a satisfying bounce
       dragY.set(0);
@@ -176,9 +171,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
       dragY.set(0);
       void sheetControls.start({
         y: 0,
-        scale: 1,
-        opacity: 1,
-        transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 },
+        transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
       });
     }
   }, [open, job.id, dragY, sheetControls]);
@@ -244,10 +237,10 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
           {/* Sheet */}
           <motion.div
             className="absolute inset-x-0 bottom-0 z-40 max-h-[88vh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
-            initial={{ y: '100%', scale: 0.95, opacity: 0 }}
+            initial={{ y: '100%' }}
             animate={sheetControls}
-            exit={{ y: '110%', scale: 0.92, opacity: 0, transition: { type: 'spring', damping: 28, stiffness: 260, mass: 0.9 } }}
-            transition={{ type: 'spring', damping: 32, stiffness: 350, mass: 0.8 }}
+            exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
+            transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
             style={{ y: dragY }}
             onPointerDown={stopSheetPropagation}
             onClick={stopSheetPropagation}
