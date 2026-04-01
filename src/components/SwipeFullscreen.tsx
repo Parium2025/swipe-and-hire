@@ -338,31 +338,24 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
               />
             </div>
           ))}
+          {/* End bounce zone — scrollable area past last job */}
+          <div className="w-full flex items-center justify-center" style={{ minHeight: '70vh' }}>
+            <AnimatePresence>
+              {showEndBounce && (
+                <motion.div
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                >
+                  <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           <div className="h-[env(safe-area-inset-bottom,2rem)]" />
         </div>
-
-        {/* End bounce overlay — shows briefly then snaps back */}
-        <AnimatePresence>
-          {showEndBounce && (
-            <motion.div
-              className="fixed inset-0 z-[9998] flex items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <motion.div
-                className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              >
-                <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Job detail sheet */}
         {currentJob && showDetail && (
