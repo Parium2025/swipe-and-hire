@@ -157,7 +157,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       if (!container || jobs.length === 0) return;
 
       const scrollTop = container.scrollTop;
-      const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
       let nearestIdx = 0;
       let nearestDist = Infinity;
 
@@ -170,9 +169,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         }
       });
 
-      const isAtEnd = nearestIdx === jobs.length - 1 && scrollTop >= maxScrollTop - END_BOUNCE_THRESHOLD;
+      const lastIndex = jobs.length - 1;
+      const lastSlide = slideRefs.current[lastIndex];
+      const hasScrolledPastLastCard = Boolean(lastSlide && scrollTop > lastSlide.offsetTop + END_BOUNCE_TRIGGER_OFFSET);
 
-      if (isAtEnd) {
+      if (hasScrolledPastLastCard) {
         triggerEndBounce();
         scrollEndTimerRef.current = null;
         return;
@@ -220,12 +221,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   }, []);
 
   const handleSwipeLeft = useCallback(() => {
-    if (currentIndex >= jobs.length - 1) {
-      triggerEndBounce();
-    } else {
-      scrollToNext();
-    }
-  }, [currentIndex, jobs.length, scrollToNext, triggerEndBounce]);
+    if (currentIndex >= jobs.length - 1) return;
+    scrollToNext();
+  }, [currentIndex, jobs.length, scrollToNext]);
 
   const handleTap = useCallback(() => {
     setShowDetail(true);
@@ -244,12 +242,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setShowApply(false);
 
     if (currentIndex >= jobs.length - 1) {
-      setTimeout(() => triggerEndBounce(), 180);
       return;
     }
 
     setTimeout(scrollToNext, 300);
-  }, [currentIndex, currentJob, jobs.length, scrollToNext, triggerEndBounce]);
+  }, [currentIndex, currentJob, jobs.length, scrollToNext]);
 
   const handleCloseApply = useCallback(() => {
     setShowApply(false);
@@ -397,7 +394,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             </div>
           ))}
 
-          <div className="h-[env(safe-area-inset-bottom,2rem)]" />
+          <div
+            aria-hidden="true"
+            className="w-full pointer-events-none"
+            style={{ height: `calc(${END_SCROLL_BUFFER}px + env(safe-area-inset-bottom, 2rem))` }}
+          />
         </div>
 
         <AnimatePresence>
@@ -411,7 +412,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             >
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20">
                 <p className="text-white text-base font-medium text-center">Inga fler jobb just nu</p>
-                <p className="text-white/80 text-sm text-center mt-1">Tar dig tillbaka till startsidan</p>
               </div>
             </motion.div>
           )}
