@@ -288,6 +288,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
   const [previewStage, setPreviewStage] = useState<string | null>(null);
   const previewTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const previewDelayRef = useRef<ReturnType<typeof setTimeout>>();
   const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
