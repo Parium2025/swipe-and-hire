@@ -361,7 +361,7 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
   }
 
   // Bygg items
-  const items = myCandidates.map((mc) => {
+  const rawItems = myCandidates.map((mc) => {
     const app = appMap.get(mc.application_id);
     const media = profileMediaMap[mc.applicant_id] || {};
     const activity = activityMap[mc.applicant_id] || {};
@@ -400,6 +400,16 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
       latest_application_at: activity.latest_application_at || app?.applied_at,
     };
   });
+
+  // Deduplicera per applicant_id (behåll senast uppdaterad)
+  const deduped = new Map<string, typeof rawItems[0]>();
+  for (const item of rawItems) {
+    const existing = deduped.get(item.applicant_id);
+    if (!existing || item.updated_at > existing.updated_at) {
+      deduped.set(item.applicant_id, item);
+    }
+  }
+  const items = Array.from(deduped.values());
 
   // Uppdatera React Query cache
   const existingData: any = queryClient.getQueryData(queryKey);

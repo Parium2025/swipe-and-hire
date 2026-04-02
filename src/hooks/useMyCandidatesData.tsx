@@ -77,11 +77,22 @@ function readMyCandidatesCache(userId: string): MyCandidateData[] | null {
   }
 }
 
+function deduplicateByApplicant(items: MyCandidateData[]): MyCandidateData[] {
+  const seen = new Map<string, MyCandidateData>();
+  for (const c of items) {
+    const existing = seen.get(c.applicant_id);
+    if (!existing || c.updated_at > existing.updated_at) {
+      seen.set(c.applicant_id, c);
+    }
+  }
+  return Array.from(seen.values());
+}
+
 function writeMyCandidatesCache(userId: string, items: MyCandidateData[]): void {
   try {
     const key = MY_CANDIDATES_CACHE_KEY + userId;
     const cached: CachedMyCandidates = {
-      items: items.slice(0, 100), // Max 100 to save space
+      items: deduplicateByApplicant(items).slice(0, 100),
       timestamp: Date.now(),
     };
     safeSetItem(key, JSON.stringify(cached));
