@@ -93,8 +93,8 @@ export const StageColumn = ({
                   {stageSettings.label}
                 </span>
               </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs">
-                <p>{stageSettings.label}</p>
+              <TooltipContent side="top" className="max-w-[min(90vw,500px)] break-words whitespace-pre-wrap">
+                <p className="break-words whitespace-pre-wrap">{stageSettings.label}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
