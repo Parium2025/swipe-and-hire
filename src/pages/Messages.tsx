@@ -8,10 +8,13 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { NewConversationDialog } from '@/components/NewConversationDialog';
 import { ConversationItem } from '@/components/messages/ConversationItem';
+import { SwipeableConversationItem } from '@/components/messages/SwipeableConversationItem';
 import { ChatView } from '@/components/messages/ChatView';
 import { EmptyConversationList, EmptyChatState } from '@/components/messages/EmptyStates';
 import { MessagesTabs } from '@/components/MessagesTabs';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useDeleteConversation } from '@/hooks/useDeleteConversation';
+import { getConversationDisplayName } from '@/lib/conversationDisplayUtils';
 import {
   MessageSquare,
   Plus,
@@ -31,6 +34,7 @@ export default function Messages() {
     return () => clearTimeout(timer);
   }, []);
   const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
+  const { deleteConversation, isDeleting } = useDeleteConversation();
   const { hasTeam } = useTeamMembers();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -219,16 +223,39 @@ export default function Messages() {
             ) : (
               <ScrollArea className="h-full">
                 <div className="p-2 space-y-1">
-                  {filteredConversations.map((conv) => (
-                    <ConversationItem
-                      key={conv.id}
-                      conversation={conv}
-                      isSelected={selectedConversationId === conv.id && (!isMobile || showMobileChat)}
-                      currentUserId={user?.id || ''}
-                      onClick={() => handleSelectConversation(conv.id)}
-                      category={categorizeConversation(conv)}
-                    />
-                  ))}
+                  {filteredConversations.map((conv) => {
+                    const otherMembers = (conv.members || []).filter(m => m.user_id !== user?.id);
+                    const displayMember = otherMembers[0];
+                    const displayName = getConversationDisplayName({
+                      isGroup: conv.is_group,
+                      groupName: conv.name,
+                      snapshot: conv.applicationSnapshot,
+                      displayMember,
+                    });
+
+                    return (
+                      <SwipeableConversationItem
+                        key={conv.id}
+                        onDelete={() => {
+                          deleteConversation(conv.id);
+                          if (selectedConversationId === conv.id) {
+                            setSelectedConversationId(null);
+                            setShowMobileChat(false);
+                          }
+                        }}
+                        isDeleting={isDeleting}
+                        conversationName={displayName}
+                      >
+                        <ConversationItem
+                          conversation={conv}
+                          isSelected={selectedConversationId === conv.id && (!isMobile || showMobileChat)}
+                          currentUserId={user?.id || ''}
+                          onClick={() => handleSelectConversation(conv.id)}
+                          category={categorizeConversation(conv)}
+                        />
+                      </SwipeableConversationItem>
+                    );
+                  })}
                 </div>
               </ScrollArea>
             )}
