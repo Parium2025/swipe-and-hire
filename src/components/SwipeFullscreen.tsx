@@ -133,35 +133,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     showEndBounceRef.current = true;
     setEndStateVisible(true);
     setCurrentIndex(jobs.length - 1);
-
-    const lastIndex = jobs.length - 1;
-
-    bounceReturnTimerRef.current = setTimeout(() => {
-      const container = scrollRef.current;
-      const targetTop = getSlideScrollTop(lastIndex);
-
-      setIsReturningFromEnd(true);
-      isReturningRef.current = true;
-      setShowEndBounce(false);
-      showEndBounceRef.current = false;
-      setEndStateVisible(false);
-
-      if (container && targetTop !== null) {
-        requestAnimationFrame(() => {
-          container.scrollTo({ top: targetTop, behavior: 'smooth' });
-        });
-      }
-
-      bounceReturnTimerRef.current = null;
-
-      bounceHideTimerRef.current = setTimeout(() => {
-        setIsReturningFromEnd(false);
-        isReturningRef.current = false;
-        endBounceActiveRef.current = false;
-        bounceHideTimerRef.current = null;
-      }, END_BOUNCE_HIDE_DELAY);
-    }, END_BOUNCE_DELAY);
-  }, [clearTimers, getSlideScrollTop, jobs.length]);
+  }, [clearTimers, jobs.length]);
 
   /* ── Scroll handler (RAF-throttled for 60fps) ─────────── */
   const handleScrollWithSnap = useCallback(() => {

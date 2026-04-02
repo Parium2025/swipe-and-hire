@@ -20,18 +20,16 @@ export const SwipeEndSection = memo(forwardRef<HTMLDivElement, SwipeEndSectionPr
         className="w-full shrink-0 snap-start snap-always flex items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]"
         style={{ minHeight: sectionHeight, height: sectionHeight }}
       >
-        <motion.div
+      <motion.div
           initial={false}
           animate={
-            showEndBounce
-              ? { opacity: 1, y: -10 }
-              : endStateVisible
-                ? { opacity: 1, y: 0 }
-                : { opacity: 0, y: 20 }
+            isVisible
+              ? { opacity: 1, scale: 1 }
+              : { opacity: 0, scale: 0.96 }
           }
           transition={{
-            opacity: { duration: 0.22, ease },
-            y: { duration: 0.3, ease },
+            opacity: { duration: 0.25, ease },
+            scale: { duration: 0.25, ease },
           }}
           className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
         >
