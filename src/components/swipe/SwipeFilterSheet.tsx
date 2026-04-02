@@ -61,14 +61,15 @@ export function SwipeFilterSheet({
   const [dismissing, setDismissing] = useState(false);
   const [isAnimatingIn, setIsAnimatingIn] = useState(true);
   const openedAtRef = useRef(0);
+  const [openCount, setOpenCount] = useState(0);
 
   // Start animation on open
   useEffect(() => {
     if (open) {
       openedAtRef.current = Date.now();
+      setOpenCount(c => c + 1);
       setIsAnimatingIn(true);
       setDismissing(false);
-      // Stop any in-flight animation and reset position
       void sheetControls.stop();
       dragY.jump(0);
       void sheetControls.start({
@@ -160,7 +161,7 @@ export function SwipeFilterSheet({
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[10002]">
+        <div key={openCount} className="fixed inset-0 z-[10002]">
           {/* Backdrop */}
           <motion.div
             className="absolute inset-0 bg-black/60"
