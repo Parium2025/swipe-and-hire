@@ -433,6 +433,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
               <div
                 key={stage}
                 ref={(el) => { tabRefs.current[stage] = el; }}
+                data-stage-tab
                 tabIndex={0}
                 onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
                 onClick={() => handleStageClick(stage)}
