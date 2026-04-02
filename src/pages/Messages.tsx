@@ -34,6 +34,7 @@ export default function Messages() {
     return () => clearTimeout(timer);
   }, []);
   const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
+  const { deleteConversation, isDeleting } = useDeleteConversation();
   const { hasTeam } = useTeamMembers();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
