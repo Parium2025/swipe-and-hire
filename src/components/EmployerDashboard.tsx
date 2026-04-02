@@ -369,6 +369,7 @@ const EmployerDashboard = memo(() => {
       />
 
       {/* Status tabs: Aktiva / Utgångna / Utkast */}
+      <div className="flex justify-center">
       <JobStatusTabs
         activeTab={activeTab}
         onTabChange={setActiveTab}
