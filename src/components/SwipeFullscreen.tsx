@@ -36,7 +36,7 @@ interface SwipeFullscreenProps {
 }
 
 /* ── Timing constants ────────────────────────────────────── */
-const SCROLL_SNAP_DELAY = 70;
+const SCROLL_SNAP_DELAY = 90;
 const END_BOUNCE_DELAY = 680;
 const END_BOUNCE_HIDE_DELAY = 680;
 const END_BOUNCE_TRIGGER_OFFSET = 12;
