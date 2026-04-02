@@ -286,6 +286,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
+  const [previewStage, setPreviewStage] = useState<string | null>(null);
+  const previewTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
@@ -311,9 +313,28 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
 
   const handleStageClick = useCallback((stage: string) => {
-    setActiveTab(stage);
+    const cfg = stageConfig[stage];
+    const isLongLabel = cfg && cfg.label.length > 10;
+
+    // Touch + long label → tap-to-preview: first tap = tooltip, second tap = select
+    if (isTouchCapable && isLongLabel) {
+      if (previewStage === stage) {
+        // Second tap → select
+        setPreviewStage(null);
+        if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+        setActiveTab(stage);
+      } else {
+        // First tap → show tooltip preview
+        setPreviewStage(stage);
+        if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+        previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2500);
+        return; // Don't switch tab yet
+      }
+    } else {
+      setActiveTab(stage);
+    }
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
-  }, []);
+  }, [isTouchCapable, previewStage, stageConfig]);
 
   const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
     // Mouse: handled by onClick. Touch/pen: only track double-tap for settings menu.
@@ -398,13 +419,16 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 style={{ backgroundColor: `${cfg.color}55` }}
               >
                 <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                {cfg.label.length > 10 ? (
+              {cfg.label.length > 10 ? (
                   <TooltipProvider delayDuration={200}>
-                    <Tooltip>
+                    <Tooltip
+                      open={isTouchCapable ? previewStage === stage : undefined}
+                      onOpenChange={isTouchCapable ? (open) => { if (!open) setPreviewStage(null); } : undefined}
+                    >
                       <TooltipTrigger asChild>
                         <span className="truncate cursor-default min-w-0">{cfg.label}</span>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
+                      <TooltipContent side="bottom" sideOffset={6} className="max-w-[min(90vw,600px)] break-words whitespace-normal">
                         <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
                       </TooltipContent>
                     </Tooltip>

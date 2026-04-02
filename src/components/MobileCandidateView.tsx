@@ -280,6 +280,8 @@ export const MobileCandidateView = memo(function MobileCandidateView({
 }: MobileCandidateViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
+  const [previewStage, setPreviewStage] = useState<string | null>(null);
+  const previewTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
@@ -390,7 +392,22 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                data-stage-tab
                tabIndex={0}
                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
-               onClick={() => setActiveTab(stage)}
+               onClick={() => {
+                const isLongLabel = cfg && cfg.label.length > 10;
+                if (isTouchCapable && isLongLabel) {
+                  if (previewStage === stage) {
+                    setPreviewStage(null);
+                    if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+                    setActiveTab(stage);
+                  } else {
+                    setPreviewStage(stage);
+                    if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+                    previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2500);
+                  }
+                } else {
+                  setActiveTab(stage);
+                }
+               }}
                onDoubleClick={() => setOpenStageMenu(stage)}
                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 backdrop-blur-sm cursor-pointer max-w-[180px] border outline-none focus:outline-none focus-visible:outline-none [outline:none!important] ${
@@ -401,11 +418,14 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
               {cfg.label.length > 10 ? (
                 <TooltipProvider delayDuration={200}>
-                  <Tooltip>
+                  <Tooltip
+                    open={isTouchCapable ? previewStage === stage : undefined}
+                    onOpenChange={isTouchCapable ? (open) => { if (!open) setPreviewStage(null); } : undefined}
+                  >
                     <TooltipTrigger asChild>
                       <span className="truncate cursor-default min-w-0">{cfg.label}</span>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
+                    <TooltipContent side="bottom" sideOffset={6} className="max-w-[min(90vw,600px)] break-words whitespace-normal">
                       <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
                     </TooltipContent>
                   </Tooltip>
