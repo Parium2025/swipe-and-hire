@@ -282,6 +282,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
   const [previewStage, setPreviewStage] = useState<string | null>(null);
   const previewTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const previewDelayRef = useRef<ReturnType<typeof setTimeout>>();
   const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
@@ -398,11 +399,21 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   if (previewStage === stage) {
                     setPreviewStage(null);
                     if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+                    if (previewDelayRef.current) clearTimeout(previewDelayRef.current);
+                    setActiveTab(stage);
+                  } else if (previewDelayRef.current) {
+                    clearTimeout(previewDelayRef.current);
+                    previewDelayRef.current = undefined;
+                    setPreviewStage(null);
+                    if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
                     setActiveTab(stage);
                   } else {
-                    setPreviewStage(stage);
-                    if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
-                    previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2500);
+                    previewDelayRef.current = setTimeout(() => {
+                      previewDelayRef.current = undefined;
+                      setPreviewStage(stage);
+                      if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+                      previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2500);
+                    }, 280);
                   }
                 } else {
                   setActiveTab(stage);
