@@ -161,7 +161,7 @@ export function SwipeFilterSheet({
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[10002]">
+        <div key={openCount} className="fixed inset-0 z-[10002]">
           {/* Backdrop */}
           <motion.div
             className="absolute inset-0 bg-black/60"
