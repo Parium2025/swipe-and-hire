@@ -223,16 +223,39 @@ export default function Messages() {
             ) : (
               <ScrollArea className="h-full">
                 <div className="p-2 space-y-1">
-                  {filteredConversations.map((conv) => (
-                    <ConversationItem
-                      key={conv.id}
-                      conversation={conv}
-                      isSelected={selectedConversationId === conv.id && (!isMobile || showMobileChat)}
-                      currentUserId={user?.id || ''}
-                      onClick={() => handleSelectConversation(conv.id)}
-                      category={categorizeConversation(conv)}
-                    />
-                  ))}
+                  {filteredConversations.map((conv) => {
+                    const otherMembers = (conv.members || []).filter(m => m.user_id !== user?.id);
+                    const displayMember = otherMembers[0];
+                    const displayName = getConversationDisplayName({
+                      isGroup: conv.is_group,
+                      groupName: conv.name,
+                      snapshot: conv.applicationSnapshot,
+                      displayMember,
+                    });
+
+                    return (
+                      <SwipeableConversationItem
+                        key={conv.id}
+                        onDelete={() => {
+                          deleteConversation(conv.id);
+                          if (selectedConversationId === conv.id) {
+                            setSelectedConversationId(null);
+                            setShowMobileChat(false);
+                          }
+                        }}
+                        isDeleting={isDeleting}
+                        conversationName={displayName}
+                      >
+                        <ConversationItem
+                          conversation={conv}
+                          isSelected={selectedConversationId === conv.id && (!isMobile || showMobileChat)}
+                          currentUserId={user?.id || ''}
+                          onClick={() => handleSelectConversation(conv.id)}
+                          category={categorizeConversation(conv)}
+                        />
+                      </SwipeableConversationItem>
+                    );
+                  })}
                 </div>
               </ScrollArea>
             )}
