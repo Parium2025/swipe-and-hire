@@ -56,9 +56,9 @@ export function SwipeFilterSheet({
   const dragY = useMotionValue(0);
   const dragStartY = useRef(0);
   const isDragging = useRef(false);
+  const isDismissingRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const backdropOpacity = useTransform(dragY, [0, 400], [1, 0]);
-  const [dismissing, setDismissing] = useState(false);
   const [isAnimatingIn, setIsAnimatingIn] = useState(true);
   const openedAtRef = useRef(0);
 
@@ -66,8 +66,9 @@ export function SwipeFilterSheet({
     if (!open) return;
 
     openedAtRef.current = Date.now();
+    isDragging.current = false;
+    isDismissingRef.current = false;
     setIsAnimatingIn(true);
-    setDismissing(false);
     dragY.jump(0);
 
     const timer = window.setTimeout(() => {
@@ -80,15 +81,16 @@ export function SwipeFilterSheet({
   }, [open, dragY]);
 
   const finalizeClose = useCallback(() => {
+    isDragging.current = false;
+    isDismissingRef.current = false;
     dragY.jump(0);
     setIsAnimatingIn(true);
-    setDismissing(false);
     onClose();
   }, [dragY, onClose]);
 
   const animatedClose = useCallback(() => {
-    if (dismissing) return;
-    setDismissing(true);
+    if (isDismissingRef.current) return;
+    isDismissingRef.current = true;
     animate(dragY, window.innerHeight, {
       type: 'spring',
       damping: 34,
@@ -96,7 +98,7 @@ export function SwipeFilterSheet({
       mass: 0.8,
       onComplete: finalizeClose,
     });
-  }, [dragY, dismissing, finalizeClose]);
+  }, [dragY, finalizeClose]);
 
   const handleBackdropDismiss = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
     if (Date.now() - openedAtRef.current < 420) {
@@ -137,18 +139,11 @@ export function SwipeFilterSheet({
     isDragging.current = false;
     const currentY = dragY.get();
     if (currentY > DISMISS_THRESHOLD) {
-      setDismissing(true);
-      animate(dragY, window.innerHeight, {
-        type: 'spring',
-        damping: 34,
-        stiffness: 400,
-        mass: 0.8,
-        onComplete: finalizeClose,
-      });
+      animatedClose();
     } else {
       animate(dragY, 0, { type: 'spring', damping: 24, stiffness: 400 });
     }
-  }, [dragY, finalizeClose]);
+  }, [animatedClose, dragY]);
 
   const handleHandleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
     isDragging.current = true;
@@ -170,7 +165,6 @@ export function SwipeFilterSheet({
             transition={{ duration: 0.25 }}
             style={isAnimatingIn ? undefined : { opacity: backdropOpacity }}
             onPointerDown={handleBackdropDismiss}
-            onClick={handleBackdropDismiss}
           />
 
           {/* Sheet */}
@@ -182,7 +176,6 @@ export function SwipeFilterSheet({
             transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
             style={isAnimatingIn ? undefined : { y: dragY }}
             onPointerDown={stopSheetPropagation}
-            onClick={stopSheetPropagation}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchEnd}
