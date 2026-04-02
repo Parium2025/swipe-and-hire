@@ -53,7 +53,7 @@ export function SwipeFilterSheet({
   activeFilterCount,
 }: SwipeFilterSheetProps) {
   const dragY = useMotionValue(0);
-  const sheetControls = useAnimation();
+  const dragStartY = useRef(0);
   const dragStartY = useRef(0);
   const isDragging = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
