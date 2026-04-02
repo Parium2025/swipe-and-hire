@@ -217,10 +217,10 @@ export const JobSlide = memo(function JobSlide({
   }, [x]);
 
   return (
-    <div className="h-full w-full flex flex-col" style={sectionHeight ? { height: sectionHeight } : undefined}>
+    <div className="h-full w-full flex flex-col px-3 pb-3 pt-2" style={sectionHeight ? { height: sectionHeight } : undefined}>
       {/* Card area with swipe */}
       <motion.div
-        className="relative mx-3 my-2 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
+        className="relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
         style={{
           x,
           rotate: cardRotate,
