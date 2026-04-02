@@ -392,7 +392,22 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                data-stage-tab
                tabIndex={0}
                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
-               onClick={() => setActiveTab(stage)}
+               onClick={() => {
+                const isLongLabel = cfg && cfg.label.length > 10;
+                if (isTouchCapable && isLongLabel) {
+                  if (previewStage === stage) {
+                    setPreviewStage(null);
+                    if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+                    setActiveTab(stage);
+                  } else {
+                    setPreviewStage(stage);
+                    if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+                    previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2500);
+                  }
+                } else {
+                  setActiveTab(stage);
+                }
+               }}
                onDoubleClick={() => setOpenStageMenu(stage)}
                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 backdrop-blur-sm cursor-pointer max-w-[180px] border outline-none focus:outline-none focus-visible:outline-none [outline:none!important] ${
