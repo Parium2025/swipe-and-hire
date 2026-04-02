@@ -1602,9 +1602,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPreloadedEmployerActiveJobs(activeCount);
       try { sessionStorage.setItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY, String(activeCount)); } catch {}
       
-      // Dashboard jobb (aktiva + utgångna, dvs alla is_active=true jobb)
-      const dashboardJobs = orgJobs.filter(j => j.is_active);
-      const dashboardCount = dashboardJobs.length;
+      // Dashboard jobb (aktiva + utgångna = samma totalsumma som dashboardens "Annonser"-kort)
+      const expiredJobs = orgJobs.filter(j => isJobExpired(j.created_at, j.expires_at));
+      const dashboardCount = activeJobs.length + expiredJobs.length;
       setPreloadedEmployerDashboardJobs(dashboardCount);
       try { sessionStorage.setItem(EMPLOYER_DASHBOARD_JOBS_CACHE_KEY, String(dashboardCount)); } catch {}
       
