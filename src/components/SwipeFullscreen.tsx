@@ -136,17 +136,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       const targetTop = getSlideScrollTop(lastIndex);
 
       setIsReturningFromEnd(true);
+      setShowEndBounce(false);
+      setEndStateVisible(false);
 
       if (container && targetTop !== null) {
-        setShowEndBounce(false);
-        setEndStateVisible(false);
-
         requestAnimationFrame(() => {
           container.scrollTo({ top: targetTop, behavior: 'smooth' });
         });
-      } else {
-        setShowEndBounce(false);
-        setEndStateVisible(false);
       }
 
       bounceReturnTimerRef.current = null;
@@ -181,7 +177,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
   const handleScroll = useCallback(() => {
     const container = scrollRef.current;
-    if (!container || showEndBounce) return;
+    if (!container || showEndBounce || isReturningFromEnd) return;
 
     const scrollTop = container.scrollTop;
     const endStateTop = getEndStateScrollTop();
@@ -208,8 +204,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   }, [getEndStateScrollTop, getSlideScrollTop, isReturningFromEnd, showEndBounce]);
 
   const handleScrollWithSnap = useCallback(() => {
+    if (showEndBounce || isReturningFromEnd) return;
+
     handleScroll();
-    if (showEndBounce) return;
 
     if (scrollEndTimerRef.current) {
       clearTimeout(scrollEndTimerRef.current);
@@ -234,7 +231,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
       scrollEndTimerRef.current = null;
     }, SCROLL_SNAP_DELAY);
-  }, [currentIndex, getEndStateScrollTop, handleScroll, jobs.length, showEndBounce, triggerEndBounce]);
+  }, [currentIndex, getEndStateScrollTop, handleScroll, isReturningFromEnd, jobs.length, showEndBounce, triggerEndBounce]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -425,19 +422,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           </div>
         )}
 
-        <AnimatePresence>
-          {isReturningFromEnd && (
-            <motion.div
-              aria-hidden="true"
-              initial={{ opacity: 0.72 }}
-              animate={{ opacity: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-              className="pointer-events-none absolute inset-x-0 top-16 bottom-0 z-10 bg-parium-gradient"
-            />
-          )}
-        </AnimatePresence>
-
         <div
           ref={scrollRef}
           className="h-full w-full overflow-y-auto overflow-x-hidden overscroll-contain snap-y snap-mandatory pt-16"
@@ -463,10 +447,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
                 initial={false}
                 animate={
                   idx === jobs.length - 1 && isReturningFromEnd
-                    ? { opacity: [0.82, 1], scale: [0.985, 1] }
+                    ? { opacity: [0.96, 1], scale: [0.992, 1], filter: ['saturate(0.96)', 'saturate(1)'] }
                     : { opacity: 1, scale: 1 }
                 }
-                transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
                 <JobSlide
                   job={job}
