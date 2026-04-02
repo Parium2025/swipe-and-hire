@@ -376,29 +376,23 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
               ref={(el) => setSlideRef(el, idx)}
               data-index={idx}
               className="w-full shrink-0 snap-start snap-always"
-              style={{ minHeight: sectionHeight, height: sectionHeight }}
+              style={{
+                minHeight: sectionHeight,
+                height: sectionHeight,
+                contain: 'layout style paint',
+                willChange: 'auto',
+              }}
             >
-              <motion.div
-                className="h-full"
-                initial={false}
-                animate={
-                  idx === jobs.length - 1 && isReturningFromEnd
-                    ? { opacity: [0.94, 1], y: [10, 0] }
-                    : { opacity: 1, y: 0 }
-                }
-                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <JobSlide
-                  job={job}
-                  applied={isApplied(job.id)}
-                  isVisible={Math.abs(idx - currentIndex) <= 1}
-                  isLast={idx === jobs.length - 1}
-                  sectionHeight={sectionHeight}
-                  onSwipeRight={handleSwipeRight}
-                  onSwipeLeft={handleSwipeLeft}
-                  onTap={handleTap}
-                />
-              </motion.div>
+              <JobSlide
+                job={job}
+                applied={isApplied(job.id)}
+                isVisible={Math.abs(idx - currentIndex) <= 1}
+                isLast={idx === jobs.length - 1}
+                sectionHeight={sectionHeight}
+                onSwipeRight={handleSwipeRight}
+                onSwipeLeft={handleSwipeLeft}
+                onTap={handleTap}
+              />
             </div>
           ))}
 
