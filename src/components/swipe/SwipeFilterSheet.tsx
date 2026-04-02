@@ -54,7 +54,6 @@ export function SwipeFilterSheet({
 }: SwipeFilterSheetProps) {
   const dragY = useMotionValue(0);
   const dragStartY = useRef(0);
-  const dragStartY = useRef(0);
   const isDragging = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const backdropOpacity = useTransform(dragY, [0, 400], [1, 0]);
