@@ -419,13 +419,16 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 style={{ backgroundColor: `${cfg.color}55` }}
               >
                 <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                {cfg.label.length > 10 ? (
+              {cfg.label.length > 10 ? (
                   <TooltipProvider delayDuration={200}>
-                    <Tooltip>
+                    <Tooltip
+                      open={isTouchCapable ? previewStage === stage : undefined}
+                      onOpenChange={isTouchCapable ? (open) => { if (!open) setPreviewStage(null); } : undefined}
+                    >
                       <TooltipTrigger asChild>
                         <span className="truncate cursor-default min-w-0">{cfg.label}</span>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
+                      <TooltipContent side="bottom" sideOffset={6} className="max-w-[min(90vw,600px)] break-words whitespace-normal">
                         <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
                       </TooltipContent>
                     </Tooltip>
