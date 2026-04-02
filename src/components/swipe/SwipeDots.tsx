@@ -13,13 +13,10 @@ export const SwipeDots = memo(function SwipeDots({
 }: SwipeDotsProps) {
   if (count > 30) return null;
 
-  const dotCount = count + (isEndStateActive ? 1 : 0);
-
   return (
     <div className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1">
-      {Array.from({ length: dotCount }).map((_, idx) => {
-        const isEndDot = idx === count;
-        const isActive = isEndDot ? isEndStateActive : idx === currentIndex && !isEndStateActive;
+      {Array.from({ length: count }).map((_, idx) => {
+        const isActive = idx === currentIndex && !isEndStateActive;
 
         return (
           <div
