@@ -361,7 +361,7 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
   }
 
   // Bygg items
-  const items = myCandidates.map((mc) => {
+  const rawItems = myCandidates.map((mc) => {
     const app = appMap.get(mc.application_id);
     const media = profileMediaMap[mc.applicant_id] || {};
     const activity = activityMap[mc.applicant_id] || {};
