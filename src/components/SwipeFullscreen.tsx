@@ -6,6 +6,9 @@ import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
 import { SwipeApplySheet } from '@/components/swipe/SwipeApplySheet';
 import { SwipeFilterSheet } from '@/components/swipe/SwipeFilterSheet';
+import { SwipeHeader } from '@/components/swipe/SwipeHeader';
+import { SwipeDots } from '@/components/swipe/SwipeDots';
+import { SwipeEndSection } from '@/components/swipe/SwipeEndSection';
 import type { SwipeJob } from '@/components/swipe/SwipeCard';
 
 export type { SwipeJob };
@@ -47,6 +50,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   const bounceReturnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const endBounceActiveRef = useRef(false);
+  const currentIndexRef = useRef(0);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
@@ -57,6 +61,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   const [endStateVisible, setEndStateVisible] = useState(false);
   const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
   const [sectionHeight, setSectionHeight] = useState(END_STATE_HEIGHT);
+
+  // Keep ref in sync for use in scroll handlers without re-creating them
+  currentIndexRef.current = currentIndex;
 
   const isApplied = useCallback(
     (jobId: string) => appliedJobIds.has(jobId) || localAppliedIds.has(jobId),
@@ -85,29 +92,20 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
   }, []);
 
-  const getSlideScrollTop = useCallback((index: number) => {
+  const getScrollTop = useCallback((element: HTMLElement | null) => {
     const container = scrollRef.current;
-    const slide = slideRefs.current[index];
-
-    if (!container || !slide) return null;
-
-    const paddingTop = Number.parseFloat(window.getComputedStyle(container).paddingTop) || 0;
+    if (!container || !element) return null;
     const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
-
-    return Math.min(Math.max(slide.offsetTop - paddingTop, 0), maxScrollTop);
+    return Math.min(Math.max(element.offsetTop, 0), maxScrollTop);
   }, []);
+
+  const getSlideScrollTop = useCallback((index: number) => {
+    return getScrollTop(slideRefs.current[index] ?? null);
+  }, [getScrollTop]);
 
   const getEndStateScrollTop = useCallback(() => {
-    const container = scrollRef.current;
-    const endSection = endSectionRef.current;
-
-    if (!container || !endSection) return null;
-
-    const paddingTop = Number.parseFloat(window.getComputedStyle(container).paddingTop) || 0;
-    const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
-
-    return Math.min(Math.max(endSection.offsetTop - paddingTop, 0), maxScrollTop);
-  }, []);
+    return getScrollTop(endSectionRef.current);
+  }, [getScrollTop]);
 
   const scrollToSlide = useCallback((index: number) => {
     const container = scrollRef.current;
@@ -203,7 +201,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
     const scrollTop = container.scrollTop;
     const endStateTop = getEndStateScrollTop();
-    const hasReachedEndState = !isReturningFromEnd && endStateTop !== null && scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
+    const hasReachedEndState = endStateTop !== null && scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
 
     setEndStateVisible(hasReachedEndState);
 
@@ -212,7 +210,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
     slideRefs.current.forEach((el, idx) => {
       if (!el) return;
-      const slideScrollTop = getSlideScrollTop(idx);
+      const slideScrollTop = getScrollTop(el);
       if (slideScrollTop === null) return;
 
       const dist = Math.abs(slideScrollTop - scrollTop);
@@ -223,7 +221,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     });
 
     setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
-  }, [getEndStateScrollTop, getSlideScrollTop, isReturningFromEnd, showEndBounce]);
+  }, [getEndStateScrollTop, getScrollTop, isReturningFromEnd, showEndBounce]);
 
   const handleScrollWithSnap = useCallback(() => {
     if (showEndBounce || isReturningFromEnd) return;
@@ -241,7 +239,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       const scrollTop = container.scrollTop;
       const endStateTop = getEndStateScrollTop();
       const hasScrolledIntoEndState =
-        currentIndex === jobs.length - 1 &&
+        currentIndexRef.current === jobs.length - 1 &&
         endStateTop !== null &&
         scrollTop >= endStateTop - END_BOUNCE_TRIGGER_OFFSET;
 
@@ -253,7 +251,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
       scrollEndTimerRef.current = null;
     }, SCROLL_SNAP_DELAY);
-  }, [currentIndex, getEndStateScrollTop, handleScroll, isReturningFromEnd, jobs.length, showEndBounce, triggerEndBounce]);
+  }, [getEndStateScrollTop, handleScroll, isReturningFromEnd, jobs.length, showEndBounce, triggerEndBounce]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -323,6 +321,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setShowApply(false);
   }, []);
 
+  const handleFilterOpen = useCallback(() => {
+    setShowFilter(true);
+  }, []);
+
   if (jobs.length === 0) {
     return createPortal(
       <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col">
@@ -389,60 +391,20 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         transition={{ duration: 0.2 }}
         className="fixed inset-0 z-[9999] bg-parium-gradient"
       >
-        <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
-          <div className="py-3">
-            <span className="text-xs text-white font-medium tabular-nums">
-              {displayIndex} / {jobs.length}
-            </span>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-11 w-11 items-center justify-center touch-manipulation"
-            aria-label="Stäng"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 transition-colors">
-              <X className="h-5 w-5 text-white" />
-            </div>
-          </button>
-        </div>
+        <SwipeHeader
+          displayIndex={displayIndex}
+          totalCount={jobs.length}
+          hasFilter={!!filterState}
+          activeFilterCount={filterState?.activeFilterCount ?? 0}
+          onFilterOpen={handleFilterOpen}
+          onClose={onClose}
+        />
 
-        {filterState && (
-          <div className="absolute top-0 left-1/2 z-20 -translate-x-1/2 pt-[env(safe-area-inset-top,0px)] pointer-events-none">
-            <div className="py-3">
-              <button
-                onClick={() => setShowFilter(true)}
-                className="pointer-events-auto relative flex items-center gap-2 h-12 px-6 rounded-full bg-white/10 border border-white/20 [@media(hover:hover)]:hover:bg-white/20 transition-colors active:scale-[0.97] touch-manipulation"
-                aria-label="Visa filter"
-              >
-                <SlidersHorizontal className="h-4.5 w-4.5 text-white" />
-                <span className="text-[15px] text-white font-medium">Visa filter</span>
-                {filterState.activeFilterCount > 0 && (
-                  <span className="flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-secondary text-white text-[11px] font-bold leading-none">
-                    {filterState.activeFilterCount}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {jobs.length <= 30 && (
-          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1">
-            {Array.from({ length: jobs.length + (isEndStateActive ? 1 : 0) }).map((_, idx) => {
-              const isEndDot = idx === jobs.length;
-              const isActive = isEndDot ? isEndStateActive : idx === currentIndex && !isEndStateActive;
-
-              return (
-                <div
-                  key={idx}
-                  className={`rounded-full transition-all duration-300 ${
-                    isActive ? 'w-2 h-2 bg-white' : 'w-1.5 h-1.5 bg-white/30'
-                  }`}
-                />
-              );
-            })}
-          </div>
-        )}
+        <SwipeDots
+          count={jobs.length}
+          currentIndex={currentIndex}
+          isEndStateActive={isEndStateActive}
+        />
 
         <div
           ref={scrollRef}
@@ -490,37 +452,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             </div>
           ))}
 
-          <div
+          <SwipeEndSection
             ref={endSectionRef}
-            aria-hidden="true"
-            className="w-full shrink-0 snap-start snap-always flex items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]"
-            style={{ minHeight: sectionHeight, height: sectionHeight }}
-          >
-            <motion.div
-              initial={false}
-              animate={
-                showEndBounce
-                  ? { opacity: 1, y: -10 }
-                  : endStateVisible
-                    ? { opacity: 1, y: 0 }
-                    : { opacity: 0, y: 20 }
-              }
-              transition={{
-                opacity: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
-                y: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
-              }}
-              className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
-            >
-              <motion.p
-                initial={false}
-                animate={endStateVisible || showEndBounce ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1], delay: endStateVisible || showEndBounce ? 0.05 : 0 }}
-                className="text-center text-[15px] font-medium text-white sm:text-base"
-              >
-                Inga fler jobb just nu
-              </motion.p>
-            </motion.div>
-          </div>
+            sectionHeight={sectionHeight}
+            showEndBounce={showEndBounce}
+            endStateVisible={endStateVisible}
+          />
         </div>
 
         {currentJob && showDetail && (
