@@ -134,9 +134,9 @@ export function SwipeableConversationItem({
             >
               <button
                 className={cn(
-                  "rounded-full flex items-center gap-1.5 px-4 py-2.5",
+                  "rounded-full flex items-center gap-1 px-3 py-2",
                   "bg-destructive/20 border border-destructive/40",
-                  "text-white font-medium text-sm",
+                  "text-white font-medium text-xs",
                   "transition-all duration-150",
                   deleteProgress >= 1 && "bg-destructive/30 border-destructive/50"
                 )}
@@ -147,7 +147,7 @@ export function SwipeableConversationItem({
                 }}
                 tabIndex={-1}
               >
-                <Trash2 className="h-4 w-4 text-white" />
+                <Trash2 className="h-3.5 w-3.5 text-white" />
                 <span>Ta bort</span>
               </button>
             </div>
