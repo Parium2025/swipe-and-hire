@@ -67,9 +67,9 @@ export function SwipeFilterSheet({
   useEffect(() => {
     if (open) {
       openedAtRef.current = Date.now();
+      setOpenCount(c => c + 1);
       setIsAnimatingIn(true);
       setDismissing(false);
-      // Stop any in-flight animation and reset position
       void sheetControls.stop();
       dragY.jump(0);
       void sheetControls.start({
