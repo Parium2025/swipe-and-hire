@@ -36,7 +36,7 @@ interface SwipeFullscreenProps {
 }
 
 /* ── Timing constants ────────────────────────────────────── */
-const SCROLL_SNAP_DELAY = 70;
+const SCROLL_SNAP_DELAY = 90;
 const END_BOUNCE_DELAY = 680;
 const END_BOUNCE_HIDE_DELAY = 680;
 const END_BOUNCE_TRIGGER_OFFSET = 12;
@@ -60,6 +60,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const currentIndexRef = useRef(0);
   const showEndBounceRef = useRef(false);
   const isReturningRef = useRef(false);
+  const rafRef = useRef<number>(0);
 
   /* ── State ────────────────────────────────────────────── */
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -92,6 +93,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     if (scrollEndTimerRef.current) { clearTimeout(scrollEndTimerRef.current); scrollEndTimerRef.current = null; }
     if (bounceReturnTimerRef.current) { clearTimeout(bounceReturnTimerRef.current); bounceReturnTimerRef.current = null; }
     if (bounceHideTimerRef.current) { clearTimeout(bounceHideTimerRef.current); bounceHideTimerRef.current = null; }
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
   }, []);
 
   const getScrollTop = useCallback((element: HTMLElement | null) => {
@@ -161,48 +163,52 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     }, END_BOUNCE_DELAY);
   }, [clearTimers, getSlideScrollTop, jobs.length]);
 
-  /* ── Scroll handler (fully ref-driven, never re-binds) ── */
+  /* ── Scroll handler (RAF-throttled for 60fps) ─────────── */
   const handleScrollWithSnap = useCallback(() => {
-    const container = scrollRef.current;
-    if (!container || showEndBounceRef.current || isReturningRef.current) return;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
-    const scrollTop = container.scrollTop;
-    const endStateTop = getEndStateScrollTop();
-    const hasReachedEndState = endStateTop !== null && scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
+    rafRef.current = requestAnimationFrame(() => {
+      const container = scrollRef.current;
+      if (!container || showEndBounceRef.current || isReturningRef.current) return;
 
-    setEndStateVisible(hasReachedEndState);
+      const scrollTop = container.scrollTop;
+      const endStateTop = getEndStateScrollTop();
+      const hasReachedEndState = endStateTop !== null && scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
 
-    // Find closest slide
-    let bestIdx = 0;
-    let bestDist = Infinity;
-    slideRefs.current.forEach((el, idx) => {
-      if (!el) return;
-      const slideTop = getScrollTop(el);
-      if (slideTop === null) return;
-      const dist = Math.abs(slideTop - scrollTop);
-      if (dist < bestDist) { bestDist = dist; bestIdx = idx; }
+      setEndStateVisible(hasReachedEndState);
+
+      // Find closest slide
+      let bestIdx = 0;
+      let bestDist = Infinity;
+      slideRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const slideTop = getScrollTop(el);
+        if (slideTop === null) return;
+        const dist = Math.abs(slideTop - scrollTop);
+        if (dist < bestDist) { bestDist = dist; bestIdx = idx; }
+      });
+      setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
+
+      // Debounced end-of-stack check
+      if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
+
+      scrollEndTimerRef.current = setTimeout(() => {
+        const st = scrollRef.current?.scrollTop;
+        if (st == null || jobs.length === 0) return;
+
+        const endTop = getEndStateScrollTop();
+        const hasScrolledIntoEnd =
+          currentIndexRef.current === jobs.length - 1 &&
+          endTop !== null &&
+          st >= endTop - END_BOUNCE_TRIGGER_OFFSET;
+
+        if (hasScrolledIntoEnd) {
+          triggerEndBounce();
+        }
+
+        scrollEndTimerRef.current = null;
+      }, SCROLL_SNAP_DELAY);
     });
-    setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
-
-    // Debounced snap check
-    if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
-
-    scrollEndTimerRef.current = setTimeout(() => {
-      const st = scrollRef.current?.scrollTop;
-      if (st == null || jobs.length === 0) return;
-
-      const endTop = getEndStateScrollTop();
-      const hasScrolledIntoEnd =
-        currentIndexRef.current === jobs.length - 1 &&
-        endTop !== null &&
-        st >= endTop - END_BOUNCE_TRIGGER_OFFSET;
-
-      if (hasScrolledIntoEnd) {
-        triggerEndBounce();
-      }
-
-      scrollEndTimerRef.current = null;
-    }, SCROLL_SNAP_DELAY);
   }, [getEndStateScrollTop, getScrollTop, jobs.length, triggerEndBounce]);
 
   /* ── Effects ──────────────────────────────────────────── */
@@ -366,8 +372,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           style={{
             WebkitOverflowScrolling: 'touch',
             willChange: 'scroll-position',
-            contain: 'layout style',
+            contain: 'layout style paint',
             scrollPaddingTop: '0px',
+            scrollBehavior: 'smooth',
           }}
         >
           {jobs.map((job, idx) => (
@@ -376,29 +383,23 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
               ref={(el) => setSlideRef(el, idx)}
               data-index={idx}
               className="w-full shrink-0 snap-start snap-always"
-              style={{ minHeight: sectionHeight, height: sectionHeight }}
+              style={{
+                minHeight: sectionHeight,
+                height: sectionHeight,
+                contain: 'layout style paint',
+                willChange: 'auto',
+              }}
             >
-              <motion.div
-                className="h-full"
-                initial={false}
-                animate={
-                  idx === jobs.length - 1 && isReturningFromEnd
-                    ? { opacity: [0.94, 1], y: [10, 0] }
-                    : { opacity: 1, y: 0 }
-                }
-                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <JobSlide
-                  job={job}
-                  applied={isApplied(job.id)}
-                  isVisible={Math.abs(idx - currentIndex) <= 1}
-                  isLast={idx === jobs.length - 1}
-                  sectionHeight={sectionHeight}
-                  onSwipeRight={handleSwipeRight}
-                  onSwipeLeft={handleSwipeLeft}
-                  onTap={handleTap}
-                />
-              </motion.div>
+              <JobSlide
+                job={job}
+                applied={isApplied(job.id)}
+                isVisible={Math.abs(idx - currentIndex) <= 1}
+                isLast={idx === jobs.length - 1}
+                sectionHeight={sectionHeight}
+                onSwipeRight={handleSwipeRight}
+                onSwipeLeft={handleSwipeLeft}
+                onTap={handleTap}
+              />
             </div>
           ))}
 
