@@ -67,7 +67,10 @@ export function SwipeFilterSheet({
     if (open) {
       openedAtRef.current = Date.now();
       setIsAnimatingIn(true);
-      dragY.set(0);
+      setDismissing(false);
+      // Stop any in-flight animation and reset position
+      void sheetControls.stop();
+      dragY.jump(0);
       void sheetControls.start({
         y: 0,
         transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
@@ -76,16 +79,19 @@ export function SwipeFilterSheet({
   }, [open, dragY, sheetControls]);
 
   const animatedClose = useCallback(() => {
+    if (dismissing) return;
     setDismissing(true);
-    void sheetControls.start({
-      y: '100%',
-      transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
+    animate(dragY, window.innerHeight, {
+      type: 'spring',
+      damping: 34,
+      stiffness: 400,
+      mass: 0.8,
+      onComplete: () => {
+        onClose();
+        setDismissing(false);
+      },
     });
-    setTimeout(() => {
-      onClose();
-      setDismissing(false);
-    }, 220);
-  }, [onClose, sheetControls]);
+  }, [onClose, dragY, dismissing]);
 
   const handleBackdropDismiss = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
     if (Date.now() - openedAtRef.current < 420) {
