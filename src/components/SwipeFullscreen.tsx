@@ -133,7 +133,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     showEndBounceRef.current = true;
     setEndStateVisible(true);
     setCurrentIndex(jobs.length - 1);
-  }, [clearTimers, getSlideScrollTop, jobs.length]);
+  }, [clearTimers, jobs.length]);
 
   /* ── Scroll handler (RAF-throttled for 60fps) ─────────── */
   const handleScrollWithSnap = useCallback(() => {
