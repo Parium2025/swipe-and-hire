@@ -161,48 +161,53 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     }, END_BOUNCE_DELAY);
   }, [clearTimers, getSlideScrollTop, jobs.length]);
 
-  /* ── Scroll handler (fully ref-driven, never re-binds) ── */
+  /* ── Scroll handler (RAF-throttled for 60fps) ─────────── */
+  const rafRef = useRef<number>(0);
   const handleScrollWithSnap = useCallback(() => {
-    const container = scrollRef.current;
-    if (!container || showEndBounceRef.current || isReturningRef.current) return;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
-    const scrollTop = container.scrollTop;
-    const endStateTop = getEndStateScrollTop();
-    const hasReachedEndState = endStateTop !== null && scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
+    rafRef.current = requestAnimationFrame(() => {
+      const container = scrollRef.current;
+      if (!container || showEndBounceRef.current || isReturningRef.current) return;
 
-    setEndStateVisible(hasReachedEndState);
+      const scrollTop = container.scrollTop;
+      const endStateTop = getEndStateScrollTop();
+      const hasReachedEndState = endStateTop !== null && scrollTop >= Math.max(0, endStateTop - SNAP_REVEAL_OFFSET);
 
-    // Find closest slide
-    let bestIdx = 0;
-    let bestDist = Infinity;
-    slideRefs.current.forEach((el, idx) => {
-      if (!el) return;
-      const slideTop = getScrollTop(el);
-      if (slideTop === null) return;
-      const dist = Math.abs(slideTop - scrollTop);
-      if (dist < bestDist) { bestDist = dist; bestIdx = idx; }
+      setEndStateVisible(hasReachedEndState);
+
+      // Find closest slide
+      let bestIdx = 0;
+      let bestDist = Infinity;
+      slideRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const slideTop = getScrollTop(el);
+        if (slideTop === null) return;
+        const dist = Math.abs(slideTop - scrollTop);
+        if (dist < bestDist) { bestDist = dist; bestIdx = idx; }
+      });
+      setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
+
+      // Debounced end-of-stack check
+      if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
+
+      scrollEndTimerRef.current = setTimeout(() => {
+        const st = scrollRef.current?.scrollTop;
+        if (st == null || jobs.length === 0) return;
+
+        const endTop = getEndStateScrollTop();
+        const hasScrolledIntoEnd =
+          currentIndexRef.current === jobs.length - 1 &&
+          endTop !== null &&
+          st >= endTop - END_BOUNCE_TRIGGER_OFFSET;
+
+        if (hasScrolledIntoEnd) {
+          triggerEndBounce();
+        }
+
+        scrollEndTimerRef.current = null;
+      }, SCROLL_SNAP_DELAY);
     });
-    setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
-
-    // Debounced snap check
-    if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
-
-    scrollEndTimerRef.current = setTimeout(() => {
-      const st = scrollRef.current?.scrollTop;
-      if (st == null || jobs.length === 0) return;
-
-      const endTop = getEndStateScrollTop();
-      const hasScrolledIntoEnd =
-        currentIndexRef.current === jobs.length - 1 &&
-        endTop !== null &&
-        st >= endTop - END_BOUNCE_TRIGGER_OFFSET;
-
-      if (hasScrolledIntoEnd) {
-        triggerEndBounce();
-      }
-
-      scrollEndTimerRef.current = null;
-    }, SCROLL_SNAP_DELAY);
   }, [getEndStateScrollTop, getScrollTop, jobs.length, triggerEndBounce]);
 
   /* ── Effects ──────────────────────────────────────────── */
