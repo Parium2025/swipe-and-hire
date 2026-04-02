@@ -170,28 +170,38 @@ export function SwipeableConversationItem({
 
       {/* Delete confirmation dialog – matches app standard */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContentNoFocus className="max-w-lg bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden">
-          <AlertDialogHeader className="text-center">
-            <div className="flex justify-center mb-2">
-              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                <AlertTriangle className="h-6 w-6 text-white" />
+        <AlertDialogContentNoFocus
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+        >
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-white" />
               </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort konversation?
+              </AlertDialogTitle>
             </div>
-            <AlertDialogTitle className="text-center text-white">
-              Ta bort konversation?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-white/70">
-              Vill du ta bort konversationen med <span className="font-medium text-white">{conversationName}</span>? Du försvinner från chatten.
+            <AlertDialogDescription className="text-white text-sm leading-relaxed">
+              Vill du ta bort konversationen med{' '}
+              <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">
+                &quot;{conversationName}&quot;
+              </span>
+              ? Du försvinner från chatten.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex gap-3 sm:justify-center">
-            <AlertDialogCancel className="rounded-full border-white/20 text-white hover:bg-white/10">
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+            <AlertDialogCancel
+              onClick={() => setShowConfirm(false)}
+              className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               disabled={isDeleting}
-              className="rounded-full bg-destructive/20 border border-destructive/40 text-white hover:bg-destructive/30"
+              variant="destructiveSoft"
+              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort
