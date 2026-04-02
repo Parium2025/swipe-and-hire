@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, type MouseEvent, type PointerEvent, type TouchEvent } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, useAnimation, animate } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { X, Search, MapPin, Briefcase, Clock, ArrowUpDown, Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,7 +53,6 @@ export function SwipeFilterSheet({
   activeFilterCount,
 }: SwipeFilterSheetProps) {
   const dragY = useMotionValue(0);
-  const sheetControls = useAnimation();
   const dragStartY = useRef(0);
   const isDragging = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -61,23 +60,16 @@ export function SwipeFilterSheet({
   const [dismissing, setDismissing] = useState(false);
   const [isAnimatingIn, setIsAnimatingIn] = useState(true);
   const openedAtRef = useRef(0);
-  const [openCount, setOpenCount] = useState(0);
 
-  // Start animation on open
+  // Reset animation state on every open
   useEffect(() => {
     if (open) {
       openedAtRef.current = Date.now();
-      setOpenCount(c => c + 1);
       setIsAnimatingIn(true);
       setDismissing(false);
-      void sheetControls.stop();
       dragY.jump(0);
-      void sheetControls.start({
-        y: 0,
-        transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
-      }).then(() => setIsAnimatingIn(false));
     }
-  }, [open, dragY, sheetControls]);
+  }, [open, dragY]);
 
   const animatedClose = useCallback(() => {
     if (dismissing) return;
@@ -159,9 +151,9 @@ export function SwipeFilterSheet({
   }, [dragY]);
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {open && (
-        <div key={openCount} className="fixed inset-0 z-[10002]">
+        <div key="swipe-filter" className="fixed inset-0 z-[10002]">
           {/* Backdrop */}
           <motion.div
             className="absolute inset-0 bg-black/60"
@@ -178,9 +170,10 @@ export function SwipeFilterSheet({
           <motion.div
             className="absolute inset-x-0 bottom-0 max-h-[92vh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
             initial={{ y: '100%' }}
-            animate={sheetControls}
-            exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
+            onAnimationComplete={() => setIsAnimatingIn(false)}
             style={isAnimatingIn ? undefined : { y: dragY }}
             onPointerDown={stopSheetPropagation}
             onClick={stopSheetPropagation}
