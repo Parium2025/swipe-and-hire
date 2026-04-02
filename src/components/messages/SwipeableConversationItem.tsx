@@ -1,17 +1,16 @@
 import { useRef, useState, useCallback } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { AlertTriangle } from 'lucide-react';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 
 const DELETE_THRESHOLD = 80;
 const MAX_TRANSLATE = 100;
@@ -60,7 +59,6 @@ export function SwipeableConversationItem({
     const deltaX = touch.clientX - startXRef.current;
     const deltaY = touch.clientY - startYRef.current;
 
-    // Lock direction after 10px movement
     if (!directionLockedRef.current) {
       if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
         directionLockedRef.current = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
@@ -68,11 +66,10 @@ export function SwipeableConversationItem({
       return;
     }
 
-    // If vertical, don't interfere
     if (directionLockedRef.current === 'vertical') return;
 
-    // Only allow swiping RIGHT (deltaX > 0) to reveal delete on the left
-    if (deltaX <= 0) {
+    // Only allow swiping LEFT (deltaX < 0) to reveal delete on the right
+    if (deltaX >= 0) {
       if (isSwipingRef.current) {
         setTranslateX(0);
       }
@@ -81,21 +78,20 @@ export function SwipeableConversationItem({
 
     isSwipingRef.current = true;
 
-    // Apply resistance after threshold
-    const clamped = Math.min(deltaX, MAX_TRANSLATE);
+    const absDelta = Math.abs(deltaX);
+    const clamped = Math.min(absDelta, MAX_TRANSLATE);
     const dampened = clamped > DELETE_THRESHOLD
       ? DELETE_THRESHOLD + (clamped - DELETE_THRESHOLD) * 0.3
       : clamped;
 
     currentXRef.current = dampened;
-    setTranslateX(dampened);
+    setTranslateX(-dampened); // negative = slide left
   }, []);
 
   const handleTouchEnd = useCallback(() => {
     if (!isSwipingRef.current) return;
 
     if (currentXRef.current >= DELETE_THRESHOLD) {
-      // Trigger delete confirmation
       resetPosition();
       setShowConfirm(true);
     } else {
@@ -111,8 +107,8 @@ export function SwipeableConversationItem({
     onDelete();
   }, [onDelete]);
 
-  const deleteProgress = Math.min(translateX / DELETE_THRESHOLD, 1);
-  const showDeleteButton = translateX > 5;
+  const deleteProgress = Math.min(Math.abs(translateX) / DELETE_THRESHOLD, 1);
+  const showDeleteButton = Math.abs(translateX) > 5;
 
   return (
     <>
@@ -123,12 +119,12 @@ export function SwipeableConversationItem({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Delete button background */}
+        {/* Delete button on the RIGHT side */}
         {showDeleteButton && (
-          <div className="absolute inset-y-0 left-0 flex items-center z-0">
+          <div className="absolute inset-y-0 right-0 flex items-center z-0 pr-2">
             <div
               className={cn(
-                "flex items-center justify-center ml-2 transition-transform",
+                "flex items-center justify-center transition-transform",
                 deleteProgress >= 1 ? "scale-110" : "scale-100"
               )}
               style={{
@@ -158,7 +154,7 @@ export function SwipeableConversationItem({
           </div>
         )}
 
-        {/* Content layer */}
+        {/* Content layer – slides LEFT to reveal delete on right */}
         <div
           className={cn(
             "relative z-10",
@@ -172,10 +168,10 @@ export function SwipeableConversationItem({
         </div>
       </div>
 
-      {/* Delete confirmation dialog */}
+      {/* Delete confirmation dialog – matches app standard */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContent className="bg-card border-white/10">
-          <AlertDialogHeader>
+        <AlertDialogContentNoFocus className="max-w-lg bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden">
+          <AlertDialogHeader className="text-center">
             <div className="flex justify-center mb-2">
               <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
                 <AlertTriangle className="h-6 w-6 text-white" />
@@ -201,7 +197,7 @@ export function SwipeableConversationItem({
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogContentNoFocus>
       </AlertDialog>
     </>
   );
