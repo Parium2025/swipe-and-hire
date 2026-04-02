@@ -121,8 +121,8 @@ export const CandidateCardContent = memo(function CandidateCardContent({
                   {candidate.first_name} {candidate.last_name}
                 </p>
               </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs">
-                <p>
+              <TooltipContent side="top" className="max-w-[min(90vw,500px)] break-words whitespace-pre-wrap">
+                <p className="break-words whitespace-pre-wrap">
                   {candidate.first_name} {candidate.last_name}
                 </p>
               </TooltipContent>
