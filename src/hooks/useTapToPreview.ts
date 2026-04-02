@@ -60,7 +60,7 @@ export function useTapToPreview() {
       // First tap → show preview tooltip
       setPreviewId(id);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setPreviewId(null), 2500);
+      timeoutRef.current = setTimeout(() => setPreviewId(null), 1800);
     }
   }, [isTouch, previewId]);
 
