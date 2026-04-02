@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, type MouseEvent, type PointerEvent, type TouchEvent } from 'react';
+import { useState, useLayoutEffect, useRef, useCallback, type MouseEvent, type PointerEvent, type TouchEvent } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { X, Search, MapPin, Briefcase, Clock, ArrowUpDown, Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,7 @@ interface SwipeFilterSheetProps {
 }
 
 const DISMISS_THRESHOLD = 120;
+const ENTER_ANIMATION_GUARD_MS = 420;
 
 const sortLabels: Record<string, string> = {
   newest: 'Nyast först',
@@ -61,15 +62,29 @@ export function SwipeFilterSheet({
   const [isAnimatingIn, setIsAnimatingIn] = useState(true);
   const openedAtRef = useRef(0);
 
-  // Reset animation state on every open
-  useEffect(() => {
-    if (open) {
-      openedAtRef.current = Date.now();
-      setIsAnimatingIn(true);
-      setDismissing(false);
-      dragY.jump(0);
-    }
+  useLayoutEffect(() => {
+    if (!open) return;
+
+    openedAtRef.current = Date.now();
+    setIsAnimatingIn(true);
+    setDismissing(false);
+    dragY.jump(0);
+
+    const timer = window.setTimeout(() => {
+      setIsAnimatingIn(false);
+    }, ENTER_ANIMATION_GUARD_MS);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [open, dragY]);
+
+  const finalizeClose = useCallback(() => {
+    dragY.jump(0);
+    setIsAnimatingIn(true);
+    setDismissing(false);
+    onClose();
+  }, [dragY, onClose]);
 
   const animatedClose = useCallback(() => {
     if (dismissing) return;
@@ -79,12 +94,9 @@ export function SwipeFilterSheet({
       damping: 34,
       stiffness: 400,
       mass: 0.8,
-      onComplete: () => {
-        onClose();
-        setDismissing(false);
-      },
+      onComplete: finalizeClose,
     });
-  }, [onClose, dragY, dismissing]);
+  }, [dragY, dismissing, finalizeClose]);
 
   const handleBackdropDismiss = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
     if (Date.now() - openedAtRef.current < 420) {
@@ -99,7 +111,6 @@ export function SwipeFilterSheet({
     event.stopPropagation();
   }, []);
 
-  // Drag to dismiss
   const handleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
     const scrollTop = scrollRef.current?.scrollTop ?? 0;
     if (scrollTop <= 0) {
@@ -127,21 +138,17 @@ export function SwipeFilterSheet({
     const currentY = dragY.get();
     if (currentY > DISMISS_THRESHOLD) {
       setDismissing(true);
-      // Animate dragY (which drives the style) to avoid conflict with sheetControls
       animate(dragY, window.innerHeight, {
         type: 'spring',
         damping: 34,
         stiffness: 400,
         mass: 0.8,
-        onComplete: () => {
-          onClose();
-          setDismissing(false);
-        },
+        onComplete: finalizeClose,
       });
     } else {
       animate(dragY, 0, { type: 'spring', damping: 24, stiffness: 400 });
     }
-  }, [dragY, onClose]);
+  }, [dragY, finalizeClose]);
 
   const handleHandleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
     isDragging.current = true;
@@ -173,7 +180,6 @@ export function SwipeFilterSheet({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
-            onAnimationComplete={() => setIsAnimatingIn(false)}
             style={isAnimatingIn ? undefined : { y: dragY }}
             onPointerDown={stopSheetPropagation}
             onClick={stopSheetPropagation}
