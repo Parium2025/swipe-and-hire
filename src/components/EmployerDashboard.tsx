@@ -378,6 +378,7 @@ const EmployerDashboard = memo(() => {
         draftCount={draftJobsCount}
         showDrafts
       />
+      </div>
 
       {/* Result indicator */}
       {searchTerm && (
