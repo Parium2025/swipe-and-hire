@@ -366,8 +366,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           style={{
             WebkitOverflowScrolling: 'touch',
             willChange: 'scroll-position',
-            contain: 'layout style',
+            contain: 'layout style paint',
             scrollPaddingTop: '0px',
+            scrollBehavior: 'smooth',
           }}
         >
           {jobs.map((job, idx) => (
