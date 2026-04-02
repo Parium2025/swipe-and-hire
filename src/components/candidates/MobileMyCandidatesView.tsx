@@ -368,6 +368,21 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     lastTouchTapRef.current = { stage, time: now };
   }, [isReadOnly]);
 
+  // Instantly dismiss tooltip when tapping anywhere outside stage tabs
+  useEffect(() => {
+    if (!previewStage) return;
+    const dismiss = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-stage-tab]')) {
+        setPreviewStage(null);
+        if (previewTimerRef.current) { clearTimeout(previewTimerRef.current); previewTimerRef.current = undefined; }
+        if (previewDelayRef.current) { clearTimeout(previewDelayRef.current); previewDelayRef.current = undefined; }
+      }
+    };
+    document.addEventListener('touchstart', dismiss, { passive: true });
+    return () => document.removeEventListener('touchstart', dismiss);
+  }, [previewStage]);
+
   useEffect(() => {
     if (stages.length === 0) return;
     if (!stages.includes(activeTab)) {
@@ -418,6 +433,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
               <div
                 key={stage}
                 ref={(el) => { tabRefs.current[stage] = el; }}
+                data-stage-tab
                 tabIndex={0}
                 onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
                 onClick={() => handleStageClick(stage)}

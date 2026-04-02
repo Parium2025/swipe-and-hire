@@ -300,6 +300,21 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     }
   }, [activeTab]);
 
+  // Instantly dismiss tooltip when tapping anywhere outside stage tabs
+  useEffect(() => {
+    if (!previewStage) return;
+    const dismiss = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-stage-tab]')) {
+        setPreviewStage(null);
+        if (previewTimerRef.current) { clearTimeout(previewTimerRef.current); previewTimerRef.current = undefined; }
+        if (previewDelayRef.current) { clearTimeout(previewDelayRef.current); previewDelayRef.current = undefined; }
+      }
+    };
+    document.addEventListener('touchstart', dismiss, { passive: true });
+    return () => document.removeEventListener('touchstart', dismiss);
+  }, [previewStage]);
+
   // Swipe between stage tabs on candidate list area
   const swipeToNextStage = useCallback(() => {
     const idx = stages.indexOf(activeTab);
