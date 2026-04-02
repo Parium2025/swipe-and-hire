@@ -92,6 +92,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     if (scrollEndTimerRef.current) { clearTimeout(scrollEndTimerRef.current); scrollEndTimerRef.current = null; }
     if (bounceReturnTimerRef.current) { clearTimeout(bounceReturnTimerRef.current); bounceReturnTimerRef.current = null; }
     if (bounceHideTimerRef.current) { clearTimeout(bounceHideTimerRef.current); bounceHideTimerRef.current = null; }
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
   }, []);
 
   const getScrollTop = useCallback((element: HTMLElement | null) => {
