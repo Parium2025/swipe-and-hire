@@ -121,7 +121,7 @@ export function SwipeableConversationItem({
       >
         {/* Delete button on the RIGHT side */}
         {showDeleteButton && (
-          <div className="absolute inset-y-0 right-0 flex items-center z-0 pr-2">
+          <div className="absolute inset-y-0 right-0 flex items-center z-0 pr-3">
             <div
               className={cn(
                 "flex items-center justify-center transition-transform",
