@@ -81,7 +81,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   /* ── Derived values ───────────────────────────────────── */
   const currentJob = jobs[currentIndex];
   const isEndStateActive = endStateVisible || showEndBounce;
-  const displayIndex = isEndStateActive ? jobs.length + 1 : Math.min(currentIndex + 1, jobs.length);
+  const displayIndex = Math.min(currentIndex + 1, jobs.length);
 
   /* ── Helpers ──────────────────────────────────────────── */
   const isApplied = useCallback(
