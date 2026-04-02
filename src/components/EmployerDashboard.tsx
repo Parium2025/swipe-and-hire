@@ -368,19 +368,16 @@ const EmployerDashboard = memo(() => {
         hasDrafts={hasDrafts}
       />
 
-      {/* Mobile: Title + Tabs without card wrapper */}
-      <div className="md:hidden flex flex-col items-center space-y-3">
-        <h3 className="dashboard-section-heading text-white font-medium text-center">Mina jobbannonser</h3>
-        <div className="flex justify-center">
-          <JobStatusTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            activeCount={activeJobs.length}
-            expiredCount={expiredJobsCount}
-            draftCount={draftJobsCount}
-            showDrafts
-          />
-        </div>
+      {/* Status tabs: Aktiva / Utgångna / Utkast */}
+      <div className="flex justify-center">
+        <JobStatusTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          activeCount={activeJobs.length}
+          expiredCount={expiredJobsCount}
+          draftCount={draftJobsCount}
+          showDrafts
+        />
       </div>
 
       {/* Result indicator */}
@@ -400,19 +397,9 @@ const EmployerDashboard = memo(() => {
       {/* Desktop: Jobs Table inside Card */}
       <Card className="bg-white/5 border-0 hidden md:block" style={{ contain: 'layout style' }}>
         <CardHeader className="md:p-4">
-          <div className="flex flex-row items-center justify-between gap-4">
-            <CardTitle className="text-sm text-white text-left">
-              Mina jobbannonser
-            </CardTitle>
-            <JobStatusTabs
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              activeCount={activeJobs.length}
-              expiredCount={expiredJobsCount}
-              draftCount={draftJobsCount}
-              showDrafts
-            />
-          </div>
+          <CardTitle className="text-sm text-white md:text-left">
+            Mina jobbannonser
+          </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4">
           {/* Desktop: Table view */}

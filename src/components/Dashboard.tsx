@@ -179,31 +179,20 @@ const Dashboard = memo(() => {
         </div>
       )}
 
-      {/* Mobile: Title + Tabs without card wrapper */}
-      <div className="md:hidden flex flex-col items-center space-y-3">
-        <h3 className="dashboard-section-heading text-white font-medium text-center">{tabTitle}</h3>
-        <div className="flex justify-center">
-          <JobStatusTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            activeCount={activeJobs.length}
-            expiredCount={expiredJobs.length}
-          />
-        </div>
+      {/* Status tabs */}
+      <div className="flex justify-center">
+        <JobStatusTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          activeCount={activeJobs.length}
+          expiredCount={expiredJobs.length}
+        />
       </div>
 
       {/* Desktop: Card-wrapped table */}
       <Card className="hidden md:block bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg">
         <CardHeader className="p-4">
-          <div className="flex flex-row items-center justify-between gap-4">
-            <CardTitle className="text-sm text-white text-left">{tabTitle}</CardTitle>
-            <JobStatusTabs
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              activeCount={activeJobs.length}
-              expiredCount={expiredJobs.length}
-            />
-          </div>
+          <CardTitle className="text-sm text-white text-left">{tabTitle}</CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4">
           <div className="hidden md:block w-full">
