@@ -313,9 +313,28 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
 
   const handleStageClick = useCallback((stage: string) => {
-    setActiveTab(stage);
+    const cfg = stageConfig[stage];
+    const isLongLabel = cfg && cfg.label.length > 10;
+
+    // Touch + long label → tap-to-preview: first tap = tooltip, second tap = select
+    if (isTouchCapable && isLongLabel) {
+      if (previewStage === stage) {
+        // Second tap → select
+        setPreviewStage(null);
+        if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+        setActiveTab(stage);
+      } else {
+        // First tap → show tooltip preview
+        setPreviewStage(stage);
+        if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+        previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2500);
+        return; // Don't switch tab yet
+      }
+    } else {
+      setActiveTab(stage);
+    }
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
-  }, []);
+  }, [isTouchCapable, previewStage, stageConfig]);
 
   const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
     // Mouse: handled by onClick. Touch/pen: only track double-tap for settings menu.
