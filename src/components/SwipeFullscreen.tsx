@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, SlidersHorizontal } from 'lucide-react';
 import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
 import { SwipeApplySheet } from '@/components/swipe/SwipeApplySheet';
@@ -9,6 +8,7 @@ import { SwipeFilterSheet } from '@/components/swipe/SwipeFilterSheet';
 import { SwipeHeader } from '@/components/swipe/SwipeHeader';
 import { SwipeDots } from '@/components/swipe/SwipeDots';
 import { SwipeEndSection } from '@/components/swipe/SwipeEndSection';
+import { SwipeEmptyState } from '@/components/swipe/SwipeEmptyState';
 import type { SwipeJob } from '@/components/swipe/SwipeCard';
 
 export type { SwipeJob };
@@ -35,6 +35,7 @@ interface SwipeFullscreenProps {
   filterState?: SwipeFilterState;
 }
 
+/* ── Timing constants ────────────────────────────────────── */
 const SCROLL_SNAP_DELAY = 70;
 const END_BOUNCE_DELAY = 680;
 const END_BOUNCE_HIDE_DELAY = 680;
@@ -42,7 +43,13 @@ const END_BOUNCE_TRIGGER_OFFSET = 12;
 const END_STATE_HEIGHT = '100dvh';
 const SNAP_REVEAL_OFFSET = 40;
 
-export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobIds, onClose, filterState }: SwipeFullscreenProps) {
+export const SwipeFullscreen = memo(function SwipeFullscreen({
+  jobs,
+  appliedJobIds,
+  onClose,
+  filterState,
+}: SwipeFullscreenProps) {
+  /* ── Refs ─────────────────────────────────────────────── */
   const scrollRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const endSectionRef = useRef<HTMLDivElement | null>(null);
@@ -51,7 +58,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const endBounceActiveRef = useRef(false);
   const currentIndexRef = useRef(0);
+  const showEndBounceRef = useRef(false);
+  const isReturningRef = useRef(false);
 
+  /* ── State ────────────────────────────────────────────── */
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
   const [showApply, setShowApply] = useState(false);
@@ -62,34 +72,26 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
   const [sectionHeight, setSectionHeight] = useState(END_STATE_HEIGHT);
 
-  // Keep ref in sync for use in scroll handlers without re-creating them
+  /* ── Keep refs in sync ────────────────────────────────── */
   currentIndexRef.current = currentIndex;
+  showEndBounceRef.current = showEndBounce;
+  isReturningRef.current = isReturningFromEnd;
 
-  const isApplied = useCallback(
-    (jobId: string) => appliedJobIds.has(jobId) || localAppliedIds.has(jobId),
-    [appliedJobIds, localAppliedIds]
-  );
-
+  /* ── Derived values ───────────────────────────────────── */
   const currentJob = jobs[currentIndex];
   const isEndStateActive = endStateVisible || showEndBounce;
   const displayIndex = isEndStateActive ? jobs.length + 1 : Math.min(currentIndex + 1, jobs.length);
 
+  /* ── Helpers ──────────────────────────────────────────── */
+  const isApplied = useCallback(
+    (jobId: string) => appliedJobIds.has(jobId) || localAppliedIds.has(jobId),
+    [appliedJobIds, localAppliedIds],
+  );
+
   const clearTimers = useCallback(() => {
-    if (scrollEndTimerRef.current) {
-      clearTimeout(scrollEndTimerRef.current);
-      scrollEndTimerRef.current = null;
-    }
-
-    if (bounceReturnTimerRef.current) {
-      clearTimeout(bounceReturnTimerRef.current);
-      bounceReturnTimerRef.current = null;
-    }
-
-    if (bounceHideTimerRef.current) {
-      clearTimeout(bounceHideTimerRef.current);
-      bounceHideTimerRef.current = null;
-    }
-
+    if (scrollEndTimerRef.current) { clearTimeout(scrollEndTimerRef.current); scrollEndTimerRef.current = null; }
+    if (bounceReturnTimerRef.current) { clearTimeout(bounceReturnTimerRef.current); bounceReturnTimerRef.current = null; }
+    if (bounceHideTimerRef.current) { clearTimeout(bounceHideTimerRef.current); bounceHideTimerRef.current = null; }
   }, []);
 
   const getScrollTop = useCallback((element: HTMLElement | null) => {
@@ -99,33 +101,34 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     return Math.min(Math.max(element.offsetTop, 0), maxScrollTop);
   }, []);
 
-  const getSlideScrollTop = useCallback((index: number) => {
-    return getScrollTop(slideRefs.current[index] ?? null);
-  }, [getScrollTop]);
+  const getSlideScrollTop = useCallback(
+    (index: number) => getScrollTop(slideRefs.current[index] ?? null),
+    [getScrollTop],
+  );
 
-  const getEndStateScrollTop = useCallback(() => {
-    return getScrollTop(endSectionRef.current);
-  }, [getScrollTop]);
+  const getEndStateScrollTop = useCallback(
+    () => getScrollTop(endSectionRef.current),
+    [getScrollTop],
+  );
 
   const scrollToSlide = useCallback((index: number) => {
     const container = scrollRef.current;
     const targetTop = getSlideScrollTop(index);
-
     if (!container || targetTop === null) return;
-
-    container.scrollTo({
-      top: targetTop,
-      behavior: 'smooth',
-    });
+    container.scrollTo({ top: targetTop, behavior: 'smooth' });
   }, [getSlideScrollTop]);
 
+  /* ── End-of-stack bounce ──────────────────────────────── */
   const triggerEndBounce = useCallback(() => {
-    if (jobs.length === 0 || showEndBounce || endBounceActiveRef.current) return;
+    if (jobs.length === 0 || showEndBounceRef.current || endBounceActiveRef.current) return;
 
     endBounceActiveRef.current = true;
     clearTimers();
+
     setIsReturningFromEnd(false);
+    isReturningRef.current = false;
     setShowEndBounce(true);
+    showEndBounceRef.current = true;
     setEndStateVisible(true);
     setCurrentIndex(jobs.length - 1);
 
@@ -136,7 +139,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       const targetTop = getSlideScrollTop(lastIndex);
 
       setIsReturningFromEnd(true);
+      isReturningRef.current = true;
       setShowEndBounce(false);
+      showEndBounceRef.current = false;
       setEndStateVisible(false);
 
       if (container && targetTop !== null) {
@@ -149,55 +154,17 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
       bounceHideTimerRef.current = setTimeout(() => {
         setIsReturningFromEnd(false);
+        isReturningRef.current = false;
         endBounceActiveRef.current = false;
         bounceHideTimerRef.current = null;
       }, END_BOUNCE_HIDE_DELAY);
     }, END_BOUNCE_DELAY);
-  }, [clearTimers, getSlideScrollTop, jobs.length, showEndBounce]);
+  }, [clearTimers, getSlideScrollTop, jobs.length]);
 
-  useEffect(() => {
-    setCurrentIndex(0);
-    setShowEndBounce(false);
-    setEndStateVisible(false);
-    setIsReturningFromEnd(false);
-    clearTimers();
-    endBounceActiveRef.current = false;
-    slideRefs.current = slideRefs.current.slice(0, jobs.length);
-
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: 0 });
-    }
-  }, [jobs.length, clearTimers]);
-
-  useEffect(() => {
-    return () => {
-      clearTimers();
-    };
-  }, [clearTimers]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const viewport = window.visualViewport;
-
-    const updateSectionHeight = () => {
-      const nextHeight = Math.round(viewport?.height ?? window.innerHeight);
-      setSectionHeight(`${nextHeight}px`);
-    };
-
-    updateSectionHeight();
-    window.addEventListener('resize', updateSectionHeight);
-    viewport?.addEventListener('resize', updateSectionHeight);
-
-    return () => {
-      window.removeEventListener('resize', updateSectionHeight);
-      viewport?.removeEventListener('resize', updateSectionHeight);
-    };
-  }, []);
-
-  const handleScroll = useCallback(() => {
+  /* ── Scroll handler (fully ref-driven, never re-binds) ── */
+  const handleScrollWithSnap = useCallback(() => {
     const container = scrollRef.current;
-    if (!container || showEndBounce || isReturningFromEnd) return;
+    if (!container || showEndBounceRef.current || isReturningRef.current) return;
 
     const scrollTop = container.scrollTop;
     const endStateTop = getEndStateScrollTop();
@@ -205,67 +172,82 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
     setEndStateVisible(hasReachedEndState);
 
+    // Find closest slide
     let bestIdx = 0;
     let bestDist = Infinity;
-
     slideRefs.current.forEach((el, idx) => {
       if (!el) return;
-      const slideScrollTop = getScrollTop(el);
-      if (slideScrollTop === null) return;
-
-      const dist = Math.abs(slideScrollTop - scrollTop);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestIdx = idx;
-      }
+      const slideTop = getScrollTop(el);
+      if (slideTop === null) return;
+      const dist = Math.abs(slideTop - scrollTop);
+      if (dist < bestDist) { bestDist = dist; bestIdx = idx; }
     });
-
     setCurrentIndex(prev => (prev !== bestIdx ? bestIdx : prev));
-  }, [getEndStateScrollTop, getScrollTop, isReturningFromEnd, showEndBounce]);
 
-  const handleScrollWithSnap = useCallback(() => {
-    if (showEndBounce || isReturningFromEnd) return;
-
-    handleScroll();
-
-    if (scrollEndTimerRef.current) {
-      clearTimeout(scrollEndTimerRef.current);
-    }
+    // Debounced snap check
+    if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
 
     scrollEndTimerRef.current = setTimeout(() => {
-      const container = scrollRef.current;
-      if (!container || jobs.length === 0) return;
+      const st = scrollRef.current?.scrollTop;
+      if (st == null || jobs.length === 0) return;
 
-      const scrollTop = container.scrollTop;
-      const endStateTop = getEndStateScrollTop();
-      const hasScrolledIntoEndState =
+      const endTop = getEndStateScrollTop();
+      const hasScrolledIntoEnd =
         currentIndexRef.current === jobs.length - 1 &&
-        endStateTop !== null &&
-        scrollTop >= endStateTop - END_BOUNCE_TRIGGER_OFFSET;
+        endTop !== null &&
+        st >= endTop - END_BOUNCE_TRIGGER_OFFSET;
 
-      if (hasScrolledIntoEndState) {
+      if (hasScrolledIntoEnd) {
         triggerEndBounce();
-        scrollEndTimerRef.current = null;
-        return;
       }
 
       scrollEndTimerRef.current = null;
     }, SCROLL_SNAP_DELAY);
-  }, [getEndStateScrollTop, handleScroll, isReturningFromEnd, jobs.length, showEndBounce, triggerEndBounce]);
+  }, [getEndStateScrollTop, getScrollTop, jobs.length, triggerEndBounce]);
+
+  /* ── Effects ──────────────────────────────────────────── */
+  useEffect(() => {
+    setCurrentIndex(0);
+    setShowEndBounce(false);
+    setEndStateVisible(false);
+    setIsReturningFromEnd(false);
+    clearTimers();
+    endBounceActiveRef.current = false;
+    showEndBounceRef.current = false;
+    isReturningRef.current = false;
+    slideRefs.current = slideRefs.current.slice(0, jobs.length);
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [jobs.length, clearTimers]);
+
+  useEffect(() => () => { clearTimers(); }, [clearTimers]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const viewport = window.visualViewport;
+
+    const updateHeight = () => {
+      setSectionHeight(`${Math.round(viewport?.height ?? window.innerHeight)}px`);
+    };
+
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    viewport?.addEventListener('resize', updateHeight);
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+      viewport?.removeEventListener('resize', updateHeight);
+    };
+  }, []);
 
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
-
     container.addEventListener('scroll', handleScrollWithSnap, { passive: true });
     return () => container.removeEventListener('scroll', handleScrollWithSnap);
   }, [handleScrollWithSnap]);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
+    return () => { document.body.style.overflow = ''; };
   }, []);
 
   useEffect(() => {
@@ -273,30 +255,24 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       if (showDetail || showApply || showFilter) return;
       if (e.key === 'Escape') onClose();
     };
-
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [showDetail, showApply, showFilter, onClose]);
 
+  /* ── Stable callbacks ─────────────────────────────────── */
   const scrollToNext = useCallback(() => {
     const nextIdx = currentIndex + 1;
-    if (nextIdx < jobs.length) {
-      scrollToSlide(nextIdx);
-    }
+    if (nextIdx < jobs.length) scrollToSlide(nextIdx);
   }, [currentIndex, jobs.length, scrollToSlide]);
 
-  const handleSwipeRight = useCallback(() => {
-    setShowApply(true);
-  }, []);
+  const handleSwipeRight = useCallback(() => { setShowApply(true); }, []);
 
   const handleSwipeLeft = useCallback(() => {
     if (currentIndex >= jobs.length - 1) return;
     scrollToNext();
   }, [currentIndex, jobs.length, scrollToNext]);
 
-  const handleTap = useCallback(() => {
-    setShowDetail(true);
-  }, []);
+  const handleTap = useCallback(() => { setShowDetail(true); }, []);
 
   const handleApplyFromDetail = useCallback(() => {
     setShowDetail(false);
@@ -307,61 +283,36 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     if (currentJob) {
       setLocalAppliedIds(prev => new Set(prev).add(currentJob.id));
     }
-
     setShowApply(false);
-
-    if (currentIndex >= jobs.length - 1) {
-      return;
+    if (currentIndex < jobs.length - 1) {
+      setTimeout(scrollToNext, 300);
     }
-
-    setTimeout(scrollToNext, 300);
   }, [currentIndex, currentJob, jobs.length, scrollToNext]);
 
-  const handleCloseApply = useCallback(() => {
-    setShowApply(false);
+  const handleCloseApply = useCallback(() => { setShowApply(false); }, []);
+  const handleCloseDetail = useCallback(() => { setShowDetail(false); }, []);
+  const handleFilterOpen = useCallback(() => { setShowFilter(true); }, []);
+  const handleFilterClose = useCallback(() => { setShowFilter(false); }, []);
+
+  // Stable ref setter
+  const setSlideRef = useCallback((el: HTMLDivElement | null, idx: number) => {
+    slideRefs.current[idx] = el;
   }, []);
 
-  const handleFilterOpen = useCallback(() => {
-    setShowFilter(true);
-  }, []);
-
+  /* ── Empty state (extracted) ──────────────────────────── */
   if (jobs.length === 0) {
     return createPortal(
-      <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col">
-        <div className="flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
-          <div className="py-3">
-            <span className="text-xs text-white font-medium tabular-nums">0 / 0</span>
-          </div>
-          {filterState && (
-            <button
-              onClick={() => setShowFilter(true)}
-              className="flex items-center gap-2 h-12 px-6 rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-colors touch-manipulation"
-            >
-              <SlidersHorizontal className="h-4.5 w-4.5 text-white" />
-              <span className="text-[15px] text-white font-medium">Visa filter</span>
-            </button>
-          )}
-          <button
-            onClick={onClose}
-            className="flex h-11 w-11 items-center justify-center touch-manipulation"
-            aria-label="Stäng"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors">
-              <X className="h-5 w-5 text-white" />
-            </div>
-          </button>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20">
-            <p className="text-white text-base font-medium text-center">Inga jobb hittades</p>
-          </div>
-        </div>
-
+      <>
+        <SwipeEmptyState
+          onClose={onClose}
+          hasFilter={!!filterState}
+          activeFilterCount={filterState?.activeFilterCount ?? 0}
+          onFilterOpen={handleFilterOpen}
+        />
         {filterState && (
           <SwipeFilterSheet
             open={showFilter}
-            onClose={() => setShowFilter(false)}
+            onClose={handleFilterClose}
             searchInput={filterState.searchInput}
             onSearchInputChange={filterState.onSearchInputChange}
             selectedCity={filterState.selectedCity}
@@ -377,11 +328,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
             activeFilterCount={filterState.activeFilterCount}
           />
         )}
-      </div>,
-      document.body
+      </>,
+      document.body,
     );
   }
 
+  /* ── Main render ──────────────────────────────────────── */
   return createPortal(
     <AnimatePresence>
       <motion.div
@@ -421,9 +373,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
           {jobs.map((job, idx) => (
             <div
               key={job.id}
-              ref={(el) => {
-                slideRefs.current[idx] = el;
-              }}
+              ref={(el) => setSlideRef(el, idx)}
               data-index={idx}
               className="w-full shrink-0 snap-start snap-always"
               style={{ minHeight: sectionHeight, height: sectionHeight }}
@@ -466,7 +416,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
               <SwipeJobDetail
                 job={currentJob}
                 open={showDetail}
-                onClose={() => setShowDetail(false)}
+                onClose={handleCloseDetail}
                 onApply={handleApplyFromDetail}
                 hasApplied={isApplied(currentJob.id)}
               />
@@ -492,7 +442,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         {filterState && (
           <SwipeFilterSheet
             open={showFilter}
-            onClose={() => setShowFilter(false)}
+            onClose={handleFilterClose}
             searchInput={filterState.searchInput}
             onSearchInputChange={filterState.onSearchInputChange}
             selectedCity={filterState.selectedCity}
@@ -510,6 +460,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         )}
       </motion.div>
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 });
