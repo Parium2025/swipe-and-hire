@@ -401,6 +401,16 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
     };
   });
 
+  // Deduplicera per applicant_id (behåll senast uppdaterad)
+  const deduped = new Map<string, typeof rawItems[0]>();
+  for (const item of rawItems) {
+    const existing = deduped.get(item.applicant_id);
+    if (!existing || item.updated_at > existing.updated_at) {
+      deduped.set(item.applicant_id, item);
+    }
+  }
+  const items = Array.from(deduped.values());
+
   // Uppdatera React Query cache
   const existingData: any = queryClient.getQueryData(queryKey);
   const newTimestamps = items.map((i) => i.updated_at).join(',');
