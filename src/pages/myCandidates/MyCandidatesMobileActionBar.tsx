@@ -106,7 +106,7 @@ export const MyCandidatesMobileActionBar = ({
   // Auto-dismiss tooltip after 2.5s
   useEffect(() => {
     if (!openTooltipStage) return;
-    const timer = setTimeout(() => setOpenTooltipStage(null), 2500);
+    const timer = setTimeout(() => setOpenTooltipStage(null), 1800);
     return () => clearTimeout(timer);
   }, [openTooltipStage]);
 

@@ -427,7 +427,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                       previewDelayRef.current = undefined;
                       setPreviewStage(stage);
                       if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
-                      previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2500);
+                      previewTimerRef.current = setTimeout(() => setPreviewStage(null), 1800);
                     }, 280);
                   }
                 } else {
