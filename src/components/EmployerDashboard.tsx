@@ -178,9 +178,9 @@ const EmployerDashboard = memo(() => {
       case 'active':
         return filteredAndSortedJobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
       case 'expired':
-        return filteredAndSortedJobs.filter(j => isJobExpiredCheck(j.created_at, j.expires_at));
+        return filteredAndSortedJobs.filter(j => j.is_active && isJobExpiredCheck(j.created_at, j.expires_at));
       case 'draft':
-        return filteredAndSortedJobs.filter(j => !j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
+        return filteredAndSortedJobs.filter(j => !j.is_active);
       default:
         return filteredAndSortedJobs;
     }
@@ -311,15 +311,15 @@ const EmployerDashboard = memo(() => {
     [jobs]
   );
   
-  // Count expired jobs — expires_at passed, regardless of is_active
+  // Count expired jobs — is_active AND expires_at passed (only published jobs that expired)
   const expiredJobsCount = useMemo(() => 
-    jobs.filter(j => isJobExpiredCheck(j.created_at, j.expires_at)).length, 
+    jobs.filter(j => j.is_active && isJobExpiredCheck(j.created_at, j.expires_at)).length, 
     [jobs]
   );
   
-  // Count draft jobs — is_active=false AND not expired (true drafts, never published or not yet expired)
+  // Count draft jobs — is_active=false (all drafts, regardless of expiration)
   const draftJobsCount = useMemo(() => 
-    jobs.filter(j => !j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at)).length, 
+    jobs.filter(j => !j.is_active).length, 
     [jobs]
   );
   
