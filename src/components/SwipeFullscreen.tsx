@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence, animate, type AnimationPlaybackControls } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, SlidersHorizontal } from 'lucide-react';
 import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
@@ -34,7 +34,7 @@ interface SwipeFullscreenProps {
 
 const SCROLL_SNAP_DELAY = 70;
 const END_BOUNCE_DELAY = 680;
-const END_BOUNCE_HIDE_DELAY = 520;
+const END_BOUNCE_HIDE_DELAY = 680;
 const END_BOUNCE_TRIGGER_OFFSET = 12;
 const END_STATE_HEIGHT = '100dvh';
 const SNAP_REVEAL_OFFSET = 40;
@@ -46,7 +46,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceReturnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const bounceScrollAnimationRef = useRef<AnimationPlaybackControls | null>(null);
   const endBounceActiveRef = useRef(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -84,32 +83,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
       bounceHideTimerRef.current = null;
     }
 
-    if (bounceScrollAnimationRef.current) {
-      bounceScrollAnimationRef.current.stop();
-      bounceScrollAnimationRef.current = null;
-    }
-  }, []);
-
-  const animateScrollTo = useCallback((targetTop: number, duration = 0.34) => {
-    const container = scrollRef.current;
-    if (!container) return;
-
-    if (Math.abs(container.scrollTop - targetTop) < 1) {
-      container.scrollTop = targetTop;
-      return;
-    }
-
-    bounceScrollAnimationRef.current?.stop();
-    bounceScrollAnimationRef.current = animate(container.scrollTop, targetTop, {
-      duration,
-      ease: [0.22, 1, 0.36, 1],
-      onUpdate: latest => {
-        container.scrollTop = latest;
-      },
-      onComplete: () => {
-        bounceScrollAnimationRef.current = null;
-      },
-    });
   }, []);
 
   const getSlideScrollTop = useCallback((index: number) => {
@@ -142,8 +115,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
     if (!container || targetTop === null) return;
 
-    animateScrollTo(targetTop, 0.28);
-  }, [animateScrollTo, getSlideScrollTop]);
+    container.scrollTo({
+      top: targetTop,
+      behavior: 'smooth',
+    });
+  }, [getSlideScrollTop]);
 
   const triggerEndBounce = useCallback(() => {
     if (jobs.length === 0 || showEndBounce || endBounceActiveRef.current) return;
@@ -167,7 +143,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
 
       if (container && targetTop !== null) {
         requestAnimationFrame(() => {
-          animateScrollTo(targetTop, 0.4);
+          container.scrollTo({ top: targetTop, behavior: 'smooth' });
         });
       }
 
@@ -179,7 +155,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
         bounceHideTimerRef.current = null;
       }, END_BOUNCE_HIDE_DELAY);
     }, END_BOUNCE_DELAY);
-  }, [animateScrollTo, clearTimers, getSlideScrollTop, jobs.length, showEndBounce]);
+  }, [clearTimers, getSlideScrollTop, jobs.length, showEndBounce]);
 
   useEffect(() => {
     setCurrentIndex(0);
@@ -495,10 +471,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
                 initial={false}
                 animate={
                   idx === jobs.length - 1 && isReturningFromEnd
-                    ? { opacity: [0.92, 1], scale: [0.985, 1], y: [18, 0] }
-                    : { opacity: 1, scale: 1, y: 0 }
+                    ? { opacity: [0.94, 1], y: [10, 0] }
+                    : { opacity: 1, y: 0 }
                 }
-                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               >
                 <JobSlide
                   job={job}
@@ -524,17 +500,16 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
               initial={false}
               animate={
                 showEndBounce
-                  ? { opacity: 1, scale: 1.02, y: -14 }
+                  ? { opacity: 1, y: -10 }
                   : endStateVisible
-                    ? { opacity: 1, scale: 1, y: 0 }
-                    : { opacity: 0, scale: 0.97, y: 24 }
+                    ? { opacity: 1, y: 0 }
+                    : { opacity: 0, y: 20 }
               }
               transition={{
-                opacity: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
-                scale: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
-                y: { duration: 0.36, ease: [0.22, 1, 0.36, 1] },
+                opacity: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+                y: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
               }}
-              className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-white/10 px-8 py-6 backdrop-blur-sm"
+              className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
             >
               <motion.p
                 initial={false}
