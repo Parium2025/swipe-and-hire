@@ -317,18 +317,29 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     const cfg = stageConfig[stage];
     const isLongLabel = cfg && cfg.label.length > 10;
 
-    // Touch + long label → tap-to-preview: first tap = tooltip, second tap = select
+    // Touch + long label → tap-to-preview with double-tap detection
     if (isTouchCapable && isLongLabel) {
       if (previewStage === stage) {
-        // Second tap → select
+        // Already previewing → select
+        setPreviewStage(null);
+        if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+        if (previewDelayRef.current) clearTimeout(previewDelayRef.current);
+        setActiveTab(stage);
+      } else if (previewDelayRef.current) {
+        // Second tap arrived before delay fired → skip tooltip, select directly
+        clearTimeout(previewDelayRef.current);
+        previewDelayRef.current = undefined;
         setPreviewStage(null);
         if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
         setActiveTab(stage);
       } else {
-        // First tap → show tooltip preview
-        setPreviewStage(stage);
-        if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
-        previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2500);
+        // First tap → wait briefly to see if a double-tap follows
+        previewDelayRef.current = setTimeout(() => {
+          previewDelayRef.current = undefined;
+          setPreviewStage(stage);
+          if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+          previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2500);
+        }, 280);
         return; // Don't switch tab yet
       }
     } else {
