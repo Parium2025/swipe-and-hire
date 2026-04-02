@@ -321,6 +321,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({ jobs, appliedJobI
     setShowApply(false);
   }, []);
 
+  const handleFilterOpen = useCallback(() => {
+    setShowFilter(true);
+  }, []);
+
   if (jobs.length === 0) {
     return createPortal(
       <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col">
