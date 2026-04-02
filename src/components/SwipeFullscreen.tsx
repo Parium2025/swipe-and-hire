@@ -133,6 +133,28 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     showEndBounceRef.current = true;
     setEndStateVisible(true);
     setCurrentIndex(jobs.length - 1);
+
+    // Auto-return to last card after showing the message
+    bounceReturnTimerRef.current = setTimeout(() => {
+      setIsReturningFromEnd(true);
+      isReturningRef.current = true;
+
+      const lastIdx = jobs.length - 1;
+      const container = scrollRef.current;
+      const targetEl = slideRefs.current[lastIdx];
+      if (container && targetEl) {
+        container.scrollTo({ top: targetEl.offsetTop, behavior: 'smooth' });
+      }
+
+      bounceHideTimerRef.current = setTimeout(() => {
+        setShowEndBounce(false);
+        showEndBounceRef.current = false;
+        setEndStateVisible(false);
+        setIsReturningFromEnd(false);
+        isReturningRef.current = false;
+        endBounceActiveRef.current = false;
+      }, END_BOUNCE_HIDE_DELAY);
+    }, END_BOUNCE_DELAY);
   }, [clearTimers, jobs.length]);
 
   /* ── Scroll handler (RAF-throttled for 60fps) ─────────── */
