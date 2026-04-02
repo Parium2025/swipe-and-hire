@@ -178,9 +178,9 @@ const EmployerDashboard = memo(() => {
       case 'active':
         return filteredAndSortedJobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
       case 'expired':
-        return filteredAndSortedJobs.filter(j => isJobExpiredCheck(j.created_at, j.expires_at));
+        return filteredAndSortedJobs.filter(j => j.is_active && isJobExpiredCheck(j.created_at, j.expires_at));
       case 'draft':
-        return filteredAndSortedJobs.filter(j => !j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
+        return filteredAndSortedJobs.filter(j => !j.is_active);
       default:
         return filteredAndSortedJobs;
     }
