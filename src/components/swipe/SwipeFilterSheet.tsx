@@ -61,6 +61,7 @@ export function SwipeFilterSheet({
   const [dismissing, setDismissing] = useState(false);
   const [isAnimatingIn, setIsAnimatingIn] = useState(true);
   const openedAtRef = useRef(0);
+  const [openCount, setOpenCount] = useState(0);
 
   // Start animation on open
   useEffect(() => {
