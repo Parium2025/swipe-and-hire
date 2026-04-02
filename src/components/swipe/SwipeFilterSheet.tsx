@@ -128,19 +128,21 @@ export function SwipeFilterSheet({
     const currentY = dragY.get();
     if (currentY > DISMISS_THRESHOLD) {
       setDismissing(true);
-      void sheetControls.start({
-        y: '100%',
-        transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
+      // Animate dragY (which drives the style) to avoid conflict with sheetControls
+      animate(dragY, window.innerHeight, {
+        type: 'spring',
+        damping: 34,
+        stiffness: 400,
+        mass: 0.8,
+        onComplete: () => {
+          onClose();
+          setDismissing(false);
+        },
       });
-      setTimeout(() => {
-        onClose();
-        setDismissing(false);
-      }, 220);
     } else {
-      dragY.set(0);
-      void sheetControls.start({ y: 0, scale: 1, opacity: 1, transition: { type: 'spring', damping: 24, stiffness: 400 } });
+      animate(dragY, 0, { type: 'spring', damping: 24, stiffness: 400 });
     }
-  }, [dragY, onClose, sheetControls]);
+  }, [dragY, onClose]);
 
   const handleHandleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
     isDragging.current = true;
