@@ -60,6 +60,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const currentIndexRef = useRef(0);
   const showEndBounceRef = useRef(false);
   const isReturningRef = useRef(false);
+  const rafRef = useRef<number>(0);
 
   /* ── State ────────────────────────────────────────────── */
   const [currentIndex, setCurrentIndex] = useState(0);
