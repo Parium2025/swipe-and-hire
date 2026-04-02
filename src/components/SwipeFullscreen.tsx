@@ -164,7 +164,6 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   }, [clearTimers, getSlideScrollTop, jobs.length]);
 
   /* ── Scroll handler (RAF-throttled for 60fps) ─────────── */
-  const rafRef = useRef<number>(0);
   const handleScrollWithSnap = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
