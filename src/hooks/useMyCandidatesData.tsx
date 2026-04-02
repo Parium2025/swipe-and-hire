@@ -71,7 +71,17 @@ function readMyCandidatesCache(userId: string): MyCandidateData[] | null {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const cached: CachedMyCandidates = JSON.parse(raw);
-    return cached.items;
+    const deduplicated = deduplicateByApplicant(cached.items || []);
+
+    // Självläk gamla cacher som fortfarande innehåller dubbletter
+    if (deduplicated.length !== (cached.items || []).length) {
+      safeSetItem(key, JSON.stringify({
+        ...cached,
+        items: deduplicated,
+      }));
+    }
+
+    return deduplicated;
   } catch {
     return null;
   }

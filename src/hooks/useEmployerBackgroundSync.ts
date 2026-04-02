@@ -136,7 +136,7 @@ export const useEmployerBackgroundSync = () => {
 
       const appMap = new Map(applications?.map(app => [app.id, app]) || []);
 
-      const items = myCandidates.map(mc => {
+      const rawItems = myCandidates.map(mc => {
         const app = appMap.get(mc.application_id);
         return {
           id: mc.id,
@@ -162,13 +162,25 @@ export const useEmployerBackgroundSync = () => {
         };
       });
 
+      const dedupedMap = new Map<string, typeof rawItems[number]>();
+      for (const item of rawItems) {
+        const existing = dedupedMap.get(item.applicant_id);
+        if (!existing || item.updated_at > existing.updated_at) {
+          dedupedMap.set(item.applicant_id, item);
+        }
+      }
+      const items = Array.from(dedupedMap.values());
+
       safeSetItem(cacheKey, JSON.stringify({
         items,
         timestamp: Date.now(),
       }));
       
-      // Synka React Query-cachen (saknades tidigare)
-      queryClient.setQueryData(['my-candidates', userId], items);
+      // Synka React Query-cachen
+      queryClient.setQueryData(['my-candidates', userId, ''], {
+        pages: [{ items, nextCursor: items.length >= 100 ? items[items.length - 1]?.updated_at ?? null : null }],
+        pageParams: [null],
+      });
     }
   }, [queryClient]);
 
