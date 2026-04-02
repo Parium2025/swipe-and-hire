@@ -1,5 +1,5 @@
 import { useState, useLayoutEffect, useRef, useCallback, type MouseEvent, type PointerEvent, type TouchEvent } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { X, Search, MapPin, Briefcase, Clock, ArrowUpDown, Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -152,34 +152,32 @@ export function SwipeFilterSheet({
     e.stopPropagation();
   }, [dragY]);
 
-  return (
-    <AnimatePresence mode="wait">
-      {open && (
-        <div key="swipe-filter" className="fixed inset-0 z-[10002]">
-          {/* Backdrop */}
-          <motion.div
-            className="absolute inset-0 bg-black/60"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            style={isAnimatingIn ? undefined : { opacity: backdropOpacity }}
-            onPointerDown={handleBackdropDismiss}
-          />
+  if (!open) return null;
 
-          {/* Sheet */}
-          <motion.div
-            className="absolute inset-x-0 bottom-0 max-h-[92vh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
-            style={isAnimatingIn ? undefined : { y: dragY }}
-            onPointerDown={stopSheetPropagation}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchEnd}
-          >
+  return (
+    <div className="fixed inset-0 z-[10002]">
+      {/* Backdrop */}
+      <motion.div
+        className="absolute inset-0 bg-black/60"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.25 }}
+        style={isAnimatingIn ? undefined : { opacity: backdropOpacity }}
+        onPointerDown={handleBackdropDismiss}
+      />
+
+      {/* Sheet */}
+      <motion.div
+        className="absolute inset-x-0 bottom-0 max-h-[92vh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
+        style={isAnimatingIn ? undefined : { y: dragY }}
+        onPointerDown={stopSheetPropagation}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+      >
             {/* Drag handle */}
             <div
               className="flex justify-center pt-3 pb-2 shrink-0 cursor-grab active:cursor-grabbing"
@@ -403,9 +401,7 @@ export function SwipeFilterSheet({
                 Visa {jobCount} jobb
               </button>
             </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+      </motion.div>
+    </div>
   );
 }
