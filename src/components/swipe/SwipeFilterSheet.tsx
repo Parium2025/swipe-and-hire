@@ -61,23 +61,16 @@ export function SwipeFilterSheet({
   const [dismissing, setDismissing] = useState(false);
   const [isAnimatingIn, setIsAnimatingIn] = useState(true);
   const openedAtRef = useRef(0);
-  const [openCount, setOpenCount] = useState(0);
 
-  // Start animation on open
+  // Reset animation state on every open
   useEffect(() => {
     if (open) {
       openedAtRef.current = Date.now();
-      setOpenCount(c => c + 1);
       setIsAnimatingIn(true);
       setDismissing(false);
-      void sheetControls.stop();
       dragY.jump(0);
-      void sheetControls.start({
-        y: 0,
-        transition: { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 },
-      }).then(() => setIsAnimatingIn(false));
     }
-  }, [open, dragY, sheetControls]);
+  }, [open, dragY]);
 
   const animatedClose = useCallback(() => {
     if (dismissing) return;
