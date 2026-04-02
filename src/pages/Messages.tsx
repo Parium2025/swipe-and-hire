@@ -8,10 +8,13 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { NewConversationDialog } from '@/components/NewConversationDialog';
 import { ConversationItem } from '@/components/messages/ConversationItem';
+import { SwipeableConversationItem } from '@/components/messages/SwipeableConversationItem';
 import { ChatView } from '@/components/messages/ChatView';
 import { EmptyConversationList, EmptyChatState } from '@/components/messages/EmptyStates';
 import { MessagesTabs } from '@/components/MessagesTabs';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useDeleteConversation } from '@/hooks/useDeleteConversation';
+import { getConversationDisplayName } from '@/lib/conversationDisplayUtils';
 import {
   MessageSquare,
   Plus,
