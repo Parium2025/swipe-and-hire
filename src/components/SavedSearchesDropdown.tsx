@@ -204,7 +204,7 @@ export function SavedSearchesDropdown({
                         </div>
                         <p 
                           ref={(el) => { criteriaRefs.current[search.id] = el; }}
-                          className="text-xs text-white truncate mt-0.5"
+                          className="text-sm text-white/70 truncate mt-1"
                         >
                           {getCriteriaSummary(search)}
                         </p>
@@ -212,10 +212,10 @@ export function SavedSearchesDropdown({
                       
                       <button
                         onClick={(e) => handleDeleteClick(e, search)}
-                        className="shrink-0 rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                        className="shrink-0 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white touch-manipulation"
                         aria-label="Ta bort sparad sökning"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </TooltipTrigger>
