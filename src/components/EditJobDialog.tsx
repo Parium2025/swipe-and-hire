@@ -979,7 +979,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   }, [formData, initialFormData, customQuestions, initialCustomQuestions, open]);
 
   const handleClose = () => {
-    // X should always discard and clear draft state directly
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+      return;
+    }
+
     setShowUnsavedDialog(false);
     setPendingClose(false);
     setHasUnsavedChanges(false);

@@ -169,6 +169,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   const [questionSearchQuery, setQuestionSearchQuery] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [isSavingAndLeaving, setIsSavingAndLeaving] = useState(false);
   const [initialFormData, setInitialFormData] = useState<TemplateFormData | null>(null);
   const [initialCustomQuestions, setInitialCustomQuestions] = useState<JobQuestion[]>([]);
   
@@ -999,6 +1000,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       onBack();
     } else {
       onOpenChange(false);
+    }
+  };
+
+  const handleSaveAndLeave = async () => {
+    setIsSavingAndLeaving(true);
+    try {
+      await handleSubmit();
+      setShowUnsavedDialog(false);
+    } finally {
+      setIsSavingAndLeaving(false);
     }
   };
 
@@ -2379,6 +2390,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         onOpenChange={setShowUnsavedDialog}
         onConfirm={resetAndClose}
         onCancel={() => setShowUnsavedDialog(false)}
+        onSaveAndLeave={handleSaveAndLeave}
+        isSaving={isSavingAndLeaving}
       />
     </>
   );
