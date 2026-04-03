@@ -487,16 +487,18 @@ const SearchJobs = memo(() => {
                   <Building className="h-3.5 w-3.5 text-white" />{uniqueCompanyCount} företag
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" side="bottom" className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[180px] max-h-64 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
-                {[...new Set(filteredAndSortedJobs.map(j => j.company_name).filter(Boolean))].sort().map((name) => (
-                  <DropdownMenuItem
-                    key={name}
-                    onClick={() => setSearchInput(name)}
-                    className="text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white"
-                  >
-                    <Building className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="truncate">{name}</span>
-                  </DropdownMenuItem>
+              <DropdownMenuContent align="center" side="bottom" className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[200px] max-w-[280px] max-h-64 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
+                {[...new Set(filteredAndSortedJobs.map(j => j.company_name).filter(Boolean))].sort().map((name, index, arr) => (
+                  <React.Fragment key={name}>
+                    <DropdownMenuItem
+                      onClick={() => setSearchInput(name)}
+                      className="text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white"
+                    >
+                      <Building className="h-3.5 w-3.5 mr-2 text-white flex-shrink-0" />
+                      <span className="truncate">{name}</span>
+                    </DropdownMenuItem>
+                    {index < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
+                  </React.Fragment>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
