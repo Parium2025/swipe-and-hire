@@ -250,25 +250,26 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Chattar Badge (outside the button bubble) */}
-          {preloadedUnreadMessages > 0 && (
-            <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center -mr-2">
-              {preloadedUnreadMessages}
-            </span>
-          )}
-          {/* Chattar Button */}
-          <button
-            onClick={() => handleNavigation('/messages')}
-            className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
-          >
-            <span 
-              className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
-                isActiveUrl('/messages') ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
-              }`} 
-            />
-            <MessageCircle className="h-4 w-4 relative z-10" />
-            <span className="relative z-10">Chattar</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {preloadedUnreadMessages > 0 && (
+              <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center shrink-0">
+                {preloadedUnreadMessages}
+              </span>
+            )}
+            {/* Chattar Button */}
+            <button
+              onClick={() => handleNavigation('/messages')}
+              className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+            >
+              <span 
+                className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
+                  isActiveUrl('/messages') ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
+                }`} 
+              />
+              <MessageCircle className="h-4 w-4 relative z-10" />
+              <span className="relative z-10">Chattar</span>
+            </button>
+          </div>
 
           {/* Företag Dropdown */}
           <DropdownMenu open={businessOpen} onOpenChange={setBusinessOpen}>
