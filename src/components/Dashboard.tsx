@@ -5,7 +5,7 @@ import { useJobsData } from '@/hooks/useJobsData';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
-import { isJobExpiredCheck } from '@/lib/date';
+import { isEmployerJobActive, isEmployerJobExpired } from '@/lib/jobStatus';
 import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
@@ -68,11 +68,11 @@ const Dashboard = memo(() => {
   const tabSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextTab, onSwipeRight: swipeToPrevTab, threshold: 50 });
 
   const activeJobs = useMemo(() => allJobs.filter(job => 
-    job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)
+    isEmployerJobActive(job)
   ), [allJobs]);
 
   const expiredJobs = useMemo(() => allJobs.filter(job => 
-    isJobExpiredCheck(job.created_at, job.expires_at)
+    isEmployerJobExpired(job)
   ), [allJobs]);
 
   const jobs = activeTab === 'active' ? activeJobs : expiredJobs;

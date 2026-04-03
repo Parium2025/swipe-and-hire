@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Eye, Users, Edit, Trash2 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining } from '@/lib/date';
+import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
+import { isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 import type { JobPosting } from '@/hooks/useJobsData';
@@ -49,8 +50,8 @@ function getCompanyInitials(name: string): string {
 
 export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch }: MobileJobCardProps) => {
   const navigate = useNavigate();
-  const isDraft = !job.is_active;
-  const isExpired = !isDraft && isJobExpiredCheck(job.created_at, job.expires_at);
+  const isDraft = isEmployerJobDraft(job);
+  const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
   const companyName = job.employer_profile?.company_name || 'Okänt företag';
   const recruiterName = job.employer_profile?.first_name && job.employer_profile?.last_name

@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, Users } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { formatDateShortSv, getTimeRemaining, isJobExpiredCheck, formatExpirationDateTime } from '@/lib/date';
+import { formatDateShortSv, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { getEmployerJobStatus, isEmployerJobExpired } from '@/lib/jobStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 
@@ -61,7 +62,7 @@ function getCompanyInitials(name: string): string {
 }
 
 export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCardProps) => {
-  const isExpired = isJobExpiredCheck(job.created_at, job.expires_at);
+  const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
   const companyName = job.employer_profile?.company_name || 'Okänt företag';
   const recruiterName = job.employer_profile?.first_name && job.employer_profile?.last_name

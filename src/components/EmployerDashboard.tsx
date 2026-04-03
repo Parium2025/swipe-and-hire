@@ -10,7 +10,8 @@ import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { MobileJobCard } from '@/components/MobileJobCard';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
-import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
+import { formatDateShortSv } from '@/lib/date';
+import { getEmployerJobStatus, isEmployerJobActive, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -164,17 +165,17 @@ const EmployerDashboard = memo(() => {
   }, []);
   
   // Check if there are any drafts
-  const hasDrafts = useMemo(() => jobs.some(job => !job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)), [jobs]);
+  const hasDrafts = useMemo(() => jobs.some(job => isEmployerJobDraft(job)), [jobs]);
   
   // Filter jobs by active tab BEFORE pagination
   const tabFilteredJobs = useMemo(() => {
     switch (activeTab) {
       case 'active':
-        return filteredAndSortedJobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
+        return filteredAndSortedJobs.filter(j => isEmployerJobActive(j));
       case 'expired':
-        return filteredAndSortedJobs.filter(j => isJobExpiredCheck(j.created_at, j.expires_at));
+        return filteredAndSortedJobs.filter(j => isEmployerJobExpired(j));
       case 'draft':
-        return filteredAndSortedJobs.filter(j => !j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
+        return filteredAndSortedJobs.filter(j => isEmployerJobDraft(j));
       default:
         return filteredAndSortedJobs;
     }
@@ -298,22 +299,19 @@ const EmployerDashboard = memo(() => {
     }
   };
 
-  // Count active jobs for stats - exclude expired jobs from "Aktiva annonser" count
-  // A job is "expired" if its expires_at has passed, regardless of is_active flag
+  // Count active/expired/draft jobs consistently across employer views
   const activeJobs = useMemo(() => 
-    jobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at)), 
+    jobs.filter(j => isEmployerJobActive(j)), 
     [jobs]
   );
   
-  // Count expired jobs — is_active AND expires_at passed (only published jobs that expired)
   const expiredJobsCount = useMemo(() => 
-    jobs.filter(j => j.is_active && isJobExpiredCheck(j.created_at, j.expires_at)).length, 
+    jobs.filter(j => isEmployerJobExpired(j)).length, 
     [jobs]
   );
   
-  // Count draft jobs — is_active=false (all drafts, regardless of expiration)
   const draftJobsCount = useMemo(() => 
-    jobs.filter(j => !j.is_active).length, 
+    jobs.filter(j => isEmployerJobDraft(j)).length, 
     [jobs]
   );
   
@@ -454,8 +452,8 @@ const EmployerDashboard = memo(() => {
                     <div key={activeTab} className="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24">
                       {pageJobs.map((job) => {
                         const jobPosting = job as JobPosting;
-                        const isExpired = isJobExpiredCheck(job.created_at, jobPosting.expires_at);
-                        const isDraft = !job.is_active && !isExpired;
+                        const isExpired = isEmployerJobExpired(jobPosting);
+                        const isDraft = isEmployerJobDraft(jobPosting);
                         return (
                           <ReadOnlyMobileJobCard
                             key={job.id}
