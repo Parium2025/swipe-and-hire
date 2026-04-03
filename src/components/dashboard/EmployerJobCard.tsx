@@ -1,7 +1,7 @@
 import { memo, useMemo, useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users, MapPin, Calendar, Timer, UserCheck, Building2 } from 'lucide-react';
+import { Eye, Users } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining, isJobExpiredCheck, formatExpirationDateTime } from '@/lib/date';
