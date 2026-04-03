@@ -173,12 +173,14 @@ function JobSeekerTopNav() {
                 {getTotalJobsCount() && (
                   <span className="text-white text-xs relative z-10">({getTotalJobsCount()})</span>
                 )}
-                <ChevronDown className="h-3 w-3 text-white relative z-10" />
-                {totalNewMatches > 0 && (
-                  <span className="absolute -top-0.5 right-0.5 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
-                    {totalNewMatches > 9 ? '9+' : totalNewMatches}
-                  </span>
-                )}
+                <span className="relative z-10">
+                  <ChevronDown className="h-3 w-3 text-white" />
+                  {totalNewMatches > 0 && (
+                    <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
+                      {totalNewMatches > 9 ? '9+' : totalNewMatches}
+                    </span>
+                  )}
+                </span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
