@@ -500,7 +500,7 @@ const SearchJobs = memo(() => {
             )}
 
             {/* Job Cards — image cards on all screen sizes */}
-            <div className="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
+            <div className="job-card-grid job-card-grid-centered-desktop grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {displayedJobs.map((job) => (
                 <ReadOnlyMobileJobCard
                   key={job.id}

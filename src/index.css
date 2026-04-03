@@ -872,6 +872,21 @@ All colors MUST be HSL.
     max-width: none;
   }
 
+  @media (min-width: 1025px) {
+    .job-card-grid-centered-desktop {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .job-card-grid-centered-desktop .job-card-mobile-shell {
+      width: min(100%, var(--job-card-mobile-max-width));
+      max-width: var(--job-card-mobile-max-width);
+      flex: 0 1 var(--job-card-mobile-max-width);
+    }
+  }
+
   .job-card-mobile-media {
     height: var(--job-card-mobile-media-height);
   }
