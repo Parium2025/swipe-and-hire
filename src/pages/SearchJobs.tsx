@@ -482,7 +482,7 @@ const SearchJobs = memo(() => {
 
       {/* Jobs Card List */}
       <div className="space-y-4">
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2 flex-wrap">
           <h2 className="text-sm font-medium text-white">Jobbsökresultat</h2>
           <div className="flex items-center gap-2 md:hidden">
             <span className="text-white/40">·</span>
@@ -495,20 +495,33 @@ const SearchJobs = memo(() => {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="center" side="bottom" className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[200px] max-w-[280px] max-h-64 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
-                {[...new Set(filteredAndSortedJobs.map(j => j.company_name).filter(Boolean))].sort().map((name, index, arr) => (
+                {[...new Set(jobs.map(j => j.company_name).filter(Boolean))].sort().map((name, index, arr) => (
                   <React.Fragment key={name}>
-                    <DropdownMenuItem
-                      onClick={() => setSearchInput(name)}
+                    <DropdownMenuCheckboxItem
+                      checked={selectedCompanies.includes(name)}
+                      onCheckedChange={(checked) => {
+                        setSelectedCompanies(prev =>
+                          checked ? [...prev, name] : prev.filter(c => c !== name)
+                        );
+                      }}
+                      onSelect={(e) => e.preventDefault()}
                       className="text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white"
                     >
-                      <Building className="h-3.5 w-3.5 mr-2 text-white flex-shrink-0" />
                       <span className="truncate">{name}</span>
-                    </DropdownMenuItem>
+                    </DropdownMenuCheckboxItem>
                     {index < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
                   </React.Fragment>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+            {selectedCompanies.length > 0 && (
+              <button
+                onClick={() => setSelectedCompanies([])}
+                className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 active:scale-[0.95] touch-manipulation"
+              >
+                <X className="h-3 w-3 text-white" />
+              </button>
+            )}
           </div>
         </div>
         
