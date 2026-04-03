@@ -145,6 +145,9 @@ const SavedJobs = () => {
     isDragging.current = false;
   }, []);
 
+  // Load cached data for instant render
+  const cachedSavedJobs = useMemo(() => user?.id ? loadSavedJobsCache(user.id) : undefined, [user?.id]);
+
   const { data: savedJobs = [], isLoading, isFetched } = useQuery({
     queryKey: ['saved-jobs', user?.id],
     queryFn: () => fetchSavedJobs(user!.id),
@@ -152,6 +155,7 @@ const SavedJobs = () => {
     staleTime: 0,
     gcTime: Infinity,
     refetchOnWindowFocus: false,
+    placeholderData: cachedSavedJobs,
   });
 
   // Hämta användarens ansökningar för "Redan sökt"-badge
