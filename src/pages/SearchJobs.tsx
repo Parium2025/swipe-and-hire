@@ -473,17 +473,13 @@ const SearchJobs = memo(() => {
 
       {/* Jobs Card List */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium text-white text-center w-full">Jobbsökresultat</h2>
-          <div className="flex items-center gap-5 text-sm text-white md:hidden">
-            <div className="flex flex-col items-center">
-              <span className="flex items-center gap-1 font-semibold"><Briefcase className="h-4 w-4" />{activeJobCount}</span>
-              <span className="text-[11px] text-white leading-tight">Aktiva jobb</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="flex items-center gap-1 font-semibold"><Building className="h-4 w-4" />{uniqueCompanyCount}</span>
-              <span className="text-[11px] text-white leading-tight">Antal företag</span>
-            </div>
+        <div className="flex items-center justify-center gap-3">
+          <h2 className="text-sm font-medium text-white">Jobbsökresultat</h2>
+          <div className="flex items-center gap-3 text-sm text-white md:hidden">
+            <span className="text-white/30">·</span>
+            <span className="flex items-center gap-1 text-white/80 text-xs"><Briefcase className="h-3.5 w-3.5" />{activeJobCount} jobb</span>
+            <span className="text-white/30">·</span>
+            <span className="flex items-center gap-1 text-white/80 text-xs"><Building className="h-3.5 w-3.5" />{uniqueCompanyCount} företag</span>
           </div>
         </div>
         
