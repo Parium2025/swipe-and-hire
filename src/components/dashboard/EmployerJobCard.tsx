@@ -154,7 +154,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
       </div>
 
       {/* Content body */}
-      <div className="job-card-mobile-body flex h-full flex-col gap-3 py-1">
+      <div className="job-card-mobile-body flex h-full flex-col gap-2 py-1">
         {/* Title */}
         <div className="flex min-h-[clamp(4.25rem,3.8rem+1.6vw,5.25rem)] items-start justify-center px-2">
           <TruncatedText
