@@ -4,10 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
+import { Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Eye, Users } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 
