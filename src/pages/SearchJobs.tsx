@@ -524,15 +524,6 @@ const SearchJobs = memo(() => {
               <button className="flex items-center gap-1.5 text-white text-sm font-medium px-3 py-2 rounded-full bg-white/5 border border-white/10 active:scale-[0.97] touch-manipulation max-w-[200px]">
                 <Building className="h-4 w-4 text-white flex-shrink-0" />
                 <span className="truncate">{selectedCompanies.length > 0 ? `${selectedCompanies.length} företag` : `${uniqueCompanyCount} företag`}</span>
-                {selectedCompanies.length > 0 && (
-                  <span
-                    role="button"
-                    onClick={(e) => { e.stopPropagation(); setSelectedCompanies([]); }}
-                    className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 ml-0.5 shrink-0"
-                  >
-                    <X className="h-3 w-3 text-white" />
-                  </span>
-                )}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" side="bottom" className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[200px] max-w-[280px] max-h-64 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
