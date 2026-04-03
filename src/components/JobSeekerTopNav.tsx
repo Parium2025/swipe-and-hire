@@ -175,7 +175,7 @@ function JobSeekerTopNav() {
                 )}
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
                 {totalNewMatches > 0 && (
-                  <span className="absolute -top-1 -right-1.5 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
+                  <span className="absolute -top-1 right-6 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
                     {totalNewMatches > 9 ? '9+' : totalNewMatches}
                   </span>
                 )}
@@ -210,26 +210,24 @@ function JobSeekerTopNav() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex items-center gap-2">
+          {/* Chattar Button */}
+          <button
+            onClick={() => handleNavigation('/messages')}
+            className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+          >
+            <span 
+              className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
+                isActiveUrl('/messages') ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
+              }`} 
+            />
+            <MessageCircle className="h-4 w-4 relative z-10" />
+            <span className="relative z-10">Chattar</span>
             {preloadedJobSeekerUnreadMessages > 0 && (
-              <span className="bg-destructive text-destructive-foreground min-w-[16px] h-[16px] rounded-full text-[9px] font-semibold flex items-center justify-center shrink-0">
+              <span className="absolute -top-1 -right-1.5 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
                 {preloadedJobSeekerUnreadMessages > 9 ? '9+' : preloadedJobSeekerUnreadMessages}
               </span>
             )}
-            {/* Chattar Button */}
-            <button
-              onClick={() => handleNavigation('/messages')}
-              className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
-            >
-              <span 
-                className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
-                  isActiveUrl('/messages') ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
-                }`} 
-              />
-              <MessageCircle className="h-4 w-4 relative z-10" />
-              <span className="relative z-10">Chattar</span>
-            </button>
-          </div>
+          </button>
 
           {/* Ekonomi Dropdown */}
           <DropdownMenu open={economyOpen} onOpenChange={setEconomyOpen}>
