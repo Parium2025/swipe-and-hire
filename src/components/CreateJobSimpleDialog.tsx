@@ -529,7 +529,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           onMouseDown={(e) => e.currentTarget.blur()}
                           onMouseUp={(e) => e.currentTarget.blur()}
                           className="w-full bg-white/5 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white h-12 md:h-12 !min-h-0 py-2 px-3 font-normal focus:outline-none focus:ring-0 rounded-md overflow-hidden min-w-0"
-                          title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
+                          title={selectedTemplate?.name || 'Välj mall...'}
                         >
                           <div className="flex items-center gap-2 w-full min-w-0">
                           <span className="text-base truncate font-normal text-white flex-1 min-w-0 text-left" title={selectedTemplate?.name || 'Välj mall...'}>
