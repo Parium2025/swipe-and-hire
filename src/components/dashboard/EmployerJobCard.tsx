@@ -187,7 +187,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             </div>
           )}
           <div className="flex flex-col items-center text-center">
-            <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Publicerad</span>
+            <span className="text-[10px] text-white tracking-wider leading-none mb-0.5">Publicerad</span>
             <span className="text-[11px] text-white font-medium leading-none">{formatDateShortSv(job.created_at)}</span>
           </div>
           <TooltipProvider delayDuration={0}>
