@@ -412,7 +412,7 @@ const SearchJobs = memo(() => {
     setSelectedSubcategories([]);
     setSearchInput('');
     setTimeFilter('all');
-    setSelectedCompanies([]);
+    setSelectedCompany(null);
   }, []);
 
   const handleLocationChange = (location: string, postalCode?: string) => {
