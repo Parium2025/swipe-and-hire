@@ -69,6 +69,7 @@ const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { jobs, stats, isLoading: loading, invalidateJobs } = useJobsData();
+  const queryClient = useQueryClient();
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<JobPosting | null>(null);
