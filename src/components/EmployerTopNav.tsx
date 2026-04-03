@@ -323,7 +323,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors hover:bg-white/10"
               >
                 {resolvedProfileImageUrl ? (
                   <img 
