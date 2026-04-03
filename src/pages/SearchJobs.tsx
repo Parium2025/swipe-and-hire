@@ -254,6 +254,11 @@ const SearchJobs = memo(() => {
   const filteredAndSortedJobs = useMemo(() => {
     let result = [...jobs];
 
+    // Company filter
+    if (selectedCompanies.length > 0) {
+      result = result.filter(j => selectedCompanies.includes(j.company_name));
+    }
+
     // Time filter
     if (timeFilter !== 'all') {
       const now = Date.now();
@@ -276,7 +281,7 @@ const SearchJobs = memo(() => {
     }
 
     return result;
-  }, [jobs, sortBy, timeFilter]);
+  }, [jobs, sortBy, timeFilter, selectedCompanies]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
