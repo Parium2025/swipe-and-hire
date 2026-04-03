@@ -324,10 +324,11 @@ const SearchJobs = memo(() => {
     return matches.length > 0 ? matches[0] : null;
   }, [jobs, debouncedSearch, searchInput, isLoading]);
 
-  // Reset display count when filters change
+  // Reset display count and default sort when filters change
   useEffect(() => {
     setDisplayCount(20);
-  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, sortBy]);
+    setSortBy('newest');
+  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes]);
 
   // Infinite scroll with IntersectionObserver
   useEffect(() => {
