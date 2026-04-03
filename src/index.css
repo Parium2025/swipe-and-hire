@@ -866,10 +866,22 @@ All colors MUST be HSL.
     margin-inline: auto;
   }
 
-  /* In grid context, let cards fill their column */
+  /* In flex grid context, cards take responsive widths */
   .job-card-grid .job-card-mobile-shell {
     width: 100%;
     max-width: none;
+  }
+
+  @media (min-width: 640px) {
+    .job-card-grid .job-card-mobile-shell {
+      width: calc(50% - 0.5rem);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .job-card-grid .job-card-mobile-shell {
+      width: calc(33.333% - 0.6875rem);
+    }
   }
 
 
