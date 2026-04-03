@@ -127,7 +127,7 @@ export function AuthSplashScreen() {
         onLoad={() => setImageLoaded(true)}
         onError={() => setImageLoaded(true)}
         style={{ 
-          height: `${logoHeight}px`,
+          height: 'clamp(200px, 30vw, 256px)',
           width: 'auto',
           marginBottom: 0,
           transform: 'translateZ(0)',
