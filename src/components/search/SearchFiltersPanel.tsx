@@ -139,7 +139,8 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
         </div>
 
         {/* Time filter chips + Expand/Collapse Filters Button */}
-        <div className="flex flex-wrap justify-center items-center gap-2 py-2">
+        {/* Desktop: show all chips inline */}
+        <div className="hidden sm:flex flex-wrap justify-center items-center gap-2 py-2">
           {([
             { value: '12h' as TimeFilter, label: '12 tim' },
             { value: '24h' as TimeFilter, label: '24 tim' },
@@ -159,10 +160,49 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
               {label}
             </button>
           ))}
-          <div className="w-px h-6 bg-white/20 mx-1 hidden sm:block" />
+          <div className="w-px h-6 bg-white/20 mx-1" />
           <button
             onClick={() => onFiltersExpandedChange(!filtersExpanded)}
             className="h-11 px-6 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"
+          >
+            <span>{filtersExpanded ? 'Dölj filter' : 'Visa filter'}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${filtersExpanded ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+
+        {/* Mobile: time filter as dropdown + Visa filter button */}
+        <div className="flex sm:hidden justify-center items-center gap-2 py-2">
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <button className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation">
+                <Clock className="h-3.5 w-3.5" />
+                <span>{timeFilter === 'all' ? 'Alla' : timeFilter === '12h' ? '12 tim' : timeFilter === '24h' ? '24 tim' : timeFilter === '3d' ? '3 dagar' : '7 dagar'}</span>
+                <ChevronDown className="h-3.5 w-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="bg-popover/95 backdrop-blur-md border-white/10 min-w-[140px]">
+              {([
+                { value: '12h' as TimeFilter, label: '12 timmar' },
+                { value: '24h' as TimeFilter, label: '24 timmar' },
+                { value: '3d' as TimeFilter, label: '3 dagar' },
+                { value: '7d' as TimeFilter, label: '7 dagar' },
+                { value: 'all' as TimeFilter, label: 'Alla' },
+              ]).map(({ value, label }) => (
+                <DropdownMenuItem
+                  key={value}
+                  onClick={() => onTimeFilterChange(value)}
+                  className="text-white py-2.5 px-3 text-sm touch-manipulation focus:bg-white/10"
+                >
+                  <span className="flex-1">{label}</span>
+                  {timeFilter === value && <Check className="h-4 w-4 text-white ml-2" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <button
+            onClick={() => onFiltersExpandedChange(!filtersExpanded)}
+            className="h-11 px-5 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation"
           >
             <span>{filtersExpanded ? 'Dölj filter' : 'Visa filter'}</span>
             <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${filtersExpanded ? 'rotate-180' : ''}`} />
