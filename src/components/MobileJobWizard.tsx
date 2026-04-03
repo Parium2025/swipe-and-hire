@@ -2457,7 +2457,7 @@ const MobileJobWizard = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContentNoFocus 
-        className="premium-modal-motion premium-edit-dialog parium-panel max-w-none h-auto bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
+         className="premium-modal-motion premium-edit-dialog parium-panel h-auto bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
