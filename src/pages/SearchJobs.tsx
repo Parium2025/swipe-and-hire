@@ -480,7 +480,8 @@ const SearchJobs = memo(() => {
     setSearchInput('');
     setTimeFilter('all');
     setSelectedCompanies([]);
-  }, []);
+    try { sessionStorage.removeItem('parium-search-filters'); } catch {}
+  }, [setSelectedPostalCode, setSelectedCity, setSelectedEmploymentTypes, setSelectedCategory, setSelectedSubcategories, setSearchInput, setTimeFilter, setSelectedCompanies]);
 
   const handleLocationChange = (location: string, postalCode?: string) => {
     setSelectedCity(location);
