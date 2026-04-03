@@ -570,7 +570,7 @@ const SearchJobs = memo(() => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          {selectedCompanies.length > 0 && (
+          {selectedCompanies.length > 1 && (
             <button
               onClick={() => setSelectedCompanies([])}
               className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 active:scale-[0.95] touch-manipulation border border-white/15"
