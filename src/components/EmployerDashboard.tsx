@@ -26,7 +26,6 @@ import { AlertDialogContentNoFocus } from "@/components/ui/alert-dialog-no-focus
 import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
-import MobileJobWizard from '@/components/MobileJobWizard';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
@@ -81,9 +80,6 @@ const EmployerDashboard = memo(() => {
   // Prefetch job details on hover for instant navigation
   const { handleMouseEnter: prefetchJob, handleMouseLeave: cancelPrefetch } = useJobPrefetch();
   
-  // State for editing drafts in wizard
-  const [draftToEdit, setDraftToEdit] = useState<JobPosting | null>(null);
-  const [draftWizardOpen, setDraftWizardOpen] = useState(false);
   const hasAutoRestoredEdit = useRef(false);
 
   // Auto-restore: if there was an active edit session, re-open the edit dialog
@@ -275,13 +271,13 @@ const EmployerDashboard = memo(() => {
     setEditDialogOpen(true);
   };
 
-  // Handle editing draft jobs - open wizard instead of job-details
+  // Handle editing draft jobs - use the same edit dialog flow as published jobs
   const handleEditDraft = (job: JobPosting) => {
-    setDraftToEdit(job);
-    setDraftWizardOpen(true);
+    setEditingJob(job);
+    setEditDialogOpen(true);
   };
 
-  const handlePremiumEditOpen = useCallback((job: JobPosting, mode: 'draft' | 'published') => {
+  const handlePremiumEditOpen = useCallback((job: JobPosting) => {
     if (pendingEditJobId) return;
 
     setPendingEditJobId(job.id);
@@ -291,11 +287,7 @@ const EmployerDashboard = memo(() => {
     }
 
     editLaunchTimeoutRef.current = window.setTimeout(() => {
-      if (mode === 'draft') {
-        handleEditDraft(job);
-      } else {
-        handleEditJob(job);
-      }
+      handleEditJob(job);
 
       setPendingEditJobId(null);
       editLaunchTimeoutRef.current = null;
@@ -485,7 +477,7 @@ const EmployerDashboard = memo(() => {
                                     className={`flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-[transform,opacity,background-color] duration-200 active:scale-[0.97] md:hover:bg-white/10 ${pendingEditJobId === job.id ? 'pointer-events-none opacity-70' : ''}`}
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handlePremiumEditOpen(jobPosting, isDraft ? 'draft' : 'published');
+                                        handlePremiumEditOpen(jobPosting);
                                     }}
                                   >
                                     <Edit className="h-4 w-4" />
@@ -567,27 +559,6 @@ const EmployerDashboard = memo(() => {
         onOpenChange={setEditDialogOpen}
         onJobUpdated={invalidateJobs}
       />
-
-      {/* Draft editing wizard */}
-      {draftToEdit && (
-        <MobileJobWizard
-          open={draftWizardOpen}
-          onOpenChange={(open) => {
-            setDraftWizardOpen(open);
-            if (!open) {
-              setDraftToEdit(null);
-            }
-          }}
-          jobTitle={draftToEdit.title}
-          selectedTemplate={null}
-          onJobCreated={() => {
-            invalidateJobs();
-            setDraftWizardOpen(false);
-            setDraftToEdit(null);
-          }}
-          existingJob={draftToEdit}
-        />
-      )}
     </div>
   );
 });
