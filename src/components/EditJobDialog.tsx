@@ -95,6 +95,8 @@ interface JobPosting {
   pitch?: string;
   job_image_url?: string;
   job_image_desktop_url?: string;
+  is_active?: boolean | null;
+  expires_at?: string | null;
 }
 
 interface JobFormData {
