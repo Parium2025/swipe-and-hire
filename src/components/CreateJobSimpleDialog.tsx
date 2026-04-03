@@ -532,8 +532,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
                         >
                           <div className="flex items-center gap-2 w-full min-w-0">
-                            <span className="text-base truncate font-normal text-white flex-1 min-w-0 text-left" title={selectedTemplate?.name || 'Ingen mall (valfritt)'}>
-                              {selectedTemplate?.name || 'Ingen mall (valfritt)'}
+                          <span className="text-base truncate font-normal text-white flex-1 min-w-0 text-left" title={selectedTemplate?.name || 'Välj mall...'}>
+                              {selectedTemplate?.name || 'Välj mall...'}
                             </span>
                             <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
                           </div>
