@@ -4,10 +4,9 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, Users, Edit, Trash2 } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
+import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining } from '@/lib/date';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 import type { JobPosting } from '@/hooks/useJobsData';
@@ -50,15 +49,14 @@ function getCompanyInitials(name: string): string {
 
 export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch }: MobileJobCardProps) => {
   const navigate = useNavigate();
-  const isExpired = isJobExpiredCheck(job.created_at, job.expires_at);
   const isDraft = !job.is_active;
+  const isExpired = !isDraft && isJobExpiredCheck(job.created_at, job.expires_at);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
   const companyName = job.employer_profile?.company_name || 'Okänt företag';
   const recruiterName = job.employer_profile?.first_name && job.employer_profile?.last_name
     ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
     : null;
 
-  // Image resolution
   const resolvedUrl = useMemo(() => {
     if (!job.job_image_url) return null;
     if (job.job_image_url.startsWith('http')) return job.job_image_url;
@@ -73,12 +71,19 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
 
   const [loadedBlobUrl, setLoadedBlobUrl] = useState<string | null>(null);
   useEffect(() => {
-    if (!resolvedUrl || cachedBlobUrl) { setLoadedBlobUrl(null); return; }
+    if (!resolvedUrl || cachedBlobUrl) {
+      setLoadedBlobUrl(null);
+      return;
+    }
     let cancelled = false;
     imageCache.loadImage(resolvedUrl)
-      .then(blobUrl => { if (!cancelled) setLoadedBlobUrl(blobUrl); })
+      .then(blobUrl => {
+        if (!cancelled) setLoadedBlobUrl(blobUrl);
+      })
       .catch(() => {});
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [resolvedUrl, cachedBlobUrl]);
 
   const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
@@ -86,25 +91,24 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 
   const handleCardClick = () => {
-    if (!job.is_active && onEditDraft) {
+    if (isDraft && onEditDraft) {
       onEditDraft(job);
-    } else {
-      navigate(`/job-details/${job.id}`);
+      return;
     }
+    navigate(`/job-details/${job.id}`);
   };
 
   const handleTouchStart = () => {
-    if (job.is_active && onPrefetch) {
+    if (!isDraft && !isExpired && onPrefetch) {
       onPrefetch(job.id);
     }
   };
 
-  // Hover color per status
   const hoverClass = isExpired
-    ? 'hover:bg-red-500/10 hover:border-red-500/30'
+    ? '[@media(hover:hover)]:hover:bg-red-500/10 [@media(hover:hover)]:hover:border-red-500/30 active:bg-red-500/15'
     : isDraft
-      ? 'hover:bg-amber-500/10 hover:border-amber-500/30'
-      : 'hover:bg-green-500/10 hover:border-green-500/30';
+      ? '[@media(hover:hover)]:hover:bg-amber-500/10 [@media(hover:hover)]:hover:border-amber-500/30 active:bg-amber-500/15'
+      : '[@media(hover:hover)]:hover:bg-green-500/10 [@media(hover:hover)]:hover:border-green-500/30 active:bg-green-500/15';
 
   return (
     <Card
@@ -113,7 +117,6 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
       onClick={handleCardClick}
       onTouchStart={handleTouchStart}
     >
-      {/* Image header */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">
         {displayUrl ? (
           <>
@@ -140,33 +143,29 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           </div>
         )}
 
-        {/* Status badge — top-left */}
         <div className="absolute top-2.5 left-2.5">
           {isExpired ? (
             <Badge variant="glassDestructive" className="text-[11px] px-2 py-0.5">
               Utgången
             </Badge>
-          ) : job.is_active ? (
-            <Badge className="bg-green-500/90 text-white border-0 text-[11px] px-2 py-0.5">
-              Aktiv
-            </Badge>
-          ) : (
+          ) : isDraft ? (
             <Badge className="bg-amber-500/90 text-white border-0 text-[11px] px-2 py-0.5">
               Utkast
+            </Badge>
+          ) : (
+            <Badge className="bg-green-500/90 text-white border-0 text-[11px] px-2 py-0.5">
+              Aktiv
             </Badge>
           )}
         </div>
 
-        {/* Views badge — top-right */}
         <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-1 border border-white/15">
           <Eye className="h-3.5 w-3.5 text-white" />
           <span className="text-xs font-medium text-white">{job.views_count || 0}</span>
         </div>
       </div>
 
-      {/* Content body */}
       <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5">
-        {/* Title */}
         <div className="flex min-h-[clamp(4.25rem,3.8rem+1.6vw,5.25rem)] items-start justify-center px-2">
           <TruncatedText
             text={job.title}
@@ -174,10 +173,8 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           />
         </div>
 
-        {/* Divider */}
         <div className="h-px bg-white/10 mx-2" />
 
-        {/* Info rows */}
         <div className="space-y-2 px-2 pb-1">
           <div className="flex items-center justify-between">
             <span className="text-sm leading-none text-white">Anställningsform</span>
@@ -202,27 +199,16 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
             <span className="text-sm leading-none text-white">Publicerad</span>
             <span className="text-sm leading-none text-white font-medium text-right">{formatDateShortSv(job.created_at)}</span>
           </div>
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer">
-                  <span className="text-sm leading-none text-white">Status</span>
-                  <span className={`text-sm leading-none font-medium ${isExpired ? 'text-red-300' : 'text-white'}`}>
-                    {isExpired ? 'Utgången' : isDraft ? 'Utkast' : `${timeInfo.text} kvar`}
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
-                <p className="text-xs">{isDraft ? 'Utkast – ej publicerad' : formatExpirationDateTime(job.created_at, job.expires_at)}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex items-center justify-between">
+            <span className="text-sm leading-none text-white">Status</span>
+            <span className={`text-sm leading-none font-medium ${isExpired ? 'text-red-300' : isDraft ? 'text-amber-300' : 'text-white'}`}>
+              {isExpired ? 'Utgången' : isDraft ? 'Utkast' : `${timeInfo.text} kvar`}
+            </span>
+          </div>
         </div>
 
-        {/* Divider before actions */}
         <div className="h-px bg-white/10 mx-2" />
 
-        {/* Action Buttons */}
         <div className={`flex gap-2 px-2 py-1.5 ${isExpired ? 'justify-center' : ''}`}>
           {!isExpired && (
             <Button
@@ -230,7 +216,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                if (!job.is_active && onEditDraft) {
+                if (isDraft && onEditDraft) {
                   onEditDraft(job);
                 } else {
                   onEdit(job);
@@ -249,7 +235,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
               e.stopPropagation();
               onDelete(job);
             }}
-            className={`${isExpired ? 'px-8' : 'flex-1'} h-11 text-sm transition-[background-color,border-color] duration-150 hover:bg-red-500/20 hover:border-red-500/40`}
+            className={`${isExpired ? 'px-8' : 'flex-1'} h-11 rounded-full border-destructive/40 bg-destructive/20 text-white transition-[background-color,border-color,color,transform] duration-150 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-[0.97]`}
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Ta bort
