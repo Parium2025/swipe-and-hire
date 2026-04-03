@@ -353,21 +353,23 @@ const SearchJobs = memo(() => {
     return matches.length > 0 ? matches[0] : null;
   }, [jobs, debouncedSearch, searchInput, isLoading]);
 
-  // Company data for dropdown-selected company filter
-  const selectedCompanyData = useMemo(() => {
-    if (!selectedCompany) return null;
-    const data = { id: '', name: selectedCompany, logo: undefined as string | undefined, jobCount: 0, avgRating: undefined as number | undefined, reviewCount: 0 };
-    jobs.forEach(job => {
-      if (job.company_name === selectedCompany) {
-        data.jobCount++;
-        if (!data.id) data.id = job.employer_id || '';
-        if (!data.logo) data.logo = job.company_logo_url;
-        if (!data.avgRating) data.avgRating = job.company_avg_rating;
-        if (!data.reviewCount) data.reviewCount = job.company_review_count || 0;
-      }
+  // Company data for dropdown-selected company filters
+  const selectedCompaniesData = useMemo(() => {
+    if (selectedCompanies.length === 0) return [];
+    return selectedCompanies.map(companyName => {
+      const data = { id: '', name: companyName, logo: undefined as string | undefined, jobCount: 0, avgRating: undefined as number | undefined, reviewCount: 0 };
+      jobs.forEach(job => {
+        if (job.company_name === companyName) {
+          data.jobCount++;
+          if (!data.id) data.id = job.employer_id || '';
+          if (!data.logo) data.logo = job.company_logo_url;
+          if (!data.avgRating) data.avgRating = job.company_avg_rating;
+          if (!data.reviewCount) data.reviewCount = job.company_review_count || 0;
+        }
+      });
+      return data;
     });
-    return data;
-  }, [jobs, selectedCompany]);
+  }, [jobs, selectedCompanies]);
 
   // Reset display count and default sort when filters change
   useEffect(() => {
