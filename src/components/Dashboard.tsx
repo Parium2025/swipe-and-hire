@@ -145,7 +145,7 @@ const Dashboard = memo(() => {
     );
   }
 
-  const tabTitle = `${activeTab === 'active' ? 'Aktiva jobb' : 'Utgångna jobb'} av ${profile?.company_name || 'ditt företag'}`;
+  
 
   return (
     <div className="dashboard-page-stack responsive-container-wide animate-fade-in">
