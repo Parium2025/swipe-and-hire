@@ -299,22 +299,19 @@ const EmployerDashboard = memo(() => {
     }
   };
 
-  // Count active jobs for stats - exclude expired jobs from "Aktiva annonser" count
-  // A job is "expired" if its expires_at has passed, regardless of is_active flag
+  // Count active/expired/draft jobs consistently across employer views
   const activeJobs = useMemo(() => 
-    jobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at)), 
+    jobs.filter(j => isEmployerJobActive(j)), 
     [jobs]
   );
   
-  // Count expired jobs — is_active AND expires_at passed (only published jobs that expired)
   const expiredJobsCount = useMemo(() => 
-    jobs.filter(j => j.is_active && isJobExpiredCheck(j.created_at, j.expires_at)).length, 
+    jobs.filter(j => isEmployerJobExpired(j)).length, 
     [jobs]
   );
   
-  // Count draft jobs — is_active=false (all drafts, regardless of expiration)
   const draftJobsCount = useMemo(() => 
-    jobs.filter(j => !j.is_active).length, 
+    jobs.filter(j => isEmployerJobDraft(j)).length, 
     [jobs]
   );
   
