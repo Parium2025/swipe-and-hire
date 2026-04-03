@@ -76,7 +76,7 @@ export const ExpandedNotesDialog = memo(({
         <VisuallyHidden>
           <DialogTitle>Anteckningar</DialogTitle>
         </VisuallyHidden>
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px] pointer-events-none" />
+        <div className="absolute inset-0 bg-white/5 pointer-events-none" />
         <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
 

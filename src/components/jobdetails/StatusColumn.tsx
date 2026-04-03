@@ -99,7 +99,7 @@ export const StatusColumn = memo(({
       }}
     >
       <div 
-        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-foreground/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-foreground/40' : ''}`}
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-foreground/20 flex-shrink-0 ${isOver ? 'ring-2 ring-foreground/40' : ''}`}
         style={{ backgroundColor: `${displayColor}55` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">

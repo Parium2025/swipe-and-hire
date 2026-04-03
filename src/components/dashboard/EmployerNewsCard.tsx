@@ -65,7 +65,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
   if (isLoading) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height`}>
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-white/5" />
         <CardContent className="relative p-6 h-full">
           <div className="flex items-center gap-2 mb-4">
             <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
