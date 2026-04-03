@@ -47,6 +47,7 @@ export function SavedSearchesDropdown({
   const [hoverTruncatedId, setHoverTruncatedId] = useState<string | null>(null);
   const { handleTap, isPreview, resetPreview, isTouch } = useTapToPreview();
   const nameRefs = useRef<Record<string, HTMLSpanElement | null>>({});
+  const criteriaRefs = useRef<Record<string, HTMLParagraphElement | null>>({});
 
   // Reset preview state when popover closes
   const handleOpenChange = (isOpen: boolean) => {
@@ -148,16 +149,27 @@ export function SavedSearchesDropdown({
                   <TooltipTrigger asChild>
                     <div
                       onClick={() => {
+                        const nameEl = nameRefs.current[search.id] ?? null;
+                        const criteriaEl = criteriaRefs.current[search.id] ?? null;
+                        // Check either element for truncation on touch
+                        const truncatedEl = (nameEl && nameEl.scrollWidth > nameEl.clientWidth + 1) 
+                          ? nameEl 
+                          : (criteriaEl && criteriaEl.scrollWidth > criteriaEl.clientWidth + 1)
+                            ? criteriaEl
+                            : null;
                         handleTap(
                           search.id,
-                          nameRefs.current[search.id] ?? null,
+                          truncatedEl,
                           () => handleApplySearch(search)
                         );
                       }}
                       onMouseEnter={() => {
                         if (isTouch) return;
-                        const el = nameRefs.current[search.id];
-                        if (el && el.scrollWidth > el.clientWidth + 1) {
+                        const nameEl = nameRefs.current[search.id];
+                        const criteriaEl = criteriaRefs.current[search.id];
+                        const nameTruncated = nameEl && nameEl.scrollWidth > nameEl.clientWidth + 1;
+                        const criteriaTruncated = criteriaEl && criteriaEl.scrollWidth > criteriaEl.clientWidth + 1;
+                        if (nameTruncated || criteriaTruncated) {
                           setHoverTruncatedId(search.id);
                         }
                       }}
@@ -190,7 +202,10 @@ export function SavedSearchesDropdown({
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-white truncate mt-0.5">
+                        <p 
+                          ref={(el) => { criteriaRefs.current[search.id] = el; }}
+                          className="text-xs text-white truncate mt-0.5"
+                        >
                           {getCriteriaSummary(search)}
                         </p>
                       </div>
