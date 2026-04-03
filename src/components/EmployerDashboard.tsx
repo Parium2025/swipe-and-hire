@@ -12,7 +12,7 @@ import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
-import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
+import { isJobExpiredCheck } from '@/lib/date';
 import {
   AlertDialog,
   AlertDialogAction,
