@@ -74,8 +74,6 @@ const EmployerDashboard = memo(() => {
   const { user, profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const { toast } = useToast();
   
-  // Prefetch job details on hover for instant navigation
-  const { handleMouseEnter: prefetchJob, handleMouseLeave: cancelPrefetch } = useJobPrefetch();
   
   // State for editing drafts in wizard
   const [draftToEdit, setDraftToEdit] = useState<JobPosting | null>(null);
