@@ -2,15 +2,21 @@ import { useState, memo, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
+import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { JobTitleCell } from '@/components/JobTitleCell';
+import { TruncatedText } from '@/components/TruncatedText';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
-import { isJobExpiredCheck } from '@/lib/date';
+import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +31,7 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import MobileJobWizard from '@/components/MobileJobWizard';
+import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
@@ -74,6 +81,8 @@ const EmployerDashboard = memo(() => {
   const { user, profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const { toast } = useToast();
   
+  // Prefetch job details on hover for instant navigation
+  const { handleMouseEnter: prefetchJob, handleMouseLeave: cancelPrefetch } = useJobPrefetch();
   
   // State for editing drafts in wizard
   const [draftToEdit, setDraftToEdit] = useState<JobPosting | null>(null);
@@ -384,122 +393,266 @@ const EmployerDashboard = memo(() => {
         </div>
       )}
 
-      {/* Job Cards Grid — unified for all screen sizes */}
-      <div className="touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
-        {loading ? (
-          <div className="space-y-3 px-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
-                <div className="flex items-start gap-3">
-                  <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-3/4 bg-white/10" />
-                    <Skeleton className="h-3 w-1/2 bg-white/10" />
-                    <div className="flex gap-2 mt-2">
-                      <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
-                      <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : tabFilteredJobs.length === 0 ? (
-          <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
-            <span>
-            {searchTerm.trim() 
-              ? 'Inga annonser matchar din sökning' 
-              : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
-              : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
-              : 'Inga utkast.'}
-            </span>
-          </div>
-        ) : (
-          <>
-            <div ref={listTopRef} />
-            <div className="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24">
-              {pageJobs.map((job) => {
-                const jobPosting = job as JobPosting;
-                const isExpired = job.is_active && isJobExpiredCheck(job.created_at, jobPosting.expires_at);
-                const isDraft = !job.is_active;
-                const recruiterName = job.employer_profile?.first_name && job.employer_profile?.last_name
-                  ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
-                  : null;
-                
-                return (
-                  <ReadOnlyMobileJobCard
-                    key={job.id}
-                    job={job as JobPosting & { company_name?: string }}
-                    hideSaveButton
-                    onCardClick={(jobId) => {
-                      if (isDraft) {
-                        handleEditDraft(jobPosting);
-                      } else {
-                        navigate(`/job-details/${jobId}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
-                      }
-                    }}
-                    statusBadge={
-                      isDraft ? (
-                        <Badge className="bg-amber-500/80 text-white border-0 text-[11px] px-2 py-0.5">Utkast</Badge>
-                      ) : isExpired ? (
-                        <Badge className="bg-red-500/80 text-white border-0 text-[11px] px-2 py-0.5">Utgången</Badge>
-                      ) : (
-                        <Badge className="bg-green-500/80 text-white border-0 text-[11px] px-2 py-0.5">Aktiv</Badge>
-                      )
-                    }
-                    footer={
-                      <div className="space-y-2">
-                        {/* Recruiter + views row */}
-                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                          {recruiterName && (
-                            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
-                              <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
-                              <span className="leading-none truncate">{recruiterName}</span>
-                            </Badge>
-                          )}
-                          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
-                            <Eye className="h-3 w-3 mr-0.5 flex-shrink-0" />
-                            <span className="leading-none">{job.views_count} visningar</span>
-                          </Badge>
-                        </div>
-                        {/* Action buttons */}
-                        <div className={`flex items-center gap-2 pt-0.5 ${isExpired && !isDraft ? 'justify-center' : ''}`}>
-                          {(!isExpired || isDraft) && (
-                            <button
-                              className={`flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-[transform,opacity,background-color] duration-200 active:scale-[0.97] md:hover:bg-white/10 ${pendingEditJobId === job.id ? 'pointer-events-none opacity-70' : ''}`}
+      {/* Jobs Table */}
+      {/* Desktop: Jobs Table inside Card */}
+      <Card className="bg-white/5 border-0 hidden md:block" style={{ contain: 'layout style' }}>
+        <CardHeader className="md:p-4">
+          <CardTitle className="text-sm text-white md:text-left">
+            Mina jobbannonser
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-4">
+          {/* Desktop: Table view */}
+          <div className="hidden md:block">
+            <div className="w-full" style={{ contain: 'layout style' }}>
+              <Table className="w-full table-fixed">
+                <TableHeader>
+                  <TableRow className="border-white/20 hover:bg-transparent">
+                    <TableHead className="text-white font-semibold text-sm text-center px-2 w-[22%]">Titel</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-2 w-[9%]">Status</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-1 w-[8%]">Visningar</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-1 w-[10%]">Ansökningar</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-2 w-[12%]">Plats</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-2 w-[13%]">Rekryterare</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-2 w-[12%]">Skapad</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-2 w-[14%]">Åtgärder</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                {tabFilteredJobs.length === 0 ? (
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-sm">
+                        {searchTerm.trim() 
+                          ? 'Inga annonser matchar din sökning' 
+                          : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
+                          : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
+                          : 'Inga utkast.'}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    pageJobs.map((job) => {
+                      const isDraft = !job.is_active;
+                      const isExpired = !isDraft && isJobExpiredCheck(job.created_at, job.expires_at);
+                      
+                      return (
+                      <TableRow 
+                        key={job.id}
+                        className={`group border-white/10 cursor-pointer transition-[background-color] duration-150 ${
+                          isExpired 
+                            ? "hover:bg-red-500/10" 
+                            : isDraft 
+                              ? "hover:bg-amber-500/10"
+                              : "hover:bg-green-500/10"
+                        }`}
+                        style={{ contain: 'layout style paint' }}
+                        onClick={() => handleJobRowClick(job as JobPosting)}
+                        onMouseEnter={() => job.is_active && prefetchJob(job.id)}
+                        onMouseLeave={cancelPrefetch}
+                      >
+                         <TableCell className="font-medium text-white text-center px-2 py-3 overflow-hidden">
+                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
+                         </TableCell>
+                         <TableCell className="text-center px-2 py-3">
+                           <div className="flex flex-col items-center gap-0.5">
+                             {job.is_active ? (
+                               isJobExpiredCheck(job.created_at, job.expires_at) ? (
+                                <Badge variant="glass" className="whitespace-nowrap text-xs bg-red-500/60 border-red-400/60 text-white">
+                                   Utgången
+                                 </Badge>
+                               ) : (
+                                 <Badge variant="glass" className="text-xs bg-green-500/60 border-green-500/60 text-white">
+                                   Aktiv
+                                 </Badge>
+                               )
+                             ) : (
+                               <Badge variant="glass" className="text-xs bg-yellow-500/60 border-yellow-500/60 text-white">
+                                 Utkast
+                               </Badge>
+                             )}
+                           </div>
+                         </TableCell>
+                         <TableCell className="text-center px-2 py-3">
+                           <Badge variant="glass" className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs">
+                             {job.views_count || 0}
+                           </Badge>
+                         </TableCell>
+                         <TableCell className="text-center px-2 py-3">
+                           <Badge variant="glass" className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
+                             {job.applications_count || 0}
+                           </Badge>
+                         </TableCell>
+                        <TableCell className="text-white text-center px-2 py-3">
+                          <div className="flex items-center justify-center gap-1 text-sm">
+                            <MapPin size={12} className="flex-shrink-0" />
+                            <TruncatedText text={job.location} className="truncate max-w-[90px]" />
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-white text-center px-2 py-3">
+                          <TruncatedText 
+                            text={job.employer_profile?.first_name && job.employer_profile?.last_name
+                              ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
+                              : '-'}
+                            className="text-sm truncate max-w-[100px] block mx-auto"
+                          />
+                        </TableCell>
+                        <TableCell className="text-white text-center px-2 py-3">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <div className="flex items-center justify-center gap-1.5 text-sm whitespace-nowrap">
+                              <Calendar size={14} />
+                              {formatDateShortSv(job.created_at)}
+                            </div>
+                            {/* Only show expiration info for active (published) jobs, not drafts */}
+                            {job.is_active && (() => {
+                              const timeInfo = getTimeRemaining(job.created_at, (job as JobPosting).expires_at);
+                              return (
+                                <TooltipProvider delayDuration={0}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className={`text-xs cursor-pointer ${timeInfo.isExpired ? 'text-red-400' : 'text-white'}`}>
+                                        {timeInfo.isExpired ? 'Utgången' : `Utgår om: ${timeInfo.text}`}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
+                                      <p className="text-xs">{formatExpirationDateTime(job.created_at, (job as JobPosting).expires_at)}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              );
+                            })()}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-3">
+                          <div className="flex items-center justify-center gap-1.5">
+                            {/* Hide edit button for expired active jobs, but always show for drafts */}
+                            {(!job.is_active || !isJobExpiredCheck(job.created_at, (job as JobPosting).expires_at)) && (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!job.is_active) {
+                                    handleEditDraft(job as JobPosting);
+                                  } else {
+                                    handleEditJob(job as JobPosting);
+                                  }
+                                }}
+                                className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 border-white/20 text-white transition-[background-color,border-color] duration-150 hover:bg-white/15 hover:border-white/50 active:scale-95"
+                              >
+                                <Edit size={14} />
+                              </button>
+                            )}
+                            <button 
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handlePremiumEditOpen(jobPosting, isDraft ? 'draft' : 'published');
+                                handleDeleteClick(job as JobPosting);
                               }}
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-[background-color,border-color,color] duration-150 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-95"
                             >
-                              <Edit className="h-4 w-4" />
-                              {pendingEditJobId === job.id ? 'Öppnar...' : 'Redigera'}
+                              <Trash2 size={14} />
                             </button>
-                          )}
-                          <button
-                            className={`${isExpired && !isDraft ? 'px-8' : 'flex-1 px-4'} inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/20 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteClick(jobPosting);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Ta bort
-                          </button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );})
+
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            
+            {/* Desktop Pagination */}
+            {totalPages > 1 && (
+              <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-4" />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Mobile: Card view — outside Card wrapper for edge-to-edge layout */}
+      <div className="md:hidden touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
+            {loading ? (
+              <div className="space-y-3 px-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                    <div className="flex items-start gap-3">
+                      <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4 bg-white/10" />
+                        <Skeleton className="h-3 w-1/2 bg-white/10" />
+                        <div className="flex gap-2 mt-2">
+                          <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
+                          <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
                         </div>
                       </div>
-                    }
-                  />
-                );
-              })}
-            </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : tabFilteredJobs.length === 0 ? (
+              <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh]  flex items-center justify-center">
+                <span>
+                {searchTerm.trim() 
+                  ? 'Inga annonser matchar din sökning' 
+                  : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
+                  : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
+                  : 'Inga utkast.'}
+                </span>
+              </div>
+            ) : (
+              <>
+                <div ref={listTopRef} />
+                    <div className="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24">
+                      {pageJobs.map((job) => {
+                        const jobPosting = job as JobPosting;
+                        const isExpired = isJobExpiredCheck(job.created_at, jobPosting.expires_at);
+                        const isDraft = !job.is_active && !isExpired;
+                        return (
+                          <ReadOnlyMobileJobCard
+                            key={job.id}
+                            job={job as JobPosting & { company_name?: string }}
+                            hideSaveButton
+                            onCardClick={(jobId) => {
+                              if (isDraft) {
+                                handleEditDraft(jobPosting);
+                              } else {
+                                navigate(`/job-details/${jobId}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
+                              }
+                            }}
+                            footer={
+                              <div className={`flex items-center gap-2 pt-0.5 ${isExpired && !isDraft ? 'justify-center' : ''}`}>
+                                {(!isExpired || isDraft) && (
+                                  <button
+                                    className={`flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-[transform,opacity,background-color] duration-200 active:scale-[0.97] md:hover:bg-white/10 ${pendingEditJobId === job.id ? 'pointer-events-none opacity-70' : ''}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handlePremiumEditOpen(jobPosting, isDraft ? 'draft' : 'published');
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    {pendingEditJobId === job.id ? 'Öppnar...' : 'Redigera'}
+                                  </button>
+                                )}
+                                <button
+                                  className={`${isExpired && !isDraft ? 'px-8' : 'flex-1 px-4'} inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/20 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(jobPosting);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  Ta bort
+                                </button>
+                              </div>
+                            }
+                          />
+                        );
+                      })}
+                    </div>
 
-            {totalPages > 1 && (
-              <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-3" />
+                {totalPages > 1 && (
+                  <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-3" />
+                )}
+              </>
             )}
-          </>
-        )}
-      </div>
+          </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus 
