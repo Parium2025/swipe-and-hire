@@ -25,7 +25,6 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import MobileJobWizard from '@/components/MobileJobWizard';
-import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
