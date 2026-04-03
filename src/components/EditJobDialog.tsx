@@ -40,7 +40,6 @@ import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalC
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
-import { isEmployerJobDraft } from '@/lib/jobStatus';
 
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
@@ -143,6 +142,7 @@ const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const isDraft = job ? isEmployerJobDraft(job) : false;
+  const isDraft = job ? !job.is_active : false;
   const [isInitializing, setIsInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
