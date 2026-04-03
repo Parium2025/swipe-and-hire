@@ -229,7 +229,9 @@ const SearchJobs = memo(() => {
     setSelectedEmploymentTypesRaw(prev => { const next = typeof v === 'function' ? v(prev) : v; persistFilters({ empTypes: next }); return next; });
   }, [persistFilters]);
 
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [filtersExpanded, setFiltersExpanded] = useState(() => {
+    return !!(savedFilters.city || (savedFilters.cat && savedFilters.cat !== 'all-categories') || savedFilters.empTypes?.length);
+  });
   
   // Company suggestion state
   const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
