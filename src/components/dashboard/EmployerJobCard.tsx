@@ -154,47 +154,49 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
       </div>
 
       {/* Content body */}
-      <div className="job-card-mobile-body space-y-3 py-1">
+      <div className="job-card-mobile-body flex h-full flex-col gap-3 py-1">
         {/* Title */}
-        <TruncatedText
-          text={job.title}
-          className="text-base font-bold text-white leading-snug line-clamp-2 text-center"
-        />
+        <div className="flex min-h-[clamp(4.25rem,3.8rem+1.6vw,5.25rem)] items-end justify-center px-2">
+          <TruncatedText
+            text={job.title}
+            className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] text-white line-clamp-2"
+          />
+        </div>
 
         {/* Divider */}
         <div className="h-px bg-white/10 mx-2" />
 
         {/* Info rows — always show all 6 rows for consistent card height */}
-        <div className="space-y-1.5 px-2">
+        <div className="space-y-2 px-2 pb-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white">Anställningsform</span>
-            <span className="text-xs text-white font-medium">{job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}</span>
+            <span className="text-sm leading-none text-white">Anställningsform</span>
+            <span className="text-sm leading-none text-white font-medium text-right">{job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white">Ansökningar</span>
-            <span className="text-xs text-white font-medium inline-flex items-center gap-1">
-              <Users className="h-3 w-3 flex-shrink-0" />
+            <span className="text-sm leading-none text-white">Ansökningar</span>
+            <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-none text-white font-medium">
+              <Users className="h-3.5 w-3.5 flex-shrink-0" />
               {job.applications_count || 0}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white">Plats</span>
-            <span className="text-xs text-white font-medium truncate max-w-[55%] text-right">{job.location || '–'}</span>
+            <span className="text-sm leading-none text-white">Plats</span>
+            <span className="max-w-[56%] truncate text-right text-sm leading-none text-white font-medium">{job.location || '–'}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white">Rekryterare</span>
-            <span className="text-xs text-white font-medium truncate max-w-[55%] text-right">{recruiterName || '–'}</span>
+            <span className="text-sm leading-none text-white">Rekryterare</span>
+            <span className="max-w-[56%] truncate text-right text-sm leading-none text-white font-medium">{recruiterName || '–'}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white">Publicerad</span>
-            <span className="text-xs text-white font-medium">{formatDateShortSv(job.created_at)}</span>
+            <span className="text-sm leading-none text-white">Publicerad</span>
+            <span className="text-sm leading-none text-white font-medium text-right">{formatDateShortSv(job.created_at)}</span>
           </div>
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-between cursor-pointer">
-                  <span className="text-xs text-white">Status</span>
-                  <span className={`text-xs font-medium ${isExpired ? 'text-red-300' : 'text-white'}`}>
+                  <span className="text-sm leading-none text-white">Status</span>
+                  <span className={`text-sm leading-none font-medium ${isExpired ? 'text-red-300' : 'text-white'}`}>
                     {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
                   </span>
                 </div>
