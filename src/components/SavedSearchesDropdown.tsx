@@ -127,18 +127,18 @@ export function SavedSearchesDropdown({
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
-          align="start"
+          className="w-[min(calc(100vw-2rem),360px)] p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
+          align="center"
         >
-          <div className="p-3 border-b border-white/10">
-            <h4 className="text-sm font-medium text-white">Sparade sökningar</h4>
-            <p className="text-xs text-white mt-0.5">
+          <div className="p-4 border-b border-white/10">
+            <h4 className="text-base font-medium text-white">Sparade sökningar</h4>
+            <p className="text-sm text-white mt-1">
               {isTouch ? 'Tryck för att förhandsgranska, tryck igen för att välja' : 'Klicka för att aktivera sökningen'}
             </p>
           </div>
           
           <TooltipProvider delayDuration={0} skipDelayDuration={0}>
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-[50vh] overflow-y-auto overscroll-contain">
             {savedSearches.map((search) => {
               const showingPreview = isPreview(search.id);
               const tooltipOpen = isTouch 
