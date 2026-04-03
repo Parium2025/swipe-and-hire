@@ -97,7 +97,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
 
   return (
     <Card
-      className="job-card-mobile-shell group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] hover:bg-white/10 hover:border-white/30"
+      className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] hover:bg-white/10 hover:border-white/30"
       onClick={() => onClick(job.id)}
     >
       {/* Image header */}

@@ -33,7 +33,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   const regularCards = stats.filter(s => !s.subItems || s.subItems.length === 0);
   
   const renderCard = (stat: StatCard, index: number, spanClass = '') => (
-    <Card key={index} className={`bg-white/5 backdrop-blur-sm border-white/20 ${spanClass}`}>
+    <Card key={index} className={`bg-white/5 border-white/20 ${spanClass}`}>
       {stat.subItems && stat.subItems.length > 0 ? (
         <div className="flex h-full">
           <div className="flex-1 flex flex-col min-w-0">
