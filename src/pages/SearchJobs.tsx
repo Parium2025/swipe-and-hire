@@ -221,7 +221,6 @@ const SearchJobs = memo(() => {
   }, [persistFilters]);
 
   const [filtersExpanded, setFiltersExpanded] = useState(false);
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
   
   // Company suggestion state
   const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
