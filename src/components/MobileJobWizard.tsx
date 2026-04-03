@@ -126,6 +126,8 @@ interface MobileJobWizardProps {
 const JOB_WIZARD_SESSION_KEY = 'job-wizard-unsaved-state';
 const JOB_WIZARD_DRAFT_KEY = 'parium_draft_job-wizard';
 const JOB_WIZARD_INTENTIONAL_CLOSE_KEY = 'parium_job_wizard_intentional_close';
+const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
+const getEditJobDraftKey = (jobId: string) => `parium_draft_edit-job-${jobId}`;
 
 const MobileJobWizard = ({
   open, 
@@ -163,6 +165,7 @@ const MobileJobWizard = ({
   const hasBeenOpenRef = useRef(false);
   // Guard: don't persist draft until restore has completed (prevents overwriting saved draft with empty data)
   const hasCompletedRestoreRef = useRef(false);
+  const editDraftKey = existingJob?.id ? getEditJobDraftKey(existingJob.id) : null;
   
   // Reset state when dialog ACTUALLY closes (not on initial mount)
   useEffect(() => {
