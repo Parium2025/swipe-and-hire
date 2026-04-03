@@ -240,7 +240,7 @@ export function SavedSearchesDropdown({
                   await onClearNewMatches();
                   setOpen(false);
                 }}
-                className="w-full text-xs text-white/60 hover:text-white py-1.5 rounded-md hover:bg-white/5 transition-colors"
+                className="w-full text-xs text-white py-2 rounded-full border border-white/20 hover:bg-white/10 transition-colors"
               >
                 Rensa alla notifikationer
               </button>
