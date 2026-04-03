@@ -525,15 +525,29 @@ const SearchJobs = memo(() => {
               <DropdownMenuContent align="center" side="bottom" className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[200px] max-w-[280px] max-h-64 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
                 {[...new Set(jobs.map(j => j.company_name).filter(Boolean))].sort().map((name, index, arr) => (
                   <React.Fragment key={name}>
-                    <DropdownMenuItem
-                      onClick={() => setSelectedCompany(name)}
-                      className={cn(
-                        "text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white",
-                        selectedCompany === name && "bg-white/10"
+                    <div className="relative">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCompanyTap(
+                            name,
+                            companyTextRefs.current[name] ?? null,
+                            () => setSelectedCompany(name)
+                          );
+                        }}
+                        className={cn(
+                          "text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white",
+                          selectedCompany === name && "bg-white/10"
+                        )}
+                      >
+                        <span ref={(el) => { companyTextRefs.current[name] = el; }} className="truncate">{name}</span>
+                      </DropdownMenuItem>
+                      {isCompanyPreview(name) && (
+                        <div className="absolute left-2 right-2 -top-1 -translate-y-full z-[60] px-3 py-2 rounded-lg bg-slate-900/95 border border-white/20 shadow-2xl text-sm text-white leading-relaxed whitespace-pre-wrap break-words animate-in fade-in-0 zoom-in-95 duration-150 pointer-events-none">
+                          {name}
+                        </div>
                       )}
-                    >
-                      <span className="truncate">{name}</span>
-                    </DropdownMenuItem>
+                    </div>
                     {index < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
                   </React.Fragment>
                 ))}
