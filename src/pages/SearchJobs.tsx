@@ -491,7 +491,7 @@ const SearchJobs = memo(() => {
                 {[...new Set(filteredAndSortedJobs.map(j => j.company_name).filter(Boolean))].sort().map((name) => (
                   <DropdownMenuItem
                     key={name}
-                    onClick={() => onSearchInputChange(name)}
+                    onClick={() => setSearchInput(name)}
                     className="text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white"
                   >
                     <Building className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
