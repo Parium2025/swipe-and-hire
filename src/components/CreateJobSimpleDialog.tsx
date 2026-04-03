@@ -24,6 +24,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { JobTemplate } from '@/types/jobWizard';
 import { cn } from '@/lib/utils';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
+import { TruncatedText } from '@/components/TruncatedText';
 
 interface CreateJobSimpleDialogProps {
   onJobCreated: (job: JobPosting) => void;
@@ -627,13 +628,19 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                               >
                                 <div className="flex items-center w-full gap-3 min-w-0">
                                   <div className="flex-1 min-w-0">
-                                    <span
-                                      ref={(el) => { templateTextRefs.current[template.id] = el; }}
+                                    <TruncatedText
+                                      text={template.name}
                                       className="font-medium text-white truncate block"
-                                      title={template.name}
+                                      alwaysShowTooltip={false}
+                                      tooltipSide="top"
                                     >
-                                      {template.name}
-                                    </span>
+                                      <span
+                                        ref={(el) => { templateTextRefs.current[template.id] = el; }}
+                                        className="truncate block"
+                                      >
+                                        {template.name}
+                                      </span>
+                                    </TruncatedText>
                                   </div>
                                   {template.is_default && (
                                     <span className="text-xs text-white/80 shrink-0">Standard</span>
@@ -641,12 +648,6 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                 </div>
                               </DropdownMenuItem>
 
-                              {/* Tap-to-preview tooltip */}
-                              {isPreview(template.id) && (
-                                <div className="absolute left-3 right-3 top-0 -translate-y-full z-[60] px-3 py-2 rounded-lg bg-slate-900/95 border border-white/20 shadow-2xl text-sm text-white leading-relaxed whitespace-pre-wrap break-words animate-in fade-in-0 zoom-in-95 duration-150 pointer-events-none">
-                                  {template.name}
-                                </div>
-                              )}
                               <div className="flex justify-center gap-2 px-4 pt-1.5 pb-2.5" onClick={(e) => e.stopPropagation()}>
                                 <button
                                   type="button"
