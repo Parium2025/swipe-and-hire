@@ -468,7 +468,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
             <>
               <div 
                 ref={containerRef} 
-                className={isMobile ? "p-1 min-h-[220px]" : "p-4 min-h-[220px]"}
+                className="p-1 md:p-4 min-h-[220px]"
                 style={{
                   transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
                   transformOrigin: 'top center',
