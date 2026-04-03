@@ -899,6 +899,24 @@ All colors MUST be HSL.
     .search-jobs-grid-single-desktop > .job-card-mobile-shell:first-child {
       grid-column: 2;
     }
+
+    /* Employer dashboard: center 1 card on 3-col grid */
+    .job-card-grid-single > .job-card-mobile-shell:first-child {
+      grid-column: 2;
+    }
+
+    /* Employer dashboard: center 2 cards on 3-col grid */
+    .job-card-grid-double {
+      justify-content: center;
+    }
+    .job-card-grid-double > .job-card-mobile-shell:first-child {
+      grid-column: 1 / 2;
+      justify-self: end;
+    }
+    .job-card-grid-double > .job-card-mobile-shell:nth-child(2) {
+      grid-column: 2 / 3;
+      justify-self: start;
+    }
   }
 
 
