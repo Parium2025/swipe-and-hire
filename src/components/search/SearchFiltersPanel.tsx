@@ -11,6 +11,8 @@ import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import type { SearchCriteria } from '@/hooks/useSavedSearches';
 
+export type TimeFilter = 'all' | '12h' | '24h' | '3d' | '7d';
+
 interface SearchFiltersPanelProps {
   // Search
   searchInput: string;
@@ -31,6 +33,9 @@ interface SearchFiltersPanelProps {
   // Sort
   sortBy: 'newest' | 'oldest' | 'most-views';
   onSortChange: (value: 'newest' | 'oldest' | 'most-views') => void;
+  // Time filter
+  timeFilter: TimeFilter;
+  onTimeFilterChange: (value: TimeFilter) => void;
   // Filter expansion
   filtersExpanded: boolean;
   onFiltersExpandedChange: (value: boolean) => void;
@@ -67,6 +72,8 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   onEmploymentTypesChange,
   sortBy,
   onSortChange,
+  timeFilter,
+  onTimeFilterChange,
   filtersExpanded,
   onFiltersExpandedChange,
   savedSearches,
@@ -131,8 +138,28 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
           </div>
         </div>
 
-        {/* Expand/Collapse Filters Button */}
-        <div className="flex justify-center py-2">
+        {/* Time filter chips + Expand/Collapse Filters Button */}
+        <div className="flex flex-wrap justify-center items-center gap-2 py-2">
+          {([
+            { value: '12h' as TimeFilter, label: '12 tim' },
+            { value: '24h' as TimeFilter, label: '24 tim' },
+            { value: '3d' as TimeFilter, label: '3 dagar' },
+            { value: '7d' as TimeFilter, label: '7 dagar' },
+            { value: 'all' as TimeFilter, label: 'Alla' },
+          ]).map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => onTimeFilterChange(value)}
+              className={`h-9 px-4 text-sm rounded-full border transition-all duration-200 active:scale-[0.97] touch-manipulation ${
+                timeFilter === value
+                  ? 'bg-white/20 border-white/40 text-white font-medium'
+                  : 'bg-white/5 border-white/15 text-white/70 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+          <div className="w-px h-6 bg-white/20 mx-1 hidden sm:block" />
           <button
             onClick={() => onFiltersExpandedChange(!filtersExpanded)}
             className="h-11 px-6 inline-flex items-center justify-center gap-2 text-sm text-white rounded-full bg-white/10 border border-white/20 hover:bg-white/15 active:scale-[0.97] transition-all duration-200 touch-manipulation"

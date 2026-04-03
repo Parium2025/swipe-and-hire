@@ -160,6 +160,7 @@ const SearchJobs = memo(() => {
   });
   const [searchInput, setSearchInput] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
+  const [timeFilter, setTimeFilter] = useState<'all' | '12h' | '24h' | '3d' | '7d'>('all');
   const [selectedPostalCode, setSelectedPostalCode] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [isPostalCodeValid, setIsPostalCodeValid] = useState(false);
@@ -238,8 +239,15 @@ const SearchJobs = memo(() => {
 
   // Sort jobs (filtering is now done in database for performance)
   const filteredAndSortedJobs = useMemo(() => {
-    // Jobs are already filtered by the database - just sort here
-    const result = [...jobs];
+    let result = [...jobs];
+
+    // Time filter
+    if (timeFilter !== 'all') {
+      const now = Date.now();
+      const hoursMap = { '12h': 12, '24h': 24, '3d': 72, '7d': 168 };
+      const cutoff = now - hoursMap[timeFilter] * 60 * 60 * 1000;
+      result = result.filter(j => new Date(j.created_at).getTime() >= cutoff);
+    }
 
     // Sort based on user preference
     switch (sortBy) {
@@ -255,7 +263,7 @@ const SearchJobs = memo(() => {
     }
 
     return result;
-  }, [jobs, sortBy]);
+  }, [jobs, sortBy, timeFilter]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
@@ -385,6 +393,7 @@ const SearchJobs = memo(() => {
     setSelectedCategory('all-categories');
     setSelectedSubcategories([]);
     setSearchInput('');
+    setTimeFilter('all');
   }, []);
 
   const handleLocationChange = (location: string, postalCode?: string) => {
@@ -433,6 +442,8 @@ const SearchJobs = memo(() => {
         hasActiveFilters={hasActiveFilters}
         onOpenSaveDialog={() => setSaveSearchDialogOpen(true)}
         onClearAll={handleClearAllFilters}
+        timeFilter={timeFilter}
+        onTimeFilterChange={setTimeFilter}
       />
 
       {/* Company Suggestion Card - LinkedIn style */}
