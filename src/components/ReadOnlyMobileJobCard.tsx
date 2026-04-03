@@ -138,7 +138,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
   return (
     <Card 
-      className="job-card-mobile-shell group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98]"
+      className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98]"
       onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`)}
     >
       {/* Visual header — image or gradient placeholder */}
@@ -201,7 +201,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
         {/* Views count badge — top-left when save button is hidden */}
         {hideSaveButton && (
-          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1 border border-white/15">
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-1 border border-white/15">
             <Eye className="h-3.5 w-3.5 text-white" />
             <span className="text-xs font-medium text-white">{job.views_count}</span>
           </div>
@@ -289,7 +289,7 @@ const SaveButton = memo(({ jobId, jobTitle, isSaved, onToggle, onUnsaveClick }: 
     <button
       onClick={handleClick}
       aria-label={isSaved ? 'Ta bort från sparade' : 'Spara jobb'}
-      className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90"
+      className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/50 border border-white/20 transition-all duration-150 active:scale-90"
     >
       <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
     </button>

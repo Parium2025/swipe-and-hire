@@ -368,7 +368,7 @@ const JobTemplatesOverview = () => {
       {/* Templates Grid */}
       <div className="space-y-4">
         {templates.length === 0 ? (
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="bg-white/10 border-white/20">
             <CardContent className="text-center py-12">
               <h3 className="text-lg font-semibold mb-2 text-white">Inga mallar än</h3>
               <p className="text-white mb-4">
@@ -391,7 +391,7 @@ const JobTemplatesOverview = () => {
           </Card>
         ) : (
           templates.map((template) => (
-            <Card key={template.id} className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card key={template.id} className="bg-white/10 border-white/20">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -602,7 +602,7 @@ const JobTemplatesOverview = () => {
                   >
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900/85 backdrop-blur-xl border-white/20 z-50">
+                  <SelectContent className="bg-slate-900/85 border-white/20 z-50">
                     {EMPLOYMENT_TYPES.map(type => (
                       <SelectItem 
                         key={type.value} 
@@ -695,7 +695,7 @@ const JobTemplatesOverview = () => {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContentNoFocus
           elevated
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">

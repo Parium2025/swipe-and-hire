@@ -292,13 +292,13 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             >
               {loading ? (
                 <div className="space-y-3">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 space-y-3">
+                  <div className="bg-white/10 rounded-lg p-4 space-y-3">
                     <Skeleton className="h-4 w-24 bg-white/10" />
                     <Skeleton className="h-4 w-full bg-white/10" />
                     <Skeleton className="h-4 w-3/4 bg-white/10" />
                     <Skeleton className="h-4 w-full bg-white/10" />
                   </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 space-y-2">
+                  <div className="bg-white/10 rounded-lg p-4 space-y-2">
                     <Skeleton className="h-4 w-32 bg-white/10" />
                     <Skeleton className="h-4 w-48 bg-white/10" />
                     <Skeleton className="h-4 w-40 bg-white/10" />
@@ -308,14 +308,14 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                 <>
                   {/* 1. Om tjänsten (Description) */}
                   {detail.description && (
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                    <div className="bg-white/10 rounded-lg p-4">
                       <h3 className="text-section-title mb-3">Om tjänsten</h3>
                       <p className="text-body whitespace-pre-wrap">{detail.description}</p>
                     </div>
                   )}
 
                   {/* 2. Detaljer om tjänsten */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <div className="bg-white/10 rounded-lg p-4">
                     <h3 className="text-section-title mb-3">Detaljer om tjänsten</h3>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
                       {detail.employment_type && (
@@ -432,7 +432,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
 
                   {/* 3. Förmåner */}
                   {detail.benefits && detail.benefits.length > 0 && (
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                    <div className="bg-white/10 rounded-lg p-4">
                       <h3 className="text-section-title mb-3">Förmåner</h3>
                       <div className="flex flex-wrap gap-2">
                         {detail.benefits.map((benefit, index) => (

@@ -79,7 +79,7 @@ export const StageColumn = ({
       style={{ width: `calc((100% - ${gapTotal}) / ${totalStageCount})` }}
     >
       <div
-        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 flex-shrink-0 ${
           isOver ? 'ring-2 ring-white/40' : ''
         }`}
         style={{ backgroundColor: `${displayColor}33` }}
@@ -120,7 +120,7 @@ export const StageColumn = ({
         </div>
       </div>
 
-      <div className="relative flex-1 min-h-0 bg-white/5 rounded-lg ring-1 ring-inset ring-white/10 backdrop-blur-sm">
+      <div className="relative flex-1 min-h-0 bg-white/5 rounded-lg ring-1 ring-inset ring-white/10">
         {canScrollUp && (
           <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-white/5 to-transparent z-10 pointer-events-none rounded-t-lg" />
         )}
@@ -132,7 +132,7 @@ export const StageColumn = ({
         >
           {isOver && (
             <div className="mb-2 flex items-center justify-center">
-              <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
+              <div className="rounded-md bg-white/10 ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
                 Släpp här
               </div>
             </div>

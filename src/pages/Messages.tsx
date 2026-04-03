@@ -211,7 +211,7 @@ export default function Messages() {
           </div>
 
           {/* Conversation list */}
-          <div className="relative flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+          <div className="relative flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10">
             {showEmptyConversationList ? (
               <div className="h-full flex items-center justify-center">
                 <EmptyConversationList

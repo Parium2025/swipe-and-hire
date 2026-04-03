@@ -88,7 +88,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
   return (
-    <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+    <Card className="bg-white/5 border-white/20">
       <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
         {/* Search Field with Save Search Button */}
         <div className="space-y-2">

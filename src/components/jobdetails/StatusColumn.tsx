@@ -99,7 +99,7 @@ export const StatusColumn = memo(({
       }}
     >
       <div 
-        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-foreground/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-foreground/40' : ''}`}
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-foreground/20 flex-shrink-0 ${isOver ? 'ring-2 ring-foreground/40' : ''}`}
         style={{ backgroundColor: `${displayColor}55` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
@@ -139,7 +139,7 @@ export const StatusColumn = memo(({
         </div>
       </div>
 
-      <div className="relative min-h-0 flex-1 rounded-lg border border-white/20 bg-white/5 backdrop-blur-sm">
+      <div className="relative min-h-0 flex-1 rounded-lg border border-white/20 bg-white/5">
         {canScrollUp && (
           <div className="absolute top-0 left-0 right-0 z-10 h-6 rounded-t-lg bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
         )}
@@ -151,7 +151,7 @@ export const StatusColumn = memo(({
         >
           {isOver && (
             <div className="mb-2 flex items-center justify-center">
-              <div className="animate-pulse rounded-md border border-white/20 bg-white/10 px-4 py-3 text-xs font-medium text-white backdrop-blur-sm">
+              <div className="animate-pulse rounded-md border border-white/20 bg-white/10 px-4 py-3 text-xs font-medium text-white">
                 Släpp här
               </div>
             </div>
