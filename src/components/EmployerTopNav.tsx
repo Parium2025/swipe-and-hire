@@ -156,8 +156,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   };
 
   const getDashboardCount = () => {
-    // Show total unique job count (myJobs already includes all jobs)
-    const total = preloadedEmployerMyJobs || 0;
+    const total = liveJobCount ?? preloadedEmployerMyJobs ?? 0;
     return total > 0 ? total : null;
   };
 
