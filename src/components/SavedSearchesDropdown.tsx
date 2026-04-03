@@ -204,7 +204,7 @@ export function SavedSearchesDropdown({
                         </div>
                         <p 
                           ref={(el) => { criteriaRefs.current[search.id] = el; }}
-                          className="text-sm text-white/70 truncate mt-1"
+                          className="text-sm text-white truncate mt-1"
                         >
                           {getCriteriaSummary(search)}
                         </p>
