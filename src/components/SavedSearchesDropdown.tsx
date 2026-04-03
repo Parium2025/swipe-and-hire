@@ -149,9 +149,17 @@ export function SavedSearchesDropdown({
                   <TooltipTrigger asChild>
                     <div
                       onClick={() => {
+                        const nameEl = nameRefs.current[search.id] ?? null;
+                        const criteriaEl = criteriaRefs.current[search.id] ?? null;
+                        // Check either element for truncation on touch
+                        const truncatedEl = (nameEl && nameEl.scrollWidth > nameEl.clientWidth + 1) 
+                          ? nameEl 
+                          : (criteriaEl && criteriaEl.scrollWidth > criteriaEl.clientWidth + 1)
+                            ? criteriaEl
+                            : null;
                         handleTap(
                           search.id,
-                          nameRefs.current[search.id] ?? null,
+                          truncatedEl,
                           () => handleApplySearch(search)
                         );
                       }}
