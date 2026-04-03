@@ -194,7 +194,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex flex-col items-center text-center cursor-pointer">
-                  <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Status</span>
+                  <span className="text-[10px] text-white tracking-wider leading-none mb-0.5">Status</span>
                   <span className={`text-[11px] font-medium leading-none ${isExpired ? 'text-red-300' : 'text-white'}`}>
                     {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
                   </span>
