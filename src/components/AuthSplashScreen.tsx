@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { authSplashEvents } from '@/lib/authSplashEvents';
-import { useDevice } from '@/hooks/use-device';
+
 import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
 
 // Minsta visningstid för att garantera att loggan hinner laddas och avkodas
