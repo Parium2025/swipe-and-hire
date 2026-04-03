@@ -1955,7 +1955,13 @@ const MobileJobWizard = ({
   }, [currentStep]);
 
   const handleClose = () => {
-    // X should always close and fully clear — no unsaved dialog
+    // If there are unsaved changes, show confirmation dialog
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+      return;
+    }
+    // No changes — close directly
     handleConfirmClose();
   };
 
