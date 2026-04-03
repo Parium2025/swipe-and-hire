@@ -74,8 +74,19 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const prefetchApplications = usePrefetchApplications();
+  const queryClient = useQueryClient();
   
-  // Resolve signed URL for profile image
+  // Read live job count from react-query cache (updated optimistically on delete)
+  const liveJobCount = (() => {
+    const allQueries = queryClient.getQueriesData<JobPosting[]>({ queryKey: ['jobs'] });
+    // Find the personal scope query (used in Mina Annonser)
+    for (const [, data] of allQueries) {
+      if (Array.isArray(data) && data.length > 0) {
+        return data.length;
+      }
+    }
+    return null;
+  })();
   const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
   
   const [dashboardOpen, setDashboardOpen] = useState(false);
