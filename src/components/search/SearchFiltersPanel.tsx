@@ -72,6 +72,8 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
   onEmploymentTypesChange,
   sortBy,
   onSortChange,
+  timeFilter,
+  onTimeFilterChange,
   filtersExpanded,
   onFiltersExpandedChange,
   savedSearches,
