@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
-import { toast } from 'sonner';
+
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -14,6 +14,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { Trash2, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -480,18 +481,25 @@ const SearchJobs = memo(() => {
             <span className="text-white/40">·</span>
             <span className="flex items-center gap-1 text-white text-xs font-medium"><Briefcase className="h-3.5 w-3.5 text-white" />{activeJobCount} jobb</span>
             <span className="text-white/40">·</span>
-            <button
-              onClick={() => {
-                const uniqueNames = [...new Set(filteredAndSortedJobs.map(j => j.company_name).filter(Boolean))].sort();
-                toast.info(`${uniqueNames.length} företag`, {
-                  description: uniqueNames.join(', '),
-                  duration: 6000,
-                });
-              }}
-              className="flex items-center gap-1 text-white text-xs font-medium active:scale-[0.97] touch-manipulation underline decoration-white/30 underline-offset-2"
-            >
-              <Building className="h-3.5 w-3.5 text-white" />{uniqueCompanyCount} företag
-            </button>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-1 text-white text-xs font-medium active:scale-[0.97] touch-manipulation">
+                  <Building className="h-3.5 w-3.5 text-white" />{uniqueCompanyCount} företag
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" side="bottom" className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[180px] max-h-64 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
+                {[...new Set(filteredAndSortedJobs.map(j => j.company_name).filter(Boolean))].sort().map((name) => (
+                  <DropdownMenuItem
+                    key={name}
+                    onClick={() => setSearchInput(name)}
+                    className="text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white"
+                  >
+                    <Building className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="truncate">{name}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         
