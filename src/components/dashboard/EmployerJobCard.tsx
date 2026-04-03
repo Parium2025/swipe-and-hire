@@ -76,6 +76,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
     return data?.publicUrl || null;
   }, [job.job_image_url]);
 
+  // Use blob cache if available, otherwise show resolved URL directly (no skeleton wait)
   const cachedBlobUrl = useMemo(() => {
     if (!resolvedUrl) return null;
     return imageCache.getCachedUrl(resolvedUrl);
@@ -91,13 +92,14 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
     return () => { cancelled = true; };
   }, [resolvedUrl, cachedBlobUrl]);
 
+  // Show blob if ready, but ALWAYS fall back to resolvedUrl immediately (no skeleton)
   const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 
   return (
     <Card
-      className="job-card-mobile-shell group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] hover:bg-white/10 hover:border-white/30"
+      className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] hover:bg-white/10 hover:border-white/30"
       onClick={() => onClick(job.id)}
     >
       {/* Image header */}
@@ -145,7 +147,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
         </div>
 
         {/* Views badge — top-right */}
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1 border border-white/15">
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-1 border border-white/15">
           <Eye className="h-3.5 w-3.5 text-white" />
           <span className="text-xs font-medium text-white">{job.views_count || 0}</span>
         </div>
