@@ -284,7 +284,7 @@ const SearchJobs = memo(() => {
     }
 
     return result;
-  }, [jobs, sortBy, timeFilter, selectedCompany]);
+  }, [jobs, sortBy, timeFilter, selectedCompanies]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
