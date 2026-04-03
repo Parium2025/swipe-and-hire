@@ -35,6 +35,10 @@ export interface JobPosting {
   updated_at: string;
   expires_at?: string;
   employer_id: string;
+  job_image_url?: string;
+  image_focus_position?: string;
+  job_image_card_url?: string;
+  job_image_desktop_url?: string;
   employer_profile?: {
     first_name: string;
     last_name: string;
