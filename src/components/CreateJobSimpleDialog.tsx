@@ -597,13 +597,6 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
 
                         <div className="flex-1 pb-2">
                           <DropdownMenuItem
-                            onSelect={() => handleTemplateSelect('none', '')}
-                            className="px-4 py-2.5 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
-                          >
-                            <span className="font-medium text-white">Ingen mall (valfritt)</span>
-                          </DropdownMenuItem>
-
-                          <DropdownMenuItem
                             onSelect={() => {
                               setTemplateMenuOpen(false);
                               setOpen(false);
