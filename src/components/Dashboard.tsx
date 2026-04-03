@@ -5,7 +5,7 @@ import { useJobsData } from '@/hooks/useJobsData';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
-import { isJobExpiredCheck } from '@/lib/date';
+import { isEmployerJobActive, isEmployerJobExpired } from '@/lib/jobStatus';
 import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';

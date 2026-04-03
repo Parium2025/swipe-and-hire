@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { expandSearchTerms, detectSalarySearch } from '@/lib/smartSearch';
-import { isJobExpiredCheck } from '@/lib/date';
+import { isEmployerJobActive, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 
 export interface FilterableJob {
   id: string;

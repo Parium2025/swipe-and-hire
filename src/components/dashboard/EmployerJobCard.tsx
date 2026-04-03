@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, Users } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { formatDateShortSv, getTimeRemaining, isJobExpiredCheck, formatExpirationDateTime } from '@/lib/date';
+import { formatDateShortSv, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { getEmployerJobStatus, isEmployerJobExpired } from '@/lib/jobStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 
