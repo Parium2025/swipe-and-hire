@@ -39,6 +39,7 @@ import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
 import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard';
 import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
+import { useTapToPreview } from '@/hooks/useTapToPreview';
 
 interface Job {
   id: string;
