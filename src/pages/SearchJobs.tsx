@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -473,13 +474,24 @@ const SearchJobs = memo(() => {
 
       {/* Jobs Card List */}
       <div className="space-y-4">
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-2">
           <h2 className="text-sm font-medium text-white">Jobbsökresultat</h2>
-          <div className="flex items-center gap-3 text-sm text-white md:hidden">
-            <span className="text-white/30">·</span>
-            <span className="flex items-center gap-1 text-white/80 text-xs"><Briefcase className="h-3.5 w-3.5" />{activeJobCount} jobb</span>
-            <span className="text-white/30">·</span>
-            <span className="flex items-center gap-1 text-white/80 text-xs"><Building className="h-3.5 w-3.5" />{uniqueCompanyCount} företag</span>
+          <div className="flex items-center gap-2 md:hidden">
+            <span className="text-white/40">·</span>
+            <span className="flex items-center gap-1 text-white text-xs font-medium"><Briefcase className="h-3.5 w-3.5 text-white" />{activeJobCount} jobb</span>
+            <span className="text-white/40">·</span>
+            <button
+              onClick={() => {
+                const uniqueNames = [...new Set(filteredAndSortedJobs.map(j => j.company_name).filter(Boolean))].sort();
+                toast.info(`${uniqueNames.length} företag`, {
+                  description: uniqueNames.join(', '),
+                  duration: 6000,
+                });
+              }}
+              className="flex items-center gap-1 text-white text-xs font-medium active:scale-[0.97] touch-manipulation underline decoration-white/30 underline-offset-2"
+            >
+              <Building className="h-3.5 w-3.5 text-white" />{uniqueCompanyCount} företag
+            </button>
           </div>
         </div>
         

@@ -180,7 +180,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 <ChevronDown className="h-3.5 w-3.5" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className="bg-popover/95 backdrop-blur-md border-white/10 min-w-[140px]">
+            <DropdownMenuContent align="center" side="bottom" avoidCollisions={false} className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[160px] max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch]">
               {([
                 { value: '12h' as TimeFilter, label: '12 timmar' },
                 { value: '24h' as TimeFilter, label: '24 timmar' },
@@ -191,7 +191,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 <DropdownMenuItem
                   key={value}
                   onClick={() => onTimeFilterChange(value)}
-                  className="text-white py-2.5 px-3 text-sm touch-manipulation focus:bg-white/10"
+                  className="text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white"
                 >
                   <span className="flex-1">{label}</span>
                   {timeFilter === value && <Check className="h-4 w-4 text-white ml-2" />}
