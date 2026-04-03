@@ -164,40 +164,36 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
         {/* Divider */}
         <div className="h-px bg-white/10 mx-2" />
 
-        {/* Info rows */}
+        {/* Info rows — always show all 6 rows for consistent card height */}
         <div className="space-y-1.5 px-2">
-          {job.employment_type && (
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-white/60">Anställningsform</span>
-              <span className="text-xs text-white font-medium">{getEmploymentTypeLabel(job.employment_type)}</span>
-            </div>
-          )}
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white/60">Ansökningar</span>
+            <span className="text-xs text-white">Anställningsform</span>
+            <span className="text-xs text-white font-medium">{job.employment_type ? getEmploymentTypeLabel(job.employment_type) : '–'}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-white">Ansökningar</span>
             <span className="text-xs text-white font-medium inline-flex items-center gap-1">
               <Users className="h-3 w-3 flex-shrink-0" />
               {job.applications_count || 0}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white/60">Plats</span>
-            <span className="text-xs text-white font-medium truncate max-w-[55%] text-right">{job.location}</span>
+            <span className="text-xs text-white">Plats</span>
+            <span className="text-xs text-white font-medium truncate max-w-[55%] text-right">{job.location || '–'}</span>
           </div>
-          {recruiterName && (
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-white/60">Rekryterare</span>
-              <span className="text-xs text-white font-medium truncate max-w-[55%] text-right">{recruiterName}</span>
-            </div>
-          )}
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white/60">Publicerad</span>
+            <span className="text-xs text-white">Rekryterare</span>
+            <span className="text-xs text-white font-medium truncate max-w-[55%] text-right">{recruiterName || '–'}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-white">Publicerad</span>
             <span className="text-xs text-white font-medium">{formatDateShortSv(job.created_at)}</span>
           </div>
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-between cursor-pointer">
-                  <span className="text-xs text-white/60">Status</span>
+                  <span className="text-xs text-white">Status</span>
                   <span className={`text-xs font-medium ${isExpired ? 'text-red-300' : 'text-white'}`}>
                     {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
                   </span>
