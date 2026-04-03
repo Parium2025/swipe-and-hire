@@ -76,6 +76,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
     return data?.publicUrl || null;
   }, [job.job_image_url]);
 
+  // Use blob cache if available, otherwise show resolved URL directly (no skeleton wait)
   const cachedBlobUrl = useMemo(() => {
     if (!resolvedUrl) return null;
     return imageCache.getCachedUrl(resolvedUrl);
@@ -91,6 +92,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
     return () => { cancelled = true; };
   }, [resolvedUrl, cachedBlobUrl]);
 
+  // Show blob if ready, but ALWAYS fall back to resolvedUrl immediately (no skeleton)
   const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
