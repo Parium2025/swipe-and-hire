@@ -431,8 +431,8 @@ const EmployerDashboard = memo(() => {
                     </TableRow>
                   ) : (
                     pageJobs.map((job) => {
-                      const isExpired = isJobExpiredCheck(job.created_at, job.expires_at);
-                      const isDraft = !job.is_active && !isExpired;
+                      const isDraft = !job.is_active;
+                      const isExpired = !isDraft && isJobExpiredCheck(job.created_at, job.expires_at);
                       
                       return (
                       <TableRow 
