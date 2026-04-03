@@ -157,8 +157,11 @@ export function SavedSearchesDropdown({
                       }}
                       onMouseEnter={() => {
                         if (isTouch) return;
-                        const el = nameRefs.current[search.id];
-                        if (el && el.scrollWidth > el.clientWidth + 1) {
+                        const nameEl = nameRefs.current[search.id];
+                        const criteriaEl = criteriaRefs.current[search.id];
+                        const nameTruncated = nameEl && nameEl.scrollWidth > nameEl.clientWidth + 1;
+                        const criteriaTruncated = criteriaEl && criteriaEl.scrollWidth > criteriaEl.clientWidth + 1;
+                        if (nameTruncated || criteriaTruncated) {
                           setHoverTruncatedId(search.id);
                         }
                       }}
