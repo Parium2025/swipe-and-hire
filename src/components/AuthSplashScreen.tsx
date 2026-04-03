@@ -13,7 +13,7 @@ const MINIMUM_DISPLAY_MS = 2000;
  * så att fade-in/out blir pixel-perfekt oavsett entry-point.
  */
 export function AuthSplashScreen() {
-  const device = useDevice();
+  
   
   // Prenumerera på splash-events
   const isTriggered = useSyncExternalStore(
