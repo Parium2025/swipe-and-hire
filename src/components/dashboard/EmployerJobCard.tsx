@@ -165,36 +165,36 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 px-1">
           {job.employment_type && (
             <div className="flex flex-col items-center text-center">
-              <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Arbetstyp</span>
+              <span className="text-[10px] text-white tracking-wider leading-none mb-0.5">Anställningsform</span>
               <span className="text-[11px] text-white font-medium leading-none">{getEmploymentTypeLabel(job.employment_type)}</span>
             </div>
           )}
           <div className="flex flex-col items-center text-center">
-            <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Ansökningar</span>
+            <span className="text-[10px] text-white tracking-wider leading-none mb-0.5">Ansökningar</span>
             <span className="text-[11px] text-white font-medium leading-none inline-flex items-center gap-0.5">
               <Users className="h-3 w-3 flex-shrink-0" />
               {job.applications_count || 0}
             </span>
           </div>
           <div className="flex flex-col items-center text-center">
-            <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Plats</span>
+            <span className="text-[10px] text-white tracking-wider leading-none mb-0.5">Plats</span>
             <span className="text-[11px] text-white font-medium leading-none truncate max-w-full">{job.location}</span>
           </div>
           {recruiterName && (
             <div className="flex flex-col items-center text-center">
-              <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Rekryterare</span>
+              <span className="text-[10px] text-white tracking-wider leading-none mb-0.5">Rekryterare</span>
               <span className="text-[11px] text-white font-medium leading-none truncate max-w-full">{recruiterName}</span>
             </div>
           )}
           <div className="flex flex-col items-center text-center">
-            <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Publicerad</span>
+            <span className="text-[10px] text-white tracking-wider leading-none mb-0.5">Publicerad</span>
             <span className="text-[11px] text-white font-medium leading-none">{formatDateShortSv(job.created_at)}</span>
           </div>
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex flex-col items-center text-center cursor-pointer">
-                  <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Status</span>
+                  <span className="text-[10px] text-white tracking-wider leading-none mb-0.5">Status</span>
                   <span className={`text-[11px] font-medium leading-none ${isExpired ? 'text-red-300' : 'text-white'}`}>
                     {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
                   </span>
