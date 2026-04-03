@@ -4,6 +4,8 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
+import { useQueryClient } from '@tanstack/react-query';
+import type { JobPosting } from '@/hooks/useJobsData';
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { SystemHealthButton, SystemHealthPanelContent } from "@/components/SystemHealthPanel";
 import { useMediaUrl } from '@/hooks/useMediaUrl';
