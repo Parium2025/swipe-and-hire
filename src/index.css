@@ -287,8 +287,9 @@ All colors MUST be HSL.
   }
 
   .premium-edit-dialog {
-    width: min(92vw, 26rem);
-    max-height: min(88vh, 52rem);
+    width: min(92vw, 26rem) !important;
+    max-width: min(92vw, 26rem) !important;
+    max-height: min(88vh, 52rem) !important;
   }
 
   .premium-edit-shell {
