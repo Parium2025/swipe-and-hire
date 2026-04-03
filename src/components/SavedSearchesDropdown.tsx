@@ -140,9 +140,11 @@ export function SavedSearchesDropdown({
           <div className="max-h-64 overflow-y-auto">
             {savedSearches.map((search) => {
               const showingPreview = isPreview(search.id);
-              const fullText = `${search.name}\n${getCriteriaSummary(search)}`;
+              const tooltipOpen = isTouch 
+                ? showingPreview 
+                : hoverTruncatedId === search.id;
               return (
-                <Tooltip key={search.id} {...(isTouch ? { open: showingPreview } : {})}>
+                <Tooltip key={search.id} open={tooltipOpen}>
                   <TooltipTrigger asChild>
                     <div
                       onClick={() => {
@@ -151,6 +153,16 @@ export function SavedSearchesDropdown({
                           nameRefs.current[search.id] ?? null,
                           () => handleApplySearch(search)
                         );
+                      }}
+                      onMouseEnter={() => {
+                        if (isTouch) return;
+                        const el = nameRefs.current[search.id];
+                        if (el && el.scrollWidth > el.clientWidth + 1) {
+                          setHoverTruncatedId(search.id);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (!isTouch) setHoverTruncatedId(null);
                       }}
                       className={cn(
                         "flex items-start gap-3 p-3 cursor-pointer transition-colors",
