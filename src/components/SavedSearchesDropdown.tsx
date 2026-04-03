@@ -141,7 +141,7 @@ export function SavedSearchesDropdown({
               const showingPreview = isPreview(search.id);
               const fullText = `${search.name}\n${getCriteriaSummary(search)}`;
               return (
-                <Tooltip key={search.id} open={showingPreview}>
+                <Tooltip key={search.id} {...(isTouch ? { open: showingPreview } : {})}>
                   <TooltipTrigger asChild>
                     <div
                       onClick={() => {
@@ -171,7 +171,7 @@ export function SavedSearchesDropdown({
                           {search.new_matches_count > 0 && (
                             <Badge 
                               variant="glass" 
-                              className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-4 px-1 shrink-0"
+                              className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] h-4 px-1 shrink-0"
                             >
                               +{search.new_matches_count}
                             </Badge>
