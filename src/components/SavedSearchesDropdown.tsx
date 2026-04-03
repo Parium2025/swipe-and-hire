@@ -117,7 +117,7 @@ export function SavedSearchesDropdown({
             {totalNewMatches > 0 && (
               <Badge 
                 variant="glass" 
-                className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-5 px-1.5"
+                className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] h-5 px-1.5"
               >
                 {totalNewMatches} nya
               </Badge>
