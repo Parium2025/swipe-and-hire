@@ -165,7 +165,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 px-1">
           {job.employment_type && (
             <div className="flex flex-col items-center text-center">
-              <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Arbetstyp</span>
+              <span className="text-[10px] text-white tracking-wider leading-none mb-0.5">Anställningsform</span>
               <span className="text-[11px] text-white font-medium leading-none">{getEmploymentTypeLabel(job.employment_type)}</span>
             </div>
           )}
