@@ -437,7 +437,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                   window.open(resolvedUrl, '_blank');
                 }
               }}
-              className={`${isMobile ? 'text-[11px] px-2 h-8' : 'text-[10px] px-2 h-6'} rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95  active:duration-75 touch-manipulation`}
+              className="text-[11px] px-2 h-8 md:text-[10px] md:h-6 rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:duration-75 touch-manipulation"
             >
               Ladda ner
             </button>
