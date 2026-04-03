@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Key, Mail, Smartphone, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import QRCodeStyling from 'qr-code-styling/lib/qr-code-styling.js';
+// @ts-ignore - CJS module without default ESM export
+import QRCodeStyling from 'qr-code-styling';
 
 const EmailVerification = () => {
   const [verificationMethod, setVerificationMethod] = useState<'email' | 'pin' | 'qr'>('email');
