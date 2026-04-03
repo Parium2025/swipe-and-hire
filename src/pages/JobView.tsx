@@ -464,15 +464,14 @@ const JobView = () => {
         {/* Combined header */}
         <div className={`flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg ${user ? 'justify-between' : 'justify-center gap-3'}`}>
           {user && (
-            <Button
+            <button
               type="button"
               onClick={handleBack}
-              variant="glass"
-              className="h-7 px-2.5 text-xs"
+              className="flex items-center gap-1.5 h-8 px-3.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all text-white text-xs font-medium backdrop-blur-sm border border-white/10"
             >
-              <ArrowLeft className="mr-1 h-3.5 w-3.5" />
+              <ArrowLeft className="h-3.5 w-3.5" />
               Tillbaka
-            </Button>
+            </button>
           )}
           
           <div className="flex items-center gap-2">
