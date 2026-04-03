@@ -105,7 +105,16 @@ const SearchJobs = memo(() => {
   const isMobile = useIsMobile();
   const [swipeModeActive, setSwipeModeActive] = useState(false);
   const [jobToUnsave, setJobToUnsave] = useState<{ id: string; title: string } | null>(null);
-  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
+  const [selectedCompanies, setSelectedCompaniesRaw] = useState<string[]>(() => {
+    try { const raw = sessionStorage.getItem('parium-search-filters'); return raw ? (JSON.parse(raw).companies || []) : []; } catch { return []; }
+  });
+  const setSelectedCompanies = useCallback((v: string[] | ((prev: string[]) => string[])) => {
+    setSelectedCompaniesRaw(prev => {
+      const next = typeof v === 'function' ? v(prev) : v;
+      try { const current = JSON.parse(sessionStorage.getItem('parium-search-filters') || '{}'); sessionStorage.setItem('parium-search-filters', JSON.stringify({ ...current, companies: next })); } catch {}
+      return next;
+    });
+  }, []);
   const { handleTap: handleCompanyTap, isPreview: isCompanyPreview, resetPreview: resetCompanyPreview } = useTapToPreview();
   const companyTextRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
