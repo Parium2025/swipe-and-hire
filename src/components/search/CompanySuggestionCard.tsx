@@ -69,9 +69,9 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
             e.stopPropagation();
             onRemove();
           }}
-          className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/10 active:scale-[0.95] touch-manipulation z-10 [@media(hover:hover)]:hover:bg-white/20"
+          className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 active:scale-[0.95] touch-manipulation z-10 [@media(hover:hover)]:hover:bg-white/20 border border-white/15"
         >
-          <X className="h-3.5 w-3.5 text-white" />
+          <X className="h-4 w-4 text-white" />
         </button>
       )}
     </div>
