@@ -487,7 +487,7 @@ const SearchJobs = memo(() => {
       />
 
       {/* Company Suggestion Card - LinkedIn style */}
-      {(matchingCompany && searchInput.trim() && !selectedCompany) && (
+      {(matchingCompany && searchInput.trim() && selectedCompanies.length === 0) && (
         <CompanySuggestionCard
           company={matchingCompany}
           onOpenProfile={(id) => {
@@ -496,15 +496,17 @@ const SearchJobs = memo(() => {
           }}
         />
       )}
-      {selectedCompanyData && (
+      {selectedCompaniesData.map(companyData => (
         <CompanySuggestionCard
-          company={selectedCompanyData}
+          key={companyData.name}
+          company={companyData}
           onOpenProfile={(id) => {
             setSelectedCompanyId(id);
             setCompanyDialogOpen(true);
           }}
+          onRemove={() => setSelectedCompanies(prev => prev.filter(c => c !== companyData.name))}
         />
-      )}
+      ))}
 
 
 
