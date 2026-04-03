@@ -3896,7 +3896,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         onOpenChange={setShowUnsavedDialog}
         onConfirm={handleConfirmClose}
         onCancel={handleCancelClose}
-        onSaveAndLeave={handleSaveAndLeave}
+        onSaveAndLeave={isDraft ? handleSaveAndLeave : undefined}
         isSaving={isSavingAndLeaving}
       />
 
