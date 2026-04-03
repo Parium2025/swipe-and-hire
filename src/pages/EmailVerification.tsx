@@ -15,7 +15,7 @@ const EmailVerification = () => {
   const [pinCode, setPinCode] = useState('');
   const [status, setStatus] = useState<'pending' | 'success' | 'error'>('pending');
   const [message, setMessage] = useState('');
-  const [qrCode, setQrCode] = useState<QRCodeStyling | null>(null);
+  const [qrCode, setQrCode] = useState<any>(null);
   const [userEmail, setUserEmail] = useState('');
   const [confirmationUrl, setConfirmationUrl] = useState('');
   
