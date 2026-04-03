@@ -648,12 +648,6 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                 </div>
                               </DropdownMenuItem>
 
-                              {/* Tap-to-preview tooltip */}
-                              {isPreview(template.id) && (
-                                <div className="absolute left-3 right-3 top-0 -translate-y-full z-[60] px-3 py-2 rounded-lg bg-slate-900/95 border border-white/20 shadow-2xl text-sm text-white leading-relaxed whitespace-pre-wrap break-words animate-in fade-in-0 zoom-in-95 duration-150 pointer-events-none">
-                                  {template.name}
-                                </div>
-                              )}
                               <div className="flex justify-center gap-2 px-4 pt-1.5 pb-2.5" onClick={(e) => e.stopPropagation()}>
                                 <button
                                   type="button"
