@@ -154,62 +154,51 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
       </div>
 
       {/* Content body */}
-      <div className="job-card-mobile-body space-y-2">
+      <div className="job-card-mobile-body space-y-2.5">
         {/* Title */}
         <TruncatedText
           text={job.title}
           className="text-base font-bold text-white leading-snug line-clamp-2 text-center"
         />
 
-        {/* Info badges row */}
-        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+        {/* Structured info grid */}
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 px-1">
           {job.employment_type && (
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
-              {getEmploymentTypeLabel(job.employment_type)}
-            </Badge>
+            <div className="flex flex-col items-center text-center">
+              <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Arbetstyp</span>
+              <span className="text-[11px] text-white font-medium leading-none">{getEmploymentTypeLabel(job.employment_type)}</span>
+            </div>
           )}
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
-            <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-none">{job.applications_count || 0} ansökningar</span>
-          </Badge>
-        </div>
-
-        {/* Location */}
-        <div className="flex items-center justify-center gap-1.5 flex-wrap">
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[90%] overflow-hidden">
-            <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-none truncate">{job.location}</span>
-          </Badge>
-        </div>
-
-        {/* Recruiter */}
-        {recruiterName && (
-          <div className="flex items-center justify-center gap-1.5">
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[90%] overflow-hidden">
-              <UserCheck className="h-3 w-3 mr-0.5 flex-shrink-0" />
-              <span className="leading-none truncate">{recruiterName}</span>
-            </Badge>
+          <div className="flex flex-col items-center text-center">
+            <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Ansökningar</span>
+            <span className="text-[11px] text-white font-medium leading-none inline-flex items-center gap-0.5">
+              <Users className="h-3 w-3 flex-shrink-0" />
+              {job.applications_count || 0}
+            </span>
           </div>
-        )}
-
-        {/* Created date + expiration */}
-        <div className="flex items-center justify-center gap-1.5 flex-wrap">
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
-            <Calendar className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-none">{formatDateShortSv(job.created_at)}</span>
-          </Badge>
+          <div className="flex flex-col items-center text-center">
+            <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Plats</span>
+            <span className="text-[11px] text-white font-medium leading-none truncate max-w-full">{job.location}</span>
+          </div>
+          {recruiterName && (
+            <div className="flex flex-col items-center text-center">
+              <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Rekryterare</span>
+              <span className="text-[11px] text-white font-medium leading-none truncate max-w-full">{recruiterName}</span>
+            </div>
+          )}
+          <div className="flex flex-col items-center text-center">
+            <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Publicerad</span>
+            <span className="text-[11px] text-white font-medium leading-none">{formatDateShortSv(job.created_at)}</span>
+          </div>
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge 
-                  variant="glass" 
-                  className={`text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center cursor-pointer ${
-                    isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''
-                  }`}
-                >
-                  <Timer className="h-3 w-3 mr-0.5 flex-shrink-0" />
-                  <span className="leading-none">{isExpired ? 'Utgången' : `${timeInfo.text} kvar`}</span>
-                </Badge>
+                <div className="flex flex-col items-center text-center cursor-pointer">
+                  <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Status</span>
+                  <span className={`text-[11px] font-medium leading-none ${isExpired ? 'text-red-300' : 'text-white'}`}>
+                    {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
+                  </span>
+                </div>
               </TooltipTrigger>
               <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
                 <p className="text-xs">{formatExpirationDateTime(job.created_at, job.expires_at)}</p>
