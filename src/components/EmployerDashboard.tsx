@@ -2,6 +2,7 @@ import { useState, memo, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
@@ -68,6 +69,7 @@ const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { jobs, stats, isLoading: loading, invalidateJobs } = useJobsData();
+  const queryClient = useQueryClient();
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<JobPosting | null>(null);
@@ -226,13 +228,21 @@ const EmployerDashboard = memo(() => {
     if (!jobToDelete) return;
     
     try {
-      // Soft delete: mark as deleted instead of actually deleting
+      // Optimistic: remove from react-query cache immediately
+      queryClient.setQueriesData({ queryKey: ['jobs'] }, (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((j: any) => j.id !== jobToDelete.id);
+      });
+
+      // Soft delete in DB
       const { error } = await supabase
         .from('job_postings')
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', jobToDelete.id);
 
       if (error) {
+        // Rollback on error
+        invalidateJobs();
         toast({
           title: "Fel vid borttagning",
           description: error.message,
@@ -248,8 +258,10 @@ const EmployerDashboard = memo(() => {
 
       setDeleteDialogOpen(false);
       setJobToDelete(null);
+      // Background refetch to sync with server
       invalidateJobs();
     } catch (error) {
+      invalidateJobs();
       toast({
         title: "Ett fel uppstod",
         description: "Kunde inte ta bort annonsen.",

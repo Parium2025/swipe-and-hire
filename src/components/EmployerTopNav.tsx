@@ -4,6 +4,8 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
+import { useQueryClient } from '@tanstack/react-query';
+import type { JobPosting } from '@/hooks/useJobsData';
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { SystemHealthButton, SystemHealthPanelContent } from "@/components/SystemHealthPanel";
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -72,8 +74,19 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const prefetchApplications = usePrefetchApplications();
+  const queryClient = useQueryClient();
   
-  // Resolve signed URL for profile image
+  // Read live job count from react-query cache (updated optimistically on delete)
+  const liveJobCount = (() => {
+    const allQueries = queryClient.getQueriesData<JobPosting[]>({ queryKey: ['jobs'] });
+    // Find the personal scope query (used in Mina Annonser)
+    for (const [, data] of allQueries) {
+      if (Array.isArray(data) && data.length > 0) {
+        return data.length;
+      }
+    }
+    return null;
+  })();
   const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
   
   const [dashboardOpen, setDashboardOpen] = useState(false);
@@ -143,8 +156,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   };
 
   const getDashboardCount = () => {
-    // Show total unique job count (myJobs already includes all jobs)
-    const total = preloadedEmployerMyJobs || 0;
+    const total = liveJobCount ?? preloadedEmployerMyJobs ?? 0;
     return total > 0 ? total : null;
   };
 
