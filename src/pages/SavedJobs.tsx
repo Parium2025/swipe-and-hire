@@ -270,7 +270,7 @@ const SavedJobs = () => {
           {/* Sort chips */}
            <div
               ref={chipsRef}
-              className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-none cursor-grab active:cursor-grabbing select-none"
+              className="flex items-center justify-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-none cursor-grab active:cursor-grabbing select-none"
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
