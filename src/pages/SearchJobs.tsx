@@ -160,7 +160,17 @@ const SearchJobs = memo(() => {
   });
   const [searchInput, setSearchInput] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
-  const [timeFilter, setTimeFilter] = useState<'all' | '12h' | '24h' | '3d' | '7d'>('all');
+  const [timeFilter, setTimeFilterState] = useState<'all' | '12h' | '24h' | '3d' | '7d'>(() => {
+    try {
+      const saved = localStorage.getItem('parium-search-time-filter');
+      if (saved && ['all', '12h', '24h', '3d', '7d'].includes(saved)) return saved as any;
+    } catch {}
+    return 'all';
+  });
+  const setTimeFilter = useCallback((v: 'all' | '12h' | '24h' | '3d' | '7d') => {
+    setTimeFilterState(v);
+    try { localStorage.setItem('parium-search-time-filter', v); } catch {}
+  }, []);
   const [selectedPostalCode, setSelectedPostalCode] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [isPostalCodeValid, setIsPostalCodeValid] = useState(false);
