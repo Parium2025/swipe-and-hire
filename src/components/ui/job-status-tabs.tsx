@@ -41,7 +41,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
 
   return (
     <div className="dashboard-tabs-viewport mx-auto">
-      <div className="dashboard-tabs-rail relative bg-white/5 backdrop-blur-[2px] border border-white/10 mx-auto">
+      <div className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
         {/* Sliding background */}
         <motion.div
           className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px]"
