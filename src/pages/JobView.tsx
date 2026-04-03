@@ -467,9 +467,9 @@ const JobView = () => {
             <button
               type="button"
               onClick={handleBack}
-              className="flex items-center gap-1.5 h-8 px-3.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all text-white text-xs font-medium backdrop-blur-sm border border-white/10"
+              className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 active:bg-white/15 active:scale-[0.97] transition-all text-white text-sm font-medium backdrop-blur-sm border border-white/15 touch-manipulation"
             >
-              <ArrowLeft className="h-3.5 w-3.5" />
+              <ArrowLeft className="h-4 w-4" />
               Tillbaka
             </button>
           )}
