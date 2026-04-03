@@ -951,7 +951,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   };
 
   const handleClose = () => {
-    // X should always close and fully clear — no unsaved dialog
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      return;
+    }
     resetAndClose();
   };
 
