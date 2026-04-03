@@ -146,28 +146,25 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
           b.title.localeCompare(a.title, 'sv')
         );
       case 'active-first':
-        // Active jobs first (is_active = true AND not expired), then expired, then drafts
         return result.sort((a, b) => {
-          const aIsActive = a.is_active && !isJobExpiredCheck(a.created_at, a.expires_at);
-          const bIsActive = b.is_active && !isJobExpiredCheck(b.created_at, b.expires_at);
+          const aIsActive = isEmployerJobActive(a);
+          const bIsActive = isEmployerJobActive(b);
           if (aIsActive && !bIsActive) return -1;
           if (!aIsActive && bIsActive) return 1;
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         });
       case 'expired-first':
-        // Expired jobs first (is_active = true AND expired)
         return result.sort((a, b) => {
-          const aIsExpired = a.is_active && isJobExpiredCheck(a.created_at, a.expires_at);
-          const bIsExpired = b.is_active && isJobExpiredCheck(b.created_at, b.expires_at);
+          const aIsExpired = isEmployerJobExpired(a);
+          const bIsExpired = isEmployerJobExpired(b);
           if (aIsExpired && !bIsExpired) return -1;
           if (!aIsExpired && bIsExpired) return 1;
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         });
       case 'draft-first':
-        // Draft jobs first (is_active = false)
         return result.sort((a, b) => {
-          const aIsDraft = !a.is_active;
-          const bIsDraft = !b.is_active;
+          const aIsDraft = isEmployerJobDraft(a);
+          const bIsDraft = isEmployerJobDraft(b);
           if (aIsDraft && !bIsDraft) return -1;
           if (!aIsDraft && bIsDraft) return 1;
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();

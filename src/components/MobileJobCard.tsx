@@ -50,8 +50,8 @@ function getCompanyInitials(name: string): string {
 
 export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch }: MobileJobCardProps) => {
   const navigate = useNavigate();
-  const isDraft = !job.is_active;
-  const isExpired = !isDraft && isJobExpiredCheck(job.created_at, job.expires_at);
+  const isDraft = isEmployerJobDraft(job);
+  const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
   const companyName = job.employer_profile?.company_name || 'Okänt företag';
   const recruiterName = job.employer_profile?.first_name && job.employer_profile?.last_name

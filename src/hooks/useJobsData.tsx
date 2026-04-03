@@ -258,10 +258,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
   }, [enableRealtime, user, queryClient, scope, profile?.organization_id]);
 
   // Memoize stats to prevent unnecessary recalculations
-  // Only count truly active jobs (is_active AND not expired) for dashboard stats
-  // A job is "expired" if expires_at has passed, regardless of is_active flag
   const activeJobsList = useMemo(() => 
-    jobs.filter(job => job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)), 
+    jobs.filter(job => isEmployerJobActive(job)), 
     [jobs]
   );
   
