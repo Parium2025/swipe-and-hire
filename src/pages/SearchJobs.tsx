@@ -105,7 +105,7 @@ const SearchJobs = memo(() => {
   const isMobile = useIsMobile();
   const [swipeModeActive, setSwipeModeActive] = useState(false);
   const [jobToUnsave, setJobToUnsave] = useState<{ id: string; title: string } | null>(null);
-  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const { handleTap: handleCompanyTap, isPreview: isCompanyPreview, resetPreview: resetCompanyPreview } = useTapToPreview();
   const companyTextRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
