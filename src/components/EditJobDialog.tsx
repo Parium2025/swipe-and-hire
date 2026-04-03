@@ -40,6 +40,7 @@ import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalC
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
+import { isEmployerJobDraft } from '@/lib/jobStatus';
 
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
@@ -139,6 +140,7 @@ const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
 
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const isDraft = job ? isEmployerJobDraft(job) : false;
   const [isInitializing, setIsInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -1563,8 +1565,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
-        image_focus_position: formData.image_focus_position || 'center'
-      };
+        image_focus_position: formData.image_focus_position || 'center',
+        ...(isDraft ? {
+          is_active: true,
+          created_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        } : {})
+      } as Record<string, any>;
 
       const { error } = await supabase
         .from('job_postings')
@@ -1600,7 +1607,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
           .insert(questionsToInsert);
       }
 
-      toast({ title: 'Annons uppdaterad!', description: 'Dina ändringar har sparats.' });
+      toast({ 
+        title: isDraft ? 'Annons publicerad!' : 'Annons uppdaterad!', 
+        description: isDraft ? 'Din annons är nu publicerad och synlig för jobbsökare.' : 'Dina ändringar har sparats.' 
+      });
       clearEditJobDraft(); // Clear localStorage draft after successful save
       setHasUnsavedChanges(false);
       onOpenChange(false);
@@ -3864,8 +3874,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 onSubmit={handleSubmit}
                 disabled={!canProceed()}
                 loading={loading}
-                submitLabel="Spara ändringar"
-                loadingLabel="Sparar..."
+                submitLabel={isDraft ? "Publicera" : "Spara ändringar"}
+                loadingLabel={isDraft ? "Publicerar..." : "Sparar..."}
                 showSubmitIcon={false}
                 hideBackOnFirstStep={false}
                 className="gap-3"
