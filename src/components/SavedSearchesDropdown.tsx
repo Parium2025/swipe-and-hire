@@ -44,6 +44,7 @@ export function SavedSearchesDropdown({
   const [open, setOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteSearch, setConfirmDeleteSearch] = useState<SavedSearch | null>(null);
+  const [hoverTruncatedId, setHoverTruncatedId] = useState<string | null>(null);
   const { handleTap, isPreview, resetPreview, isTouch } = useTapToPreview();
   const nameRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
@@ -139,9 +140,11 @@ export function SavedSearchesDropdown({
           <div className="max-h-64 overflow-y-auto">
             {savedSearches.map((search) => {
               const showingPreview = isPreview(search.id);
-              const fullText = `${search.name}\n${getCriteriaSummary(search)}`;
+              const tooltipOpen = isTouch 
+                ? showingPreview 
+                : hoverTruncatedId === search.id;
               return (
-                <Tooltip key={search.id} {...(isTouch ? { open: showingPreview } : {})}>
+                <Tooltip key={search.id} open={tooltipOpen}>
                   <TooltipTrigger asChild>
                     <div
                       onClick={() => {
@@ -150,6 +153,16 @@ export function SavedSearchesDropdown({
                           nameRefs.current[search.id] ?? null,
                           () => handleApplySearch(search)
                         );
+                      }}
+                      onMouseEnter={() => {
+                        if (isTouch) return;
+                        const el = nameRefs.current[search.id];
+                        if (el && el.scrollWidth > el.clientWidth + 1) {
+                          setHoverTruncatedId(search.id);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (!isTouch) setHoverTruncatedId(null);
                       }}
                       className={cn(
                         "flex items-start gap-3 p-3 cursor-pointer transition-colors",
