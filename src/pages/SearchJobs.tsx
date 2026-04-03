@@ -255,8 +255,8 @@ const SearchJobs = memo(() => {
     let result = [...jobs];
 
     // Company filter
-    if (selectedCompanies.length > 0) {
-      result = result.filter(j => selectedCompanies.includes(j.company_name));
+    if (selectedCompany) {
+      result = result.filter(j => j.company_name === selectedCompany);
     }
 
     // Time filter
