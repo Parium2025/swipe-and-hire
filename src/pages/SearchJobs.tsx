@@ -164,9 +164,29 @@ const SearchJobs = memo(() => {
     gcTime: Infinity,
     structuralSharing: false,
   });
-  const [searchInput, setSearchInput] = useState('');
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
+  // --- Session-persistent filter state (survives refresh, resets on app close) ---
+  const SS_KEY = 'parium-search-filters';
+  const savedFilters = useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem(SS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+  }, []);
+  const persistFilters = useCallback((patch: Record<string, unknown>) => {
+    try {
+      const current = JSON.parse(sessionStorage.getItem(SS_KEY) || '{}');
+      sessionStorage.setItem(SS_KEY, JSON.stringify({ ...current, ...patch }));
+    } catch {}
+  }, []);
+
+  const [searchInput, setSearchInputRaw] = useState<string>(savedFilters.q || '');
+  const setSearchInput = useCallback((v: string) => { setSearchInputRaw(v); persistFilters({ q: v }); }, [persistFilters]);
+
+  const [sortBy, setSortByRaw] = useState<'newest' | 'oldest' | 'most-views'>(savedFilters.sort || 'newest');
+  const setSortBy = useCallback((v: 'newest' | 'oldest' | 'most-views') => { setSortByRaw(v); persistFilters({ sort: v }); }, [persistFilters]);
+
   const [timeFilter, setTimeFilterState] = useState<'all' | '12h' | '24h' | '3d' | '7d'>(() => {
+    if (savedFilters.time && ['all', '12h', '24h', '3d', '7d'].includes(savedFilters.time)) return savedFilters.time;
     try {
       const saved = localStorage.getItem('parium-search-time-filter');
       if (saved && ['all', '12h', '24h', '3d', '7d'].includes(saved)) return saved as any;
@@ -176,13 +196,31 @@ const SearchJobs = memo(() => {
   const setTimeFilter = useCallback((v: 'all' | '12h' | '24h' | '3d' | '7d') => {
     setTimeFilterState(v);
     try { localStorage.setItem('parium-search-time-filter', v); } catch {}
-  }, []);
-  const [selectedPostalCode, setSelectedPostalCode] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
+    persistFilters({ time: v });
+  }, [persistFilters]);
+
+  const [selectedPostalCode, setSelectedPostalCodeRaw] = useState(savedFilters.postal || '');
+  const setSelectedPostalCode = useCallback((v: string) => { setSelectedPostalCodeRaw(v); persistFilters({ postal: v }); }, [persistFilters]);
+
+  const [selectedCity, setSelectedCityRaw] = useState(savedFilters.city || '');
+  const setSelectedCity = useCallback((v: string) => { setSelectedCityRaw(v); persistFilters({ city: v }); }, [persistFilters]);
+
   const [isPostalCodeValid, setIsPostalCodeValid] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('all-categories');
-  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
-  const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
+
+  const [selectedCategory, setSelectedCategoryRaw] = useState(savedFilters.cat || 'all-categories');
+  const setSelectedCategory = useCallback((v: string) => { setSelectedCategoryRaw(v); persistFilters({ cat: v }); }, [persistFilters]);
+
+  const [selectedSubcategories, setSelectedSubcategoriesRaw] = useState<string[]>(savedFilters.subcats || []);
+  const setSelectedSubcategories = useCallback((v: string[] | ((prev: string[]) => string[])) => {
+    setSelectedSubcategoriesRaw(prev => { const next = typeof v === 'function' ? v(prev) : v; persistFilters({ subcats: next }); return next; });
+  }, [persistFilters]);
+
+  const [selectedEmploymentTypes, setSelectedEmploymentTypesRaw] = useState<string[]>(savedFilters.empTypes || []);
+  const setSelectedEmploymentTypes = useCallback((v: string[] | ((prev: string[]) => string[])) => {
+    setSelectedEmploymentTypesRaw(prev => { const next = typeof v === 'function' ? v(prev) : v; persistFilters({ empTypes: next }); return next; });
+  }, [persistFilters]);
+
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   
   // Company suggestion state
