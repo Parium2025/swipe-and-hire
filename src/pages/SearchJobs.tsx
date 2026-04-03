@@ -104,6 +104,7 @@ const SearchJobs = memo(() => {
   const isMobile = useIsMobile();
   const [swipeModeActive, setSwipeModeActive] = useState(false);
   const [jobToUnsave, setJobToUnsave] = useState<{ id: string; title: string } | null>(null);
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
 
   const handleUnsaveClick = useCallback((jobId: string, jobTitle: string) => {
     setJobToUnsave({ id: jobId, title: jobTitle });
