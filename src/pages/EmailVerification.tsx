@@ -6,14 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Key, Mail, Smartphone, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import QRCodeStyling from 'qr-code-styling';
+import * as QRCodeStylingModule from 'qr-code-styling';
+// CJS/ESM interop: handle both default and namespace exports
+const QRCodeStyling = (QRCodeStylingModule as any).default || QRCodeStylingModule;
 
 const EmailVerification = () => {
   const [verificationMethod, setVerificationMethod] = useState<'email' | 'pin' | 'qr'>('email');
   const [pinCode, setPinCode] = useState('');
   const [status, setStatus] = useState<'pending' | 'success' | 'error'>('pending');
   const [message, setMessage] = useState('');
-  const [qrCode, setQrCode] = useState<QRCodeStyling | null>(null);
+  const [qrCode, setQrCode] = useState<any>(null);
   const [userEmail, setUserEmail] = useState('');
   const [confirmationUrl, setConfirmationUrl] = useState('');
   

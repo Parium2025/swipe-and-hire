@@ -124,7 +124,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           
           const transform = [outputScale, 0, 0, outputScale, 0, 0];
           canvas.style.display = 'block';
-          canvas.style.margin = isMobile ? '0 auto 8px auto' : '0 auto 16px auto';
+          canvas.style.margin = '0 auto';
+          canvas.style.marginBottom = 'clamp(8px, 1.5vw, 16px)';
           canvas.style.background = 'white';
           canvas.dataset.pageNumber = i.toString();
           container.appendChild(canvas);
@@ -467,7 +468,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
             <>
               <div 
                 ref={containerRef} 
-                className={isMobile ? "p-1 min-h-[220px]" : "p-4 min-h-[220px]"}
+                className="p-1 md:p-4 min-h-[220px]"
                 style={{
                   transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
                   transformOrigin: 'top center',

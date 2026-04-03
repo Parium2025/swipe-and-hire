@@ -94,8 +94,8 @@ export const StatusColumn = memo(({
       ref={setNodeRef}
       className="flex-shrink-0 flex flex-col transition-colors h-full"
       style={{ 
-        width: '220px',
-        minWidth: '200px',
+        width: 'clamp(200px, 22vw, 260px)',
+        minWidth: '180px',
       }}
     >
       <div 
