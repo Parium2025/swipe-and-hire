@@ -387,7 +387,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         <button
           type="button"
           onClick={() => setZoomLevel(z => Math.min(3.0, z + 0.5))} 
-          className={`${isMobile ? 'h-8 w-8' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-full border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95  active:duration-75 flex items-center justify-center touch-manipulation`}
+          className="h-8 w-8 md:h-6 md:w-6 min-h-0 min-w-0 aspect-square p-0 leading-none rounded-full border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:duration-75 flex items-center justify-center touch-manipulation"
         >
           +
         </button>
