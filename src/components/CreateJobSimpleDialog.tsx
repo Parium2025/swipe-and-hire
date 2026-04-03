@@ -654,7 +654,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                   {template.name}
                                 </div>
                               )}
-                              <div className="flex justify-center gap-2 px-4 pb-2.5" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex justify-center gap-2 px-4 pt-1.5 pb-2.5" onClick={(e) => e.stopPropagation()}>
                                 <button
                                   type="button"
                                   onClick={(e) => {
