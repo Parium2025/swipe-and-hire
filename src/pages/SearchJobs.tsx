@@ -482,9 +482,18 @@ const SearchJobs = memo(() => {
       />
 
       {/* Company Suggestion Card - LinkedIn style */}
-      {matchingCompany && searchInput.trim() && (
+      {(matchingCompany && searchInput.trim() && !selectedCompany) && (
         <CompanySuggestionCard
           company={matchingCompany}
+          onOpenProfile={(id) => {
+            setSelectedCompanyId(id);
+            setCompanyDialogOpen(true);
+          }}
+        />
+      )}
+      {selectedCompanyData && (
+        <CompanySuggestionCard
+          company={selectedCompanyData}
           onOpenProfile={(id) => {
             setSelectedCompanyId(id);
             setCompanyDialogOpen(true);
