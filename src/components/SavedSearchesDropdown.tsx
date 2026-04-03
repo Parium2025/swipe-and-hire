@@ -44,6 +44,7 @@ export function SavedSearchesDropdown({
   const [open, setOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteSearch, setConfirmDeleteSearch] = useState<SavedSearch | null>(null);
+  const [hoverTruncatedId, setHoverTruncatedId] = useState<string | null>(null);
   const { handleTap, isPreview, resetPreview, isTouch } = useTapToPreview();
   const nameRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
