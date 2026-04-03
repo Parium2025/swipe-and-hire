@@ -187,15 +187,17 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 { value: '3d' as TimeFilter, label: '3 dagar' },
                 { value: '7d' as TimeFilter, label: '7 dagar' },
                 { value: 'all' as TimeFilter, label: 'Alla' },
-              ]).map(({ value, label }) => (
-                <DropdownMenuItem
-                  key={value}
-                  onClick={() => onTimeFilterChange(value)}
-                  className="text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white"
-                >
-                  <span className="flex-1">{label}</span>
-                  {timeFilter === value && <Check className="h-4 w-4 text-white ml-2" />}
-                </DropdownMenuItem>
+              ]).map(({ value, label }, index, arr) => (
+                <React.Fragment key={value}>
+                  <DropdownMenuItem
+                    onClick={() => onTimeFilterChange(value)}
+                    className="text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white"
+                  >
+                    <span className="flex-1">{label}</span>
+                    {timeFilter === value && <Check className="h-4 w-4 text-white ml-2" />}
+                  </DropdownMenuItem>
+                  {index < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
+                </React.Fragment>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
