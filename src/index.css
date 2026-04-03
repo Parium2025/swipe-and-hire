@@ -866,6 +866,12 @@ All colors MUST be HSL.
     margin-inline: auto;
   }
 
+  /* In grid context, let cards fill their column */
+  .job-card-grid .job-card-mobile-shell {
+    width: 100%;
+    max-width: none;
+  }
+
   .job-card-mobile-media {
     height: var(--job-card-mobile-media-height);
   }

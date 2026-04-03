@@ -499,52 +499,31 @@ const SearchJobs = memo(() => {
               <SwipeModeToggle onActivate={() => setSwipeModeActive(true)} />
             )}
 
-            {/* Job Cards */}
-            <div className={isMobile ? "grid grid-cols-1 gap-4" : "space-y-4"}>
-              {displayedJobs.map((job) => {
-                const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
-                
-                // Mobile: use image cards (ReadOnlyMobileJobCard style)
-                if (isMobile) {
-                  return (
-                    <ReadOnlyMobileJobCard
-                      key={job.id}
-                      job={{
-                        id: job.id,
-                        title: job.title,
-                        location: job.location,
-                        employment_type: job.employment_type,
-                        is_active: job.is_active,
-                        views_count: job.views_count,
-                        applications_count: job.applications_count,
-                        created_at: job.created_at,
-                        expires_at: job.expires_at,
-                        job_image_url: job.job_image_url,
-                        company_name: job.company_name,
-                      }}
-                      hasApplied={appliedJobIds.has(job.id)}
-                      onUnsaveClick={handleUnsaveClick}
-                      isSavedExternal={isJobSaved(job.id)}
-                      onToggleSave={toggleSaveJob}
-                    />
-                  );
-                }
-                
-                // Desktop: extracted memoized component
-                return (
-                  <DesktopJobCard
-                    key={job.id}
-                    job={job}
-                    hasApplied={appliedJobIds.has(job.id)}
-                    isJobSaved={isJobSaved(job.id)}
-                    onToggleSave={toggleSaveJob}
-                    onOpenCompanyProfile={(employerId) => {
-                      setSelectedCompanyId(employerId);
-                      setCompanyDialogOpen(true);
-                    }}
-                  />
-                );
-              })}
+            {/* Job Cards — image cards on all screen sizes */}
+            <div className="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayedJobs.map((job) => (
+                <ReadOnlyMobileJobCard
+                  key={job.id}
+                  job={{
+                    id: job.id,
+                    title: job.title,
+                    location: job.location,
+                    employment_type: job.employment_type,
+                    is_active: job.is_active,
+                    views_count: job.views_count,
+                    applications_count: job.applications_count,
+                    created_at: job.created_at,
+                    expires_at: job.expires_at,
+                    job_image_url: job.job_image_url,
+                    image_focus_position: job.image_focus_position,
+                    company_name: job.company_name,
+                  }}
+                  hasApplied={appliedJobIds.has(job.id)}
+                  onUnsaveClick={handleUnsaveClick}
+                  isSavedExternal={isJobSaved(job.id)}
+                  onToggleSave={toggleSaveJob}
+                />
+              ))}
             </div>
           </>
         )}
