@@ -27,7 +27,7 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
         onClick={() => onOpenProfile(company.id)}
         className="w-full text-left"
       >
-        <Card className="bg-white/5 backdrop-blur-sm border-white/20 transition-all duration-300 hover:bg-white/10 hover:border-white/30 cursor-pointer">
+        <Card className="bg-white/5 border-white/20 transition-all duration-300 hover:bg-white/10 hover:border-white/30 cursor-pointer">
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12 flex-shrink-0">

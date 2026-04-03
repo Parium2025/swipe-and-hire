@@ -106,7 +106,7 @@ export const DesktopJobCard = memo(function DesktopJobCard({
                   e.stopPropagation();
                   onToggleSave(job.id);
                 }}
-                className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border backdrop-blur-[2px] transition-all duration-300 group-hover:backdrop-brightness-90 ${
+                className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-all duration-300 ${
                   isJobSaved
                     ? 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30 hover:border-red-500/50'
                     : 'bg-white/10 text-white border-white/25 hover:bg-white/15 hover:border-white/50'

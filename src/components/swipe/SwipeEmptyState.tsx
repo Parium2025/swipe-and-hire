@@ -46,7 +46,7 @@ export const SwipeEmptyState = memo(function SwipeEmptyState({
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-5 border border-white/20">
+        <div className="bg-white/10 rounded-2xl px-8 py-5 border border-white/20">
           <p className="text-white text-base font-medium text-center">Inga jobb hittades</p>
         </div>
       </div>

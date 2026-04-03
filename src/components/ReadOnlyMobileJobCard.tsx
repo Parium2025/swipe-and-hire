@@ -289,7 +289,7 @@ const SaveButton = memo(({ jobId, jobTitle, isSaved, onToggle, onUnsaveClick }: 
     <button
       onClick={handleClick}
       aria-label={isSaved ? 'Ta bort från sparade' : 'Spara jobb'}
-      className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90"
+      className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/50 border border-white/20 transition-all duration-150 active:scale-90"
     >
       <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
     </button>
