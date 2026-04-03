@@ -474,7 +474,7 @@ const SearchJobs = memo(() => {
       {/* Jobs Card List */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium text-white">Jobbsökresultat</h2>
+          <h2 className="text-sm font-medium text-white text-center w-full">Jobbsökresultat</h2>
           <div className="flex items-center gap-5 text-sm text-white md:hidden">
             <div className="flex flex-col items-center">
               <span className="flex items-center gap-1 font-semibold"><Briefcase className="h-4 w-4" />{activeJobCount}</span>
