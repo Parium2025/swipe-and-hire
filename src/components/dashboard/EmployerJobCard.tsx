@@ -177,7 +177,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             </span>
           </div>
           <div className="flex flex-col items-center text-center">
-            <span className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">Plats</span>
+            <span className="text-[10px] text-white tracking-wider leading-none mb-0.5">Plats</span>
             <span className="text-[11px] text-white font-medium leading-none truncate max-w-full">{job.location}</span>
           </div>
           {recruiterName && (
