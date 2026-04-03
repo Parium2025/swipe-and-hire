@@ -631,16 +631,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                     <TruncatedText
                                       text={template.name}
                                       className="font-medium text-white truncate block"
-                                      alwaysShowTooltip={false}
                                       tooltipSide="top"
-                                    >
-                                      <span
-                                        ref={(el) => { templateTextRefs.current[template.id] = el; }}
-                                        className="truncate block"
-                                      >
-                                        {template.name}
-                                      </span>
-                                    </TruncatedText>
+                                    />
                                   </div>
                                   {template.is_default && (
                                     <span className="text-xs text-white/80 shrink-0">Standard</span>
