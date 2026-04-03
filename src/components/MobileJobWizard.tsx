@@ -126,6 +126,8 @@ interface MobileJobWizardProps {
 const JOB_WIZARD_SESSION_KEY = 'job-wizard-unsaved-state';
 const JOB_WIZARD_DRAFT_KEY = 'parium_draft_job-wizard';
 const JOB_WIZARD_INTENTIONAL_CLOSE_KEY = 'parium_job_wizard_intentional_close';
+const EDIT_JOB_SESSION_KEY = 'parium-editing-job';
+const getEditJobDraftKey = (jobId: string) => `parium_draft_edit-job-${jobId}`;
 
 const MobileJobWizard = ({
   open, 
@@ -163,6 +165,7 @@ const MobileJobWizard = ({
   const hasBeenOpenRef = useRef(false);
   // Guard: don't persist draft until restore has completed (prevents overwriting saved draft with empty data)
   const hasCompletedRestoreRef = useRef(false);
+  const editDraftKey = existingJob?.id ? getEditJobDraftKey(existingJob.id) : null;
   
   // Reset state when dialog ACTUALLY closes (not on initial mount)
   useEffect(() => {
@@ -230,8 +233,8 @@ const MobileJobWizard = ({
         }
       }
 
-      // No draft to restore — mark restore as complete so persist can start
-      hasCompletedRestoreRef.current = true;
+      // For create flow, no draft to restore — reset base state
+      hasCompletedRestoreRef.current = !existingJob;
       setCurrentStep(0);
       
       // Reset form state for fresh load
@@ -260,6 +263,25 @@ const MobileJobWizard = ({
           const plusMatch = value.match(/^(\d+)\+$/);
           if (plusMatch) return `${parseInt(plusMatch[1]) * 1000}+`;
           return value;
+        };
+
+        const parseEditDraftState = (raw: string | null, expectedJobId?: string) => {
+          if (!raw) return null;
+          try {
+            const parsed = JSON.parse(raw);
+            if (expectedJobId && parsed?.jobId && parsed.jobId !== expectedJobId) return null;
+            const savedAt = typeof parsed?.savedAt === 'number' ? parsed.savedAt : 0;
+            const rawStep = Number(parsed?.currentStep);
+            const restoredStep = Number.isFinite(rawStep) && rawStep >= 0 ? Math.floor(rawStep) : 0;
+            return {
+              savedAt,
+              currentStep: restoredStep,
+              formData: parsed?.formData as JobFormData | undefined,
+              customQuestions: Array.isArray(parsed?.customQuestions) ? parsed.customQuestions : undefined,
+            };
+          } catch {
+            return null;
+          }
         };
         
         const loadedFormData: JobFormData = {
@@ -292,38 +314,54 @@ const MobileJobWizard = ({
           job_image_desktop_url: existingJob.job_image_desktop_url || '',
           location: existingJob.location || '',
         };
-        setFormData(loadedFormData);
+
+        const localDraft = editDraftKey ? parseEditDraftState(localStorage.getItem(editDraftKey), existingJob.id) : null;
+        const sessionDraft = parseEditDraftState(sessionStorage.getItem(EDIT_JOB_SESSION_KEY), existingJob.id);
+        const isLocalFresh = !!localDraft?.savedAt && Date.now() - localDraft.savedAt < 24 * 60 * 60 * 1000;
+        const restoredFormData = isLocalFresh && localDraft?.formData ? localDraft.formData : loadedFormData;
+        const bestStepSource = [localDraft, sessionDraft]
+          .filter((draft): draft is NonNullable<typeof draft> => !!draft)
+          .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))[0];
+
+        setFormData(restoredFormData);
+        if (bestStepSource) {
+          setCurrentStep(bestStepSource.currentStep);
+        }
         
-        // Load existing questions for this job and set both states together
         const loadExistingQuestions = async () => {
-          const { data: questions } = await supabase
-            .from('job_questions')
-            .select('*')
-            .eq('job_id', existingJob.id)
-            .order('order_index');
+          let loadedQuestions: JobQuestion[] = [];
+
+          if (isLocalFresh && localDraft?.customQuestions) {
+            loadedQuestions = localDraft.customQuestions as JobQuestion[];
+          } else {
+            const { data: questions } = await supabase
+              .from('job_questions')
+              .select('*')
+              .eq('job_id', existingJob.id)
+              .order('order_index');
+            
+            loadedQuestions = questions && questions.length > 0 
+              ? questions.map(q => ({
+                  id: q.id,
+                  question_text: q.question_text,
+                  question_type: q.question_type as JobQuestion['question_type'],
+                  options: q.options || [],
+                  is_required: q.is_required ?? true,
+                  order_index: q.order_index,
+                  placeholder_text: q.placeholder_text || '',
+                  min_value: q.min_value ?? undefined,
+                  max_value: q.max_value ?? undefined,
+                }))
+              : [];
+          }
           
-          const loadedQuestions = questions && questions.length > 0 
-            ? questions.map(q => ({
-                id: q.id,
-                question_text: q.question_text,
-                question_type: q.question_type as JobQuestion['question_type'],
-                options: q.options || [],
-                is_required: q.is_required ?? true,
-                order_index: q.order_index,
-                placeholder_text: q.placeholder_text || '',
-                min_value: q.min_value ?? undefined,
-                max_value: q.max_value ?? undefined,
-              }))
-            : [];
-          
-          // Set BOTH customQuestions AND initialCustomQuestions to same value
           setCustomQuestions(loadedQuestions);
           setInitialCustomQuestions(loadedQuestions);
-          // Set initialFormData AFTER questions are loaded to avoid race condition
-          setInitialFormData(loadedFormData);
+          setInitialFormData(restoredFormData);
           setHasUnsavedChanges(false);
+          hasCompletedRestoreRef.current = true;
         };
-        loadExistingQuestions();
+        void loadExistingQuestions();
       } else if (selectedTemplate) {
         // Force reload template data when opening
         const templateFormData: JobFormData = {
