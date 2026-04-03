@@ -750,6 +750,7 @@ const SearchJobs = memo(() => {
               setSelectedSubcategories([]);
               setSelectedEmploymentTypes([]);
               setSortBy('newest');
+              try { sessionStorage.removeItem('parium-search-filters'); } catch {}
             },
             activeFilterCount:
               (searchInput ? 1 : 0) +
