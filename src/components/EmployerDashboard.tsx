@@ -8,10 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
-import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
-import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
+import { isJobExpiredCheck } from '@/lib/date';
 import {
   AlertDialog,
   AlertDialogAction,
