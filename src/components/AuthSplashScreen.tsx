@@ -141,7 +141,7 @@ export function AuthSplashScreen() {
       <p 
         style={{
           color: 'white',
-          fontSize,
+          fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
           fontWeight: 600,
           letterSpacing: '-0.01em',
           marginTop: taglineMarginTop,
