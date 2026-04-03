@@ -31,7 +31,7 @@ import { useOptimizedJobSearch } from '@/hooks/useOptimizedJobSearch';
 import { useSavedSearches, SearchCriteria } from '@/hooks/useSavedSearches';
 import { SaveSearchDialog } from '@/components/SaveSearchDialog';
 import { useBatchPrefetchReviews, useBatchPrefetchCompanyProfiles } from '@/hooks/useCompanyReviewsCache';
-import { DesktopJobCard } from '@/components/search/DesktopJobCard';
+
 import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
 import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard';
 import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
