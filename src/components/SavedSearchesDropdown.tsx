@@ -141,7 +141,7 @@ export function SavedSearchesDropdown({
               const showingPreview = isPreview(search.id);
               const fullText = `${search.name}\n${getCriteriaSummary(search)}`;
               return (
-                <Tooltip key={search.id} open={showingPreview}>
+                <Tooltip key={search.id} {...(isTouch ? { open: showingPreview } : {})}>
                   <TooltipTrigger asChild>
                     <div
                       onClick={() => {
