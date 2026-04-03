@@ -145,7 +145,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
         </div>
 
         {/* Views badge — top-right */}
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1 border border-white/15">
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-1 border border-white/15">
           <Eye className="h-3.5 w-3.5 text-white" />
           <span className="text-xs font-medium text-white">{job.views_count || 0}</span>
         </div>
