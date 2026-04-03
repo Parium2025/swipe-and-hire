@@ -17,12 +17,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, Briefcase, Building } from 'lucide-react';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile'; // kept for swipe mode layout
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
-import { getTimeRemaining } from '@/lib/date';
+import { getTimeRemaining } from '@/lib/date'; // kept for swipe jobs mapping
 import { StatsGrid } from '@/components/StatsGrid';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { preloadImages } from '@/lib/serviceWorkerManager';
@@ -31,7 +31,7 @@ import { useOptimizedJobSearch } from '@/hooks/useOptimizedJobSearch';
 import { useSavedSearches, SearchCriteria } from '@/hooks/useSavedSearches';
 import { SaveSearchDialog } from '@/components/SaveSearchDialog';
 import { useBatchPrefetchReviews, useBatchPrefetchCompanyProfiles } from '@/hooks/useCompanyReviewsCache';
-import { DesktopJobCard } from '@/components/search/DesktopJobCard';
+
 import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
 import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard';
 import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
@@ -499,52 +499,31 @@ const SearchJobs = memo(() => {
               <SwipeModeToggle onActivate={() => setSwipeModeActive(true)} />
             )}
 
-            {/* Job Cards */}
-            <div className={isMobile ? "grid grid-cols-1 gap-4" : "space-y-4"}>
-              {displayedJobs.map((job) => {
-                const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
-                
-                // Mobile: use image cards (ReadOnlyMobileJobCard style)
-                if (isMobile) {
-                  return (
-                    <ReadOnlyMobileJobCard
-                      key={job.id}
-                      job={{
-                        id: job.id,
-                        title: job.title,
-                        location: job.location,
-                        employment_type: job.employment_type,
-                        is_active: job.is_active,
-                        views_count: job.views_count,
-                        applications_count: job.applications_count,
-                        created_at: job.created_at,
-                        expires_at: job.expires_at,
-                        job_image_url: job.job_image_url,
-                        company_name: job.company_name,
-                      }}
-                      hasApplied={appliedJobIds.has(job.id)}
-                      onUnsaveClick={handleUnsaveClick}
-                      isSavedExternal={isJobSaved(job.id)}
-                      onToggleSave={toggleSaveJob}
-                    />
-                  );
-                }
-                
-                // Desktop: extracted memoized component
-                return (
-                  <DesktopJobCard
-                    key={job.id}
-                    job={job}
-                    hasApplied={appliedJobIds.has(job.id)}
-                    isJobSaved={isJobSaved(job.id)}
-                    onToggleSave={toggleSaveJob}
-                    onOpenCompanyProfile={(employerId) => {
-                      setSelectedCompanyId(employerId);
-                      setCompanyDialogOpen(true);
-                    }}
-                  />
-                );
-              })}
+            {/* Job Cards — image cards on all screen sizes */}
+            <div className="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayedJobs.map((job) => (
+                <ReadOnlyMobileJobCard
+                  key={job.id}
+                  job={{
+                    id: job.id,
+                    title: job.title,
+                    location: job.location,
+                    employment_type: job.employment_type,
+                    is_active: job.is_active,
+                    views_count: job.views_count,
+                    applications_count: job.applications_count,
+                    created_at: job.created_at,
+                    expires_at: job.expires_at,
+                    job_image_url: job.job_image_url,
+                    image_focus_position: job.image_focus_position,
+                    company_name: job.company_name,
+                  }}
+                  hasApplied={appliedJobIds.has(job.id)}
+                  onUnsaveClick={handleUnsaveClick}
+                  isSavedExternal={isJobSaved(job.id)}
+                  onToggleSave={toggleSaveJob}
+                />
+              ))}
             </div>
           </>
         )}
