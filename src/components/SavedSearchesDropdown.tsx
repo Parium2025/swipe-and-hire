@@ -177,13 +177,13 @@ export function SavedSearchesDropdown({
                         if (!isTouch) setHoverTruncatedId(null);
                       }}
                       className={cn(
-                        "flex items-start gap-3 p-3 cursor-pointer transition-colors",
+                        "flex items-start gap-3 p-4 cursor-pointer transition-colors",
                         "hover:bg-white/5 border-b border-white/5 last:border-b-0",
                         deletingId === search.id && "opacity-50 pointer-events-none",
                         showingPreview && "bg-white/5"
                       )}
                     >
-                      <Search className="h-4 w-4 text-white mt-0.5 shrink-0" />
+                      <Search className="h-5 w-5 text-white mt-0.5 shrink-0" />
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
