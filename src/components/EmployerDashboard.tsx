@@ -599,7 +599,7 @@ const EmployerDashboard = memo(() => {
             ) : (
               <>
                 <div ref={listTopRef} />
-                    <div className="grid grid-cols-1 gap-4 pb-24">
+                    <div className="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24">
                       {pageJobs.map((job) => {
                         const jobPosting = job as JobPosting;
                         const isExpired = isJobExpiredCheck(job.created_at, jobPosting.expires_at);
