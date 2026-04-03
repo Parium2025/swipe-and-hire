@@ -232,7 +232,7 @@ const MyApplications = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {applications.map((application) => {
               const job = application.job_postings;
               if (!job) return null;
