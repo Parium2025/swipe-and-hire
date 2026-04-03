@@ -202,7 +202,10 @@ export function SavedSearchesDropdown({
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-white truncate mt-0.5">
+                        <p 
+                          ref={(el) => { criteriaRefs.current[search.id] = el; }}
+                          className="text-xs text-white truncate mt-0.5"
+                        >
                           {getCriteriaSummary(search)}
                         </p>
                       </div>
