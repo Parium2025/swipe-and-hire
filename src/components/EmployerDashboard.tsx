@@ -8,10 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
-import { TruncatedText } from '@/components/TruncatedText';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
