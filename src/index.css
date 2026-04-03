@@ -866,26 +866,15 @@ All colors MUST be HSL.
     margin-inline: auto;
   }
 
-  /* In flex grid context, cards take responsive widths */
+  /* In grid context, let cards fill their column */
   .job-card-grid .job-card-mobile-shell {
     width: 100%;
     max-width: none;
-    flex: 0 1 100%;
-  }
-
-  @media (min-width: 640px) {
-    .job-card-grid .job-card-mobile-shell {
-      flex: 0 1 calc((100% - 1rem) / 3);
-      width: calc((100% - 1rem) / 3);
-      max-width: calc((100% - 1rem) / 3);
-    }
   }
 
   @media (min-width: 1024px) {
-    .job-card-grid .job-card-mobile-shell {
-      flex: 0 1 calc((100% - 2rem) / 3);
-      width: calc((100% - 2rem) / 3);
-      max-width: calc((100% - 2rem) / 3);
+    .search-jobs-grid-single-desktop > .job-card-mobile-shell:first-child {
+      grid-column: 2;
     }
   }
 
