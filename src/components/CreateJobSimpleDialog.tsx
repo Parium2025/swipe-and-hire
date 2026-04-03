@@ -350,7 +350,11 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
   }, [jobTitle, selectedTemplate, toast, setIntentionalCloseMarker]);
 
   const handleClose = useCallback(() => {
-    // X should always close and fully clear — no unsaved dialog
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      return;
+    }
+
     setShowUnsavedDialog(false);
     setOpen(false);
     setJobTitle('');
@@ -361,7 +365,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     setMenuInstanceKey((k) => k + 1);
     setIntentionalCloseMarker(true);
     clearCreateAndWizardDrafts();
-  }, [clearCreateAndWizardDrafts, setIntentionalCloseMarker]);
+  }, [clearCreateAndWizardDrafts, hasUnsavedChanges, setIntentionalCloseMarker]);
 
   const handleConfirmClose = useCallback(() => {
     setShowUnsavedDialog(false);
@@ -879,6 +883,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
         onOpenChange={setShowUnsavedDialog}
         onConfirm={handleConfirmClose}
         onCancel={handleCancelClose}
+        onSaveAndLeave={async () => {
+          handleConfirmClose();
+        }}
       />
     </>
   );
