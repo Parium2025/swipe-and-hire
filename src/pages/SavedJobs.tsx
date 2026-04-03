@@ -325,7 +325,7 @@ const SavedJobs = () => {
             ))}
           </div>
 
-          <div className="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
             {sortedJobs.map((savedJob) => {
               const job = savedJob.job_postings!;
 

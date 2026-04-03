@@ -656,7 +656,7 @@ const SearchJobs = memo(() => {
             )}
 
             {/* Job Cards — image cards on all screen sizes */}
-            <div className={cn("job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4", displayedJobs.length === 1 && "search-jobs-grid-single-desktop")}>
+            <div className={cn("job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4", displayedJobs.length === 1 && "job-card-grid-single", displayedJobs.length === 2 && "job-card-grid-double")}>
               {displayedJobs.map((job) => (
                 <ReadOnlyMobileJobCard
                   key={job.id}
