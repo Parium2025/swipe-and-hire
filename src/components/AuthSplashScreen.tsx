@@ -110,7 +110,7 @@ export function AuthSplashScreen() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        paddingTop,
+        paddingTop: 'clamp(calc(env(safe-area-inset-top, 0px) + 24px), 5vw, 50px)',
         background: 'hsl(215, 100%, 12%)',
         opacity: isFadingIn && !isFadingOut ? 1 : 0,
         transition: 'opacity 0.4s ease-out',
