@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { authSplashEvents } from '@/lib/authSplashEvents';
-import { useDevice } from '@/hooks/use-device';
+
 import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
 
 // Minsta visningstid för att garantera att loggan hinner laddas och avkodas
@@ -13,7 +13,7 @@ const MINIMUM_DISPLAY_MS = 2000;
  * så att fade-in/out blir pixel-perfekt oavsett entry-point.
  */
 export function AuthSplashScreen() {
-  const device = useDevice();
+  
   
   // Prenumerera på splash-events
   const isTriggered = useSyncExternalStore(
@@ -98,23 +98,7 @@ export function AuthSplashScreen() {
   
   if (!isVisible) return null;
   
-  // Beräkna storlekar som matchar index.html EXAKT
-  const isMobile = device === 'mobile';
-  const isLargeDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
-  
-  // Logo: desktop 224px, lg 256px, mobile 200px
-  const logoHeight = isMobile ? 200 : (isLargeDesktop ? 256 : 224);
-  
-  // Padding-top: desktop 50px, mobile safe-area + 24px
-  const paddingTop = isMobile 
-    ? 'calc(env(safe-area-inset-top, 0px) + 24px)' 
-    : '50px';
-  
-  // Tagline font-size: desktop 1.25rem, lg/mobile 1.5rem
-  const fontSize = isMobile ? '1.5rem' : (isLargeDesktop ? '1.5rem' : '1.25rem');
-  
-  // Tagline margin-top: desktop 8px, mobile 4px
-  const taglineMarginTop = isMobile ? '4px' : '8px';
+  // CSS clamp() handles all sizing fluidly — no JS breakpoint logic needed
   
   return (
     <div
@@ -126,7 +110,7 @@ export function AuthSplashScreen() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        paddingTop,
+        paddingTop: 'clamp(calc(env(safe-area-inset-top, 0px) + 24px), 5vw, 50px)',
         background: 'hsl(215, 100%, 12%)',
         opacity: isFadingIn && !isFadingOut ? 1 : 0,
         transition: 'opacity 0.4s ease-out',
@@ -143,7 +127,7 @@ export function AuthSplashScreen() {
         onLoad={() => setImageLoaded(true)}
         onError={() => setImageLoaded(true)}
         style={{ 
-          height: `${logoHeight}px`,
+          height: 'clamp(200px, 30vw, 256px)',
           width: 'auto',
           marginBottom: 0,
           transform: 'translateZ(0)',
@@ -157,10 +141,10 @@ export function AuthSplashScreen() {
       <p 
         style={{
           color: 'white',
-          fontSize,
+          fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
           fontWeight: 600,
           letterSpacing: '-0.01em',
-          marginTop: taglineMarginTop,
+          marginTop: 'clamp(4px, 1vw, 8px)',
           marginBottom: '40px',
           textShadow: '0 2px 4px rgba(0,0,0,0.3)',
           fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
