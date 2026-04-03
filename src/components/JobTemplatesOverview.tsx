@@ -602,7 +602,7 @@ const JobTemplatesOverview = () => {
                   >
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900/85 backdrop-blur-xl border-white/20 z-50">
+                  <SelectContent className="bg-slate-900/85 border-white/20 z-50">
                     {EMPLOYMENT_TYPES.map(type => (
                       <SelectItem 
                         key={type.value} 

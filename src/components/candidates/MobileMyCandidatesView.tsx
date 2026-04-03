@@ -505,7 +505,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
           {!isReadOnly && stages.length < 8 && (
             <CreateStageDialog
               trigger={
-                <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap bg-white/5 text-white ring-1 ring-inset ring-white/10 active:scale-95 transition-all shrink-0 backdrop-blur-sm">
+                <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap bg-white/5 text-white ring-1 ring-inset ring-white/10 active:scale-95 transition-all shrink-0">
                   <Plus className="h-3.5 w-3.5" />
                   Nytt steg
                 </button>
