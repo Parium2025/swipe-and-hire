@@ -11,8 +11,6 @@ import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, Trending
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
