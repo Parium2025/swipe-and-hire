@@ -144,7 +144,7 @@ export function AuthSplashScreen() {
           fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
           fontWeight: 600,
           letterSpacing: '-0.01em',
-          marginTop: taglineMarginTop,
+          marginTop: 'clamp(4px, 1vw, 8px)',
           marginBottom: '40px',
           textShadow: '0 2px 4px rgba(0,0,0,0.3)',
           fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
