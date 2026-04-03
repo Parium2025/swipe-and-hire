@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { safeSetItem } from '@/lib/safeStorage';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -48,6 +49,26 @@ interface SavedJob {
   } | null;
 }
 
+const SAVED_JOBS_CACHE_KEY = 'parium_saved_jobs_full_v2';
+
+function loadSavedJobsCache(userId: string): SavedJob[] | undefined {
+  try {
+    const raw = localStorage.getItem(SAVED_JOBS_CACHE_KEY);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw);
+    if (parsed?.userId !== userId || !Array.isArray(parsed?.data)) return undefined;
+    return parsed.data;
+  } catch {
+    return undefined;
+  }
+}
+
+function saveSavedJobsCache(userId: string, data: SavedJob[]): void {
+  try {
+    safeSetItem(SAVED_JOBS_CACHE_KEY, JSON.stringify({ userId, data, ts: Date.now() }));
+  } catch { /* ignore */ }
+}
+
 const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
   const { data, error } = await supabase
     .from('saved_jobs')
@@ -80,7 +101,10 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return (data as unknown as SavedJob[]) || [];
+  const result = (data as unknown as SavedJob[]) || [];
+  // Persist to localStorage for instant next load
+  saveSavedJobsCache(userId, result);
+  return result;
 };
 
 const SavedJobs = () => {
@@ -121,6 +145,9 @@ const SavedJobs = () => {
     isDragging.current = false;
   }, []);
 
+  // Load cached data for instant render
+  const cachedSavedJobs = useMemo(() => user?.id ? loadSavedJobsCache(user.id) : undefined, [user?.id]);
+
   const { data: savedJobs = [], isLoading, isFetched } = useQuery({
     queryKey: ['saved-jobs', user?.id],
     queryFn: () => fetchSavedJobs(user!.id),
@@ -128,6 +155,7 @@ const SavedJobs = () => {
     staleTime: 0,
     gcTime: Infinity,
     refetchOnWindowFocus: false,
+    placeholderData: cachedSavedJobs,
   });
 
   // Hämta användarens ansökningar för "Redan sökt"-badge
