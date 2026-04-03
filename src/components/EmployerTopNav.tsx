@@ -263,7 +263,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
             <MessageCircle className="h-4 w-4 relative z-10" />
             <span className="relative z-10">Chattar</span>
             {preloadedUnreadMessages > 0 && (
-              <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center relative z-10">
+              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center z-20">
                 {preloadedUnreadMessages}
               </span>
             )}
