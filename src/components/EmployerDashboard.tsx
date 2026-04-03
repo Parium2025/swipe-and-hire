@@ -165,17 +165,17 @@ const EmployerDashboard = memo(() => {
   }, []);
   
   // Check if there are any drafts
-  const hasDrafts = useMemo(() => jobs.some(job => !job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)), [jobs]);
+  const hasDrafts = useMemo(() => jobs.some(job => isEmployerJobDraft(job)), [jobs]);
   
   // Filter jobs by active tab BEFORE pagination
   const tabFilteredJobs = useMemo(() => {
     switch (activeTab) {
       case 'active':
-        return filteredAndSortedJobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
+        return filteredAndSortedJobs.filter(j => isEmployerJobActive(j));
       case 'expired':
-        return filteredAndSortedJobs.filter(j => isJobExpiredCheck(j.created_at, j.expires_at));
+        return filteredAndSortedJobs.filter(j => isEmployerJobExpired(j));
       case 'draft':
-        return filteredAndSortedJobs.filter(j => !j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
+        return filteredAndSortedJobs.filter(j => isEmployerJobDraft(j));
       default:
         return filteredAndSortedJobs;
     }
