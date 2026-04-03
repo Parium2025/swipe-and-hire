@@ -98,23 +98,7 @@ export function AuthSplashScreen() {
   
   if (!isVisible) return null;
   
-  // Beräkna storlekar som matchar index.html EXAKT
-  const isMobile = device === 'mobile';
-  const isLargeDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
-  
-  // Logo: desktop 224px, lg 256px, mobile 200px
-  const logoHeight = isMobile ? 200 : (isLargeDesktop ? 256 : 224);
-  
-  // Padding-top: desktop 50px, mobile safe-area + 24px
-  const paddingTop = isMobile 
-    ? 'calc(env(safe-area-inset-top, 0px) + 24px)' 
-    : '50px';
-  
-  // Tagline font-size: desktop 1.25rem, lg/mobile 1.5rem
-  const fontSize = isMobile ? '1.5rem' : (isLargeDesktop ? '1.5rem' : '1.25rem');
-  
-  // Tagline margin-top: desktop 8px, mobile 4px
-  const taglineMarginTop = isMobile ? '4px' : '8px';
+  // CSS clamp() handles all sizing fluidly — no JS breakpoint logic needed
   
   return (
     <div
