@@ -47,6 +47,7 @@ export function SavedSearchesDropdown({
   const [hoverTruncatedId, setHoverTruncatedId] = useState<string | null>(null);
   const { handleTap, isPreview, resetPreview, isTouch } = useTapToPreview();
   const nameRefs = useRef<Record<string, HTMLSpanElement | null>>({});
+  const criteriaRefs = useRef<Record<string, HTMLParagraphElement | null>>({});
 
   // Reset preview state when popover closes
   const handleOpenChange = (isOpen: boolean) => {
