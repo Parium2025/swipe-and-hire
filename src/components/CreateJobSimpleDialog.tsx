@@ -24,6 +24,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { JobTemplate } from '@/types/jobWizard';
 import { cn } from '@/lib/utils';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
+import { TruncatedText } from '@/components/TruncatedText';
 
 interface CreateJobSimpleDialogProps {
   onJobCreated: (job: JobPosting) => void;
