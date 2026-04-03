@@ -11,6 +11,8 @@ import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import type { SearchCriteria } from '@/hooks/useSavedSearches';
 
+export type TimeFilter = 'all' | '12h' | '24h' | '3d' | '7d';
+
 interface SearchFiltersPanelProps {
   // Search
   searchInput: string;
@@ -31,6 +33,9 @@ interface SearchFiltersPanelProps {
   // Sort
   sortBy: 'newest' | 'oldest' | 'most-views';
   onSortChange: (value: 'newest' | 'oldest' | 'most-views') => void;
+  // Time filter
+  timeFilter: TimeFilter;
+  onTimeFilterChange: (value: TimeFilter) => void;
   // Filter expansion
   filtersExpanded: boolean;
   onFiltersExpandedChange: (value: boolean) => void;

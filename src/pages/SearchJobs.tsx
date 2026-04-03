@@ -441,6 +441,8 @@ const SearchJobs = memo(() => {
         hasActiveFilters={hasActiveFilters}
         onOpenSaveDialog={() => setSaveSearchDialogOpen(true)}
         onClearAll={handleClearAllFilters}
+        timeFilter={timeFilter}
+        onTimeFilterChange={setTimeFilter}
       />
 
       {/* Company Suggestion Card - LinkedIn style */}
