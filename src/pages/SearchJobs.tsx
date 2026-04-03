@@ -245,7 +245,7 @@ const SearchJobs = memo(() => {
   
 
   // Debounced search for better performance
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchInput);
