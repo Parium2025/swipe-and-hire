@@ -160,6 +160,7 @@ const SearchJobs = memo(() => {
   });
   const [searchInput, setSearchInput] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
+  const [timeFilter, setTimeFilter] = useState<'all' | '12h' | '24h' | '3d' | '7d'>('all');
   const [selectedPostalCode, setSelectedPostalCode] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [isPostalCodeValid, setIsPostalCodeValid] = useState(false);
