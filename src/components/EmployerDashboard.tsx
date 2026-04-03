@@ -164,7 +164,7 @@ const EmployerDashboard = memo(() => {
   }, []);
   
   // Check if there are any drafts
-  const hasDrafts = useMemo(() => jobs.some(job => !job.is_active), [jobs]);
+  const hasDrafts = useMemo(() => jobs.some(job => !job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)), [jobs]);
   
   // Filter jobs by active tab BEFORE pagination
   const tabFilteredJobs = useMemo(() => {
