@@ -369,6 +369,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           count={jobs.length}
           currentIndex={currentIndex}
           isEndStateActive={isEndStateActive}
+          onScrubTo={handleScrubTo}
         />
 
         <div
