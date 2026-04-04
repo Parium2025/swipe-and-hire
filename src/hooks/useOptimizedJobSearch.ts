@@ -178,10 +178,12 @@ const expandSearchWithFuzzy = (searchTerm: string): string[] => {
     }
   }
   
-  // Also check if any typo is a substring match
-  for (const [typo, corrections] of Object.entries(typoCorrections)) {
-    if (normalizedTerm.includes(typo) || typo.includes(normalizedTerm)) {
-      corrections.forEach(c => expandedTerms.add(c));
+  // Also check if any typo is a substring match (only for longer terms to avoid false matches)
+  if (normalizedTerm.length >= 4) {
+    for (const [typo, corrections] of Object.entries(typoCorrections)) {
+      if (normalizedTerm.includes(typo) || typo.includes(normalizedTerm)) {
+        corrections.forEach(c => expandedTerms.add(c));
+      }
     }
   }
   
