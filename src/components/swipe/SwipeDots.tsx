@@ -240,7 +240,6 @@ export const SwipeDots = memo(function SwipeDots({
           )}
         </>
       )}
-      </div>
-    </>
+    </div>
   );
 });
