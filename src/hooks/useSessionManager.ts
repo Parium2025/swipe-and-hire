@@ -213,7 +213,7 @@ export function useSessionManager(
       // Network error (still offline) — do nothing, try again next interval
       console.warn('Heartbeat failed (likely offline):', err);
     }
-  }, [userId, onKicked]);
+  }, [userId, onKicked, ensureFreshToken]);
 
   // Remove session on logout
   const removeSession = useCallback(async () => {
