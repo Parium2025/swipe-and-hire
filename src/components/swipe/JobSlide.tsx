@@ -295,7 +295,7 @@ export const JobSlide = memo(function JobSlide({
         )}
 
         {/* Bottom content */}
-        <div className="absolute bottom-0 left-0 right-0 p-5 z-10 text-center">
+        <div className="absolute bottom-0 left-0 right-0 p-5 pb-8 z-10 text-center">
           <p className="text-white font-semibold text-lg">{job.company_name}</p>
           <h2 className="text-3xl font-extrabold text-white leading-tight tracking-tight mt-1 line-clamp-3">{job.title}</h2>
           <p className="text-white/80 text-base font-medium mt-2">
