@@ -452,7 +452,7 @@ const JobSwipe = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               
               {/* Title overlay on image */}
-              <div className="absolute bottom-0 left-0 right-0 p-4">
+              <div className="absolute left-0 right-0 top-[60%] px-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Building2 className="h-4 w-4 text-white" />
                   <span className="text-white text-sm font-medium">
