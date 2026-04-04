@@ -103,7 +103,9 @@ const SearchJobs = memo(() => {
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
   const isTouchCapable = useTouchCapable();
   const isMobile = useIsMobile();
-  const [swipeModeActive, setSwipeModeActive] = useState(false);
+  const [swipeModeActive, setSwipeModeActive] = useState(() => {
+    try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
+  });
   const [jobToUnsave, setJobToUnsave] = useState<{ id: string; title: string } | null>(null);
   const [selectedCompanies, setSelectedCompaniesRaw] = useState<string[]>(() => {
     try { const raw = sessionStorage.getItem('parium-search-filters'); return raw ? (JSON.parse(raw).companies || []) : []; } catch { return []; }
@@ -654,7 +656,7 @@ const SearchJobs = memo(() => {
             {/* Mobile: Swipe Mode Toggle */}
             {/* Swipe Mode Toggle - only for touch devices */}
             {isTouchCapable && (
-              <SwipeModeToggle onActivate={() => setSwipeModeActive(true)} />
+              <SwipeModeToggle onActivate={() => { setSwipeModeActive(true); try { sessionStorage.setItem('parium-swipe-mode', 'true'); } catch {} }} />
             )}
 
             {/* Job Cards — image cards on all screen sizes */}
@@ -736,7 +738,7 @@ const SearchJobs = memo(() => {
           appliedJobIds={appliedJobIds}
           savedJobIds={new Set(Array.from(swipeJobs.map(j => j.id)).filter(id => isJobSaved(id)))}
           onToggleSave={toggleSaveJob}
-          onClose={() => setSwipeModeActive(false)}
+          onClose={() => { setSwipeModeActive(false); try { sessionStorage.removeItem('parium-swipe-mode'); } catch {} }}
           filterState={{
             searchInput,
             onSearchInputChange: setSearchInput,
