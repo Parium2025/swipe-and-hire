@@ -449,7 +449,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                           <span className="mr-1.5">Lön:</span>
                           <span className="font-semibold">{formatSalary(detail.salary_min, detail.salary_max, detail.salary_type)}</span>
                           {detail.salary_type && (
-                            <span className="text-white/70 ml-1.5 text-xs">({getSalaryTypeLabel(detail.salary_type)})</span>
+                            <span className="text-white ml-1.5 text-xs">({getSalaryTypeLabel(detail.salary_type)})</span>
                           )}
                         </div>
                       )}
@@ -497,15 +497,15 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   {questions.length > 0 && (
                     <div className="bg-white/10 rounded-lg p-4">
                       <h3 className="text-white font-semibold text-base mb-3">Ansökningsfrågor</h3>
-                      <p className="text-white/60 text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
+                      <p className="text-white text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
                       <div className="space-y-2.5">
                         {questions.map((q, i) => (
                           <div key={q.id} className="flex items-start gap-2">
-                            <span className="text-white/50 text-sm font-medium shrink-0">{i + 1}.</span>
+                            <span className="text-white text-sm font-medium shrink-0">{i + 1}.</span>
                             <div className="min-w-0">
                               <p className="text-white text-sm font-medium break-words">{q.question_text}</p>
                               {q.is_required && (
-                                <span className="text-white/40 text-xs">Obligatorisk</span>
+                                <span className="text-white text-xs">Obligatorisk</span>
                               )}
                             </div>
                           </div>
