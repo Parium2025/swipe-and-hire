@@ -431,7 +431,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return;
               }
               
-              // Both attempts failed — this is a genuine logout
+              const { data: finalSessionCheck } = await supabase.auth.getSession();
+              if (finalSessionCheck?.session) {
+                console.log('🛡️ Session still exists after failed refresh attempts — aborting forced logout');
+                isRecoveringSessionRef.current = false;
+                return;
+              }
+
               console.log('🔄 Session recovery failed — proceeding with logout');
               isRecoveringSessionRef.current = false;
               if (!mounted) return;
@@ -447,8 +453,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }, 1500);
             } catch (recoveryErr) {
               console.warn('Session recovery error:', recoveryErr);
+              const { data: finalSessionCheck } = await supabase.auth.getSession();
               isRecoveringSessionRef.current = false;
-              if (!mounted) return;
+              if (!mounted || finalSessionCheck?.session) return;
               clearAllAppCaches();
               clearSessionToken();
               window.location.href = '/auth';
@@ -1045,8 +1052,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // 🎬 Dölj splash vid obekräftad email
         authSplashEvents.hide();
         
-        // Sign out i bakgrunden utan att vänta
-        supabase.auth.signOut();
+        // Sign out only on this device so we never revoke other valid sessions
+        supabase.auth.signOut({ scope: 'local' });
         
         toast({
           title: "Kontot är inte bekräftat",
