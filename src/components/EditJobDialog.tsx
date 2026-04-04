@@ -3666,24 +3666,23 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           decoding="async"
                                         />
                                       ) : null}
-                                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                                       <div 
-                                        className="absolute inset-0 flex flex-col items-center justify-center p-6 pb-16 text-white text-center cursor-pointer"
+                                        className="absolute inset-x-0 bottom-0 flex flex-col items-center text-white text-center px-4 pb-12 pt-8 cursor-pointer bg-gradient-to-t from-black/70 via-black/30 to-transparent"
                                         onClick={() => setShowDesktopApplicationForm(true)}
                                       >
                                         <button 
                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                          className="text-sm text-white font-medium mb-2 hover:text-white transition-colors cursor-pointer line-clamp-1"
+                                          className="text-[11px] text-white font-medium mb-0.5 hover:text-white transition-colors cursor-pointer line-clamp-1"
                                         >
                                           {profile?.company_name || 'Företag'}
                                         </button>
                                         <TruncatedTitle 
                                           fullText={formData.title || 'Jobbtitel'} 
-                                          className="text-xl text-white font-bold leading-tight mb-2 line-clamp-3 cursor-default"
+                                          className="text-base text-white font-bold leading-snug mb-0.5 line-clamp-2 cursor-default"
                                         >
                                           {formData.title || 'Jobbtitel'}
                                         </TruncatedTitle>
-                                        <div className="text-sm text-white">
+                                        <div className="text-[11px] text-white/90">
                                           {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                         </div>
                                       </div>

@@ -4627,13 +4627,13 @@ const MobileJobWizard = ({
                                 
                                 {/* Content - clickable to show form */}
                                 <div 
-                                  className="absolute inset-0 flex flex-col items-center justify-center p-4 pb-16 text-white text-center cursor-pointer"
+                                  className="absolute inset-x-0 bottom-0 flex flex-col items-center text-white text-center px-4 pb-12 pt-8 cursor-pointer bg-gradient-to-t from-black/70 via-black/30 to-transparent"
                                   onClick={() => setShowDesktopApplicationForm(true)}
                                 >
-                                  {/* Company name at top */}
+                                  {/* Company name */}
                                   <button 
                                     onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                    className="text-sm text-white font-medium mb-1 hover:text-white transition-colors cursor-pointer line-clamp-1"
+                                    className="text-[11px] text-white font-medium mb-0.5 hover:text-white transition-colors cursor-pointer line-clamp-1"
                                   >
                                     {profile?.company_name || 'Företag'}
                                   </button>
@@ -4641,12 +4641,12 @@ const MobileJobWizard = ({
                                   {/* Job title */}
                                   <TruncatedText 
                                     text={formData.title || 'Jobbtitel'} 
-                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-3 w-full max-w-full cursor-pointer"
+                                    className="text-base font-bold text-white leading-snug mb-0.5 line-clamp-2 w-full max-w-full cursor-pointer"
                                     alwaysShowTooltip="desktop-only"
                                   />
                                   
-                                  {/* Meta line: employment type • location, county */}
-                                  <div className="text-sm text-white">
+                                  {/* Meta line */}
+                                  <div className="text-[11px] text-white/90">
                                     {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                   </div>
                                 </div>
