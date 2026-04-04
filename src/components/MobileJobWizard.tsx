@@ -4634,7 +4634,7 @@ const MobileJobWizard = ({
                                       <>
                                         <button 
                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                          className={`${textSizes.company} text-white font-medium mb-1 hover:text-white transition-colors cursor-pointer text-left line-clamp-1`}
+className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
                                         >
                                           {profile?.company_name || 'Företag'}
                                         </button>
