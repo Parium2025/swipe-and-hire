@@ -372,9 +372,18 @@ export function useSessionManager(
 }
 
 /**
- * Clear the session token from storage (call on full logout cleanup)
+ * Preserve the browser's session token across logouts/reloads by default.
+ *
+ * Why: this token identifies the physical browser/device for the concurrent
+ * session limiter. Rotating it on local logout/recovery makes the SAME device
+ * look like a brand-new device, which can create duplicate rows in
+ * `user_sessions` and falsely trigger the "another device" kick flow.
+ *
+ * Kept as a compatibility API because several auth flows still call it.
+ * Pass `true` only if we ever need a hard reset of the browser identity.
  */
-export function clearSessionToken(): void {
+export function clearSessionToken(force = false): void {
+  if (!force) return;
   try {
     localStorage.removeItem(SESSION_TOKEN_KEY);
   } catch {}
