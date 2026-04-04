@@ -206,6 +206,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   useEffect(() => {
     if (!open) {
       setDetail(null);
+      setQuestions([]);
       setLoading(false);
       return;
     }
@@ -213,30 +214,40 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     let cancelled = false;
 
     setDetail(null);
+    setQuestions([]);
     setLoading(true);
 
     void (async () => {
-      const { data } = await supabase
-        .from('job_postings')
-        .select(`
-          description, requirements, pitch, benefits, employment_type,
-          work_schedule, work_start_time, work_end_time,
-          work_location_type, remote_work_possible,
-          salary_min, salary_max, salary_type, salary_transparency,
-          positions_count, occupation,
-          workplace_name, workplace_city, workplace_county,
-          workplace_municipality, workplace_address, workplace_postal_code,
-          contact_email
-        `)
-        .eq('id', job.id)
-        .single();
+      const [jobRes, questionsRes] = await Promise.all([
+        supabase
+          .from('job_postings')
+          .select(`
+            description, requirements, pitch, benefits, employment_type,
+            work_schedule, work_start_time, work_end_time,
+            work_location_type, remote_work_possible,
+            salary_min, salary_max, salary_type, salary_transparency,
+            positions_count, occupation,
+            workplace_name, workplace_city, workplace_county,
+            workplace_municipality, workplace_address, workplace_postal_code,
+            contact_email, application_instructions
+          `)
+          .eq('id', job.id)
+          .single(),
+        supabase
+          .from('job_questions')
+          .select('*')
+          .eq('job_id', job.id)
+          .order('order_index'),
+      ]);
 
       if (cancelled) return;
-      setDetail(data ?? null);
+      setDetail(jobRes.data ?? null);
+      setQuestions((questionsRes.data as (JobQuestion & { id: string })[]) ?? []);
       setLoading(false);
     })().catch(() => {
       if (cancelled) return;
       setDetail(null);
+      setQuestions([]);
       setLoading(false);
     });
 
