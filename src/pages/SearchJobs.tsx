@@ -732,7 +732,7 @@ const SearchJobs = memo(() => {
         onSave={saveSearch}
       />
       {/* Swipe Mode Fullscreen Overlay */}
-      {isTouchCapable && swipeModeActive && (
+      {isTouchCapable && swipeModeActive && !isLoading && (
         <SwipeFullscreen
           jobs={swipeJobs}
           appliedJobIds={appliedJobIds}
