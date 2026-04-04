@@ -99,6 +99,15 @@ const hasRecentActivity = (windowMs = SESSION_SENTINEL_RECOVERY_WINDOW_MS): bool
   return diffMs >= 0 && diffMs <= windowMs;
 };
 
+const isLikelyVolatileSessionStorageEnv = (): boolean => {
+  try {
+    if (typeof navigator === 'undefined') return false;
+    return navigator.maxTouchPoints > 0 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+  } catch {
+    return false;
+  }
+};
+
 // Update last activity timestamp
 export const updateLastActivity = (): void => {
   try {
@@ -218,7 +227,7 @@ export class AuthStorageAdapter implements Storage {
           try { return !!localStorage.getItem(key); } catch { return false; }
         })();
         if (hasStoredAuth) {
-          if (hasRecentActivity()) {
+          if (hasRecentActivity() || isLikelyVolatileSessionStorageEnv()) {
             console.log('🔄 Session sentinel missing after recent activity — restoring tab session');
             refreshSessionSentinel();
           } else {
