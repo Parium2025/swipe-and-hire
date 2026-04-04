@@ -297,7 +297,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
       setJobTitle('');
       setTemplateMenuOpen(false);
       setTitleInputKey((k) => k + 1);
-      // Template selection alone is not "unsaved work" — user hasn't typed anything
+      // Update initial state so title onChange tracks from this point
+      initialStateRef.current = { title: '', templateId: null };
       setHasUnsavedChanges(false);
       // Force iOS refresh
       setTimeout(() => {
