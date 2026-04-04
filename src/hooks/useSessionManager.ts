@@ -171,6 +171,12 @@ export function useSessionManager(
         console.log('⚠️ Heartbeat: session expired — attempting re-registration…');
 
         try {
+          const tokenOk = await ensureFreshToken();
+          if (!tokenOk) {
+            console.log('⏳ Heartbeat: auth token not ready — will retry next cycle');
+            return;
+          }
+
           const { data, error } = await supabase.rpc('reregister_session', {
             p_session_token: token,
             p_device_label: getDeviceLabel(),
@@ -179,7 +185,19 @@ export function useSessionManager(
 
           const result = data as Record<string, unknown> | null;
 
-          if (error || result?.status === 'rejected') {
+          if (error) {
+            // Auth errors (expired token, not authenticated) → NOT a kick, retry later
+            const isAuthError = error.message?.includes('Not authenticated') || error.code === 'PGRST301';
+            if (isAuthError) {
+              console.log('⏳ Heartbeat: auth error during re-registration — will retry');
+              return;
+            }
+            console.log('🚫 Heartbeat: genuinely kicked — cannot re-register');
+            onKicked();
+            return;
+          }
+
+          if (result?.status === 'rejected') {
             console.log('🚫 Heartbeat: genuinely kicked — cannot re-register');
             onKicked();
             return;
