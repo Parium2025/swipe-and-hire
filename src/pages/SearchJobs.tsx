@@ -731,6 +731,10 @@ const SearchJobs = memo(() => {
         }}
         onSave={saveSearch}
       />
+      {/* Swipe Mode Loading Overlay */}
+      {isTouchCapable && swipeModeActive && isLoading && (
+        <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--primary)/0.8)]" />
+      )}
       {/* Swipe Mode Fullscreen Overlay */}
       {isTouchCapable && swipeModeActive && !isLoading && (
         <SwipeFullscreen
