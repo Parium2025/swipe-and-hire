@@ -35,7 +35,7 @@ export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onMod
       <div className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
         {/* Sliding background */}
         <motion.div
-          className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] will-change-transform"
+          className="absolute top-1 bottom-1 bg-white/20 rounded-[7px] will-change-transform"
           style={{ width: indicatorStyle.width, left: 0 }}
           initial={false}
           animate={{ x: indicatorStyle.x }}
