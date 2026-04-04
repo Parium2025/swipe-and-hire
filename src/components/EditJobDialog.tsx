@@ -3186,9 +3186,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           {/* Desktop monitor frame */}
                            <div className="relative">
                             {/* Monitor screen */}
-                            <div className="relative w-[700px] max-w-[90vw] rounded-t-xl bg-black p-3 shadow-2xl">
+                            <div className="relative w-full max-w-[380px] mx-auto rounded-t-xl bg-black p-2 shadow-2xl">
                               {/* Screen bezel */}
-                              <div className="relative w-full h-[420px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                              <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                                 {/* Content with Parium background */}
                                 <div 
                                   className="absolute inset-0"
