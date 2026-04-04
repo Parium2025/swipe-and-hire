@@ -3184,9 +3184,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       {previewMode === 'desktop' && (
                         <div className="flex flex-col items-center space-y-4">
                           {/* Desktop monitor frame */}
-                           <div className="relative">
+                           <div className="relative w-full max-w-[380px] mx-auto">
                             {/* Monitor screen */}
-                            <div className="relative w-full max-w-[380px] mx-auto rounded-t-xl bg-black p-2 shadow-2xl">
+                            <div className="relative w-full rounded-t-xl bg-black p-2 shadow-2xl">
                               {/* Screen bezel */}
                               <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                                 {/* Content with Parium background */}
