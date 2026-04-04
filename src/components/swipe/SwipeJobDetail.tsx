@@ -476,6 +476,59 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                       </div>
                     </div>
                   )}
+
+                  {/* 4. Pitch */}
+                  {detail.pitch && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-section-title mb-3">Varför jobba hos oss?</h3>
+                      <p className="text-body whitespace-pre-wrap">{detail.pitch}</p>
+                    </div>
+                  )}
+
+                  {/* 5. Krav */}
+                  {detail.requirements && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-section-title mb-3">Krav & kvalifikationer</h3>
+                      <p className="text-body whitespace-pre-wrap">{detail.requirements}</p>
+                    </div>
+                  )}
+
+                  {/* 6. Ansökningsfrågor */}
+                  {questions.length > 0 && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-section-title mb-3">Ansökningsfrågor</h3>
+                      <p className="text-white/60 text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
+                      <div className="space-y-2.5">
+                        {questions.map((q, i) => (
+                          <div key={q.id} className="flex items-start gap-2">
+                            <span className="text-white/50 text-sm font-medium shrink-0">{i + 1}.</span>
+                            <div className="min-w-0">
+                              <p className="text-white text-sm font-medium break-words">{q.question_text}</p>
+                              {q.is_required && (
+                                <span className="text-white/40 text-xs">Obligatorisk</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 7. Ansökningsinstruktioner */}
+                  {detail.application_instructions && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-section-title mb-3">Ansökningsinstruktioner</h3>
+                      <p className="text-body whitespace-pre-wrap">{detail.application_instructions}</p>
+                    </div>
+                  )}
+
+                  {/* 8. Kontakt */}
+                  {detail.contact_email && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-section-title mb-3">Kontakt</h3>
+                      <p className="text-white text-sm break-all">{detail.contact_email}</p>
+                    </div>
+                  )}
                 </>
               ) : null}
             </div>
