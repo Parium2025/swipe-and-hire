@@ -308,10 +308,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                 <>
                   {/* 1. Om tjänsten (Description) */}
                   {detail.description && (
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-section-title mb-3">Om tjänsten</h3>
-                      <p className="text-body whitespace-pre-wrap">{detail.description}</p>
-                    </div>
+                    <DescriptionSection text={detail.description} />
                   )}
 
                   {/* 2. Detaljer om tjänsten */}
