@@ -305,18 +305,18 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
               <X className="h-3.5 w-3.5 text-white" />
             </button>
 
-            {/* Title header */}
+            {/* Title header — company first, then title (matching swipe card layout) */}
             <div className="px-5 pb-3 shrink-0">
-              <h2 className="text-xl font-bold text-white leading-tight tracking-tight">{job.title}</h2>
-              <div className="flex items-center gap-2 mt-1 text-white/70 text-sm">
-                <span>{job.company_name}</span>
+              <div className="flex items-center gap-2 mt-1 text-white text-sm">
+                <span className="font-medium">{job.company_name}</span>
                 {job.location && (
                   <>
-                    <span className="text-white/30">·</span>
+                    <span className="text-white/50">·</span>
                     <span>{job.location}</span>
                   </>
                 )}
               </div>
+              <h2 className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5">{job.title}</h2>
             </div>
 
             {/* Content */}
