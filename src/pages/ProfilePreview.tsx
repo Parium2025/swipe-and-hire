@@ -694,7 +694,7 @@ export default function ProfilePreview() {
         </div>
 
         {/* Innehållssektioner i grid */}
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-2 gap-3">
           {/* Personlig information */}
           <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader className="pb-1.5 pt-2">
