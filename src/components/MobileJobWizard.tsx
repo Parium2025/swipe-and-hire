@@ -4622,8 +4622,6 @@ const MobileJobWizard = ({
                                   />
                                 ) : null}
                                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                                {/* Hover overlay — dark blue tint on desktop hover */}
-                                <div className="pointer-events-none absolute inset-0 bg-blue-900/0 [@media(hover:hover)]:group-hover/card:bg-blue-900/30 transition-colors duration-200 z-[1]" />
                                 
                                 {/* Content - clickable to show form */}
                                 <div 
@@ -4636,7 +4634,7 @@ const MobileJobWizard = ({
                                       <>
                                         <button 
                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                          className={`${textSizes.company} text-white font-medium mb-1 hover:text-white transition-colors cursor-pointer text-left line-clamp-1`}
+className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
                                         >
                                           {profile?.company_name || 'Företag'}
                                         </button>
