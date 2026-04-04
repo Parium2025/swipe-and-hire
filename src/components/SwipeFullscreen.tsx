@@ -48,6 +48,8 @@ const SNAP_REVEAL_OFFSET = 40;
 export const SwipeFullscreen = memo(function SwipeFullscreen({
   jobs,
   appliedJobIds,
+  savedJobIds,
+  onToggleSave,
   onClose,
   filterState,
 }: SwipeFullscreenProps) {
