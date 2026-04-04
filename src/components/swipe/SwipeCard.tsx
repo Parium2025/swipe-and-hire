@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { motion, useMotionValue, useTransform, animate, PanInfo } from 'framer-motion';
-import { Building2, MapPin, CheckCircle } from 'lucide-react';
+import { Building2, CheckCircle } from 'lucide-react';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SwipeJob {
