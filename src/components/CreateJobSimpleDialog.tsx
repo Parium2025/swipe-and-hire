@@ -501,8 +501,12 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                   ref={titleRef as any}
                   value={jobTitle}
                   onChange={(e) => {
-                    setJobTitle(e.target.value);
-                    setHasUnsavedChanges(true);
+                    const newTitle = e.target.value;
+                    setJobTitle(newTitle);
+                    // Only mark as unsaved if user changed from initial auto-populated state
+                    const titleChanged = newTitle !== initialStateRef.current.title;
+                    const templateChanged = (selectedTemplate?.id ?? null) !== initialStateRef.current.templateId;
+                    setHasUnsavedChanges(titleChanged || templateChanged);
                   }}
                   placeholder="Namnge jobbet"
                   className="bg-white/5 border-white/20 hover:border-white/30 focus:border-white/40 text-white placeholder:text-white transition-colors duration-150 text-base h-12 !min-h-0 font-normal outline-none ring-0 focus:ring-0 focus:outline-none"
