@@ -4128,9 +4128,9 @@ const MobileJobWizard = ({
                     {/* Desktop monitor frame - professional mockup */}
                     <div className="relative">
                       {/* Monitor screen */}
-                      <div className="relative w-[520px] max-w-[90vw] rounded-t-lg bg-black p-2.5 shadow-2xl">
-                        {/* Screen bezel - 16:10 realistisk modern monitorratio */}
-                        <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                      <div className="relative w-[700px] max-w-[90vw] rounded-t-xl bg-black p-3 shadow-2xl">
+                        {/* Screen bezel */}
+                        <div className="relative w-full h-[420px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                           {/* Innehåll med Parium bakgrund */}
                           <div 
                             className="absolute inset-0"
@@ -4681,9 +4681,9 @@ const MobileJobWizard = ({
                       {/* Monitor stand */}
                       <div className="flex flex-col items-center">
                         {/* Stand neck */}
-                        <div className="w-12 h-6 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-sm"></div>
+                        <div className="w-16 h-8 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-sm"></div>
                         {/* Stand base */}
-                        <div className="w-32 h-2.5 bg-gradient-to-b from-gray-800 to-gray-900 rounded-full shadow-lg"></div>
+                        <div className="w-40 h-3 bg-gradient-to-b from-gray-800 to-gray-900 rounded-full shadow-lg"></div>
                       </div>
                     </div>
                   </div>
