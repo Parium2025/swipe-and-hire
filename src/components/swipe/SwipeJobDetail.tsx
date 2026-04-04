@@ -81,6 +81,7 @@ const DISMISS_THRESHOLD = 100;
 export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: SwipeJobDetailProps) {
   const { user } = useAuth();
   const [detail, setDetail] = useState<FullJobData | null>(null);
+  const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
   const [loading, setLoading] = useState(false);
   const viewRecorded = useRef<string | null>(null);
   const openedAtRef = useRef(0);
