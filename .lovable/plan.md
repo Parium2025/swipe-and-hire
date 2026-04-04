@@ -1,30 +1,35 @@
-## Swipe Mode Filter — Fristående söktunnel
 
-### Arkitektur
-Swipe mode använder redan de filtrerade jobben från SearchJobs. Vi behöver:
+## Problem
+Swipe-kortens innehåll (JobSlide) visar för mycket text utan trunkering, vilket skapar en rörig upplevelse. Målet är att matcha den rena designen i förhandsvisningen (bild 2).
 
-1. **Ny komponent: `SwipeFilterSheet.tsx`** — en bottom sheet med sökfält, plats, yrkesområde, anställningstyp och sortering. Stilmässigt anpassad till swipe mode (mörk, glasmorfism, samma premium-känsla).
+## Design — "Premium TikTok-kort"
+Varje kort ska visa:
+1. **Bakgrundsbild** (eller gradient-fallback) — som idag
+2. **Bottensektion** med gradient-overlay:
+   - Företagsnamn (vit, medium, en rad)
+   - Jobbtitel (vit, bold, max 2 rader med `line-clamp-2`)
+   - Anställningsform • Plats (en rad, truncated)
+3. **Swipe-hints** längst ner ("← Skippa · Dubbeltryck för mer · Gilla →")
+4. **LIKE/NOPE-stämplar** vid drag — som idag
 
-2. **Uppdatera `SwipeFullscreen.tsx`** — lägg till en filter-ikon uppe till vänster (bredvid jobbräknaren). Klick öppnar SwipeFilterSheet. Visa en aktiv-filter-badge om filter är satta.
+### Vad som tas bort från kortet:
+- All beskrivningstext — den visas bara i detaljvyn (SwipeJobDetail) vid dubbeltryck
 
-3. **Uppdatera `SearchJobs.tsx`** — skicka ner filterstaten (searchInput, selectedCity, selectedCategory, selectedEmploymentTypes, sortBy) och deras setters till SwipeFullscreen.
+### SwipeJobDetail (detaljvyn vid dubbeltryck):
+- Behåller all info (beskrivning, krav, förmåner etc.)
+- **Trunkerar** beskrivningen till max 6 rader med "Visa mer"-knapp
+- Bättre visuell hierarki
 
-### SwipeFilterSheet innehåll
-- Sökfält (jobbtitel/företag)
-- Plats (LocationSearchInput)
-- Yrkesområde (dropdown)
-- Anställningstyp (dropdown)
-- Sortering (dropdown)
-- "Rensa filter" + "Visa X jobb" knapp
+### Synk med förhandsvisning:
+- Kortets layout matchar exakt vad arbetsgivaren ser i mobilförhandsvisningen (MobileJobWizard)
+- Samma typografi-storlekar och trunkering
 
-### UX
-- Filter-ikon i headern bredvid "1/N"
-- Öppnas som smooth bottom sheet (samma animation som SwipeJobDetail)
-- Aktiv badge på ikonen om filter är aktiva
-- Jobb-listan uppdateras live när filter ändras
-- Stängs via drag-ner, X eller "Visa jobb"-knapp
+## Filer att ändra
+1. `src/components/swipe/JobSlide.tsx` — Rensa bottensektionen, säkerställ trunkering
+2. `src/components/swipe/SwipeJobDetail.tsx` — Trunkera description med "Visa mer"
+3. `src/components/swipe/SwipeCard.tsx` — Synka samma bottenlayout (om den fortfarande används)
 
-### Filer som ändras
-- `src/components/swipe/SwipeFilterSheet.tsx` (NY)
-- `src/components/SwipeFullscreen.tsx` (lägg till filter-knapp + state)
-- `src/pages/SearchJobs.tsx` (skicka ner filter-props)
+## Inte ändra
+- Swipe-mekanik (touch, drag, snap)
+- Filter, header, dots
+- Backend/data
