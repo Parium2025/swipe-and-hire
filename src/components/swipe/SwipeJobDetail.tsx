@@ -17,6 +17,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { SwipeJob } from './SwipeCard';
+import type { JobQuestion } from '@/types/jobWizard';
 
 interface FullJobData {
   description?: string;
