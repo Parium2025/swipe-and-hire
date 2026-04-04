@@ -3666,35 +3666,43 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           decoding="async"
                                         />
                                       ) : null}
+                                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                                       <div 
-                                        className="absolute inset-x-0 bottom-0 flex flex-col items-center text-white text-center px-4 pb-12 pt-8 cursor-pointer bg-gradient-to-t from-black/70 via-black/30 to-transparent"
+                                        className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain"
                                         onClick={() => setShowDesktopApplicationForm(true)}
                                       >
-                                        <button 
-                                          onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                          className="text-[11px] text-white font-medium mb-0.5 hover:text-white transition-colors cursor-pointer line-clamp-1"
-                                        >
-                                          {profile?.company_name || 'Företag'}
-                                        </button>
-                                        <TruncatedTitle 
-                                          fullText={formData.title || 'Jobbtitel'} 
-                                          className="text-base text-white font-bold leading-snug mb-0.5 line-clamp-2 cursor-default"
-                                        >
-                                          {formData.title || 'Jobbtitel'}
-                                        </TruncatedTitle>
-                                        <div className="text-[11px] text-white/90">
-                                          {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
-                                        </div>
+                                        {(() => {
+                                          const textSizes = getSmartTextSizes();
+                                          return (
+                                            <>
+                                              <button 
+                                                onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
+                                                className={`${textSizes.company} text-white font-medium mb-1 hover:text-white transition-colors cursor-pointer text-left line-clamp-1`}
+                                              >
+                                                {profile?.company_name || 'Företag'}
+                                              </button>
+                                              <TruncatedTitle 
+                                                fullText={formData.title || 'Jobbtitel'} 
+                                                className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-2 cursor-default w-full max-w-full`}
+                                              >
+                                                {formData.title || 'Jobbtitel'}
+                                              </TruncatedTitle>
+                                              <div className={`${textSizes.meta} text-white`}>
+                                                {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
+                                              </div>
+                                            </>
+                                          );
+                                        })()}
                                       </div>
-                                      <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
+                                      <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
                                         <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
-                                          <X className="h-4 w-4 text-white" />
+                                          <X className="h-3.5 w-3.5 text-white" />
                                         </button>
                                         <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
-                                          <Bookmark className="h-4 w-4 text-white" />
+                                          <Bookmark className="h-3.5 w-3.5 text-white" />
                                         </button>
                                         <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
-                                          <Heart className="h-4 w-4 text-white fill-white" />
+                                          <Heart className="h-3.5 w-3.5 text-white fill-white" />
                                         </button>
                                       </div>
                                     </div>
