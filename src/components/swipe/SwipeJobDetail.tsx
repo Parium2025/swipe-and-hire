@@ -274,7 +274,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
 
           {/* Sheet */}
           <motion.div
-            className="absolute inset-x-0 bottom-0 z-40 max-h-[88vh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
+            className="absolute inset-x-0 bottom-0 z-40 max-h-[88dvh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
             initial={{ y: '100%' }}
             animate={sheetControls}
             exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
@@ -302,20 +302,6 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
               <X className="h-3.5 w-3.5 text-white" />
             </button>
 
-            {/* Title header — company first, then title (matching swipe card layout) */}
-            <div className="px-5 pb-3 shrink-0">
-              <div className="flex items-center gap-2 mt-1 text-white text-sm">
-                <span className="font-medium">{job.company_name}</span>
-                {job.location && (
-                  <>
-                    <span className="text-white/50">·</span>
-                    <span>{job.location}</span>
-                  </>
-                )}
-              </div>
-              <h2 className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5">{job.title}</h2>
-            </div>
-
             {/* Content */}
             <div
               ref={scrollRef}
@@ -326,6 +312,19 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
               onTouchEnd={handleTouchEnd}
               onTouchCancel={handleTouchEnd}
             >
+              <div className="px-1 pr-12 pb-1">
+                <div className="flex items-center gap-2 mt-1 text-white text-sm">
+                  <span className="font-medium">{job.company_name}</span>
+                  {job.location && (
+                    <>
+                      <span className="text-white/50">·</span>
+                      <span>{job.location}</span>
+                    </>
+                  )}
+                </div>
+                <h2 className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 break-words">{job.title}</h2>
+              </div>
+
               {loading ? (
                 <div className="space-y-3">
                   <div className="bg-white/10 rounded-lg p-4 space-y-3">
