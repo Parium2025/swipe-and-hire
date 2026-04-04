@@ -7,15 +7,11 @@ interface SwipeDotsProps {
   onScrubTo?: (index: number) => void;
 }
 
-/**
- * Max dots rendered in the condensed "window" view.
- * When count > MAX_VISIBLE, we show a sliding window of dots
- * centred on the current index with scaled-down edge dots.
- */
 const MAX_VISIBLE = 9;
-
-/** How many dots to show at each edge that shrink in size */
 const EDGE_FADE = 2;
+const LONG_PRESS_MS = 280;
+/** Max finger movement (px) allowed during long-press before cancelling */
+const LONG_PRESS_MOVE_TOLERANCE = 12;
 
 export const SwipeDots = memo(function SwipeDots({
   count,
@@ -28,15 +24,16 @@ export const SwipeDots = memo(function SwipeDots({
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubIndex, setScrubIndex] = useState(currentIndex);
   const isScrubbingRef = useRef(false);
+  const scrubIndexRef = useRef(currentIndex);
+  const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
 
-  // Keep scrubIndex in sync when not scrubbing
   useEffect(() => {
     if (!isScrubbingRef.current) {
       setScrubIndex(currentIndex);
+      scrubIndexRef.current = currentIndex;
     }
   }, [currentIndex]);
 
-  // Calculate visible dot window
   const useWindow = count > MAX_VISIBLE;
   let windowStart = 0;
   let windowEnd = count;
@@ -53,24 +50,20 @@ export const SwipeDots = memo(function SwipeDots({
 
   const visibleCount = windowEnd - windowStart;
 
-  // Get dot scale based on position in window (edge dots shrink)
   const getDotScale = (windowIdx: number): number => {
     if (!useWindow) return 1;
     const distFromStart = windowIdx;
     const distFromEnd = visibleCount - 1 - windowIdx;
     const distFromEdge = Math.min(distFromStart, distFromEnd);
     if (distFromEdge >= EDGE_FADE) return 1;
-    // Scale: 0.4 → 0.7 → 1.0
     return 0.4 + (distFromEdge / EDGE_FADE) * 0.6;
   };
 
-  // --- Scrubber touch logic ---
   const indexFromTouchY = useCallback(
     (clientY: number): number => {
       const track = trackRef.current;
       if (!track) return currentIndex;
       const rect = track.getBoundingClientRect();
-      // Map touch Y to 0..1 across the full track height
       const ratio = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
       return Math.min(count - 1, Math.max(0, Math.round(ratio * (count - 1))));
     },
@@ -80,7 +73,6 @@ export const SwipeDots = memo(function SwipeDots({
   const startScrub = useCallback(() => {
     setIsScrubbing(true);
     isScrubbingRef.current = true;
-    // Haptic feedback if available
     if (navigator.vibrate) navigator.vibrate(15);
   }, []);
 
@@ -89,6 +81,7 @@ export const SwipeDots = memo(function SwipeDots({
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
     }
+    touchStartPosRef.current = null;
     if (isScrubbingRef.current) {
       setIsScrubbing(false);
       isScrubbingRef.current = false;
@@ -99,27 +92,32 @@ export const SwipeDots = memo(function SwipeDots({
     (e: React.TouchEvent) => {
       if (count <= 1) return;
       const touch = e.touches[0];
-      const startY = touch.clientY;
+      touchStartPosRef.current = { x: touch.clientX, y: touch.clientY };
 
-      // Long-press to activate scrubber (280ms)
       longPressTimerRef.current = setTimeout(() => {
         startScrub();
-        const idx = indexFromTouchY(startY);
+        const idx = indexFromTouchY(touch.clientY);
         setScrubIndex(idx);
+        scrubIndexRef.current = idx;
         onScrubTo?.(idx);
-      }, 280);
+      }, LONG_PRESS_MS);
     },
     [count, startScrub, indexFromTouchY, onScrubTo],
   );
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
-      // If we haven't activated scrubbing yet, cancel the long-press timer
-      // if finger moved more than a small threshold (prevents accidental activation during scroll)
+      const touch = e.touches[0];
+
+      // Before scrubbing is active: only cancel long-press if finger moved too far
       if (!isScrubbingRef.current) {
-        if (longPressTimerRef.current) {
-          clearTimeout(longPressTimerRef.current);
-          longPressTimerRef.current = null;
+        if (longPressTimerRef.current && touchStartPosRef.current) {
+          const dx = touch.clientX - touchStartPosRef.current.x;
+          const dy = touch.clientY - touchStartPosRef.current.y;
+          if (Math.sqrt(dx * dx + dy * dy) > LONG_PRESS_MOVE_TOLERANCE) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+          }
         }
         return;
       }
@@ -127,23 +125,22 @@ export const SwipeDots = memo(function SwipeDots({
       e.preventDefault();
       e.stopPropagation();
 
-      const touch = e.touches[0];
       const idx = indexFromTouchY(touch.clientY);
-      if (idx !== scrubIndex) {
+      // Use ref to avoid stale closure — this was causing the "lock" bug
+      if (idx !== scrubIndexRef.current) {
+        scrubIndexRef.current = idx;
         setScrubIndex(idx);
         onScrubTo?.(idx);
-        // Light haptic tick
         if (navigator.vibrate) navigator.vibrate(5);
       }
     },
-    [indexFromTouchY, onScrubTo, scrubIndex],
+    [indexFromTouchY, onScrubTo],
   );
 
   const handleTouchEnd = useCallback(() => {
     stopScrub();
   }, [stopScrub]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
@@ -168,7 +165,6 @@ export const SwipeDots = memo(function SwipeDots({
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
     >
-      {/* Scrub tooltip showing current position */}
       {isScrubbing && (
         <div className="absolute right-14 top-1/2 -translate-y-1/2 bg-[hsl(215,60%,35%)]/80 backdrop-blur-md border border-white/20 text-white text-sm font-bold px-3 py-1.5 rounded-xl shadow-lg shadow-black/30 whitespace-nowrap pointer-events-none">
           {scrubIndex + 1} / {count}
@@ -176,18 +172,12 @@ export const SwipeDots = memo(function SwipeDots({
       )}
 
       {isScrubbing ? (
-        /* ── Expanded scrubber: full-height track with proportional markers ── */
         <div className="relative w-full flex-1 min-h-0" style={{ height: '60dvh' }}>
-          {/* Track line */}
           <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-white/20 rounded-full" />
-          
-          {/* Progress fill */}
           <div
             className="absolute left-1/2 -translate-x-1/2 top-0 w-0.5 bg-white/70 rounded-full transition-all duration-75"
             style={{ height: `${(scrubIndex / Math.max(1, count - 1)) * 100}%` }}
           />
-          
-          {/* Active position indicator */}
           <div
             className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white shadow-lg shadow-white/30 transition-all duration-75"
             style={{
@@ -195,8 +185,6 @@ export const SwipeDots = memo(function SwipeDots({
               transform: 'translate(-50%, -50%)',
             }}
           />
-
-          {/* Tick marks at intervals */}
           {Array.from({ length: Math.min(20, count) }).map((_, i) => {
             const position = count <= 20 ? i : Math.round((i / 19) * (count - 1));
             const topPercent = (position / Math.max(1, count - 1)) * 100;
@@ -210,17 +198,14 @@ export const SwipeDots = memo(function SwipeDots({
           })}
         </div>
       ) : (
-        /* ── Collapsed dots: windowed view ── */
         <>
           {useWindow && windowStart > 0 && (
             <div className="w-1 h-1 rounded-full bg-white/15" />
           )}
-          
           {Array.from({ length: visibleCount }).map((_, windowIdx) => {
             const realIdx = windowStart + windowIdx;
             const isActive = realIdx === activeIdx && !isEndStateActive;
             const scale = getDotScale(windowIdx);
-
             return (
               <div
                 key={realIdx}
@@ -234,7 +219,6 @@ export const SwipeDots = memo(function SwipeDots({
               />
             );
           })}
-          
           {useWindow && windowEnd < count && (
             <div className="w-1 h-1 rounded-full bg-white/15" />
           )}
