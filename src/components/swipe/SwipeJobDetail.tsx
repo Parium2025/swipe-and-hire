@@ -349,7 +349,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
 
                   {/* 2. Detaljer om tjänsten */}
                   <div className="bg-white/10 rounded-lg p-4">
-                    <h3 className="text-section-title mb-3">Detaljer om tjänsten</h3>
+                    <h3 className="text-white font-semibold text-base mb-3">Detaljer om tjänsten</h3>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
                       {detail.employment_type && (
                         <div className="text-white text-sm">
