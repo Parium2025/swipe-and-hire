@@ -17,6 +17,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { SwipeJob } from './SwipeCard';
+import type { JobQuestion } from '@/types/jobWizard';
 
 interface FullJobData {
   description?: string;
@@ -42,6 +43,7 @@ interface FullJobData {
   workplace_address?: string;
   workplace_postal_code?: string;
   contact_email?: string;
+  application_instructions?: string;
 }
 
 interface SwipeJobDetailProps {
@@ -79,6 +81,7 @@ const DISMISS_THRESHOLD = 100;
 export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: SwipeJobDetailProps) {
   const { user } = useAuth();
   const [detail, setDetail] = useState<FullJobData | null>(null);
+  const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
   const [loading, setLoading] = useState(false);
   const viewRecorded = useRef<string | null>(null);
   const openedAtRef = useRef(0);
@@ -203,6 +206,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   useEffect(() => {
     if (!open) {
       setDetail(null);
+      setQuestions([]);
       setLoading(false);
       return;
     }
@@ -210,30 +214,40 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     let cancelled = false;
 
     setDetail(null);
+    setQuestions([]);
     setLoading(true);
 
     void (async () => {
-      const { data } = await supabase
-        .from('job_postings')
-        .select(`
-          description, requirements, pitch, benefits, employment_type,
-          work_schedule, work_start_time, work_end_time,
-          work_location_type, remote_work_possible,
-          salary_min, salary_max, salary_type, salary_transparency,
-          positions_count, occupation,
-          workplace_name, workplace_city, workplace_county,
-          workplace_municipality, workplace_address, workplace_postal_code,
-          contact_email
-        `)
-        .eq('id', job.id)
-        .single();
+      const [jobRes, questionsRes] = await Promise.all([
+        supabase
+          .from('job_postings')
+          .select(`
+            description, requirements, pitch, benefits, employment_type,
+            work_schedule, work_start_time, work_end_time,
+            work_location_type, remote_work_possible,
+            salary_min, salary_max, salary_type, salary_transparency,
+            positions_count, occupation,
+            workplace_name, workplace_city, workplace_county,
+            workplace_municipality, workplace_address, workplace_postal_code,
+            contact_email, application_instructions
+          `)
+          .eq('id', job.id)
+          .single(),
+        supabase
+          .from('job_questions')
+          .select('*')
+          .eq('job_id', job.id)
+          .order('order_index'),
+      ]);
 
       if (cancelled) return;
-      setDetail(data ?? null);
+      setDetail(jobRes.data ?? null);
+      setQuestions((questionsRes.data as (JobQuestion & { id: string })[]) ?? []);
       setLoading(false);
     })().catch(() => {
       if (cancelled) return;
       setDetail(null);
+      setQuestions([]);
       setLoading(false);
     });
 
@@ -460,6 +474,59 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                           </Badge>
                         ))}
                       </div>
+                    </div>
+                  )}
+
+                  {/* 4. Pitch */}
+                  {detail.pitch && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-section-title mb-3">Varför jobba hos oss?</h3>
+                      <p className="text-body whitespace-pre-wrap">{detail.pitch}</p>
+                    </div>
+                  )}
+
+                  {/* 5. Krav */}
+                  {detail.requirements && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-section-title mb-3">Krav & kvalifikationer</h3>
+                      <p className="text-body whitespace-pre-wrap">{detail.requirements}</p>
+                    </div>
+                  )}
+
+                  {/* 6. Ansökningsfrågor */}
+                  {questions.length > 0 && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-section-title mb-3">Ansökningsfrågor</h3>
+                      <p className="text-white/60 text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
+                      <div className="space-y-2.5">
+                        {questions.map((q, i) => (
+                          <div key={q.id} className="flex items-start gap-2">
+                            <span className="text-white/50 text-sm font-medium shrink-0">{i + 1}.</span>
+                            <div className="min-w-0">
+                              <p className="text-white text-sm font-medium break-words">{q.question_text}</p>
+                              {q.is_required && (
+                                <span className="text-white/40 text-xs">Obligatorisk</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 7. Ansökningsinstruktioner */}
+                  {detail.application_instructions && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-section-title mb-3">Ansökningsinstruktioner</h3>
+                      <p className="text-body whitespace-pre-wrap">{detail.application_instructions}</p>
+                    </div>
+                  )}
+
+                  {/* 8. Kontakt */}
+                  {detail.contact_email && (
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-section-title mb-3">Kontakt</h3>
+                      <p className="text-white text-sm break-all">{detail.contact_email}</p>
                     </div>
                   )}
                 </>
