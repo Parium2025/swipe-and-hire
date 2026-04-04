@@ -642,15 +642,15 @@ export default function ProfilePreview() {
     };
     
       return (
-        <div className="max-w-full mx-auto space-y-3">
+        <div className="max-w-full mx-auto space-y-4">
         {/* Större rund profilbild/video med namn - direkt på bakgrunden */}
-        <div className="mb-3">
-          <div className="relative p-3">
+        <div className="mb-4">
+          <div className="relative p-4">
             {/* Större rund profilbild eller video för desktop */}
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-3">
                {/* Använd ProfileVideo om video finns, annars Avatar */}
                {effectiveVideoUrl ? (
-                 <div className="relative h-[200px] w-[200px]">
+                 <div className="relative h-[140px] w-[140px]">
                    <ProfileVideo
                      videoUrl={effectiveVideoUrl}
                      coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
@@ -662,9 +662,9 @@ export default function ProfilePreview() {
                    />
                  </div>
                ) : (
-                 <Avatar className="h-[200px] w-[200px] ring-2 ring-white/20 shadow-xl">
+                 <Avatar className="h-[140px] w-[140px] ring-2 ring-white/20 shadow-xl">
                    <AvatarImage src={profileImageUrl || signedCoverUrl || ''} className="object-cover" />
-                   <AvatarFallback className="bg-primary text-white text-5xl" delayMs={200}>
+                   <AvatarFallback className="bg-primary text-white text-4xl" delayMs={200}>
                      {consentedData?.first_name?.[0]}
                    </AvatarFallback>
                  </Avatar>
@@ -672,14 +672,14 @@ export default function ProfilePreview() {
                
                {/* Status text under bild/video */}
                {(effectiveVideoUrl || profileImageUrl) && (
-                 <p className="text-[10px] font-medium text-white">
-                   {effectiveVideoUrl ? 'Video tillgängligt' : 'Enbart profilbild vald'}
+                 <p className="text-xs font-medium text-white">
+                   {effectiveVideoUrl ? 'Video' : 'Profilbild'}
                  </p>
                )}
               
               {/* Namn och ålder */}
               <div className="text-center">
-                <h2 className="text-lg font-bold text-white drop-shadow-lg">
+                <h2 className="text-xl font-bold text-white drop-shadow-lg">
                   {consentedData?.first_name} {consentedData?.last_name}
                 </h2>
                 {consentedData?.age && (
