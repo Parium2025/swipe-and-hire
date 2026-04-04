@@ -282,9 +282,6 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             style={isAnimatingIn ? undefined : { y: dragY }}
             onPointerDown={stopSheetPropagation}
             onClick={stopSheetPropagation}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchEnd}
           >
             {/* Drag handle — always draggable */}
             <div
@@ -322,9 +319,12 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             {/* Content */}
             <div
               ref={scrollRef}
-              className="flex-1 overflow-y-auto px-4 pb-6 space-y-3"
-              style={{ WebkitOverflowScrolling: 'touch' }}
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 space-y-3 touch-pan-y"
+              style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
               onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
             >
               {loading ? (
                 <div className="space-y-3">
