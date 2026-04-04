@@ -93,11 +93,39 @@ export function useSessionManager(
   const lastRegisteredAtRef = useRef<number>(0); // Track when we last registered (ms)
   const consecutiveNetworkFailsRef = useRef(0); // Track network failures to avoid false kicks
 
+  // Ensure auth token is fresh (critical after laptop sleep / app background)
+  const ensureFreshToken = useCallback(async (): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error || !data.session) {
+        console.warn('⚠️ Auth session unavailable — skipping session management');
+        return false;
+      }
+      // If the token expires within 60s, force a refresh
+      const expiresAt = data.session.expires_at ?? 0;
+      if (expiresAt - Math.floor(Date.now() / 1000) < 60) {
+        console.log('🔄 Token expiring soon — refreshing before session RPC');
+        const { error: refreshErr } = await supabase.auth.refreshSession();
+        if (refreshErr) {
+          console.warn('Token refresh failed:', refreshErr.message);
+          return false;
+        }
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   // Register session when user logs in (or when returning from background)
   const registerSession = useCallback(async (force = false) => {
     if (!userId || isPreviewEnv) return;
     // Skip if already registered, unless forced (e.g. on mobile foreground)
     if (registeredRef.current && !force) return;
+
+    // Ensure auth token is valid before making RPC call
+    const tokenOk = await ensureFreshToken();
+    if (!tokenOk) return;
 
     const token = getOrCreateSessionToken();
     sessionTokenRef.current = token;
@@ -125,7 +153,7 @@ export function useSessionManager(
     } catch (err) {
       console.warn('Session registration error:', err);
     }
-  }, [userId, isPreviewEnv]);
+  }, [userId, isPreviewEnv, ensureFreshToken]);
 
   // Heartbeat to keep session alive
   // If heartbeat returns false (session expired after offline), try to re-register.
