@@ -16,11 +16,13 @@ function resolveImageUrl(url?: string): string | null {
 interface JobSlideProps {
   job: SwipeJob;
   applied: boolean;
+  saved: boolean;
   isVisible: boolean;
   isLast: boolean;
   sectionHeight?: string;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
+  onSave: () => void;
   onTap: () => void;
 }
 
