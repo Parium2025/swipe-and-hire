@@ -4625,7 +4625,14 @@ const MobileJobWizard = ({
                                 
                                 {/* Content - clickable to show form */}
                                 <div 
-                                  className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain"
+                                  className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain group/card"
+                                  onClick={() => setShowDesktopApplicationForm(true)}
+                                >
+                                  {/* Hover overlay */}
+                                  <div className="pointer-events-none absolute inset-0 bg-blue-900/0 [@media(hover:hover)]:group-hover/card:bg-blue-900/30 transition-colors duration-200" />
+                                </div>
+                                <div 
+                                  className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain z-[1]"
                                   onClick={() => setShowDesktopApplicationForm(true)}
                                 >
                                   {(() => {

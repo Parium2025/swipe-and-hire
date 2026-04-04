@@ -3667,8 +3667,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         />
                                       ) : null}
                                       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                                      {/* Hover overlay */}
+                                      <div className="pointer-events-none absolute inset-0 bg-blue-900/0 [@media(hover:hover)]:hover:bg-blue-900/30 transition-colors duration-200 z-[1]" style={{ pointerEvents: 'none' }} />
                                       <div 
-                                        className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain"
+                                        className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
                                         onClick={() => setShowDesktopApplicationForm(true)}
                                       >
                                         {(() => {
