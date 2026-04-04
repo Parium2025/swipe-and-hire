@@ -951,6 +951,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // visas innan ny data hämtas
       clearAllAppCaches();
       profileLoadedRef.current = false; // 🔧 Reset before new login attempt
+
+      // 🔐 Rensa ev. stale auth-tokens från en tidigare misslyckad logout
+      try {
+        const { authStorage: storage } = await import('@/lib/authStorage');
+        storage.clear();
+      } catch {}
  
       // Minsta visningstid för splash (matchar logout: ~1.1 sekund)
       const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1100));
@@ -1156,6 +1162,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAllAppCaches();
       clearSessionToken();
       
+      // 🔐 KRITISKT: Rensa auth-tokens från storage ALLTID
+      // Om signOut misslyckades (nätverksfel etc.) ligger tokens kvar
+      try {
+        const { authStorage: storage } = await import('@/lib/authStorage');
+        storage.clear();
+      } catch {}
+      
+      // 🔧 Tvinga user/session till null om onAuthStateChange inte hann fira
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setUserRole(null);
+      setOrganization(null);
+      
       // Vänta resterande tid för smooth övergång
       await new Promise(resolve => setTimeout(resolve, 550));
     } catch (error: any) {
@@ -1164,6 +1184,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAllDrafts();
       clearAllAppCaches();
       clearSessionToken();
+      // 🔐 Rensa auth-tokens även vid oväntat fel
+      try {
+        const { authStorage: storage } = await import('@/lib/authStorage');
+        storage.clear();
+      } catch {}
+      // 🔧 Tvinga state till null
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setUserRole(null);
+      setOrganization(null);
     } finally {
       setLoading(false);
       isManualSignOutRef.current = false;
