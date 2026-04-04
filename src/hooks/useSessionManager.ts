@@ -93,11 +93,39 @@ export function useSessionManager(
   const lastRegisteredAtRef = useRef<number>(0); // Track when we last registered (ms)
   const consecutiveNetworkFailsRef = useRef(0); // Track network failures to avoid false kicks
 
+  // Ensure auth token is fresh (critical after laptop sleep / app background)
+  const ensureFreshToken = useCallback(async (): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error || !data.session) {
+        console.warn('⚠️ Auth session unavailable — skipping session management');
+        return false;
+      }
+      // If the token expires within 60s, force a refresh
+      const expiresAt = data.session.expires_at ?? 0;
+      if (expiresAt - Math.floor(Date.now() / 1000) < 60) {
+        console.log('🔄 Token expiring soon — refreshing before session RPC');
+        const { error: refreshErr } = await supabase.auth.refreshSession();
+        if (refreshErr) {
+          console.warn('Token refresh failed:', refreshErr.message);
+          return false;
+        }
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   // Register session when user logs in (or when returning from background)
   const registerSession = useCallback(async (force = false) => {
     if (!userId || isPreviewEnv) return;
     // Skip if already registered, unless forced (e.g. on mobile foreground)
     if (registeredRef.current && !force) return;
+
+    // Ensure auth token is valid before making RPC call
+    const tokenOk = await ensureFreshToken();
+    if (!tokenOk) return;
 
     const token = getOrCreateSessionToken();
     sessionTokenRef.current = token;
@@ -125,7 +153,7 @@ export function useSessionManager(
     } catch (err) {
       console.warn('Session registration error:', err);
     }
-  }, [userId, isPreviewEnv]);
+  }, [userId, isPreviewEnv, ensureFreshToken]);
 
   // Heartbeat to keep session alive
   // If heartbeat returns false (session expired after offline), try to re-register.
@@ -143,6 +171,12 @@ export function useSessionManager(
         console.log('⚠️ Heartbeat: session expired — attempting re-registration…');
 
         try {
+          const tokenOk = await ensureFreshToken();
+          if (!tokenOk) {
+            console.log('⏳ Heartbeat: auth token not ready — will retry next cycle');
+            return;
+          }
+
           const { data, error } = await supabase.rpc('reregister_session', {
             p_session_token: token,
             p_device_label: getDeviceLabel(),
@@ -151,7 +185,19 @@ export function useSessionManager(
 
           const result = data as Record<string, unknown> | null;
 
-          if (error || result?.status === 'rejected') {
+          if (error) {
+            // Auth errors (expired token, not authenticated) → NOT a kick, retry later
+            const isAuthError = error.message?.includes('Not authenticated') || error.code === 'PGRST301';
+            if (isAuthError) {
+              console.log('⏳ Heartbeat: auth error during re-registration — will retry');
+              return;
+            }
+            console.log('🚫 Heartbeat: genuinely kicked — cannot re-register');
+            onKicked();
+            return;
+          }
+
+          if (result?.status === 'rejected') {
             console.log('🚫 Heartbeat: genuinely kicked — cannot re-register');
             onKicked();
             return;
@@ -167,7 +213,7 @@ export function useSessionManager(
       // Network error (still offline) — do nothing, try again next interval
       console.warn('Heartbeat failed (likely offline):', err);
     }
-  }, [userId, onKicked]);
+  }, [userId, onKicked, ensureFreshToken]);
 
   // Remove session on logout
   const removeSession = useCallback(async () => {
@@ -214,6 +260,12 @@ export function useSessionManager(
         console.log('⚠️ Session missing — attempting re-registration…');
 
         try {
+          const tokenOk = await ensureFreshToken();
+          if (!tokenOk) {
+            console.log('⏳ Validity: auth token not ready — skipping kick, will retry');
+            return;
+          }
+
           const { data, error: reRegError } = await supabase.rpc('reregister_session', {
             p_session_token: token,
             p_device_label: getDeviceLabel(),
@@ -222,7 +274,19 @@ export function useSessionManager(
 
           const result = data as Record<string, unknown> | null;
 
-          if (reRegError || result?.status === 'rejected') {
+          if (reRegError) {
+            // Auth errors → NOT a kick, retry later
+            const isAuthError = reRegError.message?.includes('Not authenticated') || reRegError.code === 'PGRST301';
+            if (isAuthError) {
+              console.log('⏳ Validity: auth error during re-registration — will retry');
+              return;
+            }
+            // Other DB errors → also retry, don't kick
+            console.warn('Validity: re-registration DB error — will retry:', reRegError.message);
+            return;
+          }
+
+          if (result?.status === 'rejected') {
             // 2+ other sessions exist → genuinely kicked
             alreadyKickedRef.current = true;
             registeredRef.current = false;
@@ -243,7 +307,7 @@ export function useSessionManager(
       // Network error — skip, try again next interval (mobile may be briefly offline)
       consecutiveNetworkFailsRef.current++;
     }
-  }, [userId, onKicked]);
+  }, [userId, onKicked, ensureFreshToken]);
 
   // Set up session management
   useEffect(() => {
