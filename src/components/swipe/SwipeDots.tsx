@@ -155,18 +155,26 @@ export const SwipeDots = memo(function SwipeDots({
   const activeIdx = isScrubbing ? scrubIndex : currentIndex;
 
   return (
-    <div
-      ref={trackRef}
-      className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center touch-none select-none transition-all duration-200 ${
-        isScrubbing
-          ? 'w-14 py-4 px-3 gap-0 bg-black/40 backdrop-blur-md rounded-l-2xl'
-          : 'w-14 py-3 px-4 gap-1'
-      }`}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchEnd}
-    >
+    <>
+      {/* Invisible wider touch target — allows normal scroll-through but captures long-press */}
+      <div
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12"
+        style={{ height: '50%' }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+      />
+
+      {/* Visible dots container */}
+      <div
+        ref={trackRef}
+        className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center select-none pointer-events-none transition-all duration-200 ${
+          isScrubbing
+            ? 'w-12 py-4 px-3 gap-0 bg-black/40 backdrop-blur-md rounded-l-2xl touch-none pointer-events-auto'
+            : 'w-8 py-0 px-2.5 gap-1'
+        }`}
+      >
       {/* Scrub tooltip showing current position */}
       {isScrubbing && (
         <div className="absolute right-14 top-1/2 -translate-y-1/2 bg-[hsl(215,60%,35%)]/80 backdrop-blur-md border border-white/20 text-white text-sm font-bold px-3 py-1.5 rounded-xl shadow-lg shadow-black/30 whitespace-nowrap pointer-events-none">
