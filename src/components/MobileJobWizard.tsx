@@ -4610,7 +4610,7 @@ const MobileJobWizard = ({
 
                             {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
                             {!showDesktopApplicationForm && (
-                              <div className="absolute inset-0 z-10">
+                              <div className="absolute inset-0 z-10 group/card">
                                 {/* Job Image - ONLY use desktop image, no fallback */}
                                 {jobImageDesktopDisplayUrl ? (
                                   <img
@@ -4622,17 +4622,12 @@ const MobileJobWizard = ({
                                   />
                                 ) : null}
                                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                                {/* Hover overlay — dark blue tint on desktop hover */}
+                                <div className="pointer-events-none absolute inset-0 bg-blue-900/0 [@media(hover:hover)]:group-hover/card:bg-blue-900/30 transition-colors duration-200 z-[1]" />
                                 
                                 {/* Content - clickable to show form */}
                                 <div 
-                                  className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain group/card"
-                                  onClick={() => setShowDesktopApplicationForm(true)}
-                                >
-                                  {/* Hover overlay */}
-                                  <div className="pointer-events-none absolute inset-0 bg-blue-900/0 [@media(hover:hover)]:group-hover/card:bg-blue-900/30 transition-colors duration-200" />
-                                </div>
-                                <div 
-                                  className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain z-[1]"
+                                  className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
                                   onClick={() => setShowDesktopApplicationForm(true)}
                                 >
                                   {(() => {
