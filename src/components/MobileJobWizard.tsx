@@ -223,9 +223,11 @@ const MobileJobWizard = ({
         if (bestDraft) {
           setFormData(bestDraft.formData);
           setCustomQuestions(bestDraft.customQuestions);
-          setInitialFormData(bestDraft.formData);
-          setInitialCustomQuestions(bestDraft.customQuestions);
-          setHasUnsavedChanges(false);
+          // Set initialFormData to empty so the change detection knows there's unsaved work
+          // (the restored draft hasn't been published yet)
+          setInitialFormData({} as JobFormData);
+          setInitialCustomQuestions([]);
+          // hasUnsavedChanges will be set to true by the tracking useEffect
           setCurrentStep(bestDraft.currentStep);
 
           console.log('📝 Restoring job wizard draft from latest storage snapshot');
