@@ -3305,7 +3305,7 @@ const MobileJobWizard = ({
                           setShowQuestionTemplates(true);
                         }}
                         onTouchEnd={(e) => e.currentTarget.blur()}
-                        className={`${dialogCloseButtonClassName} static right-auto top-auto z-auto touch-manipulation [-webkit-tap-highlight-color:transparent]`}
+                        className="flex h-[var(--icon-button-size-sm)] w-[var(--icon-button-size-sm)] shrink-0 items-center justify-center rounded-full bg-white/10 p-0 text-white transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] md:hover:bg-white/20"
                       >
                         <X className={dialogCloseIconClassName} />
                       </button>
