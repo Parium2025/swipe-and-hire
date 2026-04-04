@@ -8,6 +8,7 @@ const REMEMBER_ME_KEY = 'parium-remember-me';
 const LAST_ACTIVITY_KEY = 'parium-last-activity';
 const SESSION_SENTINEL_KEY = 'parium-session-alive';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
+const SESSION_SENTINEL_RECOVERY_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 
 /**
  * Module-level flag shared with useInactivityTimeout.
@@ -63,6 +64,41 @@ export const setRememberMe = (value: boolean): void => {
   }
 };
 
+const getLastActivityTimestamp = (): number => {
+  try {
+    const localActivity = localStorage.getItem(LAST_ACTIVITY_KEY);
+    const sessionActivity = sessionStorage.getItem(LAST_ACTIVITY_KEY);
+
+    let lastActivityTime = 0;
+
+    if (localActivity) {
+      const parsed = parseInt(localActivity, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        lastActivityTime = parsed;
+      }
+    }
+
+    if (sessionActivity) {
+      const parsed = parseInt(sessionActivity, 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed > lastActivityTime) {
+        lastActivityTime = parsed;
+      }
+    }
+
+    return lastActivityTime;
+  } catch {
+    return 0;
+  }
+};
+
+const hasRecentActivity = (windowMs = SESSION_SENTINEL_RECOVERY_WINDOW_MS): boolean => {
+  const lastActivityTime = getLastActivityTimestamp();
+  if (lastActivityTime === 0) return false;
+
+  const diffMs = Date.now() - lastActivityTime;
+  return diffMs >= 0 && diffMs <= windowMs;
+};
+
 // Update last activity timestamp
 export const updateLastActivity = (): void => {
   try {
@@ -79,18 +115,7 @@ export const updateLastActivity = (): void => {
 // Get formatted time since last activity (for debugging)
 export const getTimeSinceLastActivity = (): string => {
   try {
-    const localActivity = localStorage.getItem(LAST_ACTIVITY_KEY);
-    const sessionActivity = sessionStorage.getItem(LAST_ACTIVITY_KEY);
-    
-    let lastActivityTime = 0;
-    if (localActivity) {
-      const parsed = parseInt(localActivity, 10);
-      if (!isNaN(parsed) && parsed > 0) lastActivityTime = parsed;
-    }
-    if (sessionActivity) {
-      const parsed = parseInt(sessionActivity, 10);
-      if (!isNaN(parsed) && parsed > 0 && parsed > lastActivityTime) lastActivityTime = parsed;
-    }
+    const lastActivityTime = getLastActivityTimestamp();
     
     if (lastActivityTime === 0) return 'ingen aktivitet sparad';
     
@@ -108,26 +133,7 @@ export const getTimeSinceLastActivity = (): string => {
 // Check if session has expired due to inactivity
 export const hasSessionExpiredDueToInactivity = (): boolean => {
   try {
-    // Check both storages for activity timestamp
-    const localActivity = localStorage.getItem(LAST_ACTIVITY_KEY);
-    const sessionActivity = sessionStorage.getItem(LAST_ACTIVITY_KEY);
-    
-    // Use the most recent activity from either storage - pick the later one
-    let lastActivityTime = 0;
-    
-    if (localActivity) {
-      const parsed = parseInt(localActivity, 10);
-      if (!isNaN(parsed) && parsed > 0) {
-        lastActivityTime = parsed;
-      }
-    }
-    
-    if (sessionActivity) {
-      const parsed = parseInt(sessionActivity, 10);
-      if (!isNaN(parsed) && parsed > 0 && parsed > lastActivityTime) {
-        lastActivityTime = parsed;
-      }
-    }
+    const lastActivityTime = getLastActivityTimestamp();
     
     if (lastActivityTime === 0) {
       // No valid activity recorded yet - user just logged in, don't expire
@@ -212,10 +218,15 @@ export class AuthStorageAdapter implements Storage {
           try { return !!localStorage.getItem(key); } catch { return false; }
         })();
         if (hasStoredAuth) {
+          if (hasRecentActivity()) {
+            console.log('🔄 Session sentinel missing after recent activity — restoring tab session');
+            refreshSessionSentinel();
+          } else {
           console.log('🚪 Session ended: tab/app was closed without "remember me" — logging out');
           this.clearAuthData();
           clearActivityTracking();
           return null;
+          }
         }
       }
     }
