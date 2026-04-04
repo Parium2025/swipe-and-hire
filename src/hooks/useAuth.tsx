@@ -2009,16 +2009,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     await supabase.auth.signOut({ scope: 'local' });
     
-    // Persistent toast — stays until user dismisses it, then redirect
+    // Informational toast — auto-dismisses, no redirect logic
     sonnerToast('Du har loggats ut', {
-      description: 'En ny session startades på en annan enhet och denna session avslutades. Tryck här för att fortsätta.',
-      duration: Infinity,
-      onDismiss: () => {
-        window.location.href = '/auth';
-      },
-      onAutoClose: () => {
-        window.location.href = '/auth';
-      },
+      description: 'En ny session startades på en annan enhet och denna session avslutades.',
+      duration: 6000,
     });
   }, []);
 
