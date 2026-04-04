@@ -642,15 +642,15 @@ export default function ProfilePreview() {
     };
     
       return (
-        <div className="max-w-full mx-auto space-y-3">
+        <div className="max-w-full mx-auto space-y-4">
         {/* Större rund profilbild/video med namn - direkt på bakgrunden */}
-        <div className="mb-3">
-          <div className="relative p-3">
+        <div className="mb-4">
+          <div className="relative p-4">
             {/* Större rund profilbild eller video för desktop */}
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-3">
                {/* Använd ProfileVideo om video finns, annars Avatar */}
                {effectiveVideoUrl ? (
-                 <div className="relative h-[200px] w-[200px]">
+                 <div className="relative h-[140px] w-[140px]">
                    <ProfileVideo
                      videoUrl={effectiveVideoUrl}
                      coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
@@ -662,9 +662,9 @@ export default function ProfilePreview() {
                    />
                  </div>
                ) : (
-                 <Avatar className="h-[200px] w-[200px] ring-2 ring-white/20 shadow-xl">
+                 <Avatar className="h-[140px] w-[140px] ring-2 ring-white/20 shadow-xl">
                    <AvatarImage src={profileImageUrl || signedCoverUrl || ''} className="object-cover" />
-                   <AvatarFallback className="bg-primary text-white text-5xl" delayMs={200}>
+                   <AvatarFallback className="bg-primary text-white text-4xl" delayMs={200}>
                      {consentedData?.first_name?.[0]}
                    </AvatarFallback>
                  </Avatar>
@@ -672,14 +672,14 @@ export default function ProfilePreview() {
                
                {/* Status text under bild/video */}
                {(effectiveVideoUrl || profileImageUrl) && (
-                 <p className="text-[10px] font-medium text-white">
-                   {effectiveVideoUrl ? 'Video tillgängligt' : 'Enbart profilbild vald'}
+                 <p className="text-xs font-medium text-white">
+                   {effectiveVideoUrl ? 'Video' : 'Profilbild'}
                  </p>
                )}
               
               {/* Namn och ålder */}
               <div className="text-center">
-                <h2 className="text-lg font-bold text-white drop-shadow-lg">
+                <h2 className="text-xl font-bold text-white drop-shadow-lg">
                   {consentedData?.first_name} {consentedData?.last_name}
                 </h2>
                 {consentedData?.age && (
@@ -694,7 +694,7 @@ export default function ProfilePreview() {
         </div>
 
         {/* Innehållssektioner i grid */}
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-2 gap-3">
           {/* Personlig information */}
           <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader className="pb-1.5 pt-2">
@@ -912,15 +912,15 @@ export default function ProfilePreview() {
             {/* Desktop monitor frame - professional mockup */}
             <div className="relative">
               {/* Monitor screen */}
-              <div className="relative w-full max-w-[500px] rounded-t-lg bg-black p-2.5 shadow-2xl">
+              <div className="relative w-[700px] max-w-[90vw] rounded-t-xl bg-black p-3 shadow-2xl">
                 {/* Screen bezel */}
-                <div className="relative w-full h-[260px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                <div className="relative w-full h-[420px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                   {/* Innehåll med Parium bakgrund */}
                   <div 
                     className="absolute inset-0 overflow-y-auto custom-scrollbar"
                     style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
                   >
-                    <div className="p-4">
+                    <div className="p-6">
                       <DesktopListView />
                     </div>
                   </div>
@@ -930,9 +930,9 @@ export default function ProfilePreview() {
               {/* Monitor stand */}
               <div className="flex flex-col items-center">
                 {/* Stand neck */}
-                <div className="w-12 h-6 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-sm"></div>
+                <div className="w-16 h-8 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-sm"></div>
                 {/* Stand base */}
-                <div className="w-32 h-2.5 bg-gradient-to-b from-gray-800 to-gray-900 rounded-full shadow-lg"></div>
+                <div className="w-40 h-3 bg-gradient-to-b from-gray-800 to-gray-900 rounded-full shadow-lg"></div>
               </div>
             </div>
           </div>
