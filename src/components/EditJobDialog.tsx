@@ -3704,8 +3704,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             </div>
                             
                             {/* Monitor stand */}
-                            <div className="w-20 h-8 bg-gradient-to-b from-gray-700 to-gray-800 mx-auto rounded-b-lg" />
-                            <div className="w-32 h-2 bg-gradient-to-b from-gray-600 to-gray-700 mx-auto rounded-b-lg" />
+                            <div className="flex flex-col items-center">
+                              {/* Stand neck */}
+                              <div className="w-16 h-8 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-sm"></div>
+                              {/* Stand base */}
+                              <div className="w-40 h-3 bg-gradient-to-b from-gray-800 to-gray-900 rounded-full shadow-lg"></div>
+                            </div>
                           </div>
                         </div>
                       )}
