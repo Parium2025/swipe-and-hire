@@ -103,7 +103,9 @@ const SearchJobs = memo(() => {
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
   const isTouchCapable = useTouchCapable();
   const isMobile = useIsMobile();
-  const [swipeModeActive, setSwipeModeActive] = useState(false);
+  const [swipeModeActive, setSwipeModeActive] = useState(() => {
+    try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
+  });
   const [jobToUnsave, setJobToUnsave] = useState<{ id: string; title: string } | null>(null);
   const [selectedCompanies, setSelectedCompaniesRaw] = useState<string[]>(() => {
     try { const raw = sessionStorage.getItem('parium-search-filters'); return raw ? (JSON.parse(raw).companies || []) : []; } catch { return []; }
