@@ -31,6 +31,8 @@ export interface SwipeFilterState {
 interface SwipeFullscreenProps {
   jobs: SwipeJob[];
   appliedJobIds: Set<string>;
+  savedJobIds: Set<string>;
+  onToggleSave: (jobId: string) => void;
   onClose: () => void;
   filterState?: SwipeFilterState;
 }
