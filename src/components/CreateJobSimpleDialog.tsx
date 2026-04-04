@@ -316,7 +316,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     if (template) {
       setSelectedTemplate(template as any);
       setJobTitle(template.title);
-      // Template selection alone is not "unsaved work" — user hasn't typed anything custom
+      // Update initial state so title onChange tracks from this point
+      initialStateRef.current = { title: template.title, templateId: template.id };
       setHasUnsavedChanges(false);
     }
     setTemplateMenuOpen(false);
