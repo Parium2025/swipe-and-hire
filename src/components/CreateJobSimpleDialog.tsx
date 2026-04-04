@@ -295,7 +295,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     if (templateId === 'none') {
       setSelectedTemplate(null);
       setJobTitle('');
-      setHasUnsavedChanges(false);
+      const titleChanged = '' !== initialStateRef.current.title;
+      const templateChanged = null !== initialStateRef.current.templateId;
+      setHasUnsavedChanges(titleChanged || templateChanged);
       setTemplateMenuOpen(false);
       setTitleInputKey((k) => k + 1);
       // Force iOS refresh
@@ -314,6 +316,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     if (template) {
       setSelectedTemplate(template as any);
       setJobTitle(template.title);
+      const titleChanged = template.title !== initialStateRef.current.title;
+      const templateChanged = template.id !== initialStateRef.current.templateId;
+      setHasUnsavedChanges(titleChanged || templateChanged);
     }
     setTemplateMenuOpen(false);
   }, [templates]);
