@@ -296,6 +296,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const currentUserIdRef = useRef<string | null>(null);
   // Avoid doing heavy localStorage sweeps during the very first paint on /auth.
   const didInitialLoggedOutCleanupRef = useRef(false);
+  const isRecoveringSessionRef = useRef(false); // 🛡️ Guard against concurrent recovery attempts
  
   // Håll en ref i synk med state så att async login kan läsa korrekt värde
   useEffect(() => {
@@ -401,32 +402,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           
           // 🛡️ RESILIENCE: Before accepting an unexpected logout, attempt session recovery.
-          // A failed token refresh (network glitch) fires SIGNED_OUT even though
-          // the refresh token is still valid. Try to recover before giving up.
+          // Guard against multiple concurrent recovery attempts (network jitter).
+          if (isRecoveringSessionRef.current) {
+            console.log('🛡️ Recovery already in progress — skipping duplicate SIGNED_OUT');
+            return;
+          }
+          isRecoveringSessionRef.current = true;
+          
           console.log('⚠️ Unexpected SIGNED_OUT — attempting session recovery…');
           (async () => {
-            if (!mounted) return;
+            if (!mounted) { isRecoveringSessionRef.current = false; return; }
             try {
               // Attempt 1: refreshSession uses the stored refresh token
               const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
               if (!refreshError && refreshData?.session) {
                 console.log('✅ Session recovered after transient SIGNED_OUT — ignoring logout');
-                // The successful refresh will fire a new TOKEN_REFRESHED event
-                // which re-sets session/user, so we just return here.
+                isRecoveringSessionRef.current = false;
                 return;
               }
               
               // Attempt 2: Short delay + retry (covers brief network blips)
               await new Promise(r => setTimeout(r, 2000));
-              if (!mounted) return;
+              if (!mounted) { isRecoveringSessionRef.current = false; return; }
               const { data: retryData, error: retryError } = await supabase.auth.refreshSession();
               if (!retryError && retryData?.session) {
                 console.log('✅ Session recovered on retry — ignoring logout');
+                isRecoveringSessionRef.current = false;
                 return;
               }
               
               // Both attempts failed — this is a genuine logout
               console.log('🔄 Session recovery failed — proceeding with logout');
+              isRecoveringSessionRef.current = false;
               if (!mounted) return;
               toast({
                 title: 'Du har loggats ut',
@@ -440,8 +447,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }, 1500);
             } catch (recoveryErr) {
               console.warn('Session recovery error:', recoveryErr);
+              isRecoveringSessionRef.current = false;
               if (!mounted) return;
-              // Final fallback: genuine logout
               clearAllAppCaches();
               clearSessionToken();
               window.location.href = '/auth';
