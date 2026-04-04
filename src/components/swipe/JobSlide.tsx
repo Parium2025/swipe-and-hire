@@ -55,11 +55,13 @@ function getImageObjectPosition(value?: string): string {
 export const JobSlide = memo(function JobSlide({
   job,
   applied,
+  saved,
   isVisible,
   isLast,
   sectionHeight,
   onSwipeRight,
   onSwipeLeft,
+  onSave,
   onTap,
 }: JobSlideProps) {
   const inputCapability = useInputCapability();
