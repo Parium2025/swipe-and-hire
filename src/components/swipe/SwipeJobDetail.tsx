@@ -43,6 +43,7 @@ interface FullJobData {
   workplace_address?: string;
   workplace_postal_code?: string;
   contact_email?: string;
+  application_instructions?: string;
 }
 
 interface SwipeJobDetailProps {
