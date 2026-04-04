@@ -295,10 +295,10 @@ export const JobSlide = memo(function JobSlide({
         )}
 
         {/* Bottom content */}
-        <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
+        <div className="absolute bottom-0 left-0 right-0 p-5 z-10 text-center">
           <p className="text-white font-semibold text-base">{job.company_name}</p>
           <h2 className="text-2xl font-bold text-white leading-tight tracking-tight mt-0.5 line-clamp-2">{job.title}</h2>
-          <p className="text-white/80 text-sm font-medium mt-1.5 truncate">
+          <p className="text-white/80 text-sm font-medium mt-1.5">
             {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
           </p>
 
