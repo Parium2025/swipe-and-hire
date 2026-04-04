@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { memo, useRef, useState, useEffect } from 'react';
+import { memo, useRef, useState, useEffect, useCallback } from 'react';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -13,48 +13,47 @@ interface JobStatusTabsProps {
 }
 
 export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChange, activeCount, expiredCount, draftCount, showDrafts = false }: JobStatusTabsProps) {
+  const railRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLButtonElement>(null);
   const expiredRef = useRef<HTMLButtonElement>(null);
   const draftRef = useRef<HTMLButtonElement>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 0 });
+  const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
+
+  const updateIndicator = useCallback(() => {
+    const refs: Record<JobStatusTab, React.RefObject<HTMLButtonElement>> = {
+      active: activeRef,
+      expired: expiredRef,
+      draft: draftRef,
+    };
+    const ref = refs[activeTab]?.current;
+    if (ref) {
+      setIndicatorStyle({
+        x: ref.offsetLeft,
+        width: ref.offsetWidth,
+      });
+    }
+  }, [activeTab]);
 
   useEffect(() => {
-    const updateIndicator = () => {
-      const refs: Record<JobStatusTab, React.RefObject<HTMLButtonElement>> = {
-        active: activeRef,
-        expired: expiredRef,
-        draft: draftRef,
-      };
-      const ref = refs[activeTab]?.current;
-      if (ref) {
-        setIndicatorStyle({
-          left: ref.offsetLeft,
-          width: ref.offsetWidth,
-        });
-      }
-    };
-
     updateIndicator();
     window.addEventListener('resize', updateIndicator);
     return () => window.removeEventListener('resize', updateIndicator);
-  }, [activeTab, activeCount, expiredCount, draftCount]);
+  }, [updateIndicator, activeCount, expiredCount, draftCount]);
 
   return (
     <div className="dashboard-tabs-viewport mx-auto">
-      <div className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
-        {/* Sliding background */}
+      <div ref={railRef} className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
+        {/* Sliding background — uses GPU-accelerated transform instead of layout-triggering left */}
         <motion.div
-          className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px]"
+          className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] will-change-transform"
+          style={{ width: indicatorStyle.width, left: 0 }}
           initial={false}
-          animate={{
-            left: indicatorStyle.left,
-            width: indicatorStyle.width,
-          }}
+          animate={{ x: indicatorStyle.x }}
           transition={{
             type: "spring",
-            stiffness: 300,
-            damping: 35,
-            mass: 0.8,
+            stiffness: 380,
+            damping: 34,
+            mass: 0.6,
           }}
         />
         
