@@ -307,23 +307,23 @@ export const JobSlide = memo(function JobSlide({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); triggerSwipe('left'); }}
-              className="w-13 h-13 rounded-full bg-destructive flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+              className="w-[52px] h-[52px] rounded-full bg-destructive flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
-              <X className="w-5.5 h-5.5 text-white" strokeWidth={2.5} />
+              <X className="w-6 h-6 text-white" strokeWidth={2.5} />
             </button>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onSave(); }}
-              className="w-13 h-13 rounded-full bg-[hsl(215,50%,15%)] border border-white/15 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+              className="w-[52px] h-[52px] rounded-full bg-[hsl(215,50%,15%)] border border-white/15 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
-              <Bookmark className={`w-5.5 h-5.5 ${saved ? 'text-white fill-white' : 'text-white'}`} />
+              <Bookmark className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`} />
             </button>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); triggerSwipe('right'); }}
-              className="w-13 h-13 rounded-full bg-green-500 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+              className="w-[52px] h-[52px] rounded-full bg-green-500 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
-              <Heart className="w-5.5 h-5.5 text-white fill-white" />
+              <Heart className="w-6 h-6 text-white fill-white" />
             </button>
           </div>
         </div>
