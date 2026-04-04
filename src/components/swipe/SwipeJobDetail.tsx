@@ -60,14 +60,14 @@ function DescriptionSection({ text }: { text: string }) {
 
   return (
     <div className="bg-white/10 rounded-lg p-4">
-      <h3 className="text-section-title mb-3">Om tjänsten</h3>
-      <p className={`text-body whitespace-pre-wrap ${!expanded && needsTruncation ? 'line-clamp-6' : ''}`}>
+      <h3 className="text-white font-semibold text-base mb-3">Om tjänsten</h3>
+      <p className={`text-white text-sm leading-relaxed whitespace-pre-wrap ${!expanded && needsTruncation ? 'line-clamp-6' : ''}`}>
         {text}
       </p>
       {needsTruncation && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
+          className="mt-2 text-sm font-medium text-white hover:text-white/80 transition-colors"
         >
           {expanded ? 'Visa mindre' : 'Visa mer'}
         </button>
@@ -305,18 +305,18 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
               <X className="h-3.5 w-3.5 text-white" />
             </button>
 
-            {/* Title header */}
+            {/* Title header — company first, then title (matching swipe card layout) */}
             <div className="px-5 pb-3 shrink-0">
-              <h2 className="text-xl font-bold text-white leading-tight tracking-tight">{job.title}</h2>
-              <div className="flex items-center gap-2 mt-1 text-white/70 text-sm">
-                <span>{job.company_name}</span>
+              <div className="flex items-center gap-2 mt-1 text-white text-sm">
+                <span className="font-medium">{job.company_name}</span>
                 {job.location && (
                   <>
-                    <span className="text-white/30">·</span>
+                    <span className="text-white/50">·</span>
                     <span>{job.location}</span>
                   </>
                 )}
               </div>
+              <h2 className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5">{job.title}</h2>
             </div>
 
             {/* Content */}
@@ -349,7 +349,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
 
                   {/* 2. Detaljer om tjänsten */}
                   <div className="bg-white/10 rounded-lg p-4">
-                    <h3 className="text-section-title mb-3">Detaljer om tjänsten</h3>
+                    <h3 className="text-white font-semibold text-base mb-3">Detaljer om tjänsten</h3>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
                       {detail.employment_type && (
                         <div className="text-white text-sm">
@@ -466,7 +466,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   {/* 3. Förmåner */}
                   {detail.benefits && detail.benefits.length > 0 && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-section-title mb-3">Förmåner</h3>
+                      <h3 className="text-white font-semibold text-base mb-3">Förmåner</h3>
                       <div className="flex flex-wrap gap-2">
                         {detail.benefits.map((benefit, index) => (
                           <Badge key={index} variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
@@ -480,23 +480,23 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   {/* 4. Pitch */}
                   {detail.pitch && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-section-title mb-3">Varför jobba hos oss?</h3>
-                      <p className="text-body whitespace-pre-wrap">{detail.pitch}</p>
+                      <h3 className="text-white font-semibold text-base mb-3">Varför jobba hos oss?</h3>
+                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">{detail.pitch}</p>
                     </div>
                   )}
 
                   {/* 5. Krav */}
                   {detail.requirements && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-section-title mb-3">Krav & kvalifikationer</h3>
-                      <p className="text-body whitespace-pre-wrap">{detail.requirements}</p>
+                      <h3 className="text-white font-semibold text-base mb-3">Krav & kvalifikationer</h3>
+                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">{detail.requirements}</p>
                     </div>
                   )}
 
                   {/* 6. Ansökningsfrågor */}
                   {questions.length > 0 && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-section-title mb-3">Ansökningsfrågor</h3>
+                      <h3 className="text-white font-semibold text-base mb-3">Ansökningsfrågor</h3>
                       <p className="text-white/60 text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
                       <div className="space-y-2.5">
                         {questions.map((q, i) => (
@@ -517,15 +517,15 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   {/* 7. Ansökningsinstruktioner */}
                   {detail.application_instructions && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-section-title mb-3">Ansökningsinstruktioner</h3>
-                      <p className="text-body whitespace-pre-wrap">{detail.application_instructions}</p>
+                      <h3 className="text-white font-semibold text-base mb-3">Ansökningsinstruktioner</h3>
+                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">{detail.application_instructions}</p>
                     </div>
                   )}
 
                   {/* 8. Kontakt */}
                   {detail.contact_email && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-section-title mb-3">Kontakt</h3>
+                      <h3 className="text-white font-semibold text-base mb-3">Kontakt</h3>
                       <p className="text-white text-sm break-all">{detail.contact_email}</p>
                     </div>
                   )}
