@@ -296,6 +296,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const currentUserIdRef = useRef<string | null>(null);
   // Avoid doing heavy localStorage sweeps during the very first paint on /auth.
   const didInitialLoggedOutCleanupRef = useRef(false);
+  const isRecoveringSessionRef = useRef(false); // 🛡️ Guard against concurrent recovery attempts
  
   // Håll en ref i synk med state så att async login kan läsa korrekt värde
   useEffect(() => {
