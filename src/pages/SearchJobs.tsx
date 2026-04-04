@@ -140,14 +140,16 @@ const SearchJobs = memo(() => {
     setSearchInput(newSearchQuery);
     setDebouncedSearch(newSearchQuery); // Omedelbar sökning utan 300ms väntan
     
-    setSelectedCity(criteria.city || '');
+    // City/county: if saved search has county, set it as city (useOptimizedJobSearch detects " län" suffix)
+    const cityValue = criteria.county || criteria.city || '';
+    setSelectedCity(cityValue);
     setSelectedPostalCode('');
     setSelectedCategory(criteria.category || 'all-categories');
     setSelectedSubcategories([]);
     setSelectedEmploymentTypes(criteria.employment_types || []);
     
     // Expand filters if there are active filters to show
-    if (criteria.city || criteria.category || criteria.employment_types?.length) {
+    if (cityValue || criteria.category || criteria.employment_types?.length) {
       setFiltersExpanded(true);
     }
     
@@ -720,8 +722,8 @@ const SearchJobs = memo(() => {
         onOpenChange={setSaveSearchDialogOpen}
         criteria={{
           search_query: searchInput || undefined,
-          city: selectedCity || undefined,
-          county: selectedPostalCode || undefined,
+          city: selectedCity && !selectedCity.endsWith(' län') ? selectedCity : undefined,
+          county: selectedCity && selectedCity.endsWith(' län') ? selectedCity : undefined,
           employment_types: selectedEmploymentTypes.length > 0 ? selectedEmploymentTypes : undefined,
           category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
         }}
