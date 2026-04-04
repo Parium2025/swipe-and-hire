@@ -400,17 +400,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
           
-          console.log('🔄 Session ended in another tab - user was logged out');
-          toast({
-            title: 'Du har loggats ut',
-            description: 'Sessionen avslutades i en annan flik.',
-            duration: 4000,
-          });
-          setTimeout(() => {
-            clearAllAppCaches();
-            clearSessionToken();
-            window.location.href = '/auth';
-          }, 1500);
+          // 🛡️ RESILIENCE: Before accepting an unexpected logout, attempt session recovery.
+          // A failed token refresh (network glitch) fires SIGNED_OUT even though
+          // the refresh token is still valid. Try to recover before giving up.
+          console.log('⚠️ Unexpected SIGNED_OUT — attempting session recovery…');
+          (async () => {
+            if (!mounted) return;
+            try {
+              // Attempt 1: refreshSession uses the stored refresh token
+              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+              if (!refreshError && refreshData?.session) {
+                console.log('✅ Session recovered after transient SIGNED_OUT — ignoring logout');
+                // The successful refresh will fire a new TOKEN_REFRESHED event
+                // which re-sets session/user, so we just return here.
+                return;
+              }
+              
+              // Attempt 2: Short delay + retry (covers brief network blips)
+              await new Promise(r => setTimeout(r, 2000));
+              if (!mounted) return;
+              const { data: retryData, error: retryError } = await supabase.auth.refreshSession();
+              if (!retryError && retryData?.session) {
+                console.log('✅ Session recovered on retry — ignoring logout');
+                return;
+              }
+              
+              // Both attempts failed — this is a genuine logout
+              console.log('🔄 Session recovery failed — proceeding with logout');
+              if (!mounted) return;
+              toast({
+                title: 'Du har loggats ut',
+                description: 'Sessionen avslutades.',
+                duration: 4000,
+              });
+              setTimeout(() => {
+                clearAllAppCaches();
+                clearSessionToken();
+                window.location.href = '/auth';
+              }, 1500);
+            } catch (recoveryErr) {
+              console.warn('Session recovery error:', recoveryErr);
+              if (!mounted) return;
+              // Final fallback: genuine logout
+              clearAllAppCaches();
+              clearSessionToken();
+              window.location.href = '/auth';
+            }
+          })();
           return;
         }
         
