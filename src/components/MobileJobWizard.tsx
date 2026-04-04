@@ -3094,7 +3094,7 @@ const MobileJobWizard = ({
                   </>
                 ) : showQuestionTemplates ? (
                   /* Template Selection */
-                  <div className="space-y-4">
+                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                       <button
@@ -3106,7 +3106,7 @@ const MobileJobWizard = ({
                           setQuestionSearchTerm('');
                         }}
                         onTouchEnd={(e) => e.currentTarget.blur()}
-                        className={`${dialogCloseButtonClassName} static right-auto top-auto z-auto touch-manipulation [-webkit-tap-highlight-color:transparent]`}
+                        className="relative flex h-[var(--icon-button-size-sm)] w-[var(--icon-button-size-sm)] !min-h-0 !min-w-0 shrink-0 aspect-square items-center justify-center overflow-hidden rounded-full bg-white/10 p-0 text-white transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 md:hover:bg-white/20 md:hover:text-white touch-manipulation [-webkit-tap-highlight-color:transparent]"
                       >
                         <X className={dialogCloseIconClassName} />
                       </button>

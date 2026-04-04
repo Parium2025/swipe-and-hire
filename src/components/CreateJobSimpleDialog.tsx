@@ -270,15 +270,26 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
     }
   }, [isMobile, user, fetchTemplates]);
 
-  // Återställ hasUnsavedChanges när formuläret är tomt/neutralt
+  // Track the initial state to detect real user changes
+  const initialStateRef = useRef<{ title: string; templateId: string | null }>({ title: '', templateId: null });
+  const hasSetInitialState = useRef(false);
+
+  // Capture initial state once templates are loaded and auto-populated
   useEffect(() => {
-    if (!jobTitle.trim() && !selectedTemplate) {
-      setHasUnsavedChanges(false);
-    } else if (jobTitle.trim()) {
-      // Om det finns en titel, markera som ändrad
-      setHasUnsavedChanges(true);
+    if (!loadingTemplates && !hasSetInitialState.current) {
+      hasSetInitialState.current = true;
+      initialStateRef.current = { title: jobTitle, templateId: selectedTemplate?.id ?? null };
     }
-  }, [jobTitle, selectedTemplate]);
+  }, [loadingTemplates, jobTitle, selectedTemplate]);
+
+  // Reset initial state tracking when dialog opens/closes
+  useEffect(() => {
+    if (open) {
+      hasSetInitialState.current = false;
+    } else {
+      setHasUnsavedChanges(false);
+    }
+  }, [open]);
 
   const handleTemplateSelect = useCallback((templateId: string, templateName: string) => {
     if (templateId === 'none') {

@@ -166,6 +166,7 @@ const WorkplacePostalCodeSelector = ({
             value={postalCodeValue}
             onChange={handlePostalCodeChange}
             placeholder="XXX XX"
+            inputMode="numeric"
             className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm pl-10 transition-colors duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 focus:ring-0 focus:outline-none focus:border-white/50"
             maxLength={6}
             autoComplete="off"
