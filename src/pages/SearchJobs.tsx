@@ -720,8 +720,8 @@ const SearchJobs = memo(() => {
         onOpenChange={setSaveSearchDialogOpen}
         criteria={{
           search_query: searchInput || undefined,
-          city: selectedCity || undefined,
-          county: selectedPostalCode || undefined,
+          city: selectedCity && !selectedCity.endsWith(' län') ? selectedCity : undefined,
+          county: selectedCity && selectedCity.endsWith(' län') ? selectedCity : undefined,
           employment_types: selectedEmploymentTypes.length > 0 ? selectedEmploymentTypes : undefined,
           category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
         }}
