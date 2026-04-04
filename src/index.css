@@ -873,7 +873,12 @@ All colors MUST be HSL.
     max-width: none;
   }
 
-  /* Staggered fade-in for job cards on tab switch */
+  /* Staggered fade-in for job cards on tab switch — isolate from parent animate-fade-in */
+  .job-card-grid {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
   .job-card-grid .job-card-mobile-shell {
     animation: jobCardFadeIn 0.35s ease-out both;
   }
