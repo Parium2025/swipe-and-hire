@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { motion, useMotionValue, useTransform, animate, PanInfo } from 'framer-motion';
-import { Building2, MapPin, CheckCircle } from 'lucide-react';
+import { Building2, CheckCircle } from 'lucide-react';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SwipeJob {
@@ -157,17 +158,11 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
 
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-        <h2 className="text-2xl font-bold text-white leading-tight tracking-tight">{job.title}</h2>
-        <div className="flex items-center gap-2 mt-2">
-          <Building2 className="w-4 h-4 text-white/80 shrink-0" />
-          <span className="text-white/90 font-medium text-base">{job.company_name}</span>
-        </div>
-        {job.location && (
-          <div className="flex items-center gap-2 mt-1">
-            <MapPin className="w-4 h-4 text-white/70 shrink-0" />
-            <span className="text-white/80 text-sm">{job.location}</span>
-          </div>
-        )}
+        <p className="text-white/80 font-medium text-sm">{job.company_name}</p>
+        <h2 className="text-xl font-bold text-white leading-snug tracking-tight mt-0.5 line-clamp-2">{job.title}</h2>
+        <p className="text-white/70 text-sm mt-1.5 truncate">
+          {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
+        </p>
 
         {/* Tap hint */}
         {isTop && (
