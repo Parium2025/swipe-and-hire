@@ -52,6 +52,28 @@ interface SwipeJobDetailProps {
   hasApplied: boolean;
 }
 
+function DescriptionSection({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const needsTruncation = text.length > 300;
+
+  return (
+    <div className="bg-white/10 rounded-lg p-4">
+      <h3 className="text-section-title mb-3">Om tjänsten</h3>
+      <p className={`text-body whitespace-pre-wrap ${!expanded && needsTruncation ? 'line-clamp-6' : ''}`}>
+        {text}
+      </p>
+      {needsTruncation && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
+        >
+          {expanded ? 'Visa mindre' : 'Visa mer'}
+        </button>
+      )}
+    </div>
+  );
+}
+
 const DISMISS_THRESHOLD = 100;
 
 export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: SwipeJobDetailProps) {
