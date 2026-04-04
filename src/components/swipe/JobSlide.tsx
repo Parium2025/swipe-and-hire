@@ -304,7 +304,7 @@ export const JobSlide = memo(function JobSlide({
         </div>
 
         {/* Action buttons */}
-        <div className="absolute inset-x-0 bottom-[6.5%] z-10 px-5">
+        <div className="absolute inset-x-0 bottom-4 z-10 px-5">
           <div className="mt-4 flex items-center justify-center gap-5">
             <button
               type="button"
