@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef, type TouchEvent as ReactTouchEvent } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import { Building2, CheckCircle, X, Bookmark, Heart } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
@@ -44,6 +44,7 @@ const TAP_MAX_DURATION = 250;
 const TAP_MOVE_THRESHOLD = 18;
 const TAP_RESET_VELOCITY_THRESHOLD = 120;
 const TOUCH_DRAG_INTENT_THRESHOLD = 12;
+const TAP_HINT_DURATION = 1800;
 
 function getImageObjectPosition(value?: string): string {
   if (!value || value === 'center') return 'center 50%';
@@ -74,11 +75,38 @@ export const JobSlide = memo(function JobSlide({
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
+  const tapHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showTapHint, setShowTapHint] = useState(false);
 
   const imageUrl = resolveImageUrl(job.job_image_url);
 
+  const clearTapHint = useCallback(() => {
+    if (tapHintTimerRef.current) {
+      clearTimeout(tapHintTimerRef.current);
+      tapHintTimerRef.current = null;
+    }
+    setShowTapHint(false);
+  }, []);
+
+  const armTapHint = useCallback(() => {
+    clearTapHint();
+    setShowTapHint(true);
+    tapHintTimerRef.current = setTimeout(() => {
+      tapHintTimerRef.current = null;
+      setShowTapHint(false);
+      lastTapTimestampRef.current = 0;
+    }, TAP_HINT_DURATION);
+  }, [clearTapHint]);
+
+  useEffect(() => () => {
+    if (tapHintTimerRef.current) {
+      clearTimeout(tapHintTimerRef.current);
+    }
+  }, []);
+
   const triggerSwipe = useCallback((direction: SwipeDirection) => {
     lastTapTimestampRef.current = 0;
+    clearTapHint();
     swipedRef.current = true;
 
     animate(x, direction === 'right' ? EXIT_X : -EXIT_X, {
@@ -97,7 +125,7 @@ export const JobSlide = memo(function JobSlide({
       swipedRef.current = false;
       x.set(0);
     }, 250);
-  }, [onSwipeLeft, onSwipeRight, x]);
+  }, [clearTapHint, onSwipeLeft, onSwipeRight, x]);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
     if (swipedRef.current) return;
@@ -117,10 +145,11 @@ export const JobSlide = memo(function JobSlide({
 
     if (dragDistance > TAP_MOVE_THRESHOLD || dragVelocity > TAP_RESET_VELOCITY_THRESHOLD) {
       lastTapTimestampRef.current = 0;
+      clearTapHint();
     }
 
     animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
-  }, [triggerSwipe, x]);
+  }, [clearTapHint, triggerSwipe, x]);
 
   const handleTouchStartCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1) return;
@@ -153,11 +182,13 @@ export const JobSlide = memo(function JobSlide({
       if (Math.abs(deltaY) > Math.abs(deltaX)) {
         gesture.cancelled = true;
         lastTapTimestampRef.current = 0;
+        clearTapHint();
         return;
       }
 
       gesture.isDragging = true;
       lastTapTimestampRef.current = 0;
+      clearTapHint();
     }
 
     if (event.cancelable) {
@@ -165,7 +196,7 @@ export const JobSlide = memo(function JobSlide({
     }
 
     x.set(deltaX);
-  }, [useTouchTunnel, x]);
+  }, [clearTapHint, useTouchTunnel, x]);
 
   const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (!useTouchTunnel) return;
@@ -199,26 +230,30 @@ export const JobSlide = memo(function JobSlide({
 
     if (movedDistance > TAP_MOVE_THRESHOLD || pressDuration > TAP_MAX_DURATION) {
       lastTapTimestampRef.current = 0;
+      clearTapHint();
       return;
     }
 
     const now = Date.now();
 
-    if (now - lastTapTimestampRef.current <= DOUBLE_TAP_DELAY) {
+    if (showTapHint || now - lastTapTimestampRef.current <= DOUBLE_TAP_DELAY) {
+      clearTapHint();
       lastTapTimestampRef.current = 0;
       onTap();
       return;
     }
 
     lastTapTimestampRef.current = now;
-  }, [onTap, triggerSwipe, useTouchTunnel, x]);
+    armTapHint();
+  }, [armTapHint, clearTapHint, onTap, triggerSwipe, useTouchTunnel, x, showTapHint]);
 
   const handleTouchCancelCapture = useCallback(() => {
+    clearTapHint();
     touchGestureRef.current = null;
     if (!swipedRef.current) {
       animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
     }
-  }, [x]);
+  }, [clearTapHint, x]);
 
   return (
     <div
@@ -302,6 +337,14 @@ export const JobSlide = memo(function JobSlide({
             {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
           </p>
         </div>
+
+        {showTapHint && (
+          <div className="absolute inset-x-0 bottom-24 z-20 flex justify-center px-5 pointer-events-none">
+            <div className="rounded-full border border-white/20 bg-black/45 px-4 py-2 backdrop-blur-md">
+              <span className="text-sm font-semibold text-white">Tryck igen för jobbinfo</span>
+            </div>
+          </div>
+        )}
 
         {/* Action buttons */}
         <div className="absolute inset-x-0 bottom-4 z-10 px-5">

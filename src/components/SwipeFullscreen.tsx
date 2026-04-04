@@ -364,7 +364,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
 
         <div
           ref={scrollRef}
-          className={`h-full w-full overflow-y-auto overflow-x-hidden overscroll-contain ${
+          className={`h-full w-full overflow-x-hidden overscroll-contain ${
+            showDetail || showApply || showFilter ? 'overflow-y-hidden' : 'overflow-y-auto'
+          } ${
             isReturningFromEnd ? 'snap-none' : 'snap-y snap-mandatory'
           }`}
           style={{
