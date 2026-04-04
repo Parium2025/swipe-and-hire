@@ -60,14 +60,14 @@ function DescriptionSection({ text }: { text: string }) {
 
   return (
     <div className="bg-white/10 rounded-lg p-4">
-      <h3 className="text-section-title mb-3">Om tjänsten</h3>
-      <p className={`text-body whitespace-pre-wrap ${!expanded && needsTruncation ? 'line-clamp-6' : ''}`}>
+      <h3 className="text-white font-semibold text-base mb-3">Om tjänsten</h3>
+      <p className={`text-white text-sm leading-relaxed whitespace-pre-wrap ${!expanded && needsTruncation ? 'line-clamp-6' : ''}`}>
         {text}
       </p>
       {needsTruncation && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
+          className="mt-2 text-sm font-medium text-white hover:text-white/80 transition-colors"
         >
           {expanded ? 'Visa mindre' : 'Visa mer'}
         </button>
