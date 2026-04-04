@@ -1,6 +1,6 @@
 import { memo, useCallback, useRef, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
-import { Building2, CheckCircle } from 'lucide-react';
+import { Building2, CheckCircle, X, Bookmark, Heart } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,11 +16,13 @@ function resolveImageUrl(url?: string): string | null {
 interface JobSlideProps {
   job: SwipeJob;
   applied: boolean;
+  saved: boolean;
   isVisible: boolean;
   isLast: boolean;
   sectionHeight?: string;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
+  onSave: () => void;
   onTap: () => void;
 }
 
@@ -53,11 +55,13 @@ function getImageObjectPosition(value?: string): string {
 export const JobSlide = memo(function JobSlide({
   job,
   applied,
+  saved,
   isVisible,
   isLast,
   sectionHeight,
   onSwipeRight,
   onSwipeLeft,
+  onSave,
   onTap,
 }: JobSlideProps) {
   const inputCapability = useInputCapability();
@@ -298,9 +302,29 @@ export const JobSlide = memo(function JobSlide({
             {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
           </p>
 
-          {/* Hint */}
-          <div className="mt-3 flex items-center justify-center">
-            <span className="text-white/40 text-xs">← Skippa · Dubbeltryck för mer · Gilla →</span>
+          {/* Action buttons */}
+          <div className="mt-4 flex items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); triggerSwipe('left'); }}
+              className="w-12 h-12 rounded-full bg-red-500/90 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onSave(); }}
+              className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation border border-white/20"
+            >
+              <Bookmark className={`w-5 h-5 ${saved ? 'text-white fill-white' : 'text-white'}`} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); triggerSwipe('right'); }}
+              className="w-12 h-12 rounded-full bg-green-500/90 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+            >
+              <Heart className="w-5 h-5 text-white fill-white" />
+            </button>
           </div>
         </div>
       </motion.div>

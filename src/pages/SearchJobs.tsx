@@ -734,6 +734,8 @@ const SearchJobs = memo(() => {
         <SwipeFullscreen
           jobs={swipeJobs}
           appliedJobIds={appliedJobIds}
+          savedJobIds={new Set(Array.from(swipeJobs.map(j => j.id)).filter(id => isJobSaved(id)))}
+          onToggleSave={toggleSaveJob}
           onClose={() => setSwipeModeActive(false)}
           filterState={{
             searchInput,

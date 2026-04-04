@@ -31,6 +31,8 @@ export interface SwipeFilterState {
 interface SwipeFullscreenProps {
   jobs: SwipeJob[];
   appliedJobIds: Set<string>;
+  savedJobIds: Set<string>;
+  onToggleSave: (jobId: string) => void;
   onClose: () => void;
   filterState?: SwipeFilterState;
 }
@@ -46,6 +48,8 @@ const SNAP_REVEAL_OFFSET = 40;
 export const SwipeFullscreen = memo(function SwipeFullscreen({
   jobs,
   appliedJobIds,
+  savedJobIds,
+  onToggleSave,
   onClose,
   filterState,
 }: SwipeFullscreenProps) {
@@ -387,11 +391,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
               <JobSlide
                 job={job}
                 applied={isApplied(job.id)}
+                saved={savedJobIds.has(job.id)}
                 isVisible={Math.abs(idx - currentIndex) <= 1}
                 isLast={idx === jobs.length - 1}
                 sectionHeight={sectionHeight}
                 onSwipeRight={handleSwipeRight}
                 onSwipeLeft={handleSwipeLeft}
+                onSave={() => onToggleSave(job.id)}
                 onTap={handleTap}
               />
             </div>
