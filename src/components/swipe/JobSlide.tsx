@@ -314,7 +314,7 @@ export const JobSlide = memo(function JobSlide({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onSave(); }}
-              className="w-[52px] h-[52px] rounded-full bg-[hsl(215,50%,15%)] border border-white/15 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+              className="w-[52px] h-[52px] rounded-full bg-[hsl(215,60%,35%)] border border-white/20 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
               <Bookmark className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`} />
             </button>
