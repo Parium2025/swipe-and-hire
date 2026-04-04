@@ -260,6 +260,12 @@ export function useSessionManager(
         console.log('⚠️ Session missing — attempting re-registration…');
 
         try {
+          const tokenOk = await ensureFreshToken();
+          if (!tokenOk) {
+            console.log('⏳ Validity: auth token not ready — skipping kick, will retry');
+            return;
+          }
+
           const { data, error: reRegError } = await supabase.rpc('reregister_session', {
             p_session_token: token,
             p_device_label: getDeviceLabel(),
@@ -268,7 +274,19 @@ export function useSessionManager(
 
           const result = data as Record<string, unknown> | null;
 
-          if (reRegError || result?.status === 'rejected') {
+          if (reRegError) {
+            // Auth errors → NOT a kick, retry later
+            const isAuthError = reRegError.message?.includes('Not authenticated') || reRegError.code === 'PGRST301';
+            if (isAuthError) {
+              console.log('⏳ Validity: auth error during re-registration — will retry');
+              return;
+            }
+            // Other DB errors → also retry, don't kick
+            console.warn('Validity: re-registration DB error — will retry:', reRegError.message);
+            return;
+          }
+
+          if (result?.status === 'rejected') {
             // 2+ other sessions exist → genuinely kicked
             alreadyKickedRef.current = true;
             registeredRef.current = false;
