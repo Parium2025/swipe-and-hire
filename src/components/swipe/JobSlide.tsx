@@ -296,34 +296,34 @@ export const JobSlide = memo(function JobSlide({
 
         {/* Bottom content */}
         <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
-          <p className="text-white/80 font-medium text-sm">{job.company_name}</p>
-          <h2 className="text-xl font-bold text-white leading-snug tracking-tight mt-0.5 line-clamp-2">{job.title}</h2>
-          <p className="text-white/70 text-sm mt-1.5 truncate">
+          <p className="text-white font-semibold text-base">{job.company_name}</p>
+          <h2 className="text-2xl font-bold text-white leading-tight tracking-tight mt-0.5 line-clamp-2">{job.title}</h2>
+          <p className="text-white/80 text-sm font-medium mt-1.5 truncate">
             {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
           </p>
 
           {/* Action buttons */}
-          <div className="mt-4 flex items-center justify-center gap-4">
+          <div className="mt-4 flex items-center justify-center gap-5">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); triggerSwipe('left'); }}
-              className="w-12 h-12 rounded-full bg-red-500/90 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+              className="w-13 h-13 rounded-full bg-destructive flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
-              <X className="w-5 h-5 text-white" />
+              <X className="w-5.5 h-5.5 text-white" strokeWidth={2.5} />
             </button>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onSave(); }}
-              className="w-11 h-11 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+              className="w-13 h-13 rounded-full bg-[hsl(215,50%,15%)] border border-white/15 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
-              <Bookmark className={`w-5 h-5 ${saved ? 'text-white fill-white' : 'text-white'}`} />
+              <Bookmark className={`w-5.5 h-5.5 ${saved ? 'text-white fill-white' : 'text-white'}`} />
             </button>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); triggerSwipe('right'); }}
-              className="w-12 h-12 rounded-full bg-green-500/90 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+              className="w-13 h-13 rounded-full bg-green-500 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
-              <Heart className="w-5 h-5 text-white fill-white" />
+              <Heart className="w-5.5 h-5.5 text-white fill-white" />
             </button>
           </div>
         </div>
