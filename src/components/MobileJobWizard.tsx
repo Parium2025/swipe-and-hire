@@ -4622,9 +4622,6 @@ const MobileJobWizard = ({
                                   />
                                 ) : null}
                                 
-                                {/* Gradient overlay */}
-                                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                                
                                 {/* Content - clickable to show form */}
                                 <div 
                                   className="absolute inset-x-0 bottom-0 flex flex-col items-center text-white text-center px-4 pb-12 pt-8 cursor-pointer bg-gradient-to-t from-black/70 via-black/30 to-transparent"
