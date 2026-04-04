@@ -307,7 +307,7 @@ export function useSessionManager(
       // Network error — skip, try again next interval (mobile may be briefly offline)
       consecutiveNetworkFailsRef.current++;
     }
-  }, [userId, onKicked]);
+  }, [userId, onKicked, ensureFreshToken]);
 
   // Set up session management
   useEffect(() => {
