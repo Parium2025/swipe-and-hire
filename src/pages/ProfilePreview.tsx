@@ -849,41 +849,8 @@ export default function ProfilePreview() {
           </p>
         </div>
 
-        {/* View Mode Toggle - iOS Style */}
-        <div className="flex justify-center">
-          <div className="relative inline-flex bg-white/5 backdrop-blur-[2px] rounded-lg p-1 border border-white/20">
-            {/* Sliding background */}
-            <motion.div
-              className="absolute top-1 bottom-1 bg-white/20 rounded-md"
-              initial={false}
-              animate={{
-                left: viewMode === 'mobile' ? '4px' : '50%',
-                width: viewMode === 'mobile' ? 'calc(50% - 4px)' : 'calc(50% - 4px)',
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 30,
-              }}
-            />
-            
-            {/* Buttons */}
-            <button
-              onClick={() => setViewMode('mobile')}
-              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
-            >
-              <Smartphone className="h-3.5 w-3.5" />
-              Mobilvy
-            </button>
-            <button
-              onClick={() => setViewMode('desktop')}
-              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
-            >
-              <Monitor className="h-3.5 w-3.5" />
-              Datorvy
-            </button>
-          </div>
-        </div>
+        {/* View Mode Toggle */}
+        <PreviewModeTabs activeMode={viewMode} onModeChange={setViewMode} />
 
         {/* Profile View */}
         {viewMode === 'mobile' ? (
