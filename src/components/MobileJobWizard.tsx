@@ -34,6 +34,7 @@ import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes'
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, ArrowDown, Pencil, Smartphone, Monitor, Check, AlertTriangle } from 'lucide-react';
+import { PreviewModeTabs } from '@/components/ui/preview-mode-tabs';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -3499,42 +3500,9 @@ const MobileJobWizard = ({
             {/* Step 4: Förhandsvisning */}
             {currentStep === 3 && (
               <div className="space-y-6 max-w-4xl mx-auto w-full">
-                {/* Preview Mode Toggle - iOS Style like ProfilePreview */}
+                {/* Preview Mode Toggle */}
                 <div className="flex flex-col items-center space-y-4">
-                  <div className="relative inline-flex bg-white/5 backdrop-blur-[2px] rounded-lg p-1 border border-white/20">
-                    {/* Sliding background */}
-                    <motion.div
-                      className="absolute top-1 bottom-1 bg-white/20 rounded-md"
-                      initial={false}
-                      animate={{
-                        left: previewMode === 'mobile' ? '4px' : '50%',
-                        width: previewMode === 'mobile' ? 'calc(50% - 4px)' : 'calc(50% - 4px)',
-                      }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 500,
-                        damping: 30,
-                      }}
-                    />
-                    
-                    {/* Buttons */}
-                    <button
-                      type="button"
-                      onClick={() => setPreviewMode('mobile')}
-                      className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
-                    >
-                      <Smartphone className="h-3.5 w-3.5" />
-                      Mobilvy
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPreviewMode('desktop')}
-                      className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
-                    >
-                      <Monitor className="h-3.5 w-3.5" />
-                      Datorvy
-                    </button>
-                  </div>
+                  <PreviewModeTabs activeMode={previewMode} onModeChange={setPreviewMode} />
                   
                   <h3 
                     className="text-white font-medium text-center text-sm cursor-pointer hover:text-white transition-colors underline underline-offset-2"

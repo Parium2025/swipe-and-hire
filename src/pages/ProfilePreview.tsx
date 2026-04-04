@@ -8,7 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
-import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink, Pause, ArrowRight, Monitor, Smartphone, X, Mail, Briefcase, Clock } from 'lucide-react';
+import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink, Pause, ArrowRight, X, Mail, Briefcase, Clock } from 'lucide-react';
+import { PreviewModeTabs } from '@/components/ui/preview-mode-tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getMediaUrl } from '@/lib/mediaManager';
@@ -849,41 +850,8 @@ export default function ProfilePreview() {
           </p>
         </div>
 
-        {/* View Mode Toggle - iOS Style */}
-        <div className="flex justify-center">
-          <div className="relative inline-flex bg-white/5 backdrop-blur-[2px] rounded-lg p-1 border border-white/20">
-            {/* Sliding background */}
-            <motion.div
-              className="absolute top-1 bottom-1 bg-white/20 rounded-md"
-              initial={false}
-              animate={{
-                left: viewMode === 'mobile' ? '4px' : '50%',
-                width: viewMode === 'mobile' ? 'calc(50% - 4px)' : 'calc(50% - 4px)',
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 30,
-              }}
-            />
-            
-            {/* Buttons */}
-            <button
-              onClick={() => setViewMode('mobile')}
-              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
-            >
-              <Smartphone className="h-3.5 w-3.5" />
-              Mobilvy
-            </button>
-            <button
-              onClick={() => setViewMode('desktop')}
-              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
-            >
-              <Monitor className="h-3.5 w-3.5" />
-              Datorvy
-            </button>
-          </div>
-        </div>
+        {/* View Mode Toggle */}
+        <PreviewModeTabs activeMode={viewMode} onModeChange={setViewMode} />
 
         {/* Profile View */}
         {viewMode === 'mobile' ? (
