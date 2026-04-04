@@ -159,8 +159,8 @@ export const SwipeDots = memo(function SwipeDots({
       ref={trackRef}
       className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center touch-none select-none transition-all duration-200 ${
         isScrubbing
-          ? 'w-12 py-4 px-3 gap-0 bg-black/40 backdrop-blur-md rounded-l-2xl'
-          : 'w-8 py-0 px-2.5 gap-1'
+          ? 'w-14 py-4 px-3 gap-0 bg-black/40 backdrop-blur-md rounded-l-2xl'
+          : 'w-14 py-3 px-4 gap-1'
       }`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
