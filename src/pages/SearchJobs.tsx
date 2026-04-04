@@ -656,7 +656,7 @@ const SearchJobs = memo(() => {
             {/* Mobile: Swipe Mode Toggle */}
             {/* Swipe Mode Toggle - only for touch devices */}
             {isTouchCapable && (
-              <SwipeModeToggle onActivate={() => setSwipeModeActive(true)} />
+              <SwipeModeToggle onActivate={() => { setSwipeModeActive(true); try { sessionStorage.setItem('parium-swipe-mode', 'true'); } catch {} }} />
             )}
 
             {/* Job Cards — image cards on all screen sizes */}
