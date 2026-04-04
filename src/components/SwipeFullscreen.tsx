@@ -124,6 +124,15 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     container.scrollTo({ top: targetTop, behavior: 'smooth' });
   }, [getSlideScrollTop]);
 
+  /** Scrubber: instant jump (no smooth scroll) for fast drag navigation */
+  const handleScrubTo = useCallback((index: number) => {
+    const container = scrollRef.current;
+    const targetEl = slideRefs.current[index];
+    if (!container || !targetEl) return;
+    container.scrollTo({ top: targetEl.offsetTop, behavior: 'auto' });
+    setCurrentIndex(index);
+  }, []);
+
   /* ── End-of-stack bounce ──────────────────────────────── */
   const triggerEndBounce = useCallback(() => {
     if (jobs.length === 0 || showEndBounceRef.current || endBounceActiveRef.current) return;
