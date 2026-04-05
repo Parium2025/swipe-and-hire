@@ -24,7 +24,7 @@ export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onMod
     }
   }, [activeMode]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     updateIndicator();
     window.addEventListener('resize', updateIndicator);
     return () => window.removeEventListener('resize', updateIndicator);
