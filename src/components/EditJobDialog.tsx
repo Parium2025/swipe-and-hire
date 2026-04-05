@@ -2623,10 +2623,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                   {/* Step 4: Förhandsvisning */}
                   {currentStep === 3 && (
-                    <div className="space-y-6 max-w-4xl mx-auto w-full">
+                    <div ref={previewSwipeRef} className="space-y-6 max-w-4xl mx-auto w-full">
                       {/* Preview Mode Toggle */}
                       <div className="flex flex-col items-center space-y-4">
-                        <PreviewModeTabs activeMode={previewMode} onModeChange={setPreviewMode} />
+                        <PreviewModeTabs activeMode={previewMode} onModeChange={setPreviewMode} swipeContainerRef={previewSwipeRef} />
                         
                         <h3 
                           className="text-white font-medium text-center text-sm cursor-pointer hover:text-white transition-colors underline underline-offset-2"
