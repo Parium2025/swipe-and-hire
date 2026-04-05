@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { memo, useRef, useState, useEffect, useCallback } from 'react';
+import { memo, useRef, useState, useLayoutEffect, useCallback } from 'react';
 import { Smartphone, Monitor } from 'lucide-react';
 
 type PreviewMode = 'mobile' | 'desktop';
