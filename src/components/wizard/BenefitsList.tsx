@@ -68,7 +68,7 @@ export const BenefitsList = memo(({ selectedBenefits, onToggle }: BenefitsListPr
             onClick={() => handleToggle(benefit.value)}
             className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 flex items-center gap-2 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors ${isSelected ? 'bg-primary/30' : 'hover:bg-white/10'}`}
           >
-            <div className={`w-4 h-4 rounded border shrink-0 flex items-center justify-center ${isSelected ? 'bg-primary border-primary' : 'border-white/30 bg-white/10'}`}>
+            <div className={`w-4 h-4 rounded-[3px] border shrink-0 flex items-center justify-center transition-colors ${isSelected ? 'border-primary bg-primary' : 'border-white/30 bg-white/10'}`}>
               {isSelected && (
                 <Heart className="w-2.5 h-2.5 text-white" fill="currentColor" />
               )}
