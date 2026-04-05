@@ -1012,13 +1012,88 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     
     setIsSavingAndLeaving(true);
     try {
-      await handleSubmit();
+      // Save as draft WITHOUT publishing — keep is_active as-is
+      let workplaceCounty = null;
+      let workplaceMunicipality = null;
+      if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
+        const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
+        if (postalInfo) {
+          workplaceCounty = postalInfo.county || null;
+          workplaceMunicipality = postalInfo.municipality || null;
+        }
+      }
+
+      const payload: Record<string, any> = {
+        title: formData.title,
+        description: formData.description,
+        requirements: formData.requirements || null,
+        location: formData.location,
+        occupation: formData.occupation || null,
+        salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
+        salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
+        employment_type: formData.employment_type || null,
+        salary_type: formData.salary_type || null,
+        salary_transparency: formData.salary_transparency || null,
+        positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
+        work_location_type: formData.work_location_type || null,
+        remote_work_possible: formData.remote_work_possible || null,
+        workplace_name: formData.workplace_name || null,
+        workplace_address: formData.workplace_address || null,
+        workplace_postal_code: formData.workplace_postal_code || null,
+        workplace_city: formData.workplace_city || null,
+        workplace_county: workplaceCounty,
+        workplace_municipality: workplaceMunicipality,
+        work_schedule: formData.work_schedule || null,
+        work_start_time: formData.work_start_time || null,
+        work_end_time: formData.work_end_time || null,
+        benefits: formData.benefits && formData.benefits.length > 0 ? formData.benefits : null,
+        contact_email: formData.contact_email || null,
+        application_instructions: formData.application_instructions || null,
+        pitch: formData.pitch || null,
+        job_image_url: formData.job_image_url || null,
+        job_image_desktop_url: formData.job_image_desktop_url || null,
+        image_focus_position: formData.image_focus_position || 'center',
+        // Explicitly do NOT set is_active, created_at, or expires_at — keep as draft
+      };
+
+      const { error } = await supabase
+        .from('job_postings')
+        .update(payload)
+        .eq('id', job.id);
+
+      if (error) {
+        toast({ title: 'Fel vid sparning', description: error.message, variant: 'destructive' });
+        return;
+      }
+
+      // Save questions too
+      await supabase.from('job_questions').delete().eq('job_id', job.id);
+      if (customQuestions.length > 0) {
+        await supabase.from('job_questions').insert(
+          customQuestions.map(q => ({
+            job_id: job.id,
+            question_text: q.question_text,
+            question_type: q.question_type,
+            options: q.options || null,
+            is_required: q.is_required,
+            order_index: q.order_index,
+            min_value: q.min_value || null,
+            max_value: q.max_value || null,
+            placeholder_text: q.placeholder_text || null,
+          }))
+        );
+      }
+
+      toast({ title: 'Utkast sparat', description: 'Dina ändringar har sparats.' });
+      clearEditJobDraft();
       setShowUnsavedDialog(false);
       setPendingClose(false);
       setHasUnsavedChanges(false);
       onOpenChange(false);
+      onJobUpdated();
     } catch (error) {
-      console.error('Error saving:', error);
+      console.error('Error saving draft:', error);
+      toast({ title: 'Ett fel uppstod', description: 'Kunde inte spara utkastet.', variant: 'destructive' });
     } finally {
       setIsSavingAndLeaving(false);
     }
