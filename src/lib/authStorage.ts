@@ -99,28 +99,12 @@ const getLastActivityTimestamp = (): number => {
   }
 };
 
-const hasRecentActivity = (windowMs = SESSION_SENTINEL_RECOVERY_WINDOW_MS): boolean => {
+const hasRecentActivity = (windowMs = INACTIVITY_TIMEOUT_MS): boolean => {
   const lastActivityTime = getLastActivityTimestamp();
   if (lastActivityTime === 0) return false;
 
-  // On mobile, use the full inactivity timeout as the recovery window.
-  // Mobile OSes routinely wipe sessionStorage when backgrounding the browser,
-  // so the sentinel is unreliable — the 24h inactivity timer is the real guard.
-  const effectiveWindow = isLikelyVolatileSessionStorageEnv()
-    ? INACTIVITY_TIMEOUT_MS
-    : windowMs;
-
   const diffMs = Date.now() - lastActivityTime;
-  return diffMs >= 0 && diffMs <= effectiveWindow;
-};
-
-const isLikelyVolatileSessionStorageEnv = (): boolean => {
-  try {
-    if (typeof navigator === 'undefined') return false;
-    return navigator.maxTouchPoints > 0 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-  } catch {
-    return false;
-  }
+  return diffMs >= 0 && diffMs <= windowMs;
 };
 
 // Update last activity timestamp
