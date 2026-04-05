@@ -2631,24 +2631,7 @@ const MobileJobWizard = ({
                   {formData.benefits.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {formData.benefits.map((benefitValue) => {
-                        const benefitOptions = [
-                          { value: 'friskvard', label: 'Friskvårdsbidrag' },
-                          { value: 'tjanstepension', label: 'Tjänstepension' },
-                          { value: 'kollektivavtal', label: 'Kollektivavtal' },
-                          { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
-                          { value: 'bonus', label: 'Bonus' },
-                          { value: 'tjanstebil', label: 'Tjänstebil' },
-                          { value: 'mobiltelefon', label: 'Mobiltelefon' },
-                          { value: 'utbildning', label: 'Utbildning/kompetensutveckling' },
-                          { value: 'forsakringar', label: 'Försäkringar' },
-                          { value: 'extra-semester', label: 'Extra semesterdagar' },
-                          { value: 'gym', label: 'Gym/träning' },
-                          { value: 'foraldraledithet', label: 'Föräldraledighetstillägg' },
-                          { value: 'lunch', label: 'Lunch/mat' },
-                          { value: 'fri-parkering', label: 'Fri parkering' },
-                          { value: 'personalrabatter', label: 'Personalrabatter' },
-                        ];
-                        const benefit = benefitOptions.find(b => b.value === benefitValue);
+                        const benefit = BENEFIT_OPTIONS.find(b => b.value === benefitValue);
                         const label = benefit ? benefit.label : benefitValue;
                         return (
                           <span
