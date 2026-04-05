@@ -103,8 +103,15 @@ const hasRecentActivity = (windowMs = SESSION_SENTINEL_RECOVERY_WINDOW_MS): bool
   const lastActivityTime = getLastActivityTimestamp();
   if (lastActivityTime === 0) return false;
 
+  // On mobile, use the full inactivity timeout as the recovery window.
+  // Mobile OSes routinely wipe sessionStorage when backgrounding the browser,
+  // so the sentinel is unreliable — the 24h inactivity timer is the real guard.
+  const effectiveWindow = isLikelyVolatileSessionStorageEnv()
+    ? INACTIVITY_TIMEOUT_MS
+    : windowMs;
+
   const diffMs = Date.now() - lastActivityTime;
-  return diffMs >= 0 && diffMs <= windowMs;
+  return diffMs >= 0 && diffMs <= effectiveWindow;
 };
 
 const isLikelyVolatileSessionStorageEnv = (): boolean => {
