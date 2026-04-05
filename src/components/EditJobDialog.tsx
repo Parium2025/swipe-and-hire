@@ -199,6 +199,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const occupationRef = useRef<HTMLDivElement>(null);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
+  const previewSwipeRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const isTouchCapable = useTouchCapable();
 
