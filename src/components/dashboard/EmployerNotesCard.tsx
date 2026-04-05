@@ -39,10 +39,10 @@ export const EmployerNotesCard = memo(() => {
         <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
 
         <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-white/10">
-                <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-1.5">
+              <div className="p-1.5 rounded-lg bg-white/10">
+                <FileText className="h-4 w-4 text-white" strokeWidth={1.5} />
               </div>
               <button
                 onClick={() => setIsExpanded(true)}
@@ -50,15 +50,13 @@ export const EmployerNotesCard = memo(() => {
               >
                 <Maximize2 className="h-3.5 w-3.5 text-white" />
               </button>
+              <div className="border-l border-white/15 h-5 mx-0.5" />
+              <NotesToolbar editor={notesEditor} compact />
             </div>
             <div className="flex items-center gap-2">
               {saveIndicator}
               <span className="text-[10px] text-white uppercase tracking-wider font-medium">ANTECKNINGAR</span>
             </div>
-          </div>
-
-          <div className="mb-2 pb-1.5 border-b border-white/10">
-            <NotesToolbar editor={notesEditor} large />
           </div>
 
           <div className="flex-1 min-h-0 relative">
