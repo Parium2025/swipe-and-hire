@@ -1,9 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { ChevronDown, X, Heart, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BENEFITS_OPTIONS, getBenefitLabel } from '@/types/jobWizard';
-import { useTapToPreview } from '@/hooks/useTapToPreview';
 
 interface BenefitsDropdownProps {
   selectedBenefits: string[];
@@ -19,8 +18,6 @@ export const BenefitsDropdown = ({
   onToggle,
 }: BenefitsDropdownProps) => {
   const [customBenefitInput, setCustomBenefitInput] = useState('');
-  const { handleTap, isPreview, resetPreview } = useTapToPreview();
-  const textRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
   const toggleBenefit = (value: string) => {
     if (selectedBenefits.includes(value)) {
@@ -47,11 +44,6 @@ export const BenefitsDropdown = ({
       e.preventDefault();
       addCustomBenefit();
     }
-  };
-
-  const handleToggle = () => {
-    if (isOpen) resetPreview();
-    onToggle();
   };
 
   return (
@@ -83,7 +75,7 @@ export const BenefitsDropdown = ({
       <div className="relative">
         <button
           type="button"
-          onClick={handleToggle}
+          onClick={onToggle}
           className="w-full h-11 px-3 py-2 bg-white/5 border border-white/20 rounded-md text-left flex items-center justify-between text-white text-sm transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/30"
         >
           <span className="text-white">
@@ -99,42 +91,34 @@ export const BenefitsDropdown = ({
           <div className="absolute z-50 mt-1 w-full glass-panel rounded-md max-h-72 overflow-hidden">
             {/* Predefined benefits */}
             <div className="max-h-48 overflow-y-auto">
-              {BENEFITS_OPTIONS.map((option) => (
-                <div key={option.value} className="relative">
+              {BENEFITS_OPTIONS.map((option) => {
+                const isSelected = selectedBenefits.includes(option.value);
+                return (
                   <button
+                    key={option.value}
                     type="button"
-                    onClick={() => {
-                      handleTap(
-                        option.value,
-                        textRefs.current[option.value] ?? null,
-                        () => toggleBenefit(option.value)
-                      );
-                    }}
-                    className="w-full px-3 py-2.5 text-left text-sm transition-all duration-300 hover:bg-white/20 flex items-center justify-between"
+                    onClick={() => toggleBenefit(option.value)}
+                    className={`w-full px-3 py-2.5 text-left text-sm transition-all duration-150 flex items-center gap-2 ${
+                      isSelected 
+                        ? 'bg-primary/30' 
+                        : 'hover:bg-white/10'
+                    }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div className={`w-4 h-4 rounded border shrink-0 ${selectedBenefits.includes(option.value) ? 'bg-white border-white' : 'border-white/30 bg-white/10'} flex items-center justify-center`}>
-                        {selectedBenefits.includes(option.value) && (
-                          <Heart className="w-3 h-3 text-primary" />
-                        )}
-                      </div>
-                      <span
-                        ref={(el) => { textRefs.current[option.value] = el; }}
-                        className="text-white truncate"
-                      >
-                        {option.label}
-                      </span>
+                    <div className={`w-4 h-4 rounded border shrink-0 ${
+                      isSelected 
+                        ? 'bg-primary border-primary' 
+                        : 'border-white/30 bg-white/10'
+                    } flex items-center justify-center`}>
+                      {isSelected && (
+                        <Heart className="w-3 h-3 text-white" />
+                      )}
                     </div>
-                  </button>
-
-                  {/* Tap-to-preview tooltip */}
-                  {isPreview(option.value) && (
-                    <div className="absolute left-2 right-2 -top-1 -translate-y-full z-[60] px-3 py-2 rounded-lg bg-slate-900/95 border border-white/20 shadow-2xl text-sm text-white leading-relaxed whitespace-pre-wrap break-words animate-in fade-in-0 zoom-in-95 duration-150 pointer-events-none">
+                    <span className="text-white">
                       {option.label}
-                    </div>
-                  )}
-                </div>
-              ))}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
             
             {/* Custom benefit input */}

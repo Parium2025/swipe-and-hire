@@ -22,7 +22,7 @@ import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare, Copy } from 'lucide-react';
 import { PreviewModeTabs } from '@/components/ui/preview-mode-tabs';
 import { motion } from 'framer-motion';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
@@ -3872,6 +3872,28 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <div className="flex items-center gap-2 mb-2">
                             <Monitor className="h-4 w-4 text-white" />
                             <span className="text-white font-medium text-sm sm:text-base">Datorbild (valfritt)</span>
+                            {jobImageDisplayUrl && !jobImageDesktopDisplayUrl && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const mobileUrl = formData.job_image_url;
+                                  if (mobileUrl) {
+                                    handleInputChange('job_image_desktop_url', mobileUrl);
+                                    setOriginalDesktopImageUrl(originalImageUrl);
+                                    const { data: { publicUrl } } = supabase.storage
+                                      .from('job-images')
+                                      .getPublicUrl(mobileUrl);
+                                    if (publicUrl) {
+                                      setJobImageDesktopDisplayUrl(publicUrl);
+                                    }
+                                  }
+                                }}
+                                className="ml-auto premium-edit-pill-action inline-flex items-center gap-1.5 bg-primary/20 border border-primary/30 text-white text-xs transition-all duration-200 hover:bg-primary/30"
+                              >
+                                <Copy className="w-3 h-3" />
+                                <span>Använd mobilbild</span>
+                              </button>
+                            )}
                           </div>
                           <p className="text-white text-xs sm:text-sm mb-3">
                             Separat bild för dator/tablet. Om ingen laddas upp används mobilbilden.
