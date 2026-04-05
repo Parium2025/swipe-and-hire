@@ -4756,6 +4756,26 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                     <div className="flex items-center gap-2 mb-2">
                       <Monitor className="h-4 w-4 text-white" />
                       <span className="text-white font-medium text-sm sm:text-base">Datorbild (valfritt)</span>
+                      {jobImageDisplayUrl && !jobImageDesktopDisplayUrl && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const mobileUrl = formData.job_image_url;
+                            if (mobileUrl) {
+                              handleInputChange('job_image_desktop_url', mobileUrl);
+                              setOriginalDesktopStoragePath(originalStoragePath);
+                              setDesktopImageIsEdited(false);
+                              const { getMediaUrl } = await import('@/lib/mediaManager');
+                              const signedUrl = await getMediaUrl(mobileUrl, 'job-image', 86400);
+                              setOriginalDesktopImageUrl(signedUrl || mobileUrl);
+                            }
+                          }}
+                          className="ml-auto premium-edit-pill-action inline-flex items-center gap-1.5 bg-primary/20 border border-primary/30 text-white text-xs transition-all duration-200 hover:bg-primary/30"
+                        >
+                          <Copy className="w-3 h-3" />
+                          <span>Använd mobilbild</span>
+                        </button>
+                      )}
                     </div>
                     <p className="text-white text-xs sm:text-sm mb-3">
                       Separat bild för dator/tablet. Om ingen laddas upp används mobilbilden.
