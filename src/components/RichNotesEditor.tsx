@@ -90,7 +90,7 @@ const ToolbarButton = memo(({
               isActive ? "bg-white/30 ring-1 ring-white/40 shadow-sm" : "border border-transparent"
             )}
           >
-            <Icon className={cn(large ? "h-5 w-5" : compact ? "h-3.5 w-3.5" : "h-4 w-4", "text-pure-white")} />
+            <Icon className={cn(large ? "h-5 w-5" : compact ? "h-4 w-4" : "h-4 w-4", "text-pure-white")} />
           </button>
         </TooltipTrigger>
         <TooltipContent side="top">
