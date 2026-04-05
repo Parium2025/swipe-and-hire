@@ -70,7 +70,7 @@ export const BenefitsList = memo(({ selectedBenefits, onToggle }: BenefitsListPr
           >
             <div className={`w-4 h-4 rounded-[3px] border shrink-0 flex items-center justify-center transition-colors ${isSelected ? 'border-primary bg-primary' : 'border-white/30 bg-white/10'}`}>
               {isSelected && (
-                <Heart className="w-2.5 h-2.5 text-white" fill="currentColor" />
+                <Heart className="w-2.5 h-2.5 text-white" strokeWidth={2.25} />
               )}
             </div>
             <span>{benefit.label}</span>
