@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { memo, useRef, useState, useEffect, useCallback } from 'react';
+import { memo, useRef, useState, useLayoutEffect, useCallback } from 'react';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -34,7 +34,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
     }
   }, [activeTab]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     updateIndicator();
     window.addEventListener('resize', updateIndicator);
     return () => window.removeEventListener('resize', updateIndicator);
