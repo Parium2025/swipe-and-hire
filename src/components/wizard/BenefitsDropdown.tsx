@@ -110,7 +110,7 @@ export const BenefitsDropdown = ({
                         : 'border-white/30 bg-white/10'
                     } flex items-center justify-center`}>
                       {isSelected && (
-                        <Heart className="w-3 h-3 text-white" />
+                        <Heart className="w-2.5 h-2.5 text-white" fill="currentColor" />
                       )}
                     </div>
                     <span className="text-white">

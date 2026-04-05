@@ -23,6 +23,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare, Copy } from 'lucide-react';
+import { BenefitsList } from '@/components/wizard/BenefitsList';
 import { PreviewModeTabs } from '@/components/ui/preview-mode-tabs';
 import { motion } from 'framer-motion';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
@@ -1210,6 +1211,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     setShowBenefitsDropdown(!isCurrentlyOpen);
   };
 
+  const handleBenefitToggle = useCallback((value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      benefits: prev.benefits.includes(value)
+        ? prev.benefits.filter(b => b !== value)
+        : [...prev.benefits, value]
+    }));
+  }, []);
+
   const handleWorkLocationSearch = (value: string) => {
     setWorkLocationSearchTerm(value);
     setShowWorkLocationDropdown(value.length >= 0);
@@ -1875,28 +1885,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           
                           {showBenefitsDropdown && (
                             <div className="absolute top-full left-0 right-0 glass-dropdown max-h-60 overflow-y-auto">
-                              {benefitOptions.map((benefit) => (
-                                <button
-                                  key={benefit.value}
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (formData.benefits.includes(benefit.value)) {
-                                      setFormData(prev => ({ ...prev, benefits: prev.benefits.filter(b => b !== benefit.value) }));
-                                    } else {
-                                      setFormData(prev => ({ ...prev, benefits: [...prev.benefits, benefit.value] }));
-                                    }
-                                  }}
-                                  className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 flex items-center gap-2 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors ${formData.benefits.includes(benefit.value) ? 'bg-primary/30' : 'hover:bg-white/10'}`}
-                                >
-                                  <div className={`w-4 h-4 rounded border shrink-0 ${formData.benefits.includes(benefit.value) ? 'bg-primary border-primary' : 'border-white/30 bg-white/10'} flex items-center justify-center`}>
-                                    {formData.benefits.includes(benefit.value) && (
-                                      <Heart className="w-3 h-3 text-white" />
-                                    )}
-                                  </div>
-                                  <span>{benefit.label}</span>
-                                </button>
-                              ))}
+                              <BenefitsList
+                                selectedBenefits={formData.benefits}
+                                onToggle={handleBenefitToggle}
+                              />
                             </div>
                           )}
                         </div>
