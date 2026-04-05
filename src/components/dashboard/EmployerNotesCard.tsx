@@ -84,7 +84,7 @@ export const EmployerNotesCard = memo(() => {
 
           {/* Footer: save status left, word/char count right */}
           <div className="flex items-center justify-between mt-1 min-h-[16px]">
-            <span className="text-[10px] text-white/70 font-medium">
+            <span className="text-[11px] text-white font-medium">
               {isSaving ? (
                 <span className="animate-pulse">Sparar...</span>
               ) : saveFailed ? (
@@ -93,7 +93,7 @@ export const EmployerNotesCard = memo(() => {
                 'Sparat ✓'
               ) : null}
             </span>
-            <span className="text-[10px] text-white/50 font-medium tabular-nums">
+            <span className="text-[11px] text-white font-medium tabular-nums">
               {words} ord · {chars} tecken
             </span>
           </div>
