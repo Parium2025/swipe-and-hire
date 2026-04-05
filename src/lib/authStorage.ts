@@ -10,6 +10,14 @@ const SESSION_SENTINEL_KEY = 'parium-session-alive';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 const SESSION_SENTINEL_RECOVERY_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 
+const isAuthStorageKey = (key: string): boolean => {
+  return (
+    key.includes('supabase.auth') ||
+    key.includes('supabase') ||
+    key.includes('-auth-token')
+  );
+};
+
 /**
  * Module-level flag shared with useInactivityTimeout.
  * Set here (in authStorage) because this is the FIRST layer that detects
@@ -205,7 +213,7 @@ export class AuthStorageAdapter implements Storage {
   }
 
   getItem(key: string): string | null {
-    if (key.includes('supabase.auth')) {
+    if (isAuthStorageKey(key)) {
       // Check 24h inactivity timeout (applies to all users)
       if (hasSessionExpiredDueToInactivity()) {
         console.log('⏰ Session expired due to 24h inactivity (detected in authStorage) - logging out');
@@ -243,7 +251,7 @@ export class AuthStorageAdapter implements Storage {
     // For auth keys: ALWAYS read from localStorage first.
     // On mobile, sessionStorage is wiped when the OS reclaims the tab/webview,
     // so relying on it causes unexpected logouts when switching apps or locking the screen.
-    if (key.includes('supabase')) {
+    if (isAuthStorageKey(key)) {
       let value: string | null = null;
       try {
         value = localStorage.getItem(key);
@@ -269,7 +277,7 @@ export class AuthStorageAdapter implements Storage {
 
   setItem(key: string, value: string): void {
     // For supabase auth keys, always store in BOTH storages to prevent logout issues
-    if (key.includes('supabase')) {
+    if (isAuthStorageKey(key)) {
       try {
         localStorage.setItem(key, value);
       } catch (lsError) {
@@ -313,7 +321,7 @@ export class AuthStorageAdapter implements Storage {
     // Collect auth keys from localStorage
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.includes('supabase')) {
+      if (key && isAuthStorageKey(key)) {
         keysToRemove.push(key);
       }
     }
@@ -321,7 +329,7 @@ export class AuthStorageAdapter implements Storage {
     // Collect auth keys from sessionStorage
     for (let i = 0; i < sessionStorage.length; i++) {
       const key = sessionStorage.key(i);
-      if (key && key.includes('supabase') && !keysToRemove.includes(key)) {
+      if (key && isAuthStorageKey(key) && !keysToRemove.includes(key)) {
         keysToRemove.push(key);
       }
     }
