@@ -71,13 +71,6 @@ const getLastActivityTimestamp = (): number => {
   }
 };
 
-const hasRecentActivity = (windowMs = INACTIVITY_TIMEOUT_MS): boolean => {
-  const lastActivityTime = getLastActivityTimestamp();
-  if (lastActivityTime === 0) return false;
-
-  const diffMs = Date.now() - lastActivityTime;
-  return diffMs >= 0 && diffMs <= windowMs;
-};
 
 // Update last activity timestamp
 export const updateLastActivity = (): void => {
