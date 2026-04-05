@@ -34,7 +34,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
     }
   }, [activeTab]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     updateIndicator();
     window.addEventListener('resize', updateIndicator);
     return () => window.removeEventListener('resize', updateIndicator);
