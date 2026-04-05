@@ -104,7 +104,7 @@ export const BenefitsDropdown = ({
                         : 'hover:bg-white/10'
                     }`}
                   >
-                    <div className={`w-4 h-4 rounded border shrink-0 ${
+                    <div className={`w-4 h-4 rounded-[3px] border shrink-0 ${
                       isSelected 
                         ? 'bg-primary border-primary' 
                         : 'border-white/30 bg-white/10'
