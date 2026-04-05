@@ -8,7 +8,7 @@ const REMEMBER_ME_KEY = 'parium-remember-me';
 const LAST_ACTIVITY_KEY = 'parium-last-activity';
 const SESSION_SENTINEL_KEY = 'parium-session-alive';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
-const SESSION_SENTINEL_RECOVERY_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+
 
 const isAuthStorageKey = (key: string): boolean => {
   return (
@@ -99,28 +99,12 @@ const getLastActivityTimestamp = (): number => {
   }
 };
 
-const hasRecentActivity = (windowMs = SESSION_SENTINEL_RECOVERY_WINDOW_MS): boolean => {
+const hasRecentActivity = (windowMs = INACTIVITY_TIMEOUT_MS): boolean => {
   const lastActivityTime = getLastActivityTimestamp();
   if (lastActivityTime === 0) return false;
 
-  // On mobile, use the full inactivity timeout as the recovery window.
-  // Mobile OSes routinely wipe sessionStorage when backgrounding the browser,
-  // so the sentinel is unreliable — the 24h inactivity timer is the real guard.
-  const effectiveWindow = isLikelyVolatileSessionStorageEnv()
-    ? INACTIVITY_TIMEOUT_MS
-    : windowMs;
-
   const diffMs = Date.now() - lastActivityTime;
-  return diffMs >= 0 && diffMs <= effectiveWindow;
-};
-
-const isLikelyVolatileSessionStorageEnv = (): boolean => {
-  try {
-    if (typeof navigator === 'undefined') return false;
-    return navigator.maxTouchPoints > 0 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-  } catch {
-    return false;
-  }
+  return diffMs >= 0 && diffMs <= windowMs;
 };
 
 // Update last activity timestamp
@@ -231,25 +215,23 @@ export class AuthStorageAdapter implements Storage {
         return null;
       }
 
-      // If "remember me" is OFF, check session sentinel.
-      // Missing sentinel = tab/app was closed → log out.
-      // Skip this check inside iframes (Lovable preview) — the iframe reload
-      // destroys sessionStorage, which would falsely trigger a logout.
+      // If "remember me" is OFF and sentinel is missing, check recent activity.
+      // The 24h inactivity timer is the sole logout mechanism on ALL platforms.
+      // Sentinel is just a hint — if activity is recent, restore it silently.
       const isInsideIframe = typeof window !== 'undefined' && window.self !== window.top;
       if (!isInsideIframe && !shouldRememberUser() && !isSessionSentinelAlive()) {
-        // Check if there's actually auth data stored (i.e. user was logged in before)
         const hasStoredAuth = (() => {
           try { return !!localStorage.getItem(key); } catch { return false; }
         })();
         if (hasStoredAuth) {
-          if (hasRecentActivity() || isLikelyVolatileSessionStorageEnv()) {
-            console.log('🔄 Session sentinel missing after recent activity — restoring tab session');
+          if (hasRecentActivity()) {
+            console.log('🔄 Session sentinel missing but recent activity found — restoring session');
             refreshSessionSentinel();
           } else {
-          console.log('🚪 Session ended: tab/app was closed without "remember me" — logging out');
-          this.clearAuthData();
-          clearActivityTracking();
-          return null;
+            console.log('🚪 Session ended: no activity within 24h — logging out');
+            this.clearAuthData();
+            clearActivityTracking();
+            return null;
           }
         }
       }
