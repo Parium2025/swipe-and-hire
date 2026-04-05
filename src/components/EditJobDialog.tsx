@@ -1210,6 +1210,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     setShowBenefitsDropdown(!isCurrentlyOpen);
   };
 
+  const handleBenefitToggle = useCallback((value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      benefits: prev.benefits.includes(value)
+        ? prev.benefits.filter(b => b !== value)
+        : [...prev.benefits, value]
+    }));
+  }, []);
+
   const handleWorkLocationSearch = (value: string) => {
     setWorkLocationSearchTerm(value);
     setShowWorkLocationDropdown(value.length >= 0);

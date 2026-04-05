@@ -1706,6 +1706,15 @@ const MobileJobWizard = ({
     setShowBenefitsDropdown(!isCurrentlyOpen);
   };
 
+  const handleBenefitToggle = useCallback((value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      benefits: prev.benefits.includes(value)
+        ? prev.benefits.filter(b => b !== value)
+        : [...prev.benefits, value]
+    }));
+  }, []);
+
   const handleQuestionTypeClick = () => {
     const isCurrentlyOpen = showQuestionTypeDropdown;
     closeAllDropdowns();
