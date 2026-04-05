@@ -182,11 +182,11 @@ export const NotesToolbar = ({ editor, className, compact = false, large = false
       <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
       <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" isActive={editor.isActive('bulletList')} compact={compact} large={large} buttonId="bulletList" {...tapProps} />
       <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" isActive={editor.isActive('taskList')} compact={compact} large={large} buttonId="taskList" {...tapProps} />
-      {showUndoRedo && (
+      {showUndoRedo && !compact && (
         <>
-          <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
-          <ToolbarButton onClick={handleUndo} icon={Undo} title="Ångra" disabled={!editor.can().undo()} compact={compact} large={large} buttonId="undo" {...tapProps} />
-          <ToolbarButton onClick={handleRedo} icon={Redo} title="Gör om" disabled={!editor.can().redo()} compact={compact} large={large} buttonId="redo" {...tapProps} />
+          <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : "h-4 mx-1")} />
+          <ToolbarButton onClick={handleUndo} icon={Undo} title="Ångra" disabled={!editor.can().undo()} large={large} buttonId="undo" {...tapProps} />
+          <ToolbarButton onClick={handleRedo} icon={Redo} title="Gör om" disabled={!editor.can().redo()} large={large} buttonId="redo" {...tapProps} />
         </>
       )}
     </div>
