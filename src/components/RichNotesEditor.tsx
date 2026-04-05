@@ -83,14 +83,14 @@ const ToolbarButton = memo(({
             disabled={disabled}
             className={cn(
               "flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-150 caret-transparent",
-              large ? "w-11 h-11" : compact ? "w-9 h-9 min-w-[36px] min-h-[36px]" : "w-8 h-8",
+              large ? "w-11 h-11" : compact ? "w-10 h-10 min-w-[40px] min-h-[40px]" : "w-8 h-8",
               "bg-transparent md:hover:bg-white/20",
               "active:scale-90",
               "disabled:opacity-30 disabled:cursor-not-allowed",
               isActive ? "bg-white/30 ring-1 ring-white/40 shadow-sm" : "border border-transparent"
             )}
           >
-            <Icon className={cn(large ? "h-5 w-5" : compact ? "h-4 w-4" : "h-4 w-4", "text-pure-white")} />
+            <Icon className={cn(large ? "h-5 w-5" : compact ? "h-4.5 w-4.5" : "h-4 w-4", "text-pure-white")} />
           </button>
         </TooltipTrigger>
         <TooltipContent side="top">
