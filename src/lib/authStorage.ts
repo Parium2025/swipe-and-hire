@@ -25,31 +25,6 @@ let _inactivityLogoutFromStorage = false;
 export const isInactivityLogoutFromStorage = () => _inactivityLogoutFromStorage;
 export const clearInactivityLogoutFromStorage = () => { _inactivityLogoutFromStorage = false; };
 
-/**
- * Session sentinel: a sessionStorage flag that indicates the browser tab is still open.
- * - Survives normal app-switching on mobile (tab stays alive in background)
- * - Disappears when the user actually closes the tab/browser/app
- * - Used to log out non-"remember me" users when they reopen a closed tab
- */
-export const refreshSessionSentinel = (): void => {
-  try {
-    sessionStorage.setItem(SESSION_SENTINEL_KEY, '1');
-  } catch {}
-};
-
-export const isSessionSentinelAlive = (): boolean => {
-  try {
-    return sessionStorage.getItem(SESSION_SENTINEL_KEY) === '1';
-  } catch {
-    return false;
-  }
-};
-
-export const clearSessionSentinel = (): void => {
-  try {
-    sessionStorage.removeItem(SESSION_SENTINEL_KEY);
-  } catch {}
-};
 
 // Track if we should use persistent storage
 export const shouldRememberUser = (): boolean => {
