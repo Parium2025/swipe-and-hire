@@ -172,7 +172,16 @@ export function AppSidebar() {
         {/* User Profile Section - always mounted to preload, but only visible when not collapsed */}
         <div className={`shrink-0 p-4 ${collapsed ? 'hidden' : ''}`}>
           <div className="flex items-center gap-3">
-            {hasVideo && videoUrl ? (
+            {!profile ? (
+              /* Skeleton while profile loads */
+              <>
+                <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse shrink-0" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="h-3.5 w-24 bg-white/10 rounded animate-pulse" />
+                  <div className="h-3 w-16 bg-white/10 rounded animate-pulse" />
+                </div>
+              </>
+            ) : hasVideo && videoUrl ? (
               <ProfileVideo
                 videoUrl={videoUrl}
                 coverImageUrl={coverUrl || avatarUrl || undefined}
@@ -198,6 +207,7 @@ export function AppSidebar() {
                 </AvatarFallback>
               </Avatar>
             )}
+            {profile && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">
                 {profile?.first_name} {profile?.last_name}
@@ -206,6 +216,7 @@ export function AppSidebar() {
                 {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
               </p>
             </div>
+            )}
           </div>
         </div>
         
