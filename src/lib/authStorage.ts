@@ -211,26 +211,9 @@ export class AuthStorageAdapter implements Storage {
         return null;
       }
 
-      // If "remember me" is OFF and sentinel is missing, check recent activity.
-      // The 24h inactivity timer is the sole logout mechanism on ALL platforms.
-      // Sentinel is just a hint — if activity is recent, restore it silently.
-      const isInsideIframe = typeof window !== 'undefined' && window.self !== window.top;
-      if (!isInsideIframe && !shouldRememberUser() && !isSessionSentinelAlive()) {
-        const hasStoredAuth = (() => {
-          try { return !!localStorage.getItem(key); } catch { return false; }
-        })();
-        if (hasStoredAuth) {
-          if (hasRecentActivity()) {
-            console.log('🔄 Session sentinel missing but recent activity found — restoring session');
-            refreshSessionSentinel();
-          } else {
-            console.log('🚪 Session ended: no activity within 24h — logging out');
-            this.clearAuthData();
-            clearActivityTracking();
-            return null;
-          }
-        }
-      }
+      // Note: The 24h inactivity check above is the sole logout mechanism.
+      // No additional sentinel checks needed — session persists as long as
+      // there's been activity within 24 hours, on any platform.
     }
     
     // For auth keys: ALWAYS read from localStorage first.
