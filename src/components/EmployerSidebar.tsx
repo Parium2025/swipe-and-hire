@@ -315,7 +315,22 @@ export function EmployerSidebar() {
       <SidebarContent className="gap-0 overflow-x-hidden">
         {/* User Profile Section - show avatar only when collapsed, full info when expanded */}
         <div className="shrink-0 p-4">
-          {collapsed ? (
+          {!profile ? (
+            /* Skeleton while profile loads */
+            collapsed ? (
+              <div className="flex justify-center">
+                <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse" />
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse shrink-0" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="h-3.5 w-24 bg-white/10 rounded animate-pulse" />
+                  <div className="h-3 w-16 bg-white/10 rounded animate-pulse" />
+                </div>
+              </div>
+            )
+          ) : collapsed ? (
             /* Collapsed: Only show avatar centered */
             <div className="flex justify-center">
               <CompanyAvatar
