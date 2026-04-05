@@ -363,10 +363,12 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                       alt={getUserDisplayName()} 
                       className="h-10 w-10 rounded-full object-cover"
                     />
-                  ) : (
+                  ) : profile ? (
                     <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold text-white">
                       {getUserInitials()}
                     </div>
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse" />
                   )}
                   <div className="flex flex-col min-w-0 flex-1">
                     <Tooltip>
