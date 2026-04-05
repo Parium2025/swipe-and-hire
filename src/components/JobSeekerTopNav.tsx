@@ -330,10 +330,12 @@ function JobSeekerTopNav() {
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
-                ) : (
+                ) : profile ? (
                   <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20 relative z-10">
                     {getUserInitials()}
                   </div>
+                ) : (
+                  <div className="h-7 w-7 rounded-full bg-white/10 animate-pulse ring-2 ring-white/20 relative z-10" />
                 )}
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
