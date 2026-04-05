@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useLayoutEffect } from 'react';
 import { User, Users } from 'lucide-react';
 
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
@@ -24,7 +24,7 @@ export function MessagesTabs({
   const colleaguesRef = useRef<HTMLButtonElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 0 });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updateIndicator = () => {
       const refs: Record<ConversationTab, React.RefObject<HTMLButtonElement | null>> = {
         all: allRef,
