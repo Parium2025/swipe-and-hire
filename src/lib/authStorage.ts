@@ -224,7 +224,7 @@ export class AuthStorageAdapter implements Storage {
         console.warn('Failed to write auth key to sessionStorage:', ssError);
       }
       updateLastActivity();
-      refreshSessionSentinel();
+      
     } else {
       // For non-auth keys, use preferred storage
       this.getStorage().setItem(key, value);
