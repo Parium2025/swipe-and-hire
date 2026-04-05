@@ -6,7 +6,6 @@
 
 const REMEMBER_ME_KEY = 'parium-remember-me';
 const LAST_ACTIVITY_KEY = 'parium-last-activity';
-const SESSION_SENTINEL_KEY = 'parium-session-alive';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 
@@ -26,31 +25,6 @@ let _inactivityLogoutFromStorage = false;
 export const isInactivityLogoutFromStorage = () => _inactivityLogoutFromStorage;
 export const clearInactivityLogoutFromStorage = () => { _inactivityLogoutFromStorage = false; };
 
-/**
- * Session sentinel: a sessionStorage flag that indicates the browser tab is still open.
- * - Survives normal app-switching on mobile (tab stays alive in background)
- * - Disappears when the user actually closes the tab/browser/app
- * - Used to log out non-"remember me" users when they reopen a closed tab
- */
-export const refreshSessionSentinel = (): void => {
-  try {
-    sessionStorage.setItem(SESSION_SENTINEL_KEY, '1');
-  } catch {}
-};
-
-export const isSessionSentinelAlive = (): boolean => {
-  try {
-    return sessionStorage.getItem(SESSION_SENTINEL_KEY) === '1';
-  } catch {
-    return false;
-  }
-};
-
-export const clearSessionSentinel = (): void => {
-  try {
-    sessionStorage.removeItem(SESSION_SENTINEL_KEY);
-  } catch {}
-};
 
 // Track if we should use persistent storage
 export const shouldRememberUser = (): boolean => {
@@ -97,13 +71,6 @@ const getLastActivityTimestamp = (): number => {
   }
 };
 
-const hasRecentActivity = (windowMs = INACTIVITY_TIMEOUT_MS): boolean => {
-  const lastActivityTime = getLastActivityTimestamp();
-  if (lastActivityTime === 0) return false;
-
-  const diffMs = Date.now() - lastActivityTime;
-  return diffMs >= 0 && diffMs <= windowMs;
-};
 
 // Update last activity timestamp
 export const updateLastActivity = (): void => {
@@ -257,7 +224,7 @@ export class AuthStorageAdapter implements Storage {
         console.warn('Failed to write auth key to sessionStorage:', ssError);
       }
       updateLastActivity();
-      refreshSessionSentinel();
+      
     } else {
       // For non-auth keys, use preferred storage
       this.getStorage().setItem(key, value);

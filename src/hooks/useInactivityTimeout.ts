@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { updateLastActivity, hasSessionExpiredDueToInactivity, clearActivityTracking, refreshSessionSentinel } from '@/lib/authStorage';
+import { updateLastActivity, hasSessionExpiredDueToInactivity, clearActivityTracking } from '@/lib/authStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { clearSessionToken } from '@/hooks/useSessionManager';
 
@@ -20,7 +20,6 @@ export const useInactivityTimeout = (isAuthenticated: boolean) => {
   const handleActivity = useCallback(() => {
     if (isAuthenticated) {
       updateLastActivity();
-      refreshSessionSentinel();
     }
   }, [isAuthenticated]);
 
