@@ -110,6 +110,44 @@ const SidebarProvider = React.forwardRef<
       return () => window.removeEventListener("keydown", handleKeyDown)
     }, [toggleSidebar])
 
+    // Edge-swipe from left to open sidebar on mobile/touch
+    const edgeSwipeRef = React.useRef<{ startX: number; startY: number; started: boolean } | null>(null)
+
+    React.useEffect(() => {
+      if (!isMobile) return
+
+      const EDGE_ZONE = 24 // px from left edge
+      const SWIPE_THRESHOLD = 50
+      const VERTICAL_RATIO = 1.5
+
+      const onTouchStart = (e: TouchEvent) => {
+        const touch = e.touches[0]
+        if (touch.clientX <= EDGE_ZONE && !openMobile) {
+          edgeSwipeRef.current = { startX: touch.clientX, startY: touch.clientY, started: true }
+        } else {
+          edgeSwipeRef.current = null
+        }
+      }
+
+      const onTouchEnd = (e: TouchEvent) => {
+        if (!edgeSwipeRef.current?.started) return
+        const touch = e.changedTouches[0]
+        const dx = touch.clientX - edgeSwipeRef.current.startX
+        const dy = Math.abs(touch.clientY - edgeSwipeRef.current.startY)
+        if (dx > SWIPE_THRESHOLD && dx > dy * VERTICAL_RATIO) {
+          setOpenMobile(true)
+        }
+        edgeSwipeRef.current = null
+      }
+
+      document.addEventListener('touchstart', onTouchStart, { passive: true })
+      document.addEventListener('touchend', onTouchEnd, { passive: true })
+      return () => {
+        document.removeEventListener('touchstart', onTouchStart)
+        document.removeEventListener('touchend', onTouchEnd)
+      }
+    }, [isMobile, openMobile, setOpenMobile])
+
     // We add a state so that we can do data-state="expanded" or "collapsed".
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
