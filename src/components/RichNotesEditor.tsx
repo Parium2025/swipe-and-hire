@@ -144,33 +144,20 @@ export const NotesToolbar = ({ editor, className, compact = false, large = false
     editor.on('selectionUpdate', handler);
     return () => { editor.off('transaction', handler); editor.off('selectionUpdate', handler); };
   }, [editor]);
-  const handleBold = useCallback(() => {
-    editor?.chain().focus().toggleBold().run();
+  const runCommand = useCallback((cmd: (chain: ReturnType<Editor['chain']>) => ReturnType<Editor['chain']>) => {
+    if (!editor) return;
+    const isFocused = editor.isFocused;
+    const chain = isFocused ? editor.chain().focus() : editor.chain();
+    cmd(chain).run();
   }, [editor]);
 
-  const handleItalic = useCallback(() => {
-    editor?.chain().focus().toggleItalic().run();
-  }, [editor]);
-
-  const handleStrikethrough = useCallback(() => {
-    editor?.chain().focus().toggleStrike().run();
-  }, [editor]);
-
-  const handleBulletList = useCallback(() => {
-    editor?.chain().focus().toggleBulletList().run();
-  }, [editor]);
-
-  const handleCheckbox = useCallback(() => {
-    editor?.chain().focus().toggleTaskList().run();
-  }, [editor]);
-
-  const handleUndo = useCallback(() => {
-    editor?.chain().focus().undo().run();
-  }, [editor]);
-
-  const handleRedo = useCallback(() => {
-    editor?.chain().focus().redo().run();
-  }, [editor]);
+  const handleBold = useCallback(() => runCommand(c => c.toggleBold()), [runCommand]);
+  const handleItalic = useCallback(() => runCommand(c => c.toggleItalic()), [runCommand]);
+  const handleStrikethrough = useCallback(() => runCommand(c => c.toggleStrike()), [runCommand]);
+  const handleBulletList = useCallback(() => runCommand(c => c.toggleBulletList()), [runCommand]);
+  const handleCheckbox = useCallback(() => runCommand(c => c.toggleTaskList()), [runCommand]);
+  const handleUndo = useCallback(() => runCommand(c => c.undo()), [runCommand]);
+  const handleRedo = useCallback(() => runCommand(c => c.redo()), [runCommand]);
 
   if (!editor) return null;
 
