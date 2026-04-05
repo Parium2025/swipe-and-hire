@@ -716,6 +716,7 @@ const MobileJobWizard = ({
   const [desktopPreviewAnswers, setDesktopPreviewAnswers] = useState<Record<string, string>>({});
   const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
   const screenRef = useRef<HTMLDivElement>(null);
+  const previewSwipeRef = useRef<HTMLDivElement>(null);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
   const [scale, setScale] = useState(1);
   const BASE_WIDTH = 360;
