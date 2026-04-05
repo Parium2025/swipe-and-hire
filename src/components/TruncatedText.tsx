@@ -169,7 +169,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip, to
           sideOffset={8}
           avoidCollisions={false}
           className="z-[999999] max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg"
-          onPointerDownOutside={(e) => e.preventDefault()}
+          onPointerDownOutside={() => setIsOpen(false)}
           onMouseDown={(e) => e.stopPropagation()}
           onWheel={(e) => e.stopPropagation()}
         >

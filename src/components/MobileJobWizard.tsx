@@ -1215,6 +1215,20 @@ const MobileJobWizard = ({
   };
   
   const useQuestionTemplate = async (template: any) => {
+    // Check for duplicate question
+    const isDuplicate = customQuestions.some(
+      q => q.question_text.trim().toLowerCase() === template.question_text.trim().toLowerCase()
+        && q.question_type === template.question_type
+    );
+    if (isDuplicate) {
+      toast({
+        title: "Frågan finns redan",
+        description: "Du har redan lagt till den här frågan i annonsen.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Filter out empty options before adding
     const filteredOptions = template.options?.filter((opt: string) => opt.trim() !== '') || [];
     
