@@ -10,12 +10,10 @@ const SESSION_SENTINEL_KEY = 'parium-session-alive';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 
+const SUPABASE_AUTH_KEY_PATTERN = /sb-[a-z]+-auth-token/;
+
 const isAuthStorageKey = (key: string): boolean => {
-  return (
-    key.includes('supabase.auth') ||
-    key.includes('supabase') ||
-    key.includes('-auth-token')
-  );
+  return SUPABASE_AUTH_KEY_PATTERN.test(key) || key.includes('supabase.auth');
 };
 
 /**
