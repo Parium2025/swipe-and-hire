@@ -215,25 +215,23 @@ export class AuthStorageAdapter implements Storage {
         return null;
       }
 
-      // If "remember me" is OFF, check session sentinel.
-      // Missing sentinel = tab/app was closed → log out.
-      // Skip this check inside iframes (Lovable preview) — the iframe reload
-      // destroys sessionStorage, which would falsely trigger a logout.
+      // If "remember me" is OFF and sentinel is missing, check recent activity.
+      // The 24h inactivity timer is the sole logout mechanism on ALL platforms.
+      // Sentinel is just a hint — if activity is recent, restore it silently.
       const isInsideIframe = typeof window !== 'undefined' && window.self !== window.top;
       if (!isInsideIframe && !shouldRememberUser() && !isSessionSentinelAlive()) {
-        // Check if there's actually auth data stored (i.e. user was logged in before)
         const hasStoredAuth = (() => {
           try { return !!localStorage.getItem(key); } catch { return false; }
         })();
         if (hasStoredAuth) {
-          if (hasRecentActivity() || isLikelyVolatileSessionStorageEnv()) {
-            console.log('🔄 Session sentinel missing after recent activity — restoring tab session');
+          if (hasRecentActivity()) {
+            console.log('🔄 Session sentinel missing but recent activity found — restoring session');
             refreshSessionSentinel();
           } else {
-          console.log('🚪 Session ended: tab/app was closed without "remember me" — logging out');
-          this.clearAuthData();
-          clearActivityTracking();
-          return null;
+            console.log('🚪 Session ended: no activity within 24h — logging out');
+            this.clearAuthData();
+            clearActivityTracking();
+            return null;
           }
         }
       }
