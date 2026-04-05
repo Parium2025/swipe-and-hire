@@ -3181,18 +3181,23 @@ const MobileJobWizard = ({
                                   {templates.map((template) => (
                                     <div
                                       key={template.id}
-                                      className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group"
+                                      className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group cursor-pointer active:scale-[0.98]"
+                                      onClick={(e) => {
+                                        // Don't trigger if clicking Edit or Delete buttons
+                                        if ((e.target as HTMLElement).closest('button')) return;
+                                        useQuestionTemplate(template);
+                                      }}
                                     >
                                       <div className="flex flex-col gap-1.5">
                                         <TruncatedText 
                                           text={template.question_text}
-                                          className="text-white font-medium text-sm leading-tight truncate cursor-pointer hover:opacity-80 transition-opacity min-w-0"
-                                          onClick={() => useQuestionTemplate(template)}
+                                          className="text-white font-medium text-sm leading-tight truncate min-w-0"
                                         />
                                         <div className="flex items-center justify-center gap-2">
                                           <button
                                             type="button"
-                                            onClick={() => {
+                                            onClick={(e) => {
+                                              e.stopPropagation();
                                               setEditingQuestion({
                                                 ...template,
                                                 template_id: template.id
@@ -3207,7 +3212,8 @@ const MobileJobWizard = ({
                                           </button>
                                           <button
                                             type="button"
-                                            onClick={() => {
+                                            onClick={(e) => {
+                                              e.stopPropagation();
                                               if (!template.id) return;
                                               setDeleteTemplateId(template.id);
                                             }}

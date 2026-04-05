@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { memo, useRef, useState, useLayoutEffect, useCallback } from 'react';
+import { memo, useRef, useState, useLayoutEffect, useCallback, useEffect } from 'react';
 import { Smartphone, Monitor } from 'lucide-react';
 
 type PreviewMode = 'mobile' | 'desktop';
@@ -7,9 +7,11 @@ type PreviewMode = 'mobile' | 'desktop';
 interface PreviewModeTabsProps {
   activeMode: PreviewMode;
   onModeChange: (mode: PreviewMode) => void;
+  /** Optional ref to a swipeable container area below the tabs */
+  swipeContainerRef?: React.RefObject<HTMLElement>;
 }
 
-export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onModeChange }: PreviewModeTabsProps) {
+export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onModeChange, swipeContainerRef }: PreviewModeTabsProps) {
   const mobileRef = useRef<HTMLButtonElement>(null);
   const desktopRef = useRef<HTMLButtonElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
@@ -29,6 +31,44 @@ export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onMod
     window.addEventListener('resize', updateIndicator);
     return () => window.removeEventListener('resize', updateIndicator);
   }, [updateIndicator]);
+
+  // Swipe gesture support
+  useEffect(() => {
+    const container = swipeContainerRef?.current;
+    if (!container) return;
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    const onTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      tracking = true;
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!tracking) return;
+      tracking = false;
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      // Only register horizontal swipes (more horizontal than vertical, min 50px)
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0 && activeMode === 'mobile') {
+          onModeChange('desktop');
+        } else if (dx > 0 && activeMode === 'desktop') {
+          onModeChange('mobile');
+        }
+      }
+    };
+
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    container.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [swipeContainerRef, activeMode, onModeChange]);
 
   return (
     <div className="dashboard-tabs-viewport mx-auto">
