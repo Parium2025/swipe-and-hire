@@ -77,10 +77,12 @@ const MobileProfileAvatar = () => {
             {initials}
           </AvatarFallback>
         </Avatar>
-      ) : (
+      ) : profile ? (
         <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20">
           {initials}
         </div>
+      ) : (
+        <div className="h-8 w-8 rounded-full bg-white/10 animate-pulse ring-2 ring-white/20" />
       )}
     </button>
   );
