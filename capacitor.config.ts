@@ -16,6 +16,14 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert']
     }
+  },
+  ios: {
+    allowsLinkPreview: false,
+    scrollEnabled: true,
+    overrideUserAgent: undefined,
+    // Disable iOS swipe-back gesture so our sidebar edge-swipe works
+    preferredContentMode: 'mobile',
+    allowNavigation: []
   }
 };
 
