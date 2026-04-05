@@ -10,12 +10,10 @@ const SESSION_SENTINEL_KEY = 'parium-session-alive';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 
+const SUPABASE_AUTH_KEY_PATTERN = /sb-[a-z]+-auth-token/;
+
 const isAuthStorageKey = (key: string): boolean => {
-  return (
-    key.includes('supabase.auth') ||
-    key.includes('supabase') ||
-    key.includes('-auth-token')
-  );
+  return SUPABASE_AUTH_KEY_PATTERN.test(key) || key.includes('supabase.auth');
 };
 
 /**
@@ -111,12 +109,10 @@ const hasRecentActivity = (windowMs = INACTIVITY_TIMEOUT_MS): boolean => {
 export const updateLastActivity = (): void => {
   try {
     const timestamp = Date.now().toString();
-    // Always update in BOTH storages to prevent mismatch issues
     localStorage.setItem(LAST_ACTIVITY_KEY, timestamp);
     sessionStorage.setItem(LAST_ACTIVITY_KEY, timestamp);
-    console.log(`📝 Activity updated: ${new Date(Date.now()).toLocaleTimeString('sv-SE')}`);
-  } catch (e) {
-    console.warn('Failed to update last activity:', e);
+  } catch {
+    // Silently fail — not critical
   }
 };
 
@@ -215,26 +211,9 @@ export class AuthStorageAdapter implements Storage {
         return null;
       }
 
-      // If "remember me" is OFF and sentinel is missing, check recent activity.
-      // The 24h inactivity timer is the sole logout mechanism on ALL platforms.
-      // Sentinel is just a hint — if activity is recent, restore it silently.
-      const isInsideIframe = typeof window !== 'undefined' && window.self !== window.top;
-      if (!isInsideIframe && !shouldRememberUser() && !isSessionSentinelAlive()) {
-        const hasStoredAuth = (() => {
-          try { return !!localStorage.getItem(key); } catch { return false; }
-        })();
-        if (hasStoredAuth) {
-          if (hasRecentActivity()) {
-            console.log('🔄 Session sentinel missing but recent activity found — restoring session');
-            refreshSessionSentinel();
-          } else {
-            console.log('🚪 Session ended: no activity within 24h — logging out');
-            this.clearAuthData();
-            clearActivityTracking();
-            return null;
-          }
-        }
-      }
+      // Note: The 24h inactivity check above is the sole logout mechanism.
+      // No additional sentinel checks needed — session persists as long as
+      // there's been activity within 24 hours, on any platform.
     }
     
     // For auth keys: ALWAYS read from localStorage first.
