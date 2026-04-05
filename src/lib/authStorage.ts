@@ -6,7 +6,6 @@
 
 const REMEMBER_ME_KEY = 'parium-remember-me';
 const LAST_ACTIVITY_KEY = 'parium-last-activity';
-const SESSION_SENTINEL_KEY = 'parium-session-alive';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 
