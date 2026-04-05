@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, X, Heart, Plus } from 'lucide-react';
+import { ChevronDown, X, Check, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BENEFITS_OPTIONS, getBenefitLabel } from '@/types/jobWizard';
@@ -98,24 +98,18 @@ export const BenefitsDropdown = ({
                     key={option.value}
                     type="button"
                     onClick={() => toggleBenefit(option.value)}
-                    className={`w-full px-3 py-2.5 text-left text-sm transition-all duration-150 flex items-center gap-2 ${
-                      isSelected 
-                        ? 'bg-primary/30' 
-                        : 'hover:bg-white/10'
-                    }`}
+                    className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                   >
-                    <div className={`w-4 h-4 rounded-[3px] border shrink-0 ${
-                      isSelected 
-                        ? 'bg-primary border-primary' 
-                        : 'border-white/30 bg-white/10'
-                    } flex items-center justify-center`}>
-                      {isSelected && (
-                        <Heart className="w-2.5 h-2.5 text-white" strokeWidth={2.25} />
+                    <div className="flex items-center gap-2">
+                      {isSelected ? (
+                        <Check className="h-4 w-4 shrink-0 text-white" strokeWidth={2.75} />
+                      ) : (
+                        <span className="h-4 w-4 shrink-0" aria-hidden="true" />
                       )}
+                      <span className="font-medium text-white">
+                        {option.label}
+                      </span>
                     </div>
-                    <span className="text-white">
-                      {option.label}
-                    </span>
                   </button>
                 );
               })}

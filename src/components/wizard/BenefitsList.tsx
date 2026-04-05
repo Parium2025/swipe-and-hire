@@ -1,5 +1,5 @@
-import React, { memo, useState, useEffect, useRef, useCallback } from 'react';
-import { Heart } from 'lucide-react';
+import React, { memo } from 'react';
+import { Check } from 'lucide-react';
 
 const BENEFIT_OPTIONS = [
   { value: 'friskvard', label: 'Friskvårdsbidrag' },
@@ -24,56 +24,27 @@ interface BenefitsListProps {
   onToggle: (value: string) => void;
 }
 
-/**
- * BenefitsList uses local state for instant UI updates,
- * then syncs to parent via onToggle in a microtask to avoid
- * blocking the UI with a massive parent re-render.
- */
 export const BenefitsList = memo(({ selectedBenefits, onToggle }: BenefitsListProps) => {
-  // Local copy for instant UI — avoids waiting for parent re-render
-  const [localSelected, setLocalSelected] = useState<Set<string>>(() => new Set(selectedBenefits));
-  const onToggleRef = useRef(onToggle);
-  onToggleRef.current = onToggle;
-
-  // Sync from parent when selectedBenefits changes externally
-  useEffect(() => {
-    setLocalSelected(new Set(selectedBenefits));
-  }, [selectedBenefits]);
-
-  const handleToggle = useCallback((value: string) => {
-    // Instant local update
-    setLocalSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(value)) {
-        next.delete(value);
-      } else {
-        next.add(value);
-      }
-      return next;
-    });
-    // Deferred parent update so UI doesn't freeze
-    requestAnimationFrame(() => {
-      onToggleRef.current(value);
-    });
-  }, []);
-
   return (
     <>
       {BENEFIT_OPTIONS.map((benefit) => {
-        const isSelected = localSelected.has(benefit.value);
+        const isSelected = selectedBenefits.includes(benefit.value);
+
         return (
           <button
             key={benefit.value}
             type="button"
-            onClick={() => handleToggle(benefit.value)}
-            className={`w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 flex items-center gap-2 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors ${isSelected ? 'bg-primary/30' : 'hover:bg-white/10'}`}
+            onClick={() => onToggle(benefit.value)}
+            className="w-full px-3 py-2.5 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
-            <div className={`w-4 h-4 rounded-[3px] border shrink-0 flex items-center justify-center transition-colors ${isSelected ? 'border-primary bg-primary' : 'border-white/30 bg-white/10'}`}>
-              {isSelected && (
-                <Heart className="w-2.5 h-2.5 text-white" strokeWidth={2.25} />
+            <div className="flex items-center gap-2">
+              {isSelected ? (
+                <Check className="h-4 w-4 shrink-0 text-white" strokeWidth={2.75} />
+              ) : (
+                <span className="h-4 w-4 shrink-0" aria-hidden="true" />
               )}
+              <span className="font-medium">{benefit.label}</span>
             </div>
-            <span>{benefit.label}</span>
           </button>
         );
       })}
