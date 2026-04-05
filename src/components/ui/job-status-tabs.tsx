@@ -18,6 +18,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
   const expiredRef = useRef<HTMLButtonElement>(null);
   const draftRef = useRef<HTMLButtonElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
+  const hasInitialized = useRef(false);
 
   const updateIndicator = useCallback(() => {
     const refs: Record<JobStatusTab, React.RefObject<HTMLButtonElement>> = {
@@ -36,6 +37,8 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
 
   useLayoutEffect(() => {
     updateIndicator();
+    // Mark as initialized after first measurement
+    requestAnimationFrame(() => { hasInitialized.current = true; });
     window.addEventListener('resize', updateIndicator);
     return () => window.removeEventListener('resize', updateIndicator);
   }, [updateIndicator, activeCount, expiredCount, draftCount]);
@@ -43,18 +46,18 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
   return (
     <div className="dashboard-tabs-viewport mx-auto">
       <div ref={railRef} className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
-        {/* Sliding background — uses GPU-accelerated transform instead of layout-triggering left */}
+        {/* Sliding background — skip animation on initial mount for instant render */}
         <motion.div
           className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] will-change-transform"
           style={{ width: indicatorStyle.width, left: 0 }}
           initial={false}
           animate={{ x: indicatorStyle.x }}
-          transition={{
+          transition={hasInitialized.current ? {
             type: "spring",
             stiffness: 380,
             damping: 34,
             mass: 0.6,
-          }}
+          } : { duration: 0 }}
         />
         
         {/* Buttons */}
