@@ -572,7 +572,7 @@ export function MessageTemplatesSettings() {
     });
   }, [activeTemplatesByChannel, automationForm.channels]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updateIndicator = () => {
       const refs = {
         templates: templatesTabRef,

@@ -24,7 +24,7 @@ export function MessagesTabs({
   const colleaguesRef = useRef<HTMLButtonElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 0 });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updateIndicator = () => {
       const refs: Record<ConversationTab, React.RefObject<HTMLButtonElement | null>> = {
         all: allRef,
