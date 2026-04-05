@@ -20,7 +20,6 @@ export const useInactivityTimeout = (isAuthenticated: boolean) => {
   const handleActivity = useCallback(() => {
     if (isAuthenticated) {
       updateLastActivity();
-      refreshSessionSentinel();
     }
   }, [isAuthenticated]);
 
