@@ -716,6 +716,7 @@ const MobileJobWizard = ({
   const [desktopPreviewAnswers, setDesktopPreviewAnswers] = useState<Record<string, string>>({});
   const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
   const screenRef = useRef<HTMLDivElement>(null);
+  const previewSwipeRef = useRef<HTMLDivElement>(null);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
   const [scale, setScale] = useState(1);
   const BASE_WIDTH = 360;
@@ -3181,18 +3182,23 @@ const MobileJobWizard = ({
                                   {templates.map((template) => (
                                     <div
                                       key={template.id}
-                                      className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group"
+                                      className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group cursor-pointer active:scale-[0.98]"
+                                      onClick={(e) => {
+                                        // Don't trigger if clicking Edit or Delete buttons
+                                        if ((e.target as HTMLElement).closest('button')) return;
+                                        useQuestionTemplate(template);
+                                      }}
                                     >
                                       <div className="flex flex-col gap-1.5">
                                         <TruncatedText 
                                           text={template.question_text}
-                                          className="text-white font-medium text-sm leading-tight truncate cursor-pointer hover:opacity-80 transition-opacity min-w-0"
-                                          onClick={() => useQuestionTemplate(template)}
+                                          className="text-white font-medium text-sm leading-tight truncate min-w-0"
                                         />
                                         <div className="flex items-center justify-center gap-2">
                                           <button
                                             type="button"
-                                            onClick={() => {
+                                            onClick={(e) => {
+                                              e.stopPropagation();
                                               setEditingQuestion({
                                                 ...template,
                                                 template_id: template.id
@@ -3207,7 +3213,8 @@ const MobileJobWizard = ({
                                           </button>
                                           <button
                                             type="button"
-                                            onClick={() => {
+                                            onClick={(e) => {
+                                              e.stopPropagation();
                                               if (!template.id) return;
                                               setDeleteTemplateId(template.id);
                                             }}
@@ -3501,10 +3508,10 @@ const MobileJobWizard = ({
 
             {/* Step 4: Förhandsvisning */}
             {currentStep === 3 && (
-              <div className="space-y-6 max-w-4xl mx-auto w-full">
+              <div ref={previewSwipeRef} className="space-y-6 max-w-4xl mx-auto w-full">
                 {/* Preview Mode Toggle */}
                 <div className="flex flex-col items-center space-y-4">
-                  <PreviewModeTabs activeMode={previewMode} onModeChange={setPreviewMode} />
+                  <PreviewModeTabs activeMode={previewMode} onModeChange={setPreviewMode} swipeContainerRef={previewSwipeRef} />
                   
                   <h3 
                     className="text-white font-medium text-center text-sm cursor-pointer hover:text-white transition-colors underline underline-offset-2"
