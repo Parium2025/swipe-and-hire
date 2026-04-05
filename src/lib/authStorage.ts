@@ -109,12 +109,10 @@ const hasRecentActivity = (windowMs = INACTIVITY_TIMEOUT_MS): boolean => {
 export const updateLastActivity = (): void => {
   try {
     const timestamp = Date.now().toString();
-    // Always update in BOTH storages to prevent mismatch issues
     localStorage.setItem(LAST_ACTIVITY_KEY, timestamp);
     sessionStorage.setItem(LAST_ACTIVITY_KEY, timestamp);
-    console.log(`📝 Activity updated: ${new Date(Date.now()).toLocaleTimeString('sv-SE')}`);
-  } catch (e) {
-    console.warn('Failed to update last activity:', e);
+  } catch {
+    // Silently fail — not critical
   }
 };
 
