@@ -116,7 +116,7 @@ const SidebarProvider = React.forwardRef<
     React.useEffect(() => {
       if (!isMobile) return
 
-      const EDGE_ZONE = 24 // px from left edge
+      const EDGE_ZONE = 60 // px from left edge (wider to avoid browser back-gesture zone ~30px)
       const SWIPE_THRESHOLD = 50
       const VERTICAL_RATIO = 1.5
 
