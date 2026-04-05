@@ -413,6 +413,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           (async () => {
             if (!mounted) { isRecoveringSessionRef.current = false; return; }
             try {
+              const isMobileLike = typeof navigator !== 'undefined' && (
+                navigator.maxTouchPoints > 0 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)
+              );
+
+              if (isMobileLike && typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+                console.log('📱 SIGNED_OUT while app is backgrounded on mobile — waiting for foreground before recovery');
+                isRecoveringSessionRef.current = false;
+                return;
+              }
+
               // Attempt 1: refreshSession uses the stored refresh token
               const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
               if (!refreshError && refreshData?.session) {
