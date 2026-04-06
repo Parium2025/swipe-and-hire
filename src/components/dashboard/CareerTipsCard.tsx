@@ -114,10 +114,10 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
             {currentTip ? (
               <motion.div
                 key={currentTip.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -18 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
                 className={currentTip.source_url ? 'cursor-pointer group' : ''}
               >
