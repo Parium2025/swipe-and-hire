@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
@@ -7,25 +7,38 @@ import { EmployerStatsCard } from '@/components/dashboard/EmployerStatsCard';
 import { EmployerNotesCard } from '@/components/dashboard/EmployerNotesCard';
 import { EmployerInterviewsCard } from '@/components/dashboard/EmployerInterviewsCard';
 
+/** Wraps carousel cards so their pause-state doesn't re-render siblings */
+const NewsCardWrapper = memo(() => {
+  const [isPaused, setIsPaused] = React.useState(false);
+  return <EmployerNewsCard isPaused={isPaused} setIsPaused={setIsPaused} />;
+});
+NewsCardWrapper.displayName = 'NewsCardWrapper';
+
+const StatsCardWrapper = memo(() => {
+  const [isPaused, setIsPaused] = React.useState(false);
+  return <EmployerStatsCard isPaused={isPaused} setIsPaused={setIsPaused} />;
+});
+StatsCardWrapper.displayName = 'StatsCardWrapper';
+
+import React from 'react';
+
 // Main Dashboard Grid
 export const HomeDashboardGrid = memo(() => {
-  const [isNewsPaused, setIsNewsPaused] = useState(false);
-  const [isStatsPaused, setIsStatsPaused] = useState(false);
   const isMobile = useIsMobile();
-  // Each card pauses independently
+
   const mobileOrder = (
     <>
-      <EmployerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
+      <StatsCardWrapper />
       <EmployerInterviewsCard />
-      <EmployerNewsCard isPaused={isNewsPaused} setIsPaused={setIsNewsPaused} />
+      <NewsCardWrapper />
       <EmployerNotesCard />
     </>
   );
 
   const desktopOrder = (
     <>
-      <EmployerNewsCard isPaused={isNewsPaused} setIsPaused={setIsNewsPaused} />
-      <EmployerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} />
+      <NewsCardWrapper />
+      <StatsCardWrapper />
       <EmployerNotesCard />
       <EmployerInterviewsCard />
     </>
