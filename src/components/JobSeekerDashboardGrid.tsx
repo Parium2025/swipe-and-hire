@@ -7,30 +7,41 @@ import { JobSeekerStatsCard } from '@/components/dashboard/JobSeekerStatsCard';
 import { JobSeekerNotesCard } from '@/components/dashboard/JobSeekerNotesCard';
 import { JobSeekerInterviewsCard } from '@/components/dashboard/JobSeekerInterviewsCard';
 
+/** Wraps carousel cards so their pause-state doesn't re-render siblings */
+const TipsCardWrapper = memo(() => {
+  const [isPaused, setIsPaused] = useState(false);
+  return <CareerTipsCard isPaused={isPaused} setIsPaused={setIsPaused} />;
+});
+TipsCardWrapper.displayName = 'TipsCardWrapper';
+
+const StatsCardWrapper = memo(() => {
+  const [isPaused, setIsPaused] = useState(false);
+  return <JobSeekerStatsCard isPaused={isPaused} setIsPaused={setIsPaused} />;
+});
+StatsCardWrapper.displayName = 'StatsCardWrapper';
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" as const } },
+};
+
 // Main Dashboard Grid for Job Seekers
 export const JobSeekerDashboardGrid = memo(() => {
-  const [isTipsPaused, setIsTipsPaused] = useState(false);
-  const [isStatsPaused, setIsStatsPaused] = useState(false);
   const isMobile = useIsMobile();
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 16 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" as const } },
-  };
 
   const mobileOrder = (
     <>
-      <motion.div variants={cardVariants}><JobSeekerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} /></motion.div>
+      <motion.div variants={cardVariants}><StatsCardWrapper /></motion.div>
       <motion.div variants={cardVariants}><JobSeekerInterviewsCard /></motion.div>
-      <motion.div variants={cardVariants}><CareerTipsCard isPaused={isTipsPaused} setIsPaused={setIsTipsPaused} /></motion.div>
+      <motion.div variants={cardVariants}><TipsCardWrapper /></motion.div>
       <motion.div variants={cardVariants}><JobSeekerNotesCard /></motion.div>
     </>
   );
 
   const desktopOrder = (
     <>
-      <motion.div variants={cardVariants}><CareerTipsCard isPaused={isTipsPaused} setIsPaused={setIsTipsPaused} /></motion.div>
-      <motion.div variants={cardVariants}><JobSeekerStatsCard isPaused={isStatsPaused} setIsPaused={setIsStatsPaused} /></motion.div>
+      <motion.div variants={cardVariants}><TipsCardWrapper /></motion.div>
+      <motion.div variants={cardVariants}><StatsCardWrapper /></motion.div>
       <motion.div variants={cardVariants}><JobSeekerNotesCard /></motion.div>
       <motion.div variants={cardVariants}><JobSeekerInterviewsCard /></motion.div>
     </>
