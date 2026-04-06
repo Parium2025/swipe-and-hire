@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import App from './App'
+import { supabase } from '@/integrations/supabase/client'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
@@ -112,6 +113,16 @@ async function bootstrap() {
   })();
 
   if (isPreviewHost) {
+    // 🛡️ CRITICAL: Stop Supabase auto-refresh in preview to prevent
+    // token revocation that logs out the user on production (parium.se).
+    // Preview and production share the same auth backend, so a token refresh
+    // here would invalidate the refresh token used by the production site.
+    try {
+      supabase.auth.stopAutoRefresh();
+    } catch {
+      // ignore — method may not exist in older SDK versions
+    }
+
     // Best-effort cleanup without blocking first paint.
     setTimeout(() => {
       try {
