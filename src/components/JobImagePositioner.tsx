@@ -16,6 +16,10 @@ interface JobImagePositionerProps {
   imageUrl: string;
   focusPercent: number;
   onFocusChange: (percent: number) => void;
+  /** Label shown above the positioner, e.g. "Mobilvy" */
+  label?: string;
+  /** Description shown below the positioner */
+  description?: string;
 }
 
 /**
