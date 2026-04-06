@@ -107,7 +107,7 @@ export function ApplicationQuestionsWizard({
                 (answer === 'yes'
                   ? 'bg-secondary/40 border-secondary '
                   : 'bg-white/10 border-white/20 ' + (isLocked ? '' : 'hover:bg-white/15 ')) +
-                'border rounded-full px-6 py-2.5 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
+                'border rounded-full px-7 py-3 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
               }
             >
               Ja
@@ -129,7 +129,7 @@ export function ApplicationQuestionsWizard({
                 (answer === 'no'
                   ? 'bg-secondary/40 border-secondary '
                   : 'bg-white/10 border-white/20 ' + (isLocked ? '' : 'hover:bg-white/15 ')) +
-                'border rounded-full px-6 py-2.5 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
+                'border rounded-full px-7 py-3 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
               }
             >
               Nej
@@ -164,7 +164,7 @@ export function ApplicationQuestionsWizard({
                     (selected
                       ? 'bg-secondary/40 border-secondary '
                       : 'bg-white/10 border-white/20 ' + (isLocked ? '' : 'hover:bg-white/15 ')) +
-                    'border rounded-full px-4 py-2.5 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
+                    'border rounded-full px-5 py-3 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
                   }
                 >
                   {option}
@@ -325,11 +325,11 @@ export function ApplicationQuestionsWizard({
               </div>
 
               {/* Question text */}
-              <div className="text-center mb-4">
-                <h3 className="text-sm font-medium text-white leading-snug">
+              <div className="text-center mb-5">
+                <h3 className="text-base font-semibold text-white leading-snug">
                   {currentQuestion.question_text}
                   {currentQuestion.is_required && (
-                    <span className="ml-1 text-white text-xs">*</span>
+                    <span className="ml-1 text-white text-sm">*</span>
                   )}
                 </h3>
               </div>
@@ -351,11 +351,11 @@ export function ApplicationQuestionsWizard({
                 <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-2">
                   <CheckCircle className="w-5 h-5 text-secondary" />
                 </div>
-                <h3 className="text-sm font-medium text-white">Granska dina svar</h3>
+                <h3 className="text-base font-semibold text-white">Granska dina svar</h3>
               </div>
 
               {/* Answers summary - improved cards */}
-              <div className="flex-1 overflow-y-auto max-h-[200px] space-y-1.5 px-1">
+              <div className="flex-1 overflow-y-auto max-h-[260px] space-y-2 px-1">
                 {questions.map((q, idx) => {
                   const answer = answers[q.id];
                   let displayAnswer = answer || '—';
@@ -373,26 +373,26 @@ export function ApplicationQuestionsWizard({
                       key={q.id}
                       type="button"
                       onClick={() => setCurrentStep(idx)}
-                      className="w-full text-left p-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-150 group active:scale-[0.99]"
+                      className="w-full text-left p-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.14] transition-all duration-150 group active:scale-[0.99]"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] uppercase tracking-wider text-white mb-0.5">
+                          <p className="text-[11px] uppercase tracking-wider text-white/70 mb-0.5">
                             Fråga {idx + 1}
                           </p>
                           <TruncatedText
                             text={q.question_text}
-                            className="text-xs text-white truncate"
+                            className="text-sm text-white truncate"
                             alwaysShowTooltip={false}
                           />
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-xs font-medium truncate max-w-[120px] text-white">
+                          <span className="text-sm font-medium truncate max-w-[120px] text-white">
                             {typeof displayAnswer === 'string' && displayAnswer.length > 20 
                               ? displayAnswer.slice(0, 20) + '…' 
                               : displayAnswer}
                           </span>
-                          <ArrowRight className="w-3 h-3 text-white" />
+                          <ArrowRight className="w-3.5 h-3.5 text-white" />
                         </div>
                       </div>
                     </button>
