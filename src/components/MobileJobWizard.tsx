@@ -2197,6 +2197,9 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_url || null,
+        image_focus_position: manualFocus !== null ? String(manualFocus) : 'center',
+        image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
+        image_focus_position_card: formData.image_focus_position_card || 'center',
         category: category || null,
         expires_at: null,
         is_active: false // Save as draft - not published
