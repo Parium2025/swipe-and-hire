@@ -1063,6 +1063,8 @@ export type Database = {
           expires_at: string | null
           id: string
           image_focus_position: string
+          image_focus_position_card: string
+          image_focus_position_desktop: string
           is_active: boolean | null
           job_image_card_url: string | null
           job_image_desktop_url: string | null
@@ -1107,6 +1109,8 @@ export type Database = {
           expires_at?: string | null
           id?: string
           image_focus_position?: string
+          image_focus_position_card?: string
+          image_focus_position_desktop?: string
           is_active?: boolean | null
           job_image_card_url?: string | null
           job_image_desktop_url?: string | null
@@ -1151,6 +1155,8 @@ export type Database = {
           expires_at?: string | null
           id?: string
           image_focus_position?: string
+          image_focus_position_card?: string
+          image_focus_position_desktop?: string
           is_active?: boolean | null
           job_image_card_url?: string | null
           job_image_desktop_url?: string | null
