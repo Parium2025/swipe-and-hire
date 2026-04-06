@@ -82,6 +82,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   const { user } = useAuth();
   const [detail, setDetail] = useState<FullJobData | null>(null);
   const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
+  const [myAnswers, setMyAnswers] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(false);
   const viewRecorded = useRef<string | null>(null);
   const openedAtRef = useRef(0);
@@ -207,6 +208,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     if (!open) {
       setDetail(null);
       setQuestions([]);
+      setMyAnswers(null);
       setLoading(false);
       return;
     }
@@ -215,10 +217,11 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
 
     setDetail(null);
     setQuestions([]);
+    setMyAnswers(null);
     setLoading(true);
 
     void (async () => {
-      const [jobRes, questionsRes] = await Promise.all([
+      const fetchPromises: [any, any, any] = [
         supabase
           .from('job_postings')
           .select(`
@@ -238,16 +241,41 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
           .select('*')
           .eq('job_id', job.id)
           .order('order_index'),
-      ]);
+        // Fetch user's answers if they applied
+        user?.id
+          ? supabase
+              .from('job_applications')
+              .select('custom_answers')
+              .eq('job_id', job.id)
+              .eq('applicant_id', user.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
+      ];
+
+      const [jobRes, questionsRes, answersRes] = await Promise.all(fetchPromises);
 
       if (cancelled) return;
       setDetail(jobRes.data ?? null);
       setQuestions((questionsRes.data as (JobQuestion & { id: string })[]) ?? []);
+      
+      // Parse custom_answers
+      if (answersRes.data?.custom_answers) {
+        const answers = answersRes.data.custom_answers;
+        if (typeof answers === 'object' && !Array.isArray(answers)) {
+          setMyAnswers(answers as Record<string, any>);
+        } else {
+          setMyAnswers(null);
+        }
+      } else {
+        setMyAnswers(null);
+      }
+      
       setLoading(false);
     })().catch(() => {
       if (cancelled) return;
       setDetail(null);
       setQuestions([]);
+      setMyAnswers(null);
       setLoading(false);
     });
 
@@ -498,19 +526,34 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   {questions.length > 0 && (
                     <div className="bg-white/10 rounded-lg p-4">
                       <h3 className="text-white font-semibold text-base mb-3">Ansökningsfrågor</h3>
-                      <p className="text-white text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
-                      <div className="space-y-2.5">
-                        {questions.map((q, i) => (
-                          <div key={q.id} className="flex items-start gap-2">
-                            <span className="text-white text-sm font-medium shrink-0">{i + 1}.</span>
-                            <div className="min-w-0">
-                              <p className="text-white text-sm font-medium break-words">{q.question_text}</p>
-                              {q.is_required && (
-                                <span className="text-white text-xs">Obligatorisk</span>
-                              )}
+                      {!hasApplied && (
+                        <p className="text-white text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
+                      )}
+                      {hasApplied && myAnswers && (
+                        <p className="text-white text-xs mb-3">Dina svar</p>
+                      )}
+                      <div className="space-y-3">
+                        {questions.map((q, i) => {
+                          // Try to find user's answer by question_text key
+                          const answer = myAnswers?.[q.question_text] ?? myAnswers?.[q.id];
+                          const displayAnswer = Array.isArray(answer) ? answer.join(', ') : answer;
+                          
+                          return (
+                            <div key={q.id} className="flex items-start gap-2">
+                              <span className="text-white text-sm font-medium shrink-0">{i + 1}.</span>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-white text-sm font-medium break-words">{q.question_text}</p>
+                                {hasApplied && displayAnswer ? (
+                                  <p className="text-white/70 text-sm mt-1 break-words">{String(displayAnswer)}</p>
+                                ) : (
+                                  q.is_required && (
+                                    <span className="text-white text-xs">Obligatorisk</span>
+                                  )
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
