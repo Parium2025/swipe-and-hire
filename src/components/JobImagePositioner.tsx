@@ -16,13 +16,17 @@ interface JobImagePositionerProps {
   imageUrl: string;
   focusPercent: number;
   onFocusChange: (percent: number) => void;
+  /** Label shown above the positioner, e.g. "Mobilvy" */
+  label?: string;
+  /** Description shown below the positioner */
+  description?: string;
 }
 
 /**
  * A card-shaped preview where the user can drag the image vertically
  * to set the exact crop position. Stores a 0-100 percentage value.
  */
-export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: JobImagePositionerProps) {
+export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, label, description }: JobImagePositionerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const startY = useRef(0);
@@ -53,7 +57,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
 
   return (
     <div className="space-y-2">
-      <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt</p>
+      <p className="text-white text-xs font-medium">{label || 'Dra bilden för att välja fokuspunkt'}</p>
       {/* Use the same width/height ratio as the actual job card for a true preview */}
       <div
         ref={containerRef}
@@ -99,7 +103,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
         />
       </div>
       <p className="text-white text-[10px] text-center">
-        Så här kommer bilden att klippas i jobbkorten
+        {description || 'Så här kommer bilden att klippas i jobbkorten'}
       </p>
     </div>
   );

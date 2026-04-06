@@ -27,6 +27,7 @@ import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
 import { motion, AnimatePresence } from 'framer-motion';
 import FileUpload from '@/components/FileUpload';
+import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePositioner';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
@@ -316,6 +317,8 @@ const MobileJobWizard = ({
           pitch: existingJob.pitch || '',
           job_image_url: existingJob.job_image_url || '',
           job_image_desktop_url: existingJob.job_image_desktop_url || '',
+          image_focus_position_desktop: (existingJob as any).image_focus_position_desktop || 'center',
+          image_focus_position_card: (existingJob as any).image_focus_position_card || 'center',
           location: existingJob.location || '',
         };
 
@@ -395,6 +398,8 @@ const MobileJobWizard = ({
           location: selectedTemplate.location || '',
           job_image_url: '',
           job_image_desktop_url: '',
+          image_focus_position_desktop: 'center',
+          image_focus_position_card: 'center',
           work_start_time: '',
           work_end_time: '',
         };
@@ -449,6 +454,8 @@ const MobileJobWizard = ({
           location: '',
           job_image_url: '',
           job_image_desktop_url: '',
+          image_focus_position_desktop: 'center',
+          image_focus_position_card: 'center',
           work_start_time: '',
           work_end_time: '',
         };
@@ -785,7 +792,9 @@ const MobileJobWizard = ({
     application_instructions: '',
     pitch: '',
     job_image_url: '',
-    job_image_desktop_url: ''
+    job_image_desktop_url: '',
+    image_focus_position_desktop: 'center',
+    image_focus_position_card: 'center',
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
@@ -2063,7 +2072,9 @@ const MobileJobWizard = ({
       application_instructions: '',
       pitch: '',
       job_image_url: '',
-      job_image_desktop_url: ''
+      job_image_desktop_url: '',
+      image_focus_position_desktop: 'center',
+      image_focus_position_card: 'center',
     });
     setCustomQuestions([]);
     setInitialCustomQuestions([]);
@@ -2186,6 +2197,9 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_url || null,
+        image_focus_position: manualFocus !== null ? String(manualFocus) : 'center',
+        image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
+        image_focus_position_card: formData.image_focus_position_card || 'center',
         category: category || null,
         expires_at: null,
         is_active: false // Save as draft - not published
@@ -2348,6 +2362,9 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_url || null,
+        image_focus_position: manualFocus !== null ? String(manualFocus) : 'center',
+        image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
+        image_focus_position_card: formData.image_focus_position_card || 'center',
         is_active: true
       };
       
@@ -4706,12 +4723,33 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                             </button>
                           </div>
                         </div>
-                      </>
-                    )}
-                  </div>
-
-                   {/* Desktop image uses the same image automatically */}
+                        <div className="mt-4 space-y-4">
+                        <JobImagePositioner
+                          imageUrl={jobImageDisplayUrl}
+                          focusPercent={parseFocusPosition(manualFocus !== null ? String(manualFocus) : 'center')}
+                          onFocusChange={(pct) => setManualFocus(pct)}
+                          label="📱 Mobilvy — dra för att välja fokuspunkt"
+                          description="Så här visas bilden i mobilförhandsvisningen"
+                        />
+                        <JobImagePositioner
+                          imageUrl={jobImageDisplayUrl}
+                          focusPercent={parseFocusPosition(formData.image_focus_position_desktop || 'center')}
+                          onFocusChange={(pct) => handleInputChange('image_focus_position_desktop', String(pct))}
+                          label="🖥️ Datorvy — dra för att välja fokuspunkt"
+                          description="Så här visas bilden i datorförhandsvisningen"
+                        />
+                        <JobImagePositioner
+                          imageUrl={jobImageDisplayUrl}
+                          focusPercent={parseFocusPosition(formData.image_focus_position_card || 'center')}
+                          onFocusChange={(pct) => handleInputChange('image_focus_position_card', String(pct))}
+                          label="🃏 Jobbkort — dra för att välja fokuspunkt"
+                          description="Så här visas bilden i jobbkorten på startsidan"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
+              </div>
 
               </div>
             )}

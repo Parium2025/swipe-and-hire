@@ -638,15 +638,20 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           </DropdownMenuItem>
                           
                           {filteredTemplates.map((template) => (
-                            <div key={template.id} className="border-b border-white/20 last:border-b-0 relative">
+                            <div
+                              key={template.id}
+                              className="border-b border-white/20 last:border-b-0 relative cursor-pointer"
+                              onClick={() => {
+                                handleTap(
+                                  template.id,
+                                  templateTextRefs.current[template.id] ?? null,
+                                  () => handleTemplateSelect(template.id, template.name)
+                                );
+                              }}
+                            >
                               <DropdownMenuItem
                                 onSelect={(e) => {
                                   e.preventDefault();
-                                  handleTap(
-                                    template.id,
-                                    templateTextRefs.current[template.id] ?? null,
-                                    () => handleTemplateSelect(template.id, template.name)
-                                  );
                                 }}
                                 className="px-4 py-3 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors"
                               >
