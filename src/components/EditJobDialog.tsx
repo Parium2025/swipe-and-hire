@@ -3868,13 +3868,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 />
                                 <JobImagePositioner
                                   imageUrl={jobImageDisplayUrl}
-                                  focusPercent={parseFocusPosition(formData.image_focus_position_desktop)}
-                                  onFocusChange={(pct) => handleInputChange('image_focus_position_desktop', String(pct))}
-                                  label="🖥️ Datorvy — dra för att välja fokuspunkt"
-                                  description="Så här visas bilden i datorförhandsvisningen"
-                                />
-                                <JobImagePositioner
-                                  imageUrl={jobImageDisplayUrl}
                                   focusPercent={parseFocusPosition(formData.image_focus_position_card)}
                                   onFocusChange={(pct) => handleInputChange('image_focus_position_card', String(pct))}
                                   label="🃏 Jobbkort — dra för att välja fokuspunkt"
