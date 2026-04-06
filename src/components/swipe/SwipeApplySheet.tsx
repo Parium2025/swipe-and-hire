@@ -259,9 +259,9 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                   <button
                     onClick={handleSubmit}
                     disabled={submitting || hasAlreadyApplied}
-                    className={`h-14 px-10 rounded-2xl font-semibold text-base transition-all active:scale-[0.97] ${
+                    className={`h-14 px-10 rounded-full font-semibold text-base transition-all active:scale-[0.97] ${
                       hasAlreadyApplied
-                        ? 'bg-white/10 text-white/50 cursor-not-allowed'
+                        ? 'bg-green-500 text-white cursor-not-allowed'
                         : 'bg-green-500 text-white shadow-lg shadow-green-500/30'
                     }`}
                   >
