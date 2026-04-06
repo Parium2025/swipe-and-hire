@@ -325,11 +325,11 @@ export function ApplicationQuestionsWizard({
               </div>
 
               {/* Question text */}
-              <div className="text-center mb-4">
-                <h3 className="text-sm font-medium text-white leading-snug">
+              <div className="text-center mb-5">
+                <h3 className="text-base font-semibold text-white leading-snug">
                   {currentQuestion.question_text}
                   {currentQuestion.is_required && (
-                    <span className="ml-1 text-white text-xs">*</span>
+                    <span className="ml-1 text-white text-sm">*</span>
                   )}
                 </h3>
               </div>
