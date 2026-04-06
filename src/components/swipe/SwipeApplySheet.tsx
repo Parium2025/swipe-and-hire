@@ -244,7 +244,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                     <CheckCircle className="w-8 h-8 text-green-400" />
                   </div>
                   <h3 className="text-xl font-bold text-white">Ansökan skickad!</h3>
-                  <p className="text-white/60 text-sm max-w-xs">
+                  <p className="text-white/80 text-sm max-w-xs">
                     Din profil och svar har skickats till {companyName}. Lycka till!
                   </p>
                 </motion.div>
