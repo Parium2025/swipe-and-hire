@@ -351,7 +351,7 @@ export function ApplicationQuestionsWizard({
                 <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-2">
                   <CheckCircle className="w-5 h-5 text-secondary" />
                 </div>
-                <h3 className="text-sm font-medium text-white">Granska dina svar</h3>
+                <h3 className="text-base font-semibold text-white">Granska dina svar</h3>
               </div>
 
               {/* Answers summary - improved cards */}
