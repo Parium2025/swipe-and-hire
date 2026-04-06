@@ -4723,15 +4723,17 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                             </button>
                           </div>
                         </div>
+                        {previewMode === 'mobile' && (
                         <div className="mt-4 space-y-4">
                         <JobImagePositioner
                           imageUrl={jobImageDisplayUrl}
                           focusPercent={parseFocusPosition(formData.image_focus_position_card || 'center')}
                           onFocusChange={(pct) => handleInputChange('image_focus_position_card', String(pct))}
-                          label="🃏 Jobbkort — dra för att välja fokuspunkt"
+                          label="Jobbkort — dra för att välja fokuspunkt"
                           description="Så här visas bilden i jobbkorten på startsidan"
                         />
                       </div>
+                        )}
                     </>
                   )}
                 </div>
