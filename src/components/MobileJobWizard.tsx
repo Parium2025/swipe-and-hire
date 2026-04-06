@@ -792,7 +792,9 @@ const MobileJobWizard = ({
     application_instructions: '',
     pitch: '',
     job_image_url: '',
-    job_image_desktop_url: ''
+    job_image_desktop_url: '',
+    image_focus_position_desktop: 'center',
+    image_focus_position_card: 'center',
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
