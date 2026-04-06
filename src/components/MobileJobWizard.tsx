@@ -2185,7 +2185,7 @@ const MobileJobWizard = ({
         application_instructions: formData.application_instructions || null,
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
-        job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_desktop_url: formData.job_image_url || null,
         category: category || null,
         expires_at: null,
         is_active: false // Save as draft - not published
