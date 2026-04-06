@@ -47,6 +47,7 @@ import { createSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
 

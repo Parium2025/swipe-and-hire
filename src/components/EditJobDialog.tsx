@@ -40,6 +40,7 @@ import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePos
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
 

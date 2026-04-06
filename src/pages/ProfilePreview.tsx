@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { getMediaUrl } from '@/lib/mediaManager';
 import { useToast } from '@/hooks/use-toast';
 import { useDevice } from '@/hooks/use-device';
+import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { openCvFile } from '@/utils/cvUtils';
 import ProfileVideo from '@/components/ProfileVideo';
 import { TruncatedText } from '@/components/TruncatedText';
