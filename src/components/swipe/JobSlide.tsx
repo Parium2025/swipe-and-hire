@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
-import { Building2, CheckCircle, X, Bookmark, Heart } from 'lucide-react';
+import { CheckCircle, X, Bookmark, Heart } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { supabase } from '@/integrations/supabase/client';
@@ -298,7 +298,11 @@ export const JobSlide = memo(function JobSlide({
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)] flex items-center justify-center">
-              <Building2 className="w-24 h-24 text-white/10" />
+              <span className="text-6xl font-bold text-white/15 select-none">
+                {job.company_name
+                  ? job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+                  : ''}
+              </span>
             </div>
           )}
         </div>
