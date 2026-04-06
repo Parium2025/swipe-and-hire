@@ -4732,7 +4732,6 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                     </>
                   )}
                 </div>
-              </div>
 
               </div>
             )}
