@@ -548,19 +548,18 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                       }}
                     >
                       <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full bg-white/5 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white h-12 md:h-12 !min-h-0 py-2 px-3 font-normal focus:outline-none focus:ring-0 rounded-md overflow-hidden min-w-0"
+                        <button
+                          type="button"
+                          className="w-full bg-white/5 border border-white/20 text-white h-12 py-2 px-3 rounded-md overflow-hidden min-w-0 text-left focus:outline-none focus:ring-0 active:bg-white/10 [-webkit-tap-highlight-color:transparent]"
                           title={selectedTemplate?.name || 'Välj mall...'}
                         >
                           <div className="flex items-center gap-2 w-full min-w-0">
-                          <span className="text-base truncate font-normal text-white flex-1 min-w-0 text-left" title={selectedTemplate?.name || 'Välj mall...'}>
+                            <span className="text-base truncate font-normal text-white flex-1 min-w-0 text-left">
                               {selectedTemplate?.name || 'Välj mall...'}
                             </span>
                             <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
                           </div>
-                        </Button>
+                        </button>
                       </DropdownMenuTrigger>
 
                       <DropdownMenuContent 
