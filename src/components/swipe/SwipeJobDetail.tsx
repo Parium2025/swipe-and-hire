@@ -221,7 +221,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     setLoading(true);
 
     void (async () => {
-      const [jobRes, questionsRes] = await Promise.all([
+      const fetchPromises: [any, any, any] = [
         supabase
           .from('job_postings')
           .select(`
@@ -241,16 +241,41 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
           .select('*')
           .eq('job_id', job.id)
           .order('order_index'),
-      ]);
+        // Fetch user's answers if they applied
+        user?.id
+          ? supabase
+              .from('job_applications')
+              .select('custom_answers')
+              .eq('job_id', job.id)
+              .eq('applicant_id', user.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
+      ];
+
+      const [jobRes, questionsRes, answersRes] = await Promise.all(fetchPromises);
 
       if (cancelled) return;
       setDetail(jobRes.data ?? null);
       setQuestions((questionsRes.data as (JobQuestion & { id: string })[]) ?? []);
+      
+      // Parse custom_answers
+      if (answersRes.data?.custom_answers) {
+        const answers = answersRes.data.custom_answers;
+        if (typeof answers === 'object' && !Array.isArray(answers)) {
+          setMyAnswers(answers as Record<string, any>);
+        } else {
+          setMyAnswers(null);
+        }
+      } else {
+        setMyAnswers(null);
+      }
+      
       setLoading(false);
     })().catch(() => {
       if (cancelled) return;
       setDetail(null);
       setQuestions([]);
+      setMyAnswers(null);
       setLoading(false);
     });
 
