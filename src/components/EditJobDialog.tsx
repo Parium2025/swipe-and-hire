@@ -3857,19 +3857,30 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 </div>
                               </div>
 
-                              {/* Drag-based focus position picker */}
-                              <div className="mt-3">
+                              {/* Drag-based focus position pickers - 3 separate views */}
+                              <div className="mt-4 space-y-4">
                                 <JobImagePositioner
                                   imageUrl={jobImageDisplayUrl}
                                   focusPercent={parseFocusPosition(formData.image_focus_position)}
                                   onFocusChange={(pct) => handleInputChange('image_focus_position', String(pct))}
+                                  label="📱 Mobilvy — dra för att välja fokuspunkt"
+                                  description="Så här visas bilden i mobilförhandsvisningen"
+                                />
+                                <JobImagePositioner
+                                  imageUrl={jobImageDisplayUrl}
+                                  focusPercent={parseFocusPosition(formData.image_focus_position_desktop)}
+                                  onFocusChange={(pct) => handleInputChange('image_focus_position_desktop', String(pct))}
+                                  label="🖥️ Datorvy — dra för att välja fokuspunkt"
+                                  description="Så här visas bilden i datorförhandsvisningen"
+                                />
+                                <JobImagePositioner
+                                  imageUrl={jobImageDisplayUrl}
+                                  focusPercent={parseFocusPosition(formData.image_focus_position_card)}
+                                  onFocusChange={(pct) => handleInputChange('image_focus_position_card', String(pct))}
+                                  label="🃏 Jobbkort — dra för att välja fokuspunkt"
+                                  description="Så här visas bilden i jobbkorten på startsidan"
                                 />
                               </div>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Desktop image uses the same image automatically */}
                       </div>
                     </div>
                   )}
