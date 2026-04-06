@@ -536,7 +536,9 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                         {questions.map((q, i) => {
                           // Match by question ID (primary key used in custom_answers)
                           const answer = myAnswers?.[q.id] ?? myAnswers?.[q.question_text];
-                          const displayAnswer = Array.isArray(answer) ? answer.join(', ') : answer;
+                          const rawAnswer = Array.isArray(answer) ? answer.join(', ') : answer;
+                          // Translate yes/no to Swedish
+                          const displayAnswer = rawAnswer === 'yes' ? 'Ja' : rawAnswer === 'no' ? 'Nej' : rawAnswer;
                           
                           return (
                             <div key={q.id} className="flex items-start gap-2">
