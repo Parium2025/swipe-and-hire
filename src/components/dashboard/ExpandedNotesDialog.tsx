@@ -49,10 +49,10 @@ export const ExpandedNotesDialog = memo(({
   }, [open, onOpenChange]);
 
   const textStats = useMemo(() => {
-    const plainText = content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
-    const charCount = plainText.length;
-    const wordCount = plainText.trim() ? plainText.trim().split(/\s+/).length : 0;
-    return { charCount, wordCount };
+    const text = content.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+    const chars = text.length;
+    const words = text ? text.split(/\s+/).length : 0;
+    return { chars, words };
   }, [content]);
 
   const saveIndicator = (
@@ -129,7 +129,7 @@ export const ExpandedNotesDialog = memo(({
 
           <div className="flex items-center justify-end gap-4 mt-2 pt-2 border-t border-white/10 shrink-0">
             <span className="text-xs text-pure-white">
-              {textStats.charCount} tecken · {textStats.wordCount} ord
+              {textStats.words} ord · {textStats.chars} tecken
             </span>
           </div>
         </div>
