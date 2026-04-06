@@ -526,19 +526,34 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   {questions.length > 0 && (
                     <div className="bg-white/10 rounded-lg p-4">
                       <h3 className="text-white font-semibold text-base mb-3">Ansökningsfrågor</h3>
-                      <p className="text-white text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
-                      <div className="space-y-2.5">
-                        {questions.map((q, i) => (
-                          <div key={q.id} className="flex items-start gap-2">
-                            <span className="text-white text-sm font-medium shrink-0">{i + 1}.</span>
-                            <div className="min-w-0">
-                              <p className="text-white text-sm font-medium break-words">{q.question_text}</p>
-                              {q.is_required && (
-                                <span className="text-white text-xs">Obligatorisk</span>
-                              )}
+                      {!hasApplied && (
+                        <p className="text-white text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
+                      )}
+                      {hasApplied && myAnswers && (
+                        <p className="text-white text-xs mb-3">Dina svar</p>
+                      )}
+                      <div className="space-y-3">
+                        {questions.map((q, i) => {
+                          // Try to find user's answer by question_text key
+                          const answer = myAnswers?.[q.question_text] ?? myAnswers?.[q.id];
+                          const displayAnswer = Array.isArray(answer) ? answer.join(', ') : answer;
+                          
+                          return (
+                            <div key={q.id} className="flex items-start gap-2">
+                              <span className="text-white text-sm font-medium shrink-0">{i + 1}.</span>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-white text-sm font-medium break-words">{q.question_text}</p>
+                                {hasApplied && displayAnswer ? (
+                                  <p className="text-white/70 text-sm mt-1 break-words">{String(displayAnswer)}</p>
+                                ) : (
+                                  q.is_required && (
+                                    <span className="text-white text-xs">Obligatorisk</span>
+                                  )
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
