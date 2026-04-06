@@ -208,6 +208,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     if (!open) {
       setDetail(null);
       setQuestions([]);
+      setMyAnswers(null);
       setLoading(false);
       return;
     }
