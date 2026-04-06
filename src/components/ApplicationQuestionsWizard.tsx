@@ -373,7 +373,7 @@ export function ApplicationQuestionsWizard({
                       key={q.id}
                       type="button"
                       onClick={() => setCurrentStep(idx)}
-                      className="w-full text-left p-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-150 group active:scale-[0.99]"
+                      className="w-full text-left p-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.14] transition-all duration-150 group active:scale-[0.99]"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex-1 min-w-0">
