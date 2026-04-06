@@ -27,6 +27,7 @@ import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
 import { motion, AnimatePresence } from 'framer-motion';
 import FileUpload from '@/components/FileUpload';
+import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePositioner';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
