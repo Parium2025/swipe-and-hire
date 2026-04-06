@@ -1681,6 +1681,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_url || null,
         image_focus_position: formData.image_focus_position || 'center',
+        image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
+        image_focus_position_card: formData.image_focus_position_card || 'center',
         ...(isDraft ? {
           is_active: true,
           created_at: new Date().toISOString(),
