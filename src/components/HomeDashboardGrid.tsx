@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
@@ -9,18 +9,16 @@ import { EmployerInterviewsCard } from '@/components/dashboard/EmployerInterview
 
 /** Wraps carousel cards so their pause-state doesn't re-render siblings */
 const NewsCardWrapper = memo(() => {
-  const [isPaused, setIsPaused] = React.useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   return <EmployerNewsCard isPaused={isPaused} setIsPaused={setIsPaused} />;
 });
 NewsCardWrapper.displayName = 'NewsCardWrapper';
 
 const StatsCardWrapper = memo(() => {
-  const [isPaused, setIsPaused] = React.useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   return <EmployerStatsCard isPaused={isPaused} setIsPaused={setIsPaused} />;
 });
 StatsCardWrapper.displayName = 'StatsCardWrapper';
-
-import React from 'react';
 
 // Main Dashboard Grid
 export const HomeDashboardGrid = memo(() => {
