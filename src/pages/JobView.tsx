@@ -232,11 +232,7 @@ const JobView = () => {
       setLoading(false);
 
       // Resolve image URL
-      // Use desktop image only on wide screens, mobile image on small screens
-      const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
-      const rawImageUrl = isDesktop
-        ? (data.job_image_desktop_url || data.job_image_url)
-        : (data.job_image_url || data.job_image_desktop_url);
+      const rawImageUrl = data.job_image_url;
       if (rawImageUrl) {
         let resolved: string | null = null;
         if (typeof rawImageUrl === 'string' && rawImageUrl.startsWith('http')) {
