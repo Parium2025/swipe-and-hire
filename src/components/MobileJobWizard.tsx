@@ -27,7 +27,6 @@ import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
 import { motion, AnimatePresence } from 'framer-motion';
 import FileUpload from '@/components/FileUpload';
-import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePositioner';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
@@ -317,8 +316,6 @@ const MobileJobWizard = ({
           pitch: existingJob.pitch || '',
           job_image_url: existingJob.job_image_url || '',
           job_image_desktop_url: existingJob.job_image_desktop_url || '',
-          image_focus_position_desktop: (existingJob as any).image_focus_position_desktop || 'center',
-          image_focus_position_card: (existingJob as any).image_focus_position_card || 'center',
           location: existingJob.location || '',
         };
 
@@ -398,8 +395,6 @@ const MobileJobWizard = ({
           location: selectedTemplate.location || '',
           job_image_url: '',
           job_image_desktop_url: '',
-          image_focus_position_desktop: 'center',
-          image_focus_position_card: 'center',
           work_start_time: '',
           work_end_time: '',
         };
@@ -454,8 +449,6 @@ const MobileJobWizard = ({
           location: '',
           job_image_url: '',
           job_image_desktop_url: '',
-          image_focus_position_desktop: 'center',
-          image_focus_position_card: 'center',
           work_start_time: '',
           work_end_time: '',
         };
@@ -792,9 +785,7 @@ const MobileJobWizard = ({
     application_instructions: '',
     pitch: '',
     job_image_url: '',
-    job_image_desktop_url: '',
-    image_focus_position_desktop: 'center',
-    image_focus_position_card: 'center',
+    job_image_desktop_url: ''
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
@@ -1064,7 +1055,7 @@ const MobileJobWizard = ({
       
       toast({
         title: "Bild justerad",
-        description: "Jobbbilden har sparats",
+        description: editingImageType === 'desktop' ? "Datorbilden har sparats" : "Mobilbilden har sparats",
       });
       
       console.log('MobileJobWizard handleImageEdit: Function complete');
@@ -2072,9 +2063,7 @@ const MobileJobWizard = ({
       application_instructions: '',
       pitch: '',
       job_image_url: '',
-      job_image_desktop_url: '',
-      image_focus_position_desktop: 'center',
-      image_focus_position_card: 'center',
+      job_image_desktop_url: ''
     });
     setCustomQuestions([]);
     setInitialCustomQuestions([]);
@@ -2196,10 +2185,7 @@ const MobileJobWizard = ({
         application_instructions: formData.application_instructions || null,
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
-        job_image_desktop_url: formData.job_image_desktop_url || formData.job_image_url || null,
-        image_focus_position: manualFocus !== null ? String(manualFocus) : 'center',
-        image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
-        image_focus_position_card: formData.image_focus_position_card || 'center',
+        job_image_desktop_url: formData.job_image_desktop_url || null,
         category: category || null,
         expires_at: null,
         is_active: false // Save as draft - not published
@@ -2361,10 +2347,7 @@ const MobileJobWizard = ({
         application_instructions: formData.application_instructions || null,
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
-        job_image_desktop_url: formData.job_image_desktop_url || formData.job_image_url || null,
-        image_focus_position: manualFocus !== null ? String(manualFocus) : 'center',
-        image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
-        image_focus_position_card: formData.image_focus_position_card || 'center',
+        job_image_desktop_url: formData.job_image_desktop_url || null,
         is_active: true
       };
       
@@ -4578,10 +4561,10 @@ const MobileJobWizard = ({
                             {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
                             {!showDesktopApplicationForm && (
                               <div className="absolute inset-0 z-10 group/card">
-                                {/* Job Image - use desktop image with mobile fallback */}
-                                {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) ? (
+                                {/* Job Image - ONLY use desktop image, no fallback */}
+                                {jobImageDesktopDisplayUrl ? (
                                   <img
-                                    src={jobImageDesktopDisplayUrl || jobImageDisplayUrl!}
+                                    src={jobImageDesktopDisplayUrl}
                                     alt={`Jobbbild för ${formData.title}`}
                                     className="absolute inset-0 w-full h-full object-cover select-none"
                                     loading="eager"
@@ -4664,7 +4647,7 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                   <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                     <div className="flex items-center gap-2 mb-2">
                       <Smartphone className="h-4 w-4 text-white" />
-                      <span className="text-white font-medium text-sm sm:text-base">Jobbild (valfritt)</span>
+                      <span className="text-white font-medium text-sm sm:text-base">Mobilbild + Jobbkort (valfritt)</span>
                     </div>
                     <p className="text-white text-xs sm:text-sm mb-3">
                       Bild som visas i mobilförhandsvisningen
@@ -4723,21 +4706,96 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                             </button>
                           </div>
                         </div>
-                        {previewMode === 'mobile' && (
-                        <div className="mt-4 space-y-4">
-                        <JobImagePositioner
-                          imageUrl={jobImageDisplayUrl}
-                          focusPercent={parseFocusPosition(formData.image_focus_position_card || 'center')}
-                          onFocusChange={(pct) => handleInputChange('image_focus_position_card', String(pct))}
-                          label="Jobbkort — dra för att välja fokuspunkt"
-                          description="Så här visas bilden i jobbkorten på startsidan"
-                        />
-                      </div>
-                        )}
-                    </>
-                  )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Desktop image section */}
+                  <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Monitor className="h-4 w-4 text-white" />
+                      <span className="text-white font-medium text-sm sm:text-base">Datorbild (valfritt)</span>
+                      {jobImageDisplayUrl && !jobImageDesktopDisplayUrl && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const mobileUrl = formData.job_image_url;
+                            if (mobileUrl) {
+                              handleInputChange('job_image_desktop_url', mobileUrl);
+                              setOriginalDesktopStoragePath(originalStoragePath);
+                              setDesktopImageIsEdited(false);
+                              const { getMediaUrl } = await import('@/lib/mediaManager');
+                              const signedUrl = await getMediaUrl(mobileUrl, 'job-image', 86400);
+                              setOriginalDesktopImageUrl(signedUrl || mobileUrl);
+                            }
+                          }}
+                          className="ml-auto premium-edit-pill-action inline-flex items-center gap-1.5 bg-primary/20 border border-primary/30 text-white text-xs transition-all duration-200 hover:bg-primary/30"
+                        >
+                          <Copy className="w-3 h-3" />
+                          <span>Använd mobilbild</span>
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-white text-xs sm:text-sm mb-3">
+                      Separat bild för dator/tablet. Om ingen laddas upp används mobilbilden.
+                    </p>
+                    
+                    {!jobImageDesktopDisplayUrl && (
+                      <FileUpload
+                        mediaType="job-image"
+                        uploadType="image"
+                        onFileUploaded={async (storagePath, fileName) => {
+                          handleInputChange('job_image_desktop_url', storagePath);
+                          setOriginalDesktopStoragePath(storagePath);
+                          setDesktopImageIsEdited(false);
+                          const { getMediaUrl } = await import('@/lib/mediaManager');
+                          const signedUrl = await getMediaUrl(storagePath, 'job-image', 86400);
+                          setOriginalDesktopImageUrl(signedUrl || storagePath);
+                        }}
+                        acceptedFileTypes={['image/*']}
+                        maxFileSize={5 * 1024 * 1024}
+                      />
+                    )}
+                    
+                    {jobImageDesktopDisplayUrl && (
+                      <>
+                        <div className="mt-3 flex justify-center">
+                          <img 
+                            src={jobImageDesktopDisplayUrl} 
+                            alt="Datorbild förhandsvisning" 
+                            className="w-full max-w-md h-48 object-contain rounded-lg"
+                          />
+                        </div>
+                        
+                        <div className="mt-4 space-y-3">
+                          <div className="flex justify-center items-center gap-3">
+                            <div className="w-[30px]" aria-hidden="true"></div>
+                            <button
+                              type="button"
+                              onClick={openDesktopImageEditor}
+                              className="premium-edit-pill-action bg-white/20 hover:bg-white/30 text-white transition-colors"
+                            >
+                              Anpassa din bild
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleInputChange('job_image_desktop_url', '');
+                                setOriginalDesktopImageUrl(null);
+                                setOriginalDesktopStoragePath(null);
+                                setDesktopImageIsEdited(false);
+                              }}
+                              className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Ta bort bild</span>
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
 
               </div>
             )}

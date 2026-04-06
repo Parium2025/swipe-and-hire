@@ -125,7 +125,7 @@ const JobView = () => {
   });
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
-    const rawImg = initialJob?.job_image_url;
+    const rawImg = initialJob?.job_image_desktop_url || initialJob?.job_image_url;
     if (!rawImg) return null;
     let resolved = rawImg;
     if (!rawImg.startsWith('http')) {
@@ -232,7 +232,11 @@ const JobView = () => {
       setLoading(false);
 
       // Resolve image URL
-      const rawImageUrl = data.job_image_url;
+      // Use desktop image only on wide screens, mobile image on small screens
+      const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+      const rawImageUrl = isDesktop
+        ? (data.job_image_desktop_url || data.job_image_url)
+        : (data.job_image_url || data.job_image_desktop_url);
       if (rawImageUrl) {
         let resolved: string | null = null;
         if (typeof rawImageUrl === 'string' && rawImageUrl.startsWith('http')) {

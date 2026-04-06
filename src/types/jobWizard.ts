@@ -46,8 +46,6 @@ export interface JobFormData extends BaseFormData {
   work_end_time: string;
   job_image_url: string;
   job_image_desktop_url: string;
-  image_focus_position_desktop: string;
-  image_focus_position_card: string;
 }
 
 export interface TemplateFormData extends BaseFormData {
@@ -243,8 +241,6 @@ export const createEmptyJobFormData = (): JobFormData => ({
   benefits: [],
   job_image_url: '',
   job_image_desktop_url: '',
-  image_focus_position_desktop: 'center',
-  image_focus_position_card: 'center',
 });
 
 export const createEmptyTemplateFormData = (): TemplateFormData => ({

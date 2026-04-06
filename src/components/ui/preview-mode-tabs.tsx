@@ -28,15 +28,8 @@ export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onMod
 
   useLayoutEffect(() => {
     updateIndicator();
-    // Re-measure after fonts/layout settle to ensure indicator is visible on refresh
-    const raf = requestAnimationFrame(updateIndicator);
-    const fallback = setTimeout(updateIndicator, 50);
     window.addEventListener('resize', updateIndicator);
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(fallback);
-      window.removeEventListener('resize', updateIndicator);
-    };
+    return () => window.removeEventListener('resize', updateIndicator);
   }, [updateIndicator]);
 
   // Swipe gesture support
