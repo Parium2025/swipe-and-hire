@@ -49,7 +49,7 @@ export default function ProfilePreview() {
   const [maskedData, setMaskedData] = useState<ProfileViewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDetailedView, setShowDetailedView] = useState(false);
-  const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
+  const [viewMode, setViewMode] = usePersistedPreviewMode('profile-preview-mode');
   const [cvOpen, setCvOpen] = useState(false);
 
   // Lokala media-URLs synkade med samma cache-system som sidebaren
