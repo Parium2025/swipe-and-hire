@@ -541,7 +541,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                 disabled={hasApplied}
                 className={`w-full h-14 rounded-2xl font-semibold text-base transition-all active:scale-[0.97] min-h-[44px] ${
                   hasApplied
-                    ? 'bg-white/10 text-white/50 cursor-not-allowed'
+                    ? 'bg-green-600/80 text-white cursor-not-allowed'
                     : 'bg-secondary text-white shadow-lg shadow-secondary/30'
                 }`}
               >
