@@ -101,14 +101,14 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
         </div>
 
         <div className="flex-1 flex flex-col justify-center py-2">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             {currentNews ? (
               <motion.div
                 key={currentNews.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
                 onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
                 className={currentNews.source_url ? 'cursor-pointer group' : ''}
               >
