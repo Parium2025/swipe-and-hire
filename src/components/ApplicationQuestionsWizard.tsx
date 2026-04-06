@@ -355,7 +355,7 @@ export function ApplicationQuestionsWizard({
               </div>
 
               {/* Answers summary - improved cards */}
-              <div className="flex-1 overflow-y-auto max-h-[200px] space-y-1.5 px-1">
+              <div className="flex-1 overflow-y-auto max-h-[260px] space-y-2 px-1">
                 {questions.map((q, idx) => {
                   const answer = answers[q.id];
                   let displayAnswer = answer || '—';
