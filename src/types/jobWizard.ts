@@ -46,6 +46,8 @@ export interface JobFormData extends BaseFormData {
   work_end_time: string;
   job_image_url: string;
   job_image_desktop_url: string;
+  image_focus_position_desktop: string;
+  image_focus_position_card: string;
 }
 
 export interface TemplateFormData extends BaseFormData {
