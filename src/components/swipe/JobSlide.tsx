@@ -107,21 +107,23 @@ export const JobSlide = memo(function JobSlide({
   const triggerSwipe = useCallback((direction: SwipeDirection) => {
     lastTapTimestampRef.current = 0;
     clearTapHint();
-    swipedRef.current = true;
 
-    animate(x, direction === 'right' ? EXIT_X : -EXIT_X, {
+    if (direction === 'right') {
+      // Like: don't animate away, just open apply sheet
+      onSwipeRight();
+      return;
+    }
+
+    // Left swipe: animate away
+    swipedRef.current = true;
+    animate(x, -EXIT_X, {
       type: 'spring',
       stiffness: 500,
       damping: 30,
     });
 
     setTimeout(() => {
-      if (direction === 'right') {
-        onSwipeRight();
-      } else {
-        onSwipeLeft();
-      }
-
+      onSwipeLeft();
       swipedRef.current = false;
       x.set(0);
     }, 250);
