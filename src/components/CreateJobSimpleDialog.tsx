@@ -638,18 +638,18 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           </DropdownMenuItem>
                           
                           {filteredTemplates.map((template) => (
-                            <div key={template.id} className="border-b border-white/20 last:border-b-0 relative">
-                              <DropdownMenuItem
-                                onSelect={(e) => {
-                                  e.preventDefault();
-                                  handleTap(
-                                    template.id,
-                                    templateTextRefs.current[template.id] ?? null,
-                                    () => handleTemplateSelect(template.id, template.name)
-                                  );
-                                }}
-                                className="px-4 py-3 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors"
-                              >
+                            <div
+                              key={template.id}
+                              className="border-b border-white/20 last:border-b-0 relative cursor-pointer transition-colors [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10"
+                              onClick={() => {
+                                handleTap(
+                                  template.id,
+                                  templateTextRefs.current[template.id] ?? null,
+                                  () => handleTemplateSelect(template.id, template.name)
+                                );
+                              }}
+                            >
+                              <div className="px-4 py-3">
                                 <div className="flex items-center w-full gap-3 min-w-0">
                                   <div className="flex-1 min-w-0">
                                     <TruncatedText
@@ -670,7 +670,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                     <span className="text-xs text-white/80 shrink-0">Standard</span>
                                   )}
                                 </div>
-                              </DropdownMenuItem>
+                              </div>
 
                               {/* Tap-to-preview tooltip for touch devices */}
                               {isPreview(template.id) && (
