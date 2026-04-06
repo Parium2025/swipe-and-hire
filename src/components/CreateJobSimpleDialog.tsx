@@ -551,8 +551,6 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                         <Button
                           variant="outline"
                           size="sm"
-                          onMouseDown={(e) => e.currentTarget.blur()}
-                          onMouseUp={(e) => e.currentTarget.blur()}
                           className="w-full bg-white/5 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white h-12 md:h-12 !min-h-0 py-2 px-3 font-normal focus:outline-none focus:ring-0 rounded-md overflow-hidden min-w-0"
                           title={selectedTemplate?.name || 'Välj mall...'}
                         >
