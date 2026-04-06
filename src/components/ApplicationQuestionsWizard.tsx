@@ -387,7 +387,7 @@ export function ApplicationQuestionsWizard({
                           />
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-xs font-medium truncate max-w-[120px] text-white">
+                          <span className="text-sm font-medium truncate max-w-[120px] text-white">
                             {typeof displayAnswer === 'string' && displayAnswer.length > 20 
                               ? displayAnswer.slice(0, 20) + '…' 
                               : displayAnswer}
