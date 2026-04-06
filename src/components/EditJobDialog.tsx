@@ -3885,6 +3885,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           )}
                         </div>
                       </div>
+                    </div>
                   )}
                 </>
               )}
