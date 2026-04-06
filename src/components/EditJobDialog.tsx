@@ -235,7 +235,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     pitch: '',
     job_image_url: '',
     job_image_desktop_url: '',
-    image_focus_position: 'center'
+    image_focus_position: 'center',
+    image_focus_position_desktop: 'center',
+    image_focus_position_card: 'center'
   });
 
   const { user } = useAuth();
