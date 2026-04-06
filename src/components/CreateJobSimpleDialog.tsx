@@ -565,7 +565,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
 
                       <DropdownMenuContent 
                         key={menuInstanceKey}
-                        className="w-[calc(100vw-2rem)] max-w-sm bg-slate-900/85 backdrop-blur-xl border-white/20 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50 !animate-none"
+                        className="w-[calc(100vw-2rem)] max-w-sm bg-slate-900/85 backdrop-blur-xl border-white/20 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50 !animate-none data-[state=open]:!animate-none data-[state=closed]:!animate-none"
                         style={{ 
                           WebkitOverflowScrolling: 'touch', 
                           overscrollBehaviorY: 'contain', 
@@ -636,20 +636,40 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           </DropdownMenuItem>
                           
                           {filteredTemplates.map((template) => (
-                            <div
+                            <DropdownMenuItem
                               key={template.id}
-                              className="border-b border-white/20 last:border-b-0 relative cursor-pointer transition-colors [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10"
-                              onClick={() => {
+                              className="flex-col items-stretch p-0 border-b border-white/20 last:border-b-0 relative cursor-pointer transition-colors [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white rounded-none"
+                              onSelect={(e) => {
+                                const textEl = templateTextRefs.current[template.id] ?? null;
+                                const isTruncated = textEl
+                                  ? textEl.scrollWidth > textEl.clientWidth + 1
+                                  : false;
+
+                                if (!isTruncated) {
+                                  // Not truncated → select immediately (menu closes)
+                                  handleTemplateSelect(template.id, template.name);
+                                  return;
+                                }
+
+                                if (isPreview(template.id)) {
+                                  // Second tap → select (menu closes)
+                                  resetPreview();
+                                  handleTemplateSelect(template.id, template.name);
+                                  return;
+                                }
+
+                                // First tap on truncated text → show preview, keep menu open
+                                e.preventDefault();
                                 handleTap(
                                   template.id,
-                                  templateTextRefs.current[template.id] ?? null,
+                                  textEl,
                                   () => handleTemplateSelect(template.id, template.name)
                                 );
                               }}
                             >
                               <div className="px-4 py-3">
                                 <div className="flex items-center w-full gap-3 min-w-0">
-                                  <div className="flex-1 min-w-0 pointer-events-none">
+                                  <div className="flex-1 min-w-0">
                                     <span
                                       ref={(el) => { templateTextRefs.current[template.id] = el; }}
                                       className="font-medium text-white truncate block"
@@ -670,7 +690,11 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                 </div>
                               )}
 
-                              <div className="flex justify-center gap-2 px-4 pt-1.5 pb-2.5" onClick={(e) => e.stopPropagation()}>
+                              <div
+                                className="flex justify-center gap-2 px-4 pt-1.5 pb-2.5"
+                                onClick={(e) => e.stopPropagation()}
+                                onPointerDown={(e) => e.stopPropagation()}
+                              >
                                 <button
                                   type="button"
                                   onClick={(e) => {
@@ -683,8 +707,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                       setShowTemplateWizard(true);
                                     }, 150);
                                   }}
-                                  onMouseDown={(e) => e.currentTarget.blur()}
-                                  onMouseUp={(e) => e.currentTarget.blur()}
+                                  onPointerDown={(e) => e.stopPropagation()}
                                   className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 bg-white/5 backdrop-blur-[2px] border-white/20 text-white text-xs transition-colors duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95 focus:outline-none focus:ring-0"
                                   aria-label={`Redigera mall ${template.name}`}
                                 >
@@ -698,8 +721,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                     e.stopPropagation();
                                     setTemplateToDelete(template);
                                   }}
-                                  onMouseDown={(e) => e.currentTarget.blur()}
-                                  onMouseUp={(e) => e.currentTarget.blur()}
+                                  onPointerDown={(e) => e.stopPropagation()}
                                   className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 border-destructive/40 bg-destructive/20 backdrop-blur-[2px] text-white text-xs transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-95 focus:outline-none focus:ring-0"
                                   aria-label={`Ta bort mall ${template.name}`}
                                 >
@@ -707,7 +729,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                   <span>Ta bort</span>
                                 </button>
                               </div>
-                            </div>
+                            </DropdownMenuItem>
                           ))}
                           
                           {filteredTemplates.length === 0 && searchTerm && (
