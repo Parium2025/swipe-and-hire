@@ -321,12 +321,11 @@ export const JobSlide = memo(function JobSlide({
           <span className="text-red-400 text-lg font-black tracking-wider">TYCKER INTE OM</span>
         </motion.div>
 
-        {/* Applied badge */}
+        {/* Applied stamp overlay */}
         {applied && (
-          <div className="absolute top-6 left-6 z-20">
-            <div className="flex items-center gap-1.5 bg-green-500/90 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
-              <CheckCircle className="h-3.5 w-3.5" />
-              Redan sökt
+          <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+            <div className="-rotate-[18deg] border-[6px] border-green-400 rounded-xl px-8 py-3 bg-black/20 backdrop-blur-sm">
+              <span className="text-green-400 text-4xl font-black tracking-widest uppercase">SÖKT ✓</span>
             </div>
           </div>
         )}
