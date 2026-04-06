@@ -125,7 +125,7 @@ const JobView = () => {
   });
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
-    const rawImg = initialJob?.job_image_desktop_url || initialJob?.job_image_url;
+    const rawImg = initialJob?.job_image_url;
     if (!rawImg) return null;
     let resolved = rawImg;
     if (!rawImg.startsWith('http')) {
