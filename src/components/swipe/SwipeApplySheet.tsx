@@ -225,7 +225,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
             {/* Header */}
             <div className="px-5 pb-3 shrink-0">
               <h2 className="text-lg font-bold text-white">{jobTitle}</h2>
-              <p className="text-white/60 text-sm">{companyName}</p>
+              <p className="text-white/80 text-sm">{companyName}</p>
             </div>
 
             {/* Content */}
