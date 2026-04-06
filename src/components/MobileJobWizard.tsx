@@ -4561,10 +4561,10 @@ const MobileJobWizard = ({
                             {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
                             {!showDesktopApplicationForm && (
                               <div className="absolute inset-0 z-10 group/card">
-                                {/* Job Image - ONLY use desktop image, no fallback */}
-                                {jobImageDesktopDisplayUrl ? (
+                                {/* Job Image - use desktop image with mobile fallback */}
+                                {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) ? (
                                   <img
-                                    src={jobImageDesktopDisplayUrl}
+                                    src={jobImageDesktopDisplayUrl || jobImageDisplayUrl!}
                                     alt={`Jobbbild för ${formData.title}`}
                                     className="absolute inset-0 w-full h-full object-cover select-none"
                                     loading="eager"
