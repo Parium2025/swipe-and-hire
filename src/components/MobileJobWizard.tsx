@@ -4706,13 +4706,33 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                               <span>Ta bort bild</span>
                             </button>
                           </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                   {/* Desktop image uses the same image automatically */}
+                      <div className="mt-4 space-y-4">
+                        <JobImagePositioner
+                          imageUrl={jobImageDisplayUrl}
+                          focusPercent={parseFocusPosition(manualFocus !== null ? String(manualFocus) : 'center')}
+                          onFocusChange={(pct) => setManualFocus(pct)}
+                          label="📱 Mobilvy — dra för att välja fokuspunkt"
+                          description="Så här visas bilden i mobilförhandsvisningen"
+                        />
+                        <JobImagePositioner
+                          imageUrl={jobImageDisplayUrl}
+                          focusPercent={parseFocusPosition(formData.image_focus_position_desktop || 'center')}
+                          onFocusChange={(pct) => handleInputChange('image_focus_position_desktop', String(pct))}
+                          label="🖥️ Datorvy — dra för att välja fokuspunkt"
+                          description="Så här visas bilden i datorförhandsvisningen"
+                        />
+                        <JobImagePositioner
+                          imageUrl={jobImageDisplayUrl}
+                          focusPercent={parseFocusPosition(formData.image_focus_position_card || 'center')}
+                          onFocusChange={(pct) => handleInputChange('image_focus_position_card', String(pct))}
+                          label="🃏 Jobbkort — dra för att välja fokuspunkt"
+                          description="Så här visas bilden i jobbkorten på startsidan"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
+              </div>
 
               </div>
             )}
