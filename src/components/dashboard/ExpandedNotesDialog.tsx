@@ -129,7 +129,7 @@ export const ExpandedNotesDialog = memo(({
 
           <div className="flex items-center justify-end gap-4 mt-2 pt-2 border-t border-white/10 shrink-0">
             <span className="text-xs text-pure-white">
-              {textStats.charCount} tecken · {textStats.wordCount} ord
+              {textStats.words} ord · {textStats.chars} tecken
             </span>
           </div>
         </div>
