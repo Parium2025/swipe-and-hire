@@ -57,7 +57,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, labe
 
   return (
     <div className="space-y-2">
-      <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt</p>
+      <p className="text-white text-xs font-medium">{label || 'Dra bilden för att välja fokuspunkt'}</p>
       {/* Use the same width/height ratio as the actual job card for a true preview */}
       <div
         ref={containerRef}
