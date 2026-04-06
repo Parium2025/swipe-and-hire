@@ -217,6 +217,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
 
     setDetail(null);
     setQuestions([]);
+    setMyAnswers(null);
     setLoading(true);
 
     void (async () => {
