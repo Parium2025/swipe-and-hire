@@ -382,7 +382,7 @@ export function ApplicationQuestionsWizard({
                           </p>
                           <TruncatedText
                             text={q.question_text}
-                            className="text-xs text-white truncate"
+                            className="text-sm text-white truncate"
                             alwaysShowTooltip={false}
                           />
                         </div>
