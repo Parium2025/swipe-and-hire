@@ -28,8 +28,15 @@ export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onMod
 
   useLayoutEffect(() => {
     updateIndicator();
+    // Re-measure after dialog/animation settles (covers dialog open transitions)
+    const raf = requestAnimationFrame(() => updateIndicator());
+    const timer = setTimeout(() => updateIndicator(), 150);
     window.addEventListener('resize', updateIndicator);
-    return () => window.removeEventListener('resize', updateIndicator);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateIndicator);
+    };
   }, [updateIndicator]);
 
   // Swipe gesture support
