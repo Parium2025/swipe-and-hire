@@ -38,7 +38,7 @@ export const EmployerNotesCard = memo(() => {
         <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <div className="p-2 rounded-xl bg-white/10">
                 <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
               </div>
@@ -48,7 +48,7 @@ export const EmployerNotesCard = memo(() => {
               >
                 <Maximize2 className="h-5 w-5 text-white" />
               </button>
-              <div className="border-l border-white/15 h-5 mx-0.5" />
+              <div className="border-l border-white/15 h-5 mx-px" />
               <NotesToolbar editor={notesEditor} compact />
             </div>
             <span className="text-[10px] text-white uppercase tracking-wider font-medium flex-shrink-0">ANTECKNINGAR</span>

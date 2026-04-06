@@ -167,7 +167,7 @@ export const NotesToolbar = ({ editor, className, compact = false, large = false
       <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} large={large} buttonId="bold" {...tapProps} />
       <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} large={large} buttonId="italic" {...tapProps} />
       <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} large={large} buttonId="strike" {...tapProps} />
-      <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
+      <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-px" : "h-4 mx-1")} />
       <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" isActive={editor.isActive('bulletList')} compact={compact} large={large} buttonId="bulletList" {...tapProps} />
       <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" isActive={editor.isActive('taskList')} compact={compact} large={large} buttonId="taskList" {...tapProps} />
       {showUndoRedo && !compact && (
