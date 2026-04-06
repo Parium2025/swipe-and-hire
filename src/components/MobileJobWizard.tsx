@@ -4706,7 +4706,8 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                               <span>Ta bort bild</span>
                             </button>
                           </div>
-                      <div className="mt-4 space-y-4">
+                        </div>
+                        <div className="mt-4 space-y-4">
                         <JobImagePositioner
                           imageUrl={jobImageDisplayUrl}
                           focusPercent={parseFocusPosition(manualFocus !== null ? String(manualFocus) : 'center')}
