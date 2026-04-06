@@ -317,6 +317,8 @@ const MobileJobWizard = ({
           pitch: existingJob.pitch || '',
           job_image_url: existingJob.job_image_url || '',
           job_image_desktop_url: existingJob.job_image_desktop_url || '',
+          image_focus_position_desktop: (existingJob as any).image_focus_position_desktop || 'center',
+          image_focus_position_card: (existingJob as any).image_focus_position_card || 'center',
           location: existingJob.location || '',
         };
 
