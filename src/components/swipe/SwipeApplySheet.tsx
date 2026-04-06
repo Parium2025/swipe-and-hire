@@ -216,10 +216,10 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
             {/* Close */}
             <button
               onClick={onClose}
-              className="absolute top-3 right-4 z-10 flex h-7 w-7 !min-h-0 !min-w-0 items-center justify-center overflow-hidden rounded-full bg-white/10 transition-all active:scale-90 md:hover:bg-white/20"
+              className="absolute top-3 right-4 z-10 flex h-9 w-9 !min-h-0 !min-w-0 items-center justify-center overflow-hidden rounded-full bg-white/10 transition-all active:scale-90 md:hover:bg-white/20"
               aria-label="Stäng"
             >
-              <X className="h-3.5 w-3.5 text-white" />
+              <X className="h-4.5 w-4.5 text-white" />
             </button>
 
             {/* Header */}

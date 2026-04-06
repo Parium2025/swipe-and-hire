@@ -377,8 +377,8 @@ export function ApplicationQuestionsWizard({
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[11px] uppercase tracking-wider text-white/70 mb-0.5">
-                            Fråga {idx + 1}
+                          <p className="text-[11px] uppercase tracking-wider text-white mb-0.5">
+                             Fråga {idx + 1}
                           </p>
                           <TruncatedText
                             text={q.question_text}
