@@ -164,7 +164,7 @@ export function ApplicationQuestionsWizard({
                     (selected
                       ? 'bg-secondary/40 border-secondary '
                       : 'bg-white/10 border-white/20 ' + (isLocked ? '' : 'hover:bg-white/15 ')) +
-                    'border rounded-full px-4 py-2.5 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
+                    'border rounded-full px-5 py-3 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
                   }
                 >
                   {option}
