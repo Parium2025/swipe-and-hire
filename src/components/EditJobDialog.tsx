@@ -3881,8 +3881,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   description="Så här visas bilden i jobbkorten på startsidan"
                                 />
                               </div>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
                   )}
                 </>
               )}
