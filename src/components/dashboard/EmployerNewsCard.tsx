@@ -105,10 +105,10 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
             {currentNews ? (
               <motion.div
                 key={currentNews.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -18 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
                 className={currentNews.source_url ? 'cursor-pointer group' : ''}
               >
