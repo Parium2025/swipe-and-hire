@@ -3946,7 +3946,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               
               toast({
                 title: "Bild justerad",
-                description: editingImageType === 'desktop' ? "Datorbilden har sparats" : "Mobilbilden har sparats",
+                description: "Jobbbilden har sparats",
               });
             } catch (error) {
               console.error('Error saving edited image:', error);

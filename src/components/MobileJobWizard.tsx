@@ -1055,7 +1055,7 @@ const MobileJobWizard = ({
       
       toast({
         title: "Bild justerad",
-        description: editingImageType === 'desktop' ? "Datorbilden har sparats" : "Mobilbilden har sparats",
+        description: "Jobbbilden har sparats",
       });
       
       console.log('MobileJobWizard handleImageEdit: Function complete');
