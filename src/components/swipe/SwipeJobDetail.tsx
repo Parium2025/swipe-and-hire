@@ -534,8 +534,8 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                       )}
                       <div className="space-y-3">
                         {questions.map((q, i) => {
-                          // Try to find user's answer by question_text key
-                          const answer = myAnswers?.[q.question_text] ?? myAnswers?.[q.id];
+                          // Match by question ID (primary key used in custom_answers)
+                          const answer = myAnswers?.[q.id] ?? myAnswers?.[q.question_text];
                           const displayAnswer = Array.isArray(answer) ? answer.join(', ') : answer;
                           
                           return (
