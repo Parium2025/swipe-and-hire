@@ -26,7 +26,7 @@ interface JobImagePositionerProps {
  * A card-shaped preview where the user can drag the image vertically
  * to set the exact crop position. Stores a 0-100 percentage value.
  */
-export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: JobImagePositionerProps) {
+export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, label, description }: JobImagePositionerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const startY = useRef(0);
