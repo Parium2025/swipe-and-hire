@@ -107,21 +107,24 @@ export const JobSlide = memo(function JobSlide({
   const triggerSwipe = useCallback((direction: SwipeDirection) => {
     lastTapTimestampRef.current = 0;
     clearTapHint();
-    swipedRef.current = true;
 
-    animate(x, direction === 'right' ? EXIT_X : -EXIT_X, {
+    if (direction === 'right') {
+      // Like: snap back and open apply sheet (don't animate away)
+      animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+      onSwipeRight();
+      return;
+    }
+
+    // Left swipe: animate away
+    swipedRef.current = true;
+    animate(x, -EXIT_X, {
       type: 'spring',
       stiffness: 500,
       damping: 30,
     });
 
     setTimeout(() => {
-      if (direction === 'right') {
-        onSwipeRight();
-      } else {
-        onSwipeLeft();
-      }
-
+      onSwipeLeft();
       swipedRef.current = false;
       x.set(0);
     }, 250);
@@ -303,28 +306,27 @@ export const JobSlide = memo(function JobSlide({
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-        {/* LIKE stamp */}
+        {/* SÖKA stamp */}
         <motion.div
           className="absolute top-8 left-6 z-20 border-4 border-green-400 rounded-lg px-4 py-1 -rotate-12 pointer-events-none"
           style={{ opacity: likeOpacity }}
         >
-          <span className="text-green-400 text-3xl font-black tracking-wider">LIKE</span>
+          <span className="text-green-400 text-2xl font-black tracking-wider">SÖKA</span>
         </motion.div>
 
-        {/* NOPE stamp */}
+        {/* TYCKER INTE OM stamp */}
         <motion.div
-          className="absolute top-8 right-6 z-20 border-4 border-red-400 rounded-lg px-4 py-1 rotate-12 pointer-events-none"
+          className="absolute top-8 right-6 z-20 border-4 border-red-400 rounded-lg px-3 py-1 rotate-12 pointer-events-none"
           style={{ opacity: nopeOpacity }}
         >
-          <span className="text-red-400 text-3xl font-black tracking-wider">NOPE</span>
+          <span className="text-red-400 text-lg font-black tracking-wider">TYCKER INTE OM</span>
         </motion.div>
 
-        {/* Applied badge */}
+        {/* Applied stamp overlay */}
         {applied && (
-          <div className="absolute top-6 left-6 z-20">
-            <div className="flex items-center gap-1.5 bg-green-500/90 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
-              <CheckCircle className="h-3.5 w-3.5" />
-              Redan sökt
+          <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+            <div className="-rotate-[18deg] border-[6px] border-green-400 rounded-xl px-8 py-3 bg-black/20 backdrop-blur-sm">
+              <span className="text-green-400 text-4xl font-black tracking-widest uppercase">SÖKT ✓</span>
             </div>
           </div>
         )}

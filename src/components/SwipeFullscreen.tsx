@@ -297,10 +297,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
       setLocalAppliedIds(prev => new Set(prev).add(currentJob.id));
     }
     setShowApply(false);
-    if (currentIndex < jobs.length - 1) {
-      setTimeout(scrollToNext, 300);
-    }
-  }, [currentIndex, currentJob, jobs.length, scrollToNext]);
+    // Stay on the card so user sees the "SÖKT" stamp
+  }, [currentJob]);
 
   const handleCloseApply = useCallback(() => { setShowApply(false); }, []);
   const handleCloseDetail = useCallback(() => { setShowDetail(false); }, []);
