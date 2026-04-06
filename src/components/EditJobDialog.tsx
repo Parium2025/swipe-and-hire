@@ -1052,7 +1052,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         application_instructions: formData.application_instructions || null,
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
-        job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_desktop_url: formData.job_image_url || null,
         image_focus_position: formData.image_focus_position || 'center',
         // Explicitly do NOT set is_active, created_at, or expires_at — keep as draft
       };
@@ -1671,7 +1671,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         application_instructions: formData.application_instructions || null,
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
-        job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_desktop_url: formData.job_image_url || null,
         image_focus_position: formData.image_focus_position || 'center',
         ...(isDraft ? {
           is_active: true,
@@ -3782,7 +3782,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                           <div className="flex items-center gap-2 mb-2">
                             <Smartphone className="h-4 w-4 text-white" />
-                            <span className="text-white font-medium text-sm sm:text-base">Mobilbild + Jobbkort (valfritt)</span>
+                            <span className="text-white font-medium text-sm sm:text-base">Jobbild (valfritt)</span>
                           </div>
                           <p className="text-white text-xs sm:text-sm mb-3">
                             Bild som visas i mobilförhandsvisningen
@@ -3859,98 +3859,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           )}
                         </div>
 
-                        {/* Desktop image section */}
-                        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Monitor className="h-4 w-4 text-white" />
-                            <span className="text-white font-medium text-sm sm:text-base">Datorbild (valfritt)</span>
-                            {jobImageDisplayUrl && !jobImageDesktopDisplayUrl && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const mobileUrl = formData.job_image_url;
-                                  if (mobileUrl) {
-                                    handleInputChange('job_image_desktop_url', mobileUrl);
-                                    setOriginalDesktopImageUrl(originalImageUrl);
-                                    const { data: { publicUrl } } = supabase.storage
-                                      .from('job-images')
-                                      .getPublicUrl(mobileUrl);
-                                    if (publicUrl) {
-                                      setJobImageDesktopDisplayUrl(publicUrl);
-                                    }
-                                  }
-                                }}
-                                className="ml-auto premium-edit-pill-action inline-flex items-center gap-1.5 bg-primary/20 border border-primary/30 text-white text-xs transition-all duration-200 hover:bg-primary/30"
-                              >
-                                <Copy className="w-3 h-3" />
-                                <span>Använd mobilbild</span>
-                              </button>
-                            )}
-                          </div>
-                          <p className="text-white text-xs sm:text-sm mb-3">
-                            Separat bild för dator/tablet. Om ingen laddas upp används mobilbilden.
-                          </p>
-                          
-                          {!jobImageDesktopDisplayUrl && (
-                            <FileUpload
-                              mediaType="job-image"
-                              uploadType="image"
-                              onFileUploaded={async (storagePath, fileName) => {
-                                handleInputChange('job_image_desktop_url', storagePath);
-                                setOriginalDesktopImageUrl(storagePath);
-                                
-                                const { data: { publicUrl } } = supabase.storage
-                                  .from('job-images')
-                                  .getPublicUrl(storagePath);
-                                  
-                                if (publicUrl) {
-                                  setJobImageDesktopDisplayUrl(publicUrl);
-                                  const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
-                                  await preloadSingleFile(publicUrl);
-                                }
-                              }}
-                              acceptedFileTypes={['image/*']}
-                              maxFileSize={5 * 1024 * 1024}
-                            />
-                          )}
-                          
-                          {jobImageDesktopDisplayUrl && (
-                            <>
-                              <div className="mt-3 flex justify-center">
-                                <img 
-                                  src={jobImageDesktopDisplayUrl} 
-                                  alt="Datorbild förhandsvisning" 
-                                  className="w-full max-w-md h-48 object-contain rounded-lg"
-                                />
-                              </div>
-                              
-                              <div className="mt-4 space-y-3">
-                                <div className="flex justify-center items-center gap-3">
-                                  <div className="w-[30px]" aria-hidden="true"></div>
-                                  <button
-                                    type="button"
-                                    onClick={openDesktopImageEditor}
-                                    className="premium-edit-pill-action bg-white/20 hover:bg-white/30 text-white transition-colors"
-                                  >
-                                    Anpassa din bild
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      handleInputChange('job_image_desktop_url', '');
-                                      setOriginalDesktopImageUrl(null);
-                                      setJobImageDesktopDisplayUrl(null);
-                                    }}
-                                    className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                    <span>Ta bort bild</span>
-                                  </button>
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
+                        {/* Desktop image uses the same image automatically */}
                       </div>
                     </div>
                   )}
@@ -4037,7 +3946,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               
               toast({
                 title: "Bild justerad",
-                description: editingImageType === 'desktop' ? "Datorbilden har sparats" : "Mobilbilden har sparats",
+                description: "Jobbbilden har sparats",
               });
             } catch (error) {
               console.error('Error saving edited image:', error);
