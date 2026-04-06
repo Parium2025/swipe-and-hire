@@ -82,6 +82,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   const { user } = useAuth();
   const [detail, setDetail] = useState<FullJobData | null>(null);
   const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
+  const [myAnswers, setMyAnswers] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(false);
   const viewRecorded = useRef<string | null>(null);
   const openedAtRef = useRef(0);
