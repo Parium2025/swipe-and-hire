@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { getMediaUrl } from '@/lib/mediaManager';
 import { useToast } from '@/hooks/use-toast';
 import { useDevice } from '@/hooks/use-device';
+import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { openCvFile } from '@/utils/cvUtils';
 import ProfileVideo from '@/components/ProfileVideo';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -48,7 +49,7 @@ export default function ProfilePreview() {
   const [maskedData, setMaskedData] = useState<ProfileViewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDetailedView, setShowDetailedView] = useState(false);
-  const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
+  const [viewMode, setViewMode] = usePersistedPreviewMode('profile-preview-mode');
   const [cvOpen, setCvOpen] = useState(false);
 
   // Lokala media-URLs synkade med samma cache-system som sidebaren
