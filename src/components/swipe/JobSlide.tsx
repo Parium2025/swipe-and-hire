@@ -109,7 +109,8 @@ export const JobSlide = memo(function JobSlide({
     clearTapHint();
 
     if (direction === 'right') {
-      // Like: don't animate away, just open apply sheet
+      // Like: snap back and open apply sheet (don't animate away)
+      animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
       onSwipeRight();
       return;
     }
