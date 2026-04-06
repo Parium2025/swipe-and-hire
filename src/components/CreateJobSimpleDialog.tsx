@@ -651,20 +651,13 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                             >
                               <div className="px-4 py-3">
                                 <div className="flex items-center w-full gap-3 min-w-0">
-                                  <div className="flex-1 min-w-0">
-                                    <TruncatedText
-                                      text={template.name}
+                                  <div className="flex-1 min-w-0 pointer-events-none">
+                                    <span
+                                      ref={(el) => { templateTextRefs.current[template.id] = el; }}
                                       className="font-medium text-white truncate block"
-                                      tooltipSide="top"
-                                      alwaysShowTooltip="desktop-only"
                                     >
-                                      <span
-                                        ref={(el) => { templateTextRefs.current[template.id] = el; }}
-                                        className="truncate block"
-                                      >
-                                        {template.name}
-                                      </span>
-                                    </TruncatedText>
+                                      {template.name}
+                                    </span>
                                   </div>
                                   {template.is_default && (
                                     <span className="text-xs text-white/80 shrink-0">Standard</span>
