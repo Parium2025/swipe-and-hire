@@ -3782,7 +3782,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                           <div className="flex items-center gap-2 mb-2">
                             <Smartphone className="h-4 w-4 text-white" />
-                            <span className="text-white font-medium text-sm sm:text-base">Mobilbild + Jobbkort (valfritt)</span>
+                            <span className="text-white font-medium text-sm sm:text-base">Jobbild (valfritt)</span>
                           </div>
                           <p className="text-white text-xs sm:text-sm mb-3">
                             Bild som visas i mobilförhandsvisningen
