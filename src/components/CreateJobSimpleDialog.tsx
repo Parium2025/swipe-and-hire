@@ -24,7 +24,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { JobTemplate } from '@/types/jobWizard';
 import { cn } from '@/lib/utils';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
-import { TruncatedText } from '@/components/TruncatedText';
+
 
 interface CreateJobSimpleDialogProps {
   onJobCreated: (job: JobPosting) => void;
@@ -551,8 +551,6 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                         <Button
                           variant="outline"
                           size="sm"
-                          onMouseDown={(e) => e.currentTarget.blur()}
-                          onMouseUp={(e) => e.currentTarget.blur()}
                           className="w-full bg-white/5 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white h-12 md:h-12 !min-h-0 py-2 px-3 font-normal focus:outline-none focus:ring-0 rounded-md overflow-hidden min-w-0"
                           title={selectedTemplate?.name || 'Välj mall...'}
                         >
@@ -651,20 +649,13 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                             >
                               <div className="px-4 py-3">
                                 <div className="flex items-center w-full gap-3 min-w-0">
-                                  <div className="flex-1 min-w-0">
-                                    <TruncatedText
-                                      text={template.name}
+                                  <div className="flex-1 min-w-0 pointer-events-none">
+                                    <span
+                                      ref={(el) => { templateTextRefs.current[template.id] = el; }}
                                       className="font-medium text-white truncate block"
-                                      tooltipSide="top"
-                                      alwaysShowTooltip="desktop-only"
                                     >
-                                      <span
-                                        ref={(el) => { templateTextRefs.current[template.id] = el; }}
-                                        className="truncate block"
-                                      >
-                                        {template.name}
-                                      </span>
-                                    </TruncatedText>
+                                      {template.name}
+                                    </span>
                                   </div>
                                   {template.is_default && (
                                     <span className="text-xs text-white/80 shrink-0">Standard</span>
