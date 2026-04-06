@@ -225,7 +225,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
             {/* Header */}
             <div className="px-5 pb-3 shrink-0">
               <h2 className="text-lg font-bold text-white">{jobTitle}</h2>
-              <p className="text-white/60 text-sm">{companyName}</p>
+              <p className="text-white/80 text-sm">{companyName}</p>
             </div>
 
             {/* Content */}
@@ -244,14 +244,14 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                     <CheckCircle className="w-8 h-8 text-green-400" />
                   </div>
                   <h3 className="text-xl font-bold text-white">Ansökan skickad!</h3>
-                  <p className="text-white/60 text-sm max-w-xs">
+                  <p className="text-white/80 text-sm max-w-xs">
                     Din profil och svar har skickats till {companyName}. Lycka till!
                   </p>
                 </motion.div>
               ) : questions.length === 0 ? (
                 /* No custom questions — just confirm and submit */
                 <div className="flex flex-col items-center justify-center py-12 text-center space-y-6">
-                  <p className="text-white/70 text-sm max-w-xs">
+                  <p className="text-white text-sm max-w-xs">
                     Inga frågor att besvara. Din profilinformation skickas direkt med ansökan.
                   </p>
                   <button
