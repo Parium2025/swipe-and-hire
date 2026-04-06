@@ -392,7 +392,7 @@ export function ApplicationQuestionsWizard({
                               ? displayAnswer.slice(0, 20) + '…' 
                               : displayAnswer}
                           </span>
-                          <ArrowRight className="w-3 h-3 text-white" />
+                          <ArrowRight className="w-3.5 h-3.5 text-white" />
                         </div>
                       </div>
                     </button>
