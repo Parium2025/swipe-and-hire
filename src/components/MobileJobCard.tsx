@@ -126,7 +126,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
               alt={job.title}
               className="w-full h-full object-cover"
               style={{ objectPosition: `center ${(() => {
-                const v = job.image_focus_position;
+                const v = (job as any).image_focus_position_card || job.image_focus_position;
                 if (!v || v === 'center') return '50%';
                 if (v === 'top') return '20%';
                 if (v === 'bottom') return '80%';
