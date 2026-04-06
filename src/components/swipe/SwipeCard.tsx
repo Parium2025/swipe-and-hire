@@ -132,7 +132,7 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
           className="absolute top-8 left-6 z-20 border-4 border-green-400 rounded-lg px-4 py-1 -rotate-12"
           style={{ opacity: likeOpacity }}
         >
-          <span className="text-green-400 text-3xl font-black tracking-wider">LIKE</span>
+          <span className="text-green-400 text-2xl font-black tracking-wider">SÖKA</span>
         </motion.div>
       )}
 
@@ -142,7 +142,7 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
           className="absolute top-8 right-6 z-20 border-4 border-red-400 rounded-lg px-4 py-1 rotate-12"
           style={{ opacity: nopeOpacity }}
         >
-          <span className="text-red-400 text-3xl font-black tracking-wider">NOPE</span>
+          <span className="text-red-400 text-lg font-black tracking-wider">TYCKER INTE OM</span>
         </motion.div>
       )}
 
