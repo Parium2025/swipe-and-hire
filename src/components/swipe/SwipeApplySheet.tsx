@@ -7,12 +7,15 @@ import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import type { JobQuestion } from '@/types/jobWizard';
+import type { SwipeJob } from './SwipeCard';
 
 interface SwipeApplySheetProps {
   jobId: string;
   jobTitle: string;
   companyName: string;
+  job?: SwipeJob;
   open: boolean;
   onClose: () => void;
   onApplied: () => void;
