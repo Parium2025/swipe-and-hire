@@ -370,8 +370,15 @@ export const JobSlide = memo(function JobSlide({
         </div>
 
         {showTapHint && (
-          <div className="absolute inset-x-4 bottom-24 z-20 pointer-events-none">
-            <div className="rounded-xl border border-white/20 bg-slate-900/95 px-4 py-3 backdrop-blur-md shadow-2xl max-h-[300px] overflow-y-auto overscroll-contain pointer-events-auto">
+          <div
+            className="absolute inset-x-4 bottom-24 z-30"
+            onTouchStartCapture={(e) => e.stopPropagation()}
+            onTouchMoveCapture={(e) => e.stopPropagation()}
+            onTouchEndCapture={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onWheel={(e) => e.stopPropagation()}
+          >
+            <div className="rounded-xl border border-white/20 bg-slate-900/95 px-4 py-3 backdrop-blur-md shadow-2xl max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y">
               <p className="text-sm font-semibold text-white leading-relaxed break-words whitespace-pre-wrap">{job.title}</p>
               <p className="text-xs text-white/50 text-center mt-2">Tryck igen för jobbinfo</p>
             </div>
