@@ -1,9 +1,11 @@
-import { memo, useCallback, useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, useMemo, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import { CheckCircle, X, Bookmark, Heart } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { supabase } from '@/integrations/supabase/client';
+import { differenceInDays, format, parseISO } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import type { SwipeJob } from './SwipeCard';
 
 function resolveImageUrl(url?: string): string | null {
