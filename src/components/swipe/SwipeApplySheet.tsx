@@ -336,37 +336,6 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
                   )}
                 </>
               )}
-                    )}
-                    {job.occupation && (
-                      <DetailRow label="Yrke" value={job.occupation} />
-                    )}
-                    {job.work_location_type && (
-                      <DetailRow label="Platstyp" value={job.work_location_type === 'on_site' ? 'På plats' : job.work_location_type === 'hybrid' ? 'Hybrid' : job.work_location_type === 'remote' ? 'Distans' : job.work_location_type} />
-                    )}
-                    {job.remote_work_possible && (
-                      <DetailRow label="Distans" value={job.remote_work_possible === 'yes' ? 'Ja' : job.remote_work_possible === 'no' ? 'Nej' : job.remote_work_possible} />
-                    )}
-                    {job.work_schedule && (
-                      <DetailRow label="Schema" value={job.work_schedule} />
-                    )}
-                    {(job.salary_min || job.salary_max) && (
-                      <DetailRow
-                        label="Lön"
-                        value={
-                          job.salary_min && job.salary_max
-                            ? `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} kr/${job.salary_type === 'hourly' ? 'tim' : 'mån'}`
-                            : job.salary_min
-                              ? `Från ${job.salary_min.toLocaleString('sv-SE')} kr/${job.salary_type === 'hourly' ? 'tim' : 'mån'}`
-                              : `Upp till ${job.salary_max!.toLocaleString('sv-SE')} kr/${job.salary_type === 'hourly' ? 'tim' : 'mån'}`
-                        }
-                      />
-                    )}
-                    {job.positions_count && job.positions_count > 0 && (
-                      <DetailRow label="Antal tjänster" value={`${job.positions_count} st`} />
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </motion.div>
         </>
