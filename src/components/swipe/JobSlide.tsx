@@ -80,8 +80,15 @@ export const JobSlide = memo(function JobSlide({
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
   const [showTapHint, setShowTapHint] = useState(false);
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
   const imageUrl = resolveImageUrl(job.job_image_url);
+
+  const isTitleTruncated = useCallback(() => {
+    const el = titleRef.current;
+    if (!el) return false;
+    return el.scrollHeight > el.clientHeight + 1;
+  }, []);
 
   const clearTapHint = useCallback(() => {
     setShowTapHint(false);
