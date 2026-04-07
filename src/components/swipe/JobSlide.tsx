@@ -90,14 +90,21 @@ export const JobSlide = memo(function JobSlide({
     return el.scrollHeight > el.clientHeight + 1;
   }, []);
 
+  const tapHintTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
   const clearTapHint = useCallback(() => {
     setShowTapHint(false);
+    if (tapHintTimerRef.current) clearTimeout(tapHintTimerRef.current);
   }, []);
 
   const armTapHint = useCallback(() => {
     clearTapHint();
     setShowTapHint(true);
-  }, [clearTapHint]);
+    // Auto-dismiss only when title is NOT truncated (simple hint text)
+    if (!isTitleTruncated()) {
+      tapHintTimerRef.current = setTimeout(() => setShowTapHint(false), 1800);
+    }
+  }, [clearTapHint, isTitleTruncated]);
 
   const triggerSwipe = useCallback((direction: SwipeDirection) => {
     lastTapTimestampRef.current = 0;
