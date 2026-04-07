@@ -8,13 +8,24 @@ interface TruncatedTextProps {
   alwaysShowTooltip?: boolean | 'desktop-only';
   tooltipSide?: 'top' | 'bottom' | 'left' | 'right';
   onClick?: () => void;
+  forceClosed?: boolean;
+  instantClose?: boolean;
 }
 
 /**
  * Component that automatically detects if text is truncated and shows
  * a tooltip with the full text on hover
  */
-export function TruncatedText({ text, className, children, alwaysShowTooltip, tooltipSide = 'top', onClick }: TruncatedTextProps) {
+export function TruncatedText({
+  text,
+  className,
+  children,
+  alwaysShowTooltip,
+  tooltipSide = 'top',
+  onClick,
+  forceClosed = false,
+  instantClose = false,
+}: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
@@ -109,6 +120,12 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip, to
     return () => setIsOpen(false);
   }, []);
 
+  useEffect(() => {
+    if (forceClosed) {
+      setIsOpen(false);
+    }
+  }, [forceClosed]);
+
   const handleTap = () => {
     if (!supportsHover && isTouch) setIsOpen((o) => !o);
   };
@@ -154,8 +171,8 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip, to
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
       <Tooltip 
-        open={!supportsHover ? isOpen : undefined} 
-        onOpenChange={!supportsHover ? setIsOpen : undefined}
+        open={forceClosed ? false : !supportsHover ? isOpen : undefined}
+        onOpenChange={forceClosed ? undefined : !supportsHover ? setIsOpen : undefined}
         disableHoverableContent={false}
       >
         <TooltipTrigger asChild>
@@ -173,7 +190,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip, to
           side={tooltipSide}
           sideOffset={8}
           avoidCollisions={false}
-          className="z-[999999] max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg"
+          className={`z-[999999] max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
           onPointerDownOutside={() => setIsOpen(false)}
           onMouseDown={(e) => e.stopPropagation()}
           onWheel={(e) => e.stopPropagation()}
