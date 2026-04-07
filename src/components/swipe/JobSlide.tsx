@@ -22,6 +22,7 @@ interface JobSlideProps {
   isVisible: boolean;
   isLast: boolean;
   sectionHeight?: string;
+  overlayOpen?: boolean;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onSave: () => void;
