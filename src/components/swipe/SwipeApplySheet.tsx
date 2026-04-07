@@ -202,7 +202,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
 
           {/* Sheet */}
           <motion.div
-            className="absolute inset-x-0 bottom-0 z-40 max-h-[90vh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col"
+            className="absolute inset-x-0 bottom-0 z-40 max-h-[92dvh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -210,7 +210,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
           >
             {/* Drag handle */}
             <div className="flex justify-center pt-3 pb-2 shrink-0">
-              <div className="w-10 h-1 rounded-full bg-white/20" />
+              <div className="w-10 h-1.5 rounded-full bg-white/30" />
             </div>
 
             {/* Close */}
@@ -224,18 +224,14 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
               </div>
             </button>
 
-            {/* Header */}
-            <div className="px-5 pt-5 pb-3 shrink-0 text-center">
-              <h2 className="mx-auto max-w-[280px] text-[clamp(1.9rem,7vw,2.5rem)] font-extrabold leading-[1.05] tracking-tight text-white text-balance">
-                {jobTitle}
-              </h2>
-              <p className="mt-2 text-white text-[clamp(1.15rem,4.6vw,1.35rem)] font-medium">
-                {companyName}
-              </p>
+            {/* Header — compact, matching info sheet style */}
+            <div className="px-4 pr-14 pb-1 shrink-0">
+              <p className="text-white text-sm font-medium mt-1">{companyName}</p>
+              <h2 className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 break-words">{jobTitle}</h2>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto px-5 pb-6 pt-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {/* Content — flex-1 fills remaining space */}
+            <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-6 pt-1" style={{ WebkitOverflowScrolling: 'touch' }}>
               {loading ? (
                 <div className="flex items-center justify-center py-20">
                   <Loader2 className="w-6 h-6 text-white/50 animate-spin" />
@@ -255,7 +251,6 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                   </p>
                 </motion.div>
               ) : questions.length === 0 ? (
-                /* No custom questions — just confirm and submit */
                 <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
                   <p className="text-white text-sm max-w-xs">
                     Inga frågor att besvara. Din profilinformation skickas direkt med ansökan.
@@ -273,19 +268,17 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                   </button>
                 </div>
               ) : (
-                <div className="pt-3">
-                  <ApplicationQuestionsWizard
-                    questions={questions}
-                    answers={answers}
-                    onAnswerChange={handleAnswerChange}
-                    onSubmit={handleSubmit}
-                    isSubmitting={submitting}
-                    canSubmit={allRequiredAnswered()}
-                    hasAlreadyApplied={hasAlreadyApplied}
-                    contactEmail={contactEmail}
-                    jobTitle={jobTitle}
-                  />
-                </div>
+                <ApplicationQuestionsWizard
+                  questions={questions}
+                  answers={answers}
+                  onAnswerChange={handleAnswerChange}
+                  onSubmit={handleSubmit}
+                  isSubmitting={submitting}
+                  canSubmit={allRequiredAnswered()}
+                  hasAlreadyApplied={hasAlreadyApplied}
+                  contactEmail={contactEmail}
+                  jobTitle={jobTitle}
+                />
               )}
             </div>
           </motion.div>

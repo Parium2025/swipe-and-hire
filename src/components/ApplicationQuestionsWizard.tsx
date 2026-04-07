@@ -306,36 +306,31 @@ export function ApplicationQuestionsWizard({
       </div>
 
       {/* Question container */}
-      <div className={`relative flex flex-col ${
-        questions.length <= 1 ? 'min-h-[300px] sm:min-h-[320px] md:min-h-[340px]' :
-        questions.length <= 2 ? 'min-h-[340px] sm:min-h-[360px] md:min-h-[380px]' :
-        questions.length <= 3 ? 'min-h-[380px] sm:min-h-[400px] md:min-h-[420px]' :
-        'min-h-[420px] sm:min-h-[440px] md:min-h-[460px]'
-      }`}>
+      <div className="relative flex flex-col flex-1 min-h-0">
         {!isSubmitStep && currentQuestion ? (
             <div
               key={currentQuestion.id}
               className="flex-1 flex flex-col transition-opacity duration-100"
             >
               {/* Question number */}
-              <div className="text-center mb-3 pt-2">
+              <div className="text-center mb-2 pt-1">
                 <span className="text-[10px] uppercase tracking-[0.28em] text-white">
                   {currentStep + 1} / {questions.length}
                 </span>
               </div>
 
               {/* Question text */}
-              <div className="text-center mb-7 px-2">
-                <h3 className="text-[clamp(1.9rem,7vw,2.55rem)] font-extrabold text-white leading-[1.08] tracking-tight text-balance">
+              <div className="text-center mb-6 px-2">
+                <h3 className="text-lg font-bold text-white leading-snug">
                   {currentQuestion.question_text}
                   {currentQuestion.is_required && (
-                    <span className="ml-1 text-white text-base">*</span>
+                    <span className="ml-1 text-white text-sm">*</span>
                   )}
                 </h3>
               </div>
 
               {/* Answer input */}
-              <div className="flex-1 flex items-start justify-center pt-6">
+              <div className="flex-1 flex items-start justify-center">
                 <div className="w-full">
                   {renderQuestionInput(currentQuestion)}
                 </div>
