@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState, useMemo, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import { CheckCircle, X, Bookmark, Heart } from 'lucide-react';
-import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { supabase } from '@/integrations/supabase/client';
@@ -346,11 +345,11 @@ export const JobSlide = memo(function JobSlide({
         <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center">
           <div className="mx-auto w-full max-w-[21rem]">
             <p className="text-white font-bold text-lg">{job.company_name}</p>
-            <TruncatedText
-              text={job.title}
+            <h2
               className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
-              tooltipSide="bottom"
-            />
+            >
+              {job.title}
+            </h2>
             <p className="text-white font-semibold text-base mt-2 truncate">
               {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
             </p>
@@ -372,8 +371,9 @@ export const JobSlide = memo(function JobSlide({
 
         {showTapHint && (
           <div className="absolute inset-x-0 bottom-24 z-20 flex justify-center px-5 pointer-events-none">
-            <div className="rounded-full border border-white/20 bg-black/45 px-4 py-2 backdrop-blur-md">
-              <span className="text-sm font-semibold text-white">Tryck igen för jobbinfo</span>
+            <div className="rounded-2xl border border-white/20 bg-black/60 px-5 py-3 backdrop-blur-md max-w-[85%]">
+              <p className="text-sm font-bold text-white leading-snug text-center">{job.title}</p>
+              <p className="text-xs text-white/60 text-center mt-1.5">Tryck igen för jobbinfo</p>
             </div>
           </div>
         )}

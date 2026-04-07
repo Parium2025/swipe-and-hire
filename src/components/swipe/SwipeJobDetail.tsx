@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { TruncatedText } from '@/components/TruncatedText';
 import { getBenefitLabel } from '@/types/jobWizard';
 import {
   capitalize as cap,
@@ -352,7 +353,11 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                     </>
                   )}
                 </div>
-                <h2 className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{job.title}</h2>
+                <TruncatedText
+                  text={job.title}
+                  className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 line-clamp-2"
+                  tooltipSide="bottom"
+                />
               </div>
 
               {loading ? (
