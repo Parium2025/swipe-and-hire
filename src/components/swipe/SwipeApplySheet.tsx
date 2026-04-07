@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -79,6 +80,13 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
   const [submitted, setSubmitted] = useState(false);
   const [contactEmail, setContactEmail] = useState<string | undefined>();
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setIsClosing(false);
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -138,6 +146,13 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
   const handleAnswerChange = useCallback((questionId: string, value: any) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
   }, []);
+
+  const handleSheetClose = useCallback(() => {
+    flushSync(() => {
+      setIsClosing(true);
+    });
+    onClose();
+  }, [onClose]);
 
   const allRequiredAnswered = useCallback(() => {
     return questions
@@ -248,7 +263,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={handleSheetClose}
           />
 
           {/* Sheet */}
@@ -266,7 +281,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
 
             {/* Close */}
             <button
-              onClick={onClose}
+              onClick={handleSheetClose}
               className="absolute top-3 right-4 z-10 flex h-11 w-11 !min-h-0 !min-w-0 items-center justify-center touch-manipulation"
               aria-label="Stäng"
             >
@@ -282,6 +297,8 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
                 text={jobTitle}
                 className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 line-clamp-2"
                 tooltipSide="bottom"
+                forceClosed={isClosing}
+                instantClose
               />
             </div>
 
