@@ -379,7 +379,7 @@ export const JobSlide = memo(function JobSlide({
                 {truncated ? (
                   <>
                     <p className="text-sm font-semibold text-white leading-relaxed break-words whitespace-pre-wrap">{job.title}</p>
-                    <p className="text-xs text-white/60 mt-2 text-center">Tryck igen för jobbinfo</p>
+                    <p className="text-xs text-white mt-2 text-center">Tryck igen för jobbinfo</p>
                   </>
                 ) : (
                   <p className="text-sm font-semibold text-white text-center">Tryck igen för jobbinfo</p>
