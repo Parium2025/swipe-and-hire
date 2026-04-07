@@ -46,13 +46,8 @@ const TAP_MAX_DURATION = 250;
 const TAP_MOVE_THRESHOLD = 18;
 const TAP_RESET_VELOCITY_THRESHOLD = 120;
 const TOUCH_DRAG_INTENT_THRESHOLD = 12;
-const TAP_HINT_DURATION = 1800;
-
-function getImageObjectPosition(value?: string): string {
-  if (!value || value === 'center') return 'center 50%';
-  if (value === 'top') return 'center 20%';
-  if (value === 'bottom') return 'center 80%';
-  return `center ${value}%`;
+function isWithinTapHintTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest('[data-tap-hint-scroll]'));
 }
 
 export const JobSlide = memo(function JobSlide({
@@ -77,43 +72,29 @@ export const JobSlide = memo(function JobSlide({
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
-  const tapHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showTapHint, setShowTapHint] = useState(false);
 
   const imageUrl = resolveImageUrl(job.job_image_url);
 
   const clearTapHint = useCallback(() => {
-    if (tapHintTimerRef.current) {
-      clearTimeout(tapHintTimerRef.current);
-      tapHintTimerRef.current = null;
-    }
     setShowTapHint(false);
   }, []);
 
   const armTapHint = useCallback(() => {
     clearTapHint();
     setShowTapHint(true);
-    // No auto-dismiss timer — hint stays until user taps outside or interacts
   }, [clearTapHint]);
-
-  useEffect(() => () => {
-    if (tapHintTimerRef.current) {
-      clearTimeout(tapHintTimerRef.current);
-    }
-  }, []);
 
   const triggerSwipe = useCallback((direction: SwipeDirection) => {
     lastTapTimestampRef.current = 0;
     clearTapHint();
 
     if (direction === 'right') {
-      // Like: snap back and open apply sheet (don't animate away)
       animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
       onSwipeRight();
       return;
     }
 
-    // Left swipe: animate away
     swipedRef.current = true;
     animate(x, -EXIT_X, {
       type: 'spring',
@@ -153,7 +134,7 @@ export const JobSlide = memo(function JobSlide({
   }, [clearTapHint, triggerSwipe, x]);
 
   const handleTouchStartCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1) return;
+    if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1 || isWithinTapHintTarget(event.target)) return;
 
     const touch = event.touches[0];
     touchGestureRef.current = {
@@ -166,7 +147,7 @@ export const JobSlide = memo(function JobSlide({
   }, [useTouchTunnel]);
 
   const handleTouchMoveCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1) return;
+    if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1 || isWithinTapHintTarget(event.target)) return;
 
     const gesture = touchGestureRef.current;
     if (!gesture || gesture.cancelled) return;
@@ -200,7 +181,7 @@ export const JobSlide = memo(function JobSlide({
   }, [clearTapHint, useTouchTunnel, x]);
 
   const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (!useTouchTunnel) return;
+    if (!useTouchTunnel || isWithinTapHintTarget(event.target)) return;
 
     const gesture = touchGestureRef.current;
     touchGestureRef.current = null;
