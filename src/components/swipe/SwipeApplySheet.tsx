@@ -154,6 +154,18 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
     onClose();
   }, [onClose]);
 
+  const handleClosePointerDown = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    handleSheetClose();
+  }, [handleSheetClose]);
+
+  const handleCloseKeyDown = useCallback((event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    handleSheetClose();
+  }, [handleSheetClose]);
+
   const allRequiredAnswered = useCallback(() => {
     return questions
       .filter(q => q.is_required)
@@ -263,7 +275,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={handleSheetClose}
+            onPointerDown={handleSheetClose}
           />
 
           {/* Sheet */}
@@ -281,7 +293,9 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
 
             {/* Close */}
             <button
-              onClick={handleSheetClose}
+              onPointerDown={handleClosePointerDown}
+              onClick={(event) => event.preventDefault()}
+              onKeyDown={handleCloseKeyDown}
               className="absolute top-3 right-4 z-10 flex h-11 w-11 !min-h-0 !min-w-0 items-center justify-center touch-manipulation"
               aria-label="Stäng"
             >

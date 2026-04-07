@@ -167,6 +167,10 @@ export function TruncatedText({
     }
   };
 
+  const stopTooltipPropagation = (event: React.SyntheticEvent) => {
+    event.stopPropagation();
+  };
+
   // Wrap in tooltip when needed
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
@@ -190,10 +194,17 @@ export function TruncatedText({
           side={tooltipSide}
           sideOffset={8}
           avoidCollisions={false}
-          className={`z-[999999] max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
+          className={`z-[999999] max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
           onPointerDownOutside={() => setIsOpen(false)}
+          onPointerDown={stopTooltipPropagation}
+          onPointerMove={stopTooltipPropagation}
+          onPointerUp={stopTooltipPropagation}
+          onTouchStart={stopTooltipPropagation}
+          onTouchMove={stopTooltipPropagation}
+          onTouchEnd={stopTooltipPropagation}
           onMouseDown={(e) => e.stopPropagation()}
           onWheel={(e) => e.stopPropagation()}
+          onScrollCapture={stopTooltipPropagation}
         >
           <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{text}</p>
         </TooltipContent>
