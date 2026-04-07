@@ -21,7 +21,7 @@ interface SwipeApplySheetProps {
   onApplied: () => void;
 }
 
-export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, onApplied }: SwipeApplySheetProps) {
+export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
