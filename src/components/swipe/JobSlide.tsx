@@ -246,21 +246,22 @@ export const JobSlide = memo(function JobSlide({
     const now = Date.now();
 
     if (showTapHint) {
-      // If tap hint is visible, check if tap was inside the hint bubble
-      const isTapInsideHint = event.target instanceof Element && Boolean(event.target.closest('[data-tap-hint-scroll]'));
-      if (isTapInsideHint) {
-        // Tap inside hint → open job info
-        clearTapHint();
-        lastTapTimestampRef.current = 0;
-        onTap();
-      } else {
-        // Tap outside hint → just dismiss it, don't open job info
-        clearTapHint();
-        lastTapTimestampRef.current = 0;
-      }
+      // Tooltip is visible → dismiss it, don't open job info
+      clearTapHint();
+      lastTapTimestampRef.current = 0;
       return;
     }
 
+    // Check if tap was on the title area
+    const isTapOnTitle = event.target instanceof Element && Boolean(event.target.closest('[data-title-tap-zone]'));
+
+    if (isTapOnTitle) {
+      // Tap on title → show tooltip (don't open job info)
+      armTapHint();
+      return;
+    }
+
+    // Quick double-tap anywhere → open job info (keep as fallback)
     if (now - lastTapTimestampRef.current <= DOUBLE_TAP_DELAY) {
       clearTapHint();
       lastTapTimestampRef.current = 0;
@@ -268,8 +269,9 @@ export const JobSlide = memo(function JobSlide({
       return;
     }
 
-    lastTapTimestampRef.current = now;
-    armTapHint();
+    // Single tap outside title → open job info directly
+    lastTapTimestampRef.current = 0;
+    onTap();
   }, [armTapHint, clearTapHint, onTap, triggerSwipe, useTouchTunnel, x, showTapHint]);
 
   const handleTouchCancelCapture = useCallback(() => {
@@ -367,6 +369,7 @@ export const JobSlide = memo(function JobSlide({
             <p className="text-white font-bold text-lg">{job.company_name}</p>
             <h2
               ref={titleRef}
+              data-title-tap-zone
               className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
             >
               {job.title}
