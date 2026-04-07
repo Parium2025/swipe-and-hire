@@ -8,6 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { TruncatedText } from '@/components/TruncatedText';
 import type { JobQuestion } from '@/types/jobWizard';
 import type { SwipeJob } from './SwipeCard';
 
