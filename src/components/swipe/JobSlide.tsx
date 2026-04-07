@@ -346,17 +346,11 @@ export const JobSlide = memo(function JobSlide({
         <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center">
           <div className="mx-auto w-full max-w-[21rem]">
             <p className="text-white font-bold text-lg">{job.company_name}</p>
-            <h2
-              className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight"
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {job.title}
-            </h2>
+            <TruncatedText
+              text={job.title}
+              className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
+              tooltipSide="bottom"
+            />
             <p className="text-white font-semibold text-base mt-2 truncate">
               {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
             </p>
