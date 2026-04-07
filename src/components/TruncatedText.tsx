@@ -104,6 +104,11 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip, to
     };
   }, [text]);
 
+  // Close tooltip immediately when component unmounts (e.g. sheet closing)
+  useEffect(() => {
+    return () => setIsOpen(false);
+  }, []);
+
   const handleTap = () => {
     if (!supportsHover && isTouch) setIsOpen((o) => !o);
   };

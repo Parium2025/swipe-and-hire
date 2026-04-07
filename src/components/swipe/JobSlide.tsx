@@ -245,7 +245,23 @@ export const JobSlide = memo(function JobSlide({
 
     const now = Date.now();
 
-    if (showTapHint || now - lastTapTimestampRef.current <= DOUBLE_TAP_DELAY) {
+    if (showTapHint) {
+      // If tap hint is visible, check if tap was inside the hint bubble
+      const isTapInsideHint = event.target instanceof Element && Boolean(event.target.closest('[data-tap-hint-scroll]'));
+      if (isTapInsideHint) {
+        // Tap inside hint → open job info
+        clearTapHint();
+        lastTapTimestampRef.current = 0;
+        onTap();
+      } else {
+        // Tap outside hint → just dismiss it, don't open job info
+        clearTapHint();
+        lastTapTimestampRef.current = 0;
+      }
+      return;
+    }
+
+    if (now - lastTapTimestampRef.current <= DOUBLE_TAP_DELAY) {
       clearTapHint();
       lastTapTimestampRef.current = 0;
       onTap();
