@@ -1,115 +1,16 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
-
-const SCROLL_STORAGE_KEY = 'parium-scroll-positions';
-const RESTORE_TOLERANCE_PX = 2;
-const REQUIRED_STABLE_FRAMES = 2;
-const SCROLL_HEIGHT_TOLERANCE_PX = 32;
-
-interface ScrollPosition {
-  top: number;
-  anchorId?: string;
-  anchorOffset?: number;
-  scrollHeight?: number;
-}
-
-const getManagedScrollContainer = (): HTMLElement | null => {
-  return document.querySelector('[data-main-scroll-container="true"]');
-};
-
-const normalizePosition = (value: unknown): ScrollPosition | null => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return { top: value };
-  }
-
-  if (!value || typeof value !== 'object') {
-    return null;
-  }
-
-  const candidate = value as Partial<ScrollPosition>;
-  if (typeof candidate.top !== 'number' || !Number.isFinite(candidate.top)) {
-    return null;
-  }
-
-  return {
-    top: candidate.top,
-    anchorId: typeof candidate.anchorId === 'string' ? candidate.anchorId : undefined,
-    anchorOffset: typeof candidate.anchorOffset === 'number' ? candidate.anchorOffset : undefined,
-    scrollHeight: typeof candidate.scrollHeight === 'number' ? candidate.scrollHeight : undefined,
-  };
-};
-
-const readPositions = (): Record<string, ScrollPosition> => {
-  try {
-    const raw = sessionStorage.getItem(SCROLL_STORAGE_KEY);
-    if (!raw) return {};
-
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    return Object.entries(parsed).reduce<Record<string, ScrollPosition>>((acc, [pathname, value]) => {
-      const normalized = normalizePosition(value);
-      if (normalized) {
-        acc[pathname] = normalized;
-      }
-      return acc;
-    }, {});
-  } catch {
-    return {};
-  }
-};
-
-const writePositions = (positions: Record<string, ScrollPosition>) => {
-  try {
-    sessionStorage.setItem(SCROLL_STORAGE_KEY, JSON.stringify(positions));
-  } catch {
-    // ignore
-  }
-};
-
-const getAnchorElements = (scrollContainer: HTMLElement): HTMLElement[] => {
-  return Array.from(scrollContainer.querySelectorAll<HTMLElement>('[data-scroll-anchor-id]'));
-};
-
-const getAnchorSnapshot = (scrollContainer: HTMLElement): { anchorId: string; anchorOffset: number } | null => {
-  const anchors = getAnchorElements(scrollContainer);
-  if (anchors.length === 0) return null;
-
-  const containerTop = scrollContainer.getBoundingClientRect().top;
-  let bestMatch: { anchorId: string; anchorOffset: number } | null = null;
-  let bestDistance = Number.POSITIVE_INFINITY;
-
-  anchors.forEach((anchor) => {
-    const anchorId = anchor.dataset.scrollAnchorId;
-    if (!anchorId) return;
-
-    const anchorOffset = anchor.getBoundingClientRect().top - containerTop;
-    const distance = Math.abs(anchorOffset);
-
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      bestMatch = { anchorId, anchorOffset };
-    }
-  });
-
-  return bestMatch;
-};
-
-const getAnchorDelta = (
-  scrollContainer: HTMLElement,
-  anchorId?: string,
-  expectedOffset?: number,
-): number | null => {
-  if (!anchorId || typeof expectedOffset !== 'number') {
-    return null;
-  }
-
-  const escapedAnchorId = window.CSS?.escape ? window.CSS.escape(anchorId) : anchorId.replace(/"/g, '\\"');
-  const anchor = scrollContainer.querySelector<HTMLElement>(`[data-scroll-anchor-id="${escapedAnchorId}"]`);
-  if (!anchor) return null;
-
-  const containerTop = scrollContainer.getBoundingClientRect().top;
-  const actualOffset = anchor.getBoundingClientRect().top - containerTop;
-  return actualOffset - expectedOffset;
-};
+import {
+  getManagedScrollContainer,
+  readPositions,
+  writePositions,
+  getAnchorSnapshot,
+  getAnchorDelta,
+  RESTORE_TOLERANCE_PX,
+  REQUIRED_STABLE_FRAMES,
+  SCROLL_HEIGHT_TOLERANCE_PX,
+  MAX_WAIT_MS,
+} from '@/lib/scrollRestoration';
 
 export function ScrollRestoration() {
   const location = useLocation();
@@ -117,41 +18,68 @@ export function ScrollRestoration() {
   const isRestoringRef = useRef(false);
   const pendingSaveFrameRef = useRef<number | null>(null);
 
+  // -----------------------------------------------------------------------
+  // Save scroll position on user scroll
+  // -----------------------------------------------------------------------
   useEffect(() => {
-    const scrollContainer = getManagedScrollContainer();
-    if (!scrollContainer) return;
+    let scrollContainer = getManagedScrollContainer();
 
-    const handleScroll = () => {
-      if (isRestoringRef.current) return;
-      if (pendingSaveFrameRef.current) return;
+    // If the container isn't in the DOM yet (e.g. layout still mounting),
+    // poll briefly so we don't silently skip binding.
+    if (!scrollContainer) {
+      let retries = 0;
+      const maxRetries = 10;
+      const intervalId = setInterval(() => {
+        scrollContainer = getManagedScrollContainer();
+        retries += 1;
+        if (scrollContainer || retries >= maxRetries) {
+          clearInterval(intervalId);
+          if (scrollContainer) bind(scrollContainer);
+        }
+      }, 50);
 
-      pendingSaveFrameRef.current = requestAnimationFrame(() => {
-        pendingSaveFrameRef.current = null;
+      return () => clearInterval(intervalId);
+    }
+
+    return bind(scrollContainer);
+
+    function bind(container: HTMLElement) {
+      const handleScroll = () => {
         if (isRestoringRef.current) return;
+        if (pendingSaveFrameRef.current) return;
 
-        const positions = readPositions();
-        const anchorSnapshot = getAnchorSnapshot(scrollContainer);
+        pendingSaveFrameRef.current = requestAnimationFrame(() => {
+          pendingSaveFrameRef.current = null;
+          if (isRestoringRef.current) return;
 
-        positions[location.pathname] = {
-          top: scrollContainer.scrollTop,
-          anchorId: anchorSnapshot?.anchorId,
-          anchorOffset: anchorSnapshot?.anchorOffset,
-          scrollHeight: scrollContainer.scrollHeight,
-        };
-        writePositions(positions);
-      });
-    };
+          const positions = readPositions();
+          const anchorSnapshot = getAnchorSnapshot(container);
 
-    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      scrollContainer.removeEventListener('scroll', handleScroll);
-      if (pendingSaveFrameRef.current) {
-        cancelAnimationFrame(pendingSaveFrameRef.current);
-        pendingSaveFrameRef.current = null;
-      }
-    };
+          positions[location.pathname] = {
+            top: container.scrollTop,
+            anchorId: anchorSnapshot?.anchorId,
+            anchorOffset: anchorSnapshot?.anchorOffset,
+            scrollHeight: container.scrollHeight,
+          };
+          writePositions(positions);
+        });
+      };
+
+      container.addEventListener('scroll', handleScroll, { passive: true });
+
+      return () => {
+        container.removeEventListener('scroll', handleScroll);
+        if (pendingSaveFrameRef.current) {
+          cancelAnimationFrame(pendingSaveFrameRef.current);
+          pendingSaveFrameRef.current = null;
+        }
+      };
+    }
   }, [location.pathname]);
 
+  // -----------------------------------------------------------------------
+  // Restore scroll position on navigation
+  // -----------------------------------------------------------------------
   useLayoutEffect(() => {
     const positions = readPositions();
     const storedPosition = navigationType === 'POP' ? positions[location.pathname] : undefined;
@@ -160,7 +88,9 @@ export function ScrollRestoration() {
     let rafId = 0;
 
     const releaseRestoreLock = () => {
-      requestAnimationFrame(() => {
+      // Use a microtask instead of rAF so the lock is released deterministically
+      // even if the component unmounts immediately after (fixing the race condition).
+      Promise.resolve().then(() => {
         if (!cancelled) {
           isRestoringRef.current = false;
         }
@@ -186,9 +116,7 @@ export function ScrollRestoration() {
     // For restoring a saved position, we need to wait until:
     // 1. The scroll container exists
     // 2. The container has enough content to scroll to the target position
-    // This can take several hundred ms when data is loading after a remount.
     const startTime = performance.now();
-    const MAX_WAIT_MS = 3000;
     let stableFrames = 0;
 
     const tryRestore = () => {
@@ -216,8 +144,7 @@ export function ScrollRestoration() {
         scrollContainer.scrollTo({ top: targetTop, behavior: 'auto' });
       }
 
-      // If content hasn't loaded enough, the actual scrollTop will be less than targetTop.
-      // Keep retrying until content grows enough or timeout.
+      // Check if we're close enough & content has loaded
       const actualTop = scrollContainer.scrollTop;
       const nextAnchorDelta = getAnchorDelta(
         scrollContainer,
@@ -256,6 +183,9 @@ export function ScrollRestoration() {
     };
   }, [location.pathname, navigationType]);
 
+  // -----------------------------------------------------------------------
+  // Disable native scroll restoration
+  // -----------------------------------------------------------------------
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
