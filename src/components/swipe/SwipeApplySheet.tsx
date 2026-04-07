@@ -114,7 +114,7 @@ function TappableTitle({ companyName, jobTitle }: { companyName: string; jobTitl
   );
 }
 
-
+export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
