@@ -299,50 +299,43 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
                     Din profil och svar har skickats till {companyName}. Lycka till!
                   </p>
                 </motion.div>
-              ) : questions.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
-                  <p className="text-white text-sm max-w-xs">
-                    Inga frågor att besvara. Din profilinformation skickas direkt med ansökan.
-                  </p>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={submitting || hasAlreadyApplied}
-                    className={`h-14 px-10 rounded-full font-semibold text-base transition-all active:scale-[0.97] ${
-                      hasAlreadyApplied
-                        ? 'bg-green-500 text-white cursor-not-allowed'
-                        : 'bg-green-500 text-white shadow-lg shadow-green-500/30'
-                    }`}
-                  >
-                    {hasAlreadyApplied ? 'Redan sökt' : submitting ? 'Skickar...' : 'Skicka ansökan'}
-                  </button>
-                </div>
               ) : (
-                <ApplicationQuestionsWizard
-                  questions={questions}
-                  answers={answers}
-                  onAnswerChange={handleAnswerChange}
-                  onSubmit={handleSubmit}
-                  isSubmitting={submitting}
-                  canSubmit={allRequiredAnswered()}
-                  hasAlreadyApplied={hasAlreadyApplied}
-                  contactEmail={contactEmail}
-                  jobTitle={jobTitle}
-                />
-              )}
+                <>
+                  {/* Details section — above questions */}
+                  {job && <div className="mb-6"><JobDetailsSection job={job} /></div>}
 
-              {/* Detaljer om tjänsten — fills empty space */}
-              {job && !submitted && (
-                <div className="mt-8 rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
-                  <h3 className="text-white font-bold text-base">Detaljer om tjänsten</h3>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
-                    {job.employment_type && (
-                      <DetailRow label="Anställning" value={getEmploymentTypeLabel(job.employment_type)} />
-                    )}
-                    {job.location && (
-                      <DetailRow label="Ort" value={job.location} />
-                    )}
-                    {job.company_name && (
-                      <DetailRow label="Bolagsnamn" value={job.company_name} />
+                  {questions.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
+                      <p className="text-white text-sm max-w-xs">
+                        Inga frågor att besvara. Din profilinformation skickas direkt med ansökan.
+                      </p>
+                      <button
+                        onClick={handleSubmit}
+                        disabled={submitting || hasAlreadyApplied}
+                        className={`h-14 px-10 rounded-full font-semibold text-base transition-all active:scale-[0.97] ${
+                          hasAlreadyApplied
+                            ? 'bg-green-500 text-white cursor-not-allowed'
+                            : 'bg-green-500 text-white shadow-lg shadow-green-500/30'
+                        }`}
+                      >
+                        {hasAlreadyApplied ? 'Redan sökt' : submitting ? 'Skickar...' : 'Skicka ansökan'}
+                      </button>
+                    </div>
+                  ) : (
+                    <ApplicationQuestionsWizard
+                      questions={questions}
+                      answers={answers}
+                      onAnswerChange={handleAnswerChange}
+                      onSubmit={handleSubmit}
+                      isSubmitting={submitting}
+                      canSubmit={allRequiredAnswered()}
+                      hasAlreadyApplied={hasAlreadyApplied}
+                      contactEmail={contactEmail}
+                      jobTitle={jobTitle}
+                    />
+                  )}
+                </>
+              )}
                     )}
                     {job.occupation && (
                       <DetailRow label="Yrke" value={job.occupation} />
