@@ -275,7 +275,10 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onPointerDown={handleSheetClose}
+            onPointerDown={(event) => {
+              event.stopPropagation();
+              handleSheetClose();
+            }}
           />
 
           {/* Sheet */}
