@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TruncatedTextProps {
@@ -27,6 +28,7 @@ export function TruncatedText({
   instantClose = false,
 }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
+  const tooltipContentRef = useRef<HTMLDivElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -126,6 +128,29 @@ export function TruncatedText({
     }
   }, [forceClosed]);
 
+  useEffect(() => {
+    if (supportsHover || !isTouch || !isOpen) return;
+
+    const handleGlobalPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+
+      const isInsideTrigger = textRef.current?.contains(target) ?? false;
+      const isInsideTooltip = tooltipContentRef.current?.contains(target) ?? false;
+
+      if (isInsideTrigger || isInsideTooltip) return;
+
+      flushSync(() => {
+        setIsOpen(false);
+      });
+    };
+
+    document.addEventListener('pointerdown', handleGlobalPointerDown, true);
+    return () => {
+      document.removeEventListener('pointerdown', handleGlobalPointerDown, true);
+    };
+  }, [isOpen, isTouch, supportsHover]);
+
   const handleTap = () => {
     if (!supportsHover && isTouch) setIsOpen((o) => !o);
   };
@@ -191,11 +216,12 @@ export function TruncatedText({
           </div>
         </TooltipTrigger>
         <TooltipContent
+          ref={tooltipContentRef}
+          allowOutsidePointerEvents
           side={tooltipSide}
           sideOffset={8}
           avoidCollisions={false}
           className={`z-[999999] max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
-          onPointerDownOutside={() => setIsOpen(false)}
           onPointerDown={stopTooltipPropagation}
           onPointerMove={stopTooltipPropagation}
           onPointerUp={stopTooltipPropagation}
