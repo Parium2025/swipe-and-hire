@@ -12,6 +12,12 @@ interface JobStatusTabsProps {
   showDrafts?: boolean;
 }
 
+const tabColors: Record<JobStatusTab, string> = {
+  active: 'text-green-400',
+  expired: 'text-red-400',
+  draft: 'text-amber-400',
+};
+
 export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChange, activeCount, expiredCount, draftCount, showDrafts = false }: JobStatusTabsProps) {
   const railRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLButtonElement>(null);
