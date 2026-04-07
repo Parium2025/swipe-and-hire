@@ -307,10 +307,10 @@ export function ApplicationQuestionsWizard({
 
       {/* Question container */}
       <div className={`relative flex flex-col ${
-        questions.length <= 1 ? 'min-h-[160px] sm:min-h-[180px] md:min-h-[200px]' :
-        questions.length <= 2 ? 'min-h-[200px] sm:min-h-[220px] md:min-h-[240px]' :
-        questions.length <= 3 ? 'min-h-[240px] sm:min-h-[260px] md:min-h-[280px]' :
-        'min-h-[300px] sm:min-h-[300px] md:min-h-[320px]'
+        questions.length <= 1 ? 'min-h-[300px] sm:min-h-[320px] md:min-h-[340px]' :
+        questions.length <= 2 ? 'min-h-[340px] sm:min-h-[360px] md:min-h-[380px]' :
+        questions.length <= 3 ? 'min-h-[380px] sm:min-h-[400px] md:min-h-[420px]' :
+        'min-h-[420px] sm:min-h-[440px] md:min-h-[460px]'
       }`}>
         {!isSubmitStep && currentQuestion ? (
             <div
