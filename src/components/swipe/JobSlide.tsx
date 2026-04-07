@@ -107,8 +107,12 @@ export const JobSlide = memo(function JobSlide({
       tapHintTimerRef.current = setTimeout(() => setShowTapHint(false), 1800);
     }
   }, [clearTapHint, isTitleTruncated]);
+  // Clear tap hint immediately when any overlay opens/closes
+  useEffect(() => {
+    if (overlayOpen) clearTapHint();
+  }, [overlayOpen, clearTapHint]);
 
-  const triggerSwipe = useCallback((direction: SwipeDirection) => {
+
     lastTapTimestampRef.current = 0;
     clearTapHint();
 
