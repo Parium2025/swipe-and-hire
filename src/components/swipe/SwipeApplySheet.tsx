@@ -276,7 +276,14 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
             </button>
 
             {/* Header — compact, with tap-to-preview on truncated title */}
-            <TappableTitle companyName={companyName} jobTitle={jobTitle} />
+            <div className="px-4 pr-14 pb-1 shrink-0">
+              <p className="text-white text-sm font-medium mt-1">{companyName}</p>
+              <TruncatedText
+                text={jobTitle}
+                className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 line-clamp-2"
+                tooltipSide="bottom"
+              />
+            </div>
 
             {/* Content — flex-1 fills remaining space */}
             <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-6 pt-1" style={{ WebkitOverflowScrolling: 'touch' }}>
