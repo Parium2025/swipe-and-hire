@@ -84,6 +84,8 @@ const formatSalary = (min?: number, max?: number) => {
   return 'Enligt överenskommelse';
 };
 
+const SEARCH_JOBS_DISPLAY_COUNT_KEY = 'parium-search-display-count';
+
 const SearchJobs = memo(() => {
   const navigate = useNavigate();
   // toast and blurHandlers removed — no longer needed after filter extraction
@@ -242,11 +244,20 @@ const SearchJobs = memo(() => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   
   // Lazy loading state with infinite scroll
-  const [displayCount, setDisplayCount] = useState(20); // Start with 20 jobs
+  const [displayCount, setDisplayCount] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem(SEARCH_JOBS_DISPLAY_COUNT_KEY);
+      const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
+      return Number.isFinite(parsed) && parsed >= 20 ? parsed : 20;
+    } catch {
+      return 20;
+    }
+  }); // Start with 20 jobs
   const loadMoreSize = 20; // Load 20 more each time
   const listTopRef = useRef<HTMLDivElement>(null);
   const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
   const isLoadingMoreRef = useRef(false);
+  const hasInitializedFiltersRef = useRef(false);
 
   
 
@@ -423,11 +434,24 @@ const SearchJobs = memo(() => {
     });
   }, [jobs, selectedCompanies]);
 
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(SEARCH_JOBS_DISPLAY_COUNT_KEY, String(displayCount));
+    } catch {
+      // ignore
+    }
+  }, [displayCount]);
+
   // Reset display count and default sort when filters change
   useEffect(() => {
+    if (!hasInitializedFiltersRef.current) {
+      hasInitializedFiltersRef.current = true;
+      return;
+    }
+
     setDisplayCount(20);
     setSortBy('newest');
-  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes]);
+  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, setSortBy]);
 
   // Infinite scroll with IntersectionObserver
   useEffect(() => {
