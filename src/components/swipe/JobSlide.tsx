@@ -112,7 +112,7 @@ export const JobSlide = memo(function JobSlide({
     if (overlayOpen) clearTapHint();
   }, [overlayOpen, clearTapHint]);
 
-
+  const triggerSwipe = useCallback((direction: SwipeDirection) => {
     lastTapTimestampRef.current = 0;
     clearTapHint();
 
