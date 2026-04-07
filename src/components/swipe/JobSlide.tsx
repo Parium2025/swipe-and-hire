@@ -65,6 +65,7 @@ export const JobSlide = memo(function JobSlide({
   isVisible,
   isLast,
   sectionHeight,
+  overlayOpen,
   onSwipeRight,
   onSwipeLeft,
   onSave,
