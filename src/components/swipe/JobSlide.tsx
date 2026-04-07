@@ -370,10 +370,10 @@ export const JobSlide = memo(function JobSlide({
         </div>
 
         {showTapHint && (
-          <div className="absolute inset-x-0 bottom-24 z-20 flex justify-center px-5 pointer-events-none">
-            <div className="rounded-2xl border border-white/20 bg-black/60 px-5 py-3 backdrop-blur-md max-w-[85%]">
-              <p className="text-sm font-bold text-white leading-snug text-center">{job.title}</p>
-              <p className="text-xs text-white/60 text-center mt-1.5">Tryck igen för jobbinfo</p>
+          <div className="absolute inset-x-4 bottom-24 z-20 pointer-events-none">
+            <div className="rounded-xl border border-white/20 bg-slate-900/95 px-4 py-3 backdrop-blur-md shadow-2xl max-h-[300px] overflow-y-auto overscroll-contain pointer-events-auto">
+              <p className="text-sm font-semibold text-white leading-relaxed break-words whitespace-pre-wrap">{job.title}</p>
+              <p className="text-xs text-white/50 text-center mt-2">Tryck igen för jobbinfo</p>
             </div>
           </div>
         )}
