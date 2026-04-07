@@ -46,7 +46,7 @@ const TAP_MAX_DURATION = 250;
 const TAP_MOVE_THRESHOLD = 18;
 const TAP_RESET_VELOCITY_THRESHOLD = 120;
 const TOUCH_DRAG_INTENT_THRESHOLD = 12;
-const TAP_HINT_DURATION = 4000;
+const TAP_HINT_DURATION = 1800;
 
 function getImageObjectPosition(value?: string): string {
   if (!value || value === 'center') return 'center 50%';
