@@ -12,6 +12,12 @@ interface JobStatusTabsProps {
   showDrafts?: boolean;
 }
 
+const tabColors: Record<JobStatusTab, string> = {
+  active: 'text-green-400',
+  expired: 'text-red-400',
+  draft: 'text-amber-400',
+};
+
 export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChange, activeCount, expiredCount, draftCount, showDrafts = false }: JobStatusTabsProps) {
   const railRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLButtonElement>(null);
@@ -62,7 +68,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
           ref={activeRef}
           type="button"
           onClick={() => onTabChange('active')}
-          className="dashboard-tab-button relative z-10 rounded-[7px] font-medium text-white transition-colors whitespace-nowrap"
+          className={`dashboard-tab-button relative z-10 rounded-[7px] font-medium transition-colors whitespace-nowrap ${tabColors.active}`}
         >
           Aktiva ({activeCount})
         </button>
@@ -70,7 +76,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
           ref={expiredRef}
           type="button"
           onClick={() => onTabChange('expired')}
-          className="dashboard-tab-button relative z-10 rounded-[7px] font-medium text-white transition-colors whitespace-nowrap"
+          className={`dashboard-tab-button relative z-10 rounded-[7px] font-medium transition-colors whitespace-nowrap ${tabColors.expired}`}
         >
           Utgångna ({expiredCount})
         </button>
@@ -79,7 +85,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
             ref={draftRef}
             type="button"
             onClick={() => onTabChange('draft')}
-            className="dashboard-tab-button relative z-10 rounded-[7px] font-medium text-white transition-colors whitespace-nowrap"
+            className={`dashboard-tab-button relative z-10 rounded-[7px] font-medium transition-colors whitespace-nowrap ${tabColors.draft}`}
           >
             Utkast ({draftCount ?? 0})
           </button>
