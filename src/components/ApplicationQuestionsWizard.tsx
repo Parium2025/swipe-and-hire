@@ -310,10 +310,10 @@ export function ApplicationQuestionsWizard({
         {!isSubmitStep && currentQuestion ? (
             <div
               key={currentQuestion.id}
-              className="flex-1 flex flex-col transition-opacity duration-100"
+              className="flex-1 flex flex-col justify-center transition-opacity duration-100"
             >
               {/* Question number */}
-              <div className="text-center mb-2 pt-1">
+              <div className="text-center mb-2">
                 <span className="text-[10px] uppercase tracking-[0.28em] text-white">
                   {currentStep + 1} / {questions.length}
                 </span>
@@ -330,7 +330,7 @@ export function ApplicationQuestionsWizard({
               </div>
 
               {/* Answer input */}
-              <div className="flex-1 flex items-start justify-center">
+              <div className="flex items-start justify-center">
                 <div className="w-full">
                   {renderQuestionInput(currentQuestion)}
                 </div>

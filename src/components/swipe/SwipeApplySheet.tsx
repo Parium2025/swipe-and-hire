@@ -227,7 +227,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
             {/* Header — compact, matching info sheet style */}
             <div className="px-4 pr-14 pb-1 shrink-0">
               <p className="text-white text-sm font-medium mt-1">{companyName}</p>
-              <h2 className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 break-words">{jobTitle}</h2>
+              <h2 className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 line-clamp-2">{jobTitle}</h2>
             </div>
 
             {/* Content — flex-1 fills remaining space */}
