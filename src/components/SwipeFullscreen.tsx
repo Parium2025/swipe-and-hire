@@ -405,6 +405,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 isVisible={Math.abs(idx - currentIndex) <= 1}
                 isLast={idx === jobs.length - 1}
                 sectionHeight={sectionHeight}
+                overlayOpen={showDetail || showApply || showFilter}
                 onSwipeRight={handleSwipeRight}
                 onSwipeLeft={handleSwipeLeft}
                 onSave={() => onToggleSave(job.id)}

@@ -22,6 +22,7 @@ interface JobSlideProps {
   isVisible: boolean;
   isLast: boolean;
   sectionHeight?: string;
+  overlayOpen?: boolean;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onSave: () => void;
@@ -64,6 +65,7 @@ export const JobSlide = memo(function JobSlide({
   isVisible,
   isLast,
   sectionHeight,
+  overlayOpen,
   onSwipeRight,
   onSwipeLeft,
   onSave,
@@ -105,6 +107,10 @@ export const JobSlide = memo(function JobSlide({
       tapHintTimerRef.current = setTimeout(() => setShowTapHint(false), 1800);
     }
   }, [clearTapHint, isTitleTruncated]);
+  // Clear tap hint immediately when any overlay opens/closes
+  useEffect(() => {
+    if (overlayOpen) clearTapHint();
+  }, [overlayOpen, clearTapHint]);
 
   const triggerSwipe = useCallback((direction: SwipeDirection) => {
     lastTapTimestampRef.current = 0;
