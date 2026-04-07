@@ -318,24 +318,24 @@ export function ApplicationQuestionsWizard({
               className="flex-1 flex flex-col transition-opacity duration-100"
             >
               {/* Question number */}
-              <div className="text-center mb-2">
-                <span className="text-[10px] uppercase tracking-widest text-white">
+              <div className="text-center mb-3 pt-2">
+                <span className="text-[10px] uppercase tracking-[0.28em] text-white">
                   {currentStep + 1} / {questions.length}
                 </span>
               </div>
 
               {/* Question text */}
-              <div className="text-center mb-5">
-                <h3 className="text-base font-semibold text-white leading-snug">
+              <div className="text-center mb-7 px-2">
+                <h3 className="text-[clamp(1.9rem,7vw,2.55rem)] font-extrabold text-white leading-[1.08] tracking-tight text-balance">
                   {currentQuestion.question_text}
                   {currentQuestion.is_required && (
-                    <span className="ml-1 text-white text-sm">*</span>
+                    <span className="ml-1 text-white text-base">*</span>
                   )}
                 </h3>
               </div>
 
               {/* Answer input */}
-              <div className="flex-1 flex items-center justify-center">
+              <div className="flex-1 flex items-start justify-center pt-6">
                 <div className="w-full">
                   {renderQuestionInput(currentQuestion)}
                 </div>

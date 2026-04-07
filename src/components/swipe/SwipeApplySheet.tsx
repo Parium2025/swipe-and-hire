@@ -209,7 +209,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
             transition={{ type: 'spring', damping: 30, stiffness: 400 }}
           >
             {/* Drag handle */}
-            <div className="flex justify-center pt-3 pb-1 shrink-0">
+            <div className="flex justify-center pt-3 pb-2 shrink-0">
               <div className="w-10 h-1 rounded-full bg-white/20" />
             </div>
 
@@ -225,22 +225,26 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
             </button>
 
             {/* Header */}
-            <div className="px-5 pb-4 shrink-0 text-center">
-              <h2 className="text-xl font-bold text-white">{jobTitle}</h2>
-              <p className="text-white text-base mt-0.5">{companyName}</p>
+            <div className="px-5 pt-5 pb-3 shrink-0 text-center">
+              <h2 className="mx-auto max-w-[280px] text-[clamp(1.9rem,7vw,2.5rem)] font-extrabold leading-[1.05] tracking-tight text-white text-balance">
+                {jobTitle}
+              </h2>
+              <p className="mt-2 text-white text-[clamp(1.15rem,4.6vw,1.35rem)] font-medium">
+                {companyName}
+              </p>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-5 pb-6" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex-1 overflow-y-auto px-5 pb-6 pt-2" style={{ WebkitOverflowScrolling: 'touch' }}>
               {loading ? (
-                <div className="flex items-center justify-center py-16">
+                <div className="flex items-center justify-center py-20">
                   <Loader2 className="w-6 h-6 text-white/50 animate-spin" />
                 </div>
               ) : submitted ? (
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="flex flex-col items-center justify-center py-16 text-center space-y-4"
+                  className="flex flex-col items-center justify-center py-20 text-center space-y-4"
                 >
                   <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
                     <CheckCircle className="w-8 h-8 text-green-400" />
@@ -252,7 +256,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                 </motion.div>
               ) : questions.length === 0 ? (
                 /* No custom questions — just confirm and submit */
-                <div className="flex flex-col items-center justify-center py-12 text-center space-y-6">
+                <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
                   <p className="text-white text-sm max-w-xs">
                     Inga frågor att besvara. Din profilinformation skickas direkt med ansökan.
                   </p>
@@ -269,18 +273,19 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                   </button>
                 </div>
               ) : (
-                /* Questions wizard */
-                <ApplicationQuestionsWizard
-                  questions={questions}
-                  answers={answers}
-                  onAnswerChange={handleAnswerChange}
-                  onSubmit={handleSubmit}
-                  isSubmitting={submitting}
-                  canSubmit={allRequiredAnswered()}
-                  hasAlreadyApplied={hasAlreadyApplied}
-                  contactEmail={contactEmail}
-                  jobTitle={jobTitle}
-                />
+                <div className="pt-3">
+                  <ApplicationQuestionsWizard
+                    questions={questions}
+                    answers={answers}
+                    onAnswerChange={handleAnswerChange}
+                    onSubmit={handleSubmit}
+                    isSubmitting={submitting}
+                    canSubmit={allRequiredAnswered()}
+                    hasAlreadyApplied={hasAlreadyApplied}
+                    contactEmail={contactEmail}
+                    jobTitle={jobTitle}
+                  />
+                </div>
               )}
             </div>
           </motion.div>
