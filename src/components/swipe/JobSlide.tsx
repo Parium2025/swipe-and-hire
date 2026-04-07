@@ -380,8 +380,7 @@ export const JobSlide = memo(function JobSlide({
               </div>
             </div>
           );
-        })()
-        )}
+        })()}
 
         {/* Action buttons */}
         <div className="absolute inset-x-0 bottom-4 z-10 px-5">
