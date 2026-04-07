@@ -125,7 +125,10 @@ const JobView = () => {
   });
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
-    const rawImg = initialJob?.job_image_desktop_url || initialJob?.job_image_url;
+    const isDesktopInit = typeof window !== 'undefined' && window.innerWidth >= 1024;
+    const rawImg = isDesktopInit
+      ? (initialJob?.job_image_desktop_url || initialJob?.job_image_url)
+      : (initialJob?.job_image_url || initialJob?.job_image_desktop_url);
     if (!rawImg) return null;
     let resolved = rawImg;
     if (!rawImg.startsWith('http')) {
