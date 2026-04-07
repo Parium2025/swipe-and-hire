@@ -213,7 +213,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
             <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-secondary/60 rounded-full"></div>
           </div>
           
-          <main className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 pb-8 flex flex-col" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+          <main data-main-scroll-container="true" className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 pb-8 flex flex-col" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
             {children}
           </main>
         </div>
