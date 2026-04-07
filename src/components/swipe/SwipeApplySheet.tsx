@@ -24,8 +24,45 @@ interface SwipeApplySheetProps {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <span className="text-white/50">{label}: </span>
+      <span className="text-white font-medium">{label}: </span>
       <span className="text-white font-medium">{value}</span>
+    </div>
+  );
+}
+
+function JobDetailsSection({ job }: { job: SwipeJob }) {
+  const salaryLabel = (() => {
+    if (!job.salary_min && !job.salary_max && !job.salary_transparency) return null;
+    if (job.salary_transparency === 'after_interview' || job.salary_transparency === 'not_specified') {
+      return job.salary_transparency === 'after_interview' ? 'Lön efter intervju' : 'Ej specificerad';
+    }
+    if (job.salary_min || job.salary_max) {
+      const suffix = job.salary_type === 'hourly' ? 'tim' : 'mån';
+      if (job.salary_min && job.salary_max) return `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} kr/${suffix}`;
+      if (job.salary_min) return `Från ${job.salary_min.toLocaleString('sv-SE')} kr/${suffix}`;
+      return `Upp till ${job.salary_max!.toLocaleString('sv-SE')} kr/${suffix}`;
+    }
+    return null;
+  })();
+
+  return (
+    <div className="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
+      <h3 className="text-white font-bold text-base">Detaljer om tjänsten</h3>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
+        {job.employment_type && <DetailRow label="Anställning" value={getEmploymentTypeLabel(job.employment_type)} />}
+        {job.location && <DetailRow label="Ort" value={job.location} />}
+        {job.company_name && <DetailRow label="Bolagsnamn" value={job.company_name} />}
+        {job.occupation && <DetailRow label="Yrke" value={job.occupation} />}
+        {job.work_location_type && (
+          <DetailRow label="Platstyp" value={job.work_location_type === 'on_site' ? 'På plats' : job.work_location_type === 'hybrid' ? 'Hybrid' : job.work_location_type === 'remote' ? 'Distans' : job.work_location_type} />
+        )}
+        {job.remote_work_possible && (
+          <DetailRow label="Distans" value={job.remote_work_possible === 'yes' ? 'Ja' : job.remote_work_possible === 'no' ? 'Nej' : job.remote_work_possible} />
+        )}
+        {job.work_schedule && <DetailRow label="Schema" value={job.work_schedule} />}
+        {salaryLabel && <DetailRow label="Lön" value={salaryLabel} />}
+        {job.positions_count && job.positions_count > 0 && <DetailRow label="Antal tjänster" value={`${job.positions_count} st`} />}
+      </div>
     </div>
   );
 }
