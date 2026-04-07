@@ -80,17 +80,31 @@ export const JobSlide = memo(function JobSlide({
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
   const [showTapHint, setShowTapHint] = useState(false);
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
   const imageUrl = resolveImageUrl(job.job_image_url);
 
+  const isTitleTruncated = useCallback(() => {
+    const el = titleRef.current;
+    if (!el) return false;
+    return el.scrollHeight > el.clientHeight + 1;
+  }, []);
+
+  const tapHintTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
   const clearTapHint = useCallback(() => {
     setShowTapHint(false);
+    if (tapHintTimerRef.current) clearTimeout(tapHintTimerRef.current);
   }, []);
 
   const armTapHint = useCallback(() => {
     clearTapHint();
     setShowTapHint(true);
-  }, [clearTapHint]);
+    // Auto-dismiss only when title is NOT truncated (simple hint text)
+    if (!isTitleTruncated()) {
+      tapHintTimerRef.current = setTimeout(() => setShowTapHint(false), 1800);
+    }
+  }, [clearTapHint, isTitleTruncated]);
 
   const triggerSwipe = useCallback((direction: SwipeDirection) => {
     lastTapTimestampRef.current = 0;
@@ -330,6 +344,7 @@ export const JobSlide = memo(function JobSlide({
           <div className="mx-auto w-full max-w-[21rem]">
             <p className="text-white font-bold text-lg">{job.company_name}</p>
             <h2
+              ref={titleRef}
               className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
             >
               {job.title}
@@ -353,16 +368,26 @@ export const JobSlide = memo(function JobSlide({
           </div>
         </div>
 
-        {showTapHint && (
-          <div className="absolute inset-x-4 bottom-24 z-30 pointer-events-none">
-            <div
-              data-tap-hint-scroll
-              className="pointer-events-auto rounded-xl border border-white/20 bg-slate-900/95 px-4 py-3 backdrop-blur-md shadow-2xl max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y"
-            >
-              <p className="text-sm font-semibold text-white leading-relaxed break-words whitespace-pre-wrap">{job.title}</p>
+        {showTapHint && (() => {
+          const truncated = isTitleTruncated();
+          return (
+            <div className="absolute inset-x-4 bottom-24 z-30 pointer-events-none">
+              <div
+                data-tap-hint-scroll
+                className="pointer-events-auto rounded-xl border border-white/20 bg-slate-900/95 px-4 py-3 backdrop-blur-md shadow-2xl max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y"
+              >
+                {truncated ? (
+                  <>
+                    <p className="text-sm font-semibold text-white leading-relaxed break-words whitespace-pre-wrap">{job.title}</p>
+                    <p className="text-xs text-white/60 mt-2 text-center">Tryck igen för jobbinfo</p>
+                  </>
+                ) : (
+                  <p className="text-sm font-semibold text-white text-center">Tryck igen för jobbinfo</p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Action buttons */}
         <div className="absolute inset-x-0 bottom-4 z-10 px-5">
