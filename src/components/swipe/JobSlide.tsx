@@ -46,6 +46,13 @@ const TAP_MAX_DURATION = 250;
 const TAP_MOVE_THRESHOLD = 18;
 const TAP_RESET_VELOCITY_THRESHOLD = 120;
 const TOUCH_DRAG_INTENT_THRESHOLD = 12;
+function getImageObjectPosition(value?: string): string {
+  if (!value || value === 'center') return 'center 50%';
+  if (value === 'top') return 'center 20%';
+  if (value === 'bottom') return 'center 80%';
+  return `center ${value}%`;
+}
+
 function isWithinTapHintTarget(target: EventTarget | null): boolean {
   return target instanceof Element && Boolean(target.closest('[data-tap-hint-scroll]'));
 }
