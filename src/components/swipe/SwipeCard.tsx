@@ -165,7 +165,17 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
         <p className="text-white/80 font-medium text-sm">{job.company_name}</p>
-        <h2 className="text-xl font-bold text-white leading-snug tracking-tight mt-0.5 line-clamp-2">{job.title}</h2>
+        <h2
+          className="text-xl font-bold text-white leading-snug tracking-tight mt-0.5"
+          style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {job.title}
+        </h2>
         <p className="text-white/70 text-sm mt-1.5 truncate">
           {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
         </p>

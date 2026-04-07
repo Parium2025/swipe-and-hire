@@ -340,12 +340,24 @@ export const JobSlide = memo(function JobSlide({
         )}
 
         {/* Text content */}
-        <div className="absolute inset-x-0 top-[38%] z-10 px-5 text-center">
-          <p className="text-white font-bold text-xl">{job.company_name}</p>
-          <h2 className="text-3xl font-extrabold text-white leading-tight tracking-tight mt-1 line-clamp-2">{job.title}</h2>
-          <p className="text-white font-semibold text-lg mt-2">
-            {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
-          </p>
+        <div className="absolute inset-0 z-10 flex items-center justify-center px-5 pt-20 pb-32 text-center">
+          <div className="w-full max-w-[19.5rem]">
+            <p className="text-white font-bold text-xl">{job.company_name}</p>
+            <h2
+              className="mt-1 text-3xl font-extrabold text-white leading-tight tracking-tight"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {job.title}
+            </h2>
+            <p className="text-white font-semibold text-lg mt-2 truncate">
+              {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
+            </p>
+          </div>
         </div>
 
         {showTapHint && (
