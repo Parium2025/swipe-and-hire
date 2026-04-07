@@ -536,7 +536,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                   <div className="relative w-full">
                     <DropdownMenu 
                       key={menuInstanceKey}
-                      modal={false} 
+                      modal={true} 
                       open={templateMenuOpen} 
                       onOpenChange={(isOpen) => {
                         setTemplateMenuOpen(isOpen);
