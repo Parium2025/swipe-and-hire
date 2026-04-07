@@ -37,6 +37,7 @@ export const DesktopJobCard = memo(function DesktopJobCard({
 
   return (
     <Card
+      data-scroll-anchor-id={job.id}
       onClick={() => navigate(`/job-view/${job.id}`)}
       className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
     >
