@@ -1,9 +1,11 @@
-import { memo, useCallback, useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, useMemo, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import { CheckCircle, X, Bookmark, Heart } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { supabase } from '@/integrations/supabase/client';
+import { differenceInDays, format, parseISO } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import type { SwipeJob } from './SwipeCard';
 
 function resolveImageUrl(url?: string): string | null {
@@ -357,6 +359,19 @@ export const JobSlide = memo(function JobSlide({
             <p className="text-white font-semibold text-base mt-2 truncate">
               {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
             </p>
+            {(() => {
+              const publishedDate = format(parseISO(job.created_at), 'd MMM', { locale: sv });
+              const daysLeft = job.expires_at ? differenceInDays(parseISO(job.expires_at), new Date()) : null;
+              const parts: string[] = [`Publicerad ${publishedDate}`];
+              if (daysLeft !== null && daysLeft >= 0) {
+                parts.push(daysLeft === 0 ? 'Sista dagen' : `${daysLeft} dagar kvar`);
+              }
+              return (
+                <p className="text-white/70 text-sm mt-1.5 truncate">
+                  {parts.join(' • ')}
+                </p>
+              );
+            })()}
           </div>
         </div>
 

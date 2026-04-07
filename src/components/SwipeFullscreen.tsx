@@ -442,6 +442,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 jobId={currentJob.id}
                 jobTitle={currentJob.title}
                 companyName={currentJob.company_name}
+                job={currentJob}
                 open={showApply}
                 onClose={handleCloseApply}
                 onApplied={handleApplied}
