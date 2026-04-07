@@ -21,6 +21,15 @@ interface SwipeApplySheetProps {
   onApplied: () => void;
 }
 
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <span className="text-white/50">{label}: </span>
+      <span className="text-white font-medium">{value}</span>
+    </div>
+  );
+}
+
 export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
