@@ -319,7 +319,7 @@ export const JobSlide = memo(function JobSlide({
           className="absolute top-8 left-6 z-20 border-4 border-green-400 rounded-lg px-4 py-1 -rotate-12 pointer-events-none"
           style={{ opacity: likeOpacity }}
         >
-          <span className="text-green-400 text-2xl font-black tracking-wider">SÖKA</span>
+          <span className="text-green-400 text-2xl font-black tracking-wider">SÖK</span>
         </motion.div>
 
         {/* TYCKER INTE OM stamp */}
