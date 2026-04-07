@@ -373,6 +373,13 @@ const SearchJobs = memo(() => {
     description: job.description,
     salary_min: job.salary_min,
     salary_max: job.salary_max,
+    salary_type: job.salary_type,
+    occupation: job.occupation,
+    work_schedule: job.work_schedule,
+    remote_work_possible: job.remote_work_possible,
+    positions_count: job.positions_count,
+    workplace_name: job.workplace_name,
+    work_location_type: job.work_location_type,
   })), [filteredAndSortedJobs]);
 
   // Find matching companies for smart search suggestion

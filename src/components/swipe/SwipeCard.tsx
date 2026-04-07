@@ -20,6 +20,13 @@ export interface SwipeJob {
   description?: string;
   salary_min?: number;
   salary_max?: number;
+  salary_type?: string;
+  occupation?: string;
+  work_schedule?: string;
+  remote_work_possible?: string;
+  positions_count?: number;
+  workplace_name?: string;
+  work_location_type?: string;
 }
 
 function resolveImageUrl(url?: string): string | null {
