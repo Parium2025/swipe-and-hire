@@ -43,24 +43,55 @@ export function ScrollRestoration() {
   }, [location.pathname]);
 
   useLayoutEffect(() => {
-    let attempts = 0;
+    const positions = readPositions();
+    const targetTop = navigationType === 'POP' ? (positions[location.pathname] ?? 0) : 0;
 
-    const applyScroll = () => {
+    // For scroll-to-top (targetTop === 0) we can apply immediately
+    if (targetTop === 0) {
+      const scrollContainer = getManagedScrollContainer();
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: 0, behavior: 'auto' });
+      }
+      return;
+    }
+
+    // For restoring a saved position, we need to wait until:
+    // 1. The scroll container exists
+    // 2. The container has enough content to scroll to the target position
+    // This can take several hundred ms when data is loading after a remount.
+    let cancelled = false;
+    let rafId: number;
+    const startTime = performance.now();
+    const MAX_WAIT_MS = 3000;
+
+    const tryRestore = () => {
+      if (cancelled) return;
       const scrollContainer = getManagedScrollContainer();
       if (!scrollContainer) {
-        if (attempts < 12) {
-          attempts += 1;
-          requestAnimationFrame(applyScroll);
+        if (performance.now() - startTime < MAX_WAIT_MS) {
+          rafId = requestAnimationFrame(tryRestore);
         }
         return;
       }
 
-      const positions = readPositions();
-      const targetTop = navigationType === 'POP' ? (positions[location.pathname] ?? 0) : 0;
+      // Apply scroll position
       scrollContainer.scrollTo({ top: targetTop, behavior: 'auto' });
+
+      // If content hasn't loaded enough, the actual scrollTop will be less than targetTop.
+      // Keep retrying until content grows enough or timeout.
+      const actualTop = scrollContainer.scrollTop;
+      const closeEnough = Math.abs(actualTop - targetTop) < 5;
+      if (!closeEnough && performance.now() - startTime < MAX_WAIT_MS) {
+        rafId = requestAnimationFrame(tryRestore);
+      }
     };
 
-    applyScroll();
+    rafId = requestAnimationFrame(tryRestore);
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
   }, [location.pathname, navigationType]);
 
   useEffect(() => {
