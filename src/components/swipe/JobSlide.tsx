@@ -367,7 +367,7 @@ export const JobSlide = memo(function JobSlide({
                 parts.push(daysLeft === 0 ? 'Sista dagen' : `${daysLeft} dagar kvar`);
               }
               return (
-                <p className="text-white/70 text-sm mt-1.5 truncate">
+                <p className="text-white text-sm mt-1.5 truncate">
                   {parts.join(' • ')}
                 </p>
               );
