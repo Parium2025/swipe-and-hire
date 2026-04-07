@@ -67,53 +67,7 @@ function JobDetailsSection({ job }: { job: SwipeJob }) {
     </div>
   );
 }
-const TAP_HINT_MS = 1800;
 
-function TappableTitle({ companyName, jobTitle }: { companyName: string; jobTitle: string }) {
-  const [showFull, setShowFull] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-
-  const clearTimer = useCallback(() => {
-    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
-  }, []);
-
-  useEffect(() => () => clearTimer(), [clearTimer]);
-
-  const handleTap = useCallback(() => {
-    // Check if the title is actually truncated
-    const el = titleRef.current;
-    if (!el || el.scrollHeight <= el.clientHeight + 2) return;
-
-    if (showFull) {
-      clearTimer();
-      setShowFull(false);
-    } else {
-      setShowFull(true);
-      clearTimer();
-      timerRef.current = setTimeout(() => { setShowFull(false); timerRef.current = null; }, TAP_HINT_MS);
-    }
-  }, [showFull, clearTimer]);
-
-  return (
-    <div className="px-4 pr-14 pb-1 shrink-0 relative">
-      <p className="text-white text-sm font-medium mt-1">{companyName}</p>
-      <h2
-        ref={titleRef}
-        onClick={handleTap}
-        className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 overflow-hidden touch-manipulation"
-        style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
-      >
-        {jobTitle}
-      </h2>
-      {showFull && (
-        <div className="absolute left-4 right-4 top-full z-50 mt-1 rounded-xl border border-white/20 bg-black/70 px-4 py-3 backdrop-blur-md pointer-events-none">
-          <p className="text-sm font-bold text-white leading-snug">{jobTitle}</p>
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
