@@ -361,15 +361,26 @@ export const JobSlide = memo(function JobSlide({
           </div>
         </div>
 
-        {showTapHint && (
-          <div className="absolute inset-x-4 bottom-24 z-30 pointer-events-none">
-            <div
-              data-tap-hint-scroll
-              className="pointer-events-auto rounded-xl border border-white/20 bg-slate-900/95 px-4 py-3 backdrop-blur-md shadow-2xl max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y"
-            >
-              <p className="text-sm font-semibold text-white leading-relaxed break-words whitespace-pre-wrap">{job.title}</p>
+        {showTapHint && (() => {
+          const truncated = isTitleTruncated();
+          return (
+            <div className="absolute inset-x-4 bottom-24 z-30 pointer-events-none">
+              <div
+                data-tap-hint-scroll
+                className="pointer-events-auto rounded-xl border border-white/20 bg-slate-900/95 px-4 py-3 backdrop-blur-md shadow-2xl max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y"
+              >
+                {truncated ? (
+                  <>
+                    <p className="text-sm font-semibold text-white leading-relaxed break-words whitespace-pre-wrap">{job.title}</p>
+                    <p className="text-xs text-white/60 mt-2 text-center">Tryck igen för jobbinfo</p>
+                  </>
+                ) : (
+                  <p className="text-sm font-semibold text-white text-center">Tryck igen för jobbinfo</p>
+                )}
+              </div>
             </div>
-          </div>
+          );
+        })()
         )}
 
         {/* Action buttons */}
