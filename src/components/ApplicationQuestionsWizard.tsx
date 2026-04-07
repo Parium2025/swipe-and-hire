@@ -278,15 +278,14 @@ export function ApplicationQuestionsWizard({
   const navRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full min-h-[60dvh]">
       {/* Step dots progress indicator - hidden when already applied (locked view) */}
-      <div className={'flex items-center justify-center gap-1.5 py-1' + (hasAlreadyApplied ? ' hidden' : '')}>
+      <div className={'flex items-center justify-center gap-1.5 py-1 shrink-0' + (hasAlreadyApplied ? ' hidden' : '')}>
         {Array.from({ length: totalSteps }).map((_, i) => (
           <button
             key={i}
             type="button"
             onClick={() => {
-              // Allow clicking back to previous steps or current
               if (i <= currentStep) {
                 if (i < currentStep) setNavigatedBack(true);
                 setCurrentStep(i);
@@ -305,7 +304,7 @@ export function ApplicationQuestionsWizard({
         ))}
       </div>
 
-      {/* Question container */}
+      {/* Question container — flex-1 so justify-center works */}
       <div className="relative flex flex-col flex-1 min-h-0">
         {!isSubmitStep && currentQuestion ? (
             <div
