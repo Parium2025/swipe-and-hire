@@ -319,7 +319,7 @@ export const JobSlide = memo(function JobSlide({
           className="absolute top-8 left-6 z-20 border-4 border-green-400 rounded-lg px-4 py-1 -rotate-12 pointer-events-none"
           style={{ opacity: likeOpacity }}
         >
-          <span className="text-green-400 text-2xl font-black tracking-wider">SÖKA</span>
+          <span className="text-green-400 text-2xl font-black tracking-wider">SÖK</span>
         </motion.div>
 
         {/* TYCKER INTE OM stamp */}
@@ -340,7 +340,7 @@ export const JobSlide = memo(function JobSlide({
         )}
 
         {/* Text content */}
-        <div className="absolute inset-x-0 top-[25%] z-10 px-5 text-center">
+        <div className="absolute inset-x-0 top-[38%] z-10 px-5 text-center">
           <p className="text-white font-bold text-xl">{job.company_name}</p>
           <h2 className="text-3xl font-extrabold text-white leading-tight tracking-tight mt-1 line-clamp-3">{job.title}</h2>
           <p className="text-white font-semibold text-lg mt-2">
