@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { TruncatedText } from '@/components/TruncatedText';
 import { getBenefitLabel } from '@/types/jobWizard';
 import {
   capitalize as cap,
