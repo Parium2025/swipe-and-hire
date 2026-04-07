@@ -337,6 +337,7 @@ export const JobSlide = memo(function JobSlide({
           <div className="mx-auto w-full max-w-[21rem]">
             <p className="text-white font-bold text-lg">{job.company_name}</p>
             <h2
+              ref={titleRef}
               className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
             >
               {job.title}
