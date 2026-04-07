@@ -93,11 +93,7 @@ export const JobSlide = memo(function JobSlide({
   const armTapHint = useCallback(() => {
     clearTapHint();
     setShowTapHint(true);
-    tapHintTimerRef.current = setTimeout(() => {
-      tapHintTimerRef.current = null;
-      setShowTapHint(false);
-      lastTapTimestampRef.current = 0;
-    }, TAP_HINT_DURATION);
+    // No auto-dismiss timer — hint stays until user taps outside or interacts
   }, [clearTapHint]);
 
   useEffect(() => () => {
