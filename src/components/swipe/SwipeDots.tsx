@@ -9,7 +9,7 @@ interface SwipeDotsProps {
 
 const MAX_VISIBLE = 9;
 const EDGE_FADE = 2;
-const LONG_PRESS_MS = 520;
+const LONG_PRESS_MS = 280;
 const LONG_PRESS_MOVE_TOLERANCE = 6;
 const SCRUB_THROTTLE_MS = 180;
 const SCRUB_STEP_PX = 32;
