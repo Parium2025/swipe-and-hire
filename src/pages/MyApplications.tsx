@@ -33,7 +33,6 @@ import { useCandidateInterviews } from '@/hooks/useInterviews';
 import CandidateInterviewCard from '@/components/CandidateInterviewCard';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { toast } from 'sonner';
-import { MyApplicationsSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface Application {
   id: string;
@@ -168,7 +167,17 @@ const MyApplications = () => {
   };
 
   if (!showContent || isLoading) {
-    return <MyApplicationsSkeleton />;
+    return (
+       <div className="responsive-container-wide opacity-0" aria-hidden="true">
+        <div className="text-center mb-6">
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
+          <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
+        </div>
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-8 w-8 text-white animate-spin" />
+        </div>
+      </div>
+    );
   }
 
   if (error) {
