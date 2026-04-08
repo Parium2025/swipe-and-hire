@@ -262,7 +262,15 @@ const SearchJobs = memo(() => {
   const isLoadingMoreRef = useRef(false);
   const hasInitializedFiltersRef = useRef(false);
 
-  
+
+  // Mark initial load as done once jobs finish loading for the first time
+  useEffect(() => {
+    if (!isLoading && !initialLoadDone) {
+      // Small delay to let the DOM paint before removing the skeleton
+      const t = setTimeout(() => setInitialLoadDone(true), 150);
+      return () => clearTimeout(t);
+    }
+  }, [isLoading, initialLoadDone]);
 
   // Debounced search for better performance
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
