@@ -367,6 +367,7 @@ export const JobSlide = memo(function JobSlide({
                 </div>
               </div>
             )}
+            <p className="text-white font-bold text-lg">{job.company_name}</p>
             <h2
               ref={titleRef}
               data-title-tap-zone
