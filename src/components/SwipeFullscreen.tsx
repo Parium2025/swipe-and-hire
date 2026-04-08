@@ -79,15 +79,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   }, []);
 
   /* ── State ────────────────────────────────────────────── */
-  const [currentIndex, setCurrentIndex] = useState(() => {
-    const restored = (() => { try {
-      const saved = sessionStorage.getItem('parium-swipe-index');
-      if (saved === null) return 0;
-      const idx = parseInt(saved, 10);
-      return Number.isFinite(idx) && idx >= 0 ? idx : 0;
-    } catch { return 0; } })();
-    return restored;
-  });
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
   const [showApply, setShowApply] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
