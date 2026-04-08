@@ -1,35 +1,32 @@
 
-## Problem
-Swipe-kortens innehåll (JobSlide) visar för mycket text utan trunkering, vilket skapar en rörig upplevelse. Målet är att matcha den rena designen i förhandsvisningen (bild 2).
+# Skeleton Loading States — Hela appen
 
-## Design — "Premium TikTok-kort"
-Varje kort ska visa:
-1. **Bakgrundsbild** (eller gradient-fallback) — som idag
-2. **Bottensektion** med gradient-overlay:
-   - Företagsnamn (vit, medium, en rad)
-   - Jobbtitel (vit, bold, max 2 rader med `line-clamp-2`)
-   - Anställningsform • Plats (en rad, truncated)
-3. **Swipe-hints** längst ner ("← Skippa · Dubbeltryck för mer · Gilla →")
-4. **LIKE/NOPE-stämplar** vid drag — som idag
+## Mål
+Varje sida/vy ska visa en skeleton-laddningsvy vid sidladdning/refresh istället för tomt innehåll eller hopp.
 
-### Vad som tas bort från kortet:
-- All beskrivningstext — den visas bara i detaljvyn (SwipeJobDetail) vid dubbeltryck
+## Sidor som behöver skeletons (prioritetsordning)
 
-### SwipeJobDetail (detaljvyn vid dubbeltryck):
-- Behåller all info (beskrivning, krav, förmåner etc.)
-- **Trunkerar** beskrivningen till max 6 rader med "Visa mer"-knapp
-- Bättre visuell hierarki
+### Batch 1 – Mest använda
+1. **Dashboard (Employer)** – `EmployerHome.tsx` / `EmployerDashboard.tsx`
+2. **Dashboard (Jobbsökare)** – `JobSeekerHome.tsx` / `JobSeekerDashboardGrid.tsx`
+3. **Meddelanden** – `Messages.tsx` / `MessagesTabs.tsx`
+4. **Profil** – `Profile.tsx`
 
-### Synk med förhandsvisning:
-- Kortets layout matchar exakt vad arbetsgivaren ser i mobilförhandsvisningen (MobileJobWizard)
-- Samma typografi-storlekar och trunkering
+### Batch 2 – Kärnfunktioner
+5. **Mina jobb** – `MyJobs.tsx`
+6. **Mina ansökningar** – `MyApplications.tsx`
+7. **Mina kandidater** – `MyCandidates.tsx` (Kanban-vy)
+8. **Sparade jobb** – `SavedJobs.tsx`
 
-## Filer att ändra
-1. `src/components/swipe/JobSlide.tsx` — Rensa bottensektionen, säkerställ trunkering
-2. `src/components/swipe/SwipeJobDetail.tsx` — Trunkera description med "Visa mer"
-3. `src/components/swipe/SwipeCard.tsx` — Synka samma bottenlayout (om den fortfarande används)
+### Batch 3 – Sekundära sidor
+9. **Företagsprofil** – `CompanyProfile.tsx`
+10. **Inställningar** – `EmployerSettings.tsx`
+11. **Fakturering** – `Billing.tsx` / `Subscription.tsx`
+12. **Support** – `Support.tsx`
 
-## Inte ändra
-- Swipe-mekanik (touch, drag, snap)
-- Filter, header, dots
-- Backend/data
+## Approach
+- Skapa en skeleton per sida som matchar sidans layout (kort, listor, rubriker etc.)
+- Använd befintliga `Skeleton` och `SkeletonCard` komponenter
+- Visa skeleton medan data laddas (`isLoading` / `isPending` states)
+- Inga visuella ändringar på befintligt UI — bara tillägg av loading states
+- Alla skeletons använder design tokens (`bg-muted`, `animate-pulse`)
