@@ -26,6 +26,11 @@ interface ReadOnlyMobileJobCardProps {
     company_name?: string;
     company_logo_url?: string;
     positions_count?: number;
+    salary_min?: number | null;
+    salary_max?: number | null;
+    salary_type?: string | null;
+    salary_transparency?: string | null;
+    benefits?: string[] | null;
     profiles?: {
       company_name: string | null;
     };
