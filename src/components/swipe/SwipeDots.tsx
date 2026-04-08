@@ -178,9 +178,9 @@ export const SwipeDots = memo(function SwipeDots({
   return (
     <div
       ref={trackRef}
-      className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center select-none transition-all duration-200 ${
+      className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center select-none touch-none transition-all duration-200 ${
         isScrubbing
-          ? 'w-12 py-4 px-3 gap-0 bg-black/40 backdrop-blur-md rounded-l-2xl touch-none'
+          ? 'w-12 py-4 px-3 gap-0 bg-black/40 backdrop-blur-md rounded-l-2xl'
           : 'py-0 gap-1'
       }`}
       style={!isScrubbing ? { width: 56, paddingLeft: 24, paddingRight: 12 } : undefined}
