@@ -11,6 +11,7 @@ interface JobViewHeroProps {
   location?: string;
   employmentType?: string;
   positionsCount?: number;
+  companyLogoUrl?: string | null;
 }
 
 const GRADIENTS = [
