@@ -394,7 +394,7 @@ export const JobSlide = memo(function JobSlide({
             </p>
             {/* Salary + Date badges */}
             <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
-              {/* Salary badge */}
+              {/* 1. Salary badge */}
               {(() => {
                 let salaryText: string | null = null;
                 const typeLabel = job.salary_type === 'monthly' || job.salary_type === 'fast' ? 'kr/mån'
@@ -410,7 +410,6 @@ export const JobSlide = memo(function JobSlide({
                     salaryText = `Från ${(job.salary_min || job.salary_max)!.toLocaleString('sv-SE')} ${typeLabel}`;
                   }
                 } else if (job.salary_transparency && /^\d/.test(job.salary_transparency)) {
-                  // salary_transparency stores range as "0-5000" or "55000-60000"
                   const match = job.salary_transparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
                   if (match) {
                     const min = parseInt(match[1], 10);
@@ -428,7 +427,7 @@ export const JobSlide = memo(function JobSlide({
                   </div>
                 );
               })()}
-              {/* Published + days left badge */}
+              {/* 2. Published + days left badge */}
               {(() => {
                 const publishedDate = format(parseISO(job.created_at), 'd MMM', { locale: sv });
                 const daysLeft = job.expires_at ? differenceInDays(parseISO(job.expires_at), new Date()) : null;
@@ -442,7 +441,7 @@ export const JobSlide = memo(function JobSlide({
                   </div>
                 );
               })()}
-              {/* Benefits count badge */}
+              {/* 3. Benefits count badge */}
               {job.benefits && job.benefits.length > 0 && (
                 <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-1.5">
                   <Gift className="w-3 h-3 text-white" />
@@ -451,12 +450,12 @@ export const JobSlide = memo(function JobSlide({
                   </span>
                 </div>
               )}
-              {/* Applicants count badge */}
+              {/* 4. Applicants count badge */}
               {job.applications_count > 0 && (
                 <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-1.5">
                   <Users className="w-3 h-3 text-white" />
                   <span className="text-white text-xs font-semibold">
-                    {job.applications_count} {job.applications_count === 1 ? 'sökande' : 'sökande'}
+                    {job.applications_count} sökande
                   </span>
                 </div>
               )}
