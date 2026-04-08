@@ -152,13 +152,16 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-1.5 pb-6`}>
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-2 pb-6`}>
             {logoUrl ? (
               <>
                 <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
                   <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} />
                 </div>
-                <span className="text-xs font-medium text-white/70 truncate max-w-[80%]">{companyName}</span>
+                <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[80%] overflow-hidden">
+                  <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
+                  <span className="leading-none truncate font-medium text-white">{companyName}</span>
+                </Badge>
               </>
             ) : (
               <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
