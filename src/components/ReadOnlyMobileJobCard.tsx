@@ -267,7 +267,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         {/* Company + Location — glass badges, centered, truncation-safe */}
         {/* Only show company badge when there's a job image (otherwise it's already in the gradient) */}
         <div className="flex items-center justify-center gap-1.5 flex-wrap min-w-0">
-          {displayUrl && (
+          {(displayUrl || !logoUrl) && (
             <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[55%] overflow-hidden text-white">
               <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
               <span className="leading-none truncate font-medium">{companyName}</span>
