@@ -244,8 +244,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   }, [getEndStateScrollTop, getScrollTop, jobs.length, triggerEndBounce]);
 
   /* ── Effects ──────────────────────────────────────────── */
+  const hasRestoredRef = useRef(false);
+
   useEffect(() => {
-    setCurrentIndex(0);
     setShowEndBounce(false);
     setEndStateVisible(false);
     setIsReturningFromEnd(false);
@@ -254,8 +255,24 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     showEndBounceRef.current = false;
     isReturningRef.current = false;
     slideRefs.current = slideRefs.current.slice(0, jobs.length);
-    scrollRef.current?.scrollTo({ top: 0 });
-  }, [jobs.length, clearTimers]);
+
+    if (!hasRestoredRef.current && jobs.length > 0) {
+      hasRestoredRef.current = true;
+      const restored = getRestoredIndex();
+      const safeIdx = Math.min(restored, jobs.length - 1);
+      setCurrentIndex(safeIdx);
+      // Defer scroll until slides are rendered
+      requestAnimationFrame(() => {
+        const el = slideRefs.current[safeIdx];
+        if (el && scrollRef.current) {
+          scrollRef.current.scrollTo({ top: el.offsetTop, behavior: 'auto' });
+        }
+      });
+    } else if (hasRestoredRef.current) {
+      setCurrentIndex(0);
+      scrollRef.current?.scrollTo({ top: 0 });
+    }
+  }, [jobs.length, clearTimers, getRestoredIndex]);
 
   useEffect(() => () => { clearTimers(); }, [clearTimers]);
 
