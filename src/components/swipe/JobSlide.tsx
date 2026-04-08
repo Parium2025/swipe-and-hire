@@ -327,8 +327,17 @@ export const JobSlide = memo(function JobSlide({
 
         {/* Initials watermark removed – moved into text content block below */}
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        {/* Gradient overlay – stronger for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+
+        {/* Category badge at top */}
+        {job.occupation && (
+          <div className="absolute top-5 left-5 z-10 pointer-events-none">
+            <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15">
+              <span className="text-white text-xs font-semibold tracking-wide">{job.occupation}</span>
+            </div>
+          </div>
+        )}
 
         {/* SÖKA stamp */}
         <motion.div
@@ -356,16 +365,21 @@ export const JobSlide = memo(function JobSlide({
         )}
 
         {/* Text content */}
-        <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center">
+        <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.4)' }}>
           <div className="mx-auto w-full max-w-[21rem]">
             {!imageUrl && job.company_name && (
-              <div className="flex justify-center mb-6">
+              <motion.div
+                className="flex justify-center mb-6"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+              >
                 <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
                   <span className="text-2xl font-bold text-white/40 tracking-wide select-none">
                     {job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                   </span>
                 </div>
-              </div>
+              </motion.div>
             )}
             <p className="text-white font-bold text-lg">{job.company_name}</p>
             <h2
@@ -378,6 +392,21 @@ export const JobSlide = memo(function JobSlide({
             <p className="text-white font-semibold text-base mt-2 truncate">
               {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
             </p>
+            {/* Salary row */}
+            {(() => {
+              if (job.salary_transparency === 'after_interview') {
+                return <p className="text-white text-sm mt-1.5 truncate">Lön efter intervju</p>;
+              }
+              if (job.salary_min || job.salary_max) {
+                const type = job.salary_type === 'monthly' ? 'kr/mån' : job.salary_type === 'hourly' ? 'kr/tim' : 'kr';
+                if (job.salary_min && job.salary_max) {
+                  return <p className="text-white text-sm mt-1.5 truncate">{job.salary_min.toLocaleString('sv-SE')} – {job.salary_max.toLocaleString('sv-SE')} {type}</p>;
+                }
+                const val = job.salary_min || job.salary_max;
+                return <p className="text-white text-sm mt-1.5 truncate">Från {val!.toLocaleString('sv-SE')} {type}</p>;
+              }
+              return null;
+            })()}
             {(() => {
               const publishedDate = format(parseISO(job.created_at), 'd MMM', { locale: sv });
               const daysLeft = job.expires_at ? differenceInDays(parseISO(job.expires_at), new Date()) : null;
