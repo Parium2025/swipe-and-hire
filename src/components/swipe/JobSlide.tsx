@@ -85,6 +85,7 @@ export const JobSlide = memo(function JobSlide({
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   const imageUrl = resolveImageUrl(job.job_image_url);
+  const logoUrl = resolveImageUrl(job.company_logo_url, 'company-logos');
 
   const isTitleTruncated = useCallback(() => {
     const el = titleRef.current;
