@@ -9,9 +9,9 @@ interface SwipeDotsProps {
 
 const MAX_VISIBLE = 9;
 const EDGE_FADE = 2;
-const LONG_PRESS_MS = 280;
-const LONG_PRESS_MOVE_TOLERANCE = 6;
-const SCRUB_THROTTLE_MS = 180;
+const LONG_PRESS_MS = 160;
+const DRAG_ACTIVATION_PX = 8;
+const GESTURE_CANCEL_PX = 14;
 const SCRUB_STEP_PX = 32;
 
 const formatCounterValue = (value: number) => new Intl.NumberFormat('sv-SE').format(value);
@@ -22,7 +22,6 @@ export const SwipeDots = memo(function SwipeDots({
   isEndStateActive,
   onScrubTo,
 }: SwipeDotsProps) {
-  const trackRef = useRef<HTMLDivElement>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubIndex, setScrubIndex] = useState(currentIndex);
@@ -31,7 +30,6 @@ export const SwipeDots = memo(function SwipeDots({
   const scrubStartIndexRef = useRef(currentIndex);
   const scrubStartYRef = useRef<number | null>(null);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
-  const lastScrubTimeRef = useRef(0);
 
   useEffect(() => {
     if (!isScrubbingRef.current) {
@@ -67,11 +65,15 @@ export const SwipeDots = memo(function SwipeDots({
   };
 
   const startScrub = useCallback((clientY: number) => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+
     setIsScrubbing(true);
     isScrubbingRef.current = true;
     scrubStartYRef.current = clientY;
     scrubStartIndexRef.current = scrubIndexRef.current;
-    lastScrubTimeRef.current = 0;
 
     if (navigator.vibrate) navigator.vibrate(12);
   }, []);
@@ -116,15 +118,21 @@ export const SwipeDots = memo(function SwipeDots({
       const touch = e.touches[0];
 
       if (!isScrubbingRef.current) {
-        if (longPressTimerRef.current && touchStartPosRef.current) {
+        if (touchStartPosRef.current) {
           const dx = touch.clientX - touchStartPosRef.current.x;
           const dy = touch.clientY - touchStartPosRef.current.y;
-          if (Math.hypot(dx, dy) > LONG_PRESS_MOVE_TOLERANCE) {
+
+          if (Math.abs(dy) >= DRAG_ACTIVATION_PX && Math.abs(dy) > Math.abs(dx)) {
+            startScrub(touchStartPosRef.current.y);
+          } else if (longPressTimerRef.current && Math.hypot(dx, dy) > GESTURE_CANCEL_PX) {
             clearTimeout(longPressTimerRef.current);
             longPressTimerRef.current = null;
           }
         }
-        return;
+
+        if (!isScrubbingRef.current) {
+          return;
+        }
       }
 
       e.preventDefault();
@@ -138,9 +146,7 @@ export const SwipeDots = memo(function SwipeDots({
         Math.max(0, scrubStartIndexRef.current + Math.round(deltaY / SCRUB_STEP_PX)),
       );
 
-      const now = Date.now();
-      if (nextIndex !== scrubIndexRef.current && now - lastScrubTimeRef.current >= SCRUB_THROTTLE_MS) {
-        lastScrubTimeRef.current = now;
+      if (nextIndex !== scrubIndexRef.current) {
         scrubIndexRef.current = nextIndex;
         setScrubIndex(nextIndex);
         onScrubTo?.(nextIndex);
@@ -177,7 +183,6 @@ export const SwipeDots = memo(function SwipeDots({
 
   return (
     <div
-      ref={trackRef}
       className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center select-none touch-none transition-all duration-200 ${
         isScrubbing
           ? 'w-12 py-4 px-3 gap-0 bg-black/40 backdrop-blur-md rounded-l-2xl'
