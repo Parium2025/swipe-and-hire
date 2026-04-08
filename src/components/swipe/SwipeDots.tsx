@@ -28,6 +28,7 @@ export const SwipeDots = memo(function SwipeDots({
   const isScrubbingRef = useRef(false);
   const scrubIndexRef = useRef(currentIndex);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
+  const lastScrubTimeRef = useRef(0);
 
   useEffect(() => {
     if (!isScrubbingRef.current) {
