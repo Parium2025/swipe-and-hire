@@ -337,11 +337,7 @@ const EmployerDashboard = memo(() => {
 
   // Wait for data AND minimum delay before showing content with fade
   if (loading || !showContent) {
-    return (
-       <div className="space-y-4 responsive-container-wide opacity-0" aria-hidden="true">
-        {/* Invisible placeholder to prevent layout shift */}
-      </div>
-    );
+    return <EmployerDashboardSkeleton />;
   }
 
   // Always fade in on mount — symmetric with dashboard
