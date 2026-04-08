@@ -8,6 +8,7 @@ import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
 import { useIsSystemAdmin } from '@/components/SystemHealthPanel';
 import { supabase } from '@/integrations/supabase/client';
+import { EmployerHomeSkeleton } from '@/components/skeletons/PageSkeletons';
 
 const getGreeting = (): { text: string; isEvening: boolean; isDaytime: boolean } => {
   const hour = new Date().getHours();

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
+import { JobSeekerHomeSkeleton } from '@/components/skeletons/PageSkeletons';
 
 const getGreeting = (): { text: string; isEvening: boolean; isDaytime: boolean } => {
   const hour = new Date().getHours();
