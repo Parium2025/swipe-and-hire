@@ -163,11 +163,7 @@ const JobSeekerHome = memo(() => {
 
 
   if (!showContent) {
-    return (
-      <div className="space-y-6 responsive-container-wide py-8 opacity-0">
-        {/* Invisible placeholder */}
-      </div>
-    );
+    return <JobSeekerHomeSkeleton />;
   }
 
   return (
