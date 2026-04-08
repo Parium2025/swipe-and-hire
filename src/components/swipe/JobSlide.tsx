@@ -8,10 +8,10 @@ import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import type { SwipeJob } from './SwipeCard';
 
-function resolveImageUrl(url?: string): string | null {
+function resolveImageUrl(url?: string, bucket = 'job-images'): string | null {
   if (!url) return null;
   if (url.startsWith('http')) return url;
-  const { data } = supabase.storage.from('job-images').getPublicUrl(url);
+  const { data } = supabase.storage.from(bucket).getPublicUrl(url);
   return data?.publicUrl || null;
 }
 
