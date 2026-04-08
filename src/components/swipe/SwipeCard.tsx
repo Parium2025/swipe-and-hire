@@ -1,8 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, animate, PanInfo } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { supabase } from '@/integrations/supabase/client';
+import { imageCache } from '@/lib/imageCache';
 
 export interface SwipeJob {
   id: string;
