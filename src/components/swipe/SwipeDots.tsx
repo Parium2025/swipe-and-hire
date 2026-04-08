@@ -9,11 +9,11 @@ interface SwipeDotsProps {
 
 const MAX_VISIBLE = 9;
 const EDGE_FADE = 2;
-const LONG_PRESS_MS = 400;
+const LONG_PRESS_MS = 500;
 /** Max finger movement (px) allowed during long-press before cancelling */
-const LONG_PRESS_MOVE_TOLERANCE = 10;
+const LONG_PRESS_MOVE_TOLERANCE = 8;
 /** Minimum ms between scrub index changes to reduce aggressiveness */
-const SCRUB_THROTTLE_MS = 60;
+const SCRUB_THROTTLE_MS = 140;
 
 export const SwipeDots = memo(function SwipeDots({
   count,
