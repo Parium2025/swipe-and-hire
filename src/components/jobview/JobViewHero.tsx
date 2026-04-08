@@ -115,13 +115,16 @@ export const JobViewHero = memo(function JobViewHero({
   if (!imageUrl) {
     return (
       <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
-      <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-1.5 pb-16`}>
+      <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-2 pb-16`}>
           {hasLogo ? (
             <>
               <div className="w-20 h-20 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
                 <img src={companyLogoUrl!} alt={companyName} className="w-full h-full object-cover" draggable={false} />
               </div>
-              <span className="text-sm font-medium text-white/70 truncate max-w-[80%]">{companyName}</span>
+              <Badge variant="glass" className="text-xs px-2.5 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[80%] overflow-hidden">
+                <Building2 className="h-3.5 w-3.5 mr-1 flex-shrink-0 text-white" />
+                <span className="leading-none truncate font-medium text-white">{companyName}</span>
+              </Badge>
             </>
           ) : (
             <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
