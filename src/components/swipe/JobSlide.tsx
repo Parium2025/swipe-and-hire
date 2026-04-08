@@ -442,6 +442,24 @@ export const JobSlide = memo(function JobSlide({
                   </div>
                 );
               })()}
+              {/* Benefits count badge */}
+              {job.benefits && job.benefits.length > 0 && (
+                <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-1.5">
+                  <Gift className="w-3 h-3 text-white" />
+                  <span className="text-white text-xs font-semibold">
+                    Förmåner {job.benefits.length <= 5 ? `${job.benefits.length} st` : `${Math.floor(job.benefits.length / 5) * 5}+`}
+                  </span>
+                </div>
+              )}
+              {/* Applicants count badge */}
+              {job.applications_count > 0 && (
+                <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-1.5">
+                  <Users className="w-3 h-3 text-white" />
+                  <span className="text-white text-xs font-semibold">
+                    {job.applications_count} {job.applications_count === 1 ? 'sökande' : 'sökande'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
