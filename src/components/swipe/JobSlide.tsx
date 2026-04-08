@@ -325,18 +325,7 @@ export const JobSlide = memo(function JobSlide({
           )}
         </div>
 
-        {/* Initials watermark – always just above company name */}
-        {!imageUrl && job.company_name && (
-          <div className="absolute inset-x-0 top-[20%] bottom-28 z-[1] flex items-center justify-center pointer-events-none">
-            <div className="flex flex-col items-center -mt-24">
-              <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center mb-2">
-                <span className="text-3xl font-bold text-white/50 tracking-wide select-none">
-                  {job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Initials watermark removed – moved into text content block below */}
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -369,6 +358,15 @@ export const JobSlide = memo(function JobSlide({
         {/* Text content */}
         <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center">
           <div className="mx-auto w-full max-w-[21rem]">
+            {!imageUrl && job.company_name && (
+              <div className="flex justify-center mb-3">
+                <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-white/40 tracking-wide select-none">
+                    {job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                  </span>
+                </div>
+              </div>
+            )}
             <p className="text-white font-bold text-lg">{job.company_name}</p>
             <h2
               ref={titleRef}
