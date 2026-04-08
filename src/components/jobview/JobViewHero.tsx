@@ -67,12 +67,10 @@ export const JobViewHero = memo(function JobViewHero({
       
       {/* Mobile metadata */}
       <div className="mt-2 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
-        {!hasLogo && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
-            <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="truncate font-medium">{companyName}</span>
-          </Badge>
-        )}
+        <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+          <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
+          <span className="truncate font-medium">{companyName}</span>
+        </Badge>
         {location && (
           <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
             <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
