@@ -397,16 +397,30 @@ export const JobSlide = memo(function JobSlide({
               {/* Salary badge */}
               {(() => {
                 let salaryText: string | null = null;
+                const typeLabel = job.salary_type === 'monthly' || job.salary_type === 'fast' ? 'kr/mån'
+                  : job.salary_type === 'hourly' || job.salary_type === 'rorlig' ? 'kr/tim'
+                  : job.salary_type === 'fast-rorlig' ? 'kr/mån' : 'kr/mån';
+
                 if (job.salary_transparency === 'after_interview') {
                   salaryText = 'Lön efter intervju';
                 } else if (job.salary_min || job.salary_max) {
-                  const type = job.salary_type === 'monthly' ? 'kr/mån' : job.salary_type === 'hourly' ? 'kr/tim' : 'kr';
                   if (job.salary_min && job.salary_max) {
-                    salaryText = `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} ${type}`;
+                    salaryText = `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} ${typeLabel}`;
                   } else {
-                    salaryText = `Från ${(job.salary_min || job.salary_max)!.toLocaleString('sv-SE')} ${type}`;
+                    salaryText = `Från ${(job.salary_min || job.salary_max)!.toLocaleString('sv-SE')} ${typeLabel}`;
+                  }
+                } else if (job.salary_transparency && /^\d/.test(job.salary_transparency)) {
+                  // salary_transparency stores range as "0-5000" or "55000-60000"
+                  const match = job.salary_transparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+                  if (match) {
+                    const min = parseInt(match[1], 10);
+                    const max = parseInt(match[2], 10);
+                    salaryText = `${min.toLocaleString('sv-SE')} – ${max.toLocaleString('sv-SE')} ${typeLabel}`;
+                  } else {
+                    salaryText = `${job.salary_transparency} ${typeLabel}`;
                   }
                 }
+
                 if (!salaryText) return null;
                 return (
                   <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15">
