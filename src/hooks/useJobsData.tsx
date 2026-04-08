@@ -154,7 +154,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             employer_profile:profiles!job_postings_employer_id_fkey (
               first_name,
               last_name,
-              company_name
+              company_name,
+              company_logo_url
             )
           `)
           .eq('employer_id', user.id)
