@@ -8,6 +8,7 @@ import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
 import { useIsSystemAdmin } from '@/components/SystemHealthPanel';
 import { supabase } from '@/integrations/supabase/client';
+import { EmployerHomeSkeleton } from '@/components/skeletons/PageSkeletons';
 
 const getGreeting = (): { text: string; isEvening: boolean; isDaytime: boolean } => {
   const hour = new Date().getHours();
@@ -233,11 +234,7 @@ const EmployerHome = memo(() => {
   }, [weather.weatherCode, isEvening, gpsGranted, isDaytime]);
 
   if (isLoading || !showContent) {
-    return (
-      <div className="space-y-6 responsive-container-wide py-8 opacity-0">
-        {/* Invisible placeholder */}
-      </div>
-    );
+    return <EmployerHomeSkeleton />;
   }
 
   return (

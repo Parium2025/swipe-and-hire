@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
+import { JobSeekerHomeSkeleton } from '@/components/skeletons/PageSkeletons';
 
 const getGreeting = (): { text: string; isEvening: boolean; isDaytime: boolean } => {
   const hour = new Date().getHours();
@@ -163,11 +164,7 @@ const JobSeekerHome = memo(() => {
 
 
   if (!showContent) {
-    return (
-      <div className="space-y-6 responsive-container-wide py-8 opacity-0">
-        {/* Invisible placeholder */}
-      </div>
-    );
+    return <JobSeekerHomeSkeleton />;
   }
 
   return (

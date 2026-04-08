@@ -21,6 +21,7 @@ import {
   Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MessagesSkeleton } from '@/components/skeletons/PageSkeletons';
 
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
 
@@ -146,11 +147,7 @@ export default function Messages() {
   const hasData = conversations.length > 0;
 
   if (!showContentFade || (isLoading && !hasData)) {
-    return (
-      <div className="flex-1 min-h-0 flex flex-col opacity-0 responsive-container-wide">
-        {/* Invisible placeholder to prevent layout shift */}
-      </div>
-    );
+    return <MessagesSkeleton />;
   }
 
   return (
