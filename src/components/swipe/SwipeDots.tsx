@@ -1,4 +1,4 @@
-import { memo, useRef, useState, useCallback, useEffect } from 'react';
+import { memo, useRef, useState, useCallback, useEffect, useMemo } from 'react';
 
 interface SwipeDotsProps {
   count: number;
@@ -9,11 +9,12 @@ interface SwipeDotsProps {
 
 const MAX_VISIBLE = 9;
 const EDGE_FADE = 2;
-const LONG_PRESS_MS = 500;
-/** Max finger movement (px) allowed during long-press before cancelling */
-const LONG_PRESS_MOVE_TOLERANCE = 8;
-/** Minimum ms between scrub index changes to reduce aggressiveness */
-const SCRUB_THROTTLE_MS = 140;
+const LONG_PRESS_MS = 520;
+const LONG_PRESS_MOVE_TOLERANCE = 6;
+const SCRUB_THROTTLE_MS = 180;
+const SCRUB_STEP_PX = 32;
+
+const formatCounterValue = (value: number) => new Intl.NumberFormat('sv-SE').format(value);
 
 export const SwipeDots = memo(function SwipeDots({
   count,
@@ -27,6 +28,8 @@ export const SwipeDots = memo(function SwipeDots({
   const [scrubIndex, setScrubIndex] = useState(currentIndex);
   const isScrubbingRef = useRef(false);
   const scrubIndexRef = useRef(currentIndex);
+  const scrubStartIndexRef = useRef(currentIndex);
+  const scrubStartYRef = useRef<number | null>(null);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
   const lastScrubTimeRef = useRef(0);
 
@@ -34,6 +37,7 @@ export const SwipeDots = memo(function SwipeDots({
     if (!isScrubbingRef.current) {
       setScrubIndex(currentIndex);
       scrubIndexRef.current = currentIndex;
+      scrubStartIndexRef.current = currentIndex;
     }
   }, [currentIndex]);
 
@@ -62,21 +66,14 @@ export const SwipeDots = memo(function SwipeDots({
     return 0.4 + (distFromEdge / EDGE_FADE) * 0.6;
   };
 
-  const indexFromTouchY = useCallback(
-    (clientY: number): number => {
-      const track = trackRef.current;
-      if (!track) return currentIndex;
-      const rect = track.getBoundingClientRect();
-      const ratio = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-      return Math.min(count - 1, Math.max(0, Math.round(ratio * (count - 1))));
-    },
-    [count, currentIndex],
-  );
-
-  const startScrub = useCallback(() => {
+  const startScrub = useCallback((clientY: number) => {
     setIsScrubbing(true);
     isScrubbingRef.current = true;
-    if (navigator.vibrate) navigator.vibrate(15);
+    scrubStartYRef.current = clientY;
+    scrubStartIndexRef.current = scrubIndexRef.current;
+    lastScrubTimeRef.current = 0;
+
+    if (navigator.vibrate) navigator.vibrate(12);
   }, []);
 
   const stopScrub = useCallback(() => {
@@ -84,7 +81,10 @@ export const SwipeDots = memo(function SwipeDots({
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
     }
+
     touchStartPosRef.current = null;
+    scrubStartYRef.current = null;
+
     if (isScrubbingRef.current) {
       setIsScrubbing(false);
       isScrubbingRef.current = false;
@@ -94,30 +94,32 @@ export const SwipeDots = memo(function SwipeDots({
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
       if (count <= 1) return;
+
       const touch = e.touches[0];
-      touchStartPosRef.current = { x: touch.clientX, y: touch.clientY };
+      const startX = touch.clientX;
+      const startY = touch.clientY;
+      touchStartPosRef.current = { x: startX, y: startY };
+
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+      }
 
       longPressTimerRef.current = setTimeout(() => {
-        startScrub();
-        const idx = indexFromTouchY(touch.clientY);
-        setScrubIndex(idx);
-        scrubIndexRef.current = idx;
-        onScrubTo?.(idx);
+        startScrub(startY);
       }, LONG_PRESS_MS);
     },
-    [count, startScrub, indexFromTouchY, onScrubTo],
+    [count, startScrub],
   );
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
       const touch = e.touches[0];
 
-      // Before scrubbing is active: only cancel long-press if finger moved too far
       if (!isScrubbingRef.current) {
         if (longPressTimerRef.current && touchStartPosRef.current) {
           const dx = touch.clientX - touchStartPosRef.current.x;
           const dy = touch.clientY - touchStartPosRef.current.y;
-          if (Math.sqrt(dx * dx + dy * dy) > LONG_PRESS_MOVE_TOLERANCE) {
+          if (Math.hypot(dx, dy) > LONG_PRESS_MOVE_TOLERANCE) {
             clearTimeout(longPressTimerRef.current);
             longPressTimerRef.current = null;
           }
@@ -128,17 +130,24 @@ export const SwipeDots = memo(function SwipeDots({
       e.preventDefault();
       e.stopPropagation();
 
+      if (scrubStartYRef.current === null) return;
+
+      const deltaY = touch.clientY - scrubStartYRef.current;
+      const nextIndex = Math.min(
+        count - 1,
+        Math.max(0, scrubStartIndexRef.current + Math.round(deltaY / SCRUB_STEP_PX)),
+      );
+
       const now = Date.now();
-      const idx = indexFromTouchY(touch.clientY);
-      if (idx !== scrubIndexRef.current && now - lastScrubTimeRef.current >= SCRUB_THROTTLE_MS) {
+      if (nextIndex !== scrubIndexRef.current && now - lastScrubTimeRef.current >= SCRUB_THROTTLE_MS) {
         lastScrubTimeRef.current = now;
-        scrubIndexRef.current = idx;
-        setScrubIndex(idx);
-        onScrubTo?.(idx);
+        scrubIndexRef.current = nextIndex;
+        setScrubIndex(nextIndex);
+        onScrubTo?.(nextIndex);
         if (navigator.vibrate) navigator.vibrate(5);
       }
     },
-    [indexFromTouchY, onScrubTo],
+    [count, onScrubTo],
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -150,6 +159,17 @@ export const SwipeDots = memo(function SwipeDots({
       if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
     };
   }, []);
+
+  const badgeText = useMemo(() => {
+    const currentLabel = formatCounterValue(scrubIndex + 1);
+    const totalLabel = formatCounterValue(count);
+
+    return {
+      currentLabel,
+      totalLabel,
+      minWidth: `${Math.max(totalLabel.length * 2 + 5, 9)}ch`,
+    };
+  }, [count, scrubIndex]);
 
   if (count <= 1) return null;
 
@@ -170,8 +190,11 @@ export const SwipeDots = memo(function SwipeDots({
       onTouchCancel={handleTouchEnd}
     >
       {isScrubbing && (
-        <div className="absolute right-14 top-1/2 -translate-y-1/2 bg-[hsl(215,60%,35%)]/90 backdrop-blur-md border border-white/20 text-white text-sm font-bold py-2 px-5 rounded-xl shadow-lg shadow-black/30 whitespace-nowrap pointer-events-none text-center tabular-nums leading-none flex items-center justify-center min-h-[2.25rem]">
-          {scrubIndex + 1} / {count}
+        <div
+          className="absolute right-14 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-[hsl(215,60%,35%)]/90 px-4 py-2.5 text-center text-sm font-bold leading-none text-white shadow-lg shadow-black/30 backdrop-blur-md whitespace-nowrap pointer-events-none tabular-nums inline-flex min-h-[2.5rem] items-center justify-center"
+          style={{ minWidth: badgeText.minWidth }}
+        >
+          {badgeText.currentLabel} / {badgeText.totalLabel}
         </div>
       )}
 
@@ -203,9 +226,7 @@ export const SwipeDots = memo(function SwipeDots({
         </div>
       ) : (
         <>
-          {useWindow && windowStart > 0 && (
-            <div className="w-1 h-1 rounded-full bg-white/15" />
-          )}
+          {useWindow && windowStart > 0 && <div className="w-1 h-1 rounded-full bg-white/15" />}
           {Array.from({ length: visibleCount }).map((_, windowIdx) => {
             const realIdx = windowStart + windowIdx;
             const isActive = realIdx === activeIdx && !isEndStateActive;
@@ -213,9 +234,7 @@ export const SwipeDots = memo(function SwipeDots({
             return (
               <div
                 key={realIdx}
-                className={`rounded-full transition-all duration-300 ${
-                  isActive ? 'bg-white' : 'bg-white/30'
-                }`}
+                className={`rounded-full transition-all duration-300 ${isActive ? 'bg-white' : 'bg-white/30'}`}
                 style={{
                   width: isActive ? 8 * scale : 6 * scale,
                   height: isActive ? 8 * scale : 6 * scale,
@@ -223,9 +242,7 @@ export const SwipeDots = memo(function SwipeDots({
               />
             );
           })}
-          {useWindow && windowEnd < count && (
-            <div className="w-1 h-1 rounded-full bg-white/15" />
-          )}
+          {useWindow && windowEnd < count && <div className="w-1 h-1 rounded-full bg-white/15" />}
         </>
       )}
     </div>
