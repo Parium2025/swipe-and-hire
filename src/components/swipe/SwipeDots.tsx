@@ -9,11 +9,11 @@ interface SwipeDotsProps {
 
 const MAX_VISIBLE = 9;
 const EDGE_FADE = 2;
-const LONG_PRESS_MS = 400;
+const LONG_PRESS_MS = 500;
 /** Max finger movement (px) allowed during long-press before cancelling */
-const LONG_PRESS_MOVE_TOLERANCE = 10;
+const LONG_PRESS_MOVE_TOLERANCE = 8;
 /** Minimum ms between scrub index changes to reduce aggressiveness */
-const SCRUB_THROTTLE_MS = 60;
+const SCRUB_THROTTLE_MS = 140;
 
 export const SwipeDots = memo(function SwipeDots({
   count,
@@ -170,7 +170,7 @@ export const SwipeDots = memo(function SwipeDots({
       onTouchCancel={handleTouchEnd}
     >
       {isScrubbing && (
-        <div className="absolute right-14 top-1/2 -translate-y-1/2 bg-[hsl(215,60%,35%)]/80 backdrop-blur-md border border-white/20 text-white text-sm font-bold px-4 py-1.5 rounded-xl shadow-lg shadow-black/30 whitespace-nowrap pointer-events-none min-w-[4rem] text-center tabular-nums">
+        <div className="absolute right-14 top-1/2 -translate-y-1/2 bg-[hsl(215,60%,35%)]/90 backdrop-blur-md border border-white/20 text-white text-sm font-bold py-2 px-5 rounded-xl shadow-lg shadow-black/30 whitespace-nowrap pointer-events-none text-center tabular-nums leading-none flex items-center justify-center min-h-[2.25rem]">
           {scrubIndex + 1} / {count}
         </div>
       )}
