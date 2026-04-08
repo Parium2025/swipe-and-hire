@@ -90,6 +90,12 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
+  const logoUrl = useMemo(() => {
+    const url = job.employer_profile?.company_logo_url;
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return supabase.storage.from('company-logos').getPublicUrl(url).data?.publicUrl || null;
+  }, [job.employer_profile?.company_logo_url]);
 
   const handleCardClick = () => {
     if (isDraft && onEditDraft) {
