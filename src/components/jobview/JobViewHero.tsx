@@ -11,6 +11,7 @@ interface JobViewHeroProps {
   location?: string;
   employmentType?: string;
   positionsCount?: number;
+  companyLogoUrl?: string | null;
 }
 
 const GRADIENTS = [
@@ -48,10 +49,12 @@ export const JobViewHero = memo(function JobViewHero({
   location,
   employmentType,
   positionsCount,
+  companyLogoUrl,
 }: JobViewHeroProps) {
   const positionsText = (positionsCount || 1) === 1 ? '1 ledig tjänst' : `${positionsCount} lediga tjänster`;
   const gradient = useMemo(() => getGradientForName(companyName), [companyName]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
+  const hasLogo = !!companyLogoUrl;
 
   // Shared overlay content for both image and gradient fallback
   const overlayContent = (
@@ -64,11 +67,15 @@ export const JobViewHero = memo(function JobViewHero({
       
       {/* Mobile metadata */}
       <div className="mt-2 sm:hidden flex items-center justify-center gap-1.5 text-[13px] text-white">
-        <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
-        <span className="truncate font-medium">{companyName}</span>
+        {!hasLogo && (
+          <>
+            <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
+            <span className="truncate font-medium">{companyName}</span>
+          </>
+        )}
         {location && (
           <>
-            <span className="text-white/30">·</span>
+            {!hasLogo && <span className="text-white/30">·</span>}
             <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-white" />
             <span className="truncate">{location}</span>
           </>
@@ -108,10 +115,19 @@ export const JobViewHero = memo(function JobViewHero({
   if (!imageUrl) {
     return (
       <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
-        <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center pb-16`}>
-          <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-            <span className="text-3xl font-bold text-white/50 tracking-wide">{initials}</span>
-          </div>
+      <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-1.5 pb-16`}>
+          {hasLogo ? (
+            <>
+              <div className="w-20 h-20 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
+                <img src={companyLogoUrl!} alt={companyName} className="w-full h-full object-cover" draggable={false} />
+              </div>
+              <span className="text-sm font-medium text-white/70 truncate max-w-[80%]">{companyName}</span>
+            </>
+          ) : (
+            <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
+              <span className="text-3xl font-bold text-white/50 tracking-wide">{initials}</span>
+            </div>
+          )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         {overlayContent}

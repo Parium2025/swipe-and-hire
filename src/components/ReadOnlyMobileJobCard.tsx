@@ -178,11 +178,14 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           </>
         ) : (
           /* Gradient placeholder with company initials */
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-2 pb-6`}>
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-1.5 pb-6`}>
             {logoUrl ? (
-              <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} />
-              </div>
+              <>
+                <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
+                  <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} />
+                </div>
+                <span className="text-xs font-medium text-white/70 truncate max-w-[80%]">{companyName}</span>
+              </>
             ) : (
               <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
                 <span className="text-xl font-bold text-white/50 tracking-wide">{initials}</span>
@@ -255,10 +258,12 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
         {/* Company + Location — glass badges, centered, truncation-safe */}
         <div className="flex items-center justify-center gap-1.5 flex-wrap min-w-0">
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[55%] overflow-hidden">
-            <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-none truncate font-medium">{companyName}</span>
-          </Badge>
+          {!logoUrl && (
+            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[55%] overflow-hidden">
+              <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
+              <span className="leading-none truncate font-medium">{companyName}</span>
+            </Badge>
+          )}
           <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[42%] overflow-hidden">
             <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
             <span className="leading-none truncate">{job.location}</span>

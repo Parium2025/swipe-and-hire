@@ -549,6 +549,7 @@ const JobView = () => {
               location={job.location}
               employmentType={job.employment_type}
               positionsCount={job.positions_count}
+              companyLogoUrl={companyLogoUrl}
             />
 
             {/* Description */}
