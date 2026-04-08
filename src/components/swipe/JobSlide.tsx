@@ -356,9 +356,9 @@ export const JobSlide = memo(function JobSlide({
 
         {/* Applied stamp overlay */}
         {applied && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
-            <div className="-rotate-[18deg] border-[6px] border-green-500 rounded-xl px-8 py-3 bg-black/20 backdrop-blur-sm">
-              <span className="text-green-500 text-4xl font-black tracking-widest uppercase">SÖKT ✓</span>
+          <div className="absolute top-4 left-4 z-30 pointer-events-none">
+            <div className="-rotate-[12deg] border-[3px] border-green-500 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
+              <span className="text-green-500 text-lg font-black tracking-widest uppercase">SÖKT ✓</span>
             </div>
           </div>
         )}
