@@ -29,6 +29,7 @@ export interface SwipeJob {
   work_location_type?: string;
   salary_transparency?: string;
   benefits?: string[] | null;
+  company_logo_url?: string;
 }
 
 function resolveImageUrl(url?: string): string | null {

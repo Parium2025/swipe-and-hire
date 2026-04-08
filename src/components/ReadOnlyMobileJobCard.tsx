@@ -24,6 +24,7 @@ interface ReadOnlyMobileJobCardProps {
     job_image_url?: string;
     image_focus_position?: string;
     company_name?: string;
+    company_logo_url?: string;
     positions_count?: number;
     profiles?: {
       company_name: string | null;
@@ -125,6 +126,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
+  const logoUrl = useMemo(() => {
+    if (!job.company_logo_url) return null;
+    if (job.company_logo_url.startsWith('http')) return job.company_logo_url;
+    return supabase.storage.from('company-logos').getPublicUrl(job.company_logo_url).data?.publicUrl || null;
+  }, [job.company_logo_url]);
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -164,9 +170,15 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         ) : (
           /* Gradient placeholder with company initials */
           <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-2 pb-6`}>
-            <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-              <span className="text-xl font-bold text-white/50 tracking-wide">{initials}</span>
-            </div>
+            {logoUrl ? (
+              <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
+                <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} />
+              </div>
+            ) : (
+              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
+                <span className="text-xl font-bold text-white/50 tracking-wide">{initials}</span>
+              </div>
+            )}
           </div>
         )}
         

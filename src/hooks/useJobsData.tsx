@@ -43,6 +43,7 @@ export interface JobPosting {
     first_name: string;
     last_name: string;
     company_name: string | null;
+    company_logo_url: string | null;
   };
 }
 
@@ -133,7 +134,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             employer_profile:profiles!job_postings_employer_id_fkey (
               first_name,
               last_name,
-              company_name
+              company_name,
+              company_logo_url
             )
           `)
           .in('employer_id', userIds)
@@ -152,7 +154,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             employer_profile:profiles!job_postings_employer_id_fkey (
               first_name,
               last_name,
-              company_name
+              company_name,
+              company_logo_url
             )
           `)
           .eq('employer_id', user.id)
