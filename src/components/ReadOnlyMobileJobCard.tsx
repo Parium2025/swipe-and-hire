@@ -2,7 +2,7 @@ import { memo, useState, useEffect, useMemo, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2 } from 'lucide-react';
+import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2, Gift } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +26,11 @@ interface ReadOnlyMobileJobCardProps {
     company_name?: string;
     company_logo_url?: string;
     positions_count?: number;
+    salary_min?: number | null;
+    salary_max?: number | null;
+    salary_type?: string | null;
+    salary_transparency?: string | null;
+    benefits?: string[] | null;
     profiles?: {
       company_name: string | null;
     };
@@ -261,13 +266,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
         {/* Company + Location — glass badges, centered, truncation-safe */}
         <div className="flex items-center justify-center gap-1.5 flex-wrap min-w-0">
-          {!logoUrl && (
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[55%] overflow-hidden">
-              <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
-              <span className="leading-none truncate font-medium">{companyName}</span>
-            </Badge>
-          )}
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[42%] overflow-hidden">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[55%] overflow-hidden text-white">
+            <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none truncate font-medium">{companyName}</span>
+          </Badge>
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[42%] overflow-hidden text-white">
             <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
             <span className="leading-none truncate">{job.location}</span>
           </Badge>
@@ -276,17 +279,55 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         {/* Tags row — badges restored, centered */}
         <div className="flex items-center justify-center gap-1.5 flex-wrap">
           {job.employment_type && (
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
+            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none text-white">
               {getEmploymentTypeLabel(job.employment_type)}
             </Badge>
           )}
+          {/* Salary badge */}
+          {(() => {
+            let salaryText: string | null = null;
+            const typeLabel = job.salary_type === 'monthly' || job.salary_type === 'fast' ? 'kr/mån'
+              : job.salary_type === 'hourly' || job.salary_type === 'rorlig' ? 'kr/tim'
+              : job.salary_type === 'fast-rorlig' ? 'kr/mån' : 'kr/mån';
+
+            if (job.salary_transparency === 'after_interview') {
+              salaryText = 'Lön efter intervju';
+            } else if (job.salary_min || job.salary_max) {
+              if (job.salary_min && job.salary_max) {
+                salaryText = `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} ${typeLabel}`;
+              } else {
+                salaryText = `Från ${(job.salary_min || job.salary_max)!.toLocaleString('sv-SE')} ${typeLabel}`;
+              }
+            } else if (job.salary_transparency && /^\d/.test(job.salary_transparency)) {
+              const match = job.salary_transparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+              if (match) {
+                salaryText = `${parseInt(match[1], 10).toLocaleString('sv-SE')} – ${parseInt(match[2], 10).toLocaleString('sv-SE')} ${typeLabel}`;
+              } else {
+                salaryText = `${job.salary_transparency} ${typeLabel}`;
+              }
+            }
+            if (!salaryText) return null;
+            return (
+              <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none text-white">
+                {salaryText}
+              </Badge>
+            );
+          })()}
           {!(isExpired && statusBadge) && (
-            <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
+            <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
               <Timer className="h-3 w-3 mr-0.5 flex-shrink-0" />
               <span className="leading-none">{isExpired ? 'Utgången' : `${timeText} kvar`}</span>
             </Badge>
           )}
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
+          {job.benefits && job.benefits.length > 0 && (
+            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+              <Gift className="h-3 w-3 mr-0.5 flex-shrink-0" />
+              <span className="leading-none">
+                Förmåner {job.benefits.length <= 5 ? `${job.benefits.length} st` : `${Math.floor(job.benefits.length / 5) * 5}+`}
+              </span>
+            </Badge>
+          )}
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
             <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
             <span className="leading-none">{job.applications_count || 0} sökande</span>
           </Badge>

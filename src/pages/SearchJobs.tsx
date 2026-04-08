@@ -721,6 +721,11 @@ const SearchJobs = memo(() => {
                     image_focus_position: job.image_focus_position,
                     company_name: job.company_name,
                     company_logo_url: job.company_logo_url,
+                    salary_min: job.salary_min,
+                    salary_max: job.salary_max,
+                    salary_type: job.salary_type,
+                    salary_transparency: job.salary_transparency,
+                    benefits: job.benefits,
                   }}
                   hasApplied={appliedJobIds.has(job.id)}
                   onUnsaveClick={handleUnsaveClick}
