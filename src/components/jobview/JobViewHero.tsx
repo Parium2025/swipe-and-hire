@@ -197,7 +197,7 @@ export const JobViewHero = memo(function JobViewHero({
   }
 
   return (
-    <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
+    <div className="relative w-full h-80 md:h-96 overflow-hidden rounded-lg">
       <img
         src={imageUrl}
         alt={`${title} hos ${companyName}`}
