@@ -9,9 +9,11 @@ interface SwipeDotsProps {
 
 const MAX_VISIBLE = 9;
 const EDGE_FADE = 2;
-const LONG_PRESS_MS = 280;
+const LONG_PRESS_MS = 400;
 /** Max finger movement (px) allowed during long-press before cancelling */
-const LONG_PRESS_MOVE_TOLERANCE = 12;
+const LONG_PRESS_MOVE_TOLERANCE = 10;
+/** Minimum ms between scrub index changes to reduce aggressiveness */
+const SCRUB_THROTTLE_MS = 60;
 
 export const SwipeDots = memo(function SwipeDots({
   count,
@@ -26,6 +28,7 @@ export const SwipeDots = memo(function SwipeDots({
   const isScrubbingRef = useRef(false);
   const scrubIndexRef = useRef(currentIndex);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
+  const lastScrubTimeRef = useRef(0);
 
   useEffect(() => {
     if (!isScrubbingRef.current) {
@@ -125,9 +128,10 @@ export const SwipeDots = memo(function SwipeDots({
       e.preventDefault();
       e.stopPropagation();
 
+      const now = Date.now();
       const idx = indexFromTouchY(touch.clientY);
-      // Use ref to avoid stale closure — this was causing the "lock" bug
-      if (idx !== scrubIndexRef.current) {
+      if (idx !== scrubIndexRef.current && now - lastScrubTimeRef.current >= SCRUB_THROTTLE_MS) {
+        lastScrubTimeRef.current = now;
         scrubIndexRef.current = idx;
         setScrubIndex(idx);
         onScrubTo?.(idx);
@@ -166,7 +170,7 @@ export const SwipeDots = memo(function SwipeDots({
       onTouchCancel={handleTouchEnd}
     >
       {isScrubbing && (
-        <div className="absolute right-14 top-1/2 -translate-y-1/2 bg-[hsl(215,60%,35%)]/80 backdrop-blur-md border border-white/20 text-white text-sm font-bold px-3 py-1.5 rounded-xl shadow-lg shadow-black/30 whitespace-nowrap pointer-events-none">
+        <div className="absolute right-14 top-1/2 -translate-y-1/2 bg-[hsl(215,60%,35%)]/80 backdrop-blur-md border border-white/20 text-white text-sm font-bold px-4 py-1.5 rounded-xl shadow-lg shadow-black/30 whitespace-nowrap pointer-events-none min-w-[4rem] text-center tabular-nums">
           {scrubIndex + 1} / {count}
         </div>
       )}
