@@ -63,7 +63,22 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
   const scale = isTop ? 1 : 0.95;
   const yOffset = isTop ? 0 : 8;
 
-  const imageUrl = resolveImageUrl(job.job_image_url);
+  const rawImageUrl = useMemo(() => resolveImageUrl(job.job_image_url), [job.job_image_url]);
+
+  // Blob cache: try sync first, then load async
+  const cachedBlob = useMemo(() => rawImageUrl ? imageCache.getCachedUrl(rawImageUrl) : null, [rawImageUrl]);
+  const [loadedBlob, setLoadedBlob] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!rawImageUrl || cachedBlob) return;
+    let cancelled = false;
+    imageCache.loadImage(rawImageUrl).then(url => {
+      if (!cancelled) setLoadedBlob(url);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [rawImageUrl, cachedBlob]);
+
+  const imageUrl = cachedBlob || loadedBlob || rawImageUrl;
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
     const { offset, velocity } = info;
