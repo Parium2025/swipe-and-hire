@@ -358,7 +358,15 @@ export const JobSlide = memo(function JobSlide({
         {/* Text content */}
         <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center">
           <div className="mx-auto w-full max-w-[21rem]">
-            <p className="text-white font-bold text-lg">{job.company_name}</p>
+            {!imageUrl && job.company_name && (
+              <div className="flex justify-center mb-3">
+                <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-white/40 tracking-wide select-none">
+                    {job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                  </span>
+                </div>
+              </div>
+            )}
             <h2
               ref={titleRef}
               data-title-tap-zone
