@@ -720,6 +720,7 @@ const SearchJobs = memo(() => {
                     job_image_url: job.job_image_url,
                     image_focus_position: job.image_focus_position,
                     company_name: job.company_name,
+                    company_logo_url: job.company_logo_url,
                   }}
                   hasApplied={appliedJobIds.has(job.id)}
                   onUnsaveClick={handleUnsaveClick}

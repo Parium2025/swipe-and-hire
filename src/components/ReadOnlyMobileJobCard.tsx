@@ -24,6 +24,7 @@ interface ReadOnlyMobileJobCardProps {
     job_image_url?: string;
     image_focus_position?: string;
     company_name?: string;
+    company_logo_url?: string;
     positions_count?: number;
     profiles?: {
       company_name: string | null;
