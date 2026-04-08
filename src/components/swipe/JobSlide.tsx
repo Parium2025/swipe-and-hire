@@ -392,34 +392,43 @@ export const JobSlide = memo(function JobSlide({
             <p className="text-white font-semibold text-base mt-2 truncate">
               {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
             </p>
-            {/* Salary row */}
-            {(() => {
-              if (job.salary_transparency === 'after_interview') {
-                return <p className="text-white text-sm mt-1.5 truncate">Lön efter intervju</p>;
-              }
-              if (job.salary_min || job.salary_max) {
-                const type = job.salary_type === 'monthly' ? 'kr/mån' : job.salary_type === 'hourly' ? 'kr/tim' : 'kr';
-                if (job.salary_min && job.salary_max) {
-                  return <p className="text-white text-sm mt-1.5 truncate">{job.salary_min.toLocaleString('sv-SE')} – {job.salary_max.toLocaleString('sv-SE')} {type}</p>;
+            {/* Salary + Date badges */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
+              {/* Salary badge */}
+              {(() => {
+                let salaryText: string | null = null;
+                if (job.salary_transparency === 'after_interview') {
+                  salaryText = 'Lön efter intervju';
+                } else if (job.salary_min || job.salary_max) {
+                  const type = job.salary_type === 'monthly' ? 'kr/mån' : job.salary_type === 'hourly' ? 'kr/tim' : 'kr';
+                  if (job.salary_min && job.salary_max) {
+                    salaryText = `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} ${type}`;
+                  } else {
+                    salaryText = `Från ${(job.salary_min || job.salary_max)!.toLocaleString('sv-SE')} ${type}`;
+                  }
                 }
-                const val = job.salary_min || job.salary_max;
-                return <p className="text-white text-sm mt-1.5 truncate">Från {val!.toLocaleString('sv-SE')} {type}</p>;
-              }
-              return null;
-            })()}
-            {(() => {
-              const publishedDate = format(parseISO(job.created_at), 'd MMM', { locale: sv });
-              const daysLeft = job.expires_at ? differenceInDays(parseISO(job.expires_at), new Date()) : null;
-              const parts: string[] = [`Publicerad ${publishedDate}`];
-              if (daysLeft !== null && daysLeft >= 0) {
-                parts.push(daysLeft === 0 ? 'Sista dagen' : `${daysLeft} dagar kvar`);
-              }
-              return (
-                <p className="text-white text-sm mt-1.5 truncate">
-                  {parts.join(' • ')}
-                </p>
-              );
-            })()}
+                if (!salaryText) return null;
+                return (
+                  <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15">
+                    <span className="text-white text-xs font-semibold">{salaryText}</span>
+                  </div>
+                );
+              })()}
+              {/* Published + days left badge */}
+              {(() => {
+                const publishedDate = format(parseISO(job.created_at), 'd MMM', { locale: sv });
+                const daysLeft = job.expires_at ? differenceInDays(parseISO(job.expires_at), new Date()) : null;
+                const parts: string[] = [`Publicerad ${publishedDate}`];
+                if (daysLeft !== null && daysLeft >= 0) {
+                  parts.push(daysLeft === 0 ? 'Sista dagen' : `${daysLeft} dagar kvar`);
+                }
+                return (
+                  <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15">
+                    <span className="text-white text-xs font-semibold">{parts.join(' • ')}</span>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         </div>
 
