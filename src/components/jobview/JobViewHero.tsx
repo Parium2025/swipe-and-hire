@@ -67,11 +67,15 @@ export const JobViewHero = memo(function JobViewHero({
       
       {/* Mobile metadata */}
       <div className="mt-2 sm:hidden flex items-center justify-center gap-1.5 text-[13px] text-white">
-        <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
-        <span className="truncate font-medium">{companyName}</span>
+        {!hasLogo && (
+          <>
+            <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
+            <span className="truncate font-medium">{companyName}</span>
+          </>
+        )}
         {location && (
           <>
-            <span className="text-white/30">·</span>
+            {!hasLogo && <span className="text-white/30">·</span>}
             <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-white" />
             <span className="truncate">{location}</span>
           </>
