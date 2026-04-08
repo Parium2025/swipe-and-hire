@@ -368,18 +368,30 @@ export const JobSlide = memo(function JobSlide({
         {/* Text content */}
         <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.4)' }}>
           <div className="mx-auto w-full max-w-[21rem]">
-            {!imageUrl && job.company_name && (
+            {/* Company logo or initials fallback */}
+            {(logoUrl || !imageUrl) && job.company_name && (
               <motion.div
-                className="flex justify-center mb-6"
+                className="flex justify-center mb-4"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
               >
-                <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-white/40 tracking-wide select-none">
-                    {job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-                  </span>
-                </div>
+                {logoUrl ? (
+                  <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg">
+                    <img
+                      src={logoUrl}
+                      alt={job.company_name}
+                      className="w-full h-full object-cover"
+                      draggable={false}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
+                    <span className="text-xl font-bold text-white/40 tracking-wide select-none">
+                      {job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                    </span>
+                  </div>
+                )}
               </motion.div>
             )}
             <p className="text-white font-bold text-lg">{job.company_name}</p>
