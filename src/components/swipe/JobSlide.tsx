@@ -321,18 +321,20 @@ export const JobSlide = memo(function JobSlide({
               draggable={false}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]">
-              <div className="absolute inset-0 flex items-center justify-center pt-[30%]">
-                <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-                  <span className="text-3xl font-bold text-white/50 tracking-wide select-none">
-                    {job.company_name
-                      ? job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-                      : ''}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]" />
           )}
+        </div>
+
+        {/* Initials watermark – positioned relative to text block */}
+        {!imageUrl && job.company_name && (
+          <div className="absolute inset-x-0 top-[20%] bottom-28 z-[1] flex items-center justify-center pointer-events-none">
+            <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center mt-8">
+              <span className="text-3xl font-bold text-white/50 tracking-wide select-none">
+                {job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+              </span>
+            </div>
+          </div>
+        )}
         </div>
 
         {/* Gradient overlay */}
