@@ -94,6 +94,8 @@ const SearchJobs = memo(() => {
 
   // Delayed fade-in (employer-side parity)
   const [showContent, setShowContent] = useState(false);
+  // Full-screen skeleton overlay: visible until first data load completes
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);
