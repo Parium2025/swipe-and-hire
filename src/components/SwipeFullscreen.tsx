@@ -97,6 +97,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
   const [sectionHeight, setSectionHeight] = useState(END_STATE_HEIGHT);
 
+  /* ── Persist current index to sessionStorage ──────────── */
+  useEffect(() => {
+    try { sessionStorage.setItem(SWIPE_INDEX_KEY, String(currentIndex)); } catch {}
+  }, [currentIndex]);
+
   /* ── Keep refs in sync ────────────────────────────────── */
   currentIndexRef.current = currentIndex;
   showEndBounceRef.current = showEndBounce;
