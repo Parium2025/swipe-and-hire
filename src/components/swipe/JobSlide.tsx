@@ -4,6 +4,7 @@ import { CheckCircle, X, Bookmark, Heart, Users, Gift } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { supabase } from '@/integrations/supabase/client';
+import { imageCache } from '@/lib/imageCache';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import type { SwipeJob } from './SwipeCard';
@@ -85,7 +86,16 @@ export const JobSlide = memo(function JobSlide({
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   const imageUrl = resolveImageUrl(job.job_image_url);
-  const logoUrl = resolveImageUrl(job.company_logo_url, 'company-logos');
+  const rawLogoUrl = useMemo(() => resolveImageUrl(job.company_logo_url, 'company-logos'), [job.company_logo_url]);
+  const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
+  const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
+  useEffect(() => {
+    if (!rawLogoUrl || cachedLogoBlob) { setLoadedLogoBlob(null); return; }
+    let cancelled = false;
+    imageCache.loadImage(rawLogoUrl).then(b => { if (!cancelled) setLoadedLogoBlob(b); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [rawLogoUrl, cachedLogoBlob]);
+  const logoUrl = cachedLogoBlob || loadedLogoBlob || rawLogoUrl;
 
   const isTitleTruncated = useCallback(() => {
     const el = titleRef.current;

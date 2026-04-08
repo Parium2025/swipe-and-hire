@@ -90,12 +90,21 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
-  const logoUrl = useMemo(() => {
+  const rawLogoUrl = useMemo(() => {
     const url = job.employer_profile?.company_logo_url;
     if (!url) return null;
     if (url.startsWith('http')) return url;
     return supabase.storage.from('company-logos').getPublicUrl(url).data?.publicUrl || null;
   }, [job.employer_profile?.company_logo_url]);
+  const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
+  const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
+  useEffect(() => {
+    if (!rawLogoUrl || cachedLogoBlob) { setLoadedLogoBlob(null); return; }
+    let cancelled = false;
+    imageCache.loadImage(rawLogoUrl).then(b => { if (!cancelled) setLoadedLogoBlob(b); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [rawLogoUrl, cachedLogoBlob]);
+  const logoUrl = cachedLogoBlob || loadedLogoBlob || rawLogoUrl;
 
   const handleCardClick = () => {
     if (isDraft && onEditDraft) {

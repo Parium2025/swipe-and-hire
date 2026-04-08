@@ -160,7 +160,15 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
         if (allProfiles) {
           allProfiles.forEach(profile => {
             if (profile.company_logo_url) {
-              logoUrls.push(profile.company_logo_url.split('?')[0]);
+              const raw = profile.company_logo_url;
+              if (raw.startsWith('http')) {
+                logoUrls.push(raw.split('?')[0]);
+              } else {
+                const publicUrl = supabase.storage
+                  .from('company-logos')
+                  .getPublicUrl(raw).data.publicUrl;
+                if (publicUrl) logoUrls.push(publicUrl);
+              }
             }
           });
         }

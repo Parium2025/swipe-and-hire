@@ -126,11 +126,20 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
-  const logoUrl = useMemo(() => {
+  const rawLogoUrl = useMemo(() => {
     if (!job.company_logo_url) return null;
     if (job.company_logo_url.startsWith('http')) return job.company_logo_url;
     return supabase.storage.from('company-logos').getPublicUrl(job.company_logo_url).data?.publicUrl || null;
   }, [job.company_logo_url]);
+  const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
+  const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
+  useEffect(() => {
+    if (!rawLogoUrl || cachedLogoBlob) { setLoadedLogoBlob(null); return; }
+    let cancelled = false;
+    imageCache.loadImage(rawLogoUrl).then(b => { if (!cancelled) setLoadedLogoBlob(b); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [rawLogoUrl, cachedLogoBlob]);
+  const logoUrl = cachedLogoBlob || loadedLogoBlob || rawLogoUrl;
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
