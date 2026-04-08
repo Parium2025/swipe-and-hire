@@ -21,6 +21,7 @@ import {
   Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MessagesSkeleton } from '@/components/skeletons/PageSkeletons';
 
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
 

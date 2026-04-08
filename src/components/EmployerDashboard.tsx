@@ -9,6 +9,7 @@ import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from '
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { MobileJobCard } from '@/components/MobileJobCard';
+import { EmployerDashboardSkeleton } from '@/components/skeletons/PageSkeletons';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { formatDateShortSv } from '@/lib/date';

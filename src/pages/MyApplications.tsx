@@ -33,6 +33,7 @@ import { useCandidateInterviews } from '@/hooks/useInterviews';
 import CandidateInterviewCard from '@/components/CandidateInterviewCard';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { toast } from 'sonner';
+import { MyApplicationsSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface Application {
   id: string;

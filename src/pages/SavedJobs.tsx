@@ -20,6 +20,7 @@ import { Heart, Loader2, Trash2, AlertTriangle, ArrowDownUp } from 'lucide-react
 import { toast } from 'sonner';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
+import { SavedJobsSkeleton } from '@/components/skeletons/PageSkeletons';
 
 type SortOption = 'newest' | 'oldest' | 'expired' | 'active';
 
