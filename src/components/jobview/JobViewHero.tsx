@@ -49,10 +49,12 @@ export const JobViewHero = memo(function JobViewHero({
   location,
   employmentType,
   positionsCount,
+  companyLogoUrl,
 }: JobViewHeroProps) {
   const positionsText = (positionsCount || 1) === 1 ? '1 ledig tjänst' : `${positionsCount} lediga tjänster`;
   const gradient = useMemo(() => getGradientForName(companyName), [companyName]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
+  const hasLogo = !!companyLogoUrl;
 
   // Shared overlay content for both image and gradient fallback
   const overlayContent = (
