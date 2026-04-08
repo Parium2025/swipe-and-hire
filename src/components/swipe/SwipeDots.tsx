@@ -170,7 +170,7 @@ export const SwipeDots = memo(function SwipeDots({
       onTouchCancel={handleTouchEnd}
     >
       {isScrubbing && (
-        <div className="absolute right-14 top-1/2 -translate-y-1/2 bg-[hsl(215,60%,35%)]/80 backdrop-blur-md border border-white/20 text-white text-sm font-bold px-3 py-1.5 rounded-xl shadow-lg shadow-black/30 whitespace-nowrap pointer-events-none">
+        <div className="absolute right-14 top-1/2 -translate-y-1/2 bg-[hsl(215,60%,35%)]/80 backdrop-blur-md border border-white/20 text-white text-sm font-bold px-4 py-1.5 rounded-xl shadow-lg shadow-black/30 whitespace-nowrap pointer-events-none min-w-[4rem] text-center tabular-nums">
           {scrubIndex + 1} / {count}
         </div>
       )}
