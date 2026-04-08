@@ -6,10 +6,11 @@ import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
 import { initConnectivityManager } from "@/lib/connectivityManager";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// 🚀 CRITICAL: Lazy load heavy pages for instant /auth load on mobile
-// Only Auth, Landing, and lightweight pages are loaded synchronously
+// 🚀 CRITICAL: Keep auth + main app shell synchronous to avoid production chunk-mismatch
+// lockouts after deploys when an old cached bundle still points to stale lazy chunks.
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
+import Index from "./pages/Index";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
@@ -58,8 +59,7 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
   });
 }
 
-// Heavy pages - lazy loaded to reduce initial bundle by ~60%
-const Index = lazyWithRetry(() => import("./pages/Index"));
+// Heavy pages that can still be lazy-loaded safely
 const JobApplication = lazyWithRetry(() => import("./pages/JobApplication"));
 const JobView = lazyWithRetry(() => import("./pages/JobView"));
 const CvTunnel = lazyWithRetry(() => import("./pages/CvTunnel"));
