@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
-
+import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -38,6 +38,7 @@ import { useBatchPrefetchReviews, useBatchPrefetchCompanyProfiles } from '@/hook
 import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
 import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard';
 import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
+import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPageSkeleton';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
 
@@ -93,6 +94,8 @@ const SearchJobs = memo(() => {
 
   // Delayed fade-in (employer-side parity)
   const [showContent, setShowContent] = useState(false);
+  // Full-screen skeleton overlay: visible until first data load completes
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);
@@ -259,8 +262,6 @@ const SearchJobs = memo(() => {
   const isLoadingMoreRef = useRef(false);
   const hasInitializedFiltersRef = useRef(false);
 
-  
-
   // Debounced search for better performance
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
   useEffect(() => {
@@ -279,6 +280,14 @@ const SearchJobs = memo(() => {
     subcategories: selectedSubcategories,
     enabled: true,
   });
+
+  // Mark initial load as done once jobs finish loading for the first time
+  useEffect(() => {
+    if (!isLoading && !initialLoadDone) {
+      const t = setTimeout(() => setInitialLoadDone(true), 150);
+      return () => clearTimeout(t);
+    }
+  }, [isLoading, initialLoadDone]);
 
   // Prefetch reviews and company profiles for all companies in results for instant dialog load
   const prefetchReviews = useBatchPrefetchReviews();
@@ -763,39 +772,11 @@ const SearchJobs = memo(() => {
         }}
         onSave={saveSearch}
       />
-      {/* Swipe Mode Loading Skeleton */}
-      {isTouchCapable && swipeModeActive && isLoading && (
-        <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col">
-          {/* Fake header */}
-          <div className="flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)] py-3">
-            <div className="h-4 w-12 bg-white/10 rounded animate-pulse" />
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-24 bg-white/10 rounded-full animate-pulse" />
-              <div className="h-8 w-8 bg-white/10 rounded-full animate-pulse" />
-            </div>
-          </div>
-          {/* Fake dots */}
-          <div className="flex justify-center gap-1.5 py-2">
-            {[1,2,3,4,5].map(i => (
-              <div key={i} className={`h-1.5 rounded-full animate-pulse ${i === 1 ? 'w-6 bg-white/40' : 'w-1.5 bg-white/15'}`} />
-            ))}
-          </div>
-          {/* Fake card */}
-          <div className="flex-1 mx-4 mb-4 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex flex-col">
-            {/* Image area */}
-            <div className="flex-1 bg-white/5 animate-pulse" />
-            {/* Bottom info */}
-            <div className="p-5 space-y-3">
-              <div className="h-6 w-3/4 bg-white/10 rounded animate-pulse" />
-              <div className="h-4 w-1/2 bg-white/10 rounded animate-pulse" />
-              <div className="flex gap-2 pt-1">
-                <div className="h-6 w-20 bg-white/10 rounded-full animate-pulse" />
-                <div className="h-6 w-24 bg-white/10 rounded-full animate-pulse" />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Full-screen skeleton overlays — cover everything during initial load */}
+      <AnimatePresence>
+        {!initialLoadDone && isTouchCapable && swipeModeActive && <SwipeModeSkeleton key="swipe-skel" />}
+        {!initialLoadDone && !(isTouchCapable && swipeModeActive) && <JobListSkeleton key="list-skel" />}
+      </AnimatePresence>
       {/* Swipe Mode Fullscreen Overlay */}
       {isTouchCapable && swipeModeActive && !isLoading && (
         <SwipeFullscreen
