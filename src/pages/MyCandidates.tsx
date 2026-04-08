@@ -550,11 +550,7 @@ const MyCandidates = () => {
   }, [selectedCandidate, mapCandidateToAppData]);
 
   if (isLoading || !showContent) {
-    return (
-       <div className="responsive-container-wide opacity-0">
-        {/* Invisible placeholder to prevent layout shift */}
-      </div>
-    );
+    return <MyCandidatesSkeleton />;
   }
 
   return (
