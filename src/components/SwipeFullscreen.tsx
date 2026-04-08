@@ -79,15 +79,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   }, []);
 
   /* ── State ────────────────────────────────────────────── */
-  const [currentIndex, setCurrentIndex] = useState(() => {
-    const restored = (() => { try {
-      const saved = sessionStorage.getItem('parium-swipe-index');
-      if (saved === null) return 0;
-      const idx = parseInt(saved, 10);
-      return Number.isFinite(idx) && idx >= 0 ? idx : 0;
-    } catch { return 0; } })();
-    return restored;
-  });
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
   const [showApply, setShowApply] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
@@ -97,10 +89,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
   const [sectionHeight, setSectionHeight] = useState(END_STATE_HEIGHT);
 
-  /* ── Persist current index to sessionStorage ──────────── */
+  /* ── Clear persisted index on unmount (reset on re-entry) ── */
   useEffect(() => {
-    try { sessionStorage.setItem(SWIPE_INDEX_KEY, String(currentIndex)); } catch {}
-  }, [currentIndex]);
+    return () => {
+      try { sessionStorage.removeItem(SWIPE_INDEX_KEY); } catch {}
+    };
+  }, []);
 
   /* ── Keep refs in sync ────────────────────────────────── */
   currentIndexRef.current = currentIndex;
