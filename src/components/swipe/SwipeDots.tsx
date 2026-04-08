@@ -128,9 +128,10 @@ export const SwipeDots = memo(function SwipeDots({
       e.preventDefault();
       e.stopPropagation();
 
+      const now = Date.now();
       const idx = indexFromTouchY(touch.clientY);
-      // Use ref to avoid stale closure — this was causing the "lock" bug
-      if (idx !== scrubIndexRef.current) {
+      if (idx !== scrubIndexRef.current && now - lastScrubTimeRef.current >= SCRUB_THROTTLE_MS) {
+        lastScrubTimeRef.current = now;
         scrubIndexRef.current = idx;
         setScrubIndex(idx);
         onScrubTo?.(idx);
