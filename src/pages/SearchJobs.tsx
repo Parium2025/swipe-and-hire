@@ -391,6 +391,7 @@ const SearchJobs = memo(() => {
     work_location_type: job.work_location_type,
     salary_transparency: job.salary_transparency,
     benefits: job.benefits,
+    company_logo_url: job.company_logo_url,
   })), [filteredAndSortedJobs]);
 
   // Find matching companies for smart search suggestion
