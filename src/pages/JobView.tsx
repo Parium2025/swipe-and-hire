@@ -550,6 +550,13 @@ const JobView = () => {
               employmentType={job.employment_type}
               positionsCount={job.positions_count}
               companyLogoUrl={companyLogoUrl}
+              salaryMin={job.salary_min}
+              salaryMax={job.salary_max}
+              salaryType={job.salary_type}
+              salaryTransparency={job.salary_transparency}
+              benefits={job.benefits}
+              createdAt={job.created_at}
+              expiresAt={job.expires_at}
             />
 
             {/* Description */}

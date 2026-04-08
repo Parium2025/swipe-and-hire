@@ -1,8 +1,9 @@
 import { memo, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Users, Building2, MapPin } from 'lucide-react';
+import { Users, Building2, MapPin, Timer, Gift } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getTimeRemaining } from '@/lib/date';
 
 interface JobViewHeroProps {
   title: string;
@@ -12,6 +13,13 @@ interface JobViewHeroProps {
   employmentType?: string;
   positionsCount?: number;
   companyLogoUrl?: string | null;
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  salaryType?: string | null;
+  salaryTransparency?: string | null;
+  benefits?: string[] | null;
+  createdAt?: string;
+  expiresAt?: string | null;
 }
 
 const GRADIENTS = [
@@ -42,6 +50,28 @@ function getCompanyInitials(name: string): string {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
+function getSalaryText(salaryMin?: number | null, salaryMax?: number | null, salaryType?: string | null, salaryTransparency?: string | null): string | null {
+  const typeLabel = salaryType === 'monthly' || salaryType === 'fast' ? 'kr/mån'
+    : salaryType === 'hourly' || salaryType === 'rorlig' ? 'kr/tim'
+    : salaryType === 'fast-rorlig' ? 'kr/mån' : 'kr/mån';
+
+  if (salaryTransparency === 'after_interview') return 'Lön efter intervju';
+  if (salaryMin || salaryMax) {
+    if (salaryMin && salaryMax) {
+      return `${salaryMin.toLocaleString('sv-SE')} – ${salaryMax.toLocaleString('sv-SE')} ${typeLabel}`;
+    }
+    return `Från ${(salaryMin || salaryMax)!.toLocaleString('sv-SE')} ${typeLabel}`;
+  }
+  if (salaryTransparency && /^\d/.test(salaryTransparency)) {
+    const match = salaryTransparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+    if (match) {
+      return `${parseInt(match[1], 10).toLocaleString('sv-SE')} – ${parseInt(match[2], 10).toLocaleString('sv-SE')} ${typeLabel}`;
+    }
+    return `${salaryTransparency} ${typeLabel}`;
+  }
+  return null;
+}
+
 export const JobViewHero = memo(function JobViewHero({
   title,
   imageUrl,
@@ -50,11 +80,21 @@ export const JobViewHero = memo(function JobViewHero({
   employmentType,
   positionsCount,
   companyLogoUrl,
+  salaryMin,
+  salaryMax,
+  salaryType,
+  salaryTransparency,
+  benefits,
+  createdAt,
+  expiresAt,
 }: JobViewHeroProps) {
   const positionsText = (positionsCount || 1) === 1 ? '1 ledig tjänst' : `${positionsCount} lediga tjänster`;
   const gradient = useMemo(() => getGradientForName(companyName), [companyName]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const hasLogo = !!companyLogoUrl;
+  const hasImage = !!imageUrl;
+  const salaryText = useMemo(() => getSalaryText(salaryMin, salaryMax, salaryType, salaryTransparency), [salaryMin, salaryMax, salaryType, salaryTransparency]);
+  const timeInfo = useMemo(() => createdAt ? getTimeRemaining(createdAt, expiresAt ?? undefined) : null, [createdAt, expiresAt]);
 
   // Shared overlay content for both image and gradient fallback
   const overlayContent = (
@@ -65,12 +105,14 @@ export const JobViewHero = memo(function JobViewHero({
         tooltipSide="bottom"
       />
       
-      {/* Mobile metadata */}
+      {/* Mobile metadata — only show company badge when there's an image */}
       <div className="mt-2 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
-        <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
-          <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
-          <span className="truncate font-medium">{companyName}</span>
-        </Badge>
+        {hasImage && (
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+            <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="truncate font-medium">{companyName}</span>
+          </Badge>
+        )}
         {location && (
           <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
             <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
@@ -79,14 +121,33 @@ export const JobViewHero = memo(function JobViewHero({
         )}
       </div>
 
-      {/* Mobile badges */}
+      {/* Mobile badges — full set matching job cards */}
       <div className="mt-1.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
         {employmentType && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none text-white">
             {getEmploymentTypeLabel(employmentType)}
           </Badge>
         )}
-        <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
+        {salaryText && (
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none text-white">
+            {salaryText}
+          </Badge>
+        )}
+        {timeInfo && (
+          <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white ${timeInfo.isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
+            <Timer className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none">{timeInfo.isExpired ? 'Utgången' : `${timeInfo.text} kvar`}</span>
+          </Badge>
+        )}
+        {benefits && benefits.length > 0 && (
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+            <Gift className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none">
+              Förmåner {benefits.length <= 5 ? `${benefits.length} st` : `${Math.floor(benefits.length / 5) * 5}+`}
+            </span>
+          </Badge>
+        )}
+        <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
           <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
           <span className="leading-none">{positionsText}</span>
         </Badge>
