@@ -175,8 +175,18 @@ export const JobSlide = memo(function JobSlide({
     animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
   }, [clearTapHint, triggerSwipe, x]);
 
+  // Track overlay close timing to prevent tap-through
+  const overlayClosedAtRef = useRef(0);
+  const prevOverlayOpenRef = useRef(overlayOpen);
+  useEffect(() => {
+    if (prevOverlayOpenRef.current && !overlayOpen) {
+      overlayClosedAtRef.current = Date.now();
+    }
+    prevOverlayOpenRef.current = overlayOpen;
+  }, [overlayOpen]);
+
   const handleTouchStartCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1 || isWithinTapHintTarget(event.target)) return;
+    if (!useTouchTunnel || swipedRef.current || overlayOpen || event.touches.length !== 1 || isWithinTapHintTarget(event.target)) return;
 
     const touch = event.touches[0];
     touchGestureRef.current = {
@@ -186,7 +196,7 @@ export const JobSlide = memo(function JobSlide({
       isDragging: false,
       cancelled: false,
     };
-  }, [useTouchTunnel]);
+  }, [useTouchTunnel, overlayOpen]);
 
   const handleTouchMoveCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1 || isWithinTapHintTarget(event.target)) return;
@@ -225,6 +235,11 @@ export const JobSlide = memo(function JobSlide({
   const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (!useTouchTunnel || isWithinTapHintTarget(event.target)) return;
 
+    // Reject if overlay is open or was very recently closed (prevents tap-through)
+    if (overlayOpen || (Date.now() - overlayClosedAtRef.current < 500)) {
+      touchGestureRef.current = null;
+      return;
+    }
     const gesture = touchGestureRef.current;
     touchGestureRef.current = null;
 
@@ -287,7 +302,7 @@ export const JobSlide = memo(function JobSlide({
     // Single tap outside title → open job info directly
     lastTapTimestampRef.current = 0;
     onTap();
-  }, [armTapHint, clearTapHint, onTap, triggerSwipe, useTouchTunnel, x, showTapHint]);
+  }, [armTapHint, clearTapHint, onTap, triggerSwipe, useTouchTunnel, overlayOpen, x, showTapHint]);
 
   const handleTouchCancelCapture = useCallback(() => {
     clearTapHint();
