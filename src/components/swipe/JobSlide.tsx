@@ -22,6 +22,7 @@ interface JobSlideProps {
   saved: boolean;
   skipped?: boolean;
   isVisible: boolean;
+  isActive: boolean;
   isLast: boolean;
   sectionHeight?: string;
   overlayOpen?: boolean;
