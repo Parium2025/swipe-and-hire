@@ -8,7 +8,7 @@ import {
   getSalaryTransparencyLabel,
 } from '@/lib/jobViewHelpers';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { Clock, Banknote, Briefcase } from 'lucide-react';
+import { Clock, Banknote } from 'lucide-react';
 
 interface JobViewDetailsProps {
   employmentType?: string;
