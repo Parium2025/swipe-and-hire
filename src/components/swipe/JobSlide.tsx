@@ -304,7 +304,7 @@ export const JobSlide = memo(function JobSlide({
   useEffect(() => {
     if (isActive && !prevActiveRef.current) {
       setFadeIn(true);
-      const t = setTimeout(() => setFadeIn(false), 350);
+      const t = setTimeout(() => setFadeIn(false), 520);
       return () => clearTimeout(t);
     }
     prevActiveRef.current = isActive;
