@@ -158,16 +158,34 @@ export const JobViewHero = memo(function JobViewHero({
       {/* Desktop/tablet metadata */}
       <div className="mt-4 hidden sm:flex flex-wrap items-center justify-center gap-2 text-sm md:text-base text-white">
         {employmentType && (
-          <span className="text-white">{getEmploymentTypeLabel(employmentType).toUpperCase()}</span>
+          <span className="inline-flex items-center gap-1 text-white">
+            <Briefcase className="h-3.5 w-3.5" />
+            {getEmploymentTypeLabel(employmentType).toUpperCase()}
+          </span>
         )}
         {employmentType && location && (
           <span className="text-white/60">·</span>
         )}
         {location && (
-          <span className="text-white">{location.toUpperCase()}</span>
+          <span className="inline-flex items-center gap-1 text-white">
+            <MapPin className="h-3.5 w-3.5" />
+            {location.toUpperCase()}
+          </span>
+        )}
+        {salaryText && (
+          <>
+            <span className="text-white/60">·</span>
+            <span className="inline-flex items-center gap-1 text-white">
+              <Banknote className="h-3.5 w-3.5" />
+              {salaryText}
+            </span>
+          </>
         )}
         <span className="text-white/60">·</span>
-        <span className="text-white">{positionsText}</span>
+        <span className="inline-flex items-center gap-1 text-white">
+          <Users className="h-3.5 w-3.5" />
+          {positionsText}
+        </span>
       </div>
     </div>
   );
