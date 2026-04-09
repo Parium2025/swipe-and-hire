@@ -235,6 +235,11 @@ export const JobSlide = memo(function JobSlide({
   const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (!useTouchTunnel || isWithinTapHintTarget(event.target)) return;
 
+    // Reject if overlay is open or was very recently closed (prevents tap-through)
+    if (overlayOpen || (Date.now() - overlayClosedAtRef.current < 500)) {
+      touchGestureRef.current = null;
+      return;
+    }
     const gesture = touchGestureRef.current;
     touchGestureRef.current = null;
 
