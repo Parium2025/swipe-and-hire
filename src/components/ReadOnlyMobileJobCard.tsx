@@ -282,8 +282,9 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         {/* Tags row — badges restored, centered */}
         <div className="flex items-center justify-center gap-1.5 flex-wrap">
           {job.employment_type && (
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none text-white">
-              {getEmploymentTypeLabel(job.employment_type)}
+            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+              <Briefcase className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="leading-none">{getEmploymentTypeLabel(job.employment_type)}</span>
             </Badge>
           )}
           {/* Salary badge */}
