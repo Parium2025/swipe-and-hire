@@ -125,13 +125,13 @@ export const JobViewHero = memo(function JobViewHero({
       <div className="mt-1.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
         {employmentType && (
           <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
-            <Briefcase className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <Briefcase className="h-3 w-3 mr-1 flex-shrink-0" />
             <span className="leading-none">{getEmploymentTypeLabel(employmentType)}</span>
           </Badge>
         )}
         {salaryText && (
           <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
-            <Banknote className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <Banknote className="h-3 w-3 mr-1 flex-shrink-0" />
             <span className="leading-none">{salaryText}</span>
           </Badge>
         )}
