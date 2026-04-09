@@ -67,6 +67,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceReturnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const overlayShieldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const endBounceActiveRef = useRef(false);
   const currentIndexRef = useRef(0);
   const showEndBounceRef = useRef(false);
@@ -95,6 +96,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [endStateVisible, setEndStateVisible] = useState(false);
   const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
   const [sectionHeight, setSectionHeight] = useState(END_STATE_HEIGHT);
+  const [overlayInteractionShieldActive, setOverlayInteractionShieldActive] = useState(false);
 
   /* ── Clear persisted index on unmount (reset on re-entry) ── */
   useEffect(() => {
@@ -123,6 +125,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     if (scrollEndTimerRef.current) { clearTimeout(scrollEndTimerRef.current); scrollEndTimerRef.current = null; }
     if (bounceReturnTimerRef.current) { clearTimeout(bounceReturnTimerRef.current); bounceReturnTimerRef.current = null; }
     if (bounceHideTimerRef.current) { clearTimeout(bounceHideTimerRef.current); bounceHideTimerRef.current = null; }
+    if (overlayShieldTimerRef.current) { clearTimeout(overlayShieldTimerRef.current); overlayShieldTimerRef.current = null; }
     if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
   }, []);
 
@@ -379,7 +382,17 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
 
   const startOverlayCooldown = useCallback(() => {
     overlayCooldownRef.current = true;
-    setTimeout(() => { overlayCooldownRef.current = false; }, 400);
+    setOverlayInteractionShieldActive(true);
+
+    if (overlayShieldTimerRef.current) {
+      clearTimeout(overlayShieldTimerRef.current);
+    }
+
+    overlayShieldTimerRef.current = setTimeout(() => {
+      overlayCooldownRef.current = false;
+      setOverlayInteractionShieldActive(false);
+      overlayShieldTimerRef.current = null;
+    }, 520);
   }, []);
 
   const handleCloseApply = useCallback(() => { setShowApply(false); startOverlayCooldown(); }, [startOverlayCooldown]);
@@ -551,6 +564,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
             onClearAll={filterState.onClearAll}
             jobCount={jobs.length}
             activeFilterCount={filterState.activeFilterCount}
+          />
+        )}
+
+        {overlayInteractionShieldActive && (
+          <div
+            aria-hidden="true"
+            className="fixed inset-0 z-[10002] pointer-events-auto"
           />
         )}
       </motion.div>
