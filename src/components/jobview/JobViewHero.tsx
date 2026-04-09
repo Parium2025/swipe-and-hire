@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Users, Building2, MapPin, Timer, Gift } from 'lucide-react';
+import { Users, Building2, MapPin, Timer, Gift, Briefcase, Banknote } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
