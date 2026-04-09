@@ -377,7 +377,15 @@ export const JobSlide = memo(function JobSlide({
           </div>
         )}
 
-        {/* Text content */}
+        {/* Skipped stamp overlay */}
+        {skipped && !applied && (
+          <div className="absolute top-4 left-4 z-30 pointer-events-none">
+            <div className="-rotate-[12deg] border-[3px] border-white/40 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
+              <span className="text-white/60 text-lg font-black tracking-widest uppercase">SKIPPAD</span>
+            </div>
+          </div>
+        )}
+
         <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.4)' }}>
           <div className="mx-auto w-full max-w-[21rem]">
             {/* Company logo or initials fallback */}
