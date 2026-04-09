@@ -20,6 +20,7 @@ interface JobSlideProps {
   job: SwipeJob;
   applied: boolean;
   saved: boolean;
+  skipped?: boolean;
   isVisible: boolean;
   isLast: boolean;
   sectionHeight?: string;
