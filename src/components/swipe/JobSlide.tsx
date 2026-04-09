@@ -191,7 +191,7 @@ export const JobSlide = memo(function JobSlide({
       clearTapHint();
     }
 
-    animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+    animate(x, 0, SNAP_SPRING);
   }, [clearTapHint, triggerSwipe, x]);
 
   // Track overlay close timing to prevent tap-through
@@ -282,7 +282,7 @@ export const JobSlide = memo(function JobSlide({
         return;
       }
 
-      animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+      animate(x, 0, SNAP_SPRING);
       return;
     }
 
@@ -327,7 +327,7 @@ export const JobSlide = memo(function JobSlide({
     clearTapHint();
     touchGestureRef.current = null;
     if (!swipedRef.current) {
-      animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+      animate(x, 0, SNAP_SPRING);
     }
   }, [clearTapHint, x]);
 
@@ -354,6 +354,7 @@ export const JobSlide = memo(function JobSlide({
         className={`relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent] ${fadeIn ? 'animate-[fadeSlideIn_0.5s_cubic-bezier(0.22,1,0.36,1)_both]' : ''}`}
         style={{
           x,
+          y,
           opacity: exitOpacity,
           rotate: cardRotate,
           scale: cardScale,
