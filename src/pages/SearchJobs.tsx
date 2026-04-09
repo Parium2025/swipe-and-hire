@@ -103,6 +103,7 @@ const SearchJobs = memo(() => {
   }, []);
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob, unsaveJob } = useSavedJobs();
+  const { skippedJobIds, recordAction: recordSwipeAction, undoAction: undoSwipeAction } = useSwipeActions();
   const { seedJobsFromSearch } = useJobPrefetchCache();
   
   const { savedSearches, saveSearch, deleteSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
