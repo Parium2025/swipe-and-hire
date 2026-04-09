@@ -327,16 +327,15 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   }, [currentJob, onRecordSwipeAction]);
 
   const handleSwipeLeft = useCallback(() => {
-    if (currentIndex >= jobs.length - 1) return;
     const skippedJob = jobs[currentIndex];
+    if (!skippedJob) return;
     
-    // Record skip action
-    if (skippedJob) onRecordSwipeAction?.(skippedJob.id, 'skipped');
-    
-    scrollToNext();
+    // Record skip action – the job will be removed from the array by the parent
+    // so the next job automatically slides into the current position
+    onRecordSwipeAction?.(skippedJob.id, 'skipped');
 
     // Show undo toast
-    if (skippedJob && onUndoSwipeAction) {
+    if (onUndoSwipeAction) {
       toast(`${skippedJob.title} skippat`, {
         action: {
           label: 'Ångra',
@@ -345,7 +344,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         duration: 4000,
       });
     }
-  }, [currentIndex, jobs, scrollToNext, onRecordSwipeAction, onUndoSwipeAction]);
+  }, [currentIndex, jobs, onRecordSwipeAction, onUndoSwipeAction]);
 
   const handleTap = useCallback(() => { setShowDetail(true); }, []);
 
