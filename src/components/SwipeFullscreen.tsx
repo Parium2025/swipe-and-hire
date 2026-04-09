@@ -56,6 +56,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   onToggleSave,
   onClose,
   filterState,
+  skippedJobIds,
+  onRecordSwipeAction,
+  onUndoSwipeAction,
 }: SwipeFullscreenProps) {
   /* ── Refs ─────────────────────────────────────────────── */
   const scrollRef = useRef<HTMLDivElement>(null);
