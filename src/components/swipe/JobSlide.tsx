@@ -44,7 +44,8 @@ type SwipeDirection = 'left' | 'right';
 
 const SWIPE_THRESHOLD = 100;
 const VELOCITY_THRESHOLD = 400;
-const EXIT_X = typeof window !== 'undefined' ? window.innerWidth * 1.2 : 500;
+const EXIT_X = typeof window !== 'undefined' ? window.innerWidth * 1.4 : 600;
+const SNAP_SPRING = { type: 'spring' as const, stiffness: 340, damping: 28, mass: 0.9 };
 const DOUBLE_TAP_DELAY = 280;
 const TAP_MAX_DURATION = 250;
 const TAP_MOVE_THRESHOLD = 18;
@@ -79,11 +80,12 @@ export const JobSlide = memo(function JobSlide({
   const inputCapability = useInputCapability();
   const useTouchTunnel = inputCapability !== 'mouse';
   const x = useMotionValue(0);
+  const y = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
   const likeOpacity = useTransform(x, [0, 60, 140], [0, 0.4, 1]);
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
-  const cardRotate = useTransform(x, [-200, 0, 200], [-8, 0, 8]);
-  const cardScale = useTransform(x, [-200, 0, 200], [0.96, 1, 0.96]);
+  const cardRotate = useTransform(x, [-200, 0, 200], [-10, 0, 10]);
+  const cardScale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
@@ -133,22 +135,29 @@ export const JobSlide = memo(function JobSlide({
     clearTapHint();
 
     if (direction === 'right') {
-      animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+      animate(x, 0, SNAP_SPRING);
       onSwipeRight();
       return;
     }
 
     swipedRef.current = true;
 
-    // Premium exit: smooth spring with opacity fade
+    // Premium exit: natural arc with opacity fade
     animate(x, -EXIT_X, {
       type: 'spring',
-      stiffness: 260,
-      damping: 28,
-      mass: 0.8,
+      stiffness: 220,
+      damping: 26,
+      mass: 0.85,
+    });
+    // Subtle downward arc for a "tossed" feel
+    animate(y, 60, {
+      type: 'spring',
+      stiffness: 180,
+      damping: 22,
+      mass: 0.85,
     });
     animate(exitOpacity, 0, {
-      duration: 0.35,
+      duration: 0.4,
       ease: [0.22, 1, 0.36, 1],
     });
 
@@ -156,9 +165,10 @@ export const JobSlide = memo(function JobSlide({
       onSwipeLeft();
       swipedRef.current = false;
       x.set(0);
+      y.set(0);
       exitOpacity.set(1);
-    }, 420);
-  }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x]);
+    }, 480);
+  }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x, y]);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
     if (swipedRef.current) return;
@@ -181,7 +191,7 @@ export const JobSlide = memo(function JobSlide({
       clearTapHint();
     }
 
-    animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+    animate(x, 0, SNAP_SPRING);
   }, [clearTapHint, triggerSwipe, x]);
 
   // Track overlay close timing to prevent tap-through
@@ -272,7 +282,7 @@ export const JobSlide = memo(function JobSlide({
         return;
       }
 
-      animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+      animate(x, 0, SNAP_SPRING);
       return;
     }
 
@@ -317,7 +327,7 @@ export const JobSlide = memo(function JobSlide({
     clearTapHint();
     touchGestureRef.current = null;
     if (!swipedRef.current) {
-      animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+      animate(x, 0, SNAP_SPRING);
     }
   }, [clearTapHint, x]);
 
@@ -344,6 +354,7 @@ export const JobSlide = memo(function JobSlide({
         className={`relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent] ${fadeIn ? 'animate-[fadeSlideIn_0.5s_cubic-bezier(0.22,1,0.36,1)_both]' : ''}`}
         style={{
           x,
+          y,
           opacity: exitOpacity,
           rotate: cardRotate,
           scale: cardScale,
