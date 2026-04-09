@@ -131,7 +131,7 @@ export const JobViewHero = memo(function JobViewHero({
         )}
         {salaryText && (
           <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
-            <Banknote className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <Banknote className="h-3 w-3 mr-1 flex-shrink-0" />
             <span className="leading-none">{salaryText}</span>
           </Badge>
         )}
