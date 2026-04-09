@@ -321,12 +321,31 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     if (nextIdx < jobs.length) scrollToSlide(nextIdx);
   }, [currentIndex, jobs.length, scrollToSlide]);
 
-  const handleSwipeRight = useCallback(() => { setShowApply(true); }, []);
+  const handleSwipeRight = useCallback(() => {
+    if (currentJob) onRecordSwipeAction?.(currentJob.id, 'liked');
+    setShowApply(true);
+  }, [currentJob, onRecordSwipeAction]);
 
   const handleSwipeLeft = useCallback(() => {
     if (currentIndex >= jobs.length - 1) return;
+    const skippedJob = jobs[currentIndex];
+    
+    // Record skip action
+    if (skippedJob) onRecordSwipeAction?.(skippedJob.id, 'skipped');
+    
     scrollToNext();
-  }, [currentIndex, jobs.length, scrollToNext]);
+
+    // Show undo toast
+    if (skippedJob && onUndoSwipeAction) {
+      toast(`${skippedJob.title} skippat`, {
+        action: {
+          label: 'Ångra',
+          onClick: () => onUndoSwipeAction(skippedJob.id),
+        },
+        duration: 4000,
+      });
+    }
+  }, [currentIndex, jobs, scrollToNext, onRecordSwipeAction, onUndoSwipeAction]);
 
   const handleTap = useCallback(() => { setShowDetail(true); }, []);
 
@@ -338,10 +357,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const handleApplied = useCallback(() => {
     if (currentJob) {
       setLocalAppliedIds(prev => new Set(prev).add(currentJob.id));
+      onRecordSwipeAction?.(currentJob.id, 'applied');
     }
     setShowApply(false);
     // Stay on the card so user sees the "SÖKT" stamp
-  }, [currentJob]);
+  }, [currentJob, onRecordSwipeAction]);
 
   const handleCloseApply = useCallback(() => { setShowApply(false); }, []);
   const handleCloseDetail = useCallback(() => { setShowDetail(false); }, []);
