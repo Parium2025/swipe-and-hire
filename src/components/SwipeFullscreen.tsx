@@ -355,7 +355,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     }
   }, [currentIndex, jobs, onRecordSwipeAction, onUndoSwipeAction]);
 
-  const handleTap = useCallback(() => { setShowDetail(true); }, []);
+  // Guard against tap-through: when an overlay closes, ignore taps briefly
+  const overlayCooldownRef = useRef(false);
+
+  const handleTap = useCallback(() => {
+    if (overlayCooldownRef.current) return;
+    setShowDetail(true);
+  }, []);
 
   const handleApplyFromDetail = useCallback(() => {
     setShowDetail(false);
