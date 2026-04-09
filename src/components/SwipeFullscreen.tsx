@@ -465,6 +465,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 job={job}
                 applied={isApplied(job.id)}
                 saved={savedJobIds.has(job.id)}
+                skipped={skippedJobIds?.has(job.id) ?? false}
                 isVisible={Math.abs(idx - currentIndex) <= 1}
                 isLast={idx === jobs.length - 1}
                 sectionHeight={sectionHeight}
