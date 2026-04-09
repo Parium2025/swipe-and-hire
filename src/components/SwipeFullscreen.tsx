@@ -520,19 +520,17 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           </div>
         )}
 
-        {currentJob && showApply && (
-          <div className="fixed inset-0 z-[10001] pointer-events-none">
-            <div className="relative w-full h-full pointer-events-auto">
-              <SwipeApplySheet
-                jobId={currentJob.id}
-                jobTitle={currentJob.title}
-                companyName={currentJob.company_name}
-                job={currentJob}
-                open={showApply}
-                onClose={handleCloseApply}
-                onApplied={handleApplied}
-              />
-            </div>
+        {currentJob && (
+          <div className={`fixed inset-0 z-[10001] ${showApply ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+            <SwipeApplySheet
+              jobId={currentJob.id}
+              jobTitle={currentJob.title}
+              companyName={currentJob.company_name}
+              job={currentJob}
+              open={showApply}
+              onClose={handleCloseApply}
+              onApplied={handleApplied}
+            />
           </div>
         )}
 
