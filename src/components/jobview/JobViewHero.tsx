@@ -124,8 +124,9 @@ export const JobViewHero = memo(function JobViewHero({
       {/* Mobile badges — full set matching job cards */}
       <div className="mt-1.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
         {employmentType && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none text-white">
-            {getEmploymentTypeLabel(employmentType)}
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+            <Briefcase className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none">{getEmploymentTypeLabel(employmentType)}</span>
           </Badge>
         )}
         {salaryText && (
