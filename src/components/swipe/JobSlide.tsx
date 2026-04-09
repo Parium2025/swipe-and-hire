@@ -317,7 +317,7 @@ export const JobSlide = memo(function JobSlide({
     >
       {/* Card area with swipe */}
       <motion.div
-        className={`relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent] transition-opacity duration-300 ease-out ${fadeIn ? 'animate-[fadeSlideIn_0.32s_ease-out_both]' : ''}`}
+        className={`relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent] transition-opacity duration-300 ease-out ${fadeIn ? 'animate-[fadeSlideIn_0.5s_cubic-bezier(0.22,1,0.36,1)_both]' : ''}`}
         style={{
           x,
           rotate: cardRotate,
