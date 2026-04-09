@@ -79,10 +79,11 @@ export const JobSlide = memo(function JobSlide({
   const inputCapability = useInputCapability();
   const useTouchTunnel = inputCapability !== 'mouse';
   const x = useMotionValue(0);
+  const exitOpacity = useMotionValue(1);
   const likeOpacity = useTransform(x, [0, 60, 140], [0, 0.4, 1]);
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
-  const cardRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
-  const cardScale = useTransform(x, [-200, 0, 200], [0.97, 1, 0.97]);
+  const cardRotate = useTransform(x, [-200, 0, 200], [-8, 0, 8]);
+  const cardScale = useTransform(x, [-200, 0, 200], [0.96, 1, 0.96]);
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
@@ -138,18 +139,26 @@ export const JobSlide = memo(function JobSlide({
     }
 
     swipedRef.current = true;
+
+    // Premium exit: smooth spring with opacity fade
     animate(x, -EXIT_X, {
       type: 'spring',
-      stiffness: 500,
-      damping: 30,
+      stiffness: 260,
+      damping: 28,
+      mass: 0.8,
+    });
+    animate(exitOpacity, 0, {
+      duration: 0.35,
+      ease: [0.22, 1, 0.36, 1],
     });
 
     setTimeout(() => {
       onSwipeLeft();
       swipedRef.current = false;
       x.set(0);
-    }, 250);
-  }, [clearTapHint, onSwipeLeft, onSwipeRight, x]);
+      exitOpacity.set(1);
+    }, 420);
+  }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x]);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
     if (swipedRef.current) return;
@@ -332,9 +341,10 @@ export const JobSlide = memo(function JobSlide({
     >
       {/* Card area with swipe */}
       <motion.div
-        className={`relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent] transition-opacity duration-300 ease-out ${fadeIn ? 'animate-[fadeSlideIn_0.5s_cubic-bezier(0.22,1,0.36,1)_both]' : ''}`}
+        className={`relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent] ${fadeIn ? 'animate-[fadeSlideIn_0.5s_cubic-bezier(0.22,1,0.36,1)_both]' : ''}`}
         style={{
           x,
+          opacity: exitOpacity,
           rotate: cardRotate,
           scale: cardScale,
           touchAction: useTouchTunnel ? 'pan-y' : 'auto',
