@@ -262,16 +262,25 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
       const restored = getRestoredIndex();
       const safeIdx = Math.min(restored, jobs.length - 1);
       setCurrentIndex(safeIdx);
-      // Defer scroll until slides are rendered
       requestAnimationFrame(() => {
         const el = slideRefs.current[safeIdx];
         if (el && scrollRef.current) {
           scrollRef.current.scrollTo({ top: el.offsetTop, behavior: 'auto' });
         }
       });
-    } else if (hasRestoredRef.current) {
-      setCurrentIndex(0);
-      scrollRef.current?.scrollTo({ top: 0 });
+    } else if (hasRestoredRef.current && jobs.length > 0) {
+      // When a job is removed (skip/undo), clamp index to valid range
+      setCurrentIndex(prev => {
+        const clamped = Math.min(prev, jobs.length - 1);
+        // Snap to the correct slide position
+        requestAnimationFrame(() => {
+          const el = slideRefs.current[clamped];
+          if (el && scrollRef.current) {
+            scrollRef.current.scrollTo({ top: el.offsetTop, behavior: 'auto' });
+          }
+        });
+        return clamped;
+      });
     }
   }, [jobs.length, clearTimers, getRestoredIndex]);
 
@@ -327,16 +336,15 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   }, [currentJob, onRecordSwipeAction]);
 
   const handleSwipeLeft = useCallback(() => {
-    if (currentIndex >= jobs.length - 1) return;
     const skippedJob = jobs[currentIndex];
+    if (!skippedJob) return;
     
-    // Record skip action
-    if (skippedJob) onRecordSwipeAction?.(skippedJob.id, 'skipped');
-    
-    scrollToNext();
+    // Record skip action – the job will be removed from the array by the parent
+    // so the next job automatically slides into the current position
+    onRecordSwipeAction?.(skippedJob.id, 'skipped');
 
     // Show undo toast
-    if (skippedJob && onUndoSwipeAction) {
+    if (onUndoSwipeAction) {
       toast(`${skippedJob.title} skippat`, {
         action: {
           label: 'Ångra',
@@ -345,7 +353,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         duration: 4000,
       });
     }
-  }, [currentIndex, jobs, scrollToNext, onRecordSwipeAction, onUndoSwipeAction]);
+  }, [currentIndex, jobs, onRecordSwipeAction, onUndoSwipeAction]);
 
   const handleTap = useCallback(() => { setShowDetail(true); }, []);
 

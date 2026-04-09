@@ -367,10 +367,11 @@ const SearchJobs = memo(() => {
 
   const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
 
-  // Memoize swipe jobs to avoid re-mapping on every render
-  // Skipped jobs are placed at the end of the list
+  // Memoize swipe jobs – skipped jobs are completely removed from the stack
   const swipeJobs = useMemo(() => {
-    const mapped = filteredAndSortedJobs.map(job => ({
+    return filteredAndSortedJobs
+      .filter(job => !skippedJobIds.has(job.id))
+      .map(job => ({
       id: job.id,
       title: job.title,
       company_name: job.company_name,
@@ -397,11 +398,6 @@ const SearchJobs = memo(() => {
       benefits: job.benefits,
       company_logo_url: job.company_logo_url,
     }));
-    
-    // Sort: unskipped first, skipped last
-    const unskipped = mapped.filter(j => !skippedJobIds.has(j.id));
-    const skipped = mapped.filter(j => skippedJobIds.has(j.id));
-    return [...unskipped, ...skipped];
   }, [filteredAndSortedJobs, skippedJobIds]);
 
   // Find matching companies for smart search suggestion
