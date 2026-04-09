@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect, useRef, memo } from 'react';
+import { useState, useCallback, useEffect, useRef, memo, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
 import { SwipeApplySheet } from '@/components/swipe/SwipeApplySheet';
@@ -35,6 +36,9 @@ interface SwipeFullscreenProps {
   onToggleSave: (jobId: string) => void;
   onClose: () => void;
   filterState?: SwipeFilterState;
+  skippedJobIds?: Set<string>;
+  onRecordSwipeAction?: (jobId: string, action: 'skipped' | 'liked' | 'applied') => void;
+  onUndoSwipeAction?: (jobId: string) => void;
 }
 
 /* ── Timing constants ────────────────────────────────────── */
@@ -52,6 +56,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   onToggleSave,
   onClose,
   filterState,
+  skippedJobIds,
+  onRecordSwipeAction,
+  onUndoSwipeAction,
 }: SwipeFullscreenProps) {
   /* ── Refs ─────────────────────────────────────────────── */
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -314,12 +321,31 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     if (nextIdx < jobs.length) scrollToSlide(nextIdx);
   }, [currentIndex, jobs.length, scrollToSlide]);
 
-  const handleSwipeRight = useCallback(() => { setShowApply(true); }, []);
+  const handleSwipeRight = useCallback(() => {
+    if (currentJob) onRecordSwipeAction?.(currentJob.id, 'liked');
+    setShowApply(true);
+  }, [currentJob, onRecordSwipeAction]);
 
   const handleSwipeLeft = useCallback(() => {
     if (currentIndex >= jobs.length - 1) return;
+    const skippedJob = jobs[currentIndex];
+    
+    // Record skip action
+    if (skippedJob) onRecordSwipeAction?.(skippedJob.id, 'skipped');
+    
     scrollToNext();
-  }, [currentIndex, jobs.length, scrollToNext]);
+
+    // Show undo toast
+    if (skippedJob && onUndoSwipeAction) {
+      toast(`${skippedJob.title} skippat`, {
+        action: {
+          label: 'Ångra',
+          onClick: () => onUndoSwipeAction(skippedJob.id),
+        },
+        duration: 4000,
+      });
+    }
+  }, [currentIndex, jobs, scrollToNext, onRecordSwipeAction, onUndoSwipeAction]);
 
   const handleTap = useCallback(() => { setShowDetail(true); }, []);
 
@@ -331,10 +357,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const handleApplied = useCallback(() => {
     if (currentJob) {
       setLocalAppliedIds(prev => new Set(prev).add(currentJob.id));
+      onRecordSwipeAction?.(currentJob.id, 'applied');
     }
     setShowApply(false);
     // Stay on the card so user sees the "SÖKT" stamp
-  }, [currentJob]);
+  }, [currentJob, onRecordSwipeAction]);
 
   const handleCloseApply = useCallback(() => { setShowApply(false); }, []);
   const handleCloseDetail = useCallback(() => { setShowDetail(false); }, []);
@@ -438,6 +465,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 job={job}
                 applied={isApplied(job.id)}
                 saved={savedJobIds.has(job.id)}
+                skipped={skippedJobIds?.has(job.id) ?? false}
                 isVisible={Math.abs(idx - currentIndex) <= 1}
                 isLast={idx === jobs.length - 1}
                 sectionHeight={sectionHeight}

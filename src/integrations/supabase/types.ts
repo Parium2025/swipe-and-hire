@@ -2288,6 +2288,41 @@ export type Database = {
         }
         Relationships: []
       }
+      swipe_actions: {
+        Row: {
+          action: Database["public"]["Enums"]["swipe_action_type"]
+          created_at: string
+          id: string
+          job_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["swipe_action_type"]
+          created_at?: string
+          id?: string
+          job_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["swipe_action_type"]
+          created_at?: string
+          id?: string
+          job_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swipe_actions_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_data_consents: {
         Row: {
           consent_date: string | null
@@ -2759,6 +2794,7 @@ export type Database = {
         | "application_no_response_14d"
         | "interview_before"
         | "interview_after"
+      swipe_action_type: "skipped" | "liked" | "applied"
       user_role: "job_seeker" | "employer"
     }
     CompositeTypes: {
@@ -2898,6 +2934,7 @@ export const Constants = {
         "interview_before",
         "interview_after",
       ],
+      swipe_action_type: ["skipped", "liked", "applied"],
       user_role: ["job_seeker", "employer"],
     },
   },

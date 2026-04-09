@@ -20,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, Briefcase, Building } from 'lucide-react';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
+import { useSwipeActions } from '@/hooks/useSwipeActions';
 import { useIsMobile } from '@/hooks/use-mobile'; // kept for swipe mode layout
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
@@ -102,6 +103,7 @@ const SearchJobs = memo(() => {
   }, []);
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob, unsaveJob } = useSavedJobs();
+  const { skippedJobIds, recordAction: recordSwipeAction, undoAction: undoSwipeAction } = useSwipeActions();
   const { seedJobsFromSearch } = useJobPrefetchCache();
   
   const { savedSearches, saveSearch, deleteSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
@@ -366,33 +368,41 @@ const SearchJobs = memo(() => {
   const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
 
   // Memoize swipe jobs to avoid re-mapping on every render
-  const swipeJobs = useMemo(() => filteredAndSortedJobs.map(job => ({
-    id: job.id,
-    title: job.title,
-    company_name: job.company_name,
-    location: job.workplace_city || job.location,
-    employment_type: job.employment_type,
-    job_image_url: job.job_image_url,
-    image_focus_position: job.image_focus_position,
-    views_count: job.views_count,
-    applications_count: job.applications_count,
-    created_at: job.created_at,
-    expires_at: job.expires_at,
-    employer_id: job.employer_id,
-    description: job.description,
-    salary_min: job.salary_min,
-    salary_max: job.salary_max,
-    salary_type: job.salary_type,
-    occupation: job.occupation,
-    work_schedule: job.work_schedule,
-    remote_work_possible: job.remote_work_possible,
-    positions_count: job.positions_count,
-    workplace_name: job.workplace_name,
-    work_location_type: job.work_location_type,
-    salary_transparency: job.salary_transparency,
-    benefits: job.benefits,
-    company_logo_url: job.company_logo_url,
-  })), [filteredAndSortedJobs]);
+  // Skipped jobs are placed at the end of the list
+  const swipeJobs = useMemo(() => {
+    const mapped = filteredAndSortedJobs.map(job => ({
+      id: job.id,
+      title: job.title,
+      company_name: job.company_name,
+      location: job.workplace_city || job.location,
+      employment_type: job.employment_type,
+      job_image_url: job.job_image_url,
+      image_focus_position: job.image_focus_position,
+      views_count: job.views_count,
+      applications_count: job.applications_count,
+      created_at: job.created_at,
+      expires_at: job.expires_at,
+      employer_id: job.employer_id,
+      description: job.description,
+      salary_min: job.salary_min,
+      salary_max: job.salary_max,
+      salary_type: job.salary_type,
+      occupation: job.occupation,
+      work_schedule: job.work_schedule,
+      remote_work_possible: job.remote_work_possible,
+      positions_count: job.positions_count,
+      workplace_name: job.workplace_name,
+      work_location_type: job.work_location_type,
+      salary_transparency: job.salary_transparency,
+      benefits: job.benefits,
+      company_logo_url: job.company_logo_url,
+    }));
+    
+    // Sort: unskipped first, skipped last
+    const unskipped = mapped.filter(j => !skippedJobIds.has(j.id));
+    const skipped = mapped.filter(j => skippedJobIds.has(j.id));
+    return [...unskipped, ...skipped];
+  }, [filteredAndSortedJobs, skippedJobIds]);
 
   // Find matching companies for smart search suggestion
   // 🔥 CRITICAL: Använd debouncedSearch OCH kontrollera att det matchar searchInput
@@ -793,6 +803,9 @@ const SearchJobs = memo(() => {
           savedJobIds={new Set(Array.from(swipeJobs.map(j => j.id)).filter(id => isJobSaved(id)))}
           onToggleSave={toggleSaveJob}
           onClose={() => { setSwipeModeActive(false); try { sessionStorage.removeItem('parium-swipe-mode'); } catch {} }}
+          skippedJobIds={skippedJobIds}
+          onRecordSwipeAction={recordSwipeAction}
+          onUndoSwipeAction={undoSwipeAction}
           filterState={{
             searchInput,
             onSearchInputChange: setSearchInput,
