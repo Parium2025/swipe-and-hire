@@ -297,6 +297,19 @@ export const JobSlide = memo(function JobSlide({
     }
   }, [clearTapHint, x]);
 
+  // Track when card becomes active to trigger fade-in
+  const prevActiveRef = useRef(isActive);
+  const [fadeIn, setFadeIn] = useState(false);
+
+  useEffect(() => {
+    if (isActive && !prevActiveRef.current) {
+      setFadeIn(true);
+      const t = setTimeout(() => setFadeIn(false), 350);
+      return () => clearTimeout(t);
+    }
+    prevActiveRef.current = isActive;
+  }, [isActive]);
+
   return (
     <div
       className="h-full w-full flex flex-col px-3 pb-[calc(env(safe-area-inset-bottom,0px)+1.25rem)] pt-[calc(env(safe-area-inset-top,0px)+4.75rem)]"
