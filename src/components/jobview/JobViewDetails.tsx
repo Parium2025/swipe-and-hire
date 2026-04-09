@@ -112,8 +112,8 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
           </div>
         )}
         {(workStartTime || workEndTime) && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Arbetstid:</span>
+          <div className="flex items-center text-white text-sm">
+            <span className="shrink-0 w-[110px] inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5 text-white/70" />Arbetstid:</span>
             <span className="font-medium">{workStartTime} – {workEndTime}</span>
           </div>
         )}
