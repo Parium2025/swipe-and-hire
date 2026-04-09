@@ -302,7 +302,7 @@ export const JobSlide = memo(function JobSlide({
     // Single tap outside title → open job info directly
     lastTapTimestampRef.current = 0;
     onTap();
-  }, [armTapHint, clearTapHint, onTap, triggerSwipe, useTouchTunnel, x, showTapHint]);
+  }, [armTapHint, clearTapHint, onTap, triggerSwipe, useTouchTunnel, overlayOpen, x, showTapHint]);
 
   const handleTouchCancelCapture = useCallback(() => {
     clearTapHint();
