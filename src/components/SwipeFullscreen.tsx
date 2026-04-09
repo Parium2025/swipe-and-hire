@@ -262,16 +262,25 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
       const restored = getRestoredIndex();
       const safeIdx = Math.min(restored, jobs.length - 1);
       setCurrentIndex(safeIdx);
-      // Defer scroll until slides are rendered
       requestAnimationFrame(() => {
         const el = slideRefs.current[safeIdx];
         if (el && scrollRef.current) {
           scrollRef.current.scrollTo({ top: el.offsetTop, behavior: 'auto' });
         }
       });
-    } else if (hasRestoredRef.current) {
-      setCurrentIndex(0);
-      scrollRef.current?.scrollTo({ top: 0 });
+    } else if (hasRestoredRef.current && jobs.length > 0) {
+      // When a job is removed (skip/undo), clamp index to valid range
+      setCurrentIndex(prev => {
+        const clamped = Math.min(prev, jobs.length - 1);
+        // Snap to the correct slide position
+        requestAnimationFrame(() => {
+          const el = slideRefs.current[clamped];
+          if (el && scrollRef.current) {
+            scrollRef.current.scrollTo({ top: el.offsetTop, behavior: 'auto' });
+          }
+        });
+        return clamped;
+      });
     }
   }, [jobs.length, clearTimers, getRestoredIndex]);
 
