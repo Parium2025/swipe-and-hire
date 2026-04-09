@@ -22,6 +22,7 @@ interface JobSlideProps {
   saved: boolean;
   skipped?: boolean;
   isVisible: boolean;
+  isActive: boolean;
   isLast: boolean;
   sectionHeight?: string;
   overlayOpen?: boolean;
@@ -66,6 +67,7 @@ export const JobSlide = memo(function JobSlide({
   saved,
   skipped,
   isVisible,
+  isActive,
   isLast,
   sectionHeight,
   overlayOpen,
@@ -295,6 +297,19 @@ export const JobSlide = memo(function JobSlide({
     }
   }, [clearTapHint, x]);
 
+  // Track when card becomes active to trigger fade-in
+  const prevActiveRef = useRef(isActive);
+  const [fadeIn, setFadeIn] = useState(false);
+
+  useEffect(() => {
+    if (isActive && !prevActiveRef.current) {
+      setFadeIn(true);
+      const t = setTimeout(() => setFadeIn(false), 350);
+      return () => clearTimeout(t);
+    }
+    prevActiveRef.current = isActive;
+  }, [isActive]);
+
   return (
     <div
       className="h-full w-full flex flex-col px-3 pb-[calc(env(safe-area-inset-bottom,0px)+1.25rem)] pt-[calc(env(safe-area-inset-top,0px)+4.75rem)]"
@@ -302,7 +317,7 @@ export const JobSlide = memo(function JobSlide({
     >
       {/* Card area with swipe */}
       <motion.div
-        className="relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
+        className={`relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent] transition-opacity duration-300 ease-out ${fadeIn ? 'animate-[fadeSlideIn_0.32s_ease-out_both]' : ''}`}
         style={{
           x,
           rotate: cardRotate,

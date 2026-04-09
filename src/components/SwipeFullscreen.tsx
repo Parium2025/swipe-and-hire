@@ -475,6 +475,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 saved={savedJobIds.has(job.id)}
                 skipped={skippedJobIds?.has(job.id) ?? false}
                 isVisible={Math.abs(idx - currentIndex) <= 1}
+                isActive={idx === currentIndex}
                 isLast={idx === jobs.length - 1}
                 sectionHeight={sectionHeight}
                 overlayOpen={showDetail || showApply || showFilter}
