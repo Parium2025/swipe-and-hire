@@ -20,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, Briefcase, Building } from 'lucide-react';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
+import { useSwipeActions } from '@/hooks/useSwipeActions';
 import { useIsMobile } from '@/hooks/use-mobile'; // kept for swipe mode layout
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
