@@ -803,6 +803,9 @@ const SearchJobs = memo(() => {
           savedJobIds={new Set(Array.from(swipeJobs.map(j => j.id)).filter(id => isJobSaved(id)))}
           onToggleSave={toggleSaveJob}
           onClose={() => { setSwipeModeActive(false); try { sessionStorage.removeItem('parium-swipe-mode'); } catch {} }}
+          skippedJobIds={skippedJobIds}
+          onRecordSwipeAction={recordSwipeAction}
+          onUndoSwipeAction={undoSwipeAction}
           filterState={{
             searchInput,
             onSearchInputChange: setSearchInput,
