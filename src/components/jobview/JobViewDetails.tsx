@@ -139,8 +139,8 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
           </div>
         )}
         {!formatSalary(salaryMin, salaryMax, salaryType) && salaryTransparency && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Lön:</span>
+          <div className="flex items-center text-white text-sm">
+            <span className="shrink-0 w-[110px] inline-flex items-center gap-1"><Banknote className="h-3.5 w-3.5 text-white/70" />Lön:</span>
             <span className="font-medium">{getSalaryTransparencyLabel(salaryTransparency)}</span>
           </div>
         )}
