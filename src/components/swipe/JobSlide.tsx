@@ -175,8 +175,18 @@ export const JobSlide = memo(function JobSlide({
     animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
   }, [clearTapHint, triggerSwipe, x]);
 
+  // Track overlay close timing to prevent tap-through
+  const overlayClosedAtRef = useRef(0);
+  const prevOverlayOpenRef = useRef(overlayOpen);
+  useEffect(() => {
+    if (prevOverlayOpenRef.current && !overlayOpen) {
+      overlayClosedAtRef.current = Date.now();
+    }
+    prevOverlayOpenRef.current = overlayOpen;
+  }, [overlayOpen]);
+
   const handleTouchStartCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1 || isWithinTapHintTarget(event.target)) return;
+    if (!useTouchTunnel || swipedRef.current || overlayOpen || event.touches.length !== 1 || isWithinTapHintTarget(event.target)) return;
 
     const touch = event.touches[0];
     touchGestureRef.current = {
@@ -186,7 +196,7 @@ export const JobSlide = memo(function JobSlide({
       isDragging: false,
       cancelled: false,
     };
-  }, [useTouchTunnel]);
+  }, [useTouchTunnel, overlayOpen]);
 
   const handleTouchMoveCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1 || isWithinTapHintTarget(event.target)) return;
