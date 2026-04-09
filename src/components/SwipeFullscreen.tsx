@@ -355,7 +355,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     }
   }, [currentIndex, jobs, onRecordSwipeAction, onUndoSwipeAction]);
 
-  const handleTap = useCallback(() => { setShowDetail(true); }, []);
+  // Guard against tap-through: when an overlay closes, ignore taps briefly
+  const overlayCooldownRef = useRef(false);
+
+  const handleTap = useCallback(() => {
+    if (overlayCooldownRef.current) return;
+    setShowDetail(true);
+  }, []);
 
   const handleApplyFromDetail = useCallback(() => {
     setShowDetail(false);
@@ -371,10 +377,15 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     // Stay on the card so user sees the "SÖKT" stamp
   }, [currentJob, onRecordSwipeAction]);
 
-  const handleCloseApply = useCallback(() => { setShowApply(false); }, []);
-  const handleCloseDetail = useCallback(() => { setShowDetail(false); }, []);
+  const startOverlayCooldown = useCallback(() => {
+    overlayCooldownRef.current = true;
+    setTimeout(() => { overlayCooldownRef.current = false; }, 400);
+  }, []);
+
+  const handleCloseApply = useCallback(() => { setShowApply(false); startOverlayCooldown(); }, [startOverlayCooldown]);
+  const handleCloseDetail = useCallback(() => { setShowDetail(false); startOverlayCooldown(); }, [startOverlayCooldown]);
   const handleFilterOpen = useCallback(() => { setShowFilter(true); }, []);
-  const handleFilterClose = useCallback(() => { setShowFilter(false); }, []);
+  const handleFilterClose = useCallback(() => { setShowFilter(false); startOverlayCooldown(); }, [startOverlayCooldown]);
 
   // Stable ref setter
   const setSlideRef = useCallback((el: HTMLDivElement | null, idx: number) => {
