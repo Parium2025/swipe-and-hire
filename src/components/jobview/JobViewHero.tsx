@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Users, Building2, MapPin, Timer, Gift } from 'lucide-react';
+import { Users, Building2, MapPin, Timer, Gift, Briefcase, Banknote } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
@@ -124,13 +124,15 @@ export const JobViewHero = memo(function JobViewHero({
       {/* Mobile badges — full set matching job cards */}
       <div className="mt-1.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
         {employmentType && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none text-white">
-            {getEmploymentTypeLabel(employmentType)}
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+            <Briefcase className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none">{getEmploymentTypeLabel(employmentType)}</span>
           </Badge>
         )}
         {salaryText && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none text-white">
-            {salaryText}
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+            <Banknote className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none">{salaryText}</span>
           </Badge>
         )}
         {timeInfo && (

@@ -8,7 +8,7 @@ import {
   getSalaryTransparencyLabel,
 } from '@/lib/jobViewHelpers';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { Clock, Banknote, Briefcase } from 'lucide-react';
+import { Clock, Banknote } from 'lucide-react';
 
 interface JobViewDetailsProps {
   employmentType?: string;
@@ -49,8 +49,8 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
       <h2 className="text-section-title mb-3">Detaljer om tjänsten</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
         {employmentType && (
-          <div className="flex items-center text-white text-sm">
-            <span className="shrink-0 w-[110px] inline-flex items-center gap-1"><Briefcase className="h-3.5 w-3.5 text-white/70" />Anställning:</span>
+          <div className="flex text-white text-sm">
+            <span className="shrink-0 w-[110px]">Anställning:</span>
             <span className="font-medium">{getEmploymentTypeLabel(employmentType)}</span>
           </div>
         )}
