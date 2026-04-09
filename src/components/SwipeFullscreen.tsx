@@ -35,6 +35,9 @@ interface SwipeFullscreenProps {
   onToggleSave: (jobId: string) => void;
   onClose: () => void;
   filterState?: SwipeFilterState;
+  skippedJobIds?: Set<string>;
+  onRecordSwipeAction?: (jobId: string, action: 'skipped' | 'liked' | 'applied') => void;
+  onUndoSwipeAction?: (jobId: string) => void;
 }
 
 /* ── Timing constants ────────────────────────────────────── */
