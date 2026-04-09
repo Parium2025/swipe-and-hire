@@ -67,6 +67,7 @@ export const JobSlide = memo(function JobSlide({
   saved,
   skipped,
   isVisible,
+  isActive,
   isLast,
   sectionHeight,
   overlayOpen,
