@@ -179,9 +179,9 @@ export const JobViewHero = memo(function JobViewHero({
               <div className="w-20 h-20 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
                 <img src={companyLogoUrl!} alt={companyName} className="w-full h-full object-cover" draggable={false} />
               </div>
-              <Badge variant="glass" className="text-xs px-2.5 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[80%] overflow-hidden text-white">
-                <Building2 className="h-3.5 w-3.5 mr-1 flex-shrink-0 text-white" />
-                <span className="leading-none truncate font-medium text-white">{companyName}</span>
+              <Badge variant="glass" className="text-xs px-2.5 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[80%] overflow-hidden text-white [text-shadow:0_0_1px_rgba(255,255,255,0.6)]">
+                <Building2 className="h-3.5 w-3.5 mr-1 flex-shrink-0 text-white drop-shadow-[0_0_1px_rgba(255,255,255,0.5)]" />
+                <span className="leading-none truncate font-semibold text-white">{companyName}</span>
               </Badge>
             </>
           ) : (
