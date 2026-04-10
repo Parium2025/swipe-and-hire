@@ -539,7 +539,7 @@ export const JobSlide = memo(function JobSlide({
             opacity: exitOpacity,
             rotate: cardRotate,
             scale: combinedScale,
-            touchAction: useTouchTunnel ? 'pan-y' : 'auto',
+            touchAction: useTouchTunnel ? 'none' : 'auto',
           }}
           drag={useTouchTunnel ? false : 'x'}
           dragDirectionLock={!useTouchTunnel}
