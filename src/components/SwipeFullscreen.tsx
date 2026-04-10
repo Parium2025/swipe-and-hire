@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef, memo, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Undo2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
 import { SwipeApplySheet } from '@/components/swipe/SwipeApplySheet';
