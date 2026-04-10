@@ -401,6 +401,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const handleFilterOpen = useCallback(() => { setShowFilter(true); }, []);
   const handleFilterClose = useCallback(() => { setShowFilter(false); startOverlayCooldown(); }, [startOverlayCooldown]);
 
+  const handleUndo = useCallback(() => {
+    if (!lastSkippedJobId || !onUndoSwipeAction) return;
+    onUndoSwipeAction(lastSkippedJobId);
+    setLastSkippedJobId(null);
+  }, [lastSkippedJobId, onUndoSwipeAction]);
+
   // Stable ref setter
   const setSlideRef = useCallback((el: HTMLDivElement | null, idx: number) => {
     slideRefs.current[idx] = el;
