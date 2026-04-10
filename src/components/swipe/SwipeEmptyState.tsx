@@ -1,11 +1,13 @@
 import { memo } from 'react';
-import { X, SlidersHorizontal } from 'lucide-react';
+import { X, SlidersHorizontal, Undo2 } from 'lucide-react';
 
 interface SwipeEmptyStateProps {
   onClose: () => void;
   hasFilter: boolean;
   activeFilterCount: number;
   onFilterOpen: () => void;
+  canUndo?: boolean;
+  onUndo?: () => void;
 }
 
 export const SwipeEmptyState = memo(function SwipeEmptyState({
@@ -13,6 +15,8 @@ export const SwipeEmptyState = memo(function SwipeEmptyState({
   hasFilter,
   activeFilterCount,
   onFilterOpen,
+  canUndo,
+  onUndo,
 }: SwipeEmptyStateProps) {
   return (
     <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col">
@@ -45,10 +49,22 @@ export const SwipeEmptyState = memo(function SwipeEmptyState({
         </button>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6">
+      <div className="flex-1 flex flex-col items-center justify-center gap-5 p-6">
         <div className="bg-white/10 rounded-2xl px-8 py-5 border border-white/20">
           <p className="text-white text-base font-medium text-center">Inga jobb hittades</p>
         </div>
+
+        {canUndo && onUndo && (
+          <button
+            type="button"
+            onClick={onUndo}
+            data-swipe-action-button
+            className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+          >
+            <Undo2 className="w-4.5 h-4.5 text-white" />
+            <span className="text-sm text-white font-medium">Ångra</span>
+          </button>
+        )}
       </div>
     </div>
   );

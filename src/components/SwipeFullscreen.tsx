@@ -419,6 +419,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           hasFilter={!!filterState}
           activeFilterCount={filterState?.activeFilterCount ?? 0}
           onFilterOpen={handleFilterOpen}
+          canUndo={!!lastSkippedJobId && !!onUndoSwipeAction}
+          onUndo={handleUndo}
         />
         {filterState && (
           <SwipeFilterSheet
