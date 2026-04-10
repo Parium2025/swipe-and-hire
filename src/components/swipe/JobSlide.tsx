@@ -335,7 +335,6 @@ export const JobSlide = memo(function JobSlide({
 
   // Track when card becomes active to trigger fade-in
   const prevActiveRef = useRef(isActive);
-  const [fadeIn, setFadeIn] = useState(false);
 
   useEffect(() => {
     if (isActive && !prevActiveRef.current) {
