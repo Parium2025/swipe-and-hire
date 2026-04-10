@@ -100,8 +100,9 @@ export const JobSlide = memo(function JobSlide({
     const progress = (-latest - 6) / 150;
     return Math.max(0, Math.min(progress, 1));
   });
-  const underlayY = useTransform(leftSwipeProgress, [0, 1], [96, 0]);
-  const underlayScale = useTransform(leftSwipeProgress, [0, 1], [0.955, 1]);
+  // Underlay only reaches ~80% during drag — last 20px + scale handled by entry animation
+  const underlayY = useTransform(leftSwipeProgress, [0, 1], [96, 20]);
+  const underlayScale = useTransform(leftSwipeProgress, [0, 1], [0.94, 0.97]);
   const underlayOpacity = useTransform(leftSwipeProgress, [0, 0.16, 1], [0, 0.22, 1]);
   const underlayTextOpacity = useTransform(leftSwipeProgress, [0, 0.3, 1], [0, 0.5, 1]);
   const swipedRef = useRef(false);
