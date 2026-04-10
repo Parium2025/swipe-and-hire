@@ -387,6 +387,7 @@ export const JobSlide = memo(function JobSlide({
               opacity: underlayOpacity,
             }}
           >
+            {/* Background image */}
             <div className="absolute inset-0">
               {nextImageUrl ? (
                 <img
@@ -404,24 +405,45 @@ export const JobSlide = memo(function JobSlide({
               )}
             </div>
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20" />
+            {/* Gradient — matches active card exactly */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
 
+            {/* Category badge */}
             {nextJob.occupation && (
-              <motion.div className="absolute top-5 left-5 z-10" style={{ opacity: underlayTextOpacity }}>
+              <div className="absolute top-5 left-5 z-10">
                 <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md">
                   <span className="text-xs font-semibold tracking-wide text-white">{nextJob.occupation}</span>
                 </div>
-              </motion.div>
+              </div>
             )}
 
-            <motion.div
+            {/* Full content — identical to active card so nothing flashes on transition */}
+            <div
               className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center"
-              style={{
-                opacity: underlayTextOpacity,
-                textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.4)',
-              }}
+              style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.4)' }}
             >
               <div className="mx-auto w-full max-w-[21rem]">
+                {/* Company logo or initials — same logic as active card */}
+                {(!nextImageUrl || nextJob.company_logo_url) && nextJob.company_name && (
+                  <div className="flex justify-center mb-4">
+                    {nextJob.company_logo_url ? (
+                      <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg">
+                        <img
+                          src={resolveImageUrl(nextJob.company_logo_url, 'company-logos') || ''}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          draggable={false}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
+                        <span className="text-xl font-bold text-white/40 tracking-wide select-none">
+                          {nextJob.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
                 <p className="text-lg font-bold text-white">{nextJob.company_name}</p>
                 <h3 className="mt-1 line-clamp-2 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold leading-[1.08] tracking-tight text-white">
                   {nextJob.title}
@@ -429,8 +451,83 @@ export const JobSlide = memo(function JobSlide({
                 <p className="mt-2 truncate text-base font-semibold text-white">
                   {[nextJob.employment_type && getEmploymentTypeLabel(nextJob.employment_type), nextJob.location].filter(Boolean).join(' • ')}
                 </p>
+                {/* Badges — salary, date, benefits, applicants */}
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
+                  {(() => {
+                    let salaryText: string | null = null;
+                    const typeLabel = nextJob.salary_type === 'monthly' || nextJob.salary_type === 'fast' ? 'kr/mån'
+                      : nextJob.salary_type === 'hourly' || nextJob.salary_type === 'rorlig' ? 'kr/tim'
+                      : nextJob.salary_type === 'fast-rorlig' ? 'kr/mån' : 'kr/mån';
+                    if (nextJob.salary_transparency === 'after_interview') {
+                      salaryText = 'Lön efter intervju';
+                    } else if (nextJob.salary_min || nextJob.salary_max) {
+                      if (nextJob.salary_min && nextJob.salary_max) {
+                        salaryText = `${nextJob.salary_min.toLocaleString('sv-SE')} – ${nextJob.salary_max.toLocaleString('sv-SE')} ${typeLabel}`;
+                      } else {
+                        salaryText = `Från ${(nextJob.salary_min || nextJob.salary_max)!.toLocaleString('sv-SE')} ${typeLabel}`;
+                      }
+                    } else if (nextJob.salary_transparency && /^\d/.test(nextJob.salary_transparency)) {
+                      const match = nextJob.salary_transparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+                      if (match) {
+                        salaryText = `${parseInt(match[1], 10).toLocaleString('sv-SE')} – ${parseInt(match[2], 10).toLocaleString('sv-SE')} ${typeLabel}`;
+                      } else {
+                        salaryText = `${nextJob.salary_transparency} ${typeLabel}`;
+                      }
+                    }
+                    if (!salaryText) return null;
+                    return (
+                      <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15">
+                        <span className="text-white text-xs font-semibold">{salaryText}</span>
+                      </div>
+                    );
+                  })()}
+                  {(() => {
+                    const publishedDate = format(parseISO(nextJob.created_at), 'd MMM', { locale: sv });
+                    const daysLeft = nextJob.expires_at ? differenceInDays(parseISO(nextJob.expires_at), new Date()) : null;
+                    const parts: string[] = [`Publicerad ${publishedDate}`];
+                    if (daysLeft !== null && daysLeft >= 0) {
+                      parts.push(daysLeft === 0 ? 'Sista dagen' : `${daysLeft} dagar kvar`);
+                    }
+                    return (
+                      <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15">
+                        <span className="text-white text-xs font-semibold">{parts.join(' • ')}</span>
+                      </div>
+                    );
+                  })()}
+                  {nextJob.benefits && nextJob.benefits.length > 0 && (
+                    <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-1.5">
+                      <Gift className="w-3 h-3 text-white" />
+                      <span className="text-white text-xs font-semibold">
+                        Förmåner {nextJob.benefits.length <= 5 ? `${nextJob.benefits.length} st` : `${Math.floor(nextJob.benefits.length / 5) * 5}+`}
+                      </span>
+                    </div>
+                  )}
+                  {nextJob.applications_count > 0 && (
+                    <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-1.5">
+                      <Users className="w-3 h-3 text-white" />
+                      <span className="text-white text-xs font-semibold">
+                        {nextJob.applications_count} sökande
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </motion.div>
+            </div>
+
+            {/* Action buttons — visual ghost for seamless transition */}
+            <div className="absolute inset-x-0 bottom-4 z-10 px-5">
+              <div className="mt-4 flex items-center justify-center gap-5">
+                <div className="w-[52px] h-[52px] rounded-full bg-destructive/70 flex items-center justify-center shadow-lg">
+                  <X className="w-6 h-6 text-white/70" strokeWidth={2.5} />
+                </div>
+                <div className="w-[52px] h-[52px] rounded-full bg-secondary/70 border border-white/20 flex items-center justify-center shadow-lg">
+                  <Bookmark className="w-6 h-6 text-white/70" />
+                </div>
+                <div className="w-[52px] h-[52px] rounded-full bg-green-500/70 flex items-center justify-center shadow-lg">
+                  <Heart className="w-6 h-6 text-white/70 fill-white/70" />
+                </div>
+              </div>
+            </div>
           </motion.div>
         )}
 
@@ -525,12 +622,7 @@ export const JobSlide = memo(function JobSlide({
           <div className="mx-auto w-full max-w-[21rem]">
             {/* Company logo or initials fallback */}
             {(logoUrl || !imageUrl) && job.company_name && (
-              <motion.div
-                className="flex justify-center mb-4"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-              >
+              <div className="flex justify-center mb-4">
                 {logoUrl ? (
                   <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg">
                     <img
@@ -547,7 +639,7 @@ export const JobSlide = memo(function JobSlide({
                     </span>
                   </div>
                 )}
-              </motion.div>
+              </div>
             )}
             <p className="text-white font-bold text-lg">{job.company_name}</p>
             <h2
