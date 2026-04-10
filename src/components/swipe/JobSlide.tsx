@@ -66,6 +66,12 @@ function isWithinTapHintTarget(target: EventTarget | null): boolean {
   return target instanceof Element && Boolean(target.closest('[data-tap-hint-scroll]'));
 }
 
+function isWithinInteractiveTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(
+    target.closest('button, a, input, textarea, select, [role="button"], [data-swipe-action-button]'),
+  );
+}
+
 export const JobSlide = memo(function JobSlide({
   job,
   nextJob,
@@ -234,7 +240,14 @@ export const JobSlide = memo(function JobSlide({
   }, [overlayOpen]);
 
   const handleTouchStartCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (!useTouchTunnel || swipedRef.current || overlayOpen || event.touches.length !== 1 || isWithinTapHintTarget(event.target)) return;
+    if (
+      !useTouchTunnel ||
+      swipedRef.current ||
+      overlayOpen ||
+      event.touches.length !== 1 ||
+      isWithinTapHintTarget(event.target) ||
+      isWithinInteractiveTarget(event.target)
+    ) return;
 
     const touch = event.touches[0];
     touchGestureRef.current = {
@@ -247,7 +260,13 @@ export const JobSlide = memo(function JobSlide({
   }, [useTouchTunnel, overlayOpen]);
 
   const handleTouchMoveCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (!useTouchTunnel || swipedRef.current || event.touches.length !== 1 || isWithinTapHintTarget(event.target)) return;
+    if (
+      !useTouchTunnel ||
+      swipedRef.current ||
+      event.touches.length !== 1 ||
+      isWithinTapHintTarget(event.target) ||
+      isWithinInteractiveTarget(event.target)
+    ) return;
 
     const gesture = touchGestureRef.current;
     if (!gesture || gesture.cancelled) return;
@@ -281,7 +300,14 @@ export const JobSlide = memo(function JobSlide({
   }, [clearTapHint, useTouchTunnel, x]);
 
   const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (!useTouchTunnel || isWithinTapHintTarget(event.target)) return;
+    if (
+      !useTouchTunnel ||
+      isWithinTapHintTarget(event.target) ||
+      isWithinInteractiveTarget(event.target)
+    ) {
+      touchGestureRef.current = null;
+      return;
+    }
 
     // Reject if overlay is open or was very recently closed (prevents tap-through)
     if (overlayOpen || (Date.now() - overlayClosedAtRef.current < 500)) {
@@ -740,6 +766,7 @@ export const JobSlide = memo(function JobSlide({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); triggerSwipe('left'); }}
+              data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-destructive flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
               <X className="w-6 h-6 text-white" strokeWidth={2.5} />
@@ -747,6 +774,7 @@ export const JobSlide = memo(function JobSlide({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onSave(); }}
+              data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 active:scale-[0.93] transition-transform touch-manipulation"
             >
               <Bookmark className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`} />
@@ -754,6 +782,7 @@ export const JobSlide = memo(function JobSlide({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); triggerSwipe('right'); }}
+              data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-green-500 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
               <Heart className="w-6 h-6 text-white fill-white" />
@@ -762,6 +791,7 @@ export const JobSlide = memo(function JobSlide({
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onUndo(); }}
+                data-swipe-action-button
                 className="w-[44px] h-[44px] rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
               >
                 <Undo2 className="w-5 h-5 text-white" />
