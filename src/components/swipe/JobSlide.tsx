@@ -361,10 +361,10 @@ export const JobSlide = memo(function JobSlide({
         className="relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
         style={{
           x,
-          y: useTransform([y, entryY], ([dragY, eY]) => (dragY as number) + (eY as number)),
+          y: combinedY,
           opacity: exitOpacity,
           rotate: cardRotate,
-          scale: useTransform([cardScale, entryScale], ([cs, es]) => (cs as number) * (es as number)),
+          scale: combinedScale,
           touchAction: useTouchTunnel ? 'pan-y' : 'auto',
         }}
         drag={useTouchTunnel ? false : 'x'}
