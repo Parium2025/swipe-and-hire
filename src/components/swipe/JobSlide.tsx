@@ -100,11 +100,11 @@ export const JobSlide = memo(function JobSlide({
     const progress = (-latest - 6) / 150;
     return Math.max(0, Math.min(progress, 1));
   });
-   // Underlay stays hidden until 50% swipe, then reveals dramatically
-   const underlayY = useTransform(leftSwipeProgress, [0, 0.5, 1], [600, 600, 32]);
-   const underlayScale = useTransform(leftSwipeProgress, [0, 0.5, 1], [0.75, 0.75, 0.96]);
-   const underlayOpacity = useTransform(leftSwipeProgress, [0, 0.5, 0.7, 1], [0, 0, 0.4, 1]);
-  const underlayTextOpacity = useTransform(leftSwipeProgress, [0, 0.3, 1], [0, 0.5, 1]);
+  // Premium underlay: completely hidden until 65% swipe, then smooth cinematic rise
+  const underlayY = useTransform(leftSwipeProgress, [0, 0.65, 0.85, 1], [800, 800, 120, 32]);
+  const underlayScale = useTransform(leftSwipeProgress, [0, 0.65, 0.85, 1], [0.68, 0.68, 0.88, 0.96]);
+  const underlayOpacity = useTransform(leftSwipeProgress, [0, 0.65, 0.8, 1], [0, 0, 0.3, 1]);
+  const underlayTextOpacity = useTransform(leftSwipeProgress, [0, 0.75, 0.9, 1], [0, 0, 0.4, 1]);
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
@@ -361,10 +361,10 @@ export const JobSlide = memo(function JobSlide({
         entryY.set(0);
       } else {
         // Start from where underlay left off and pop into final place
-         entryScale.set(0.96);
-         entryY.set(32);
-        animate(entryScale, 1, { type: 'spring', stiffness: 380, damping: 28, mass: 0.55 });
-        animate(entryY, 0, { type: 'spring', stiffness: 400, damping: 30, mass: 0.6 });
+        entryScale.set(0.96);
+        entryY.set(32);
+        animate(entryScale, 1, { type: 'spring', stiffness: 320, damping: 24, mass: 0.6 });
+        animate(entryY, 0, { type: 'spring', stiffness: 340, damping: 26, mass: 0.65 });
       }
     }
     prevActiveRef.current = isActive;
