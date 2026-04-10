@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState, useMemo, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
-import { CheckCircle, X, Bookmark, Heart, Users, Gift } from 'lucide-react';
+import { CheckCircle, X, Bookmark, Heart, Users, Gift, Undo2 } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,10 +28,12 @@ interface JobSlideProps {
   sectionHeight?: string;
   overlayOpen?: boolean;
   skipEntryAnimation?: boolean;
+  canUndo?: boolean;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onSave: () => void;
   onTap: () => void;
+  onUndo?: () => void;
 }
 
 interface TouchGestureState {
@@ -76,10 +78,12 @@ export const JobSlide = memo(function JobSlide({
   sectionHeight,
   overlayOpen,
   skipEntryAnimation,
+  canUndo,
   onSwipeRight,
   onSwipeLeft,
   onSave,
   onTap,
+  onUndo,
 }: JobSlideProps) {
   const inputCapability = useInputCapability();
   const useTouchTunnel = inputCapability !== 'mouse';
@@ -732,7 +736,7 @@ export const JobSlide = memo(function JobSlide({
 
         {/* Action buttons */}
         <div className="absolute inset-x-0 bottom-4 z-10 px-5">
-          <div className="mt-4 flex items-center justify-center gap-5">
+          <div className="mt-4 flex items-center justify-center gap-4">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); triggerSwipe('left'); }}
@@ -754,6 +758,15 @@ export const JobSlide = memo(function JobSlide({
             >
               <Heart className="w-6 h-6 text-white fill-white" />
             </button>
+            {canUndo && onUndo && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onUndo(); }}
+                className="w-[44px] h-[44px] rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+              >
+                <Undo2 className="w-5 h-5 text-white" />
+              </button>
+            )}
           </div>
         </div>
         </motion.div>

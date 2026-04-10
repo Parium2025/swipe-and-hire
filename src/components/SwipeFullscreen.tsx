@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef, memo, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 import { JobSlide } from '@/components/swipe/JobSlide';
 import { SwipeJobDetail } from '@/components/swipe/SwipeJobDetail';
 import { SwipeApplySheet } from '@/components/swipe/SwipeApplySheet';
@@ -98,6 +97,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
   const [sectionHeight, setSectionHeight] = useState(END_STATE_HEIGHT);
   const [overlayInteractionShieldActive, setOverlayInteractionShieldActive] = useState(false);
+  const [lastSkippedJobId, setLastSkippedJobId] = useState<string | null>(null);
 
   /* ── Clear persisted index on unmount (reset on re-entry) ── */
   useEffect(() => {
@@ -351,20 +351,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     setSkipEntryAnimationForId(jobs[currentIndex + 1]?.id ?? null);
     
     // Record skip action – the job will be removed from the array by the parent
-    // so the next job automatically slides into the current position
     onRecordSwipeAction?.(skippedJob.id, 'skipped');
 
-    // Show undo toast
-    if (onUndoSwipeAction) {
-      toast(`${skippedJob.title} skippat`, {
-        action: {
-          label: 'Ångra',
-          onClick: () => onUndoSwipeAction(skippedJob.id),
-        },
-        duration: 4000,
-      });
-    }
-  }, [currentIndex, jobs, onRecordSwipeAction, onUndoSwipeAction]);
+    // Track last skipped job for undo button
+    setLastSkippedJobId(skippedJob.id);
+  }, [currentIndex, jobs, onRecordSwipeAction]);
 
   // Guard against tap-through: when an overlay closes, ignore taps briefly
   const overlayCooldownRef = useRef(false);
@@ -407,6 +398,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const handleCloseDetail = useCallback(() => { setShowDetail(false); startOverlayCooldown(); }, [startOverlayCooldown]);
   const handleFilterOpen = useCallback(() => { setShowFilter(true); }, []);
   const handleFilterClose = useCallback(() => { setShowFilter(false); startOverlayCooldown(); }, [startOverlayCooldown]);
+
+  const handleUndo = useCallback(() => {
+    if (!lastSkippedJobId || !onUndoSwipeAction) return;
+    onUndoSwipeAction(lastSkippedJobId);
+    setLastSkippedJobId(null);
+  }, [lastSkippedJobId, onUndoSwipeAction]);
 
   // Stable ref setter
   const setSlideRef = useCallback((el: HTMLDivElement | null, idx: number) => {
@@ -513,10 +510,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 sectionHeight={sectionHeight}
                 overlayOpen={showDetail || showApply || showFilter}
                 skipEntryAnimation={job.id === skipEntryAnimationForId}
+                canUndo={!!lastSkippedJobId && !!onUndoSwipeAction}
                 onSwipeRight={handleSwipeRight}
                 onSwipeLeft={handleSwipeLeft}
                 onSave={() => onToggleSave(job.id)}
                 onTap={handleTap}
+                onUndo={handleUndo}
               />
             </div>
           ))}
