@@ -361,10 +361,10 @@ export const JobSlide = memo(function JobSlide({
         entryY.set(0);
       } else {
         // Start from where underlay left off and pop into final place
-         entryScale.set(0.96);
-         entryY.set(32);
-        animate(entryScale, 1, { type: 'spring', stiffness: 380, damping: 28, mass: 0.55 });
-        animate(entryY, 0, { type: 'spring', stiffness: 400, damping: 30, mass: 0.6 });
+        entryScale.set(0.96);
+        entryY.set(32);
+        animate(entryScale, 1, { type: 'spring', stiffness: 320, damping: 24, mass: 0.6 });
+        animate(entryY, 0, { type: 'spring', stiffness: 340, damping: 26, mass: 0.65 });
       }
     }
     prevActiveRef.current = isActive;
