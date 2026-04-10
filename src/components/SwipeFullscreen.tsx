@@ -353,20 +353,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     setSkipEntryAnimationForId(jobs[currentIndex + 1]?.id ?? null);
     
     // Record skip action – the job will be removed from the array by the parent
-    // so the next job automatically slides into the current position
     onRecordSwipeAction?.(skippedJob.id, 'skipped');
 
-    // Show undo toast
-    if (onUndoSwipeAction) {
-      toast(`${skippedJob.title} skippat`, {
-        action: {
-          label: 'Ångra',
-          onClick: () => onUndoSwipeAction(skippedJob.id),
-        },
-        duration: 4000,
-      });
-    }
-  }, [currentIndex, jobs, onRecordSwipeAction, onUndoSwipeAction]);
+    // Track last skipped job for undo button
+    setLastSkippedJobId(skippedJob.id);
+  }, [currentIndex, jobs, onRecordSwipeAction]);
 
   // Guard against tap-through: when an overlay closes, ignore taps briefly
   const overlayCooldownRef = useRef(false);
