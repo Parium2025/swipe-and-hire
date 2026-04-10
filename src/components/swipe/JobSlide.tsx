@@ -96,11 +96,11 @@ export const JobSlide = memo(function JobSlide({
     const progress = (-latest - 6) / 150;
     return Math.max(0, Math.min(progress, 1));
   });
-  // Premium underlay: completely hidden until 65% swipe, then smooth cinematic rise
-  const underlayY = useTransform(leftSwipeProgress, [0, 0.65, 0.85, 1], [800, 800, 120, 32]);
-  const underlayScale = useTransform(leftSwipeProgress, [0, 0.65, 0.85, 1], [0.68, 0.68, 0.88, 0.96]);
-  const underlayOpacity = useTransform(leftSwipeProgress, [0, 0.65, 0.8, 1], [0, 0, 0.3, 1]);
-  const underlayTextOpacity = useTransform(leftSwipeProgress, [0, 0.75, 0.9, 1], [0, 0, 0.4, 1]);
+  // Premium underlay: completely hidden until 90% swipe, then quick cinematic reveal
+  const underlayY = useTransform(leftSwipeProgress, [0, 0.9, 1], [800, 800, 32]);
+  const underlayScale = useTransform(leftSwipeProgress, [0, 0.9, 1], [0.68, 0.68, 0.96]);
+  const underlayOpacity = useTransform(leftSwipeProgress, [0, 0.9, 0.95, 1], [0, 0, 0.3, 1]);
+  const underlayTextOpacity = useTransform(leftSwipeProgress, [0, 0.92, 1], [0, 0, 1]);
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
