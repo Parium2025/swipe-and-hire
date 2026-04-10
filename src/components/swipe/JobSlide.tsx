@@ -153,7 +153,7 @@ export const JobSlide = memo(function JobSlide({
 
     swipedRef.current = true;
 
-    // Premium exit: natural arc with opacity fade
+    // Premium exit: slide current card out
     animate(x, -EXIT_X, {
       type: 'spring',
       stiffness: 220,
@@ -165,13 +165,35 @@ export const JobSlide = memo(function JobSlide({
       ease: [0.22, 1, 0.36, 1],
     });
 
+    // Premium underlay reveal: slow, graceful rise from below
+    animate(underlayY, 0, {
+      type: 'spring',
+      stiffness: 120,
+      damping: 22,
+      mass: 1.2,
+    });
+    animate(underlayScale, 1, {
+      type: 'spring',
+      stiffness: 120,
+      damping: 22,
+      mass: 1.2,
+    });
+    animate(underlayOpacity, 1, {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1],
+    });
+
     setTimeout(() => {
       onSwipeLeft();
       swipedRef.current = false;
       x.set(0);
       exitOpacity.set(1);
-    }, 480);
-  }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x]);
+      // Reset underlay for next swipe
+      underlayY.set(800);
+      underlayScale.set(0.68);
+      underlayOpacity.set(0);
+    }, 600);
+  }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x, underlayY, underlayScale, underlayOpacity]);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
     if (swipedRef.current) return;
