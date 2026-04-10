@@ -165,13 +165,6 @@ export const JobSlide = memo(function JobSlide({
       damping: 26,
       mass: 0.85,
     });
-    // Subtle downward arc for a "tossed" feel
-    animate(y, 60, {
-      type: 'spring',
-      stiffness: 180,
-      damping: 22,
-      mass: 0.85,
-    });
     animate(exitOpacity, 0, {
       duration: 0.4,
       ease: [0.22, 1, 0.36, 1],
@@ -181,10 +174,9 @@ export const JobSlide = memo(function JobSlide({
       onSwipeLeft();
       swipedRef.current = false;
       x.set(0);
-      y.set(0);
       exitOpacity.set(1);
     }, 480);
-  }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x, y]);
+  }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x]);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
     if (swipedRef.current) return;
