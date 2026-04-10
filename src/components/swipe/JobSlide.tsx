@@ -339,12 +339,14 @@ export const JobSlide = memo(function JobSlide({
 
   useEffect(() => {
     if (isActive && !prevActiveRef.current) {
-      setFadeIn(true);
-      const t = setTimeout(() => setFadeIn(false), 520);
-      return () => clearTimeout(t);
+      // Animate entry: scale up from 0.92 and slide up from 40px
+      entryScale.set(0.92);
+      entryY.set(40);
+      animate(entryScale, 1, { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 });
+      animate(entryY, 0, { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 });
     }
     prevActiveRef.current = isActive;
-  }, [isActive]);
+  }, [isActive, entryScale, entryY]);
 
   return (
     <div
