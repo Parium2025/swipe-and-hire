@@ -354,13 +354,13 @@ export const JobSlide = memo(function JobSlide({
     >
       {/* Card area with swipe */}
       <motion.div
-        className={`relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent] ${fadeIn ? 'animate-[fadeSlideIn_0.55s_cubic-bezier(0.16,1,0.3,1)_both]' : ''}`}
+        className="relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
         style={{
           x,
-          y,
+          y: useTransform([y, entryY], ([dragY, eY]) => (dragY as number) + (eY as number)),
           opacity: exitOpacity,
           rotate: cardRotate,
-          scale: cardScale,
+          scale: useTransform([cardScale, entryScale], ([cs, es]) => (cs as number) * (es as number)),
           touchAction: useTouchTunnel ? 'pan-y' : 'auto',
         }}
         drag={useTouchTunnel ? false : 'x'}
