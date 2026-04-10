@@ -100,8 +100,9 @@ export const JobSlide = memo(function JobSlide({
     const progress = (-latest - 6) / 150;
     return Math.max(0, Math.min(progress, 1));
   });
-  const underlayY = useTransform(leftSwipeProgress, [0, 1], [96, 0]);
-  const underlayScale = useTransform(leftSwipeProgress, [0, 1], [0.955, 1]);
+  // Underlay only reaches ~80% during drag — last 20px + scale handled by entry animation
+  const underlayY = useTransform(leftSwipeProgress, [0, 1], [96, 20]);
+  const underlayScale = useTransform(leftSwipeProgress, [0, 1], [0.94, 0.97]);
   const underlayOpacity = useTransform(leftSwipeProgress, [0, 0.16, 1], [0, 0.22, 1]);
   const underlayTextOpacity = useTransform(leftSwipeProgress, [0, 0.3, 1], [0, 0.5, 1]);
   const swipedRef = useRef(false);
@@ -359,11 +360,11 @@ export const JobSlide = memo(function JobSlide({
         entryScale.set(1);
         entryY.set(0);
       } else {
-        // Animate entry: scale up from 0.92 and slide up from 40px
-        entryScale.set(0.92);
-        entryY.set(40);
-        animate(entryScale, 1, { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 });
-        animate(entryY, 0, { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 });
+        // Start from where underlay left off (y:20, scale:0.97) and pop into final place
+        entryScale.set(0.97);
+        entryY.set(20);
+        animate(entryScale, 1, { type: 'spring', stiffness: 400, damping: 30, mass: 0.6 });
+        animate(entryY, 0, { type: 'spring', stiffness: 400, damping: 30, mass: 0.6 });
       }
     }
     prevActiveRef.current = isActive;
