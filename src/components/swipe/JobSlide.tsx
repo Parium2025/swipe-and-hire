@@ -78,10 +78,12 @@ export const JobSlide = memo(function JobSlide({
   sectionHeight,
   overlayOpen,
   skipEntryAnimation,
+  canUndo,
   onSwipeRight,
   onSwipeLeft,
   onSave,
   onTap,
+  onUndo,
 }: JobSlideProps) {
   const inputCapability = useInputCapability();
   const useTouchTunnel = inputCapability !== 'mouse';
