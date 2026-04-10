@@ -519,7 +519,7 @@ export const JobSlide = memo(function JobSlide({
           className="relative h-full rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
           style={{
             x,
-            y: combinedY,
+            
             opacity: exitOpacity,
             rotate: cardRotate,
             scale: combinedScale,
