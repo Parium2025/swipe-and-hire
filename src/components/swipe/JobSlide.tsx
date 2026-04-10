@@ -18,6 +18,7 @@ function resolveImageUrl(url?: string, bucket = 'job-images'): string | null {
 
 interface JobSlideProps {
   job: SwipeJob;
+  nextJob?: SwipeJob;
   applied: boolean;
   saved: boolean;
   skipped?: boolean;
@@ -26,6 +27,7 @@ interface JobSlideProps {
   isLast: boolean;
   sectionHeight?: string;
   overlayOpen?: boolean;
+  skipEntryAnimation?: boolean;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onSave: () => void;
@@ -64,6 +66,7 @@ function isWithinTapHintTarget(target: EventTarget | null): boolean {
 
 export const JobSlide = memo(function JobSlide({
   job,
+  nextJob,
   applied,
   saved,
   skipped,
@@ -72,6 +75,7 @@ export const JobSlide = memo(function JobSlide({
   isLast,
   sectionHeight,
   overlayOpen,
+  skipEntryAnimation,
   onSwipeRight,
   onSwipeLeft,
   onSave,
@@ -92,6 +96,14 @@ export const JobSlide = memo(function JobSlide({
   const combinedScale = useTransform([cardScale, entryScale], ([cs, es]) => (cs as number) * (es as number));
   // Combine drag y with entry animation y
   const combinedY = useTransform([y, entryY], ([dragY, eY]) => (dragY as number) + (eY as number));
+  const leftSwipeProgress = useTransform(x, (latest) => {
+    const progress = (-latest - 6) / 150;
+    return Math.max(0, Math.min(progress, 1));
+  });
+  const underlayY = useTransform(leftSwipeProgress, [0, 1], [96, 0]);
+  const underlayScale = useTransform(leftSwipeProgress, [0, 1], [0.955, 1]);
+  const underlayOpacity = useTransform(leftSwipeProgress, [0, 0.16, 1], [0, 0.22, 1]);
+  const underlayTextOpacity = useTransform(leftSwipeProgress, [0, 0.3, 1], [0, 0.5, 1]);
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
@@ -99,6 +111,7 @@ export const JobSlide = memo(function JobSlide({
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   const imageUrl = resolveImageUrl(job.job_image_url);
+  const nextImageUrl = useMemo(() => resolveImageUrl(nextJob?.job_image_url), [nextJob?.job_image_url]);
   const rawLogoUrl = useMemo(() => resolveImageUrl(job.company_logo_url, 'company-logos'), [job.company_logo_url]);
   const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
   const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
@@ -342,14 +355,19 @@ export const JobSlide = memo(function JobSlide({
 
   useEffect(() => {
     if (isActive && !prevActiveRef.current) {
-      // Animate entry: scale up from 0.92 and slide up from 40px
-      entryScale.set(0.92);
-      entryY.set(40);
-      animate(entryScale, 1, { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 });
-      animate(entryY, 0, { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 });
+      if (skipEntryAnimation) {
+        entryScale.set(1);
+        entryY.set(0);
+      } else {
+        // Animate entry: scale up from 0.92 and slide up from 40px
+        entryScale.set(0.92);
+        entryY.set(40);
+        animate(entryScale, 1, { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 });
+        animate(entryY, 0, { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 });
+      }
     }
     prevActiveRef.current = isActive;
-  }, [isActive, entryScale, entryY]);
+  }, [entryScale, entryY, isActive, skipEntryAnimation]);
 
   return (
     <div
@@ -357,27 +375,85 @@ export const JobSlide = memo(function JobSlide({
       style={sectionHeight ? { height: sectionHeight } : undefined}
     >
       {/* Card area with swipe */}
-      <motion.div
-        className="relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
-        style={{
-          x,
-          y: combinedY,
-          opacity: exitOpacity,
-          rotate: cardRotate,
-          scale: combinedScale,
-          touchAction: useTouchTunnel ? 'pan-y' : 'auto',
-        }}
-        drag={useTouchTunnel ? false : 'x'}
-        dragDirectionLock={!useTouchTunnel}
-        dragConstraints={useTouchTunnel ? undefined : { left: 0, right: 0 }}
-        dragElastic={useTouchTunnel ? undefined : 0.7}
-        onDragEnd={useTouchTunnel ? undefined : handleDragEnd}
-        onTouchStartCapture={handleTouchStartCapture}
-        onTouchMoveCapture={handleTouchMoveCapture}
-        onTouchEndCapture={handleTouchEndCapture}
-        onTouchCancelCapture={handleTouchCancelCapture}
-        onDoubleClick={useTouchTunnel ? undefined : onTap}
-      >
+      <div className="relative min-h-0 flex-1">
+        {nextJob && isActive && !overlayOpen && (
+          <motion.div
+            aria-hidden="true"
+            className="absolute inset-0 overflow-hidden rounded-2xl border border-white/10 shadow-2xl pointer-events-none"
+            style={{
+              y: underlayY,
+              scale: underlayScale,
+              opacity: underlayOpacity,
+            }}
+          >
+            <div className="absolute inset-0">
+              {nextImageUrl ? (
+                <img
+                  src={nextImageUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  style={{
+                    objectPosition: getImageObjectPosition(nextJob.image_focus_position),
+                  }}
+                  loading="eager"
+                  draggable={false}
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]" />
+              )}
+            </div>
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20" />
+
+            {nextJob.occupation && (
+              <motion.div className="absolute top-5 left-5 z-10" style={{ opacity: underlayTextOpacity }}>
+                <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md">
+                  <span className="text-xs font-semibold tracking-wide text-white">{nextJob.occupation}</span>
+                </div>
+              </motion.div>
+            )}
+
+            <motion.div
+              className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center"
+              style={{
+                opacity: underlayTextOpacity,
+                textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.4)',
+              }}
+            >
+              <div className="mx-auto w-full max-w-[21rem]">
+                <p className="text-lg font-bold text-white">{nextJob.company_name}</p>
+                <h3 className="mt-1 line-clamp-2 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold leading-[1.08] tracking-tight text-white">
+                  {nextJob.title}
+                </h3>
+                <p className="mt-2 truncate text-base font-semibold text-white">
+                  {[nextJob.employment_type && getEmploymentTypeLabel(nextJob.employment_type), nextJob.location].filter(Boolean).join(' • ')}
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        <motion.div
+          className="relative h-full rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
+          style={{
+            x,
+            y: combinedY,
+            opacity: exitOpacity,
+            rotate: cardRotate,
+            scale: combinedScale,
+            touchAction: useTouchTunnel ? 'pan-y' : 'auto',
+          }}
+          drag={useTouchTunnel ? false : 'x'}
+          dragDirectionLock={!useTouchTunnel}
+          dragConstraints={useTouchTunnel ? undefined : { left: 0, right: 0 }}
+          dragElastic={useTouchTunnel ? undefined : 0.7}
+          onDragEnd={useTouchTunnel ? undefined : handleDragEnd}
+          onTouchStartCapture={handleTouchStartCapture}
+          onTouchMoveCapture={handleTouchMoveCapture}
+          onTouchEndCapture={handleTouchEndCapture}
+          onTouchCancelCapture={handleTouchCancelCapture}
+          onDoubleClick={useTouchTunnel ? undefined : onTap}
+        >
         {/* Background image */}
         <div className="absolute inset-0">
           {imageUrl ? (
@@ -591,7 +667,8 @@ export const JobSlide = memo(function JobSlide({
             </button>
           </div>
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
       {/* Scroll hint on last card */}
     </div>

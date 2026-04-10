@@ -92,6 +92,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [showApply, setShowApply] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [localAppliedIds, setLocalAppliedIds] = useState<Set<string>>(new Set());
+  const [skipEntryAnimationForId, setSkipEntryAnimationForId] = useState<string | null>(null);
   const [showEndBounce, setShowEndBounce] = useState(false);
   const [endStateVisible, setEndStateVisible] = useState(false);
   const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
@@ -319,6 +320,12 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   }, []);
 
   useEffect(() => {
+    if (skipEntryAnimationForId && currentJob?.id === skipEntryAnimationForId) {
+      setSkipEntryAnimationForId(null);
+    }
+  }, [currentJob?.id, skipEntryAnimationForId]);
+
+  useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (showDetail || showApply || showFilter) return;
       if (e.key === 'Escape') onClose();
@@ -341,6 +348,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const handleSwipeLeft = useCallback(() => {
     const skippedJob = jobs[currentIndex];
     if (!skippedJob) return;
+    setSkipEntryAnimationForId(jobs[currentIndex + 1]?.id ?? null);
     
     // Record skip action – the job will be removed from the array by the parent
     // so the next job automatically slides into the current position
@@ -495,6 +503,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
             >
               <JobSlide
                 job={job}
+                nextJob={idx === currentIndex ? jobs[idx + 1] : undefined}
                 applied={isApplied(job.id)}
                 saved={savedJobIds.has(job.id)}
                 skipped={skippedJobIds?.has(job.id) ?? false}
@@ -503,6 +512,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 isLast={idx === jobs.length - 1}
                 sectionHeight={sectionHeight}
                 overlayOpen={showDetail || showApply || showFilter}
+                skipEntryAnimation={job.id === skipEntryAnimationForId}
                 onSwipeRight={handleSwipeRight}
                 onSwipeLeft={handleSwipeLeft}
                 onSave={() => onToggleSave(job.id)}
