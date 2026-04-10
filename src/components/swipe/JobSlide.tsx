@@ -82,10 +82,16 @@ export const JobSlide = memo(function JobSlide({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
+  const entryScale = useMotionValue(1);
+  const entryY = useMotionValue(0);
   const likeOpacity = useTransform(x, [0, 60, 140], [0, 0.4, 1]);
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
   const cardRotate = useTransform(x, [-200, 0, 200], [-10, 0, 10]);
   const cardScale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
+  // Combine drag scale with entry animation scale
+  const combinedScale = useTransform([cardScale, entryScale], ([cs, es]) => (cs as number) * (es as number));
+  // Combine drag y with entry animation y
+  const combinedY = useTransform([y, entryY], ([dragY, eY]) => (dragY as number) + (eY as number));
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
@@ -333,16 +339,17 @@ export const JobSlide = memo(function JobSlide({
 
   // Track when card becomes active to trigger fade-in
   const prevActiveRef = useRef(isActive);
-  const [fadeIn, setFadeIn] = useState(false);
 
   useEffect(() => {
     if (isActive && !prevActiveRef.current) {
-      setFadeIn(true);
-      const t = setTimeout(() => setFadeIn(false), 520);
-      return () => clearTimeout(t);
+      // Animate entry: scale up from 0.92 and slide up from 40px
+      entryScale.set(0.92);
+      entryY.set(40);
+      animate(entryScale, 1, { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 });
+      animate(entryY, 0, { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 });
     }
     prevActiveRef.current = isActive;
-  }, [isActive]);
+  }, [isActive, entryScale, entryY]);
 
   return (
     <div
@@ -351,13 +358,13 @@ export const JobSlide = memo(function JobSlide({
     >
       {/* Card area with swipe */}
       <motion.div
-        className={`relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent] ${fadeIn ? 'animate-[fadeSlideIn_0.55s_cubic-bezier(0.16,1,0.3,1)_both]' : ''}`}
+        className="relative min-h-0 flex-1 rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
         style={{
           x,
-          y,
+          y: combinedY,
           opacity: exitOpacity,
           rotate: cardRotate,
-          scale: cardScale,
+          scale: combinedScale,
           touchAction: useTouchTunnel ? 'pan-y' : 'auto',
         }}
         drag={useTouchTunnel ? false : 'x'}
