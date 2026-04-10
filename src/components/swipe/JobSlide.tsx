@@ -622,12 +622,7 @@ export const JobSlide = memo(function JobSlide({
           <div className="mx-auto w-full max-w-[21rem]">
             {/* Company logo or initials fallback */}
             {(logoUrl || !imageUrl) && job.company_name && (
-              <motion.div
-                className="flex justify-center mb-4"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-              >
+              <div className="flex justify-center mb-4">
                 {logoUrl ? (
                   <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg">
                     <img
