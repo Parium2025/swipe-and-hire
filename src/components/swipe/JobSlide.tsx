@@ -88,6 +88,10 @@ export const JobSlide = memo(function JobSlide({
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
   const cardRotate = useTransform(x, [-200, 0, 200], [-10, 0, 10]);
   const cardScale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
+  // Combine drag scale with entry animation scale
+  const combinedScale = useTransform([cardScale, entryScale], ([cs, es]) => (cs as number) * (es as number));
+  // Combine drag y with entry animation y
+  const combinedY = useTransform([y, entryY], ([dragY, eY]) => (dragY as number) + (eY as number));
   const swipedRef = useRef(false);
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
