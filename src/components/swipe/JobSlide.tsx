@@ -84,18 +84,14 @@ export const JobSlide = memo(function JobSlide({
   const inputCapability = useInputCapability();
   const useTouchTunnel = inputCapability !== 'mouse';
   const x = useMotionValue(0);
-  const y = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
   const entryScale = useMotionValue(1);
-  const entryY = useMotionValue(0);
   const likeOpacity = useTransform(x, [0, 60, 140], [0, 0.4, 1]);
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
   const cardRotate = useTransform(x, [-200, 0, 200], [-10, 0, 10]);
   const cardScale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
   // Combine drag scale with entry animation scale
   const combinedScale = useTransform([cardScale, entryScale], ([cs, es]) => (cs as number) * (es as number));
-  // Combine drag y with entry animation y
-  const combinedY = useTransform([y, entryY], ([dragY, eY]) => (dragY as number) + (eY as number));
   const leftSwipeProgress = useTransform(x, (latest) => {
     const progress = (-latest - 6) / 150;
     return Math.max(0, Math.min(progress, 1));
