@@ -28,10 +28,12 @@ interface JobSlideProps {
   sectionHeight?: string;
   overlayOpen?: boolean;
   skipEntryAnimation?: boolean;
+  canUndo?: boolean;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onSave: () => void;
   onTap: () => void;
+  onUndo?: () => void;
 }
 
 interface TouchGestureState {
