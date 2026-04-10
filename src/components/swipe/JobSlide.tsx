@@ -639,7 +639,7 @@ export const JobSlide = memo(function JobSlide({
                     </span>
                   </div>
                 )}
-              </motion.div>
+              </div>
             )}
             <p className="text-white font-bold text-lg">{job.company_name}</p>
             <h2
