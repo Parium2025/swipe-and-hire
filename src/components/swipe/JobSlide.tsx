@@ -344,15 +344,10 @@ export const JobSlide = memo(function JobSlide({
 
   useEffect(() => {
     if (isActive && !prevActiveRef.current) {
-      if (skipEntryAnimation) {
-        entryScale.set(1);
-      } else {
-        entryScale.set(0.96);
-        animate(entryScale, 1, { type: 'spring', stiffness: 320, damping: 24, mass: 0.6 });
-      }
+      entryScale.set(1);
     }
     prevActiveRef.current = isActive;
-  }, [entryScale, isActive, skipEntryAnimation]);
+  }, [entryScale, isActive]);
 
   return (
     <div
