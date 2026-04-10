@@ -84,18 +84,14 @@ export const JobSlide = memo(function JobSlide({
   const inputCapability = useInputCapability();
   const useTouchTunnel = inputCapability !== 'mouse';
   const x = useMotionValue(0);
-  const y = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
   const entryScale = useMotionValue(1);
-  const entryY = useMotionValue(0);
   const likeOpacity = useTransform(x, [0, 60, 140], [0, 0.4, 1]);
   const nopeOpacity = useTransform(x, [-140, -60, 0], [1, 0.4, 0]);
   const cardRotate = useTransform(x, [-200, 0, 200], [-10, 0, 10]);
   const cardScale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
   // Combine drag scale with entry animation scale
   const combinedScale = useTransform([cardScale, entryScale], ([cs, es]) => (cs as number) * (es as number));
-  // Combine drag y with entry animation y
-  const combinedY = useTransform([y, entryY], ([dragY, eY]) => (dragY as number) + (eY as number));
   const leftSwipeProgress = useTransform(x, (latest) => {
     const progress = (-latest - 6) / 150;
     return Math.max(0, Math.min(progress, 1));
@@ -169,13 +165,6 @@ export const JobSlide = memo(function JobSlide({
       damping: 26,
       mass: 0.85,
     });
-    // Subtle downward arc for a "tossed" feel
-    animate(y, 60, {
-      type: 'spring',
-      stiffness: 180,
-      damping: 22,
-      mass: 0.85,
-    });
     animate(exitOpacity, 0, {
       duration: 0.4,
       ease: [0.22, 1, 0.36, 1],
@@ -185,10 +174,9 @@ export const JobSlide = memo(function JobSlide({
       onSwipeLeft();
       swipedRef.current = false;
       x.set(0);
-      y.set(0);
       exitOpacity.set(1);
     }, 480);
-  }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x, y]);
+  }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x]);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
     if (swipedRef.current) return;
@@ -358,17 +346,13 @@ export const JobSlide = memo(function JobSlide({
     if (isActive && !prevActiveRef.current) {
       if (skipEntryAnimation) {
         entryScale.set(1);
-        entryY.set(0);
       } else {
-        // Start from where underlay left off and pop into final place
         entryScale.set(0.96);
-        entryY.set(32);
         animate(entryScale, 1, { type: 'spring', stiffness: 320, damping: 24, mass: 0.6 });
-        animate(entryY, 0, { type: 'spring', stiffness: 340, damping: 26, mass: 0.65 });
       }
     }
     prevActiveRef.current = isActive;
-  }, [entryScale, entryY, isActive, skipEntryAnimation]);
+  }, [entryScale, isActive, skipEntryAnimation]);
 
   return (
     <div
@@ -535,7 +519,7 @@ export const JobSlide = memo(function JobSlide({
           className="relative h-full rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
           style={{
             x,
-            y: combinedY,
+            
             opacity: exitOpacity,
             rotate: cardRotate,
             scale: combinedScale,
