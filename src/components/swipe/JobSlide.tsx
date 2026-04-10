@@ -361,8 +361,8 @@ export const JobSlide = memo(function JobSlide({
         entryY.set(0);
       } else {
         // Start from where underlay left off and pop into final place
-        entryScale.set(0.96);
-        entryY.set(28);
+         entryScale.set(0.96);
+         entryY.set(32);
         animate(entryScale, 1, { type: 'spring', stiffness: 380, damping: 28, mass: 0.55 });
         animate(entryY, 0, { type: 'spring', stiffness: 400, damping: 30, mass: 0.6 });
       }
