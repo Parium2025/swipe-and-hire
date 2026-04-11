@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -176,7 +176,11 @@ const SavedJobs = () => {
   const queryClient = useQueryClient();
   const { unsaveJob } = useSavedJobs();
   const { undoAction } = useSwipeActions();
-  const [activeTab, setActiveTab] = useState<TabValue>('saved');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab: TabValue = (searchParams.get('tab') === 'skipped' ? 'skipped' : 'saved');
+  const setActiveTab = useCallback((tab: TabValue) => {
+    setSearchParams({ tab }, { replace: true });
+  }, [setSearchParams]);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
