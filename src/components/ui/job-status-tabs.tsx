@@ -42,8 +42,15 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
 
   useLayoutEffect(() => {
     updateIndicator();
+    // Ensure measurement after fonts/layout settle
+    const raf = requestAnimationFrame(updateIndicator);
+    const fallback = setTimeout(updateIndicator, 100);
     window.addEventListener('resize', updateIndicator);
-    return () => window.removeEventListener('resize', updateIndicator);
+    return () => {
+      window.removeEventListener('resize', updateIndicator);
+      cancelAnimationFrame(raf);
+      clearTimeout(fallback);
+    };
   }, [updateIndicator, activeCount, expiredCount, draftCount]);
 
   return (
