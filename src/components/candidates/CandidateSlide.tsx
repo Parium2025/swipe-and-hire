@@ -179,7 +179,7 @@ export const CandidateSlide = memo(function CandidateSlide({
               >
                 <div data-tab-content className="flex items-center justify-center gap-1 whitespace-nowrap w-fit mx-auto">
                   <Icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="leading-none">{tab.label}</span>
+                  <span className="leading-snug">{tab.label}</span>
                 </div>
               </button>
             );

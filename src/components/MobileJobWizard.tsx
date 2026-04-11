@@ -515,7 +515,7 @@ const MobileJobWizard = ({
     } else if (length <= 70) {
       return { fontSize: 'text-sm', lineHeight: 'leading-tight' };
     } else {
-      return { fontSize: 'text-sm', lineHeight: 'leading-none' };
+      return { fontSize: 'text-sm', lineHeight: 'leading-snug' };
     }
   };
   

@@ -130,7 +130,7 @@ export const CandidateCardContent = memo(function CandidateCardContent({
           </TooltipProvider>
           <StarRating rating={candidate.rating} />
           {(latestApplicationTime || lastActiveTime) && (
-            <div className="flex items-center gap-1.5 mt-0.5 max-w-full text-white text-[9px] leading-none">
+            <div className="flex items-center gap-1.5 mt-0.5 max-w-full text-white text-[9px] leading-snug">
               {latestApplicationTime && (
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
