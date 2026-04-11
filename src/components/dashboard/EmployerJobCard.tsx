@@ -182,11 +182,11 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-none text-white">Plats</span>
-            <span className="max-w-[56%] truncate text-right text-sm leading-none text-white font-medium">{job.location || '–'}</span>
+            <span className="max-w-[62%] truncate text-right text-sm leading-none text-white font-medium">{job.location || '–'}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-none text-white">Rekryterare</span>
-            <span className="max-w-[56%] truncate text-right text-sm leading-none text-white font-medium">{recruiterName || '–'}</span>
+            <span className="max-w-[62%] truncate text-right text-sm leading-none text-white font-medium">{recruiterName || '–'}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm leading-none text-white">Publicerad</span>
