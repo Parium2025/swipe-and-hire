@@ -87,24 +87,28 @@ export const SwipeDots = memo(function SwipeDots({
     touchStartPosRef.current = null;
     scrubStartYRef.current = null;
 
-    if (isScrubbingRef.current) {
-      setIsScrubbing(false);
-      isScrubbingRef.current = false;
-    }
+    // Always reset scrubbing state fully so next touch starts clean
+    setIsScrubbing(false);
+    isScrubbingRef.current = false;
   }, []);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
       if (count <= 1) return;
 
+      // Hard reset all state so every touch is treated as a fresh gesture
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
+      }
+      isScrubbingRef.current = false;
+      setIsScrubbing(false);
+      scrubStartYRef.current = null;
+
       const touch = e.touches[0];
       const startX = touch.clientX;
       const startY = touch.clientY;
       touchStartPosRef.current = { x: startX, y: startY };
-
-      if (longPressTimerRef.current) {
-        clearTimeout(longPressTimerRef.current);
-      }
 
       longPressTimerRef.current = setTimeout(() => {
         startScrub(startY);
