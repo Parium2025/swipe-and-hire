@@ -32,7 +32,7 @@ export const JobSeekerDashboardGrid = memo(() => {
   const mobileOrder = (
     <>
       <motion.div variants={cardVariants}><StatsCardWrapper /></motion.div>
-      <motion.div variants={cardVariants}><JobSeekerInterviewsCard /></motion.div>
+      <div><JobSeekerInterviewsCard /></div>
       <motion.div variants={cardVariants}><TipsCardWrapper /></motion.div>
       <motion.div variants={cardVariants}><JobSeekerNotesCard /></motion.div>
     </>
@@ -43,7 +43,7 @@ export const JobSeekerDashboardGrid = memo(() => {
       <motion.div variants={cardVariants}><TipsCardWrapper /></motion.div>
       <motion.div variants={cardVariants}><StatsCardWrapper /></motion.div>
       <motion.div variants={cardVariants}><JobSeekerNotesCard /></motion.div>
-      <motion.div variants={cardVariants}><JobSeekerInterviewsCard /></motion.div>
+      <div><JobSeekerInterviewsCard /></div>
     </>
   );
 
