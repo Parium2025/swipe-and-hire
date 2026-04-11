@@ -30,7 +30,6 @@ interface JobSlideProps {
   skipEntryAnimation?: boolean;
   isUndoEntry?: boolean;
   canUndo?: boolean;
-  onActivate?: () => void;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onSave: () => void;
@@ -57,9 +56,6 @@ const TAP_MAX_DURATION = 250;
 const TAP_MOVE_THRESHOLD = 18;
 const TAP_RESET_VELOCITY_THRESHOLD = 120;
 const TOUCH_DRAG_INTENT_THRESHOLD = 12;
-const LEFT_SWIPE_COMMIT_DELAY_MS = 280;
-const LEFT_SWIPE_FADE_DURATION_S = 0.26;
-const LEFT_SWIPE_UNDERLAY_DURATION_S = 0.3;
 function getImageObjectPosition(value?: string): string {
   if (!value || value === 'center') return 'center 50%';
   if (value === 'top') return 'center 20%';
@@ -91,7 +87,6 @@ export const JobSlide = memo(function JobSlide({
   skipEntryAnimation,
   isUndoEntry,
   canUndo,
-  onActivate,
   onSwipeRight,
   onSwipeLeft,
   onSave,
@@ -184,30 +179,30 @@ export const JobSlide = memo(function JobSlide({
     // Premium exit: slide current card out
     animate(x, -EXIT_X, {
       type: 'spring',
-      stiffness: 260,
-      damping: 28,
-      mass: 0.8,
+      stiffness: 220,
+      damping: 26,
+      mass: 0.85,
     });
     animate(exitOpacity, 0, {
-      duration: LEFT_SWIPE_FADE_DURATION_S,
+      duration: 0.4,
       ease: [0.22, 1, 0.36, 1],
     });
 
-    // Premium underlay reveal: preserved, but timed to finish sooner
+    // Premium underlay reveal: slow, graceful rise from below
     animate(underlayY, 0, {
       type: 'spring',
-      stiffness: 170,
-      damping: 24,
-      mass: 1,
+      stiffness: 120,
+      damping: 22,
+      mass: 1.2,
     });
     animate(underlayScale, 1, {
       type: 'spring',
-      stiffness: 170,
-      damping: 24,
-      mass: 1,
+      stiffness: 120,
+      damping: 22,
+      mass: 1.2,
     });
     animate(underlayOpacity, 1, {
-      duration: LEFT_SWIPE_UNDERLAY_DURATION_S,
+      duration: 0.6,
       ease: [0.22, 1, 0.36, 1],
     });
 
@@ -220,7 +215,7 @@ export const JobSlide = memo(function JobSlide({
       underlayY.set(800);
       underlayScale.set(0.68);
       underlayOpacity.set(0);
-    }, LEFT_SWIPE_COMMIT_DELAY_MS);
+    }, 600);
   }, [clearTapHint, exitOpacity, onSwipeLeft, onSwipeRight, x, underlayY, underlayScale, underlayOpacity]);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
@@ -267,9 +262,11 @@ export const JobSlide = memo(function JobSlide({
       isWithinInteractiveTarget(event.target)
     ) return;
 
-    const scrollContainer = event.currentTarget.closest('[data-swipe-scroll-container="true"]');
-    if (scrollContainer instanceof HTMLElement) {
-      scrollContainer.scrollTo({ top: scrollContainer.scrollTop, behavior: 'auto' });
+    // Kill any ongoing scroll momentum so the card "lands" immediately
+    // and the user can begin a horizontal swipe without waiting
+    const scrollParent = (event.currentTarget as HTMLElement).closest('[class*="overflow-y"]');
+    if (scrollParent) {
+      scrollParent.scrollTop = scrollParent.scrollTop;
     }
 
     const touch = event.touches[0];
@@ -311,7 +308,6 @@ export const JobSlide = memo(function JobSlide({
       }
 
       gesture.isDragging = true;
-      onActivate?.();
       lastTapTimestampRef.current = 0;
       clearTapHint();
     }
@@ -321,7 +317,7 @@ export const JobSlide = memo(function JobSlide({
     }
 
     x.set(deltaX);
-  }, [clearTapHint, onActivate, useTouchTunnel, x]);
+  }, [clearTapHint, useTouchTunnel, x]);
 
   const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (
