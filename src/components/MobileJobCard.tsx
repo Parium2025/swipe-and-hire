@@ -18,6 +18,8 @@ interface MobileJobCardProps {
   onDelete: (job: JobPosting) => void;
   onEditDraft?: (job: JobPosting) => void;
   onPrefetch?: (jobId: string) => void;
+  /** Card index in list — first 6 load eagerly, rest lazy */
+  cardIndex?: number;
 }
 
 const GRADIENTS = [
@@ -48,7 +50,7 @@ function getCompanyInitials(name: string): string {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
-export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, cardIndex = 0 }: MobileJobCardProps) => {
   const navigate = useNavigate();
   const isDraft = isEmployerJobDraft(job);
   const isExpired = isEmployerJobExpired(job);
@@ -147,7 +149,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                 if (v === 'bottom') return '80%';
                 return `${v}%`;
               })()}` }}
-              loading="eager"
+              loading={cardIndex < 6 ? 'eager' : 'lazy'}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>
