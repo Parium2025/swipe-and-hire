@@ -702,7 +702,7 @@ export default function ProfilePreview() {
               <CardHeader className="pb-1.5 pt-2">
                 <div className="flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                  <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
+                  <h3 className="text-xs font-semibold leading-snug tracking-tight text-white">
                     Personlig information
                   </h3>
                 </div>
@@ -754,7 +754,7 @@ export default function ProfilePreview() {
               <CardHeader className="pb-1.5 pt-2">
                 <div className="flex items-center gap-1.5">
                   <Briefcase className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                  <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
+                  <h3 className="text-xs font-semibold leading-snug tracking-tight text-white">
                     Anställningsinformation
                   </h3>
                 </div>
@@ -789,7 +789,7 @@ export default function ProfilePreview() {
             <div className="col-span-2 space-y-0.5">
               <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
                 <CardHeader className="pb-1.5 pt-2">
-                  <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
+                  <h3 className="text-xs font-semibold leading-snug tracking-tight text-white">
                     Presentation/Om mig
                   </h3>
                 </CardHeader>
@@ -810,7 +810,7 @@ export default function ProfilePreview() {
             <CardHeader className="pb-1.5 pt-2">
               <div className="flex items-center gap-1.5">
                 <FileText className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
+                <h3 className="text-xs font-semibold leading-snug tracking-tight text-white">
                   CV
                 </h3>
               </div>
