@@ -2894,9 +2894,56 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               <div className="font-medium">{formatPositionsCount()}</div>
                                             </div>
                                           </div>
-                                        )}
+                                         )}
 
-                                         <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                         {/* Lönetransparens */}
+                                         {formData.salary_transparency && formatSalaryTransparency() && (
+                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
+                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                               <Banknote className="h-2 w-2 mr-1 text-white flex-shrink-0" />
+                                               Lönetransparens
+                                             </h5>
+                                             <div className="text-xs text-white leading-relaxed break-words">
+                                               <div className="font-medium">{formatSalaryTransparency()}</div>
+                                             </div>
+                                           </div>
+                                         )}
+
+                                         {/* Arbetstider */}
+                                         {(formData.work_start_time || formData.work_end_time) && (
+                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
+                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                               <Clock className="h-2 w-2 mr-1 text-white flex-shrink-0" />
+                                               Arbetstider
+                                             </h5>
+                                             <div className="text-xs text-white leading-relaxed break-words">
+                                               <div className="font-medium">
+                                                 {formData.work_start_time && formData.work_end_time 
+                                                   ? `${formData.work_start_time} – ${formData.work_end_time}`
+                                                   : formData.work_start_time || formData.work_end_time}
+                                               </div>
+                                             </div>
+                                           </div>
+                                         )}
+
+                                         {/* Förmåner */}
+                                         {formData.benefits && formData.benefits.length > 0 && (
+                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
+                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                               <Heart className="h-2 w-2 mr-1 text-white flex-shrink-0" />
+                                               Förmåner
+                                             </h5>
+                                             <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                               {formData.benefits.map((benefit, idx) => (
+                                                 <div key={idx} className="flex items-start">
+                                                   <span className="flex-shrink-0 mr-1">•</span>
+                                                   <span className="break-words">{benefit}</span>
+                                                 </div>
+                                               ))}
+                                             </div>
+                                           </div>
+                                         )}
+
                                            <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                              <MapPin className="h-2 w-2 mr-1 text-white" />
                                               Bolagsnamn
