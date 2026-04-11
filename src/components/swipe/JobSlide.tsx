@@ -262,6 +262,13 @@ export const JobSlide = memo(function JobSlide({
       isWithinInteractiveTarget(event.target)
     ) return;
 
+    // Kill any ongoing scroll momentum so the card "lands" immediately
+    // and the user can begin a horizontal swipe without waiting
+    const scrollParent = (event.currentTarget as HTMLElement).closest('[class*="overflow-y"]');
+    if (scrollParent) {
+      scrollParent.scrollTop = scrollParent.scrollTop;
+    }
+
     const touch = event.touches[0];
     touchGestureRef.current = {
       startX: touch.clientX,
