@@ -402,7 +402,7 @@ const EmployerDashboard = memo(() => {
         ) : (
           <>
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-              {pageJobs.map((job) => (
+              {pageJobs.map((job, idx) => (
                 <CardErrorBoundary key={job.id}>
                   <MobileJobCard
                     job={job as JobPosting}
@@ -410,6 +410,7 @@ const EmployerDashboard = memo(() => {
                     onDelete={(j) => handleDeleteClick(j)}
                     onEditDraft={(j) => handleEditDraft(j)}
                     onPrefetch={(id) => prefetchJob(id)}
+                    cardIndex={idx}
                   />
                 </CardErrorBoundary>
               ))}
