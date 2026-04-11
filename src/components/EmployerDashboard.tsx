@@ -401,7 +401,7 @@ const EmployerDashboard = memo(() => {
           </div>
         ) : (
           <>
-            <div key={activeTab} className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {pageJobs.map((job) => (
                 <MobileJobCard
                   key={job.id}
@@ -453,7 +453,7 @@ const EmployerDashboard = memo(() => {
             ) : (
               <>
                 <div ref={listTopRef} />
-                    <div key={activeTab} className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+                    <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
                       {pageJobs.map((job) => {
                         const jobPosting = job as JobPosting;
                         const isExpired = isEmployerJobExpired(jobPosting);
