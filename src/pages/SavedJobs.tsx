@@ -175,7 +175,7 @@ const SavedJobs = () => {
   const { user, refreshSidebarCounts } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { unsaveJob } = useSavedJobs();
+  const { unsaveJob, isJobSaved, toggleSaveJob } = useSavedJobs();
   const { undoAction } = useSwipeActions();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab: TabValue = (searchParams.get('tab') === 'skipped' ? 'skipped' : 'saved');
@@ -495,6 +495,8 @@ const SavedJobs = () => {
                       }}
                       cardIndex={index}
                       hasApplied={appliedJobIds.has(job.id)}
+                      isSavedExternal={true}
+                      onToggleSave={toggleSaveJob}
                       onUnsaveClick={handleUnsaveClick}
                       onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
                     />
@@ -554,6 +556,8 @@ const SavedJobs = () => {
                       }}
                       cardIndex={index}
                       hasApplied={appliedJobIds.has(job.id)}
+                      isSavedExternal={isJobSaved(job.id)}
+                      onToggleSave={toggleSaveJob}
                       onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
                     />
                     {/* Restore button overlay */}
