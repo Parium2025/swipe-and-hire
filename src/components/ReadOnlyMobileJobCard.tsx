@@ -268,23 +268,23 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         {/* Only show company badge when there's a job image (otherwise it's already in the gradient) */}
         <div className="flex items-center justify-center gap-1.5 flex-wrap min-w-0">
           {(displayUrl || !logoUrl) && (
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[55%] overflow-hidden text-white">
+            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[55%] overflow-hidden text-white">
               <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
-              <span className="leading-none truncate font-medium">{companyName}</span>
+              <span className="leading-snug truncate font-medium">{companyName}</span>
             </Badge>
           )}
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center max-w-[42%] overflow-hidden text-white">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[42%] overflow-hidden text-white">
             <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-none truncate">{job.location}</span>
+            <span className="leading-snug truncate">{job.location}</span>
           </Badge>
         </div>
 
         {/* Tags row — badges restored, centered */}
         <div className="flex items-center justify-center gap-1.5 flex-wrap">
           {job.employment_type && (
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
               <Briefcase className="h-3 w-3 mr-1 flex-shrink-0" />
-              <span className="leading-none">{getEmploymentTypeLabel(job.employment_type)}</span>
+              <span className="leading-snug">{getEmploymentTypeLabel(job.employment_type)}</span>
             </Badge>
           )}
           {/* Salary badge */}
@@ -312,29 +312,29 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             }
             if (!salaryText) return null;
             return (
-              <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+              <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
                 <Banknote className="h-3 w-3 mr-1 flex-shrink-0" />
-                <span className="leading-none">{salaryText}</span>
+                <span className="leading-snug">{salaryText}</span>
               </Badge>
             );
           })()}
           {!(isExpired && statusBadge) && (
-            <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
+            <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
               <Timer className="h-3 w-3 mr-0.5 flex-shrink-0" />
-              <span className="leading-none">{isExpired ? 'Utgången' : `${timeText} kvar`}</span>
+              <span className="leading-snug">{isExpired ? 'Utgången' : `${timeText} kvar`}</span>
             </Badge>
           )}
           {job.benefits && job.benefits.length > 0 && (
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
               <Gift className="h-3 w-3 mr-0.5 flex-shrink-0" />
-              <span className="leading-none">
+              <span className="leading-snug">
                 Förmåner {job.benefits.length <= 5 ? `${job.benefits.length} st` : `${Math.floor(job.benefits.length / 5) * 5}+`}
               </span>
             </Badge>
           )}
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
             <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-none">{job.applications_count || 0} sökande</span>
+            <span className="leading-snug">{job.applications_count || 0} sökande</span>
           </Badge>
         </div>
         {footer && footer}
