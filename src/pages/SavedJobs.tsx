@@ -114,6 +114,11 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
         applications_count,
         views_count,
         positions_count,
+        salary_min,
+        salary_max,
+        salary_type,
+        salary_transparency,
+        benefits,
         profiles (
           company_name,
           company_logo_url,
@@ -151,6 +156,11 @@ const fetchSkippedJobs = async (userId: string): Promise<SkippedJob[]> => {
         applications_count,
         views_count,
         positions_count,
+        salary_min,
+        salary_max,
+        salary_type,
+        salary_transparency,
+        benefits,
         profiles (
           company_name,
           company_logo_url,
