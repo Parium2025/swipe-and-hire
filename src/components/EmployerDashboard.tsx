@@ -11,6 +11,7 @@ import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { MobileJobCard } from '@/components/MobileJobCard';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { formatDateShortSv } from '@/lib/date';
 import { getEmployerJobStatus, isEmployerJobActive, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import {
