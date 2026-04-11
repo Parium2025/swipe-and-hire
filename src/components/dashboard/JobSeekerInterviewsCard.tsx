@@ -151,7 +151,7 @@ export const JobSeekerInterviewsCard = memo(() => {
                         {getLocationLabel(interview.location_type)}
                       </span>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
