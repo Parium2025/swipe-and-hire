@@ -202,20 +202,20 @@ const SupportAdmin = () => {
       case 'in_progress':
         return <Clock className="h-4 w-4 text-blue-500" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Clock className="h-4 w-4 text-white/50" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'open':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-500/20 text-yellow-300';
       case 'closed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-500/20 text-green-300';
       case 'in_progress':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-500/20 text-blue-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-white/10 text-white/70';
     }
   };
 

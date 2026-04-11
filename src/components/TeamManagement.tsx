@@ -29,7 +29,7 @@ const ROLE_LABELS: Record<string, string> = {
 const ROLE_COLORS: Record<string, string> = {
   admin: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
   recruiter: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  viewer: 'bg-gray-500/20 text-gray-300 border-gray-500/30'
+  viewer: 'bg-white/10 text-white/70 border-white/20'
 };
 
 const TeamManagement = () => {
