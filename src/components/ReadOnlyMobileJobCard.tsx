@@ -113,12 +113,15 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
   // If not blob-cached yet, load in background
   const [loadedBlobUrl, setLoadedBlobUrl] = useState<string | null>(null);
+  // Fallback flag: if blob URL becomes invalid (iOS memory pressure), use raw URL
+  const [blobFailed, setBlobFailed] = useState(false);
 
   useEffect(() => {
     if (!resolvedUrl || cachedBlobUrl) {
       setLoadedBlobUrl(null);
       return;
     }
+    setBlobFailed(false);
     let cancelled = false;
     imageCache.loadImage(resolvedUrl)
       .then(blobUrl => { if (!cancelled) setLoadedBlobUrl(blobUrl); })
@@ -127,7 +130,20 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   }, [resolvedUrl, cachedBlobUrl]);
 
   // Priority: blob from cache (instant) → blob from load → raw URL
-  const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
+  // If blob failed (revoked by OS), skip blob entirely and use raw URL
+  const displayUrl = blobFailed ? resolvedUrl : (cachedBlobUrl || loadedBlobUrl || resolvedUrl);
+
+  // Handle image load errors (blob URL revocation on iOS)
+  const handleImageError = useMemo(() => {
+    return (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const src = e.currentTarget.src;
+      if (src.startsWith('blob:')) {
+        // Blob was revoked — evict from cache and fall back to raw URL
+        if (resolvedUrl) imageCache.evict(resolvedUrl);
+        setBlobFailed(true);
+      }
+    };
+  }, [resolvedUrl]);
 
   const companyName = job.company_name || job.employer_profile?.company_name || job.profiles?.company_name || 'Okänt företag';
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
