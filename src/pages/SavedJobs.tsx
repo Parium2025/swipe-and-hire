@@ -184,12 +184,14 @@ const SavedJobs = () => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
-  // Delayed fade-in
-  const [showContent, setShowContent] = useState(false);
+  // Delayed fade-in — skip when returning (data already cached)
+  const isReturning = useRef(savedJobs.length > 0 || skippedJobs.length > 0);
+  const [showContent, setShowContent] = useState(isReturning.current);
   useEffect(() => {
+    if (showContent) return;
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [showContent]);
 
   // Mouse-drag scrolling for sort chips
   const chipsRef = useRef<HTMLDivElement>(null);
@@ -234,6 +236,7 @@ const SavedJobs = () => {
     staleTime: 30_000,
     gcTime: Infinity,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   // Hämta användarens ansökningar för "Redan sökt"-badge
