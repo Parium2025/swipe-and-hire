@@ -114,10 +114,8 @@ export const JobSeekerInterviewsCard = memo(() => {
                   'Okänt företag';
                 
                 return (
-                  <motion.div
+                  <div
                     key={interview.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
                     className="bg-white/10 rounded-lg p-2 cursor-pointer hover:bg-white/15 transition-colors"
                     onClick={() => {
                       if (interview.location_type === 'video' && interview.location_details) {
@@ -153,7 +151,7 @@ export const JobSeekerInterviewsCard = memo(() => {
                         {getLocationLabel(interview.location_type)}
                       </span>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
