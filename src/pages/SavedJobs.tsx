@@ -184,9 +184,9 @@ const SavedJobs = () => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
-  // Delayed fade-in — skip when returning (data already cached)
-  const isReturning = useRef(savedJobs.length > 0 || skippedJobs.length > 0);
-  const [showContent, setShowContent] = useState(isReturning.current);
+  // Delayed fade-in — skip when returning (query cache already populated)
+  const hasCache = useRef(!!queryClient.getQueryData(['saved-jobs', user?.id]) || !!queryClient.getQueryData(['skipped-jobs', user?.id]));
+  const [showContent, setShowContent] = useState(hasCache.current);
   useEffect(() => {
     if (showContent) return;
     const timer = setTimeout(() => setShowContent(true), 100);
