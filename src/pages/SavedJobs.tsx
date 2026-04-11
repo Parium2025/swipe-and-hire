@@ -78,6 +78,7 @@ interface SkippedJob {
 }
 
 const SAVED_JOBS_CACHE_KEY = 'parium_saved_jobs_full_v2';
+const SAVED_JOBS_RETURN_NO_CARD_ANIMATION_KEY = 'parium-saved-jobs-return-no-card-animation';
 
 function loadSavedJobsCache(userId: string): SavedJob[] | undefined {
   try {
@@ -183,10 +184,19 @@ const SavedJobs = () => {
   }, [setSearchParams]);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
+  const [disableCardEntryAnimation, setDisableCardEntryAnimation] = useState(false);
 
   // Delayed fade-in — skip when returning (query cache already populated)
   const hasCache = useRef(!!queryClient.getQueryData(['saved-jobs', user?.id]) || !!queryClient.getQueryData(['skipped-jobs', user?.id]));
   const [showContent, setShowContent] = useState(hasCache.current);
+  useEffect(() => {
+    const shouldDisableCardAnimation = sessionStorage.getItem(SAVED_JOBS_RETURN_NO_CARD_ANIMATION_KEY) === 'true';
+    if (shouldDisableCardAnimation) {
+      setDisableCardEntryAnimation(true);
+      sessionStorage.removeItem(SAVED_JOBS_RETURN_NO_CARD_ANIMATION_KEY);
+    }
+  }, []);
+
   useEffect(() => {
     if (showContent) return;
     const timer = setTimeout(() => setShowContent(true), 100);
@@ -452,7 +462,7 @@ const SavedJobs = () => {
                 ))}
               </div>
 
-              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${disableCardEntryAnimation ? ' job-card-grid-no-entry' : ''}${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
                 {sortedJobs.map((savedJob) => {
                   const job = savedJob.job_postings!;
                   const companyName =
@@ -479,6 +489,7 @@ const SavedJobs = () => {
                       }}
                       hasApplied={appliedJobIds.has(job.id)}
                       onUnsaveClick={handleUnsaveClick}
+                      onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
                     />
                   );
                 })}
@@ -509,7 +520,7 @@ const SavedJobs = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${disableCardEntryAnimation ? ' job-card-grid-no-entry' : ''}${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {filteredSkippedJobs.map((skippedJob) => {
                 const job = skippedJob.job_postings!;
                 const companyName =
@@ -535,6 +546,7 @@ const SavedJobs = () => {
                         positions_count: job.positions_count || undefined,
                       }}
                       hasApplied={appliedJobIds.has(job.id)}
+                      onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
                     />
                     {/* Restore button overlay */}
                     <button
