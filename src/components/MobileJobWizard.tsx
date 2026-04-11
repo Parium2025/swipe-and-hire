@@ -37,6 +37,7 @@ import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Bu
 import { BenefitsList, BENEFIT_OPTIONS } from '@/components/wizard/BenefitsList';
 import { PreviewModeTabs } from '@/components/ui/preview-mode-tabs';
 import { Switch } from '@/components/ui/switch';
+import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePositioner';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
@@ -4700,6 +4701,15 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                             </button>
                           </div>
                         </div>
+
+                        {/* Drag-based focus position picker */}
+                        <div className="mt-3">
+                          <JobImagePositioner
+                            imageUrl={jobImageDisplayUrl}
+                            focusPercent={parseFocusPosition(formData.image_focus_position)}
+                            onFocusChange={(pct) => handleInputChange('image_focus_position', String(pct))}
+                          />
+                        </div>
                       </>
                     )}
                   </div>
@@ -4785,6 +4795,15 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                               <span>Ta bort bild</span>
                             </button>
                           </div>
+                        </div>
+
+                        {/* Drag-based focus position picker for desktop */}
+                        <div className="mt-3">
+                          <JobImagePositioner
+                            imageUrl={jobImageDesktopDisplayUrl}
+                            focusPercent={parseFocusPosition(formData.image_focus_position_desktop)}
+                            onFocusChange={(pct) => handleInputChange('image_focus_position_desktop', String(pct))}
+                          />
                         </div>
                       </>
                     )}
