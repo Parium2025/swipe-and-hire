@@ -196,8 +196,8 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-between cursor-pointer">
-                  <span className="text-sm leading-none text-white">Status</span>
-                  <span className={`text-sm leading-none font-medium ${isExpired ? 'text-red-300' : 'text-white'}`}>
+                  <span className="text-sm leading-snug text-white">Status</span>
+                  <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-300' : 'text-white'}`}>
                     {isExpired ? 'Utgången' : `${timeInfo.text} kvar`}
                   </span>
                 </div>
