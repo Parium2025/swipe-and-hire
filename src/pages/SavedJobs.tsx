@@ -336,7 +336,12 @@ const SavedJobs = () => {
   }, [savedJobs, sortBy]);
 
   const filteredSkippedJobs = useMemo(() => {
-    return skippedJobs.filter(sj => sj.job_postings !== null);
+    return skippedJobs.filter(sj => {
+      if (!sj.job_postings) return false;
+      if (!sj.job_postings.is_active) return false;
+      if (sj.job_postings.expires_at && new Date(sj.job_postings.expires_at) < new Date()) return false;
+      return true;
+    });
   }, [skippedJobs]);
 
   const showLoading = isLoading && !isFetched && savedJobs.length === 0;
