@@ -492,7 +492,7 @@ const JobApplication = () => {
                   className={`p-3 rounded-lg border text-sm font-medium transition-all ${
                     isSelected
                       ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-900'
+                      : 'bg-white/5 hover:bg-white/10 border-white/20 text-white'
                   }`}
                 >
                   {option}
@@ -546,7 +546,7 @@ const JobApplication = () => {
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl">Jobbet kunde inte hittas</h2>
         </div>
@@ -569,14 +569,14 @@ const JobApplication = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
-      <div className="bg-gray-800 text-white p-4 sticky top-0 z-10">
+      <div className="bg-white/5 backdrop-blur-sm text-white p-4 sticky top-0 z-10 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate('/dashboard')}
-              className="text-white hover:bg-gray-700"
+              className="text-white hover:bg-white/10"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
