@@ -215,7 +215,6 @@ const EmployerDashboard = memo(() => {
     }
   }, [page]);
 
-import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
   const handleDeleteClick = (job: JobPosting) => {
     setJobToDelete(job);
     setDeleteDialogOpen(true);

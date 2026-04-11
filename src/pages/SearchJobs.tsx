@@ -26,6 +26,7 @@ import { useTouchCapable } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { getTimeRemaining } from '@/lib/date'; // kept for swipe jobs mapping
 import { StatsGrid } from '@/components/StatsGrid';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
