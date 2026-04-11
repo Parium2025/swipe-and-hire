@@ -29,7 +29,7 @@ const ROLE_LABELS: Record<string, string> = {
 const ROLE_COLORS: Record<string, string> = {
   admin: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
   recruiter: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  viewer: 'bg-gray-500/20 text-gray-300 border-gray-500/30'
+  viewer: 'bg-white/10 text-white/70 border-white/20'
 };
 
 const TeamManagement = () => {
@@ -345,7 +345,7 @@ const TeamManagement = () => {
         <ul className="text-sm text-white space-y-1">
           <li><span className="text-amber-300">Admin</span> - Full åtkomst, kan hantera team och inställningar</li>
           <li><span className="text-blue-300">Rekryterare</span> - Kan skapa annonser och hantera kandidater</li>
-          <li><span className="text-gray-300">Läsare</span> - Kan endast se annonser och kandidater</li>
+          <li><span className="text-white/70">Läsare</span> - Kan endast se annonser och kandidater</li>
         </ul>
       </div>
     </div>
