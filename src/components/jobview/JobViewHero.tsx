@@ -108,13 +108,13 @@ export const JobViewHero = memo(function JobViewHero({
       {/* Mobile metadata — only show company badge when there's an image */}
       <div className="mt-3.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
         {(hasImage || !hasLogo) && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
             <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
             <span className="truncate font-medium">{companyName}</span>
           </Badge>
         )}
         {location && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
             <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
             <span className="truncate">{location}</span>
           </Badge>
@@ -124,34 +124,34 @@ export const JobViewHero = memo(function JobViewHero({
       {/* Mobile badges — full set matching job cards */}
       <div className="mt-1.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
         {employmentType && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
             <Briefcase className="h-3 w-3 mr-1 flex-shrink-0" />
-            <span className="leading-none">{getEmploymentTypeLabel(employmentType)}</span>
+            <span className="leading-snug">{getEmploymentTypeLabel(employmentType)}</span>
           </Badge>
         )}
         {salaryText && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
             <Banknote className="h-3 w-3 mr-1 flex-shrink-0" />
-            <span className="leading-none">{salaryText}</span>
+            <span className="leading-snug">{salaryText}</span>
           </Badge>
         )}
         {timeInfo && (
-          <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white ${timeInfo.isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
+          <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white ${timeInfo.isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
             <Timer className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-none">{timeInfo.isExpired ? 'Utgången' : `${timeInfo.text} kvar`}</span>
+            <span className="leading-snug">{timeInfo.isExpired ? 'Utgången' : `${timeInfo.text} kvar`}</span>
           </Badge>
         )}
         {benefits && benefits.length > 0 && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
             <Gift className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-none">
+            <span className="leading-snug">
               Förmåner {benefits.length <= 5 ? `${benefits.length} st` : `${Math.floor(benefits.length / 5) * 5}+`}
             </span>
           </Badge>
         )}
-        <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center text-white">
+        <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
           <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
-          <span className="leading-none">{positionsText}</span>
+          <span className="leading-snug">{positionsText}</span>
         </Badge>
       </div>
 
