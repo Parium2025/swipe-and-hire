@@ -3047,19 +3047,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                    </div>
                                                    
                                                     {/* Input förhandsvisning baserat på frågetyp */}
-                                                    {question.question_type === 'text' && (
-                                                       <textarea
-                                                         className="w-full min-h-0 border border-white/20 bg-white/10 rounded p-1 text-[8px] leading-tight text-white placeholder:text-[8px] placeholder:leading-tight placeholder:text-white/50 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto"
-                                                        placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                        rows={1}
-                                                        style={{ height: '20px' }}
-                                                        onInput={(e) => {
-                                                          const el = e.currentTarget;
-                                                          el.style.height = 'auto';
-                                                          el.style.height = Math.min(el.scrollHeight, 60) + 'px';
-                                                        }}
-                                                      />
-                                                    )}
+                                                     {question.question_type === 'text' && (
+                                                        <textarea
+                                                          className="w-full min-h-[34px] border border-white/20 bg-white/10 rounded px-1.5 py-1 text-[7px] leading-[1.2] text-white placeholder:text-[7px] placeholder:leading-[1.2] placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[96px] overflow-y-auto"
+                                                         placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                                         rows={2}
+                                                         style={{ height: '34px' }}
+                                                         onInput={(e) => {
+                                                           const el = e.currentTarget;
+                                                           el.style.height = 'auto';
+                                                           el.style.height = Math.min(el.scrollHeight, 96) + 'px';
+                                                         }}
+                                                       />
+                                                     )}
                                                   
                                                   {question.question_type === 'yes_no' && (
                                                     <div className="flex gap-1.5">
@@ -3586,15 +3586,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                      {/* Input förhandsvisning baserat på frågetyp */}
                                                      {question.question_type === 'text' && (
                                                         <textarea
-                                                          className="w-full min-h-0 border border-white/20 bg-white/10 rounded p-1 text-[8px] leading-tight text-white placeholder:text-[8px] placeholder:leading-tight placeholder:text-white/50 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto"
+                                                          className="w-full min-h-[34px] border border-white/20 bg-white/10 rounded px-1.5 py-1 text-[7px] leading-[1.2] text-white placeholder:text-[7px] placeholder:leading-[1.2] placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[96px] overflow-y-auto"
                                                           placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                          rows={1}
-                                                          style={{ height: '20px' }}
+                                                          rows={2}
+                                                          style={{ height: '34px' }}
                                                           value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
                                                           onChange={(e) => {
                                                             const el = e.target;
                                                             el.style.height = 'auto';
-                                                            el.style.height = Math.min(el.scrollHeight, 60) + 'px';
+                                                            el.style.height = Math.min(el.scrollHeight, 96) + 'px';
                                                             setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: el.value }));
                                                           }}
                                                         />
