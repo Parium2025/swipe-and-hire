@@ -210,7 +210,7 @@ export const JobViewHero = memo(function JobViewHero({
             </div>
           )}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute inset-0 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />" />
         {overlayContent}
       </div>
     );
@@ -225,7 +225,7 @@ export const JobViewHero = memo(function JobViewHero({
         loading="eager"
         fetchPriority="high"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+      <div className="absolute inset-0 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />" />
       {overlayContent}
     </div>
   );
