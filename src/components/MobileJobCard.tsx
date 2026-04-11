@@ -113,13 +113,24 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   }, [job.employer_profile?.company_logo_url]);
   const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
   const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
+  const [logoBlobFailed, setLogoBlobFailed] = useState(false);
   useEffect(() => {
     if (!rawLogoUrl || cachedLogoBlob) { setLoadedLogoBlob(null); return; }
+    setLogoBlobFailed(false);
     let cancelled = false;
     imageCache.loadImage(rawLogoUrl).then(b => { if (!cancelled) setLoadedLogoBlob(b); }).catch(() => {});
     return () => { cancelled = true; };
   }, [rawLogoUrl, cachedLogoBlob]);
-  const logoUrl = cachedLogoBlob || loadedLogoBlob || rawLogoUrl;
+  const logoUrl = logoBlobFailed ? rawLogoUrl : (cachedLogoBlob || loadedLogoBlob || rawLogoUrl);
+
+  const handleLogoError = useMemo(() => {
+    return (e: React.SyntheticEvent<HTMLImageElement>) => {
+      if (e.currentTarget.src.startsWith('blob:')) {
+        if (rawLogoUrl) imageCache.evict(rawLogoUrl);
+        setLogoBlobFailed(true);
+      }
+    };
+  }, [rawLogoUrl]);
 
   const handleCardClick = () => {
     if (isDraft && onEditDraft) {
@@ -172,7 +183,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
             {logoUrl ? (
               <>
                 <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                  <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} />
+                  <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} />
                 </div>
                 <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] overflow-hidden">
                   <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
