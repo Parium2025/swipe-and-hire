@@ -398,6 +398,24 @@ export const JobSlide = memo(function JobSlide({
     prevActiveRef.current = isActive;
   }, [entryScale, isActive]);
 
+  // Undo entry: slide card back from the left with a premium spring
+  useEffect(() => {
+    if (isUndoEntry && isActive) {
+      x.set(-400);
+      exitOpacity.set(0.3);
+      animate(x, 0, {
+        type: 'spring',
+        stiffness: 180,
+        damping: 24,
+        mass: 0.9,
+      });
+      animate(exitOpacity, 1, {
+        duration: 0.35,
+        ease: [0.22, 1, 0.36, 1],
+      });
+    }
+  }, [isUndoEntry, isActive, x, exitOpacity]);
+
   return (
     <div
       className="h-full w-full flex flex-col px-3 pb-[calc(env(safe-area-inset-bottom,0px)+1.25rem)] pt-[calc(env(safe-area-inset-top,0px)+4.75rem)]"
