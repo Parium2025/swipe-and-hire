@@ -3049,14 +3049,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     {/* Input förhandsvisning baserat på frågetyp */}
                                                      {question.question_type === 'text' && (
                                                         <textarea
-                                                          className="w-full min-h-[34px] border border-white/20 bg-white/10 rounded px-1.5 py-1 text-[7px] leading-[1.2] text-white placeholder:text-[7px] placeholder:leading-[1.2] placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[96px] overflow-y-auto"
+                                                          className="w-full min-h-[40px] md:min-h-[46px] lg:min-h-[50px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-[7px] md:text-[6px] lg:text-[5px] leading-[1.15] text-white placeholder:text-[7px] md:placeholder:text-[6px] lg:placeholder:text-[5px] placeholder:leading-[1.15] placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[120px] overflow-y-auto"
                                                          placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                          rows={2}
-                                                         style={{ height: '34px' }}
                                                          onInput={(e) => {
                                                            const el = e.currentTarget;
                                                            el.style.height = 'auto';
-                                                           el.style.height = Math.min(el.scrollHeight, 96) + 'px';
+                                                           el.style.height = Math.min(el.scrollHeight, 120) + 'px';
                                                          }}
                                                        />
                                                      )}
@@ -3586,15 +3585,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                      {/* Input förhandsvisning baserat på frågetyp */}
                                                      {question.question_type === 'text' && (
                                                         <textarea
-                                                          className="w-full min-h-[34px] border border-white/20 bg-white/10 rounded px-1.5 py-1 text-[7px] leading-[1.2] text-white placeholder:text-[7px] placeholder:leading-[1.2] placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[96px] overflow-y-auto"
+                                                          className="w-full min-h-[40px] md:min-h-[46px] lg:min-h-[50px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-[7px] md:text-[6px] lg:text-[5px] leading-[1.15] text-white placeholder:text-[7px] md:placeholder:text-[6px] lg:placeholder:text-[5px] placeholder:leading-[1.15] placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[120px] overflow-y-auto"
                                                           placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                           rows={2}
-                                                          style={{ height: '34px' }}
                                                           value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
                                                           onChange={(e) => {
                                                             const el = e.target;
                                                             el.style.height = 'auto';
-                                                            el.style.height = Math.min(el.scrollHeight, 96) + 'px';
+                                                            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
                                                             setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: el.value }));
                                                           }}
                                                         />
