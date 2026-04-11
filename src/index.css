@@ -898,6 +898,12 @@ All colors MUST be HSL.
   .job-card-grid .job-card-mobile-shell {
     animation: jobCardFadeIn 0.35s ease-out both;
   }
+  /* Saved/Skipped uses only page fade-in, never per-card animation */
+  .saved-jobs-grid-stable .job-card-mobile-shell {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
   /* When returning from job detail: no card animation at all — instant render, no shake */
   .job-card-grid.job-card-grid-no-entry .job-card-mobile-shell {
     animation: none !important;
