@@ -155,13 +155,26 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     container.scrollTo({ top: targetTop, behavior: 'smooth' });
   }, [getSlideScrollTop]);
 
-  /** Scrubber: instant jump (no smooth scroll) for fast drag navigation */
+  /** Scrubber: truly instant jump — bypass smooth scroll + snap settling */
   const handleScrubTo = useCallback((index: number) => {
     const container = scrollRef.current;
     const targetEl = slideRefs.current[index];
     if (!container || !targetEl) return;
+
+    const previousScrollBehavior = container.style.scrollBehavior;
+    const previousScrollSnapType = container.style.scrollSnapType;
+
+    container.style.scrollBehavior = 'auto';
+    container.style.scrollSnapType = 'none';
     container.scrollTo({ top: targetEl.offsetTop, behavior: 'auto' });
     setCurrentIndex(index);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        container.style.scrollBehavior = previousScrollBehavior;
+        container.style.scrollSnapType = previousScrollSnapType;
+      });
+    });
   }, []);
 
   /* ── End-of-stack bounce ──────────────────────────────── */
