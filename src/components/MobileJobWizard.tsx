@@ -3550,8 +3550,8 @@ const MobileJobWizard = ({
                           
                            {/* Form container (toggle) */}
                            <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
-                             <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
-                               <div className="text-xs font-bold text-white">Ansökningsformulär</div>
+                             <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem] gap-1">
+                               <div className="text-[10px] font-bold text-white truncate min-w-0">Ansökan</div>
                                <div className="relative">
                                  {showCompanyTooltip && isScrolledTop && (
                                    <div className="pointer-events-none absolute z-[999] top-0 -right-28 flex items-center gap-1">
