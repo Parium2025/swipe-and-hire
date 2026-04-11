@@ -11,7 +11,7 @@ const MAX_VISIBLE = 9;
 const EDGE_FADE = 2;
 const LONG_PRESS_MS = 160;
 const DRAG_ACTIVATION_PX = 8;
-const GESTURE_CANCEL_PX = 14;
+const GESTURE_CANCEL_PX = 30;
 const SCRUB_STEP_PX = 32;
 
 const formatCounterValue = (value: number) => new Intl.NumberFormat('sv-SE').format(value);
