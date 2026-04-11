@@ -318,6 +318,8 @@ const MobileJobWizard = ({
           pitch: existingJob.pitch || '',
           job_image_url: existingJob.job_image_url || '',
           job_image_desktop_url: existingJob.job_image_desktop_url || '',
+          image_focus_position: (existingJob as any).image_focus_position || 'center',
+          image_focus_position_desktop: (existingJob as any).image_focus_position_desktop || 'center',
           location: existingJob.location || '',
         };
 
@@ -397,6 +399,8 @@ const MobileJobWizard = ({
           location: selectedTemplate.location || '',
           job_image_url: '',
           job_image_desktop_url: '',
+          image_focus_position: 'center',
+          image_focus_position_desktop: 'center',
           work_start_time: '',
           work_end_time: '',
         };
@@ -451,6 +455,8 @@ const MobileJobWizard = ({
           location: '',
           job_image_url: '',
           job_image_desktop_url: '',
+          image_focus_position: 'center',
+          image_focus_position_desktop: 'center',
           work_start_time: '',
           work_end_time: '',
         };
@@ -787,7 +793,9 @@ const MobileJobWizard = ({
     application_instructions: '',
     pitch: '',
     job_image_url: '',
-    job_image_desktop_url: ''
+    job_image_desktop_url: '',
+    image_focus_position: 'center',
+    image_focus_position_desktop: 'center'
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
@@ -2065,7 +2073,9 @@ const MobileJobWizard = ({
       application_instructions: '',
       pitch: '',
       job_image_url: '',
-      job_image_desktop_url: ''
+      job_image_desktop_url: '',
+      image_focus_position: 'center',
+      image_focus_position_desktop: 'center'
     });
     setCustomQuestions([]);
     setInitialCustomQuestions([]);
