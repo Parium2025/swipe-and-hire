@@ -3046,14 +3046,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                      </label>
                                                    </div>
                                                    
-                                                   {/* Input förhandsvisning baserat på frågetyp */}
-                                                   {question.question_type === 'text' && (
-                                                      <textarea
-                                                        className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white resize-none"
-                                                       placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                       rows={1}
-                                                     />
-                                                   )}
+                                                    {/* Input förhandsvisning baserat på frågetyp */}
+                                                    {question.question_type === 'text' && (
+                                                       <textarea
+                                                         className="w-full border border-white/20 bg-white/10 rounded p-1 text-[10px] text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto leading-tight"
+                                                        placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                                        rows={1}
+                                                        onInput={(e) => {
+                                                          const el = e.currentTarget;
+                                                          el.style.height = 'auto';
+                                                          el.style.height = Math.min(el.scrollHeight, 60) + 'px';
+                                                        }}
+                                                      />
+                                                    )}
                                                   
                                                   {question.question_type === 'yes_no' && (
                                                     <div className="flex gap-1.5">
@@ -3577,16 +3582,21 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                       </label>
                                                     </div>
                                                    
-                                                    {/* Input förhandsvisning baserat på frågetyp */}
-                                                    {question.question_type === 'text' && (
-                                                      <textarea
-                                                        className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white resize-none focus:outline-none focus:border-white/40"
-                                                        placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                        rows={1}
-                                                        value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
-                                                        onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
-                                                      />
-                                                    )}
+                                                     {/* Input förhandsvisning baserat på frågetyp */}
+                                                     {question.question_type === 'text' && (
+                                                       <textarea
+                                                         className="w-full border border-white/20 bg-white/10 rounded p-1 text-[10px] text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto leading-tight"
+                                                         placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                                         rows={1}
+                                                         value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
+                                                         onChange={(e) => {
+                                                           const el = e.target;
+                                                           el.style.height = 'auto';
+                                                           el.style.height = Math.min(el.scrollHeight, 60) + 'px';
+                                                           setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: el.value }));
+                                                         }}
+                                                       />
+                                                     )}
                                                    
                                                     {question.question_type === 'yes_no' && (
                                                       <div className="flex gap-1.5">
