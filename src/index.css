@@ -394,6 +394,16 @@ All colors MUST be HSL.
     font-size: 1rem;
   }
 
+  .premium-edit-shell .preview-answer-textarea {
+    font-size: 0.75rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .premium-edit-shell .preview-answer-textarea::placeholder {
+    font-size: 0.75rem !important;
+    line-height: 1.25 !important;
+  }
+
   .premium-edit-pill-action {
     min-height: var(--control-height);
     padding-inline: 1rem;
