@@ -3568,7 +3568,7 @@ const MobileJobWizard = ({
                                      </div>
                                    </div>
                                  )}
-                                 <button onClick={() => setShowApplicationForm(false)} className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors" aria-label="Stäng ansökningsformulär"><X className="h-3.5 w-3.5" /></button>
+                                 <button onClick={() => setShowApplicationForm(false)} className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors" aria-label="Stäng ansökningsformulär"><X className="h-3.5 w-3.5" /></button>
                                </div>
                              </div>
 
