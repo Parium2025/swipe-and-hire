@@ -156,7 +156,10 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   };
 
   const getDashboardCount = () => {
-    const total = liveJobCount ?? preloadedEmployerMyJobs ?? 0;
+    // Show whichever is larger: org dashboard jobs or personal jobs (covers both views)
+    const dashboardTotal = preloadedEmployerDashboardJobs || 0;
+    const myJobsTotal = liveJobCount ?? preloadedEmployerMyJobs ?? 0;
+    const total = Math.max(dashboardTotal, myJobsTotal);
     return total > 0 ? total : null;
   };
 

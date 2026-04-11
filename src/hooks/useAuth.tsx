@@ -1674,27 +1674,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         orgJobs = data || [];
       }
       
-      // Helper för att kolla om ett jobb är utgånget (samma logik som i date.ts)
-      const isJobExpired = (createdAt: string, expiresAt: string | null): boolean => {
-        const effectiveExpiry = expiresAt 
-          ? new Date(expiresAt) 
-          : new Date(new Date(createdAt).getTime() + 24 * 60 * 60 * 1000); // Default: 1 dag
-        return effectiveExpiry < new Date();
+      // Helper för att kolla om ett jobb är utgånget (samma logik som jobStatus.ts)
+      const isJobExpired = (job: { is_active: boolean | null; expires_at: string | null }): boolean => {
+        if (!job.expires_at) return false; // Inget utgångsdatum = inte utgånget
+        return !Number.isNaN(new Date(job.expires_at).getTime()) && new Date(job.expires_at) < new Date();
+      };
+
+      const isJobDraft = (job: { is_active: boolean | null; expires_at: string | null }): boolean => {
+        if (job.is_active) return false;
+        return !isJobExpired(job);
       };
       
-      // Mina annonser (totalt - alla i organisationen)
-      const myJobsCount = orgJobs.length;
+      // Mina annonser = användarens EGNA jobb (personal scope, samma som Mina Annonser-sidan)
+      const personalJobs = orgJobs.filter(j => j.employer_id === user.id);
+      const myJobsCount = personalJobs.length;
       setPreloadedEmployerMyJobs(myJobsCount);
       try { sessionStorage.setItem(EMPLOYER_MY_JOBS_CACHE_KEY, String(myJobsCount)); } catch {}
       
-      // Aktiva annonser (exkludera utgångna jobb - samma filter som Dashboard)
-      const activeJobs = orgJobs.filter(j => j.is_active && !isJobExpired(j.created_at, j.expires_at));
+      // Aktiva annonser (org-scope, exkludera utgångna och utkast)
+      const activeJobs = orgJobs.filter(j => j.is_active && !isJobExpired(j));
       const activeCount = activeJobs.length;
       setPreloadedEmployerActiveJobs(activeCount);
       try { sessionStorage.setItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY, String(activeCount)); } catch {}
       
-      // Dashboard jobb (aktiva + utgångna = samma totalsumma som dashboardens "Annonser"-kort)
-      const expiredJobs = orgJobs.filter(j => isJobExpired(j.created_at, j.expires_at));
+      // Dashboard jobb (org-scope: aktiva + utgångna, exkl utkast)
+      const expiredJobs = orgJobs.filter(j => isJobExpired(j));
       const dashboardCount = activeJobs.length + expiredJobs.length;
       setPreloadedEmployerDashboardJobs(dashboardCount);
       try { sessionStorage.setItem(EMPLOYER_DASHBOARD_JOBS_CACHE_KEY, String(dashboardCount)); } catch {}
@@ -1708,6 +1712,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const totalApplications = activeJobs.reduce((sum, j) => sum + (j.applications_count || 0), 0);
       setPreloadedEmployerTotalApplications(totalApplications);
       try { sessionStorage.setItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, String(totalApplications)); } catch {}
+
+      console.log('[EmployerStats] Personal jobs:', myJobsCount, '| Org active:', activeCount, '| Org expired:', expiredJobs.length, '| Dashboard total:', dashboardCount);
       
       // Hämta antal unika kandidater (distinct applicant_id)
       const jobIds = orgJobs.map(j => j.id);
