@@ -57,6 +57,8 @@ interface ReadOnlyMobileJobCardProps {
   onCardClick?: (jobId: string) => void;
   /** Extra content rendered below the tags row (e.g. edit/delete buttons) */
   footer?: ReactNode;
+  /** Card index in list — first 6 load eagerly, rest lazy */
+  cardIndex?: number;
 }
 
 // Deterministic gradient based on job id for visual variety
@@ -92,7 +94,7 @@ function getCompanyInitials(name: string): string {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
-export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, onDeleteClick, isSavedExternal, onToggleSave, statusBadge, hideSaveButton = false, onCardClick, footer }: ReadOnlyMobileJobCardProps) => {
+export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, onDeleteClick, isSavedExternal, onToggleSave, statusBadge, hideSaveButton = false, onCardClick, footer, cardIndex = 0 }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
 
   // Resolve the raw storage path to a public URL
@@ -177,7 +179,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
                 if (v === 'bottom') return '80%';
                 return `${v}%`;
               })()}` }}
-              loading="eager"
+              loading={cardIndex < 6 ? 'eager' : 'lazy'}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>
