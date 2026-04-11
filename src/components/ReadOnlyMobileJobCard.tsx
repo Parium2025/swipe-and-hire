@@ -165,7 +165,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`)}
     >
       {/* Visual header — image or gradient placeholder */}
-      <div className="job-card-mobile-media relative w-full overflow-hidden">
+      <div className="job-card-mobile-media relative w-full overflow-hidden animate-fade-in">
         {displayUrl ? (
           <>
             <img
@@ -261,10 +261,12 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       {/* Content */}
        <div className="job-card-mobile-body space-y-2.5">
         {/* Title */}
-        <TruncatedText
-          text={job.title}
-          className="text-base font-bold text-white leading-snug line-clamp-2 text-center"
-        />
+        <div className="animate-fade-in">
+          <TruncatedText
+            text={job.title}
+            className="text-base font-bold text-white leading-snug line-clamp-2 text-center"
+          />
+        </div>
 
         {/* Company + Location — glass badges, centered, truncation-safe */}
         {/* Only show company badge when there's a job image (otherwise it's already in the gradient) */}
@@ -339,7 +341,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             <span className="leading-snug">{job.applications_count || 0} sökande</span>
           </Badge>
         </div>
-        {footer && footer}
+        {footer ? <div className="animate-fade-in">{footer}</div> : null}
       </div>
     </Card>
   );
