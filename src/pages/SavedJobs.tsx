@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { safeSetItem } from '@/lib/safeStorage';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,6 +31,7 @@ interface SavedJob {
   job_postings: {
     id: string;
     title: string;
+    image_focus_position?: string | null;
     location: string | null;
     workplace_city: string | null;
     workplace_county: string | null;
@@ -58,6 +58,7 @@ interface SkippedJob {
   job_postings: {
     id: string;
     title: string;
+    image_focus_position?: string | null;
     location: string | null;
     workplace_city: string | null;
     workplace_county: string | null;
@@ -86,6 +87,7 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
       created_at,
       job_postings (
         id,
+        title,
         image_focus_position,
         location,
         workplace_city,
@@ -121,6 +123,7 @@ const fetchSkippedJobs = async (userId: string): Promise<SkippedJob[]> => {
       created_at,
       job_postings (
         id,
+        title,
         image_focus_position,
         location,
         workplace_city,
@@ -191,7 +194,7 @@ const SavedJobs = () => {
     isDragging.current = false;
   }, []);
 
-  const { data: savedJobs = [], isLoading, isFetched } = useQuery({
+  const { data: savedJobs = [], isLoading } = useQuery({
     queryKey: ['saved-jobs', user?.id],
     queryFn: () => fetchSavedJobs(user!.id),
     enabled: !!user,
@@ -325,9 +328,7 @@ const SavedJobs = () => {
     });
   }, [skippedJobs]);
 
-  const showLoading = isLoading && !isFetched && savedJobs.length === 0;
-
-  if (!showContent || showLoading) {
+  if (!showContent) {
     return (
       <div className="responsive-container-wide opacity-0" aria-hidden="true">
         <div className="text-center mb-6">
@@ -381,7 +382,11 @@ const SavedJobs = () => {
       {/* ── Saved tab ── */}
       {activeTab === 'saved' && (
         <>
-          {sortedJobs.length === 0 ? (
+          {isLoading && savedJobs.length === 0 ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 text-white animate-spin" />
+            </div>
+          ) : sortedJobs.length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
                 <Heart className="h-12 w-12 text-white mx-auto mb-4" />
