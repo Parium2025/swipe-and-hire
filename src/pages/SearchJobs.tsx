@@ -26,6 +26,7 @@ import { useTouchCapable } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { getTimeRemaining } from '@/lib/date'; // kept for swipe jobs mapping
 import { StatsGrid } from '@/components/StatsGrid';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -710,34 +711,36 @@ const SearchJobs = memo(() => {
 
             {/* Job Cards — image cards on all screen sizes */}
             <div className={cn("job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4", displayedJobs.length === 1 && "job-card-grid-single", displayedJobs.length === 2 && "job-card-grid-double")}>
-              {displayedJobs.map((job) => (
-                <ReadOnlyMobileJobCard
-                  key={job.id}
-                  job={{
-                    id: job.id,
-                    title: job.title,
-                    location: job.location,
-                    employment_type: job.employment_type,
-                    is_active: job.is_active,
-                    views_count: job.views_count,
-                    applications_count: job.applications_count,
-                    created_at: job.created_at,
-                    expires_at: job.expires_at,
-                    job_image_url: job.job_image_url,
-                    image_focus_position: job.image_focus_position,
-                    company_name: job.company_name,
-                    company_logo_url: job.company_logo_url,
-                    salary_min: job.salary_min,
-                    salary_max: job.salary_max,
-                    salary_type: job.salary_type,
-                    salary_transparency: job.salary_transparency,
-                    benefits: job.benefits,
-                  }}
-                  hasApplied={appliedJobIds.has(job.id)}
-                  onUnsaveClick={handleUnsaveClick}
-                  isSavedExternal={isJobSaved(job.id)}
-                  onToggleSave={toggleSaveJob}
-                />
+              {displayedJobs.map((job, idx) => (
+                <CardErrorBoundary key={job.id}>
+                  <ReadOnlyMobileJobCard
+                    cardIndex={idx}
+                    job={{
+                      id: job.id,
+                      title: job.title,
+                      location: job.location,
+                      employment_type: job.employment_type,
+                      is_active: job.is_active,
+                      views_count: job.views_count,
+                      applications_count: job.applications_count,
+                      created_at: job.created_at,
+                      expires_at: job.expires_at,
+                      job_image_url: job.job_image_url,
+                      image_focus_position: job.image_focus_position,
+                      company_name: job.company_name,
+                      company_logo_url: job.company_logo_url,
+                      salary_min: job.salary_min,
+                      salary_max: job.salary_max,
+                      salary_type: job.salary_type,
+                      salary_transparency: job.salary_transparency,
+                      benefits: job.benefits,
+                    }}
+                    hasApplied={appliedJobIds.has(job.id)}
+                    onUnsaveClick={handleUnsaveClick}
+                    isSavedExternal={isJobSaved(job.id)}
+                    onToggleSave={toggleSaveJob}
+                  />
+                </CardErrorBoundary>
               ))}
             </div>
           </>

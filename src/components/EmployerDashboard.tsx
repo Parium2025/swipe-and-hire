@@ -11,6 +11,7 @@ import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { MobileJobCard } from '@/components/MobileJobCard';
 
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { formatDateShortSv } from '@/lib/date';
 import { getEmployerJobStatus, isEmployerJobActive, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import {
@@ -214,7 +215,6 @@ const EmployerDashboard = memo(() => {
     }
   }, [page]);
 
-
   const handleDeleteClick = (job: JobPosting) => {
     setJobToDelete(job);
     setDeleteDialogOpen(true);
@@ -402,15 +402,17 @@ const EmployerDashboard = memo(() => {
         ) : (
           <>
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-              {pageJobs.map((job) => (
-                <MobileJobCard
-                  key={job.id}
-                  job={job as JobPosting}
-                  onEdit={(j) => handleEditJob(j)}
-                  onDelete={(j) => handleDeleteClick(j)}
-                  onEditDraft={(j) => handleEditDraft(j)}
-                  onPrefetch={(id) => prefetchJob(id)}
-                />
+              {pageJobs.map((job, idx) => (
+                <CardErrorBoundary key={job.id}>
+                  <MobileJobCard
+                    job={job as JobPosting}
+                    onEdit={(j) => handleEditJob(j)}
+                    onDelete={(j) => handleDeleteClick(j)}
+                    onEditDraft={(j) => handleEditDraft(j)}
+                    onPrefetch={(id) => prefetchJob(id)}
+                    cardIndex={idx}
+                  />
+                </CardErrorBoundary>
               ))}
             </div>
             {totalPages > 1 && (
@@ -454,49 +456,51 @@ const EmployerDashboard = memo(() => {
               <>
                 <div ref={listTopRef} />
                     <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-                      {pageJobs.map((job) => {
+                      {pageJobs.map((job, idx) => {
                         const jobPosting = job as JobPosting;
                         const isExpired = isEmployerJobExpired(jobPosting);
                         const isDraft = isEmployerJobDraft(jobPosting);
                         return (
-                          <ReadOnlyMobileJobCard
-                            key={job.id}
-                            job={job as JobPosting & { company_name?: string }}
-                            hideSaveButton
-                            onCardClick={(jobId) => {
-                              if (isDraft) {
-                                handleEditDraft(jobPosting);
-                              } else {
-                                navigate(`/job-details/${jobId}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
-                              }
-                            }}
-                            footer={
-                              <div className={`flex items-center gap-2 pt-0.5 ${isExpired && !isDraft ? 'justify-center' : ''}`}>
-                                {(!isExpired || isDraft) && (
+                          <CardErrorBoundary key={job.id}>
+                            <ReadOnlyMobileJobCard
+                              job={job as JobPosting & { company_name?: string }}
+                              cardIndex={idx}
+                              hideSaveButton
+                              onCardClick={(jobId) => {
+                                if (isDraft) {
+                                  handleEditDraft(jobPosting);
+                                } else {
+                                  navigate(`/job-details/${jobId}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
+                                }
+                              }}
+                              footer={
+                                <div className={`flex items-center gap-2 pt-0.5 ${isExpired && !isDraft ? 'justify-center' : ''}`}>
+                                  {(!isExpired || isDraft) && (
+                                    <button
+                                      className={`flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-[transform,opacity,background-color] duration-200 active:scale-[0.97] md:hover:bg-white/10 ${pendingEditJobId === job.id ? 'pointer-events-none opacity-70' : ''}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                          handlePremiumEditOpen(jobPosting);
+                                      }}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                      {pendingEditJobId === job.id ? 'Öppnar...' : 'Redigera'}
+                                    </button>
+                                  )}
                                   <button
-                                    className={`flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-[transform,opacity,background-color] duration-200 active:scale-[0.97] md:hover:bg-white/10 ${pendingEditJobId === job.id ? 'pointer-events-none opacity-70' : ''}`}
+                                    className={`${isExpired && !isDraft ? 'px-8' : 'flex-1 px-4'} inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/20 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white`}
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                        handlePremiumEditOpen(jobPosting);
+                                      handleDeleteClick(jobPosting);
                                     }}
                                   >
-                                    <Edit className="h-4 w-4" />
-                                    {pendingEditJobId === job.id ? 'Öppnar...' : 'Redigera'}
+                                    <Trash2 className="h-4 w-4" />
+                                    Ta bort
                                   </button>
-                                )}
-                                <button
-                                  className={`${isExpired && !isDraft ? 'px-8' : 'flex-1 px-4'} inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/20 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteClick(jobPosting);
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Ta bort
-                                </button>
-                              </div>
-                            }
-                          />
+                                </div>
+                              }
+                            />
+                          </CardErrorBoundary>
                         );
                       })}
                     </div>
