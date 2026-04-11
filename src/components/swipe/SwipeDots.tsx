@@ -30,6 +30,11 @@ export const SwipeDots = memo(function SwipeDots({
   const scrubStartIndexRef = useRef(currentIndex);
   const scrubStartYRef = useRef<number | null>(null);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
+  // Stable refs for window-level listeners
+  const countRef = useRef(count);
+  const onScrubToRef = useRef(onScrubTo);
+  countRef.current = count;
+  onScrubToRef.current = onScrubTo;
 
   useEffect(() => {
     if (!isScrubbingRef.current) {
@@ -64,6 +69,44 @@ export const SwipeDots = memo(function SwipeDots({
     return 0.4 + (distFromEdge / EDGE_FADE) * 0.6;
   };
 
+  // Window-level move handler — survives DOM changes
+  const windowTouchMove = useCallback((e: TouchEvent) => {
+    if (!isScrubbingRef.current || scrubStartYRef.current === null) return;
+
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const deltaY = touch.clientY - scrubStartYRef.current;
+    const c = countRef.current;
+    const nextIndex = Math.min(
+      c - 1,
+      Math.max(0, scrubStartIndexRef.current + Math.round(deltaY / SCRUB_STEP_PX)),
+    );
+
+    if (nextIndex !== scrubIndexRef.current) {
+      scrubIndexRef.current = nextIndex;
+      setScrubIndex(nextIndex);
+      onScrubToRef.current?.(nextIndex);
+      if (navigator.vibrate) navigator.vibrate(5);
+    }
+  }, []);
+
+  const windowTouchEnd = useCallback(() => {
+    // Full cleanup
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    touchStartPosRef.current = null;
+    scrubStartYRef.current = null;
+    isScrubbingRef.current = false;
+    setIsScrubbing(false);
+
+    window.removeEventListener('touchmove', windowTouchMove, true);
+    window.removeEventListener('touchend', windowTouchEnd, true);
+    window.removeEventListener('touchcancel', windowTouchEnd, true);
+  }, [windowTouchMove]);
+
   const startScrub = useCallback((clientY: number) => {
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
@@ -75,22 +118,13 @@ export const SwipeDots = memo(function SwipeDots({
     scrubStartYRef.current = clientY;
     scrubStartIndexRef.current = scrubIndexRef.current;
 
+    // Attach window-level listeners so DOM changes don't break the gesture
+    window.addEventListener('touchmove', windowTouchMove, { capture: true, passive: false });
+    window.addEventListener('touchend', windowTouchEnd, { capture: true });
+    window.addEventListener('touchcancel', windowTouchEnd, { capture: true });
+
     if (navigator.vibrate) navigator.vibrate(12);
-  }, []);
-
-  const stopScrub = useCallback(() => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-
-    touchStartPosRef.current = null;
-    scrubStartYRef.current = null;
-
-    // Always reset scrubbing state fully so next touch starts clean
-    setIsScrubbing(false);
-    isScrubbingRef.current = false;
-  }, []);
+  }, [windowTouchMove, windowTouchEnd]);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
@@ -101,6 +135,11 @@ export const SwipeDots = memo(function SwipeDots({
         clearTimeout(longPressTimerRef.current);
         longPressTimerRef.current = null;
       }
+      // Clean up any stale window listeners from a previous gesture
+      window.removeEventListener('touchmove', windowTouchMove, true);
+      window.removeEventListener('touchend', windowTouchEnd, true);
+      window.removeEventListener('touchcancel', windowTouchEnd, true);
+
       isScrubbingRef.current = false;
       setIsScrubbing(false);
       scrubStartYRef.current = null;
@@ -114,62 +153,50 @@ export const SwipeDots = memo(function SwipeDots({
         startScrub(startY);
       }, LONG_PRESS_MS);
     },
-    [count, startScrub],
+    [count, startScrub, windowTouchMove, windowTouchEnd],
   );
 
+  // React-level touchMove only used to detect initial drag before scrubbing activates
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
+      if (isScrubbingRef.current) return; // window listeners handle it
+
       const touch = e.touches[0];
+      if (touchStartPosRef.current) {
+        const dx = touch.clientX - touchStartPosRef.current.x;
+        const dy = touch.clientY - touchStartPosRef.current.y;
 
-      if (!isScrubbingRef.current) {
-        if (touchStartPosRef.current) {
-          const dx = touch.clientX - touchStartPosRef.current.x;
-          const dy = touch.clientY - touchStartPosRef.current.y;
-
-          if (Math.abs(dy) >= DRAG_ACTIVATION_PX && Math.abs(dy) > Math.abs(dx)) {
-            startScrub(touchStartPosRef.current.y);
-          } else if (longPressTimerRef.current && Math.abs(dx) > GESTURE_CANCEL_PX) {
-            // Only cancel on horizontal movement — vertical is scrub intent
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-          }
+        if (Math.abs(dy) >= DRAG_ACTIVATION_PX && Math.abs(dy) > Math.abs(dx)) {
+          startScrub(touchStartPosRef.current.y);
+        } else if (longPressTimerRef.current && Math.abs(dx) > GESTURE_CANCEL_PX) {
+          clearTimeout(longPressTimerRef.current);
+          longPressTimerRef.current = null;
         }
-
-        if (!isScrubbingRef.current) {
-          return;
-        }
-      }
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (scrubStartYRef.current === null) return;
-
-      const deltaY = touch.clientY - scrubStartYRef.current;
-      const nextIndex = Math.min(
-        count - 1,
-        Math.max(0, scrubStartIndexRef.current + Math.round(deltaY / SCRUB_STEP_PX)),
-      );
-
-      if (nextIndex !== scrubIndexRef.current) {
-        scrubIndexRef.current = nextIndex;
-        setScrubIndex(nextIndex);
-        onScrubTo?.(nextIndex);
-        if (navigator.vibrate) navigator.vibrate(5);
       }
     },
-    [count, onScrubTo],
+    [startScrub],
   );
 
   const handleTouchEnd = useCallback(() => {
-    stopScrub();
-  }, [stopScrub]);
+    // If scrubbing is active, window listener handles cleanup
+    if (isScrubbingRef.current) return;
 
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    touchStartPosRef.current = null;
+  }, []);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+      window.removeEventListener('touchmove', windowTouchMove, true);
+      window.removeEventListener('touchend', windowTouchEnd, true);
+      window.removeEventListener('touchcancel', windowTouchEnd, true);
     };
-  }, []);
+  }, [windowTouchMove, windowTouchEnd]);
 
   const badgeText = useMemo(() => {
     const currentLabel = formatCounterValue(scrubIndex + 1);
