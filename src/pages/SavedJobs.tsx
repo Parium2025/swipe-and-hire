@@ -78,6 +78,7 @@ interface SkippedJob {
 }
 
 const SAVED_JOBS_CACHE_KEY = 'parium_saved_jobs_full_v2';
+const SAVED_JOBS_RETURN_NO_CARD_ANIMATION_KEY = 'parium-saved-jobs-return-no-card-animation';
 
 function loadSavedJobsCache(userId: string): SavedJob[] | undefined {
   try {
