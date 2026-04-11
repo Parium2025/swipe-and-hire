@@ -456,12 +456,6 @@ const JobView = () => {
   }
 
   const handleBack = () => {
-    try {
-      if (document.referrer.includes('/saved-jobs') || window.history.state?.usr?.fromSavedJobs) {
-        sessionStorage.setItem('parium-saved-jobs-return-no-card-animation', 'true');
-      }
-    } catch {}
-
     const state = window.history.state as any;
     const idx = typeof state?.idx === 'number' ? state.idx : undefined;
     if (typeof idx === 'number' && idx > 0) {
