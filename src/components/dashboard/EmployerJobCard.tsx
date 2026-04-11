@@ -84,8 +84,10 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
   }, [resolvedUrl]);
 
   const [loadedBlobUrl, setLoadedBlobUrl] = useState<string | null>(null);
+  const [blobFailed, setBlobFailed] = useState(false);
   useEffect(() => {
     if (!resolvedUrl || cachedBlobUrl) { setLoadedBlobUrl(null); return; }
+    setBlobFailed(false);
     let cancelled = false;
     imageCache.loadImage(resolvedUrl)
       .then(blobUrl => { if (!cancelled) setLoadedBlobUrl(blobUrl); })
@@ -94,7 +96,16 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
   }, [resolvedUrl, cachedBlobUrl]);
 
   // Show blob if ready, but ALWAYS fall back to resolvedUrl immediately (no skeleton)
-  const displayUrl = cachedBlobUrl || loadedBlobUrl || resolvedUrl;
+  const displayUrl = blobFailed ? resolvedUrl : (cachedBlobUrl || loadedBlobUrl || resolvedUrl);
+
+  const handleImageError = useMemo(() => {
+    return (e: React.SyntheticEvent<HTMLImageElement>) => {
+      if (e.currentTarget.src.startsWith('blob:')) {
+        if (resolvedUrl) imageCache.evict(resolvedUrl);
+        setBlobFailed(true);
+      }
+    };
+  }, [resolvedUrl]);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 
@@ -119,6 +130,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
                 return `${v}%`;
               })()}` }}
               loading="eager"
+              onError={handleImageError}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>

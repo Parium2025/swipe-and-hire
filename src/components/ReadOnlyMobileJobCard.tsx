@@ -156,13 +156,24 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   }, [job.company_logo_url]);
   const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
   const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
+  const [logoBlobFailed, setLogoBlobFailed] = useState(false);
   useEffect(() => {
     if (!rawLogoUrl || cachedLogoBlob) { setLoadedLogoBlob(null); return; }
+    setLogoBlobFailed(false);
     let cancelled = false;
     imageCache.loadImage(rawLogoUrl).then(b => { if (!cancelled) setLoadedLogoBlob(b); }).catch(() => {});
     return () => { cancelled = true; };
   }, [rawLogoUrl, cachedLogoBlob]);
-  const logoUrl = cachedLogoBlob || loadedLogoBlob || rawLogoUrl;
+  const logoUrl = logoBlobFailed ? rawLogoUrl : (cachedLogoBlob || loadedLogoBlob || rawLogoUrl);
+
+  const handleLogoError = useMemo(() => {
+    return (e: React.SyntheticEvent<HTMLImageElement>) => {
+      if (e.currentTarget.src.startsWith('blob:')) {
+        if (rawLogoUrl) imageCache.evict(rawLogoUrl);
+        setLogoBlobFailed(true);
+      }
+    };
+  }, [rawLogoUrl]);
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
