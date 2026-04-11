@@ -3049,9 +3049,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     {/* Input förhandsvisning baserat på frågetyp */}
                                                     {question.question_type === 'text' && (
                                                        <textarea
-                                                         className="w-full border border-white/20 bg-white/10 rounded p-1 text-[10px] text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto leading-tight"
+                                                         className="w-full min-h-0 border border-white/20 bg-white/10 rounded p-1 text-[10px] leading-tight text-white placeholder:text-[9px] placeholder:leading-tight placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto"
                                                         placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                         rows={1}
+                                                        style={{ height: '24px' }}
                                                         onInput={(e) => {
                                                           const el = e.currentTarget;
                                                           el.style.height = 'auto';
@@ -3584,18 +3585,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                    
                                                      {/* Input förhandsvisning baserat på frågetyp */}
                                                      {question.question_type === 'text' && (
-                                                       <textarea
-                                                         className="w-full border border-white/20 bg-white/10 rounded p-1 text-[10px] text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto leading-tight"
-                                                         placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                         rows={1}
-                                                         value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
-                                                         onChange={(e) => {
-                                                           const el = e.target;
-                                                           el.style.height = 'auto';
-                                                           el.style.height = Math.min(el.scrollHeight, 60) + 'px';
-                                                           setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: el.value }));
-                                                         }}
-                                                       />
+                                                        <textarea
+                                                          className="w-full min-h-0 border border-white/20 bg-white/10 rounded p-1 text-[10px] leading-tight text-white placeholder:text-[9px] placeholder:leading-tight placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto"
+                                                          placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                                          rows={1}
+                                                          style={{ height: '24px' }}
+                                                          value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
+                                                          onChange={(e) => {
+                                                            const el = e.target;
+                                                            el.style.height = 'auto';
+                                                            el.style.height = Math.min(el.scrollHeight, 60) + 'px';
+                                                            setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: el.value }));
+                                                          }}
+                                                        />
                                                      )}
                                                    
                                                     {question.question_type === 'yes_no' && (
