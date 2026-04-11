@@ -64,8 +64,20 @@ export const JobSeekerInterviewsCard = memo(() => {
   const upcomingInterviews = interviews.slice(0, 5);
   const hasMore = interviews.length > 5;
 
-  // Keep the actual card shell/header mounted even while loading,
-  // so the icon never swaps/moves on refresh.
+  if (isLoading) {
+    return (
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
+        <div className="absolute inset-0 bg-white/5" />
+        <CardContent className="relative p-4 h-full">
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
+            <Skeleton className="h-4 w-24 bg-white/20" />
+          </div>
+          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
@@ -83,13 +95,7 @@ export const JobSeekerInterviewsCard = memo(() => {
         
         {/* Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {isLoading ? (
-            <div className="space-y-1.5 h-full pr-1">
-              <Skeleton className="h-[52px] w-full bg-white/10 rounded-lg" />
-              <Skeleton className="h-[52px] w-full bg-white/10 rounded-lg" />
-              <Skeleton className="h-[52px] w-full bg-white/10 rounded-lg" />
-            </div>
-          ) : upcomingInterviews.length === 0 ? (
+          {upcomingInterviews.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <Calendar className="h-8 w-8 text-white mb-2" />
               <p className="text-sm font-medium text-white">Inga bokade intervjuer</p>
@@ -108,8 +114,10 @@ export const JobSeekerInterviewsCard = memo(() => {
                   'Okänt företag';
                 
                 return (
-                  <div
+                  <motion.div
                     key={interview.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
                     className="bg-white/10 rounded-lg p-2 cursor-pointer hover:bg-white/15 transition-colors"
                     onClick={() => {
                       if (interview.location_type === 'video' && interview.location_details) {
@@ -145,7 +153,7 @@ export const JobSeekerInterviewsCard = memo(() => {
                         {getLocationLabel(interview.location_type)}
                       </span>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
