@@ -217,7 +217,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             {logoUrl ? (
               <>
                 <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                  <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} />
+                  <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} />
                 </div>
                 <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] overflow-hidden">
                   <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
