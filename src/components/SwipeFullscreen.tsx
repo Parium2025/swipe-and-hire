@@ -98,6 +98,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [sectionHeight, setSectionHeight] = useState(END_STATE_HEIGHT);
   const [overlayInteractionShieldActive, setOverlayInteractionShieldActive] = useState(false);
   const [lastSkippedJobId, setLastSkippedJobId] = useState<string | null>(null);
+  const [undoEntryJobId, setUndoEntryJobId] = useState<string | null>(null);
 
   /* ── Clear persisted index on unmount (reset on re-entry) ── */
   useEffect(() => {
@@ -401,8 +402,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
 
   const handleUndo = useCallback(() => {
     if (!lastSkippedJobId || !onUndoSwipeAction) return;
+    setUndoEntryJobId(lastSkippedJobId);
     onUndoSwipeAction(lastSkippedJobId);
     setLastSkippedJobId(null);
+    // Clear undo entry flag after animation completes
+    setTimeout(() => setUndoEntryJobId(null), 700);
   }, [lastSkippedJobId, onUndoSwipeAction]);
 
   // Stable ref setter
@@ -512,6 +516,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 sectionHeight={sectionHeight}
                 overlayOpen={showDetail || showApply || showFilter}
                 skipEntryAnimation={job.id === skipEntryAnimationForId}
+                isUndoEntry={job.id === undoEntryJobId}
                 canUndo={!!lastSkippedJobId && !!onUndoSwipeAction}
                 onSwipeRight={handleSwipeRight}
                 onSwipeLeft={handleSwipeLeft}

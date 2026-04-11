@@ -28,6 +28,7 @@ interface JobSlideProps {
   sectionHeight?: string;
   overlayOpen?: boolean;
   skipEntryAnimation?: boolean;
+  isUndoEntry?: boolean;
   canUndo?: boolean;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
@@ -84,6 +85,7 @@ export const JobSlide = memo(function JobSlide({
   sectionHeight,
   overlayOpen,
   skipEntryAnimation,
+  isUndoEntry,
   canUndo,
   onSwipeRight,
   onSwipeLeft,
@@ -395,6 +397,24 @@ export const JobSlide = memo(function JobSlide({
     }
     prevActiveRef.current = isActive;
   }, [entryScale, isActive]);
+
+  // Undo entry: slide card back from the left with a premium spring
+  useEffect(() => {
+    if (isUndoEntry && isActive) {
+      x.set(-400);
+      exitOpacity.set(0.3);
+      animate(x, 0, {
+        type: 'spring',
+        stiffness: 180,
+        damping: 24,
+        mass: 0.9,
+      });
+      animate(exitOpacity, 1, {
+        duration: 0.35,
+        ease: [0.22, 1, 0.36, 1],
+      });
+    }
+  }, [isUndoEntry, isActive, x, exitOpacity]);
 
   return (
     <div
