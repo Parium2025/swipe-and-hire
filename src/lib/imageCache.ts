@@ -166,6 +166,18 @@ class ImageCache {
   }
 
   /**
+   * Evict a single URL from the cache (e.g. when blob URL is revoked by OS)
+   */
+  evict(url: string): void {
+    const cacheKey = this.getCacheKey(url);
+    const cached = this.cache.get(cacheKey);
+    if (cached) {
+      URL.revokeObjectURL(cached.objectUrl);
+      this.cache.delete(cacheKey);
+    }
+  }
+
+  /**
    * Rensa hela cachen (använd försiktigt)
    */
   clear(): void {
