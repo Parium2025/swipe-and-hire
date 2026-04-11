@@ -124,7 +124,8 @@ export const SwipeDots = memo(function SwipeDots({
 
           if (Math.abs(dy) >= DRAG_ACTIVATION_PX && Math.abs(dy) > Math.abs(dx)) {
             startScrub(touchStartPosRef.current.y);
-          } else if (longPressTimerRef.current && Math.hypot(dx, dy) > GESTURE_CANCEL_PX) {
+          } else if (longPressTimerRef.current && Math.abs(dx) > GESTURE_CANCEL_PX) {
+            // Only cancel on horizontal movement — vertical is scrub intent
             clearTimeout(longPressTimerRef.current);
             longPressTimerRef.current = null;
           }
