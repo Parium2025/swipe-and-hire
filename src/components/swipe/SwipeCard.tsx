@@ -68,9 +68,11 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
   // Blob cache: try sync first, then load async
   const cachedBlob = useMemo(() => rawImageUrl ? imageCache.getCachedUrl(rawImageUrl) : null, [rawImageUrl]);
   const [loadedBlob, setLoadedBlob] = useState<string | null>(null);
+  const [blobFailed, setBlobFailed] = useState(false);
 
   useEffect(() => {
     if (!rawImageUrl || cachedBlob) return;
+    setBlobFailed(false);
     let cancelled = false;
     imageCache.loadImage(rawImageUrl).then(url => {
       if (!cancelled) setLoadedBlob(url);
@@ -78,7 +80,16 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
     return () => { cancelled = true; };
   }, [rawImageUrl, cachedBlob]);
 
-  const imageUrl = cachedBlob || loadedBlob || rawImageUrl;
+  const imageUrl = blobFailed ? rawImageUrl : (cachedBlob || loadedBlob || rawImageUrl);
+
+  const handleImageError = useMemo(() => {
+    return (e: React.SyntheticEvent<HTMLImageElement>) => {
+      if (e.currentTarget.src.startsWith('blob:')) {
+        if (rawImageUrl) imageCache.evict(rawImageUrl);
+        setBlobFailed(true);
+      }
+    };
+  }, [rawImageUrl]);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
     const { offset, velocity } = info;
@@ -141,6 +152,7 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
             })()}` }}
             loading="eager"
             draggable={false}
+            onError={handleImageError}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)] flex items-center justify-center">
