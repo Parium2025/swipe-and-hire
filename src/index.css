@@ -975,6 +975,12 @@ All colors MUST be HSL.
     line-height: 1;
   }
 
+  .preview-tab-compact {
+    min-height: 2rem;
+    padding-inline: 0.625rem;
+    font-size: 0.75rem;
+  }
+
   /* Utility to position the bottom-right glow consistently */
   .pwa-bottom-glow {
     position: absolute;

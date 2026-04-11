@@ -98,19 +98,19 @@ export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onMod
           ref={mobileRef}
           type="button"
           onClick={() => onModeChange('mobile')}
-          className="dashboard-tab-button relative z-10 rounded-[7px] font-medium text-white transition-colors whitespace-nowrap flex items-center gap-1.5"
+          className="dashboard-tab-button preview-tab-compact relative z-10 rounded-[7px] font-medium text-white transition-colors whitespace-nowrap flex items-center gap-1"
         >
-          <Smartphone className="h-3.5 w-3.5" />
-          Mobilvy
+          <Smartphone className="h-3 w-3" />
+          <span className="text-xs">Mobilvy</span>
         </button>
         <button
           ref={desktopRef}
           type="button"
           onClick={() => onModeChange('desktop')}
-          className="dashboard-tab-button relative z-10 rounded-[7px] font-medium text-white transition-colors whitespace-nowrap flex items-center gap-1.5"
+          className="dashboard-tab-button preview-tab-compact relative z-10 rounded-[7px] font-medium text-white transition-colors whitespace-nowrap flex items-center gap-1"
         >
-          <Monitor className="h-3.5 w-3.5" />
-          Datorvy
+          <Monitor className="h-3 w-3" />
+          <span className="text-xs">Datorvy</span>
         </button>
       </div>
     </div>

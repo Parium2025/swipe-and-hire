@@ -2730,7 +2730,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       {previewMode === 'mobile' && (
                       <div className="flex flex-col items-center space-y-4">
                         <div className="relative flex items-center justify-center gap-4 scale-90 sm:scale-100">
-                          <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
+                          <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px] md:w-[220px] md:h-[440px]">
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                               <>
                                 {/* Left tooltip (company name) */}
@@ -2800,7 +2800,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                          setIsScrolledTop(target.scrollTop === 0);
                                        }}
                                      >
-                                       <div className="space-y-1.5 pb-2">
+                                       <div className="space-y-1 pb-2">
                                          <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 relative">
                                           <div className="flex items-center">
                                             {profile?.company_logo_url ? (
@@ -2886,7 +2886,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                                          {formData.positions_count && parseInt(formData.positions_count) > 0 && (
                                            <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center whitespace-nowrap">
+                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                                <Users className="h-2 w-2 mr-1 text-white" />
                                                Antal rekryteringar
                                              </h5>
@@ -2894,10 +2894,58 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               <div className="font-medium">{formatPositionsCount()}</div>
                                             </div>
                                           </div>
-                                        )}
+                                         )}
 
-                                         <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                           <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                         {/* Lönetransparens */}
+                                         {formData.salary_transparency && formatSalaryTransparency() && (
+                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
+                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                               <Banknote className="h-2 w-2 mr-1 text-white flex-shrink-0" />
+                                               Lönetransparens
+                                             </h5>
+                                             <div className="text-xs text-white leading-relaxed break-words">
+                                               <div className="font-medium">{formatSalaryTransparency()}</div>
+                                             </div>
+                                           </div>
+                                         )}
+
+                                         {/* Arbetstider */}
+                                         {(formData.work_start_time || formData.work_end_time) && (
+                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
+                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                               <Clock className="h-2 w-2 mr-1 text-white flex-shrink-0" />
+                                               Arbetstider
+                                             </h5>
+                                             <div className="text-xs text-white leading-relaxed break-words">
+                                               <div className="font-medium">
+                                                 {formData.work_start_time && formData.work_end_time 
+                                                   ? `${formData.work_start_time} – ${formData.work_end_time}`
+                                                   : formData.work_start_time || formData.work_end_time}
+                                               </div>
+                                             </div>
+                                           </div>
+                                         )}
+
+                                         {/* Förmåner */}
+                                         {formData.benefits && formData.benefits.length > 0 && (
+                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
+                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                               <Heart className="h-2 w-2 mr-1 text-white flex-shrink-0" />
+                                               Förmåner
+                                             </h5>
+                                             <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                               {formData.benefits.map((benefit, idx) => (
+                                                 <div key={idx} className="flex items-start">
+                                                   <span className="flex-shrink-0 mr-1">•</span>
+                                                   <span className="break-words">{benefit}</span>
+                                                 </div>
+                                               ))}
+                                             </div>
+                                           </div>
+                                         )}
+
+                                         <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
+                                            <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                              <MapPin className="h-2 w-2 mr-1 text-white" />
                                               Bolagsnamn
                                            </h5>

@@ -3504,7 +3504,7 @@ const MobileJobWizard = ({
                    {/* Phone mockup med ansökningsformulär + tooltip */}
                   <div className="relative flex items-center justify-center gap-4 scale-90 sm:scale-100">
                     
-                    <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
+                    <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px] md:w-[220px] md:h-[440px]">
                     {/* Tooltip framför mobilen som pekar på företagsnamnet + X-knapp */}
                     {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                       <>
@@ -3590,7 +3590,7 @@ const MobileJobWizard = ({
                                  setIsScrolledTop(target.scrollTop === 0);
                                }}
                              >
-                              <div className="space-y-1.5 pb-2">{/* Minimal botten-padding */}
+                              <div className="space-y-1 pb-2">{/* Minimal botten-padding */}
                                
                                   {/* Företagsinformation */}
                                   <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 relative">
@@ -3670,7 +3670,7 @@ const MobileJobWizard = ({
                                {/* Lön */}
                                {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                   <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                    <h5 className="text-xs font-medium text_white mb-0.5 flex items-center">
+                                    <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                        <Banknote className="h-2 w-2 mr-1 text-white" />
                                        Lön
                                      </h5>
@@ -3731,7 +3731,7 @@ const MobileJobWizard = ({
                                    {/* Antal rekryteringar */}
                                    {formData.positions_count && parseInt(formData.positions_count) > 0 && (
                                      <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                       <h5 className="text-xs font-medium text-white mb-0.5 flex items-center whitespace-nowrap">
+                                       <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                          <Users className="h-2 w-2 mr-1 text-white" />
                                          Antal rekryteringar
                                        </h5>
