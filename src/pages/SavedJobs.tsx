@@ -480,7 +480,7 @@ const SavedJobs = () => {
                 ))}
               </div>
 
-              <div className={`job-card-grid job-card-grid-no-entry grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
                 {sortedJobs.map((savedJob, index) => {
                   const job = savedJob.job_postings!;
                   const companyName =
@@ -489,31 +489,37 @@ const SavedJobs = () => {
                     'Företag';
 
                   return (
-                    <ReadOnlyMobileJobCard
-                      key={job.id}
-                      job={{
-                        id: job.id,
-                        title: job.title,
-                        location: job.workplace_city || job.location || '',
-                        employment_type: job.employment_type || undefined,
-                        is_active: job.is_active,
-                        views_count: job.views_count ?? 0,
-                        applications_count: job.applications_count ?? 0,
-                        created_at: job.created_at,
-                        expires_at: job.expires_at || undefined,
-                        job_image_url: job.job_image_url || undefined,
-                        image_focus_position: job.image_focus_position || undefined,
-                        company_name: companyName,
-                        company_logo_url: job.profiles?.company_logo_url || undefined,
-                        positions_count: job.positions_count || undefined,
-                      }}
-                      cardIndex={index}
-                      hasApplied={appliedJobIds.has(job.id)}
-                      isSavedExternal={true}
-                      onToggleSave={toggleSaveJob}
-                      onUnsaveClick={handleUnsaveClick}
-                      onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
-                    />
+                    <CardErrorBoundary key={job.id}>
+                      <ReadOnlyMobileJobCard
+                        job={{
+                          id: job.id,
+                          title: job.title,
+                          location: job.workplace_city || job.location || '',
+                          employment_type: job.employment_type || undefined,
+                          is_active: job.is_active,
+                          views_count: job.views_count ?? 0,
+                          applications_count: job.applications_count ?? 0,
+                          created_at: job.created_at,
+                          expires_at: job.expires_at || undefined,
+                          job_image_url: job.job_image_url || undefined,
+                          image_focus_position: job.image_focus_position || undefined,
+                          company_name: companyName,
+                          company_logo_url: job.profiles?.company_logo_url || undefined,
+                          positions_count: job.positions_count || undefined,
+                          salary_min: job.salary_min,
+                          salary_max: job.salary_max,
+                          salary_type: job.salary_type,
+                          salary_transparency: job.salary_transparency,
+                          benefits: job.benefits,
+                        }}
+                        cardIndex={index}
+                        hasApplied={appliedJobIds.has(job.id)}
+                        isSavedExternal={true}
+                        onToggleSave={toggleSaveJob}
+                        onUnsaveClick={handleUnsaveClick}
+                        onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
+                      />
+                    </CardErrorBoundary>
                   );
                 })}
               </div>
@@ -543,7 +549,7 @@ const SavedJobs = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className={`job-card-grid job-card-grid-no-entry grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {filteredSkippedJobs.map((skippedJob, index) => {
                 const job = skippedJob.job_postings!;
                 const companyName =
@@ -552,39 +558,46 @@ const SavedJobs = () => {
                   'Företag';
 
                 return (
-                  <div key={job.id} className="relative group">
-                    <ReadOnlyMobileJobCard
-                      job={{
-                        id: job.id,
-                        title: job.title,
-                        location: job.workplace_city || job.location || '',
-                        employment_type: job.employment_type || undefined,
-                        is_active: job.is_active,
-                        views_count: job.views_count ?? 0,
-                        applications_count: job.applications_count ?? 0,
-                        created_at: job.created_at,
-                        expires_at: job.expires_at || undefined,
-                        job_image_url: job.job_image_url || undefined,
-                        image_focus_position: job.image_focus_position || undefined,
-                        company_name: companyName,
-                        company_logo_url: job.profiles?.company_logo_url || undefined,
-                        positions_count: job.positions_count || undefined,
-                      }}
-                      cardIndex={index}
-                      hasApplied={appliedJobIds.has(job.id)}
-                      isSavedExternal={isJobSaved(job.id)}
-                      onToggleSave={toggleSaveJob}
-                      onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
-                    />
-                    {/* Restore button overlay */}
-                    <button
-                      onClick={() => handleRestoreSkipped(job.id)}
-                      className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 border border-white/25 text-white text-xs font-medium shadow-lg transition-colors touch-manipulation md:hover:bg-white/25"
-                    >
-                      <Undo2 className="h-3.5 w-3.5" />
-                      Återställ
-                    </button>
-                  </div>
+                  <CardErrorBoundary key={job.id}>
+                    <div className="relative group">
+                      <ReadOnlyMobileJobCard
+                        job={{
+                          id: job.id,
+                          title: job.title,
+                          location: job.workplace_city || job.location || '',
+                          employment_type: job.employment_type || undefined,
+                          is_active: job.is_active,
+                          views_count: job.views_count ?? 0,
+                          applications_count: job.applications_count ?? 0,
+                          created_at: job.created_at,
+                          expires_at: job.expires_at || undefined,
+                          job_image_url: job.job_image_url || undefined,
+                          image_focus_position: job.image_focus_position || undefined,
+                          company_name: companyName,
+                          company_logo_url: job.profiles?.company_logo_url || undefined,
+                          positions_count: job.positions_count || undefined,
+                          salary_min: job.salary_min,
+                          salary_max: job.salary_max,
+                          salary_type: job.salary_type,
+                          salary_transparency: job.salary_transparency,
+                          benefits: job.benefits,
+                        }}
+                        cardIndex={index}
+                        hasApplied={appliedJobIds.has(job.id)}
+                        isSavedExternal={isJobSaved(job.id)}
+                        onToggleSave={toggleSaveJob}
+                        onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
+                      />
+                      {/* Restore button overlay */}
+                      <button
+                        onClick={() => handleRestoreSkipped(job.id)}
+                        className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 border border-white/25 text-white text-xs font-medium shadow-lg transition-colors touch-manipulation md:hover:bg-white/25"
+                      >
+                        <Undo2 className="h-3.5 w-3.5" />
+                        Återställ
+                      </button>
+                    </div>
+                  </CardErrorBoundary>
                 );
               })}
             </div>
