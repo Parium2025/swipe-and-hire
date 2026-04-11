@@ -687,6 +687,7 @@ export const JobSlide = memo(function JobSlide({
                       alt={job.company_name}
                       className="w-full h-full object-cover"
                       draggable={false}
+                      onError={handleLogoError}
                     />
                   </div>
                 ) : (
