@@ -3049,10 +3049,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     {/* Input förhandsvisning baserat på frågetyp */}
                                                     {question.question_type === 'text' && (
                                                        <textarea
-                                                         className="w-full min-h-0 border border-white/20 bg-white/10 rounded p-1 text-[10px] leading-tight text-white placeholder:text-[9px] placeholder:leading-tight placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto"
+                                                         className="w-full min-h-0 border border-white/20 bg-white/10 rounded p-1 text-[8px] leading-tight text-white placeholder:text-[8px] placeholder:leading-tight placeholder:text-white/50 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto"
                                                         placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                         rows={1}
-                                                        style={{ height: '24px' }}
+                                                        style={{ height: '20px' }}
                                                         onInput={(e) => {
                                                           const el = e.currentTarget;
                                                           el.style.height = 'auto';
@@ -3586,10 +3586,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                      {/* Input förhandsvisning baserat på frågetyp */}
                                                      {question.question_type === 'text' && (
                                                         <textarea
-                                                          className="w-full min-h-0 border border-white/20 bg-white/10 rounded p-1 text-[10px] leading-tight text-white placeholder:text-[9px] placeholder:leading-tight placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto"
+                                                          className="w-full min-h-0 border border-white/20 bg-white/10 rounded p-1 text-[8px] leading-tight text-white placeholder:text-[8px] placeholder:leading-tight placeholder:text-white/50 resize-none focus:outline-none focus:border-white/40 max-h-[60px] overflow-y-auto"
                                                           placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                           rows={1}
-                                                          style={{ height: '24px' }}
+                                                          style={{ height: '20px' }}
                                                           value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
                                                           onChange={(e) => {
                                                             const el = e.target;
