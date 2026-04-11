@@ -582,7 +582,7 @@ const JobApplication = () => {
             </Button>
             <div>
               <h1 className="font-bold text-lg">{companyName}</h1>
-              <p className="text-sm text-gray-300">{job.location}</p>
+              <p className="text-sm text-white/70">{job.location}</p>
             </div>
           </div>
         </div>
