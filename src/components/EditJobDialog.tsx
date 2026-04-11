@@ -2873,7 +2873,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                          {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                            <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               <Banknote className="h-2 w-2 mr-1 text-white" />
                                                Lön
                                              </h5>
                                              <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
@@ -2887,7 +2886,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                          {formData.positions_count && parseInt(formData.positions_count) > 0 && (
                                            <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               <Users className="h-2 w-2 mr-1 text-white" />
                                                Antal rekryteringar
                                              </h5>
                                              <div className="text-xs text-white leading-relaxed break-words">
@@ -2900,7 +2898,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                          {formData.salary_transparency && formatSalaryTransparency() && (
                                            <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               <Banknote className="h-2 w-2 mr-1 text-white flex-shrink-0" />
                                                Lönetransparens
                                              </h5>
                                              <div className="text-xs text-white leading-relaxed break-words">
@@ -2913,7 +2910,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                          {(formData.work_start_time || formData.work_end_time) && (
                                            <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               <Clock className="h-2 w-2 mr-1 text-white flex-shrink-0" />
                                                Arbetstider
                                              </h5>
                                              <div className="text-xs text-white leading-relaxed break-words">
@@ -2930,7 +2926,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                          {formData.benefits && formData.benefits.length > 0 && (
                                            <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               <Heart className="h-2 w-2 mr-1 text-white flex-shrink-0" />
                                                Förmåner
                                              </h5>
                                              <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
@@ -2946,8 +2941,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                                          <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                             <MapPin className="h-2 w-2 mr-1 text-white" />
-                                              Bolagsnamn
+                                             Bolagsnamn
                                            </h5>
                                            <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
                                             {formData.workplace_name && (
@@ -2977,7 +2971,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                                          <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
                                            <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                             <Mail className="h-2 w-2 mr-1 text-white" />
                                              Kontakt
                                            </h5>
                                            <div className="text-xs text-white leading-relaxed break-words">
@@ -3058,7 +3051,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                       <textarea
                                                         className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white resize-none"
                                                        placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                       rows={2}
+                                                       rows={1}
                                                      />
                                                    )}
                                                   
@@ -3272,8 +3265,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         <Bookmark className="h-3 w-3 text-white" />
                                       </button>
                                       <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-6 h-6 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
-                                        <Heart className="h-3 w-3 text-white fill-white" />
-                                      </button>
+                                        </button>
                                     </div>
                                   </div>
                                 )}
@@ -3419,7 +3411,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                             <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                               <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <Banknote className="h-3 w-3 mr-1 text-white" />
                                                 Lön
                                               </h5>
                                               <div className="text-xs text-white leading-relaxed space-y-0.5">
@@ -3434,7 +3425,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           {formData.salary_transparency && formatSalaryTransparency() && (
                                             <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                               <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <Banknote className="h-3 w-3 mr-1 text-white" />
                                                 Lönetransparens
                                               </h5>
                                               <div className="text-xs text-white font-medium">{formatSalaryTransparency()}</div>
@@ -3444,7 +3434,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                            {/* Bolagsnamn */}
                                           <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                              <MapPin className="h-3 w-3 mr-1 text-white" />
                                               Bolagsnamn
                                             </h5>
                                             <div className="text-xs text-white leading-relaxed space-y-0.5">
@@ -3473,7 +3462,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           {formData.positions_count && parseInt(formData.positions_count) > 0 && (
                                             <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                               <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <Users className="h-3 w-3 mr-1 text-white" />
                                                 Antal rekryteringar
                                               </h5>
                                               <div className="text-xs text-white font-medium">{formatPositionsCount()}</div>
@@ -3484,7 +3472,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           {(formData.work_start_time || formData.work_end_time) && (
                                             <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                               <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <Clock className="h-3 w-3 mr-1 text-white" />
                                                 Arbetstider
                                               </h5>
                                               <div className="text-xs text-white font-medium">
@@ -3499,7 +3486,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           {formData.benefits && formData.benefits.length > 0 && (
                                             <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                               <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <Heart className="h-3 w-3 mr-1 text-white" />
                                                 Förmåner
                                               </h5>
                                               <div className="text-xs text-white space-y-0.5">
@@ -3517,7 +3503,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           {formData.contact_email && (
                                             <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                               <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <Mail className="h-3 w-3 mr-1 text-white" />
                                                 Kontakt
                                               </h5>
                                               <div className="text-xs text-white">
@@ -3535,7 +3520,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           {formData.requirements && (
                                             <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                               <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <CheckSquare className="h-3 w-3 mr-1 text-white" />
                                                 Kvalifikationer
                                               </h5>
                                               <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">
@@ -3598,7 +3582,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                       <textarea
                                                         className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white resize-none focus:outline-none focus:border-white/40"
                                                         placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                        rows={2}
+                                                        rows={1}
                                                         value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
                                                         onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                       />
@@ -3806,8 +3790,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           <Bookmark className="h-3.5 w-3.5 text-white" />
                                         </button>
                                         <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
-                                          <Heart className="h-3.5 w-3.5 text-white fill-white" />
-                                        </button>
+                                          </button>
                                       </div>
                                     </div>
                                   )}
