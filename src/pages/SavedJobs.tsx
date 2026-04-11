@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { safeSetItem } from '@/lib/safeStorage';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,6 +31,7 @@ interface SavedJob {
   job_postings: {
     id: string;
     title: string;
+    image_focus_position?: string | null;
     location: string | null;
     workplace_city: string | null;
     workplace_county: string | null;
@@ -58,6 +58,7 @@ interface SkippedJob {
   job_postings: {
     id: string;
     title: string;
+    image_focus_position?: string | null;
     location: string | null;
     workplace_city: string | null;
     workplace_county: string | null;
@@ -77,27 +78,6 @@ interface SkippedJob {
   } | null;
 }
 
-const SAVED_JOBS_CACHE_KEY = 'parium_saved_jobs_full_v2';
-const SAVED_JOBS_RETURN_NO_CARD_ANIMATION_KEY = 'parium-saved-jobs-return-no-card-animation';
-
-function loadSavedJobsCache(userId: string): SavedJob[] | undefined {
-  try {
-    const raw = localStorage.getItem(SAVED_JOBS_CACHE_KEY);
-    if (!raw) return undefined;
-    const parsed = JSON.parse(raw);
-    if (parsed?.userId !== userId || !Array.isArray(parsed?.data)) return undefined;
-    return parsed.data;
-  } catch {
-    return undefined;
-  }
-}
-
-function saveSavedJobsCache(userId: string, data: SavedJob[]): void {
-  try {
-    safeSetItem(SAVED_JOBS_CACHE_KEY, JSON.stringify({ userId, data, ts: Date.now() }));
-  } catch { /* ignore */ }
-}
-
 const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
   const { data, error } = await supabase
     .from('saved_jobs')
@@ -108,6 +88,7 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
       job_postings (
         id,
         title,
+        image_focus_position,
         location,
         workplace_city,
         workplace_county,
@@ -130,9 +111,7 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  const result = (data as unknown as SavedJob[]) || [];
-  saveSavedJobsCache(userId, result);
-  return result;
+  return (data as unknown as SavedJob[]) || [];
 };
 
 const fetchSkippedJobs = async (userId: string): Promise<SkippedJob[]> => {
@@ -145,6 +124,7 @@ const fetchSkippedJobs = async (userId: string): Promise<SkippedJob[]> => {
       job_postings (
         id,
         title,
+        image_focus_position,
         location,
         workplace_city,
         workplace_county,
@@ -184,27 +164,12 @@ const SavedJobs = () => {
   }, [setSearchParams]);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
-  const [disableCardEntryAnimation] = useState(() => {
-    try {
-      const shouldDisable = sessionStorage.getItem(SAVED_JOBS_RETURN_NO_CARD_ANIMATION_KEY) === 'true';
-      if (shouldDisable) {
-        sessionStorage.removeItem(SAVED_JOBS_RETURN_NO_CARD_ANIMATION_KEY);
-      }
-      return shouldDisable;
-    } catch {
-      return false;
-    }
-  });
-
-  // Delayed fade-in — skip when returning (query cache already populated)
-  const hasCache = useRef(!!queryClient.getQueryData(['saved-jobs', user?.id]) || !!queryClient.getQueryData(['skipped-jobs', user?.id]));
-  const [showContent, setShowContent] = useState(hasCache.current);
+  const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
-    if (showContent) return;
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);
-  }, [showContent]);
+  }, []);
 
   // Mouse-drag scrolling for sort chips
   const chipsRef = useRef<HTMLDivElement>(null);
@@ -229,10 +194,7 @@ const SavedJobs = () => {
     isDragging.current = false;
   }, []);
 
-  // Load cached data for instant render
-  const cachedSavedJobs = useMemo(() => user?.id ? loadSavedJobsCache(user.id) : undefined, [user?.id]);
-
-  const { data: savedJobs = [], isLoading, isFetched } = useQuery({
+  const { data: savedJobs = [], isLoading } = useQuery({
     queryKey: ['saved-jobs', user?.id],
     queryFn: () => fetchSavedJobs(user!.id),
     enabled: !!user,
@@ -240,7 +202,6 @@ const SavedJobs = () => {
     gcTime: Infinity,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    placeholderData: cachedSavedJobs,
   });
 
   const { data: skippedJobs = [], isLoading: isLoadingSkipped } = useQuery({
@@ -367,9 +328,7 @@ const SavedJobs = () => {
     });
   }, [skippedJobs]);
 
-  const showLoading = isLoading && !isFetched && savedJobs.length === 0;
-
-  if (!showContent || showLoading) {
+  if (!showContent) {
     return (
       <div className="responsive-container-wide opacity-0" aria-hidden="true">
         <div className="text-center mb-6">
@@ -423,7 +382,11 @@ const SavedJobs = () => {
       {/* ── Saved tab ── */}
       {activeTab === 'saved' && (
         <>
-          {sortedJobs.length === 0 ? (
+          {isLoading && savedJobs.length === 0 ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 text-white animate-spin" />
+            </div>
+          ) : sortedJobs.length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
                 <Heart className="h-12 w-12 text-white mx-auto mb-4" />
@@ -468,7 +431,7 @@ const SavedJobs = () => {
                 ))}
               </div>
 
-              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${disableCardEntryAnimation ? ' job-card-grid-no-entry' : ''}${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
                 {sortedJobs.map((savedJob, index) => {
                   const job = savedJob.job_postings!;
                   const companyName =
@@ -490,6 +453,7 @@ const SavedJobs = () => {
                         created_at: job.created_at,
                         expires_at: job.expires_at || undefined,
                         job_image_url: job.job_image_url || undefined,
+                        image_focus_position: job.image_focus_position || undefined,
                         company_name: companyName,
                         positions_count: job.positions_count || undefined,
                       }}
@@ -529,7 +493,7 @@ const SavedJobs = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${disableCardEntryAnimation ? ' job-card-grid-no-entry' : ''}${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {filteredSkippedJobs.map((skippedJob, index) => {
                 const job = skippedJob.job_postings!;
                 const companyName =
@@ -551,6 +515,7 @@ const SavedJobs = () => {
                         created_at: job.created_at,
                         expires_at: job.expires_at || undefined,
                         job_image_url: job.job_image_url || undefined,
+                        image_focus_position: job.image_focus_position || undefined,
                         company_name: companyName,
                         positions_count: job.positions_count || undefined,
                       }}
