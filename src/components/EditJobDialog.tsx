@@ -2944,7 +2944,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                            </div>
                                          )}
 
-                                           <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                         <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
+                                            <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                              <MapPin className="h-2 w-2 mr-1 text-white" />
                                               Bolagsnamn
                                            </h5>
