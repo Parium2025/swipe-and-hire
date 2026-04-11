@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -176,16 +176,22 @@ const SavedJobs = () => {
   const queryClient = useQueryClient();
   const { unsaveJob } = useSavedJobs();
   const { undoAction } = useSwipeActions();
-  const [activeTab, setActiveTab] = useState<TabValue>('saved');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab: TabValue = (searchParams.get('tab') === 'skipped' ? 'skipped' : 'saved');
+  const setActiveTab = useCallback((tab: TabValue) => {
+    setSearchParams({ tab }, { replace: true });
+  }, [setSearchParams]);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
-  // Delayed fade-in
-  const [showContent, setShowContent] = useState(false);
+  // Delayed fade-in — skip when returning (query cache already populated)
+  const hasCache = useRef(!!queryClient.getQueryData(['saved-jobs', user?.id]) || !!queryClient.getQueryData(['skipped-jobs', user?.id]));
+  const [showContent, setShowContent] = useState(hasCache.current);
   useEffect(() => {
+    if (showContent) return;
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [showContent]);
 
   // Mouse-drag scrolling for sort chips
   const chipsRef = useRef<HTMLDivElement>(null);
@@ -230,6 +236,7 @@ const SavedJobs = () => {
     staleTime: 30_000,
     gcTime: Infinity,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   // Hämta användarens ansökningar för "Redan sökt"-badge
