@@ -209,7 +209,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           <button
             onClick={handleDeleteClick}
             aria-label="Ta bort ansökan"
-            className="absolute top-2.5 right-2.5 flex h-9 w-9 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-all duration-150 active:scale-90 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+            className="absolute top-2.5 right-2.5 flex h-9 w-9 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
           >
             <Trash2 className="h-4 w-4 text-white" />
           </button>
@@ -367,7 +367,7 @@ const SaveButton = memo(({ jobId, jobTitle, isSaved, onToggle, onUnsaveClick }: 
     <button
       onClick={handleClick}
       aria-label={isSaved ? 'Ta bort från sparade' : 'Spara jobb'}
-      className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/50 border border-white/20 transition-all duration-150 active:scale-90"
+      className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/50 border border-white/20 transition-colors"
     >
       <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
     </button>

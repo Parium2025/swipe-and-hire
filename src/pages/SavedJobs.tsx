@@ -371,7 +371,7 @@ const SavedJobs = () => {
   }
 
   return (
-    <div className="responsive-container-wide animate-fade-in">
+    <div className="responsive-container-wide">
       <div className="text-center mb-5">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">
           {activeTab === 'saved' ? `Sparade Jobb (${sortedJobs.length})` : `Skippade Jobb (${filteredSkippedJobs.length})`}
@@ -459,7 +459,7 @@ const SavedJobs = () => {
                 ))}
               </div>
 
-              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+              <div className={`job-card-grid job-card-grid-no-entry grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
                 {sortedJobs.map((savedJob, index) => {
                   const job = savedJob.job_postings!;
                   const companyName =
@@ -522,7 +522,7 @@ const SavedJobs = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+            <div className={`job-card-grid job-card-grid-no-entry grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {filteredSkippedJobs.map((skippedJob, index) => {
                 const job = skippedJob.job_postings!;
                 const companyName =
@@ -558,7 +558,7 @@ const SavedJobs = () => {
                     {/* Restore button overlay */}
                     <button
                       onClick={() => handleRestoreSkipped(job.id)}
-                      className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 border border-white/25 text-white text-xs font-medium shadow-lg active:scale-[0.93] transition-colors touch-manipulation md:hover:bg-white/25"
+                      className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 border border-white/25 text-white text-xs font-medium shadow-lg transition-colors touch-manipulation md:hover:bg-white/25"
                     >
                       <Undo2 className="h-3.5 w-3.5" />
                       Återställ
