@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useSwipeActions } from '@/hooks/useSwipeActions';
+import { usePreloadImages } from '@/hooks/useCachedImage';
 
 type SortOption = 'newest' | 'oldest' | 'expired' | 'active';
 type TabValue = 'saved' | 'skipped';
@@ -45,6 +46,7 @@ interface SavedJob {
     positions_count: number | null;
     profiles: {
       company_name: string | null;
+      company_logo_url?: string | null;
       first_name: string | null;
       last_name: string | null;
     } | null;
@@ -72,6 +74,7 @@ interface SkippedJob {
     positions_count: number | null;
     profiles: {
       company_name: string | null;
+      company_logo_url?: string | null;
       first_name: string | null;
       last_name: string | null;
     } | null;
@@ -102,6 +105,7 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
         positions_count,
         profiles (
           company_name,
+          company_logo_url,
           first_name,
           last_name
         )
@@ -138,6 +142,7 @@ const fetchSkippedJobs = async (userId: string): Promise<SkippedJob[]> => {
         positions_count,
         profiles (
           company_name,
+          company_logo_url,
           first_name,
           last_name
         )
@@ -328,6 +333,29 @@ const SavedJobs = () => {
     });
   }, [skippedJobs]);
 
+  const activeTabPreloadUrls = useMemo(() => {
+    const sourceJobs = activeTab === 'saved'
+      ? sortedJobs.map((entry) => entry.job_postings).filter(Boolean)
+      : filteredSkippedJobs.map((entry) => entry.job_postings).filter(Boolean);
+
+    const resolveStorageUrl = (bucket: 'job-images' | 'company-logos', path?: string | null) => {
+      if (!path) return null;
+      if (path.startsWith('http')) return path;
+      return supabase.storage.from(bucket).getPublicUrl(path).data?.publicUrl || null;
+    };
+
+    return Array.from(new Set(
+      sourceJobs
+        .flatMap((job) => [
+          resolveStorageUrl('job-images', job?.job_image_url),
+          resolveStorageUrl('company-logos', job?.profiles?.company_logo_url),
+        ])
+        .filter((url): url is string => !!url)
+    )).slice(0, 6);
+  }, [activeTab, sortedJobs, filteredSkippedJobs]);
+
+  const activeTabMediaReady = usePreloadImages(activeTabPreloadUrls);
+
   if (!showContent) {
     return (
       <div className="responsive-container-wide opacity-0" aria-hidden="true">
@@ -382,7 +410,7 @@ const SavedJobs = () => {
       {/* ── Saved tab ── */}
       {activeTab === 'saved' && (
         <>
-          {isLoading && savedJobs.length === 0 ? (
+          {((isLoading && savedJobs.length === 0) || !activeTabMediaReady) ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 text-white animate-spin" />
             </div>
@@ -441,7 +469,7 @@ const SavedJobs = () => {
 
                   return (
                     <ReadOnlyMobileJobCard
-                      key={savedJob.id}
+                      key={job.id}
                       job={{
                         id: job.id,
                         title: job.title,
@@ -455,6 +483,7 @@ const SavedJobs = () => {
                         job_image_url: job.job_image_url || undefined,
                         image_focus_position: job.image_focus_position || undefined,
                         company_name: companyName,
+                        company_logo_url: job.profiles?.company_logo_url || undefined,
                         positions_count: job.positions_count || undefined,
                       }}
                       cardIndex={index}
@@ -475,7 +504,7 @@ const SavedJobs = () => {
       {/* ── Skipped tab ── */}
       {activeTab === 'skipped' && (
         <>
-          {isLoadingSkipped ? (
+          {(isLoadingSkipped || !activeTabMediaReady) ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 text-white animate-spin" />
             </div>
@@ -502,7 +531,7 @@ const SavedJobs = () => {
                   'Företag';
 
                 return (
-                  <div key={skippedJob.id} className="relative group">
+                  <div key={job.id} className="relative group">
                     <ReadOnlyMobileJobCard
                       job={{
                         id: job.id,
@@ -517,6 +546,7 @@ const SavedJobs = () => {
                         job_image_url: job.job_image_url || undefined,
                         image_focus_position: job.image_focus_position || undefined,
                         company_name: companyName,
+                        company_logo_url: job.profiles?.company_logo_url || undefined,
                         positions_count: job.positions_count || undefined,
                       }}
                       cardIndex={index}
