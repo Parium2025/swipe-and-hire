@@ -18,6 +18,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { Heart, Loader2, Trash2, AlertTriangle, ArrowDownUp, Undo2, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useSwipeActions } from '@/hooks/useSwipeActions';
 import { usePreloadImages } from '@/hooks/useCachedImage';
@@ -44,6 +45,11 @@ interface SavedJob {
     applications_count: number | null;
     views_count: number | null;
     positions_count: number | null;
+    salary_min: number | null;
+    salary_max: number | null;
+    salary_type: string | null;
+    salary_transparency: string | null;
+    benefits: string[] | null;
     profiles: {
       company_name: string | null;
       company_logo_url?: string | null;
@@ -72,6 +78,11 @@ interface SkippedJob {
     applications_count: number | null;
     views_count: number | null;
     positions_count: number | null;
+    salary_min: number | null;
+    salary_max: number | null;
+    salary_type: string | null;
+    salary_transparency: string | null;
+    benefits: string[] | null;
     profiles: {
       company_name: string | null;
       company_logo_url?: string | null;
