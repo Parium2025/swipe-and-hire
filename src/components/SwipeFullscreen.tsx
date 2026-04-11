@@ -155,14 +155,30 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     container.scrollTo({ top: targetTop, behavior: 'smooth' });
   }, [getSlideScrollTop]);
 
-  /** Scrubber: instant jump (no smooth scroll) for fast drag navigation */
-  const handleScrubTo = useCallback((index: number) => {
+  const activateSlide = useCallback((index: number) => {
     const container = scrollRef.current;
     const targetEl = slideRefs.current[index];
-    if (!container || !targetEl) return;
-    container.scrollTo({ top: targetEl.offsetTop, behavior: 'auto' });
+
+    if (scrollEndTimerRef.current) {
+      clearTimeout(scrollEndTimerRef.current);
+      scrollEndTimerRef.current = null;
+    }
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    }
+
+    if (container && targetEl) {
+      container.scrollTo({ top: targetEl.offsetTop, behavior: 'auto' });
+    }
+
     setCurrentIndex(index);
   }, []);
+
+  /** Scrubber: instant jump (no smooth scroll) for fast drag navigation */
+  const handleScrubTo = useCallback((index: number) => {
+    activateSlide(index);
+  }, [activateSlide]);
 
   /* ── End-of-stack bounce ──────────────────────────────── */
   const triggerEndBounce = useCallback(() => {
@@ -341,30 +357,30 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     if (nextIdx < jobs.length) scrollToSlide(nextIdx);
   }, [currentIndex, jobs.length, scrollToSlide]);
 
-  const handleSwipeRight = useCallback(() => {
-    if (currentJob) onRecordSwipeAction?.(currentJob.id, 'liked');
+  const handleSwipeRight = useCallback((jobId: string, index: number) => {
+    activateSlide(index);
+    onRecordSwipeAction?.(jobId, 'liked');
     setShowApply(true);
-  }, [currentJob, onRecordSwipeAction]);
+  }, [activateSlide, onRecordSwipeAction]);
 
-  const handleSwipeLeft = useCallback(() => {
-    const skippedJob = jobs[currentIndex];
+  const handleSwipeLeft = useCallback((jobId: string, index: number) => {
+    const skippedJob = jobs[index];
     if (!skippedJob) return;
-    setSkipEntryAnimationForId(jobs[currentIndex + 1]?.id ?? null);
-    
-    // Record skip action – the job will be removed from the array by the parent
-    onRecordSwipeAction?.(skippedJob.id, 'skipped');
 
-    // Track last skipped job for undo button
-    setLastSkippedJobId(skippedJob.id);
-  }, [currentIndex, jobs, onRecordSwipeAction]);
+    activateSlide(index);
+    setSkipEntryAnimationForId(jobs[index + 1]?.id ?? null);
+    onRecordSwipeAction?.(jobId, 'skipped');
+    setLastSkippedJobId(jobId);
+  }, [activateSlide, jobs, onRecordSwipeAction]);
 
   // Guard against tap-through: when an overlay closes, ignore taps briefly
   const overlayCooldownRef = useRef(false);
 
-  const handleTap = useCallback(() => {
+  const handleTap = useCallback((index: number) => {
     if (overlayCooldownRef.current) return;
+    activateSlide(index);
     setShowDetail(true);
-  }, []);
+  }, [activateSlide]);
 
   const handleApplyFromDetail = useCallback(() => {
     setShowDetail(false);
@@ -478,6 +494,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
 
         <div
           ref={scrollRef}
+          data-swipe-scroll-container="true"
           className={`h-full w-full overflow-x-hidden overscroll-contain ${
             showDetail || showApply || showFilter ? 'overflow-y-hidden' : 'overflow-y-auto'
           } ${
@@ -518,10 +535,11 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 skipEntryAnimation={job.id === skipEntryAnimationForId}
                 isUndoEntry={job.id === undoEntryJobId}
                 canUndo={!!lastSkippedJobId && !!onUndoSwipeAction}
-                onSwipeRight={handleSwipeRight}
-                onSwipeLeft={handleSwipeLeft}
+                onActivate={() => activateSlide(idx)}
+                onSwipeRight={() => handleSwipeRight(job.id, idx)}
+                onSwipeLeft={() => handleSwipeLeft(job.id, idx)}
                 onSave={() => onToggleSave(job.id)}
-                onTap={handleTap}
+                onTap={() => handleTap(idx)}
                 onUndo={handleUndo}
               />
             </div>

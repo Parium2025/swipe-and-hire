@@ -30,6 +30,7 @@ interface JobSlideProps {
   skipEntryAnimation?: boolean;
   isUndoEntry?: boolean;
   canUndo?: boolean;
+  onActivate?: () => void;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   onSave: () => void;
@@ -87,6 +88,7 @@ export const JobSlide = memo(function JobSlide({
   skipEntryAnimation,
   isUndoEntry,
   canUndo,
+  onActivate,
   onSwipeRight,
   onSwipeLeft,
   onSave,
@@ -262,11 +264,9 @@ export const JobSlide = memo(function JobSlide({
       isWithinInteractiveTarget(event.target)
     ) return;
 
-    // Kill any ongoing scroll momentum so the card "lands" immediately
-    // and the user can begin a horizontal swipe without waiting
-    const scrollParent = (event.currentTarget as HTMLElement).closest('[class*="overflow-y"]');
-    if (scrollParent) {
-      scrollParent.scrollTop = scrollParent.scrollTop;
+    const scrollContainer = event.currentTarget.closest('[data-swipe-scroll-container="true"]');
+    if (scrollContainer instanceof HTMLElement) {
+      scrollContainer.scrollTo({ top: scrollContainer.scrollTop, behavior: 'auto' });
     }
 
     const touch = event.touches[0];
@@ -308,6 +308,7 @@ export const JobSlide = memo(function JobSlide({
       }
 
       gesture.isDragging = true;
+      onActivate?.();
       lastTapTimestampRef.current = 0;
       clearTapHint();
     }
@@ -317,7 +318,7 @@ export const JobSlide = memo(function JobSlide({
     }
 
     x.set(deltaX);
-  }, [clearTapHint, useTouchTunnel, x]);
+  }, [clearTapHint, onActivate, useTouchTunnel, x]);
 
   const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (
