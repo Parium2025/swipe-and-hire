@@ -28,6 +28,7 @@ interface JobSlideProps {
   sectionHeight?: string;
   overlayOpen?: boolean;
   skipEntryAnimation?: boolean;
+  isUndoEntry?: boolean;
   canUndo?: boolean;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
@@ -84,6 +85,7 @@ export const JobSlide = memo(function JobSlide({
   sectionHeight,
   overlayOpen,
   skipEntryAnimation,
+  isUndoEntry,
   canUndo,
   onSwipeRight,
   onSwipeLeft,
