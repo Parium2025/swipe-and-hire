@@ -87,10 +87,9 @@ export const SwipeDots = memo(function SwipeDots({
     touchStartPosRef.current = null;
     scrubStartYRef.current = null;
 
-    if (isScrubbingRef.current) {
-      setIsScrubbing(false);
-      isScrubbingRef.current = false;
-    }
+    // Always reset scrubbing state fully so next touch starts clean
+    setIsScrubbing(false);
+    isScrubbingRef.current = false;
   }, []);
 
   const handleTouchStart = useCallback(
