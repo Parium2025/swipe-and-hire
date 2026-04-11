@@ -449,7 +449,7 @@ const JobSwipe = () => {
                 fetchPriority="high"
               />
               {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute inset-0 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />" />
               
               {/* Title overlay on image */}
               <div className="absolute left-0 right-0 top-[60%] px-4">
