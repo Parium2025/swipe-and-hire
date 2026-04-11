@@ -16,14 +16,42 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { Heart, Loader2, Trash2, AlertTriangle, ArrowDownUp } from 'lucide-react';
+import { Heart, Loader2, Trash2, AlertTriangle, ArrowDownUp, Undo2, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
+import { useSwipeActions } from '@/hooks/useSwipeActions';
 
 type SortOption = 'newest' | 'oldest' | 'expired' | 'active';
+type TabValue = 'saved' | 'skipped';
 
 interface SavedJob {
+  id: string;
+  job_id: string;
+  created_at: string;
+  job_postings: {
+    id: string;
+    title: string;
+    location: string | null;
+    workplace_city: string | null;
+    workplace_county: string | null;
+    employment_type: string | null;
+    job_image_url: string | null;
+    is_active: boolean;
+    created_at: string;
+    expires_at: string | null;
+    applications_count: number | null;
+    views_count: number | null;
+    positions_count: number | null;
+    profiles: {
+      company_name: string | null;
+      first_name: string | null;
+      last_name: string | null;
+    } | null;
+  } | null;
+}
+
+interface SkippedJob {
   id: string;
   job_id: string;
   created_at: string;
@@ -102,9 +130,44 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
 
   if (error) throw error;
   const result = (data as unknown as SavedJob[]) || [];
-  // Persist to localStorage for instant next load
   saveSavedJobsCache(userId, result);
   return result;
+};
+
+const fetchSkippedJobs = async (userId: string): Promise<SkippedJob[]> => {
+  const { data, error } = await supabase
+    .from('swipe_actions')
+    .select(`
+      id,
+      job_id,
+      created_at,
+      job_postings (
+        id,
+        title,
+        location,
+        workplace_city,
+        workplace_county,
+        employment_type,
+        job_image_url,
+        is_active,
+        created_at,
+        expires_at,
+        applications_count,
+        views_count,
+        positions_count,
+        profiles (
+          company_name,
+          first_name,
+          last_name
+        )
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('action', 'skipped')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data as unknown as SkippedJob[]) || [];
 };
 
 const SavedJobs = () => {
@@ -112,10 +175,12 @@ const SavedJobs = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { unsaveJob } = useSavedJobs();
+  const { undoAction } = useSwipeActions();
+  const [activeTab, setActiveTab] = useState<TabValue>('saved');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
-  // Delayed fade-in (employer-side parity)
+  // Delayed fade-in
   const [showContent, setShowContent] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 100);
@@ -156,6 +221,15 @@ const SavedJobs = () => {
     gcTime: Infinity,
     refetchOnWindowFocus: false,
     placeholderData: cachedSavedJobs,
+  });
+
+  const { data: skippedJobs = [], isLoading: isLoadingSkipped } = useQuery({
+    queryKey: ['skipped-jobs', user?.id],
+    queryFn: () => fetchSkippedJobs(user!.id),
+    enabled: !!user && activeTab === 'skipped',
+    staleTime: 30_000,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 
   // Hämta användarens ansökningar för "Redan sökt"-badge
@@ -212,10 +286,15 @@ const SavedJobs = () => {
     if (!jobToRemove) return;
     unsaveJob(jobToRemove.id);
     setJobToRemove(null);
-    // Refetch to update the list
     queryClient.invalidateQueries({ queryKey: ['saved-jobs', user?.id] });
     refreshSidebarCounts();
   };
+
+  const handleRestoreSkipped = useCallback(async (jobId: string) => {
+    await undoAction(jobId);
+    queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user?.id] });
+    toast.success('Jobbet har återställts');
+  }, [undoAction, queryClient, user?.id]);
 
   const isExpired = (expiresAt: string | null) => {
     if (!expiresAt) return false;
@@ -227,12 +306,11 @@ const SavedJobs = () => {
     
     const isJobExpired = (sj: SavedJob) => !sj.job_postings!.is_active || isExpired(sj.job_postings!.expires_at);
     
-    // Helper: active first, then expired; within each group sort by date
     const sortWithPriority = (list: SavedJob[], ascending: boolean) => {
       return [...list].sort((a, b) => {
         const aExp = isJobExpired(a) ? 1 : 0;
         const bExp = isJobExpired(b) ? 1 : 0;
-        if (aExp !== bExp) return aExp - bExp; // active first
+        if (aExp !== bExp) return aExp - bExp;
         const dateA = new Date(a.created_at).getTime();
         const dateB = new Date(b.created_at).getTime();
         return ascending ? dateA - dateB : dateB - dateA;
@@ -257,6 +335,10 @@ const SavedJobs = () => {
     }
   }, [savedJobs, sortBy]);
 
+  const filteredSkippedJobs = useMemo(() => {
+    return skippedJobs.filter(sj => sj.job_postings !== null);
+  }, [skippedJobs]);
+
   const showLoading = isLoading && !isFetched && savedJobs.length === 0;
 
   if (!showContent || showLoading) {
@@ -275,88 +357,186 @@ const SavedJobs = () => {
 
   return (
     <div className="responsive-container-wide animate-fade-in">
-      <div className="text-center mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Sparade Jobb ({sortedJobs.length})</h1>
-        <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>
+      <div className="text-center mb-5">
+        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">
+          {activeTab === 'saved' ? `Sparade Jobb (${sortedJobs.length})` : `Skippade Jobb (${filteredSkippedJobs.length})`}
+        </h1>
+        <p className="text-sm text-white">
+          {activeTab === 'saved' ? 'Dina favorit-jobb samlade på ett ställe' : 'Jobb du har svipat förbi — återställ de du ångrar'}
+        </p>
       </div>
 
-      {sortedJobs.length === 0 ? (
-        <Card className="bg-white/5 border-white/10">
-          <CardContent className="p-8 text-center">
-            <Heart className="h-12 w-12 text-white mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white mb-2">Inga sparade jobb än</h3>
-            <p className="text-white mb-4">
-              När du hittar intressanta jobb kan du spara dem här för enkel åtkomst
-            </p>
-            <Button onClick={() => navigate('/search-jobs')} variant="glass">
-              Sök jobb
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
+      {/* Tab switcher */}
+      <div className="flex items-center justify-center gap-2 mb-5">
+        <button
+          onClick={() => setActiveTab('saved')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation ${
+            activeTab === 'saved'
+              ? 'bg-white/20 text-white border border-white/30'
+              : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10'
+          }`}
+        >
+          <Heart className="h-3.5 w-3.5" />
+          Sparade
+        </button>
+        <button
+          onClick={() => setActiveTab('skipped')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation ${
+            activeTab === 'skipped'
+              ? 'bg-white/20 text-white border border-white/30'
+              : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10'
+          }`}
+        >
+          <EyeOff className="h-3.5 w-3.5" />
+          Skippade
+        </button>
+      </div>
+
+      {/* ── Saved tab ── */}
+      {activeTab === 'saved' && (
         <>
-          {/* Sort chips */}
-           <div
-              ref={chipsRef}
-              className="flex items-center justify-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-none cursor-grab active:cursor-grabbing select-none"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-            >
-            <ArrowDownUp className="h-4 w-4 text-white shrink-0" />
-            {([
-              { key: 'newest', label: 'Nyast först' },
-              { key: 'oldest', label: 'Äldst först' },
-              { key: 'active', label: 'Visa aktiva' },
-              { key: 'expired', label: 'Visa utgångna' },
-            ] as const).map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setSortBy(key)}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                  sortBy === key
-                    ? 'bg-white/20 text-white border border-white/30'
-                    : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10 md:hover:text-white/80'
-                }`}
+          {sortedJobs.length === 0 ? (
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-8 text-center">
+                <Heart className="h-12 w-12 text-white mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-white mb-2">Inga sparade jobb än</h3>
+                <p className="text-white mb-4">
+                  När du hittar intressanta jobb kan du spara dem här för enkel åtkomst
+                </p>
+                <Button onClick={() => navigate('/search-jobs')} variant="glass">
+                  Sök jobb
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* Sort chips */}
+              <div
+                ref={chipsRef}
+                className="flex items-center justify-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-none cursor-grab active:cursor-grabbing select-none"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
               >
-                {label}
-              </button>
-            ))}
-          </div>
+                <ArrowDownUp className="h-4 w-4 text-white shrink-0" />
+                {([
+                  { key: 'newest', label: 'Nyast först' },
+                  { key: 'oldest', label: 'Äldst först' },
+                  { key: 'active', label: 'Visa aktiva' },
+                  { key: 'expired', label: 'Visa utgångna' },
+                ] as const).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setSortBy(key)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                      sortBy === key
+                        ? 'bg-white/20 text-white border border-white/30'
+                        : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10 md:hover:text-white/80'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
 
-          <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-            {sortedJobs.map((savedJob) => {
-              const job = savedJob.job_postings!;
+              <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+                {sortedJobs.map((savedJob) => {
+                  const job = savedJob.job_postings!;
+                  const companyName =
+                    job.profiles?.company_name ||
+                    `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim() ||
+                    'Företag';
 
-              const companyName =
-                job.profiles?.company_name ||
-                `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim() ||
-                'Företag';
+                  return (
+                    <ReadOnlyMobileJobCard
+                      key={savedJob.id}
+                      job={{
+                        id: job.id,
+                        title: job.title,
+                        location: job.workplace_city || job.location || '',
+                        employment_type: job.employment_type || undefined,
+                        is_active: job.is_active,
+                        views_count: job.views_count ?? 0,
+                        applications_count: job.applications_count ?? 0,
+                        created_at: job.created_at,
+                        expires_at: job.expires_at || undefined,
+                        job_image_url: job.job_image_url || undefined,
+                        company_name: companyName,
+                        positions_count: job.positions_count || undefined,
+                      }}
+                      hasApplied={appliedJobIds.has(job.id)}
+                      onUnsaveClick={handleUnsaveClick}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </>
+      )}
 
-              return (
-                <ReadOnlyMobileJobCard
-                  key={savedJob.id}
-                  job={{
-                    id: job.id,
-                    title: job.title,
-                    location: job.workplace_city || job.location || '',
-                    employment_type: job.employment_type || undefined,
-                    is_active: job.is_active,
-                    views_count: job.views_count ?? 0,
-                    applications_count: job.applications_count ?? 0,
-                    created_at: job.created_at,
-                    expires_at: job.expires_at || undefined,
-                    job_image_url: job.job_image_url || undefined,
-                    company_name: companyName,
-                    positions_count: job.positions_count || undefined,
-                  }}
-                  hasApplied={appliedJobIds.has(job.id)}
-                  onUnsaveClick={handleUnsaveClick}
-                />
-              );
-            })}
-          </div>
+      {/* ── Skipped tab ── */}
+      {activeTab === 'skipped' && (
+        <>
+          {isLoadingSkipped ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 text-white animate-spin" />
+            </div>
+          ) : filteredSkippedJobs.length === 0 ? (
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-8 text-center">
+                <EyeOff className="h-12 w-12 text-white mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-white mb-2">Inga skippade jobb</h3>
+                <p className="text-white mb-4">
+                  Jobb du svipat förbi i swipe-läget hamnar här
+                </p>
+                <Button onClick={() => navigate('/search-jobs')} variant="glass">
+                  Sök jobb
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+              {filteredSkippedJobs.map((skippedJob) => {
+                const job = skippedJob.job_postings!;
+                const companyName =
+                  job.profiles?.company_name ||
+                  `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim() ||
+                  'Företag';
+
+                return (
+                  <div key={skippedJob.id} className="relative group">
+                    <ReadOnlyMobileJobCard
+                      job={{
+                        id: job.id,
+                        title: job.title,
+                        location: job.workplace_city || job.location || '',
+                        employment_type: job.employment_type || undefined,
+                        is_active: job.is_active,
+                        views_count: job.views_count ?? 0,
+                        applications_count: job.applications_count ?? 0,
+                        created_at: job.created_at,
+                        expires_at: job.expires_at || undefined,
+                        job_image_url: job.job_image_url || undefined,
+                        company_name: companyName,
+                        positions_count: job.positions_count || undefined,
+                      }}
+                      hasApplied={appliedJobIds.has(job.id)}
+                    />
+                    {/* Restore button overlay */}
+                    <button
+                      onClick={() => handleRestoreSkipped(job.id)}
+                      className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 text-white text-xs font-medium shadow-lg active:scale-[0.93] transition-all touch-manipulation md:hover:bg-white/25"
+                    >
+                      <Undo2 className="h-3.5 w-3.5" />
+                      Återställ
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </>
       )}
 
