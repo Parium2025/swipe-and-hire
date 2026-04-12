@@ -9,6 +9,8 @@ import { SwipeHeader } from '@/components/swipe/SwipeHeader';
 import { SwipeDots } from '@/components/swipe/SwipeDots';
 import { SwipeEndSection } from '@/components/swipe/SwipeEndSection';
 import { SwipeEmptyState } from '@/components/swipe/SwipeEmptyState';
+import { useSwipeImagePreloader } from '@/hooks/useSwipeImagePreloader';
+import { hapticSuccess } from '@/lib/haptics';
 import type { SwipeJob } from '@/components/swipe/SwipeCard';
 
 export type { SwipeJob };
