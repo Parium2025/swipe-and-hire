@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useDevice } from '@/hooks/use-device';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import { Play, Pause } from 'lucide-react';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 
@@ -29,6 +30,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   const progressBarRef = useRef<HTMLDivElement>(null);
   const device = useDevice();
   const isMobile = device === 'mobile';
+  const isTouchDevice = useTouchCapable();
 
   // Preload cover image if provided (videoUrl and coverImageUrl are now pre-signed by parent)
   const coverImages = useMemo(() => {
@@ -129,7 +131,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
     }
-    if (!isMobile) {
+    if (!isTouchDevice) {
       setShowVideo(false);
     }
   };
@@ -179,19 +181,19 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   };
 
   const handleMouseEnter = () => {
-    if (!isMobile) {
+    if (!isTouchDevice) {
       setControlsVisible(true);
     }
   };
 
   const handleMouseLeave = () => {
-    if (!isMobile && !isDragging) {
+    if (!isTouchDevice && !isDragging) {
       setControlsVisible(false);
     }
   };
 
   const handleTouchStart = () => {
-    if (isMobile) {
+    if (isTouchDevice) {
       setControlsVisible(true);
       setTimeout(() => setControlsVisible(false), 3000);
     }
@@ -201,7 +203,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     if (isDragging) {
       const handleGlobalMouseUp = () => {
         setIsDragging(false);
-        if (!isMobile) {
+        if (!isTouchDevice) {
           setControlsVisible(false);
         }
       };
@@ -222,7 +224,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
         document.removeEventListener('mousemove', handleGlobalMouseMove);
       };
     }
-  }, [isDragging, isMobile, duration]);
+  }, [isDragging, isTouchDevice, duration]);
 
   // Visa alltid omslagsbild/initialer medan URL:er signeras för att undvika blink
 
@@ -275,8 +277,8 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
         />
       )}
       
-      {/* Play/Pause overlay for mobile or preview variant */}
-      {(isMobile || countdownVariant === 'preview') && (
+      {/* Play/Pause overlay for touch devices or preview variant */}
+      {(isTouchDevice || countdownVariant === 'preview') && (
         <div
           className={`absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity ${
             isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-0'
