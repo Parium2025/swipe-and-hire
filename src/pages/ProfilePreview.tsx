@@ -609,28 +609,13 @@ export default function ProfilePreview() {
             <div className="flex flex-col items-center gap-3">
                {/* Använd ProfileVideo om video finns, annars Avatar */}
                 {effectiveVideoUrl ? (
-                  <div 
-                    className="relative h-[140px] w-[140px]"
-                    onClick={(e) => {
-                      if (effectiveVideoUrl) {
-                        e.stopPropagation();
-                      }
-                    }}
-                  >
-                     <ProfileVideo
-                       videoUrl={effectiveVideoUrl}
-                       coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
-                       userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
-                       alt="Profilbild"
-                       className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
-                       countdownVariant="preview"
-                       showCountdown={false}
-                       disablePlayback={false}
-                       forceTouchMode={true}
-                     />
-                     {/* Countdown rendered outside the circular clip area */}
-                     <DesktopVideoCountdown videoRef={null} videoUrl={effectiveVideoUrl} parentRef={undefined} />
-                  </div>
+                  <DesktopVideoWithCountdown
+                    effectiveVideoUrl={effectiveVideoUrl}
+                    signedCoverUrl={signedCoverUrl}
+                    profileImageUrl={profileImageUrl}
+                    consentedData={consentedData}
+                  />
+                ) : (
                ) : (
                  <Avatar className="h-[140px] w-[140px] ring-2 ring-white/20 shadow-xl">
                    <AvatarImage src={profileImageUrl || signedCoverUrl || ''} className="object-cover" />
