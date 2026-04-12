@@ -490,67 +490,6 @@ export default function ProfilePreview() {
       );
     };
 
-  // Helper: Desktop video with countdown rendered outside the circular clip
-  const DesktopVideoWithCountdown = ({ effectiveVideoUrl, signedCoverUrl, profileImageUrl, consentedData }: {
-    effectiveVideoUrl: string;
-    signedCoverUrl: string | null;
-    profileImageUrl: string | null;
-    consentedData: any;
-  }) => {
-    const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-    const [countdown, setCountdown] = useState<number | null>(null);
-    const videoContainerRef = useRef<HTMLDivElement>(null);
-
-    // Poll the video element for remaining time when playing
-    useEffect(() => {
-      if (!isVideoPlaying) {
-        setCountdown(null);
-        return;
-      }
-      const interval = setInterval(() => {
-        const videoEl = videoContainerRef.current?.querySelector('video');
-        if (videoEl && videoEl.duration) {
-          const remaining = Math.ceil(videoEl.duration - videoEl.currentTime);
-          setCountdown(remaining > 0 ? remaining : 0);
-        }
-      }, 100);
-      return () => clearInterval(interval);
-    }, [isVideoPlaying]);
-
-    return (
-      <div 
-        className="relative h-[140px] w-[140px]"
-        ref={videoContainerRef}
-        onClick={(e) => {
-          if (effectiveVideoUrl) {
-            e.stopPropagation();
-          }
-        }}
-      >
-        <ProfileVideo
-          videoUrl={effectiveVideoUrl}
-          coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
-          userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
-          alt="Profilbild"
-          className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
-          countdownVariant="preview"
-          showCountdown={false}
-          disablePlayback={false}
-          forceTouchMode={true}
-          onPlayingChange={setIsVideoPlaying}
-        />
-        {/* Countdown outside circular clip */}
-        {isVideoPlaying && countdown !== null && (
-          <div
-            className="absolute -top-2 -right-2 px-1.5 py-0.5 text-xs font-bold text-white rounded-full"
-            style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8)', background: 'rgba(0,0,0,0.5)' }}
-          >
-            {countdown}s
-          </div>
-        )}
-      </div>
-    );
-  };
 
     return (
       <div className="w-full h-full relative overflow-hidden select-none" style={{ touchAction: 'pan-y', overscrollBehaviorX: 'none' }}>
