@@ -79,6 +79,7 @@ export function useSwipeActions() {
   const undoAction = useCallback(async (jobId: string) => {
     if (!user?.id) return;
 
+    // Read previous action before optimistic delete
     const previousAction = actions.get(jobId);
 
     // Optimistic update
@@ -107,7 +108,7 @@ export function useSwipeActions() {
         });
       }
     }
-  }, [user?.id, actions]);
+  }, [user?.id]);
 
   const getAction = useCallback((jobId: string): SwipeActionType | undefined => {
     return actions.get(jobId);
