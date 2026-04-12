@@ -174,7 +174,7 @@ const JobSeekerHome = memo(() => {
     <>
       <GpsPrompt />
       {showWeatherEffects && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
-      <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 animate-fade-in relative z-10">
+      <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 relative z-10">
         {/* Personal greeting */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
