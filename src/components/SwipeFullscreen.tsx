@@ -354,8 +354,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     // Record skip action – the job will be removed from the array by the parent
     onRecordSwipeAction?.(skippedJob.id, 'skipped');
 
-    // Track last skipped job for undo button
-    setLastSkippedJobId(skippedJob.id);
+    // Push to undo stack
+    setUndoStack(prev => [...prev, skippedJob.id]);
   }, [currentIndex, jobs, onRecordSwipeAction]);
 
   // Guard against tap-through: when an overlay closes, ignore taps briefly
@@ -401,13 +401,14 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const handleFilterClose = useCallback(() => { setShowFilter(false); startOverlayCooldown(); }, [startOverlayCooldown]);
 
   const handleUndo = useCallback(() => {
-    if (!lastSkippedJobId || !onUndoSwipeAction) return;
-    setUndoEntryJobId(lastSkippedJobId);
-    onUndoSwipeAction(lastSkippedJobId);
-    setLastSkippedJobId(null);
+    if (undoStack.length === 0 || !onUndoSwipeAction) return;
+    const lastId = undoStack[undoStack.length - 1];
+    setUndoEntryJobId(lastId);
+    onUndoSwipeAction(lastId);
+    setUndoStack(prev => prev.slice(0, -1));
     // Clear undo entry flag after animation completes
     setTimeout(() => setUndoEntryJobId(null), 700);
-  }, [lastSkippedJobId, onUndoSwipeAction]);
+  }, [undoStack, onUndoSwipeAction]);
 
   // Stable ref setter
   const setSlideRef = useCallback((el: HTMLDivElement | null, idx: number) => {
