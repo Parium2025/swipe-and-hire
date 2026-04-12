@@ -30,6 +30,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   const progressBarRef = useRef<HTMLDivElement>(null);
   const device = useDevice();
   const isMobile = device === 'mobile';
+  const isTouchDevice = useTouchCapable();
 
   // Preload cover image if provided (videoUrl and coverImageUrl are now pre-signed by parent)
   const coverImages = useMemo(() => {
