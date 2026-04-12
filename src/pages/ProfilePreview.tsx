@@ -696,23 +696,23 @@ export default function ProfilePreview() {
         </div>
 
         {/* Innehållssektioner i grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           {/* Personlig information */}
-          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-              <CardHeader className="pb-1.5 pt-2">
-                <div className="flex items-center gap-1.5">
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl min-w-0 overflow-hidden">
+              <CardHeader className="pb-1.5 pt-2 px-2 sm:px-4">
+                <div className="flex items-center gap-1.5 min-w-0">
                   <User className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                  <h3 className="text-xs font-semibold leading-snug tracking-tight text-white">
+                  <h3 className="text-[10px] sm:text-xs font-semibold leading-snug tracking-tight text-white truncate">
                     Personlig information
                   </h3>
                 </div>
               </CardHeader>
-            <CardContent className="space-y-2 text-xs pb-2">
+            <CardContent className="space-y-2 text-xs pb-2 px-2 sm:px-4">
               {consentedData?.phone && (
-                <div className="flex flex-col items-start gap-0.5">
-                  <p className="text-xs text-white font-medium">Telefon:</p>
+                <div className="flex flex-col items-start gap-0.5 min-w-0">
+                  <p className="text-[10px] sm:text-xs text-white font-medium">Telefon:</p>
                   <p 
-                    className="text-white cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
+                    className="text-white cursor-pointer transition-opacity hover:opacity-80 text-[9px] sm:text-[10px] break-all"
                     onClick={handlePhoneClick}
                   >
                     {consentedData.phone}
@@ -720,10 +720,10 @@ export default function ProfilePreview() {
                 </div>
               )}
               {user?.email && (
-                <div className="flex flex-col items-start gap-0.5">
-                  <p className="text-xs text-white font-medium">E-post:</p>
+                <div className="flex flex-col items-start gap-0.5 min-w-0">
+                  <p className="text-[10px] sm:text-xs text-white font-medium">E-post:</p>
                   <p 
-                    className="text-white cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
+                    className="text-white cursor-pointer transition-opacity hover:opacity-80 text-[9px] sm:text-[10px] break-all [overflow-wrap:anywhere]"
                     onClick={handleEmailClick}
                   >
                     {user.email}
@@ -731,17 +731,17 @@ export default function ProfilePreview() {
                 </div>
               )}
               {consentedData?.postal_code && (
-                <div className="flex flex-col items-start gap-0.5">
-                  <p className="text-xs text-white font-medium">Postnummer:</p>
-                  <p className="text-white text-[10px]">{consentedData.postal_code}</p>
+                <div className="flex flex-col items-start gap-0.5 min-w-0">
+                  <p className="text-[10px] sm:text-xs text-white font-medium">Postnummer:</p>
+                  <p className="text-white text-[9px] sm:text-[10px]">{consentedData.postal_code}</p>
                 </div>
               )}
               {consentedData?.location && (
-                <div className="flex flex-col items-start gap-0.5">
-                  <p className="text-xs text-white font-medium">Ort:</p>
-                  <p className="text-white text-[10px]">{consentedData.location}</p>
+                <div className="flex flex-col items-start gap-0.5 min-w-0">
+                  <p className="text-[10px] sm:text-xs text-white font-medium">Ort:</p>
+                  <p className="text-white text-[9px] sm:text-[10px] break-words">{consentedData.location}</p>
                   {profile?.home_location && (
-                    <p className="text-white text-[10px]">{profile.home_location}</p>
+                    <p className="text-white text-[9px] sm:text-[10px] break-words">{profile.home_location}</p>
                   )}
                 </div>
               )}
@@ -750,34 +750,34 @@ export default function ProfilePreview() {
 
           {/* Anställningsinformation */}
           {(consentedData?.employment_type || consentedData?.work_schedule || consentedData?.availability) && (
-            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-              <CardHeader className="pb-1.5 pt-2">
-                <div className="flex items-center gap-1.5">
+            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl min-w-0 overflow-hidden">
+              <CardHeader className="pb-1.5 pt-2 px-2 sm:px-4">
+                <div className="flex items-center gap-1.5 min-w-0">
                   <Briefcase className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                  <h3 className="text-xs font-semibold leading-snug tracking-tight text-white">
+                  <h3 className="text-[10px] sm:text-xs font-semibold leading-snug tracking-tight text-white truncate">
                     Anställningsinformation
                   </h3>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2 text-xs pb-2">
+              <CardContent className="space-y-2 text-xs pb-2 px-2 sm:px-4">
                 {consentedData?.employment_type && (
-                  <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">Anställningsstatus?</p>
-                    <p className="text-white text-[10px]">
+                  <div className="flex flex-col items-start gap-0.5 min-w-0">
+                    <p className="text-[10px] sm:text-xs text-white font-medium break-words">Anställningsstatus?</p>
+                    <p className="text-white text-[9px] sm:text-[10px] break-words">
                       Svar: {getEmploymentStatusLabel(consentedData.employment_type)}
                     </p>
                   </div>
                 )}
                 {consentedData?.work_schedule && (
-                  <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">Hur mycket jobbar du idag?</p>
-                    <p className="text-white text-[10px]">Svar: {getWorkingHoursLabel(consentedData.work_schedule)}</p>
+                  <div className="flex flex-col items-start gap-0.5 min-w-0">
+                    <p className="text-[10px] sm:text-xs text-white font-medium break-words">Hur mycket jobbar du idag?</p>
+                    <p className="text-white text-[9px] sm:text-[10px] break-words">Svar: {getWorkingHoursLabel(consentedData.work_schedule)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
-                  <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">När kan du börja nytt jobb?</p>
-                    <p className="text-white text-[10px]">Svar: {getAvailabilityLabel(consentedData.availability)}</p>
+                  <div className="flex flex-col items-start gap-0.5 min-w-0">
+                    <p className="text-[10px] sm:text-xs text-white font-medium break-words">När kan du börja nytt jobb?</p>
+                    <p className="text-white text-[9px] sm:text-[10px] break-words">Svar: {getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}
               </CardContent>
@@ -889,7 +889,7 @@ export default function ProfilePreview() {
                     className="absolute inset-0 overflow-y-auto custom-scrollbar"
                     style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
                   >
-                    <div className="p-6">
+                    <div className="p-2 sm:p-4 md:p-6">
                       <DesktopListView />
                     </div>
                   </div>
