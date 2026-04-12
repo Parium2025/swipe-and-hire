@@ -215,7 +215,7 @@ export default function ProfilePreview() {
                    className="w-full h-full rounded-full"
                    countdownVariant="preview"
                    showCountdown={true}
-                    disablePlayback={true}
+                    disablePlayback={false}
                  />
                ) : (
                 /* Om ingen video, visa Avatar med fallback till initialer */
