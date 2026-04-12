@@ -281,13 +281,22 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
             }}
           />
 
-          {/* Sheet */}
+          {/* Sheet — drag down to dismiss */}
           <motion.div
             className="absolute inset-x-0 bottom-0 z-40 max-h-[92dvh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.6 }}
+            onDragEnd={(_e, info) => {
+              // Dismiss if dragged down > 100px or with enough velocity
+              if (info.offset.y > 100 || info.velocity.y > 500) {
+                handleSheetClose();
+              }
+            }}
           >
             {/* Drag handle */}
             <div className="flex justify-center pt-3 pb-2 shrink-0">
