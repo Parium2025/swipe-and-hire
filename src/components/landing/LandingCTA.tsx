@@ -12,43 +12,40 @@ const LandingCTA = () => {
   };
 
   return (
-    <section id="kontakt" className="relative py-24 sm:py-32 lg:py-40 px-5 sm:px-6 md:px-12 lg:px-24" aria-label="Kom igång med Parium rekryteringsplattform">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 max-w-lg h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    <section id="kontakt" className="relative px-5 py-24 sm:px-6 sm:py-32 md:px-12 lg:px-24 lg:py-40" aria-label="Kom igång med Parium rekryteringsplattform">
+      <div className="absolute left-1/2 top-0 h-px w-2/3 max-w-lg -translate-x-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-      <div className="max-w-4xl mx-auto text-center relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-secondary/[0.04] rounded-full blur-[120px] pointer-events-none" aria-hidden="true" />
+      <div className="relative mx-auto max-w-4xl text-center">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[540px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/6 blur-[120px]" aria-hidden="true" />
 
         <motion.div
           className="relative z-10"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.8 }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.03em] text-white mb-5 sm:mb-6">
+          <h2 className="mb-5 text-3xl font-bold tracking-[-0.03em] text-white sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl">
             Redo att förändra
             <br />
-            <span className="bg-gradient-to-r from-secondary via-[hsl(180_80%_65%)] to-secondary bg-clip-text text-transparent">
-              hur du rekryterar?
-            </span>
+            hur du rekryterar?
           </h2>
-          <p className="text-white/35 text-[15px] sm:text-base md:text-lg max-w-lg mx-auto mb-8 sm:mb-10 leading-relaxed">
-            Gå med tusentals företag och jobbsökare som redan upptäckt framtidens rekrytering.
-            Helt gratis under lanseringsperioden.
+          <p className="mx-auto mb-8 max-w-lg text-[15px] leading-relaxed text-white/82 sm:mb-10 sm:text-base md:text-lg">
+            Gå med företag och kandidater som vill korta tiden från första kontakt till rätt match.
           </p>
 
           <Button
-            variant="secondary"
+            variant="glass"
             onClick={handleStart}
-            className="group rounded-full px-8 py-4 h-auto text-base sm:text-lg font-semibold min-h-[52px] gap-3"
+            className="group min-h-[54px] rounded-full border-white/[0.18] bg-white/[0.12] px-8 py-4 text-base font-semibold text-white sm:text-lg"
           >
-            <Sparkles className="w-5 h-5" />
+            <Sparkles className="h-5 w-5" />
             Kom igång gratis
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-200" />
+            <ArrowRight className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-1.5" />
           </Button>
 
-          <p className="text-white/20 text-xs mt-5">
-            Ingen kreditkort krävs · Gratis under hela beta-perioden
+          <p className="mt-5 text-xs text-white/68">
+            Ingen kreditkort krävs · Gratis under beta-perioden
           </p>
         </motion.div>
       </div>

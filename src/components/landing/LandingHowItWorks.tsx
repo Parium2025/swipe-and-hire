@@ -6,53 +6,50 @@ const steps = [
     icon: UserPlus,
     step: '01',
     title: 'Skapa profil',
-    description: 'Registrera dig på 30 sekunder. Ladda upp CV, spela in en videopresentation – eller båda.',
+    description: 'Registrera dig snabbt, ladda upp CV och aktivera video om du vill sticka ut direkt.',
   },
   {
     icon: Search,
     step: '02',
     title: 'Swipea & matcha',
-    description: 'Bläddra igenom relevanta jobb eller kandidater. Swipea höger på dem som matchar dina kriterier.',
+    description: 'Se relevanta jobb eller kandidater först, utan långa listor eller onödigt brus.',
   },
   {
     icon: Handshake,
     step: '03',
     title: 'Anställ direkt',
-    description: 'Chatta, boka intervju och signera – allt i en plattform. Från match till anställning utan omvägar.',
+    description: 'Chatta, boka intervju och gå från match till anställning i ett sammanhängande flöde.',
   },
 ];
-
-const ease = [0.22, 1, 0.36, 1] as const;
 
 const LandingHowItWorks = () => {
   return (
     <section
       id="hur-det-funkar"
-      className="relative py-24 sm:py-32 lg:py-40 px-5 sm:px-6 md:px-12 lg:px-24"
+      className="relative px-5 py-24 sm:px-6 sm:py-32 md:px-12 lg:px-24 lg:py-40"
       aria-labelledby="how-heading"
     >
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 max-w-lg h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute left-1/2 top-0 h-px w-2/3 max-w-lg -translate-x-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         <motion.header
-          className="text-center mb-16 sm:mb-20 lg:mb-24"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          className="mb-16 text-center sm:mb-20 lg:mb-24"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.6, ease }}
+          transition={{ duration: 0.6 }}
         >
-          <span className="text-secondary text-[11px] sm:text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">
-            Så fungerar det
+          <span className="mb-4 block text-[11px] font-semibold uppercase tracking-[0.2em] text-white/86 sm:text-xs">
+            Hur det funkar
           </span>
-          <h2 id="how-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white">
+          <h2 id="how-heading" className="text-3xl font-bold tracking-[-0.03em] text-white sm:text-4xl md:text-5xl">
             Tre steg till din nästa match
           </h2>
         </motion.header>
 
-        <div className="grid md:grid-cols-3 gap-8 sm:gap-10 lg:gap-14 relative">
-          {/* Connecting line — desktop */}
-          <div className="hidden md:block absolute top-14 left-[16%] right-[16%] h-px" aria-hidden="true">
-            <div className="w-full h-full bg-gradient-to-r from-white/5 via-secondary/15 to-white/5" />
+        <div className="relative grid gap-8 sm:gap-10 md:grid-cols-3 lg:gap-14">
+          <div className="absolute left-[16%] right-[16%] top-14 hidden h-px md:block" aria-hidden="true">
+            <div className="h-full w-full bg-gradient-to-r from-white/5 via-white/12 to-white/5" />
           </div>
 
           {steps.map((step, i) => {
@@ -60,22 +57,22 @@ const LandingHowItWorks = () => {
             return (
               <motion.article
                 key={step.step}
-                className="relative text-center group"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                className="group relative text-center"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.12, ease }}
+                transition={{ duration: 0.6, delay: i * 0.12 }}
               >
-                <div className="relative z-10 mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary border border-white/[0.08] flex items-center justify-center mb-6 sm:mb-8 group-hover:border-white/[0.15] transition-colors duration-300">
-                  <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-secondary" strokeWidth={1.5} />
-                  <span className="absolute -top-2.5 -right-2.5 w-7 h-7 rounded-full bg-secondary text-secondary-foreground text-[11px] font-bold flex items-center justify-center">
+                <div className="relative z-10 mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03] sm:mb-8 sm:h-20 sm:w-20">
+                  <Icon className="h-7 w-7 text-white sm:h-8 sm:w-8" strokeWidth={1.5} />
+                  <span className="absolute -right-2.5 -top-2.5 flex h-7 w-7 items-center justify-center rounded-full border border-white/[0.12] bg-white text-[11px] font-bold text-primary">
                     {step.step}
                   </span>
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 tracking-tight">
+                <h3 className="mb-3 text-lg font-semibold tracking-tight text-white sm:text-xl">
                   {step.title}
                 </h3>
-                <p className="text-white/35 text-[13px] sm:text-sm leading-relaxed max-w-[280px] mx-auto">
+                <p className="mx-auto max-w-[280px] text-[13px] leading-relaxed text-white/78 sm:text-sm">
                   {step.description}
                 </p>
               </motion.article>

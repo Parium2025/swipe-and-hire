@@ -2,12 +2,10 @@ import { lazy, Suspense, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Globe = lazy(() => import('./Globe'));
-
-const ease = [0.22, 1, 0.36, 1] as const;
 
 const LandingHero = () => {
   const navigate = useNavigate();
@@ -18,151 +16,154 @@ const LandingHero = () => {
     target: sectionRef,
     offset: ['start start', 'end start'],
   });
-  const globeY = useTransform(scrollYProgress, [0, 1], [0, isMobile ? 60 : 120]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.45], [1, 0.72]);
+  const contentScale = useTransform(scrollYProgress, [0, 0.45], [1, 0.985]);
+  const globeY = useTransform(scrollYProgress, [0, 1], [0, isMobile ? 30 : 70]);
 
   const goTo = (role: 'job_seeker' | 'employer') => {
     sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth', { state: { mode: 'register', role } });
   };
 
+  const heroPills = ['AI-screening', 'Swipe-matchning', 'Direktmeddelanden'];
+
   return (
     <section
       ref={sectionRef}
       className="relative min-h-[100dvh] flex items-center overflow-hidden"
-      aria-label="Parium – Skandinaviens smartaste rekryteringsplattform för snabb jobbmatchning"
+      aria-label="Parium – AI-driven rekryteringsplattform för kandidater och arbetsgivare i Norden"
     >
-      {/* Globe – massive background, pushed right on desktop */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,hsl(220_100%_11%)_0%,hsl(214_100%_14%)_46%,hsl(205_100%_16%)_100%)]" />
+        <div className="absolute left-[-10%] top-[18%] h-[42vh] w-[36vw] rounded-full bg-accent/5 blur-[120px]" />
+        <div className="absolute right-[-6%] top-1/2 h-[72vh] w-[52vw] -translate-y-1/2 rounded-full bg-secondary/10 blur-[140px]" />
+        <div className="absolute top-[8%] right-[6%] h-[68vw] w-[68vw] max-h-[1100px] max-w-[1100px] rounded-full border border-white/[0.04]" />
+        <div className="absolute top-[15%] right-[13%] h-[54vw] w-[54vw] max-h-[880px] max-w-[880px] rounded-full border border-white/[0.03]" />
+      </div>
+
       <motion.div
-        className="absolute inset-0 flex items-center justify-center lg:justify-end pointer-events-none"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2.5, delay: 0.1, ease }}
+        className="absolute inset-y-0 right-0 left-[38%] sm:left-[44%] lg:left-auto lg:w-[min(68vw,1080px)] pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.4, delay: 0.2 }}
         style={{ y: globeY }}
         aria-hidden="true"
       >
-        <div className="relative w-[95vw] h-[95vw] sm:w-[80vw] sm:h-[80vw] md:w-[70vw] md:h-[70vw] lg:w-[60vw] lg:h-[60vw] xl:w-[55vw] xl:h-[55vw] max-w-[900px] max-h-[900px] lg:translate-x-[12%] xl:translate-x-[18%]">
-          <Suspense
-            fallback={
-              <div className="w-full h-full rounded-full bg-white/[0.02] animate-pulse" />
-            }
-          >
-            <Globe className="w-full h-full pointer-events-auto" />
+        <div className="absolute inset-y-1/2 right-0 h-[125vw] w-[125vw] max-h-[1180px] max-w-[1180px] -translate-y-1/2 sm:h-[100vw] sm:w-[100vw] lg:h-[1060px] lg:w-[1060px] xl:h-[1120px] xl:w-[1120px]">
+          <Suspense fallback={<div className="h-full w-full rounded-full bg-white/[0.03]" />}>
+            <Globe className="h-full w-full" />
           </Suspense>
         </div>
       </motion.div>
 
-      {/* Bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-primary via-primary/80 to-transparent pointer-events-none z-[1]" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-primary via-primary/85 to-transparent pointer-events-none z-[1]" />
 
-      {/* Content */}
       <motion.div
-        className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 md:px-12 lg:px-24 w-full pt-28 sm:pt-32 lg:pt-0"
-        style={{ opacity: contentOpacity }}
+        className="relative z-10 max-w-7xl mx-auto w-full px-5 sm:px-6 md:px-12 lg:px-24 pt-28 sm:pt-32"
+        style={{ opacity: contentOpacity, scale: contentScale }}
       >
-        <div className="max-w-2xl">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3, ease }}
-          >
-            <span className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] sm:text-xs font-medium text-white/50 tracking-[0.08em] uppercase">
+        <div className="max-w-[580px]">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }}>
+            <span className="inline-flex items-center gap-2.5 rounded-full border border-white/[0.1] bg-white/[0.04] px-4 py-2 text-[11px] font-medium uppercase tracking-[0.08em] text-white/80 sm:text-xs">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-60" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-secondary opacity-70" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-secondary" />
               </span>
               Lansering 2026 — Early access öppen
             </span>
           </motion.div>
 
-          {/* Headline */}
           <motion.h1
-            className="mt-6 sm:mt-8 text-[2.5rem] leading-[1.05] sm:text-[3.5rem] md:text-[4rem] lg:text-[4.5rem] xl:text-[5rem] font-bold tracking-[-0.04em] text-white"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.5, ease }}
+            className="mt-7 text-[2.7rem] font-bold leading-[0.98] tracking-[-0.05em] text-white sm:text-[3.8rem] md:text-[4.5rem] lg:text-[5.35rem]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.9, delay: 0.35 }}
           >
             Rekrytering
             <br />
-            för den som
+            för bolag som
             <br />
-            <span className="relative inline-block">
-              <span className="bg-gradient-to-r from-secondary via-[hsl(180_80%_65%)] to-secondary bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_4s_ease-in-out_infinite]">
-                vägrar vänta
-              </span>
-              <motion.span
-                className="absolute -bottom-1.5 left-0 right-0 h-[3px] bg-gradient-to-r from-secondary/80 via-accent/60 to-transparent rounded-full"
-                initial={{ scaleX: 0, originX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 1.2, delay: 1.2, ease }}
-              />
+            <span className="bg-gradient-to-r from-white via-secondary to-white bg-clip-text text-transparent bg-[length:220%_auto] animate-[shimmer_5s_linear_infinite]">
+              vägrar vänta.
             </span>
           </motion.h1>
 
-          {/* Sub */}
           <motion.p
-            className="mt-5 sm:mt-7 text-[15px] sm:text-base md:text-[17px] text-white/40 max-w-[480px] leading-[1.7]"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.7, ease }}
+            className="mt-6 max-w-[540px] text-[15px] leading-[1.75] text-white/82 sm:text-base md:text-[17px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
           >
-            Parium kopplar ihop kandidater och arbetsgivare på{' '}
-            <strong className="text-white/60 font-medium">sekunder</strong> — inte veckor.
-            Swipea, matcha och anställ med Skandinaviens smartaste rekryteringsplattform.
+            Parium är en AI-driven rekryteringsplattform för företag och kandidater i Sverige och Norden.
+            Swipea, matcha, chatta och anställ snabbare med video-profiler, smart screening och direkt kontakt i ett flöde.
           </motion.p>
 
-          {/* CTAs — using app's actual button system */}
           <motion.div
-            className="flex flex-col sm:flex-row gap-3 mt-8 sm:mt-10"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.9, ease }}
+            className="mt-6 flex flex-wrap gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.62 }}
+          >
+            {heroPills.map((pill) => (
+              <span
+                key={pill}
+                className="inline-flex min-h-[36px] items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-3.5 text-[12px] font-medium text-white/88"
+              >
+                {pill}
+              </span>
+            ))}
+          </motion.div>
+
+          <motion.div
+            className="mt-9 flex flex-col gap-3 sm:flex-row"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.74 }}
           >
             <Button
-              variant="secondary"
+              variant="glass"
               onClick={() => goTo('job_seeker')}
-              className="group rounded-full px-7 py-4 h-auto text-[15px] sm:text-base font-semibold min-h-[52px] gap-2.5"
+              className="group min-h-[54px] rounded-full border-white/[0.18] bg-white/[0.12] px-7 py-4 text-base font-semibold text-white shadow-[0_0_80px_hsl(var(--secondary)/0.10)]"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="h-4 w-4" />
               Hitta jobb nu
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
             </Button>
             <Button
               variant="glass"
               onClick={() => goTo('employer')}
-              className="group rounded-full px-7 py-4 h-auto text-[15px] sm:text-base font-semibold min-h-[52px] gap-2.5"
+              className="group min-h-[54px] rounded-full px-7 py-4 text-base font-semibold text-white"
             >
               Hitta kandidater
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
             </Button>
           </motion.div>
 
-          {/* Social proof */}
           <motion.div
-            className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mt-10 sm:mt-14"
+            className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.3, duration: 0.8 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
           >
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2.5">
-                {['from-secondary to-accent', 'from-accent to-primary-glow', 'from-primary-glow to-secondary', 'from-white/10 to-white/20'].map((grad, i) => (
-                  <div key={i} className={`w-8 h-8 rounded-full bg-gradient-to-br ${grad} border-2 border-primary ring-1 ring-white/[0.06]`} />
+                {['bg-white', 'bg-white/90', 'bg-secondary', 'bg-white/20'].map((item, i) => (
+                  <div key={i} className={`h-8 w-8 rounded-full border-2 border-primary ${item}`} />
                 ))}
               </div>
-              <div className="text-white/30 text-[13px]">
-                <span className="text-white/50 font-medium">500+</span> företag i kön
-              </div>
+              <span className="text-[13px] text-white/76">
+                <span className="font-semibold text-white">500+</span> företag i väntelistan
+              </span>
             </div>
-            <div className="hidden sm:block w-px h-5 bg-white/[0.08]" />
-            <div className="flex items-center gap-1.5">
+            <div className="hidden h-5 w-px bg-white/[0.12] sm:block" />
+            <div className="flex items-center gap-1.5 text-white/84">
               {[1, 2, 3, 4, 5].map((star) => (
-                <svg key={star} className="w-3.5 h-3.5 text-secondary fill-secondary" viewBox="0 0 20 20">
+                <svg key={star} className="h-3.5 w-3.5 fill-white text-white" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               ))}
-              <span className="text-white/30 text-[13px] ml-1">4.9/5 betyg</span>
+              <span className="ml-1 text-[13px] text-white/76">4.9/5 från tidiga användare</span>
             </div>
           </motion.div>
         </div>

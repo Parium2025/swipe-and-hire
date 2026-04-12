@@ -5,7 +5,7 @@ const features = [
   {
     icon: Zap,
     title: 'Swipe-matchning',
-    description: 'Kandidater och jobb matchas med ett swipe. Snabbare och mer träffsäkert än alla traditionella rekryteringsplattformar.',
+    description: 'Kandidater och jobb matchas med ett swipe. Snabbare och mer träffsäkert än traditionell rekrytering.',
   },
   {
     icon: ScanFace,
@@ -15,22 +15,22 @@ const features = [
   {
     icon: BarChart3,
     title: 'AI-driven screening',
-    description: 'Automatisk AI-utvärdering mot dina urvalskriterier. Sparar timmar av manuellt rekryteringsarbete varje vecka.',
+    description: 'Automatisk AI-utvärdering mot dina urvalskriterier. Spara timmar av manuellt arbete varje vecka.',
   },
   {
     icon: Shield,
     title: 'GDPR-säkert',
-    description: 'All data lagras i Sverige med end-to-end kryptering. Fullt GDPR-kompatibelt med inbyggd samtyckshantering.',
+    description: 'All data lagras tryggt och plattformen är byggd för modern dataskyddshantering.',
   },
   {
     icon: MessageCircle,
     title: 'Direktmeddelanden',
-    description: 'Chatta i realtid med kandidater och arbetsgivare. Boka intervjuer direkt i plattformen utan omvägar.',
+    description: 'Chatta, följ upp och boka intervjuer direkt i plattformen utan omvägar.',
   },
   {
     icon: Globe2,
     title: 'Byggt för Norden',
-    description: 'Designat specifikt för den nordiska arbetsmarknaden med lokala anpassningar, svensk UX och nordisk jobbkultur.',
+    description: 'Skapat för Sverige och Norden med lokala flöden, språk och rekryteringsbeteenden i fokus.',
   },
 ];
 
@@ -38,56 +38,52 @@ const LandingFeatures = () => {
   return (
     <section
       id="funktioner"
-      className="relative py-24 sm:py-32 lg:py-40 px-5 sm:px-6 md:px-12 lg:px-24"
+      className="relative px-5 py-24 sm:px-6 sm:py-32 md:px-12 lg:px-24 lg:py-40"
       aria-labelledby="features-heading"
     >
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 max-w-lg h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute left-1/2 top-0 h-px w-2/3 max-w-lg -translate-x-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         <motion.header
-          className="text-center mb-16 sm:mb-20 lg:mb-24"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          className="mb-16 text-center sm:mb-20 lg:mb-24"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6 }}
         >
-          <span className="text-secondary text-[11px] sm:text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">
+          <span className="mb-4 block text-[11px] font-semibold uppercase tracking-[0.2em] text-white/86 sm:text-xs">
             Funktioner
           </span>
-          <h2
-            id="features-heading"
-            className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white mb-4 sm:mb-5"
-          >
-            Allt du behöver.
+          <h2 id="features-heading" className="mb-4 text-3xl font-bold tracking-[-0.03em] text-white sm:mb-5 sm:text-4xl md:text-5xl">
+            Rekryteringsverktyget som
             <br />
-            <span className="text-white/35">Inget du inte gör.</span>
+            <span className="text-white">faktiskt känns snabbt.</span>
           </h2>
-          <p className="text-white/35 text-[15px] sm:text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-            En komplett rekryteringsplattform byggd från grunden för att vara snabb, intuitiv och effektiv.
+          <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-white/80 sm:text-base md:text-lg">
+            Ett modernt system för rekrytering, jobbmatchning, screening och dialog — byggt för att kännas premium i varje steg.
           </p>
         </motion.header>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
           {features.map((feature, i) => {
             const Icon = feature.icon;
             return (
               <motion.article
                 key={feature.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true, margin: '-40px' }}
                 transition={{ duration: 0.5, delay: i * 0.06 }}
-                className="group relative p-6 sm:p-7 lg:p-8 rounded-2xl border border-white/[0.06] bg-white/[0.02]
-                  hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-500"
+                className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.04] sm:p-7 lg:p-8"
               >
                 <div className="relative z-10">
-                  <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center mb-5 group-hover:border-white/[0.15] transition-all duration-300">
-                    <Icon className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.1] bg-white/[0.05] transition-all duration-300 group-hover:border-white/[0.18]">
+                    <Icon className="h-5 w-5 text-white" strokeWidth={1.5} />
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2.5 tracking-tight">
+                  <h3 className="mb-2.5 text-base font-semibold tracking-tight text-white sm:text-lg">
                     {feature.title}
                   </h3>
-                  <p className="text-white/35 text-[13px] sm:text-sm leading-relaxed group-hover:text-white/50 transition-colors duration-300">
+                  <p className="text-[13px] leading-relaxed text-white/78 sm:text-sm">
                     {feature.description}
                   </p>
                 </div>
