@@ -169,6 +169,9 @@ export const JobSlide = memo(function JobSlide({
     lastTapTimestampRef.current = 0;
     clearTapHint();
 
+    // Haptic feedback on swipe commit
+    hapticMedium();
+
     if (direction === 'right') {
       animate(x, 0, SNAP_SPRING);
       onSwipeRight();
@@ -280,6 +283,9 @@ export const JobSlide = memo(function JobSlide({
     };
   }, [useTouchTunnel, overlayOpen]);
 
+  // Track whether we already fired threshold haptic for this gesture
+  const thresholdHapticFiredRef = useRef(false);
+
   const handleTouchMoveCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (
       !useTouchTunnel ||
@@ -309,6 +315,7 @@ export const JobSlide = memo(function JobSlide({
       }
 
       gesture.isDragging = true;
+      thresholdHapticFiredRef.current = false;
       lastTapTimestampRef.current = 0;
       clearTapHint();
     }
@@ -318,6 +325,12 @@ export const JobSlide = memo(function JobSlide({
     }
 
     x.set(deltaX);
+
+    // Light haptic when crossing the swipe threshold (fire once per gesture)
+    if (!thresholdHapticFiredRef.current && Math.abs(deltaX) >= SWIPE_THRESHOLD) {
+      thresholdHapticFiredRef.current = true;
+      hapticLight();
+    }
   }, [clearTapHint, useTouchTunnel, x]);
 
   const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
