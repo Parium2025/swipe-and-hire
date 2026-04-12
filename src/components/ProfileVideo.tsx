@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useDevice } from '@/hooks/use-device';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import { Play, Pause } from 'lucide-react';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 
