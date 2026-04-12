@@ -16,9 +16,10 @@ interface ProfileVideoProps {
   onPlayingChange?: (isPlaying: boolean) => void; // Callback when playing state changes
   onClick?: (e: React.MouseEvent) => void; // Custom click handler (bypasses default play behavior)
   disablePlayback?: boolean; // When true, clicking does nothing (just shows thumbnail)
+  forceTouchMode?: boolean; // Force touch-style controls even on mouse devices (used in previews)
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onClick, disablePlayback = false }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onClick, disablePlayback = false, forceTouchMode = false }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -31,6 +32,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   const device = useDevice();
   const isMobile = device === 'mobile';
   const isTouchDevice = useTouchCapable();
+  const effectiveIsTouchDevice = forceTouchMode || isTouchDevice;
 
   // Preload cover image if provided (videoUrl and coverImageUrl are now pre-signed by parent)
   const coverImages = useMemo(() => {
@@ -131,7 +133,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
     }
-    if (!isTouchDevice) {
+    if (!effectiveIsTouchDevice) {
       setShowVideo(false);
     }
   };
@@ -181,19 +183,19 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   };
 
   const handleMouseEnter = () => {
-    if (!isTouchDevice) {
+    if (!effectiveIsTouchDevice) {
       setControlsVisible(true);
     }
   };
 
   const handleMouseLeave = () => {
-    if (!isTouchDevice && !isDragging) {
+    if (!effectiveIsTouchDevice && !isDragging) {
       setControlsVisible(false);
     }
   };
 
   const handleTouchStart = () => {
-    if (isTouchDevice) {
+    if (effectiveIsTouchDevice) {
       setControlsVisible(true);
       setTimeout(() => setControlsVisible(false), 3000);
     }
@@ -203,7 +205,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     if (isDragging) {
       const handleGlobalMouseUp = () => {
         setIsDragging(false);
-        if (!isTouchDevice) {
+        if (!effectiveIsTouchDevice) {
           setControlsVisible(false);
         }
       };
@@ -224,7 +226,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
         document.removeEventListener('mousemove', handleGlobalMouseMove);
       };
     }
-  }, [isDragging, isTouchDevice, duration]);
+  }, [isDragging, effectiveIsTouchDevice, duration]);
 
   // Visa alltid omslagsbild/initialer medan URL:er signeras för att undvika blink
 
@@ -278,10 +280,14 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       )}
       
       {/* Play/Pause overlay for touch devices or preview variant */}
-      {(isTouchDevice || countdownVariant === 'preview') && (
+      {(effectiveIsTouchDevice || countdownVariant === 'preview') && (
         <div
-          className={`absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity ${
-            isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-0'
+          className={`absolute inset-0 flex items-center justify-center transition-opacity ${
+            isPlaying
+              ? (effectiveIsTouchDevice || countdownVariant === 'preview'
+                  ? 'bg-transparent opacity-100'
+                  : 'bg-black/20 opacity-0 hover:opacity-100')
+              : 'bg-transparent opacity-0'
           }`}
           onClick={(e) => {
             e.stopPropagation();
