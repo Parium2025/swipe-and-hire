@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
 import type { SwipeJob } from './SwipeCard';
 
 function resolveImageUrl(url?: string, bucket = 'job-images'): string | null {
