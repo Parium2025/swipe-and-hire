@@ -30,6 +30,8 @@ export const SwipeDots = memo(function SwipeDots({
   const scrubStartIndexRef = useRef(currentIndex);
   const scrubStartYRef = useRef<number | null>(null);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
+  /** Generation counter to prevent stale touchEnd from killing a new session */
+  const sessionRef = useRef(0);
 
   useEffect(() => {
     if (!isScrubbingRef.current) {
@@ -78,7 +80,10 @@ export const SwipeDots = memo(function SwipeDots({
     if (navigator.vibrate) navigator.vibrate(12);
   }, []);
 
-  const stopScrub = useCallback(() => {
+  const stopScrub = useCallback((session: number) => {
+    // Ignore stale touchEnd from a previous session
+    if (session !== sessionRef.current) return;
+
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
@@ -97,6 +102,9 @@ export const SwipeDots = memo(function SwipeDots({
     (e: React.TouchEvent) => {
       if (count <= 1) return;
 
+      // New session – any pending stopScrub from a previous session will be ignored
+      const session = ++sessionRef.current;
+
       const touch = e.touches[0];
       const startX = touch.clientX;
       const startY = touch.clientY;
@@ -107,6 +115,7 @@ export const SwipeDots = memo(function SwipeDots({
       }
 
       longPressTimerRef.current = setTimeout(() => {
+        if (session !== sessionRef.current) return;
         startScrub(startY);
       }, LONG_PRESS_MS);
     },
@@ -157,7 +166,7 @@ export const SwipeDots = memo(function SwipeDots({
   );
 
   const handleTouchEnd = useCallback(() => {
-    stopScrub();
+    stopScrub(sessionRef.current);
   }, [stopScrub]);
 
   useEffect(() => {
