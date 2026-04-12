@@ -14,6 +14,7 @@ interface ProfileVideoProps {
   showProgressBar?: boolean; // Show progress/scrubbing bar on hover (default: true)
   countdownVariant?: 'default' | 'compact' | 'preview'; // 'compact' for Min Profil, 'preview' for Förhandsgranska Profil, 'default' elsewhere
   onPlayingChange?: (isPlaying: boolean) => void; // Callback when playing state changes
+  onRemainingChange?: (remaining: number | null) => void; // Callback with remaining seconds
   onClick?: (e: React.MouseEvent) => void; // Custom click handler (bypasses default play behavior)
   disablePlayback?: boolean; // When true, clicking does nothing (just shows thumbnail)
   forceTouchMode?: boolean; // Force touch-style controls even on mouse devices (used in previews)
