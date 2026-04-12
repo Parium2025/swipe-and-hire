@@ -16,9 +16,16 @@ const SCRUB_STEP_PX = 32;
 
 const formatCounterValue = (value: number) => new Intl.NumberFormat('sv-SE').format(value);
 
-const getTouchByIdentifier = (touches: TouchList, identifier: number | null) => {
+const getTouchByIdentifier = (
+  touches: { length: number; item: (index: number) => Touch | null },
+  identifier: number | null,
+) => {
   if (identifier === null) return null;
-  return Array.from(touches).find((touch) => touch.identifier === identifier) ?? null;
+  for (let index = 0; index < touches.length; index += 1) {
+    const touch = touches.item(index);
+    if (touch?.identifier === identifier) return touch;
+  }
+  return null;
 };
 
 export const SwipeDots = memo(function SwipeDots({
