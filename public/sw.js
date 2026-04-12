@@ -8,7 +8,7 @@ const API_CACHE = `parium-api-${CACHE_VERSION}`;
 const CRITICAL_ASSETS = [
   '/',
   '/index.html',
-  '/favicon.ico',
+  '/favicon-parium.png',
 ];
 
 // Mönster för bilder och filer som ska cachas permanent
