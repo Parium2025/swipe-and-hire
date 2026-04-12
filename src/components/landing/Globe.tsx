@@ -7,7 +7,7 @@ interface GlobeProps {
   className?: string;
 }
 
-const markers = [
+const markers: Array<{ location: [number, number]; size: number }> = [
   { location: [59.3293, 18.0686], size: 0.18 },
   { location: [57.7089, 11.9746], size: 0.11 },
   { location: [55.604, 13.003], size: 0.1 },
