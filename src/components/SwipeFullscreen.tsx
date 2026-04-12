@@ -97,7 +97,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
   const [sectionHeight, setSectionHeight] = useState(END_STATE_HEIGHT);
   const [overlayInteractionShieldActive, setOverlayInteractionShieldActive] = useState(false);
-  const [lastSkippedJobId, setLastSkippedJobId] = useState<string | null>(null);
+  const [undoStack, setUndoStack] = useState<string[]>([]);
   const [undoEntryJobId, setUndoEntryJobId] = useState<string | null>(null);
 
   /* ── Clear persisted index on unmount (reset on re-entry) ── */
