@@ -116,7 +116,7 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-primary text-white overflow-x-hidden overflow-y-auto" style={{ overflowY: 'auto', position: 'static', height: 'auto' }}>
+    <div className="fixed inset-0 w-full bg-primary text-white overflow-x-hidden overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
       {/* Deep layered gradient background */}
       <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-30%,hsl(210_80%_15%/0.6),transparent)]" />
