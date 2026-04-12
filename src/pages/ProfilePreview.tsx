@@ -881,9 +881,9 @@ export default function ProfilePreview() {
             {/* Desktop monitor frame - professional mockup */}
             <div className="relative">
               {/* Monitor screen */}
-              <div className="relative w-[700px] max-w-[90vw] rounded-t-xl bg-black p-3 shadow-2xl">
+              <div className="relative w-[340px] sm:w-[520px] md:w-[700px] max-w-[90vw] rounded-t-xl bg-black p-2 sm:p-3 shadow-2xl">
                 {/* Screen bezel */}
-                <div className="relative w-full h-[420px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                <div className="relative w-full h-[200px] sm:h-[300px] md:h-[420px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                   {/* Innehåll med Parium bakgrund */}
                   <div 
                     className="absolute inset-0 overflow-y-auto custom-scrollbar"
