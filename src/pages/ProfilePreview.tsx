@@ -616,7 +616,6 @@ export default function ProfilePreview() {
                     consentedData={consentedData}
                   />
                 ) : (
-               ) : (
                  <Avatar className="h-[140px] w-[140px] ring-2 ring-white/20 shadow-xl">
                    <AvatarImage src={profileImageUrl || signedCoverUrl || ''} className="object-cover" />
                    <AvatarFallback className="bg-primary text-white text-4xl" delayMs={200}>
