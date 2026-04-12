@@ -105,6 +105,12 @@ export const JobSlide = memo(function JobSlide({
   const cardScale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
   // Combine drag scale with entry animation scale
   const combinedScale = useTransform([cardScale, entryScale], ([cs, es]) => (cs as number) * (es as number));
+  // Dynamic shadow that intensifies with drag distance — premium depth effect
+  const cardShadow = useTransform(x, [-200, 0, 200], [
+    '0 25px 60px -12px rgba(0,0,0,0.5), 0 8px 20px -6px rgba(0,0,0,0.3)',
+    '0 10px 30px -8px rgba(0,0,0,0.25)',
+    '0 25px 60px -12px rgba(0,0,0,0.5), 0 8px 20px -6px rgba(0,0,0,0.3)',
+  ]);
   // Underlay: driven by explicit timed animation, NOT drag progress
   const underlayY = useMotionValue(800);
   const underlayScale = useMotionValue(0.68);
