@@ -428,7 +428,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           hasFilter={!!filterState}
           activeFilterCount={filterState?.activeFilterCount ?? 0}
           onFilterOpen={handleFilterOpen}
-          canUndo={undoStack.length > 0 && !!onUndoSwipeAction}
+          canUndo={canUndo && !!onUndoSwipeAction}
           onUndo={handleUndo}
         />
         {filterState && (
@@ -522,7 +522,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 overlayOpen={showDetail || showApply || showFilter}
                 skipEntryAnimation={job.id === skipEntryAnimationForId}
                 isUndoEntry={job.id === undoEntryJobId}
-                canUndo={undoStack.length > 0 && !!onUndoSwipeAction}
+                canUndo={canUndo && !!onUndoSwipeAction}
                 onSwipeRight={handleSwipeRight}
                 onSwipeLeft={handleSwipeLeft}
                 onSave={() => onToggleSave(job.id)}
