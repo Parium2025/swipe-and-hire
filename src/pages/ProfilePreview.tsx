@@ -617,16 +617,17 @@ export default function ProfilePreview() {
                      }
                    }}
                  >
-                   <ProfileVideo
-                     videoUrl={effectiveVideoUrl}
-                     coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
-                     userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
-                     alt="Profilbild"
-                     className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
-                     countdownVariant="preview"
-                     showCountdown={true}
-                     disablePlayback={false}
-                   />
+                    <ProfileVideo
+                      videoUrl={effectiveVideoUrl}
+                      coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
+                      userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
+                      alt="Profilbild"
+                      className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
+                      countdownVariant="preview"
+                      showCountdown={true}
+                      disablePlayback={false}
+                      forceTouchMode={true}
+                    />
                  </div>
                ) : (
                  <Avatar className="h-[140px] w-[140px] ring-2 ring-white/20 shadow-xl">
