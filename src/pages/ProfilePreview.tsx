@@ -183,56 +183,12 @@ export default function ProfilePreview() {
 
     // FÖRSTA VY: Minimal Tinder-stil med swipe - anpassat för mobil-mockup
     const TinderCard = () => {
-      const [startX, setStartX] = useState(0);
-      const [currentX, setCurrentX] = useState(0);
-      const [isDragging, setIsDragging] = useState(false);
-
-      const handleTouchStart = (e: React.TouchEvent) => {
-        setStartX(e.touches[0].clientX);
-        setIsDragging(true);
-      };
-
-      const handleTouchMove = (e: React.TouchEvent) => {
-        if (!isDragging) return;
-        setCurrentX(e.touches[0].clientX - startX);
-      };
-
-      const handleTouchEnd = () => {
-        if (!isDragging) return;
-        setIsDragging(false);
-        
-        // Swipe threshold
-        if (Math.abs(currentX) > 100) {
-          if (currentX > 0) {
-            // Swipe höger - visa intresse
-            toast({
-              title: "Swipade höger! 👍",
-              description: "Visar intresse för kandidaten",
-            });
-          } else {
-            // Swipe vänster - inte intresserad
-            toast({
-              title: "Swipade vänster 👎",
-              description: "Inte intresserad av kandidaten",
-            });
-          }
-        }
-        
-        // Reset position
-        setCurrentX(0);
-      };
-
       return (
       <div className="w-full h-full relative">
         <Card 
           className="bg-transparent border-none shadow-none overflow-hidden rounded-none transition-all duration-300 h-full"
           onClick={() => setShowDetailedView(true)}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
           style={{
-            transform: `translateX(${currentX}px) rotate(${currentX * 0.1}deg)`,
-            transition: isDragging ? 'none' : 'transform 0.3s ease-out',
             cursor: 'pointer'
           }}
         >
