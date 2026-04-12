@@ -87,7 +87,7 @@ export const JobSeekerInterviewsCard = memo(() => {
       <CardContent className="relative p-3 h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
-          <div className="p-2 rounded-xl bg-white/10">
+          <div className="p-2 rounded-xl bg-white/10" style={{ animationDelay: '0s', animation: 'none' }}>
             <Calendar className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
           <span className="text-[10px] text-white uppercase tracking-wider font-medium">INTERVJUER</span>
