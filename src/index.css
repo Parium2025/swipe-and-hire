@@ -13,6 +13,13 @@
   100% { background-position: -200% center; }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.6; }
+  25% { transform: translateY(-12px) translateX(4px); opacity: 1; }
+  50% { transform: translateY(-6px) translateX(-3px); opacity: 0.4; }
+  75% { transform: translateY(-18px) translateX(6px); opacity: 0.8; }
+}
+
 html {
   scrollbar-gutter: stable both-edges;
   overflow-x: hidden !important;
