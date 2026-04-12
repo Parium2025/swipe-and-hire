@@ -16,6 +16,24 @@ const SCRUB_STEP_PX = 32;
 
 const formatCounterValue = (value: number) => new Intl.NumberFormat('sv-SE').format(value);
 
+type TouchLike = {
+  identifier: number;
+  clientX: number;
+  clientY: number;
+};
+
+const getTouchByIdentifier = (
+  touches: { length: number; item: (index: number) => TouchLike | null },
+  identifier: number | null,
+) => {
+  if (identifier === null) return null;
+  for (let index = 0; index < touches.length; index += 1) {
+    const touch = touches.item(index);
+    if (touch?.identifier === identifier) return touch;
+  }
+  return null;
+};
+
 export const SwipeDots = memo(function SwipeDots({
   count,
   currentIndex,
@@ -30,6 +48,8 @@ export const SwipeDots = memo(function SwipeDots({
   const scrubStartIndexRef = useRef(currentIndex);
   const scrubStartYRef = useRef<number | null>(null);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
+  const activeTouchIdRef = useRef<number | null>(null);
+  const activeSessionRef = useRef(0);
   /** Generation counter to prevent stale touchEnd from killing a new session */
   const sessionRef = useRef(0);
 
@@ -91,6 +111,7 @@ export const SwipeDots = memo(function SwipeDots({
 
     touchStartPosRef.current = null;
     scrubStartYRef.current = null;
+    activeTouchIdRef.current = null;
 
     if (isScrubbingRef.current) {
       setIsScrubbing(false);
@@ -104,10 +125,12 @@ export const SwipeDots = memo(function SwipeDots({
 
       // New session – any pending stopScrub from a previous session will be ignored
       const session = ++sessionRef.current;
+      activeSessionRef.current = session;
 
       const touch = e.touches[0];
       const startX = touch.clientX;
       const startY = touch.clientY;
+      activeTouchIdRef.current = touch.identifier;
       touchStartPosRef.current = { x: startX, y: startY };
 
       if (longPressTimerRef.current) {
@@ -124,7 +147,8 @@ export const SwipeDots = memo(function SwipeDots({
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
-      const touch = e.touches[0];
+      const touch = getTouchByIdentifier(e.touches, activeTouchIdRef.current);
+      if (!touch) return;
 
       if (!isScrubbingRef.current) {
         if (touchStartPosRef.current) {
@@ -165,8 +189,14 @@ export const SwipeDots = memo(function SwipeDots({
     [count, onScrubTo],
   );
 
-  const handleTouchEnd = useCallback(() => {
-    stopScrub(sessionRef.current);
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const activeTouchId = activeTouchIdRef.current;
+    if (activeTouchId === null) return;
+
+    const touch = getTouchByIdentifier(e.changedTouches, activeTouchId);
+    if (!touch) return;
+
+    stopScrub(activeSessionRef.current);
   }, [stopScrub]);
 
   useEffect(() => {
