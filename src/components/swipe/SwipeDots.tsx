@@ -166,7 +166,7 @@ export const SwipeDots = memo(function SwipeDots({
   );
 
   const handleTouchEnd = useCallback(() => {
-    stopScrub();
+    stopScrub(sessionRef.current);
   }, [stopScrub]);
 
   useEffect(() => {
