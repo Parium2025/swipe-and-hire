@@ -97,7 +97,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [isReturningFromEnd, setIsReturningFromEnd] = useState(false);
   const [sectionHeight, setSectionHeight] = useState(END_STATE_HEIGHT);
   const [overlayInteractionShieldActive, setOverlayInteractionShieldActive] = useState(false);
-  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const undoStackRef = useRef<string[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
   const [undoEntryJobId, setUndoEntryJobId] = useState<string | null>(null);
 
   /* ── Clear persisted index on unmount (reset on re-entry) ── */
@@ -354,8 +355,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     // Record skip action – the job will be removed from the array by the parent
     onRecordSwipeAction?.(skippedJob.id, 'skipped');
 
-    // Push to undo stack
-    setUndoStack(prev => [...prev, skippedJob.id]);
+    // Push to undo stack (ref-based to avoid re-renders)
+    undoStackRef.current = [...undoStackRef.current, skippedJob.id];
+    setCanUndo(true);
   }, [currentIndex, jobs, onRecordSwipeAction]);
 
   // Guard against tap-through: when an overlay closes, ignore taps briefly
@@ -401,14 +403,16 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const handleFilterClose = useCallback(() => { setShowFilter(false); startOverlayCooldown(); }, [startOverlayCooldown]);
 
   const handleUndo = useCallback(() => {
-    if (undoStack.length === 0 || !onUndoSwipeAction) return;
-    const lastId = undoStack[undoStack.length - 1];
+    const stack = undoStackRef.current;
+    if (stack.length === 0 || !onUndoSwipeAction) return;
+    const lastId = stack[stack.length - 1];
     setUndoEntryJobId(lastId);
     onUndoSwipeAction(lastId);
-    setUndoStack(prev => prev.slice(0, -1));
+    undoStackRef.current = stack.slice(0, -1);
+    setCanUndo(undoStackRef.current.length > 0);
     // Clear undo entry flag after animation completes
     setTimeout(() => setUndoEntryJobId(null), 700);
-  }, [undoStack, onUndoSwipeAction]);
+  }, [onUndoSwipeAction]);
 
   // Stable ref setter
   const setSlideRef = useCallback((el: HTMLDivElement | null, idx: number) => {
@@ -424,7 +428,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
           hasFilter={!!filterState}
           activeFilterCount={filterState?.activeFilterCount ?? 0}
           onFilterOpen={handleFilterOpen}
-          canUndo={undoStack.length > 0 && !!onUndoSwipeAction}
+          canUndo={canUndo && !!onUndoSwipeAction}
           onUndo={handleUndo}
         />
         {filterState && (
@@ -518,7 +522,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
                 overlayOpen={showDetail || showApply || showFilter}
                 skipEntryAnimation={job.id === skipEntryAnimationForId}
                 isUndoEntry={job.id === undoEntryJobId}
-                canUndo={undoStack.length > 0 && !!onUndoSwipeAction}
+                canUndo={canUndo && !!onUndoSwipeAction}
                 onSwipeRight={handleSwipeRight}
                 onSwipeLeft={handleSwipeLeft}
                 onSave={() => onToggleSave(job.id)}
