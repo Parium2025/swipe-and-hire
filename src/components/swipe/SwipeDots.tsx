@@ -16,8 +16,14 @@ const SCRUB_STEP_PX = 32;
 
 const formatCounterValue = (value: number) => new Intl.NumberFormat('sv-SE').format(value);
 
+type TouchLike = {
+  identifier: number;
+  clientX: number;
+  clientY: number;
+};
+
 const getTouchByIdentifier = (
-  touches: { length: number; item: (index: number) => Touch | null },
+  touches: { length: number; item: (index: number) => TouchLike | null },
   identifier: number | null,
 ) => {
   if (identifier === null) return null;
