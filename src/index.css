@@ -20,6 +20,21 @@
   75% { transform: translateY(-18px) translateX(6px); opacity: 0.8; }
 }
 
+@keyframes orbitSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbitDrift {
+  0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.95; }
+  50% { transform: translate3d(0, -10px, 0); opacity: 0.6; }
+}
+
+@keyframes globePulse {
+  0%, 100% { transform: scale(1); opacity: 0.88; }
+  50% { transform: scale(1.025); opacity: 1; }
+}
+
 html {
   scrollbar-gutter: stable both-edges;
   overflow-x: hidden !important;
@@ -224,6 +239,14 @@ All colors MUST be HSL.
 
     /* Pure colors tokens */
     --pure-white: 0 0% 100%;
+    --landing-surface: 215 90% 14%;
+    --landing-surface-strong: 214 88% 17%;
+    --landing-panel: 216 76% 16%;
+    --landing-panel-strong: 214 78% 18%;
+    --landing-border: 200 82% 68%;
+    --landing-shadow: 215 100% 6%;
+    --landing-glow: 200 100% 60%;
+    --landing-grid: 200 70% 80%;
 
     /* Parium Brand Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(215 100% 12%), hsl(200 100% 60%));
@@ -302,6 +325,122 @@ All colors MUST be HSL.
 }
 
 @layer components {
+  .landing-page-surface {
+    background:
+      radial-gradient(circle at 14% 18%, hsl(var(--secondary) / 0.14), transparent 24%),
+      radial-gradient(circle at 82% 20%, hsl(var(--landing-glow) / 0.18), transparent 24%),
+      radial-gradient(circle at 72% 48%, hsl(var(--landing-glow) / 0.12), transparent 30%),
+      linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--landing-surface)) 48%, hsl(var(--primary)) 100%);
+  }
+
+  .landing-grid-lines {
+    background-image:
+      linear-gradient(to right, hsl(var(--landing-grid) / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--landing-grid) / 0.05) 1px, transparent 1px);
+    background-size: 160px 160px;
+    mask-image: linear-gradient(180deg, transparent 0%, black 12%, black 82%, transparent 100%);
+    opacity: 0.6;
+  }
+
+  .landing-noise {
+    opacity: 0.08;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.75'/%3E%3C/svg%3E");
+  }
+
+  .landing-panel {
+    background:
+      linear-gradient(180deg, hsl(var(--landing-panel) / 0.92), hsl(var(--landing-surface-strong) / 0.82)),
+      hsl(var(--landing-panel) / 0.9);
+    border: 1px solid hsl(var(--landing-border) / 0.14);
+    box-shadow:
+      0 30px 80px -46px hsl(var(--landing-shadow) / 0.96),
+      inset 0 1px 0 hsl(var(--pure-white) / 0.08);
+  }
+
+  .landing-panel-strong {
+    background:
+      radial-gradient(circle at top right, hsl(var(--secondary) / 0.12), transparent 32%),
+      linear-gradient(180deg, hsl(var(--landing-panel-strong) / 0.96), hsl(var(--landing-surface) / 0.88));
+    border: 1px solid hsl(var(--landing-border) / 0.16);
+    box-shadow:
+      0 42px 110px -60px hsl(var(--landing-shadow) / 0.98),
+      inset 0 1px 0 hsl(var(--pure-white) / 0.1);
+  }
+
+  .landing-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.5rem;
+    padding-inline: 1rem;
+    border-radius: 9999px;
+    border: 1px solid hsl(var(--landing-border) / 0.16);
+    background: hsl(var(--landing-panel) / 0.78);
+    color: hsl(var(--pure-white));
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    box-shadow: inset 0 1px 0 hsl(var(--pure-white) / 0.08);
+  }
+
+  .landing-signal-pill {
+    display: inline-flex;
+    min-height: 2.5rem;
+    align-items: center;
+    border-radius: 9999px;
+    border: 1px solid hsl(var(--landing-border) / 0.14);
+    background: hsl(var(--landing-panel) / 0.74);
+    padding-inline: 0.95rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: hsl(var(--pure-white));
+    box-shadow: inset 0 1px 0 hsl(var(--pure-white) / 0.06);
+  }
+
+  .landing-primary-button {
+    border-color: hsl(var(--landing-border) / 0.34) !important;
+    background:
+      linear-gradient(135deg, hsl(var(--secondary) / 0.2), hsl(var(--landing-glow) / 0.12)),
+      hsl(var(--landing-panel) / 0.72) !important;
+    color: hsl(var(--pure-white)) !important;
+    box-shadow: 0 24px 60px -34px hsl(var(--secondary) / 0.62), inset 0 1px 0 hsl(var(--pure-white) / 0.16);
+  }
+
+  .landing-secondary-button {
+    border-color: hsl(var(--landing-border) / 0.18) !important;
+    background: hsl(var(--landing-panel) / 0.76) !important;
+    color: hsl(var(--pure-white)) !important;
+    box-shadow: inset 0 1px 0 hsl(var(--pure-white) / 0.1);
+  }
+
+  .landing-globe-halo {
+    background: radial-gradient(circle, hsl(var(--secondary) / 0.18) 0%, hsl(var(--secondary) / 0) 68%);
+    filter: blur(60px);
+    animation: globePulse 8s ease-in-out infinite;
+  }
+
+  .landing-globe-aura {
+    background: radial-gradient(circle, hsl(var(--landing-glow) / 0.12) 0%, hsl(var(--landing-glow) / 0) 72%);
+    filter: blur(90px);
+  }
+
+  .landing-orbit-ring {
+    border: 1px solid hsl(var(--landing-border) / 0.1);
+  }
+
+  .landing-orbit-spin {
+    animation: orbitSpin 90s linear infinite;
+  }
+
+  .landing-orbit-spin-reverse {
+    animation: orbitSpin 120s linear infinite reverse;
+  }
+
+  .landing-drift {
+    animation: orbitDrift 9s ease-in-out infinite;
+  }
+
   .premium-modal-motion {
     will-change: transform, opacity;
     transform-origin: center bottom;
@@ -473,6 +612,15 @@ All colors MUST be HSL.
   to {
     opacity: 0;
     transform: translate3d(0, 0.625rem, 0) scale(0.992);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-globe-halo,
+  .landing-orbit-spin,
+  .landing-orbit-spin-reverse,
+  .landing-drift {
+    animation: none !important;
   }
 }
 

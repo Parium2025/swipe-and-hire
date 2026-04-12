@@ -1,7 +1,6 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import createGlobe from 'cobe';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GlobeProps {
   className?: string;
@@ -35,145 +34,169 @@ const markers: Array<{ location: [number, number]; size: number }> = [
   { location: [35.6762, 139.6503], size: 0.04 },
 ];
 
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
 const Globe = ({ className = '' }: GlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const phiRef = useRef(-1.15);
-  const thetaRef = useRef(0.28);
-  const scaleRef = useRef(1.02);
-  const pointerInteracting = useRef<number | null>(null);
-  const pointerDelta = useRef(0);
-  const startTime = useRef(Date.now());
-  const isMobile = useIsMobile();
+  const phiRef = useRef(-1.58);
+  const thetaRef = useRef(0.42);
+  const scaleRef = useRef(0.86);
+  const pointerDownRef = useRef(false);
+  const pointerXRef = useRef(0);
+  const velocityRef = useRef(0);
+  const globeRef = useRef<ReturnType<typeof createGlobe> | null>(null);
+  const frameRef = useRef(0);
+  const sizeRef = useRef(0);
   const prefersReducedMotion = useReducedMotion();
   const [isVisible, setIsVisible] = useState(false);
+  const [canvasSize, setCanvasSize] = useState(0);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const observer = new IntersectionObserver(
+    const intersectionObserver = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) setIsVisible(true);
       },
       { threshold: 0.1 }
     );
 
-    observer.observe(container);
-    return () => observer.disconnect();
+    const resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+
+      const nextSize = Math.round(entry.contentRect.width);
+      sizeRef.current = nextSize;
+      setCanvasSize(nextSize);
+    });
+
+    intersectionObserver.observe(container);
+    resizeObserver.observe(container);
+
+    return () => {
+      intersectionObserver.disconnect();
+      resizeObserver.disconnect();
+    };
   }, []);
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
-    pointerInteracting.current = e.clientX - pointerDelta.current;
-    if (canvasRef.current) canvasRef.current.style.cursor = 'grabbing';
+    pointerDownRef.current = true;
+    pointerXRef.current = e.clientX;
+    canvasRef.current?.setPointerCapture?.(e.pointerId);
   }, []);
 
-  const onPointerUp = useCallback(() => {
-    pointerInteracting.current = null;
-    if (canvasRef.current) canvasRef.current.style.cursor = 'grab';
-  }, []);
+  const onPointerUp = useCallback((e?: React.PointerEvent) => {
+    pointerDownRef.current = false;
 
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (pointerInteracting.current !== null) {
-      pointerDelta.current = e.clientX - pointerInteracting.current;
+    if (e) {
+      canvasRef.current?.releasePointerCapture?.(e.pointerId);
     }
   }, []);
 
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!pointerDownRef.current || !canvasSize) return;
+
+    const delta = (e.clientX - pointerXRef.current) / canvasSize;
+    pointerXRef.current = e.clientX;
+    velocityRef.current = delta * 0.72;
+    phiRef.current += delta * 5.2;
+  }, [canvasSize]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !isVisible) return;
+    if (!canvas || !isVisible || !canvasSize) return;
 
-    let animationFrame = 0;
-    let size = canvas.offsetWidth;
-    startTime.current = Date.now();
+    const compact = canvasSize < 560;
+    const targetPhi = 0.18;
+    const targetTheta = 0.34;
+    const targetScale = compact ? 1.04 : 1.11;
+    const introDuration = prefersReducedMotion ? 1 : 3200;
+    const devicePixelRatio = clamp(window.devicePixelRatio, 1, compact ? 1.18 : 1.5);
+    const samples = compact ? 10000 : canvasSize < 900 ? 16000 : 22000;
+    const startTime = performance.now();
 
-    const dpr = isMobile ? 1.15 : 1.35;
-    const samples = isMobile ? 12000 : 18000;
-    const introSeconds = prefersReducedMotion ? 0.01 : 4.5;
-    const targetPhi = 0.16;
-    const targetTheta = 0.33;
-    const targetScale = isMobile ? 1.03 : 1.08;
+    globeRef.current?.destroy();
 
     const globe = createGlobe(canvas, {
-      devicePixelRatio: dpr,
-      width: size,
-      height: size,
+      devicePixelRatio,
+      width: canvasSize,
+      height: canvasSize,
       phi: phiRef.current,
       theta: thetaRef.current,
       dark: 1,
-      diffuse: 2.6,
+      diffuse: 2.45,
       mapSamples: samples,
-      mapBrightness: 7,
+      mapBrightness: 6.2,
       mapBaseBrightness: 0.02,
-      baseColor: [0.015, 0.03, 0.08],
-      markerColor: [0.25, 0.77, 1],
-      glowColor: [0.04, 0.16, 0.34],
+      baseColor: [0.01, 0.03, 0.08],
+      markerColor: [0.2, 0.74, 1],
+      glowColor: [0.05, 0.18, 0.38],
       opacity: 1,
       scale: scaleRef.current,
       markers,
     });
 
-    const animate = () => {
-      const elapsed = (Date.now() - startTime.current) / 1000;
+    globeRef.current = globe;
 
-      if (elapsed < introSeconds) {
-        const t = elapsed / introSeconds;
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+
+      if (elapsed < introDuration) {
+        const t = elapsed / introDuration;
         const ease = 1 - Math.pow(1 - t, 4);
-        phiRef.current = -1.15 + (targetPhi + 1.15) * ease;
-        thetaRef.current = 0.28 + (targetTheta - 0.28) * ease;
-        scaleRef.current = 0.92 + (targetScale - 0.92) * ease;
+        phiRef.current = -1.58 + (targetPhi + 1.58) * ease;
+        thetaRef.current = 0.42 + (targetTheta - 0.42) * ease;
+        scaleRef.current = 0.86 + (targetScale - 0.86) * ease;
       } else if (!prefersReducedMotion) {
-        if (pointerInteracting.current === null) {
-          phiRef.current += isMobile ? 0.0011 : 0.00085;
+        if (!pointerDownRef.current) {
+          phiRef.current += compact ? 0.00115 : 0.00075;
+          phiRef.current += velocityRef.current;
+          velocityRef.current *= 0.94;
         } else {
-          phiRef.current += pointerDelta.current * 0.0017;
-          pointerDelta.current *= 0.92;
+          velocityRef.current *= 0.9;
         }
       }
 
-      size = canvas.offsetWidth;
       globe.update({
         phi: phiRef.current,
         theta: thetaRef.current,
         scale: scaleRef.current,
-        width: size,
-        height: size,
+        width: canvasSize,
+        height: canvasSize,
       });
 
-      animationFrame = requestAnimationFrame(animate);
+      frameRef.current = requestAnimationFrame(animate);
     };
 
-    animationFrame = requestAnimationFrame(animate);
+    frameRef.current = requestAnimationFrame(animate);
 
     return () => {
-      cancelAnimationFrame(animationFrame);
+      cancelAnimationFrame(frameRef.current);
       globe.destroy();
     };
-  }, [isMobile, isVisible, prefersReducedMotion]);
+  }, [canvasSize, isVisible, prefersReducedMotion]);
 
   return (
     <div ref={containerRef} className={`relative aspect-square isolate ${className}`} aria-hidden="true">
-      <div className="absolute inset-[-18%] rounded-full bg-secondary/10 blur-[140px]" />
-      <div className="absolute inset-[-8%] rounded-full bg-accent/8 blur-[80px]" />
-      <div className="absolute inset-[-2%] rounded-full border border-white/[0.05]" />
-      <div className="absolute inset-[-10%] rounded-full border border-white/[0.04] animate-[spin_100s_linear_infinite]" />
-      <div className="absolute inset-[-18%] rounded-full border border-white/[0.03] animate-[spin_130s_linear_infinite_reverse]" />
-      {!isMobile && (
-        <>
-          <div className="absolute top-[14%] left-[12%] h-1.5 w-1.5 rounded-full bg-secondary animate-[float_7s_ease-in-out_infinite]" />
-          <div className="absolute top-[30%] right-[10%] h-2 w-2 rounded-full bg-accent animate-[float_9s_ease-in-out_infinite_-2s]" />
-          <div className="absolute bottom-[18%] left-[16%] h-1 w-1 rounded-full bg-white/60 animate-[float_8s_ease-in-out_infinite_-1s]" />
-          <div className="absolute top-[52%] right-[6%] h-1.5 w-1.5 rounded-full bg-secondary animate-[float_10s_ease-in-out_infinite_-4s]" />
-        </>
-      )}
+      <div className="landing-globe-halo absolute inset-[8%] rounded-full" />
+      <div className="landing-globe-aura absolute inset-[-10%] rounded-full" />
+      <div className="landing-orbit-ring landing-orbit-spin absolute inset-[-5%] rounded-full" />
+      <div className="landing-orbit-ring landing-orbit-spin-reverse absolute inset-[-13%] rounded-full" />
+      <div className="absolute inset-[-1.5%] rounded-full border border-[hsl(var(--landing-border)/0.14)]" />
+      <div className="landing-drift absolute left-[12%] top-[22%] h-3 w-3 rounded-full bg-[hsl(var(--secondary))] shadow-[0_0_36px_hsl(var(--secondary)/0.55)]" />
+      <div className="landing-drift absolute right-[13%] top-[30%] h-2.5 w-2.5 rounded-full bg-[hsl(var(--secondary))] shadow-[0_0_28px_hsl(var(--secondary)/0.48)] [animation-delay:-1.5s]" />
+      <div className="landing-drift absolute bottom-[18%] left-[18%] h-2 w-2 rounded-full bg-[hsl(var(--pure-white))] shadow-[0_0_24px_hsl(var(--pure-white)/0.4)] [animation-delay:-3s]" />
+      <div className="landing-drift absolute bottom-[26%] right-[8%] h-2 w-2 rounded-full bg-[hsl(var(--secondary))] shadow-[0_0_30px_hsl(var(--secondary)/0.48)] [animation-delay:-4.2s]" />
       <canvas
         ref={canvasRef}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
         onPointerMove={onPointerMove}
-        className={`h-full w-full cursor-grab select-none transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
-        style={{ contain: 'layout paint size', aspectRatio: '1 / 1' }}
+        className={`h-full w-full cursor-grab select-none transition-opacity duration-700 active:cursor-grabbing ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+        style={{ contain: 'layout paint size', aspectRatio: '1 / 1', touchAction: 'pan-y' }}
       />
     </div>
   );
