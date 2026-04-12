@@ -30,6 +30,8 @@ export const SwipeDots = memo(function SwipeDots({
   const scrubStartIndexRef = useRef(currentIndex);
   const scrubStartYRef = useRef<number | null>(null);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
+  /** Generation counter to prevent stale touchEnd from killing a new session */
+  const sessionRef = useRef(0);
 
   useEffect(() => {
     if (!isScrubbingRef.current) {
