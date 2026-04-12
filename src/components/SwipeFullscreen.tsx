@@ -103,6 +103,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [canUndo, setCanUndo] = useState(false);
   const [undoEntryJobId, setUndoEntryJobId] = useState<string | null>(null);
 
+  /* ── Image preloading for next 3 cards ─────────────────── */
+  useSwipeImagePreloader(jobs, currentIndex, 3);
+
   /* ── Clear persisted index on unmount (reset on re-entry) ── */
   useEffect(() => {
     return () => {
@@ -412,6 +415,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     onUndoSwipeAction(lastId);
     undoStackRef.current = stack.slice(0, -1);
     setCanUndo(undoStackRef.current.length > 0);
+    // Haptic feedback for undo
+    hapticSuccess();
     // Clear undo entry flag after animation completes
     setTimeout(() => setUndoEntryJobId(null), 700);
   }, [onUndoSwipeAction]);
