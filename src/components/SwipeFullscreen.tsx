@@ -9,6 +9,8 @@ import { SwipeHeader } from '@/components/swipe/SwipeHeader';
 import { SwipeDots } from '@/components/swipe/SwipeDots';
 import { SwipeEndSection } from '@/components/swipe/SwipeEndSection';
 import { SwipeEmptyState } from '@/components/swipe/SwipeEmptyState';
+import { useSwipeImagePreloader } from '@/hooks/useSwipeImagePreloader';
+import { hapticSuccess } from '@/lib/haptics';
 import type { SwipeJob } from '@/components/swipe/SwipeCard';
 
 export type { SwipeJob };
@@ -100,6 +102,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const undoStackRef = useRef<string[]>([]);
   const [canUndo, setCanUndo] = useState(false);
   const [undoEntryJobId, setUndoEntryJobId] = useState<string | null>(null);
+
+  /* ── Image preloading for next 3 cards ─────────────────── */
+  useSwipeImagePreloader(jobs, currentIndex, 3);
 
   /* ── Clear persisted index on unmount (reset on re-entry) ── */
   useEffect(() => {
@@ -410,6 +415,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     onUndoSwipeAction(lastId);
     undoStackRef.current = stack.slice(0, -1);
     setCanUndo(undoStackRef.current.length > 0);
+    // Haptic feedback for undo
+    hapticSuccess();
     // Clear undo entry flag after animation completes
     setTimeout(() => setUndoEntryJobId(null), 700);
   }, [onUndoSwipeAction]);

@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
 import type { SwipeJob } from './SwipeCard';
 
 function resolveImageUrl(url?: string, bucket = 'job-images'): string | null {
@@ -104,6 +105,12 @@ export const JobSlide = memo(function JobSlide({
   const cardScale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
   // Combine drag scale with entry animation scale
   const combinedScale = useTransform([cardScale, entryScale], ([cs, es]) => (cs as number) * (es as number));
+  // Dynamic shadow that intensifies with drag distance — premium depth effect
+  const cardShadow = useTransform(x, [-200, 0, 200], [
+    '0 25px 60px -12px rgba(0,0,0,0.5), 0 8px 20px -6px rgba(0,0,0,0.3)',
+    '0 10px 30px -8px rgba(0,0,0,0.25)',
+    '0 25px 60px -12px rgba(0,0,0,0.5), 0 8px 20px -6px rgba(0,0,0,0.3)',
+  ]);
   // Underlay: driven by explicit timed animation, NOT drag progress
   const underlayY = useMotionValue(800);
   const underlayScale = useMotionValue(0.68);
@@ -167,6 +174,9 @@ export const JobSlide = memo(function JobSlide({
   const triggerSwipe = useCallback((direction: SwipeDirection) => {
     lastTapTimestampRef.current = 0;
     clearTapHint();
+
+    // Haptic feedback on swipe commit
+    hapticMedium();
 
     if (direction === 'right') {
       animate(x, 0, SNAP_SPRING);
@@ -279,6 +289,9 @@ export const JobSlide = memo(function JobSlide({
     };
   }, [useTouchTunnel, overlayOpen]);
 
+  // Track whether we already fired threshold haptic for this gesture
+  const thresholdHapticFiredRef = useRef(false);
+
   const handleTouchMoveCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (
       !useTouchTunnel ||
@@ -308,6 +321,7 @@ export const JobSlide = memo(function JobSlide({
       }
 
       gesture.isDragging = true;
+      thresholdHapticFiredRef.current = false;
       lastTapTimestampRef.current = 0;
       clearTapHint();
     }
@@ -317,6 +331,12 @@ export const JobSlide = memo(function JobSlide({
     }
 
     x.set(deltaX);
+
+    // Light haptic when crossing the swipe threshold (fire once per gesture)
+    if (!thresholdHapticFiredRef.current && Math.abs(deltaX) >= SWIPE_THRESHOLD) {
+      thresholdHapticFiredRef.current = true;
+      hapticLight();
+    }
   }, [clearTapHint, useTouchTunnel, x]);
 
   const handleTouchEndCapture = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
@@ -596,13 +616,14 @@ export const JobSlide = memo(function JobSlide({
         )}
 
         <motion.div
-          className="relative h-full rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
+          className="relative h-full rounded-2xl overflow-hidden select-none [-webkit-tap-highlight-color:transparent]"
           style={{
             x,
             
             opacity: exitOpacity,
             rotate: cardRotate,
             scale: combinedScale,
+            boxShadow: cardShadow,
             touchAction: useTouchTunnel ? 'pan-y' : 'auto',
           }}
           drag={useTouchTunnel ? false : 'x'}
@@ -812,7 +833,7 @@ export const JobSlide = memo(function JobSlide({
             </button>
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); onSave(); }}
+              onClick={(e) => { e.stopPropagation(); hapticLight(); onSave(); }}
               data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 active:scale-[0.93] transition-transform touch-manipulation"
             >
