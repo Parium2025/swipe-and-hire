@@ -275,10 +275,12 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
         />
       )}
       
-      {/* Play/Pause overlay for mobile */}
-      {isMobile && (
+      {/* Play/Pause overlay for mobile or preview variant */}
+      {(isMobile || countdownVariant === 'preview') && (
         <div
-          className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+          className={`absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity ${
+            isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-0'
+          }`}
           onClick={(e) => {
             e.stopPropagation();
             handleTap();
@@ -320,7 +322,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       {showProgressBar && duration > 0 && (
         <div 
           className={`absolute bottom-2 left-2 right-2 md:bottom-4 md:left-3 md:right-3 transition-opacity duration-300 ${
-            (controlsVisible || isDragging) && isPlaying ? 'opacity-100' : 'opacity-0'
+            (controlsVisible || isDragging || countdownVariant === 'preview') && isPlaying ? 'opacity-100' : 'opacity-0'
           }`}
           onMouseMove={handleProgressDrag}
         >
