@@ -22,7 +22,6 @@ import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { CvViewer } from '@/components/CvViewer';
-import { motion } from 'framer-motion';
 
 interface ProfileViewData {
   id: string;
