@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
 interface LandingNavProps {
@@ -28,22 +27,22 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-primary/80 backdrop-blur-xl border-b border-white/[0.06]'
+            ? 'bg-primary/85 backdrop-blur-xl border-b border-white/[0.06]'
             : 'bg-transparent border-b border-transparent'
         }`}
+        role="navigation"
+        aria-label="Huvudnavigation"
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            {/* Logo */}
             <img
               src={pariumLogo}
-              alt="Parium"
+              alt="Parium – Rekryteringsplattform"
               width={224}
               height={224}
               className="h-auto w-28 md:w-36 lg:w-40"
             />
 
-            {/* Desktop nav */}
             <div className="hidden md:flex items-center gap-8">
               {navItems.map((item) => (
                 <a
@@ -56,18 +55,16 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
               ))}
             </div>
 
-            {/* Desktop CTA */}
             <div className="hidden md:block">
-              <Button
+              <button
                 onClick={onLoginClick}
-                size="sm"
-                className="rounded-full px-5 bg-white/5 border border-white/15 text-white text-sm font-medium hover:bg-white/10 transition-all"
+                className="px-5 py-2.5 rounded-full bg-white/[0.06] border border-white/[0.12] text-white text-sm font-medium
+                  hover:bg-white/[0.1] hover:border-white/[0.2] transition-all duration-200"
               >
                 Logga in
-              </Button>
+              </button>
             </div>
 
-            {/* Mobile toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 rounded-full text-white/70 hover:bg-white/10 transition-colors"
@@ -79,7 +76,6 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
         </div>
       </nav>
 
-      {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="fixed inset-0 bg-primary/98 backdrop-blur-xl pt-24 px-6">
@@ -95,17 +91,16 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
                 </a>
               ))}
               <div className="pt-8">
-                <Button
+                <button
                   onClick={() => {
                     setMobileMenuOpen(false);
                     sessionStorage.setItem('parium-skip-splash', '1');
                     onLoginClick();
                   }}
-                  className="w-full rounded-full bg-white text-primary hover:bg-white/90 font-semibold"
-                  size="lg"
+                  className="w-full py-4 rounded-full bg-gradient-to-r from-secondary to-accent text-primary font-semibold text-base"
                 >
                   Logga in
-                </Button>
+                </button>
               </div>
             </div>
           </div>
