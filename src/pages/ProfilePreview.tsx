@@ -660,12 +660,7 @@ export default function ProfilePreview() {
             <div className="flex flex-col items-center gap-3">
                {/* Använd ProfileVideo om video finns, annars Avatar */}
                 {effectiveVideoUrl ? (
-                  <DesktopVideoWithCountdown
-                    effectiveVideoUrl={effectiveVideoUrl}
-                    signedCoverUrl={signedCoverUrl}
-                    profileImageUrl={profileImageUrl}
-                    consentedData={consentedData}
-                  />
+                   <DesktopVideoWithCountdown />
                 ) : (
                  <Avatar className="h-[140px] w-[140px] ring-2 ring-white/20 shadow-xl">
                    <AvatarImage src={profileImageUrl || signedCoverUrl || ''} className="object-cover" />
