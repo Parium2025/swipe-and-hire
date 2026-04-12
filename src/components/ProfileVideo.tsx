@@ -52,7 +52,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     const updateTime = () => {
       if (videoRef.current) {
         const remaining = Math.ceil(videoRef.current.duration - videoRef.current.currentTime);
-        setRemainingSeconds(remaining > 0 ? remaining : 0);
+        const value = remaining > 0 ? remaining : 0;
+        setRemainingSeconds(value);
+        onRemainingChange?.(value);
       }
     };
 
@@ -62,6 +64,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     return () => {
       clearInterval(interval);
       setRemainingSeconds(null);
+      onRemainingChange?.(null);
     };
   }, [isPlaying]);
 
@@ -320,7 +323,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
                 ? 'top-5 right-5 md:top-3 md:right-7 px-1.5 py-0.5 text-sm md:text-sm'
                 : 'top-3 right-3 md:top-3 md:right-6 px-2 py-1 text-sm md:text-base'
           }`}
-          style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8)' }}
+          className="video-text-shadow"
         >
           {remainingSeconds}s
         </div>
