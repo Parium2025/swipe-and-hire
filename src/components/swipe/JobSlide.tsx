@@ -616,13 +616,14 @@ export const JobSlide = memo(function JobSlide({
         )}
 
         <motion.div
-          className="relative h-full rounded-2xl overflow-hidden shadow-2xl select-none [-webkit-tap-highlight-color:transparent]"
+          className="relative h-full rounded-2xl overflow-hidden select-none [-webkit-tap-highlight-color:transparent]"
           style={{
             x,
             
             opacity: exitOpacity,
             rotate: cardRotate,
             scale: combinedScale,
+            boxShadow: cardShadow,
             touchAction: useTouchTunnel ? 'pan-y' : 'auto',
           }}
           drag={useTouchTunnel ? false : 'x'}
