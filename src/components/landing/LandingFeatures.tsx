@@ -84,12 +84,10 @@ const LandingFeatures = () => {
 
           <div className="grid gap-4">
             {features.slice(4).map((feature) => {
-            const Icon = feature.icon;
-            return (
-                <article
-                key={feature.title}
-                  className="landing-panel rounded-[1.8rem] p-6 sm:p-7 lg:p-8"
-              >
+              const Icon = feature.icon;
+
+              return (
+                <article key={feature.title} className="landing-panel rounded-[1.8rem] p-6 sm:p-7 lg:p-8">
                   <div className="flex items-start gap-4">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[hsl(var(--landing-border)/0.18)] bg-[hsl(var(--landing-panel)/0.84)]">
                       <Icon className="h-5 w-5 text-pure-white" strokeWidth={1.5} />
@@ -100,9 +98,10 @@ const LandingFeatures = () => {
                     </div>
                   </div>
                 </article>
-            );
-          })}
+              );
+            })}
         </div>
+      </div>
       </div>
     </section>
   );
