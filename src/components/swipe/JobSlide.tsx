@@ -833,7 +833,7 @@ export const JobSlide = memo(function JobSlide({
             </button>
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); onSave(); }}
+              onClick={(e) => { e.stopPropagation(); hapticLight(); onSave(); }}
               data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 active:scale-[0.93] transition-transform touch-manipulation"
             >
