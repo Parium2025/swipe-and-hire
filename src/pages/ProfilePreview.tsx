@@ -526,27 +526,10 @@ export default function ProfilePreview() {
     const DesktopVideoWithCountdown = () => {
       const [isVideoPlaying, setIsVideoPlaying] = useState(false);
       const [countdown, setCountdown] = useState<number | null>(null);
-      const videoContainerRef = useRef<HTMLDivElement>(null);
-
-      useEffect(() => {
-        if (!isVideoPlaying) {
-          setCountdown(null);
-          return;
-        }
-        const interval = setInterval(() => {
-          const videoEl = videoContainerRef.current?.querySelector('video');
-          if (videoEl && videoEl.duration) {
-            const remaining = Math.ceil(videoEl.duration - videoEl.currentTime);
-            setCountdown(remaining > 0 ? remaining : 0);
-          }
-        }, 100);
-        return () => clearInterval(interval);
-      }, [isVideoPlaying]);
 
       return (
         <div 
           className="relative h-[140px] w-[140px]"
-          ref={videoContainerRef}
           onClick={(e) => e.stopPropagation()}
         >
           <ProfileVideo
@@ -560,12 +543,10 @@ export default function ProfilePreview() {
             disablePlayback={false}
             forceTouchMode={true}
             onPlayingChange={setIsVideoPlaying}
+            onRemainingChange={setCountdown}
           />
           {isVideoPlaying && countdown !== null && (
-            <div
-              className="absolute top-[1.1rem] right-[1.1rem] px-1 py-0.5 text-sm font-bold text-white"
-              style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8)' }}
-            >
+            <div className="absolute top-[1.1rem] right-[1.1rem] px-1 py-0.5 text-sm font-bold text-white video-text-shadow">
               {countdown}s
             </div>
           )}

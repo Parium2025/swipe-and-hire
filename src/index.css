@@ -124,6 +124,9 @@ video:focus-visible,
   --tw-ring-offset-color: transparent !important;
 }
 
+.video-text-shadow {
+  text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8);
+}
 
 /* Specifikt för video-element och media */
 video,

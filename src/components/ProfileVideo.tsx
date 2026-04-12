@@ -14,12 +14,13 @@ interface ProfileVideoProps {
   showProgressBar?: boolean; // Show progress/scrubbing bar on hover (default: true)
   countdownVariant?: 'default' | 'compact' | 'preview'; // 'compact' for Min Profil, 'preview' for Förhandsgranska Profil, 'default' elsewhere
   onPlayingChange?: (isPlaying: boolean) => void; // Callback when playing state changes
+  onRemainingChange?: (remaining: number | null) => void; // Callback with remaining seconds
   onClick?: (e: React.MouseEvent) => void; // Custom click handler (bypasses default play behavior)
   disablePlayback?: boolean; // When true, clicking does nothing (just shows thumbnail)
   forceTouchMode?: boolean; // Force touch-style controls even on mouse devices (used in previews)
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onClick, disablePlayback = false, forceTouchMode = false }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onRemainingChange, onClick, disablePlayback = false, forceTouchMode = false }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -51,7 +52,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     const updateTime = () => {
       if (videoRef.current) {
         const remaining = Math.ceil(videoRef.current.duration - videoRef.current.currentTime);
-        setRemainingSeconds(remaining > 0 ? remaining : 0);
+        const value = remaining > 0 ? remaining : 0;
+        setRemainingSeconds(value);
+        onRemainingChange?.(value);
       }
     };
 
@@ -61,6 +64,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     return () => {
       clearInterval(interval);
       setRemainingSeconds(null);
+      onRemainingChange?.(null);
     };
   }, [isPlaying]);
 
@@ -312,14 +316,13 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       {/* Countdown timer when video is playing */}
       {showCountdown && isPlaying && remainingSeconds !== null && (
         <div 
-          className={`absolute font-bold text-white ${
+          className={`absolute font-bold text-white video-text-shadow ${
             countdownVariant === 'compact'
               ? 'top-2 right-[1.375rem] px-1 py-0.5 text-xs'
               : countdownVariant === 'preview'
                 ? 'top-5 right-5 md:top-3 md:right-7 px-1.5 py-0.5 text-sm md:text-sm'
                 : 'top-3 right-3 md:top-3 md:right-6 px-2 py-1 text-sm md:text-base'
           }`}
-          style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8)' }}
         >
           {remainingSeconds}s
         </div>
