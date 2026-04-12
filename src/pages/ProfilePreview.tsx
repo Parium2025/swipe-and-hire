@@ -187,6 +187,7 @@ export default function ProfilePreview() {
         <Card 
           className="bg-transparent border-none shadow-none overflow-hidden rounded-none transition-all duration-300 h-full"
           onClick={() => setShowDetailedView(true)}
+          onDragStart={(e) => e.preventDefault()}
           style={{
             cursor: 'pointer'
           }}
@@ -206,7 +207,7 @@ export default function ProfilePreview() {
             >
                {/* Använd ProfileVideo komponenten om video finns */}
                {data.video_url && effectiveVideoUrl ? (
-                 <ProfileVideo
+                  <ProfileVideo
                    videoUrl={effectiveVideoUrl}
                    coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
                    userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
@@ -214,6 +215,7 @@ export default function ProfilePreview() {
                    className="w-full h-full rounded-full"
                    countdownVariant="preview"
                    showCountdown={true}
+                    disablePlayback={true}
                  />
                ) : (
                 /* Om ingen video, visa Avatar med fallback till initialer */
@@ -490,7 +492,7 @@ export default function ProfilePreview() {
 
 
     return (
-      <div className="w-full h-full relative overflow-hidden">
+      <div className="w-full h-full relative overflow-hidden select-none" style={{ touchAction: 'pan-y', overscrollBehaviorX: 'none' }}>
         {/* Enkel växling mellan swipe-kort och detaljvy utan framer-motion för maximal stabilitet på mobil */}
         {!showDetailedView ? (
           <div className="w-full h-full absolute inset-0">
@@ -821,8 +823,8 @@ export default function ProfilePreview() {
 
                 {/* Innehåll med Parium bakgrund */}
                 <div 
-                  className="absolute inset-0 rounded-[2rem] overflow-y-auto custom-scrollbar"
-                  style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
+                  className="absolute inset-0 rounded-[2rem] overflow-y-auto overflow-x-hidden custom-scrollbar"
+                  style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)', touchAction: 'pan-y', overscrollBehaviorX: 'none' }}
                 >
                   <div className="h-full p-0">
                     <ProfileView data={consentedData} isConsented={true} />
