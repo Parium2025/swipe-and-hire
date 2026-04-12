@@ -18,51 +18,56 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   }, []);
 
   const navItems = [
+    { label: 'Bevis', href: '#bevis' },
     { label: 'Funktioner', href: '#funktioner' },
-    { label: 'Hur det funkar', href: '#hur-det-funkar' },
+    { label: 'Process', href: '#hur-det-funkar' },
     { label: 'Kontakt', href: '#kontakt' },
   ];
 
   return (
     <>
       <nav
-        className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
-          scrolled ? 'border-b border-white/[0.06] bg-primary/78 backdrop-blur-xl' : 'bg-transparent'
+        className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? 'border-b border-[hsl(var(--landing-border)/0.16)] bg-[hsl(var(--primary)/0.92)] shadow-[0_18px_50px_-30px_hsl(var(--landing-shadow)/0.9)]'
+            : 'bg-transparent'
         }`}
         role="navigation"
         aria-label="Huvudnavigation"
       >
         <div className="mx-auto max-w-7xl px-5 sm:px-6 md:px-12 lg:px-24">
-          <div className="flex h-16 items-center justify-between sm:h-20">
-            <img
-              src={pariumLogo}
-              alt="Parium – Rekryteringsplattform"
-              width={224}
-              height={224}
-              className="h-auto w-28 md:w-36 lg:w-40"
-            />
+          <div className="flex h-[4.5rem] items-center justify-between sm:h-[5.25rem]">
+            <a href="#top" className="flex items-center" aria-label="Gå till toppen av sidan">
+              <img
+                src={pariumLogo}
+                alt="Parium – Rekryteringsplattform"
+                width={224}
+                height={224}
+                className="h-auto w-28 sm:w-32 lg:w-36"
+              />
+            </a>
 
-            <div className="hidden items-center gap-8 md:flex">
+            <div className="hidden items-center gap-8 lg:flex">
               {navItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-sm font-medium text-white/72 transition-colors hover:text-white"
+                  className="text-sm font-medium tracking-[0.01em] text-pure-white transition-opacity duration-200 hover:opacity-100"
                 >
                   {item.label}
                 </a>
               ))}
             </div>
 
-            <div className="hidden md:block">
-              <Button variant="glass" onClick={onLoginClick} className="px-6 py-2.5 text-sm font-medium text-white">
+            <div className="hidden lg:block">
+              <Button variant="glass" onClick={onLoginClick} className="landing-secondary-button px-6 text-sm font-semibold">
                 Logga in
               </Button>
             </div>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2.5 text-white/82 transition-colors hover:bg-white/10 md:hidden"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-[hsl(var(--landing-border)/0.18)] bg-[hsl(var(--landing-panel)/0.72)] p-2.5 text-pure-white transition-transform duration-200 active:scale-[0.97] lg:hidden"
               aria-label="Öppna meny"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -73,19 +78,19 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
 
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="fixed inset-0 bg-primary/96 px-6 pt-24 backdrop-blur-xl">
-            <div className="flex flex-col gap-1">
+          <div className="fixed inset-0 bg-[hsl(var(--primary)/0.98)] px-6 pt-24">
+            <div className="landing-panel mx-auto flex max-w-md flex-col gap-1 rounded-[2rem] p-4">
               {navItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex min-h-[54px] items-center border-b border-white/[0.06] py-4 text-lg font-medium text-white/82 transition-colors hover:text-white"
+                  className="flex min-h-[54px] items-center rounded-[1.25rem] px-4 py-4 text-lg font-semibold text-pure-white transition-transform duration-200 active:scale-[0.99]"
                 >
                   {item.label}
                 </a>
               ))}
-              <div className="pt-8">
+              <div className="pt-6">
                 <Button
                   variant="glass"
                   onClick={() => {
@@ -93,7 +98,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
                     sessionStorage.setItem('parium-skip-splash', '1');
                     onLoginClick();
                   }}
-                  className="min-h-[54px] w-full rounded-full border-white/[0.18] bg-white/[0.12] text-base font-semibold text-white"
+                  className="landing-primary-button min-h-[54px] w-full text-base font-semibold"
                 >
                   Logga in
                 </Button>
