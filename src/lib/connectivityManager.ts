@@ -46,7 +46,7 @@ async function checkConnectivity(): Promise<boolean> {
 
       // Ping our own origin with cache-busting to avoid SW/CDN caches.
       // Avoid trusting navigator.onLine here because it can lag after rapid toggles.
-      const response = await fetch(`${window.location.origin}/favicon.ico?_cb=${Date.now()}`, {
+      const response = await fetch(`${window.location.origin}/favicon-parium.png?_cb=${Date.now()}`, {
         method: 'HEAD',
         cache: 'no-store',
         credentials: 'same-origin',
