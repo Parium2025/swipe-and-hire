@@ -563,7 +563,7 @@ export default function ProfilePreview() {
           />
           {isVideoPlaying && countdown !== null && (
             <div
-              className="absolute top-1 right-3 px-1 py-0.5 text-sm font-bold text-white"
+              className="absolute top-[1.1rem] right-[1.1rem] px-1 py-0.5 text-sm font-bold text-white"
               style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8)' }}
             >
               {countdown}s
