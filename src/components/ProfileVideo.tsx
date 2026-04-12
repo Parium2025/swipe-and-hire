@@ -20,7 +20,7 @@ interface ProfileVideoProps {
   forceTouchMode?: boolean; // Force touch-style controls even on mouse devices (used in previews)
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onClick, disablePlayback = false, forceTouchMode = false }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onRemainingChange, onClick, disablePlayback = false, forceTouchMode = false }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
