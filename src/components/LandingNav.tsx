@@ -12,7 +12,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 32);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -26,16 +26,14 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? 'bg-primary/80 backdrop-blur-xl border-b border-white/[0.06]'
-            : 'bg-transparent'
+        className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
+          scrolled ? 'border-b border-white/[0.06] bg-primary/78 backdrop-blur-xl' : 'bg-transparent'
         }`}
         role="navigation"
         aria-label="Huvudnavigation"
       >
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 md:px-12 lg:px-24">
-          <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="mx-auto max-w-7xl px-5 sm:px-6 md:px-12 lg:px-24">
+          <div className="flex h-16 items-center justify-between sm:h-20">
             <img
               src={pariumLogo}
               alt="Parium – Rekryteringsplattform"
@@ -44,12 +42,12 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
               className="h-auto w-28 md:w-36 lg:w-40"
             />
 
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden items-center gap-8 md:flex">
               {navItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-white/40 hover:text-white/80 transition-colors text-sm font-medium"
+                  className="text-sm font-medium text-white/72 transition-colors hover:text-white"
                 >
                   {item.label}
                 </a>
@@ -57,21 +55,17 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
             </div>
 
             <div className="hidden md:block">
-              <Button
-                variant="glass"
-                onClick={onLoginClick}
-                className="px-6 py-2.5 text-sm font-medium"
-              >
+              <Button variant="glass" onClick={onLoginClick} className="px-6 py-2.5 text-sm font-medium text-white">
                 Logga in
               </Button>
             </div>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2.5 rounded-full text-white/70 hover:bg-white/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label="Toggle menu"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2.5 text-white/82 transition-colors hover:bg-white/10 md:hidden"
+              aria-label="Öppna meny"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
@@ -79,27 +73,27 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
 
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="fixed inset-0 bg-primary/98 backdrop-blur-xl pt-24 px-6">
+          <div className="fixed inset-0 bg-primary/96 px-6 pt-24 backdrop-blur-xl">
             <div className="flex flex-col gap-1">
               {navItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-white/60 hover:text-white text-lg font-medium py-4 border-b border-white/[0.06] transition-colors min-h-[52px] flex items-center"
+                  className="flex min-h-[54px] items-center border-b border-white/[0.06] py-4 text-lg font-medium text-white/82 transition-colors hover:text-white"
                 >
                   {item.label}
                 </a>
               ))}
               <div className="pt-8">
                 <Button
-                  variant="secondary"
+                  variant="glass"
                   onClick={() => {
                     setMobileMenuOpen(false);
                     sessionStorage.setItem('parium-skip-splash', '1');
                     onLoginClick();
                   }}
-                  className="w-full py-4 rounded-full text-base min-h-[52px]"
+                  className="min-h-[54px] w-full rounded-full border-white/[0.18] bg-white/[0.12] text-base font-semibold text-white"
                 >
                   Logga in
                 </Button>

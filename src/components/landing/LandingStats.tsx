@@ -36,26 +36,26 @@ AnimatedNumber.displayName = 'AnimatedNumber';
 
 const LandingStats = () => {
   return (
-    <section className="relative py-16 sm:py-20 lg:py-24 px-5 sm:px-6 md:px-12 lg:px-24" aria-label="Statistik om Parium rekryteringsplattform">
+    <section className="relative px-5 py-16 sm:px-6 sm:py-20 md:px-12 lg:px-24 lg:py-24" aria-label="Statistik om Parium rekryteringsplattform">
       <div className="absolute inset-0 bg-white/[0.01]" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 max-w-lg h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 max-w-lg h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute left-1/2 top-0 h-px w-2/3 max-w-lg -translate-x-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute bottom-0 left-1/2 h-px w-2/3 max-w-lg -translate-x-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-      <div className="max-w-6xl mx-auto relative z-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10 lg:gap-12">
+      <div className="relative z-10 mx-auto max-w-6xl">
+        <div className="grid grid-cols-2 gap-6 sm:gap-10 lg:grid-cols-4 lg:gap-12">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
               className="text-center"
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <div className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-bold text-white tracking-tight mb-2 leading-none">
+              <div className="mb-2 text-3xl font-bold leading-none tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.5rem]">
                 <AnimatedNumber value={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="text-white/30 text-[11px] sm:text-xs lg:text-sm font-medium tracking-wide uppercase">
+              <div className="text-[11px] font-medium uppercase tracking-wide text-white/74 sm:text-xs lg:text-sm">
                 {stat.label}
               </div>
             </motion.div>
