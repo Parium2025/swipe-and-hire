@@ -609,7 +609,14 @@ export default function ProfilePreview() {
             <div className="flex flex-col items-center gap-3">
                {/* Använd ProfileVideo om video finns, annars Avatar */}
                {effectiveVideoUrl ? (
-                 <div className="relative h-[140px] w-[140px]">
+                 <div 
+                   className="relative h-[140px] w-[140px]"
+                   onClick={(e) => {
+                     if (effectiveVideoUrl) {
+                       e.stopPropagation();
+                     }
+                   }}
+                 >
                    <ProfileVideo
                      videoUrl={effectiveVideoUrl}
                      coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
@@ -618,6 +625,7 @@ export default function ProfilePreview() {
                      className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
                      countdownVariant="preview"
                      showCountdown={true}
+                     disablePlayback={false}
                    />
                  </div>
                ) : (
