@@ -46,7 +46,7 @@ const Globe = ({ className = '' }: GlobeProps) => {
       offset: isMobile ? [0, 0.02] : [0.06, 0.03],
       dark: 1,
       diffuse: 2.1,
-      mapSamples: isMobile ? 1800 : 5600,
+      mapSamples: isMobile ? 8000 : 16000,
       mapBrightness: 8,
       mapBaseBrightness: 0.42,
       baseColor: [0.12, 0.18, 0.34],
