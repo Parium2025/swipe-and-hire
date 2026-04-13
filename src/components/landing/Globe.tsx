@@ -7,15 +7,13 @@ interface GlobeProps {
 }
 
 /**
- * Interactive dot-matrix globe focused on Scandinavia.
- * Uses cobe library for WebGL rendering.
- * Touch: drag to rotate. Desktop: drag + auto-rotate.
+ * Immersive zoomed-in globe showing Scandinavia/Europe as a horizon.
+ * Creates a cinematic "planet surface" effect rather than a small ball.
  */
 const Globe = ({ className = '' }: GlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const globeRef = useRef<ReturnType<typeof createGlobe> | null>(null);
-  const phiRef = useRef(0.25);
-  const thetaRef = useRef(0.25);
+  const phiRef = useRef(0.3);
+  const thetaRef = useRef(0.35);
   const pointerInteracting = useRef<number | null>(null);
   const pointerDelta = useRef(0);
   const isMobile = useIsMobile();
@@ -48,38 +46,38 @@ const Globe = ({ className = '' }: GlobeProps) => {
 
     let animationFrame: number;
     let width = canvas.offsetWidth;
-    let startTime = performance.now();
+    const startTime = performance.now();
 
     const dpr = isMobile ? 1.5 : 2;
-    const samples = isMobile ? 14000 : 24000;
+    const samples = isMobile ? 16000 : 28000;
 
     const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
-      width: width * 2,
-      height: width * 2,
+      width: width * dpr,
+      height: width * dpr,
       phi: phiRef.current,
       theta: thetaRef.current,
       dark: 1,
-      diffuse: 3.5,
+      diffuse: 3,
       mapSamples: samples,
-      mapBrightness: 10,
-      baseColor: [0.015, 0.06, 0.18],
+      mapBrightness: 8,
+      baseColor: [0.02, 0.06, 0.15],
       markerColor: [0.3, 0.85, 1],
-      glowColor: [0.02, 0.1, 0.4],
+      glowColor: [0.03, 0.12, 0.4],
       markers: [
-        // Scandinavia — larger markers
-        { location: [59.3293, 18.0686], size: 0.12 },   // Stockholm
-        { location: [55.6761, 12.5683], size: 0.08 },   // Copenhagen
-        { location: [59.9139, 10.7522], size: 0.08 },   // Oslo
-        { location: [60.1699, 24.9384], size: 0.07 },   // Helsinki
-        { location: [57.7089, 11.9746], size: 0.07 },   // Gothenburg
-        { location: [55.604, 13.003], size: 0.06 },     // Malmö
-        { location: [63.8258, 20.2630], size: 0.05 },   // Umeå
-        { location: [67.8558, 20.2253], size: 0.05 },   // Kiruna
+        // Scandinavia
+        { location: [59.3293, 18.0686], size: 0.14 },
+        { location: [55.6761, 12.5683], size: 0.1 },
+        { location: [59.9139, 10.7522], size: 0.1 },
+        { location: [60.1699, 24.9384], size: 0.08 },
+        { location: [57.7089, 11.9746], size: 0.08 },
+        { location: [55.604, 13.003], size: 0.07 },
+        { location: [63.8258, 20.2630], size: 0.06 },
+        { location: [67.8558, 20.2253], size: 0.05 },
         // Europe
-        { location: [51.5074, -0.1278], size: 0.05 },
-        { location: [48.8566, 2.3522], size: 0.05 },
-        { location: [52.52, 13.405], size: 0.05 },
+        { location: [51.5074, -0.1278], size: 0.06 },
+        { location: [48.8566, 2.3522], size: 0.06 },
+        { location: [52.52, 13.405], size: 0.06 },
         { location: [41.9028, 12.4964], size: 0.04 },
         { location: [40.4168, -3.7038], size: 0.04 },
         { location: [50.0755, 14.4378], size: 0.03 },
@@ -93,20 +91,17 @@ const Globe = ({ className = '' }: GlobeProps) => {
         { location: [25.2048, 55.2708], size: 0.03 },
       ],
     });
-    globeRef.current = globe;
-    // Mark ready after first frame
+
     requestAnimationFrame(() => setReady(true));
 
     const animate = () => {
       const elapsed = performance.now() - startTime;
 
       if (pointerInteracting.current === null) {
-        // Smooth slow rotation
-        phiRef.current += 0.003;
-        // Gentle theta oscillation for a "breathing" feel
-        thetaRef.current = 0.25 + Math.sin(elapsed * 0.0003) * 0.03;
+        phiRef.current += 0.002;
+        thetaRef.current = 0.35 + Math.sin(elapsed * 0.00025) * 0.04;
       } else {
-        phiRef.current += pointerDelta.current / 250;
+        phiRef.current += pointerDelta.current / 300;
         pointerDelta.current *= 0.92;
       }
 
@@ -114,8 +109,8 @@ const Globe = ({ className = '' }: GlobeProps) => {
       globe.update({
         phi: phiRef.current,
         theta: thetaRef.current,
-        width: width * 2,
-        height: width * 2,
+        width: width * dpr,
+        height: width * dpr,
       });
 
       animationFrame = requestAnimationFrame(animate);
@@ -130,18 +125,18 @@ const Globe = ({ className = '' }: GlobeProps) => {
 
   return (
     <div
-      className={`relative aspect-square ${className}`}
+      className={`relative ${className}`}
       aria-hidden="true"
       style={{
         opacity: ready ? 1 : 0,
-        transform: ready ? 'scale(1)' : 'scale(0.8)',
-        transition: 'opacity 1.2s cubic-bezier(0.22,1,0.36,1), transform 1.4s cubic-bezier(0.22,1,0.36,1)',
+        transform: ready ? 'scale(1)' : 'scale(0.92)',
+        transition: 'opacity 1.5s cubic-bezier(0.22,1,0.36,1), transform 1.8s cubic-bezier(0.22,1,0.36,1)',
       }}
     >
-      {/* Multi-layer glow for depth */}
-      <div className="absolute inset-[-35%] rounded-full bg-[hsl(210_80%_22%/0.5)] blur-[120px] animate-pulse" style={{ animationDuration: '4s' }} />
-      <div className="absolute inset-[-20%] rounded-full bg-[hsl(200_90%_40%/0.18)] blur-[90px]" />
-      <div className="absolute inset-[-8%] rounded-full bg-[hsl(195_100%_50%/0.1)] blur-[60px]" />
+      {/* Atmospheric glow layers */}
+      <div className="absolute inset-[-40%] rounded-full bg-[hsl(210_80%_18%/0.6)] blur-[150px] animate-pulse" style={{ animationDuration: '5s' }} />
+      <div className="absolute inset-[-25%] rounded-full bg-[hsl(200_90%_35%/0.2)] blur-[100px]" />
+      <div className="absolute inset-[-10%] rounded-full bg-[hsl(195_100%_50%/0.08)] blur-[70px]" />
       <canvas
         ref={canvasRef}
         onPointerDown={onPointerDown}

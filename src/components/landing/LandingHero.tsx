@@ -9,7 +9,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 const stagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.18, delayChildren: 0.6 } },
+  show: { transition: { staggerChildren: 0.18, delayChildren: 0.5 } },
 };
 
 const fadeUp = {
@@ -18,9 +18,9 @@ const fadeUp = {
 };
 
 const headlines = [
-  { main: 'Rekrytering', accent: 'vägrar vänta', pre: 'för den som' },
-  { main: 'Matcha talang', accent: 'på sekunder', pre: 'med AI' },
-  { main: 'Framtidens', accent: 'börjar här', pre: 'rekrytering' },
+  { main: 'Rekrytering', pre: 'för den som', accent: 'vägrar vänta' },
+  { main: 'Matcha talang', pre: 'med AI —', accent: 'på sekunder' },
+  { main: 'Framtidens', pre: 'rekrytering', accent: 'börjar här' },
 ];
 
 const LandingHero = () => {
@@ -46,20 +46,19 @@ const LandingHero = () => {
       className="relative h-[100dvh] flex items-center justify-center overflow-hidden"
       aria-label="Parium – Skandinaviens smartaste rekryteringsplattform"
     >
-      {/* Full-screen globe behind everything */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <Suspense fallback={<div className="w-[90vmin] h-[90vmin] rounded-full bg-white/[0.02] animate-pulse" />}>
-          <Globe className="w-[85vmin] sm:w-[75vmin] md:w-[70vmin] lg:w-[65vmin] xl:w-[60vmin] pointer-events-auto" />
+      {/* Globe: zoomed in, positioned low to create a "planet horizon" */}
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-[-35%] sm:bottom-[-40%] md:bottom-[-45%] lg:bottom-[-50%] pointer-events-none">
+        <Suspense fallback={<div className="w-[140vw] aspect-square rounded-full bg-white/[0.02] animate-pulse" />}>
+          <Globe className="w-[140vw] sm:w-[130vw] md:w-[120vw] lg:w-[110vw] xl:w-[100vw] aspect-square pointer-events-auto" />
         </Suspense>
       </div>
 
       {/* Gradient overlays for text readability */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(210_80%_15%/0.7),transparent)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_30%,hsl(215_100%_6%/0.6)_70%)] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-primary via-primary/80 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-primary via-primary/70 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,hsl(210_80%_12%/0.8),transparent)] pointer-events-none" />
 
-      {/* Content overlay */}
-      <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-6 md:px-12 w-full text-center">
+      {/* Content overlay – positioned in upper portion */}
+      <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-6 md:px-12 w-full text-center -mt-[10vh] sm:-mt-[12vh]">
         <motion.div
           className="space-y-6 sm:space-y-8"
           variants={stagger}
@@ -78,19 +77,19 @@ const LandingHero = () => {
           </motion.div>
 
           {/* Rotating headline */}
-          <motion.div variants={fadeUp} className="min-h-[140px] sm:min-h-[180px] md:min-h-[220px] flex items-center justify-center">
+          <motion.div variants={fadeUp} className="min-h-[130px] sm:min-h-[170px] md:min-h-[200px] flex items-center justify-center">
             <AnimatePresence mode="wait">
               <motion.h1
                 key={headlineIdx}
-                className="text-[2.5rem] leading-[1.05] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6.5rem] font-bold tracking-[-0.04em] text-white"
+                className="text-[2.5rem] leading-[1.05] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6.5rem] font-bold tracking-[-0.04em] text-white drop-shadow-[0_4px_40px_rgba(0,0,0,0.5)]"
                 initial={{ opacity: 0, y: 30, filter: 'blur(12px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease } }}
                 exit={{ opacity: 0, y: -20, filter: 'blur(8px)', transition: { duration: 0.4, ease } }}
               >
                 {h.main}
                 <br />
-                <span className="text-white/60 font-medium">{h.pre} </span>
-                <span className="bg-gradient-to-r from-secondary via-[hsl(180_80%_65%)] to-secondary bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_ease-in-out_infinite]">
+                <span className="text-white/50 font-medium">{h.pre} </span>
+                <span className="bg-gradient-to-r from-secondary via-[hsl(180_80%_65%)] to-secondary bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_ease-in-out_infinite] drop-shadow-none">
                   {h.accent}
                 </span>
               </motion.h1>
@@ -99,7 +98,7 @@ const LandingHero = () => {
 
           {/* Subheadline */}
           <motion.p
-            className="text-[15px] sm:text-lg md:text-xl text-white/45 max-w-[560px] mx-auto leading-relaxed"
+            className="text-[15px] sm:text-lg md:text-xl text-white/45 max-w-[560px] mx-auto leading-relaxed drop-shadow-[0_2px_20px_rgba(0,0,0,0.4)]"
             variants={fadeUp}
           >
             Parium kopplar ihop kandidater och arbetsgivare på{' '}
