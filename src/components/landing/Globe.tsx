@@ -121,7 +121,9 @@ const Globe = ({ className = '' }: GlobeProps) => {
       });
     };
 
-    if ('ResizeObserver' in window) {
+    const supportsResizeObserver = typeof ResizeObserver !== 'undefined';
+
+    if (supportsResizeObserver) {
       resizeObserver = new ResizeObserver(handleResize);
       resizeObserver.observe(canvas);
     } else {
