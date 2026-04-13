@@ -56,15 +56,15 @@ const LandingHero = () => {
       className="relative h-[100dvh] flex items-center justify-center overflow-hidden"
       aria-label="Parium – Skandinaviens smartaste rekryteringsplattform"
     >
-      {/* Globe: cinematic scale-in from blur */}
+      {/* Globe: NASA satellite close-up, fills hero */}
       <motion.div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none will-change-transform translate-y-[5%] sm:translate-y-[2%]"
+        className="absolute inset-0 flex items-end justify-center pointer-events-none will-change-transform overflow-hidden"
         variants={isMobile ? undefined : scaleReveal}
         initial={isMobile ? undefined : 'hidden'}
         animate={isMobile ? undefined : 'show'}
       >
-        <Suspense fallback={<div className="w-[clamp(320px,86vw,420px)] h-[clamp(320px,86vw,420px)] rounded-full bg-white/5" />}>
-          <Globe className="w-[clamp(320px,86vw,420px)] h-[clamp(320px,86vw,420px)] sm:w-[100vw] md:w-[104vw] lg:w-[108vw] xl:w-[112vw] aspect-square max-w-none pointer-events-auto" />
+        <Suspense fallback={<div className="w-[160vw] h-[160vw] rounded-full bg-white/5" />}>
+          <Globe className="w-[160vw] h-[160vw] sm:w-[140vw] md:w-[130vw] lg:w-[120vw] aspect-square max-w-none pointer-events-auto translate-y-[30%]" />
         </Suspense>
       </motion.div>
 
