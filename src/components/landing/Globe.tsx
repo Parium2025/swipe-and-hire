@@ -37,7 +37,7 @@ function EarthSphere({ isDay }: { isDay: boolean }) {
   });
 
   return (
-    <mesh ref={meshRef} rotation={[0.15, -0.4, 0.1]}>
+    <mesh ref={meshRef} rotation={[0.35, -0.25, 0.08]}>
       <sphereGeometry args={[2, 128, 128]} />
       <meshStandardMaterial
         map={texture}
