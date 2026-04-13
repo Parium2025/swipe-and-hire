@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
+import LandingStars from '@/components/landing/LandingStars';
 
 const LandingStats = lazy(() => import('@/components/landing/LandingStats'));
 const LandingFeatures = lazy(() => import('@/components/landing/LandingFeatures'));
@@ -152,6 +153,8 @@ const Landing = () => {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_80%_50%,hsl(200_90%_12%/0.3),transparent)]" />
         <div className="absolute bottom-0 left-0 right-0 h-[50vh] bg-[radial-gradient(ellipse_100%_100%_at_50%_100%,hsl(215_100%_8%/0.5),transparent)]" />
       </div>
+
+      <LandingStars />
 
       <div className="relative z-10">
         <LandingNav onLoginClick={handleLogin} />
