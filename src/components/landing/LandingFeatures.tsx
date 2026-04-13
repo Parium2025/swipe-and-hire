@@ -1,114 +1,109 @@
-import { motion, useReducedMotion } from 'framer-motion';
-import { BarChart3, Globe2, MessageCircle, ScanFace, Shield, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Zap, ScanFace, BarChart3, Shield, MessageCircle, Globe2 } from 'lucide-react';
 
 const features = [
   {
     icon: Zap,
-    title: 'Jobbmatchning med verkligt tempo',
-    description: 'Kandidater och jobb möts snabbare i en upplevelse som känns byggd för fart från första sekund.',
-    points: ['Snabbare första signal', 'Mindre friktion före kontakt'],
-    span: 'lg:col-span-7',
+    title: 'Swipe-matchning',
+    description: 'Kandidater och jobb matchas med ett swipe. Snabbare och mer träffsäkert än alla traditionella plattformar.',
+    gradient: 'from-yellow-400/20 to-orange-500/20',
   },
   {
     icon: ScanFace,
-    title: 'Video-profiler som säger mer',
-    description: 'Visa personlighet, energi och närvaro utan att allt reduceras till ett traditionellt CV.',
-    points: ['Mer mänsklig presentation', 'Starkare första intryck'],
-    span: 'lg:col-span-5',
+    title: 'Video-profiler',
+    description: 'Se personligheten bakom CV:t. Kandidater presenterar sig med korta, autentiska videoklipp.',
+    gradient: 'from-violet-400/20 to-fuchsia-500/20',
   },
   {
     icon: BarChart3,
-    title: 'AI-screening närmare beslutet',
-    description: 'Screening, urval och nästa steg presenteras i samma sammanhang så att teamet agerar snabbare.',
-    points: ['Ingen separat triagevy', 'Prioritering direkt i flödet'],
-    span: 'lg:col-span-4',
+    title: 'AI-driven screening',
+    description: 'Automatisk utvärdering mot dina urvalskriterier. Sparar timmar av manuellt arbete varje vecka.',
+    gradient: 'from-cyan-400/20 to-blue-500/20',
   },
   {
     icon: Shield,
-    title: 'Byggd för förtroende',
-    description: 'Trygg struktur, tydligt språk och ett gränssnitt som signalerar kontroll och kvalitet.',
-    points: ['Hög kontrast', 'Premiumkänsla på varje skärm'],
-    span: 'lg:col-span-4',
+    title: 'GDPR-säkert',
+    description: 'All data lagras i Sverige med end-to-end kryptering. Fullt GDPR-kompatibelt med inbyggd samtyckshantering.',
+    gradient: 'from-emerald-400/20 to-green-500/20',
   },
   {
     icon: MessageCircle,
-    title: 'Direktdialog utan friktion',
-    description: 'Från match till meddelande och intervju utan att lämna det sammanhang där beslutet redan tas.',
-    points: ['Mindre verktygsbyte', 'Kortare väg till intervju'],
-    span: 'lg:col-span-4',
+    title: 'Direktmeddelanden',
+    description: 'Chatta i realtid med kandidater och arbetsgivare. Inga omvägar, inga mellanhänder.',
+    gradient: 'from-blue-400/20 to-indigo-500/20',
   },
   {
     icon: Globe2,
-    title: 'Nordisk från grunden',
-    description: 'Språk, struktur och produktkänsla anpassad för Sverige och Norden snarare än generisk global SaaS.',
-    points: ['SEO för nordisk rekrytering', 'Copy som speglar produkten'],
-    span: 'lg:col-span-12',
+    title: 'Byggt för Norden',
+    description: 'Designat specifikt för den nordiska arbetsmarknaden med lokala anpassningar och svensk UX.',
+    gradient: 'from-teal-400/20 to-cyan-500/20',
   },
 ];
 
 const LandingFeatures = () => {
-  const reduceMotion = useReducedMotion();
-
-  const reveal = (delay = 0) => ({
-    initial: { opacity: 0, y: reduceMotion ? 0 : 26 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.18 },
-    transition: { duration: 0.68, delay, ease: [0.22, 1, 0.36, 1] as const },
-  });
-
   return (
-    <section id="plattform" className="relative px-5 py-24 sm:px-6 sm:py-32 md:px-12 lg:px-24 lg:py-40" aria-labelledby="features-heading">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-8">
-          <motion.header className="lg:sticky lg:top-28 lg:h-fit" {...reveal()}>
-            <span className="landing-eyebrow">Plattformen</span>
-            <h2 id="features-heading" className="mt-6 max-w-[11ch] text-[clamp(2.35rem,5vw,4.9rem)] font-bold leading-[0.94] tracking-[-0.06em] text-pure-white">
-              Det här sticker ut för att allt känns gjort med riktning.
-            </h2>
-            <p className="mt-6 max-w-[36rem] text-[1rem] leading-8 text-pure-white sm:text-[1.05rem]">
-              Istället för generiska kort bygger sektionen upp en tydlig produktstory: hur kandidaten, arbetsgivaren och beslutet hålls ihop i samma premiumflöde.
-            </p>
+    <section
+      id="funktioner"
+      className="relative py-24 sm:py-32 lg:py-40 px-5 sm:px-6 md:px-12 lg:px-24"
+      aria-labelledby="features-heading"
+    >
+      {/* Divider */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 max-w-lg h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <span className="landing-signal-pill">Byggd för skala</span>
-              <span className="landing-signal-pill">Hög kontrast</span>
-              <span className="landing-signal-pill">Responsiv från start</span>
-            </div>
-          </motion.header>
+      <div className="max-w-7xl mx-auto">
+        <motion.header
+          className="text-center mb-16 sm:mb-20 lg:mb-24"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.6 }}
+        >
+          <span className="text-secondary text-[11px] sm:text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">
+            Funktioner
+          </span>
+          <h2
+            id="features-heading"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white mb-4 sm:mb-5"
+          >
+            Allt du behöver.
+            <br />
+            <span className="text-white/40">Inget du inte gör.</span>
+          </h2>
+          <p className="text-white/40 text-[15px] sm:text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+            En komplett rekryteringsplattform byggd från grunden för att vara snabb, intuitiv och effektiv.
+          </p>
+        </motion.header>
 
-          <div className="grid gap-4 lg:grid-cols-12">
-            {features.map((feature, index) => {
-              const Icon = feature.icon;
-
-              return (
-                <motion.article
-                  key={feature.title}
-                  className={`landing-feature-card rounded-[1.8rem] p-6 sm:p-7 lg:p-8 ${feature.span} ${index < 2 ? 'landing-feature-card-tall' : ''}`}
-                  {...reveal(index * 0.06)}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="landing-showcase-icon flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] text-pure-white">
-                      <Icon className="h-5 w-5" strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span className="landing-feature-label">0{index + 1}</span>
-                        <h3 className="text-xl font-semibold tracking-[-0.03em] text-pure-white">{feature.title}</h3>
-                      </div>
-                      <p className="mt-3 max-w-[34rem] text-sm leading-7 text-pure-white sm:text-[0.96rem]">{feature.description}</p>
-                      <div className="mt-5 flex flex-wrap gap-3">
-                        {feature.points.map((point) => (
-                          <span key={point} className="landing-signal-pill">
-                            {point}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+          {features.map((feature, i) => {
+            const Icon = feature.icon;
+            return (
+              <motion.article
+                key={feature.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: i * 0.06 }}
+                className="group relative p-6 sm:p-7 lg:p-8 rounded-2xl border border-white/[0.05] bg-white/[0.015]
+                  hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-500
+                  @media(hover:hover){hover:translate-y-[-2px]}"
+              >
+                {/* Hover gradient bg */}
+                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
+                <div className="relative z-10">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center mb-5 group-hover:border-white/[0.15] transition-colors duration-300">
+                    <Icon className="w-5 h-5 text-secondary" strokeWidth={1.5} />
                   </div>
-                </motion.article>
-              );
-            })}
-          </div>
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2.5 tracking-tight">
+                    {feature.title}
+                  </h3>
+                  <p className="text-white/40 text-[13px] sm:text-sm leading-relaxed group-hover:text-white/50 transition-colors duration-300">
+                    {feature.description}
+                  </p>
+                </div>
+              </motion.article>
+            );
+          })}
         </div>
       </div>
     </section>

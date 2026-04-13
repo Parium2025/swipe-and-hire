@@ -1,107 +1,77 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const testimonials = [
   {
-    quote: 'Det här känns mer som ett produktbolag än ett traditionellt HR-verktyg. Vi fick överblick direkt.',
+    quote: 'Vi hittade tre perfekta kandidater på mindre än en vecka. Parium förändrade helt hur vi rekryterar.',
     name: 'Emma Lindström',
     role: 'HR-chef, TechCo AB',
     initials: 'EL',
   },
   {
-    quote: 'Jag förstod direkt hur jag skulle agera på mobilen. Snabbt, tydligt och mycket snyggare än allt annat jag testat.',
+    quote: 'Swipe-funktionen gör det genuint roligt att söka jobb. Jag fick mitt drömjobb på 3 dagar.',
     name: 'Marcus Eriksson',
     role: 'Utvecklare',
     initials: 'ME',
   },
   {
-    quote: 'AI-screeningen gör att vi lägger tiden på rätt kandidater istället för att drunkna i manuellt urval.',
+    quote: 'AI-screeningen sparar oss 15 timmar per vecka. Det är som att ha en extra rekryterare i teamet.',
     name: 'Sara Bergqvist',
     role: 'VD, StartupHub',
     initials: 'SB',
   },
 ];
 
-const faqs = [
-  {
-    question: 'Vad är Parium?',
-    answer:
-      'Parium är en AI-driven rekryteringsplattform för företag och kandidater i Sverige och Norden med jobbmatchning, video, screening och direktdialog i samma system.',
-  },
-  {
-    question: 'Hur fungerar AI-rekrytering i Parium?',
-    answer:
-      'Plattformen kombinerar AI-screening, urvalslogik och direktdialog för att korta vägen från intresse till intervju och anställning.',
-  },
-  {
-    question: 'Fungerar Parium på mobil, surfplatta och desktop?',
-    answer:
-      'Ja, upplevelsen är byggd för Android, iPhone, surfplatta, laptop och stora skärmar med stöd för touch, mus och responsiv skalning.',
-  },
-  {
-    question: 'Kan både företag och kandidater använda Parium?',
-    answer:
-      'Ja, Parium har separata men sammanhängande flöden för arbetsgivare som vill hitta kandidater och kandidater som vill hitta jobb snabbare.',
-  },
-  {
-    question: 'Varför är landningssidan byggd så här?',
-    answer:
-      'För att spegla produktens premiumkänsla bättre, skapa tydligare budskap för båda målgrupperna och ge starkare SEO med semantisk struktur, FAQ och tydligare innehåll.',
-  },
-];
-
 const LandingTestimonials = () => {
-  const reduceMotion = useReducedMotion();
-
-  const reveal = (delay = 0) => ({
-    initial: { opacity: 0, y: reduceMotion ? 0 : 24 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.18 },
-    transition: { duration: 0.68, delay, ease: [0.22, 1, 0.36, 1] as const },
-  });
-
   return (
-    <section id="faq" className="relative px-5 py-24 sm:px-6 sm:py-32 md:px-12 lg:px-24 lg:py-40" aria-labelledby="testimonials-heading">
-      <div className="mx-auto max-w-7xl">
-        <motion.header className="max-w-[46rem]" {...reveal()}>
-          <span className="landing-eyebrow">Proof & SEO</span>
-          <h2 id="testimonials-heading" className="mt-6 text-[clamp(2.35rem,5vw,4.8rem)] font-bold leading-[0.94] tracking-[-0.06em] text-pure-white">
-            Social proof för människor. Tydliga svar för Google.
+    <section
+      className="relative py-24 sm:py-32 lg:py-40 px-5 sm:px-6 md:px-12 lg:px-24"
+      aria-labelledby="testimonials-heading"
+    >
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 max-w-lg h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+
+      <div className="max-w-7xl mx-auto">
+        <motion.header
+          className="text-center mb-16 sm:mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.6 }}
+        >
+          <span className="text-secondary text-[11px] sm:text-xs font-semibold tracking-[0.2em] uppercase mb-4 block">
+            Vad folk säger
+          </span>
+          <h2 id="testimonials-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white">
+            Älskad av rekryterare{' '}
+            <span className="text-white/40">och jobbsökare</span>
           </h2>
-          <p className="mt-6 text-[1rem] leading-8 text-pure-white sm:text-[1.05rem]">
-            Sektionen är byggd för att övertyga två gånger: först visuellt för besökaren, sedan strukturellt för sökmotorer som läser sidan semantiskt.
-          </p>
         </motion.header>
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:gap-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            {testimonials.map((testimonial, index) => (
-              <motion.blockquote
-                key={testimonial.name}
-                className={`landing-quote-card rounded-[1.7rem] p-6 sm:p-7 ${index === 2 ? 'md:col-span-2' : ''}`}
-                {...reveal(index * 0.08)}
-              >
-                <p className="text-lg leading-8 text-pure-white">“{testimonial.quote}”</p>
-                <footer className="mt-6 flex items-center gap-3">
-                  <div className="landing-showcase-step flex h-11 w-11 items-center justify-center rounded-full text-xs font-semibold text-pure-white">
-                    {testimonial.initials}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-pure-white">{testimonial.name}</div>
-                    <div className="text-sm text-pure-white">{testimonial.role}</div>
-                  </div>
-                </footer>
-              </motion.blockquote>
-            ))}
-          </div>
-
-          <div className="grid gap-4">
-            {faqs.map((faq, index) => (
-              <motion.article key={faq.question} className="landing-faq-entry rounded-[1.5rem] p-5 sm:p-6" {...reveal(index * 0.05)}>
-                <h3 className="text-lg font-semibold tracking-[-0.03em] text-pure-white">{faq.question}</h3>
-                <p className="mt-3 text-sm leading-7 text-pure-white sm:text-[0.96rem]">{faq.answer}</p>
-              </motion.article>
-            ))}
-          </div>
+        <div className="grid md:grid-cols-3 gap-5 sm:gap-6">
+          {testimonials.map((t, i) => (
+            <motion.blockquote
+              key={t.name}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="relative p-6 sm:p-8 rounded-2xl border border-white/[0.05] bg-white/[0.015] hover:bg-white/[0.03] transition-colors duration-300"
+            >
+              {/* Quote mark */}
+              <div className="text-secondary/20 text-5xl font-serif leading-none mb-4" aria-hidden="true">"</div>
+              <p className="text-white/60 text-[14px] sm:text-[15px] leading-relaxed mb-6 italic">
+                {t.quote}
+              </p>
+              <footer className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-secondary/30 to-accent/30 border border-white/10 flex items-center justify-center text-white text-xs font-semibold">
+                  {t.initials}
+                </div>
+                <div>
+                  <div className="text-white text-sm font-medium">{t.name}</div>
+                  <div className="text-white/30 text-xs">{t.role}</div>
+                </div>
+              </footer>
+            </motion.blockquote>
+          ))}
         </div>
       </div>
     </section>

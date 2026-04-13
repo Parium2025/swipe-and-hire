@@ -1,80 +1,57 @@
 import { useNavigate } from 'react-router-dom';
-import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 
 const LandingCTA = () => {
   const navigate = useNavigate();
-  const reduceMotion = useReducedMotion();
 
-  const reveal = (delay = 0) => ({
-    initial: { opacity: 0, y: reduceMotion ? 0 : 24 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.2 },
-    transition: { duration: 0.68, delay, ease: [0.22, 1, 0.36, 1] as const },
-  });
-
-  const handleStart = (role?: 'job_seeker' | 'employer') => {
+  const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
-    navigate('/auth', { state: { mode: 'register', role } });
+    navigate('/auth', { state: { mode: 'register' } });
   };
 
   return (
-    <section id="kontakt" className="relative px-5 py-24 sm:px-6 sm:py-32 md:px-12 lg:px-24 lg:py-40" aria-label="Kom igång med Parium rekryteringsplattform">
-      <div className="mx-auto max-w-7xl">
-        <motion.div className="landing-cta-surface relative overflow-hidden rounded-[2.2rem] p-6 sm:p-8 lg:p-12" {...reveal()}>
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-end">
-            <div className="relative z-10">
-              <span className="landing-eyebrow">Nästa steg</span>
-              <h2 className="mt-6 max-w-[11ch] text-[clamp(2.35rem,5vw,4.8rem)] font-bold leading-[0.94] tracking-[-0.06em] text-pure-white">
-                Redo att ge första intrycket samma nivå som produkten?
-              </h2>
-              <p className="mt-6 max-w-[36rem] text-[1rem] leading-8 text-pure-white sm:text-[1.05rem]">
-                Parium är byggt för bolag och kandidater som vill ha mer fart, bättre känsla och mindre friktion i varje steg av rekryteringen.
-              </p>
+    <section className="relative py-24 sm:py-32 lg:py-40 px-5 sm:px-6 md:px-12 lg:px-24" aria-label="Kom igång">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 max-w-lg h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <span className="landing-signal-pill">App-nativ känsla</span>
-                <span className="landing-signal-pill">Byggd för Norden</span>
-                <span className="landing-signal-pill">SEO som hjälper synlighet</span>
-              </div>
-            </div>
+      <div className="max-w-4xl mx-auto text-center relative">
+        {/* Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-secondary/[0.07] rounded-full blur-[150px] pointer-events-none" aria-hidden="true" />
 
-            <div className="relative z-10 grid gap-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <article className="landing-role-panel rounded-[1.7rem] p-5 sm:p-6">
-                  <p className="text-xs uppercase tracking-[0.18em] text-pure-white">För arbetsgivare</p>
-                  <p className="mt-3 text-sm leading-7 text-pure-white">Publicera jobb, screena snabbare och boka intervjuer utan att växla mellan verktyg.</p>
-                  <Button variant="glassBlue" onClick={() => handleStart('employer')} className="landing-primary-button mt-5 px-6 text-sm font-semibold">
-                    <Sparkles className="h-4 w-4" />
-                    Skapa företagskonto
-                  </Button>
-                </article>
-                <article className="landing-role-panel rounded-[1.7rem] p-5 sm:p-6">
-                  <p className="text-xs uppercase tracking-[0.18em] text-pure-white">För kandidater</p>
-                  <p className="mt-3 text-sm leading-7 text-pure-white">Hitta jobb, visa mer än ett CV och kom till riktig kontakt mycket snabbare.</p>
-                  <Button variant="glass" onClick={() => handleStart('job_seeker')} className="landing-secondary-button mt-5 px-6 text-sm font-semibold">
-                    Hitta jobb nu
-                  </Button>
-                </article>
-              </div>
+        <motion.div
+          className="relative z-10"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.03em] text-white mb-5 sm:mb-6">
+            Redo att förändra
+            <br />
+            <span className="bg-gradient-to-r from-secondary via-[hsl(180_80%_65%)] to-secondary bg-clip-text text-transparent">
+              hur du rekryterar?
+            </span>
+          </h2>
+          <p className="text-white/40 text-[15px] sm:text-base md:text-lg max-w-lg mx-auto mb-8 sm:mb-10 leading-relaxed">
+            Gå med tusentals företag och jobbsökare som redan upptäckt framtidens rekrytering.
+            Helt gratis under lanseringsperioden.
+          </p>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button variant="glassBlue" onClick={() => handleStart('employer')} className="landing-primary-button group px-7 text-base font-semibold">
-                  Starta med Parium
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-                </Button>
-                <Button variant="glass" onClick={() => handleStart('job_seeker')} className="landing-secondary-button group px-7 text-base font-semibold">
-                  Utforska jobbsidan
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-                </Button>
-              </div>
-
-              <p className="text-sm leading-7 text-pure-white">
-                Tidig åtkomst, tydlig onboarding och en upplevelse som redan från första scroll signalerar premium.
-              </p>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={handleStart}
+              className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-white text-primary font-semibold text-base sm:text-lg
+                hover:shadow-[0_0_40px_rgba(255,255,255,0.12)] active:scale-[0.97]
+                transition-all duration-200 min-h-[52px]"
+            >
+              Kom igång gratis
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-200" />
+            </button>
           </div>
+
+          <p className="text-white/25 text-xs mt-5">
+            Ingen kreditkort krävs · Gratis under hela beta-perioden
+          </p>
         </motion.div>
       </div>
     </section>
