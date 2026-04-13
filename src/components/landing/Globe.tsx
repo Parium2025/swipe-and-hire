@@ -26,10 +26,13 @@ function EarthSphere({ isDay }: { isDay: boolean }) {
   texture.magFilter = THREE.LinearFilter;
   texture.generateMipmaps = true;
 
-  // Slow continuous rotation
+  // Slow upward drift (Italy → Scandinavia) + gentle horizontal rotation
   useFrame((_, delta) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.015; // ~1 revolution per 7 minutes
+      // Primary: tilt upward continuously (negative x = reveals northern latitudes)
+      meshRef.current.rotation.x -= delta * 0.012;
+      // Secondary: very slow eastward drift for realism
+      meshRef.current.rotation.y += delta * 0.005;
     }
   });
 
