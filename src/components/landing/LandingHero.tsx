@@ -9,7 +9,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 const stagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.22, delayChildren: 1.2 } },
+  show: { transition: { staggerChildren: 0.16, delayChildren: 0.55 } },
 };
 
 const fadeUp = {
@@ -18,8 +18,8 @@ const fadeUp = {
 };
 
 const scaleReveal = {
-  hidden: { opacity: 0, scale: 0.85, filter: 'blur(20px)' },
-  show: { opacity: 1, scale: 1, filter: 'blur(0px)', transition: { duration: 2, ease } },
+  hidden: { opacity: 0, scale: 0.9, filter: 'blur(16px)' },
+  show: { opacity: 1, scale: 1, filter: 'blur(0px)', transition: { duration: 1.6, ease } },
 };
 
 const headlines = [
@@ -53,13 +53,13 @@ const LandingHero = () => {
     >
       {/* Globe: cinematic scale-in from blur */}
       <motion.div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        className="absolute inset-0 flex items-center justify-center pointer-events-none will-change-transform"
         variants={scaleReveal}
         initial="hidden"
         animate="show"
       >
-        <Suspense fallback={<div className="w-[140vh] aspect-square rounded-full bg-white/[0.02] animate-pulse" />}>
-          <Globe className="w-[120vh] sm:w-[130vh] md:w-[140vh] lg:w-[150vh] xl:w-[160vh] aspect-square pointer-events-auto" />
+        <Suspense fallback={<div className="w-[108vw] aspect-square rounded-full bg-white/[0.02] animate-pulse" />}>
+          <Globe className="w-[104vw] sm:w-[108vw] md:w-[112vw] lg:w-[116vw] xl:w-[118vw] aspect-square max-w-none pointer-events-auto translate-y-[2%]" />
         </Suspense>
       </motion.div>
 
@@ -80,7 +80,7 @@ const LandingHero = () => {
         >
           {/* Badge */}
           <motion.div variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.06] border border-white/[0.10] text-[11px] sm:text-xs font-medium text-white/60 tracking-widest uppercase backdrop-blur-xl">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.08] border border-white/[0.12] text-[11px] sm:text-xs font-medium text-white/60 tracking-widest uppercase shadow-[0_12px_40px_rgba(0,0,0,0.24)]">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary" />
@@ -137,7 +137,7 @@ const LandingHero = () => {
               onClick={() => goTo('employer')}
               className="group flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-white/[0.06] border border-white/[0.15] text-white font-semibold text-[15px] sm:text-base
                 hover:bg-white/[0.12] hover:border-white/[0.25] active:scale-[0.97]
-                backdrop-blur-xl transition-all duration-300 min-h-[48px]"
+                shadow-[0_12px_40px_rgba(0,0,0,0.22)] transition-all duration-300 min-h-[48px]"
             >
               Hitta kandidater
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />

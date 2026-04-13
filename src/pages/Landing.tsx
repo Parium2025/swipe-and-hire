@@ -1,14 +1,15 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
-import LandingStats from '@/components/landing/LandingStats';
-import LandingFeatures from '@/components/landing/LandingFeatures';
-import LandingHowItWorks from '@/components/landing/LandingHowItWorks';
-import LandingTestimonials from '@/components/landing/LandingTestimonials';
-import LandingCTA from '@/components/landing/LandingCTA';
-import LandingFooter from '@/components/landing/LandingFooter';
+
+const LandingStats = lazy(() => import('@/components/landing/LandingStats'));
+const LandingFeatures = lazy(() => import('@/components/landing/LandingFeatures'));
+const LandingHowItWorks = lazy(() => import('@/components/landing/LandingHowItWorks'));
+const LandingTestimonials = lazy(() => import('@/components/landing/LandingTestimonials'));
+const LandingCTA = lazy(() => import('@/components/landing/LandingCTA'));
+const LandingFooter = lazy(() => import('@/components/landing/LandingFooter'));
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -116,7 +117,7 @@ const Landing = () => {
   };
 
   return (
-    <div className="fixed inset-0 w-full bg-primary text-white overflow-x-hidden overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+    <div className="relative min-h-screen w-full bg-primary text-white overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
       {/* Deep layered gradient background */}
       <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-30%,hsl(210_80%_15%/0.6),transparent)]" />
@@ -128,13 +129,17 @@ const Landing = () => {
         <LandingNav onLoginClick={handleLogin} />
         <main>
           <LandingHero />
-          <LandingStats />
-          <LandingFeatures />
-          <LandingHowItWorks />
-          <LandingTestimonials />
-          <LandingCTA />
+          <Suspense fallback={null}>
+            <LandingStats />
+            <LandingFeatures />
+            <LandingHowItWorks />
+            <LandingTestimonials />
+            <LandingCTA />
+          </Suspense>
         </main>
-        <LandingFooter />
+        <Suspense fallback={null}>
+          <LandingFooter />
+        </Suspense>
       </div>
     </div>
   );
