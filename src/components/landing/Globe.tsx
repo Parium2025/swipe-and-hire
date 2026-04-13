@@ -92,11 +92,10 @@ const Globe = ({ className = '' }: GlobeProps) => {
         { location: [1.3521, 103.8198], size: 0.03 },
         { location: [25.2048, 55.2708], size: 0.03 },
       ],
-      onRender: () => {
-        if (!ready) setReady(true);
-      },
     });
     globeRef.current = globe;
+    // Mark ready after first frame
+    requestAnimationFrame(() => setReady(true));
 
     const animate = () => {
       const elapsed = performance.now() - startTime;
