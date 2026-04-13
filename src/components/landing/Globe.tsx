@@ -15,8 +15,8 @@ const isDaytime = (): boolean => {
 
 /**
  * NASA Earth – circular globe mask with smooth upward pan.
- * Automatically switches between Blue Marble (day) and Black Marble (night)
- * based on the user's local time. Both images are preloaded for zero pop-in.
+ * Uses pre-cropped high-res imagery (8192px wide) focused on Europe (lat 25°–75°).
+ * Automatically switches between Blue Marble (day) and Black Marble (night).
  */
 const Globe = memo(({ className = '' }: GlobeProps) => {
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -32,7 +32,6 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
       if ('decode' in img) img.decode().catch(() => {});
       return img;
     };
-    // Preload the active one first, then the other
     imgRef.current = preload(imageSrc);
     preload(isDay ? '/images/earth-night.jpg' : '/images/earth-day.jpg');
   }, [imageSrc, isDay]);
@@ -43,17 +42,17 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
       aria-hidden="true"
       style={{ position: 'relative' }}
     >
-      {/* Earth image – extreme zoom on Europe, smooth upward drift */}
+      {/* Earth image – pre-cropped to Europe, smooth upward drift */}
       <div
-        className="absolute inset-0 animate-[earthPan_45s_linear_infinite]"
+        className="absolute inset-0 animate-[earthPan_50s_linear_infinite]"
         style={{
           backgroundImage: `url(${imageSrc})`,
-          backgroundSize: isDay ? '350% auto' : '1200% auto',
-          backgroundPosition: isDay ? '48% 28%' : '54% 18%',
-          backgroundRepeat: 'repeat',
+          backgroundSize: '500% auto',
+          backgroundPosition: '54% 100%',
+          backgroundRepeat: 'repeat-y',
           filter: isDay
-            ? 'brightness(1.1) contrast(1.15) saturate(1.2)'
-            : 'brightness(1.8) contrast(1.25) saturate(1.3)',
+            ? 'brightness(1.05) contrast(1.1) saturate(1.15)'
+            : 'brightness(1.6) contrast(1.2) saturate(1.2)',
           imageRendering: 'auto',
           willChange: 'background-position',
           transform: 'translateZ(0)',
