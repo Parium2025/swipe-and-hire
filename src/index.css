@@ -13,10 +13,10 @@
   100% { background-position: -200% center; }
 }
 
-/* NASA Earth: very slow upward drift, only a few % movement for smooth feel */
+/* NASA Earth: smooth upward drift across Europe, seamless infinite loop */
 @keyframes earthPan {
-  0%   { background-position: 54% 22%; }
-  100% { background-position: 54% 16%; }
+  0%   { background-position: 54% 24%; }
+  100% { background-position: 54% 10%; }
 }
 
 html {
