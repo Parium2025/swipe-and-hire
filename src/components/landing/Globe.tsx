@@ -56,7 +56,7 @@ const Globe = ({ className = '' }: GlobeProps) => {
       devicePixelRatio: dpr,
       width: width * dpr,
       height: width * dpr,
-      phi: 0.3,
+      phi: 1.8,
       theta: THETA_START,
       dark: 1,
       diffuse: 6,
