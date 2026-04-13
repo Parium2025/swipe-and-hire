@@ -13,10 +13,10 @@
   100% { background-position: -200% center; }
 }
 
-/* NASA Earth: continuous smooth upward scroll, seamless loop via repeat-y */
+/* NASA Earth: very slow upward drift, only a few % movement for smooth feel */
 @keyframes earthPan {
-  0%   { background-position: 54% 0%; }
-  100% { background-position: 54% -100%; }
+  0%   { background-position: 54% 22%; }
+  100% { background-position: 54% 16%; }
 }
 
 html {
