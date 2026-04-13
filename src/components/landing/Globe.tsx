@@ -9,8 +9,9 @@ interface GlobeProps {
 const Globe = ({ className = '' }: GlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // phi = longitude rotation in cobe. ~1.8 rad centers on Europe/Scandinavia
-  const phiRef = useRef(1.8);
-  const thetaRef = useRef(0.55);
+  // phi ~0.3 rad ≈ 17°E longitude → centers on Scandinavia/Northern Europe
+  const phiRef = useRef(0.3);
+  const thetaRef = useRef(0.15);
   const pointerInteracting = useRef<number | null>(null);
   const pointerDelta = useRef(0);
   const isMobile = useIsMobile();
