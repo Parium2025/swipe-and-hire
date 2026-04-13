@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'framer-motion';
 import { BriefcaseBusiness, CalendarCheck2, MessageCircleMore, Search, UserRoundSearch, Video } from 'lucide-react';
 
 const employerFlow = [
@@ -43,25 +44,34 @@ const candidateFlow = [
 ];
 
 const LandingHowItWorks = () => {
+  const reduceMotion = useReducedMotion();
+
+  const reveal = (delay = 0) => ({
+    initial: { opacity: 0, y: reduceMotion ? 0 : 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.18 },
+    transition: { duration: 0.68, delay, ease: [0.22, 1, 0.36, 1] as const },
+  });
+
   return (
     <section id="floden" className="relative px-5 py-24 sm:px-6 sm:py-32 md:px-12 lg:px-24 lg:py-40" aria-labelledby="how-heading">
       <div className="mx-auto max-w-7xl">
-        <header className="mb-14 max-w-[46rem] sm:mb-16 lg:mb-18">
+        <motion.header className="mb-14 max-w-[46rem] sm:mb-16 lg:mb-18" {...reveal()}>
           <span className="landing-eyebrow">Hur det funkar</span>
           <h2 id="how-heading" className="mt-6 text-[clamp(2.35rem,5vw,4.8rem)] font-bold leading-[0.94] tracking-[-0.06em] text-pure-white">
-            Två tydliga vägar. Ett sammanhängande system.
+            Två riktningar. Ett flöde som faktiskt håller ihop.
           </h2>
           <p className="mt-6 max-w-[38rem] text-[1rem] leading-8 text-pure-white sm:text-[1.05rem]">
-            Istället för en generell trestegsskiss visar sidan nu hur Parium arbetar för båda sidor av marknaden — arbetsgivare och kandidater.
+            Parium visar hur arbetsgivare och kandidater rör sig genom samma system med olika behov men samma premiumtempo.
           </p>
-        </header>
+        </motion.header>
 
         <div className="grid gap-4 lg:grid-cols-2 lg:gap-5">
           {[
             { title: 'För arbetsgivare', description: 'Rekryteringsflödet från publicering till intervju.', items: employerFlow },
             { title: 'För kandidater', description: 'Jobbsökandet som känns snabbt, modernt och mänskligt.', items: candidateFlow },
-          ].map((group) => (
-            <article key={group.title} className="landing-panel-strong rounded-[2rem] p-6 sm:p-8 lg:p-10">
+          ].map((group, groupIndex) => (
+            <motion.article key={group.title} className="landing-flow-shell landing-panel-strong rounded-[2rem] p-6 sm:p-8 lg:p-10" {...reveal(groupIndex * 0.08)}>
               <p className="text-xs uppercase tracking-[0.18em] text-pure-white">{group.title}</p>
               <p className="mt-3 max-w-[30rem] text-sm leading-7 text-pure-white sm:text-[0.96rem]">{group.description}</p>
 
@@ -70,33 +80,31 @@ const LandingHowItWorks = () => {
                   const Icon = step.icon;
 
                   return (
-                    <article key={step.step} className="landing-story-card rounded-[1.55rem] p-5 sm:p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] border border-[hsl(var(--landing-border)/0.18)] bg-[hsl(var(--landing-panel)/0.82)]">
-                          <Icon className="h-5 w-5 text-pure-white" strokeWidth={1.5} />
+                    <article key={step.step} className="landing-flow-step rounded-[1.55rem] p-5 sm:p-6">
+                      <div className="landing-flow-step-icon flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] text-pure-white">
+                        <Icon className="h-5 w-5" strokeWidth={1.5} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-3">
+                          <h3 className="text-lg font-semibold tracking-[-0.03em] text-pure-white">{step.title}</h3>
+                          <span className="text-xs font-bold tracking-[0.18em] text-pure-white">{step.step}</span>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-3">
-                            <h3 className="text-lg font-semibold tracking-[-0.03em] text-pure-white">{step.title}</h3>
-                            <span className="text-xs font-bold tracking-[0.18em] text-pure-white">{step.step}</span>
-                          </div>
-                          <p className="mt-3 text-sm leading-7 text-pure-white">{step.description}</p>
-                        </div>
+                        <p className="mt-3 text-sm leading-7 text-pure-white">{step.description}</p>
                       </div>
                     </article>
                   );
                 })}
               </div>
-            </article>
+            </motion.article>
           ))}
         </div>
 
-        <div className="mt-5 rounded-[1.8rem] border border-[hsl(var(--landing-border)/0.14)] bg-[hsl(var(--landing-panel)/0.62)] p-5 sm:p-6 lg:p-7">
+        <motion.div className="landing-proof-card mt-5 rounded-[1.8rem] p-5 sm:p-6 lg:p-7" {...reveal(0.1)}>
           <p className="text-xs uppercase tracking-[0.18em] text-pure-white">Varför strukturen är bättre</p>
           <p className="mt-3 max-w-[60rem] text-sm leading-7 text-pure-white sm:text-[0.96rem]">
-            Den nya strukturen förklarar tydligare värdet för båda målgrupperna, fungerar bättre i mobil scroll och stärker SEO genom mer konkret semantik kring produktens användning.
+            Strukturen förklarar tydligt värdet för båda målgrupperna, fungerar starkare i mobil scroll och bygger SEO genom konkret semantik kring hur produkten faktiskt används.
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

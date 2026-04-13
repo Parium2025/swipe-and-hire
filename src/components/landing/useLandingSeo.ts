@@ -3,11 +3,11 @@ import { useEffect } from 'react';
 const LANDING_URL = 'https://parium-ab.lovable.app';
 const OG_IMAGE = `${LANDING_URL}/lovable-uploads/parium-logo-transparent.png`;
 
-const title = 'Parium | AI-rekrytering för Norden';
+const title = 'Parium | Premium AI-rekrytering i Norden';
 const description =
   'Parium är en AI-rekryteringsplattform för Sverige och Norden med jobbmatchning, video, screening och direktdialog för företag och kandidater.';
 const keywords =
-  'AI-rekrytering, rekryteringsplattform, rekryteringsverktyg, jobbmatchning, video CV, video profiler, kandidatmatchning, hiring platform, HR tech, recruitment software, rekrytering Sverige, rekrytering Norden, hitta kandidater, hitta jobb, screening, intervjuverktyg, talangplattform, employer branding, direktdialog, rekryteringsapp';
+  'AI-rekrytering, premium rekryteringsplattform, rekryteringsverktyg, jobbmatchning, video CV, video profiler, kandidatmatchning, hiring platform, HR tech, recruitment software, rekrytering Sverige, rekrytering Norden, hitta kandidater, hitta jobb, screening, intervjuverktyg, talangplattform, employer branding, direktdialog, rekryteringsapp';
 
 const faqEntities = [
   {
