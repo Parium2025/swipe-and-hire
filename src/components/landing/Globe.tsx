@@ -45,12 +45,18 @@ const Globe = ({ className = '' }: GlobeProps) => {
     const startTime = performance.now();
     const dpr = isMobile ? 1.5 : 2;
 
+    // Cinematic pan: start looking at Italy (theta ~0.55), pan up to Scandinavia (theta ~0.35)
+    // over ~6 seconds, then gently breathe
+    const INTRO_DURATION = 6000; // ms
+    const THETA_START = 0.55; // Italy region
+    const THETA_END = 0.35;   // Scandinavia region
+
     const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
       width: width * dpr,
       height: width * dpr,
-      phi: phiRef.current,
-      theta: thetaRef.current,
+      phi: 0.3,
+      theta: THETA_START,
       dark: 1,
       diffuse: 6,
       mapSamples: isMobile ? 20000 : 40000,
@@ -58,52 +64,30 @@ const Globe = ({ className = '' }: GlobeProps) => {
       baseColor: [0.05, 0.1, 0.25],
       markerColor: [0.4, 0.9, 1],
       glowColor: [0.08, 0.2, 0.6],
-      markers: [
-        // Scandinavia – prominent
-        { location: [59.3293, 18.0686], size: 0.15 },
-        { location: [55.6761, 12.5683], size: 0.12 },
-        { location: [59.9139, 10.7522], size: 0.12 },
-        { location: [60.1699, 24.9384], size: 0.1 },
-        { location: [57.7089, 11.9746], size: 0.1 },
-        { location: [55.604, 13.003], size: 0.08 },
-        { location: [63.8258, 20.2630], size: 0.07 },
-        { location: [67.8558, 20.2253], size: 0.06 },
-        { location: [65.584, 22.1547], size: 0.05 },
-        { location: [58.41, 15.62], size: 0.06 },
-        // Europe – cities visible
-        { location: [51.5074, -0.1278], size: 0.08 },
-        { location: [48.8566, 2.3522], size: 0.08 },
-        { location: [52.52, 13.405], size: 0.08 },
-        { location: [41.9028, 12.4964], size: 0.06 },
-        { location: [40.4168, -3.7038], size: 0.06 },
-        { location: [50.0755, 14.4378], size: 0.05 },
-        { location: [47.4979, 19.0402], size: 0.05 },
-        { location: [48.2082, 16.3738], size: 0.05 },
-        { location: [52.2297, 21.0122], size: 0.05 },
-        { location: [53.3498, -6.2603], size: 0.04 },
-        { location: [38.7223, -9.1393], size: 0.04 },
-        { location: [45.4642, 9.19], size: 0.05 },
-        { location: [43.2965, 5.3698], size: 0.04 },
-        { location: [50.8503, 4.3517], size: 0.05 },
-        { location: [46.2044, 6.1432], size: 0.04 },
-        // Global
-        { location: [40.7128, -74.006], size: 0.06 },
-        { location: [35.6762, 139.6503], size: 0.06 },
-        { location: [1.3521, 103.8198], size: 0.04 },
-        { location: [25.2048, 55.2708], size: 0.04 },
-        { location: [55.7558, 37.6173], size: 0.06 },
-        { location: [33.8688, 151.2093], size: 0.04 },
-      ],
+      markers: [], // No markers – clean look
     });
 
     requestAnimationFrame(() => setReady(true));
+
+    // Easing: cubic ease-out for smooth deceleration
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
     const animate = () => {
       const elapsed = performance.now() - startTime;
 
       if (pointerInteracting.current === null) {
-        phiRef.current += 0.0015;
-        thetaRef.current = 0.45 + Math.sin(elapsed * 0.0002) * 0.03;
+        // Very slow rotation for cinematic feel
+        phiRef.current += 0.001;
+
+        if (elapsed < INTRO_DURATION) {
+          // Cinematic intro: pan from Italy to Scandinavia
+          const progress = easeOutCubic(Math.min(elapsed / INTRO_DURATION, 1));
+          thetaRef.current = THETA_START + (THETA_END - THETA_START) * progress;
+        } else {
+          // After intro: subtle breathing motion around Scandinavia
+          const postIntro = elapsed - INTRO_DURATION;
+          thetaRef.current = THETA_END + Math.sin(postIntro * 0.00015) * 0.02;
+        }
       } else {
         phiRef.current += pointerDelta.current / 300;
         pointerDelta.current *= 0.92;
