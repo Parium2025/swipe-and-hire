@@ -10,12 +10,9 @@ const lonToPhiCobe = (lonDeg: number) => -Math.PI / 2 - (lonDeg * Math.PI) / 180
 const latToThetaCobe = (latDeg: number) => (latDeg * Math.PI) / 180;
 
 const PHI_ROME = lonToPhiCobe(12.4964);
-const PHI_EUROPE = lonToPhiCobe(14.5);
+const PHI_EUROPE = lonToPhiCobe(16);
 const THETA_ROME = latToThetaCobe(41.9028);
-const THETA_EUROPE = latToThetaCobe(46.5);
-
-const STOCKHOLM: [number, number] = [59.3293, 18.0686];
-const ROME: [number, number] = [41.9028, 12.4964];
+const THETA_EUROPE = latToThetaCobe(55);
 
 const Globe = ({ className = '' }: GlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -46,27 +43,18 @@ const Globe = ({ className = '' }: GlobeProps) => {
       height: renderSize,
       phi: currentPhi,
       theta: currentTheta,
-      scale: isMobile ? 1.04 : 1.08,
-      offset: isMobile ? [0, 0.015] : [0.02, 0.018],
-      dark: 0.82,
-      diffuse: 1.55,
-      mapSamples: isMobile ? 7800 : 14000,
-      mapBrightness: isMobile ? 8.8 : 9.2,
-      mapBaseBrightness: 0.02,
-      baseColor: [0.04, 0.08, 0.18],
+      scale: isMobile ? 1.06 : 1.1,
+      offset: isMobile ? [0, 0.012] : [0.02, 0.016],
+      dark: 0.92,
+      diffuse: 1.4,
+      mapSamples: isMobile ? 9000 : 16000,
+      mapBrightness: isMobile ? 9.4 : 9.8,
+      mapBaseBrightness: 0.03,
+      baseColor: [0.03, 0.06, 0.14],
       markerColor: [0.42, 0.88, 1],
-      glowColor: [0.08, 0.32, 0.78],
-      arcColor: [0.34, 0.76, 1],
-      arcWidth: 0.7,
-      arcHeight: 0.16,
-      markerElevation: 0.025,
-      markers: [
-        { location: STOCKHOLM, size: isMobile ? 0.03 : 0.024, color: [0.86, 0.98, 1] },
-        { location: ROME, size: isMobile ? 0.02 : 0.017, color: [0.42, 0.88, 1] },
-      ],
-      arcs: [
-        { from: ROME, to: STOCKHOLM, color: [0.34, 0.76, 1] },
-      ],
+      glowColor: [0.1, 0.34, 0.8],
+      markers: [],
+      arcs: [],
       context: {
         antialias: false,
         alpha: true,
