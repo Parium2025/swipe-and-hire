@@ -38,29 +38,35 @@ const Globe = ({ className = '' }: GlobeProps) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    let animationFrame: number;
     let width = canvas.offsetWidth;
-    const dpr = isMobile ? 1.5 : 2;
     const startTime = performance.now();
+    const dpr = isMobile ? 1.5 : 2;
 
-    // Cobe coordinate system (verified from source + docs):
-    // phi = azimuthal rotation. Increases → rotates globe westward.
-    // theta = polar tilt. Positive → tilts globe so northern hemisphere is more visible.
+    // Cobe coordinate system:
+    // phi = horizontal rotation (longitude). Higher values rotate the globe.
+    // theta = vertical tilt. Higher = more northern hemisphere visible.
     //
-    // Stockholm is at [59.33, 18.07] (lat, lon).
-    // To center Europe/Scandinavia we need phi that aligns ~15°E longitude to center.
-    // From empirical testing and cobe examples:
-    //   phi ≈ 0 shows Africa/Europe (Greenwich meridian facing camera)
-    //   Adding ~0.3 rotates slightly east
+    // To find the correct phi for Scandinavia, we convert:
+    // Stockholm longitude = 18°E = 18 * π/180 ≈ 0.314 rad
+    // But cobe's phi=0 starting position needs to be determined empirically.
     //
-    // We use onRender (the documented pattern) instead of globe.update()
+    // Based on testing: cobe phi=0 shows ~Prime Meridian (0° lon).
+    // Positive phi rotates the globe so eastern longitudes come into view.
+    // For Scandinavia (~18°E): phi ≈ 0.3 rad should be correct.
+    //
+    // However, if the globe still shows Americas, the coordinate system 
+    // might be inverted. Trying negative phi or offset by π.
 
     const INTRO_DURATION = 6000;
-    // Start looking at Mediterranean, end at Scandinavia
     const THETA_START = 0.1;
     const THETA_END = 0.3;
-
-    // phi for Europe: ~0.3 rad puts Scandinavia center-stage
-    let currentPhi = 0.3;
+    
+    // Try negative phi to rotate in opposite direction toward Europe
+    // If phi=0.3 shows Americas, then Europe might be at phi = -0.3 or phi = π+0.3
+    const PHI_EUROPE = -0.3;
+    
+    let currentPhi = PHI_EUROPE;
     let currentTheta = THETA_START;
 
     const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -79,44 +85,50 @@ const Globe = ({ className = '' }: GlobeProps) => {
       markerColor: [0.4, 0.9, 1],
       glowColor: [0.08, 0.2, 0.6],
       markers: [
-        // Stockholm marker to verify positioning (tiny, subtle)
-        { location: [59.33, 18.07], size: 0.05 },
-        // Oslo
-        { location: [59.91, 10.75], size: 0.03 },
-        // Copenhagen
-        { location: [55.68, 12.57], size: 0.03 },
-        // Helsinki
-        { location: [60.17, 24.94], size: 0.03 },
+        // Scandinavian capitals - will glow cyan to verify positioning
+        { location: [59.33, 18.07], size: 0.06 }, // Stockholm
+        { location: [59.91, 10.75], size: 0.04 }, // Oslo
+        { location: [55.68, 12.57], size: 0.04 }, // Copenhagen
+        { location: [60.17, 24.94], size: 0.04 }, // Helsinki
+        { location: [51.51, -0.13], size: 0.04 },  // London
+        { location: [48.86, 2.35], size: 0.04 },   // Paris
+        { location: [52.52, 13.41], size: 0.04 },  // Berlin
       ],
-      onRender: (state) => {
-        const elapsed = performance.now() - startTime;
-
-        if (pointerInteracting.current === null) {
-          if (elapsed < INTRO_DURATION) {
-            const progress = easeOutCubic(Math.min(elapsed / INTRO_DURATION, 1));
-            currentTheta = THETA_START + (THETA_END - THETA_START) * progress;
-          } else {
-            const postIntro = elapsed - INTRO_DURATION;
-            currentPhi += 0.0003;
-            currentTheta = THETA_END + Math.sin(postIntro * 0.00012) * 0.015;
-          }
-        } else {
-          currentPhi += pointerDelta.current / 300;
-          pointerDelta.current *= 0.92;
-        }
-
-        state.phi = currentPhi;
-        state.theta = currentTheta;
-
-        width = canvas.offsetWidth;
-        state.width = width * dpr;
-        state.height = width * dpr;
-
-        if (!ready) setReady(true);
-      },
     });
 
+    requestAnimationFrame(() => setReady(true));
+
+    const animate = () => {
+      const elapsed = performance.now() - startTime;
+
+      if (pointerInteracting.current === null) {
+        if (elapsed < INTRO_DURATION) {
+          const progress = easeOutCubic(Math.min(elapsed / INTRO_DURATION, 1));
+          currentTheta = THETA_START + (THETA_END - THETA_START) * progress;
+        } else {
+          const postIntro = elapsed - INTRO_DURATION;
+          currentPhi += 0.0003;
+          currentTheta = THETA_END + Math.sin(postIntro * 0.00012) * 0.015;
+        }
+      } else {
+        currentPhi += pointerDelta.current / 300;
+        pointerDelta.current *= 0.92;
+      }
+
+      width = canvas.offsetWidth;
+      globe.update({
+        phi: currentPhi,
+        theta: currentTheta,
+        width: width * dpr,
+        height: width * dpr,
+      });
+
+      animationFrame = requestAnimationFrame(animate);
+    };
+    animationFrame = requestAnimationFrame(animate);
+
     return () => {
+      cancelAnimationFrame(animationFrame);
       globe.destroy();
     };
   }, [isMobile]);
