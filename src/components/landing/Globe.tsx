@@ -6,12 +6,16 @@ interface GlobeProps {
   className?: string;
 }
 
-// cobe phi = longitude in radians (0 = Atlantic, positive = east)
-// cobe theta = latitude tilt in radians (positive = north)
-const PHI_ROME = 0.21;      // ~12°E
-const PHI_EUROPE = 0.30;    // ~17°E (Scandinavia)
-const THETA_ROME = 0.25;    // ~42°N
-const THETA_EUROPE = 0.38;  // ~58°N (Stockholm area)
+const lonToPhiCobe = (lonDeg: number) => -Math.PI / 2 - (lonDeg * Math.PI) / 180;
+const latToThetaCobe = (latDeg: number) => (latDeg * Math.PI) / 180;
+
+const PHI_ROME = lonToPhiCobe(12.4964);
+const PHI_EUROPE = lonToPhiCobe(16);
+const THETA_ROME = latToThetaCobe(41.9028);
+const THETA_EUROPE = latToThetaCobe(57);
+
+const STOCKHOLM: [number, number] = [59.3293, 18.0686];
+const ROME: [number, number] = [41.9028, 12.4964];
 
 const Globe = ({ className = '' }: GlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -22,9 +26,9 @@ const Globe = ({ className = '' }: GlobeProps) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    let animationFrame: number;
+    let animationFrame = 0;
     const startTime = performance.now();
-    const introDuration = isMobile ? 1800 : 3000;
+    const introDuration = isMobile ? 1600 : 2600;
     const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.2);
     const minRenderSize = isMobile ? 320 : 420;
     const maxRenderSize = isMobile ? 420 : 840;
@@ -38,21 +42,24 @@ const Globe = ({ className = '' }: GlobeProps) => {
 
     const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
-      width: renderSize * dpr,
-      height: renderSize * dpr,
+      width: renderSize,
+      height: renderSize,
       phi: currentPhi,
       theta: currentTheta,
-      scale: isMobile ? 1.12 : 1.18,
-      offset: isMobile ? [0, 0.02] : [0.06, 0.03],
+      scale: isMobile ? 1.08 : 1.12,
+      offset: isMobile ? [0, 0.01] : [0.02, 0.02],
       dark: 1,
       diffuse: 2.1,
-      mapSamples: isMobile ? 8000 : 16000,
-      mapBrightness: 8,
-      mapBaseBrightness: 0.42,
-      baseColor: [0.12, 0.18, 0.34],
-      markerColor: [0.4, 0.9, 1],
-      glowColor: [0.14, 0.42, 0.86],
-      markers: [],
+      mapSamples: isMobile ? 6000 : 12000,
+      mapBrightness: 7.2,
+      mapBaseBrightness: 0.5,
+      baseColor: [0.16, 0.25, 0.44],
+      markerColor: [0.42, 0.88, 1],
+      glowColor: [0.1, 0.36, 0.82],
+      markers: [
+        { location: STOCKHOLM, size: isMobile ? 0.09 : 0.07, color: [0.56, 0.92, 1] },
+        { location: ROME, size: isMobile ? 0.06 : 0.05, color: [0.32, 0.78, 1] },
+      ],
       context: {
         antialias: false,
         alpha: true,
@@ -75,27 +82,33 @@ const Globe = ({ className = '' }: GlobeProps) => {
         const progress = easeInOutCubic(Math.min(elapsed / introDuration, 1));
         currentPhi = PHI_ROME + (PHI_EUROPE - PHI_ROME) * progress;
         currentTheta = THETA_ROME + (THETA_EUROPE - THETA_ROME) * progress;
-      } else {
-        if (isMobile) {
-          globe.update({
-            phi: PHI_EUROPE,
-            theta: THETA_EUROPE,
-          });
-          return;
-        }
 
-        const postIntro = elapsed - introDuration;
-        currentPhi = PHI_EUROPE + Math.sin(postIntro * 0.00008) * 0.005;
-        currentTheta = THETA_EUROPE + Math.sin(postIntro * 0.0001) * 0.003;
+        globe.update({
+          phi: currentPhi,
+          theta: currentTheta,
+        });
+
+        animationFrame = requestAnimationFrame(animate);
+        return;
       }
 
+      if (isMobile) {
+        globe.update({
+          phi: PHI_EUROPE,
+          theta: THETA_EUROPE,
+        });
+        return;
+      }
+
+      const postIntro = elapsed - introDuration;
       globe.update({
-        phi: currentPhi,
-        theta: currentTheta,
+        phi: PHI_EUROPE + Math.sin(postIntro * 0.00008) * 0.004,
+        theta: THETA_EUROPE + Math.sin(postIntro * 0.0001) * 0.0025,
       });
 
       animationFrame = requestAnimationFrame(animate);
     };
+
     animationFrame = requestAnimationFrame(animate);
 
     return () => {
@@ -114,7 +127,6 @@ const Globe = ({ className = '' }: GlobeProps) => {
         transition: 'opacity 1.5s cubic-bezier(0.22,1,0.36,1), transform 1.8s cubic-bezier(0.22,1,0.36,1)',
       }}
     >
-      <div className="absolute inset-0 rounded-full border border-white/10 shadow-[inset_0_0_40px_rgba(255,255,255,0.06),0_0_60px_rgba(56,189,248,0.12)]" />
       <canvas
         ref={canvasRef}
         className="w-full h-full select-none"
