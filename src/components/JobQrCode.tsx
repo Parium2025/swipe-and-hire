@@ -1,10 +1,12 @@
 import { memo, useEffect, useRef, useState, useCallback } from 'react';
-import QRCodeStyling from 'qr-code-styling';
+import * as QRCodeStylingModule from 'qr-code-styling';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { QrCode, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { TruncatedText } from '@/components/TruncatedText';
+
+const QRCodeStyling = (QRCodeStylingModule as any).default || QRCodeStylingModule;
 
 interface JobQrCodeProps {
   jobId: string;
@@ -15,7 +17,7 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
   const [open, setOpen] = useState(false);
   const [qrReady, setQrReady] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
-  const qrInstanceRef = useRef<QRCodeStyling | null>(null);
+  const qrInstanceRef = useRef<any>(null);
 
   const jobUrl = `${window.location.origin}/job/${jobId}`;
 
