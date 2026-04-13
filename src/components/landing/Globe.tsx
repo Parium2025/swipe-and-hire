@@ -66,13 +66,13 @@ const Globe = ({ className = '' }: GlobeProps) => {
       scale: 1.0,         // Normal scale – full sphere visible
       offset: [0, 0],
       dark: 1,
-      diffuse: 1.2,
-      mapSamples: isMobile ? 16000 : 24000,
-      mapBrightness: 8,
-      mapBaseBrightness: 0.02,
-      baseColor: [0.02, 0.03, 0.08],     // Very dark blue ocean
-      markerColor: [0.5, 0.85, 1],
-      glowColor: [0.06, 0.18, 0.45],     // Subtle blue atmospheric glow
+      diffuse: 2.5,
+      mapSamples: isMobile ? 18000 : 28000,
+      mapBrightness: 20,
+      mapBaseBrightness: 0.08,
+      baseColor: [0.01, 0.02, 0.06],     // Very dark ocean
+      markerColor: [0.6, 0.9, 1],
+      glowColor: [0.08, 0.24, 0.6],      // Blue atmospheric glow
       markers: [],
       arcs: [],
       context: {
