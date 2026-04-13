@@ -58,21 +58,21 @@ const LandingHero = () => {
     >
       {/* Globe: cinematic scale-in from blur */}
       <motion.div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none will-change-transform"
+        className="absolute inset-0 flex items-center justify-center pointer-events-none will-change-transform translate-y-[5%] sm:translate-y-[2%]"
         variants={isMobile ? undefined : scaleReveal}
         initial={isMobile ? undefined : 'hidden'}
         animate={isMobile ? undefined : 'show'}
       >
-        <Suspense fallback={<div className="w-[92vw] aspect-square rounded-full bg-white/5" />}>
-          <Globe className="w-[92vw] sm:w-[108vw] md:w-[112vw] lg:w-[116vw] xl:w-[118vw] aspect-square max-w-none pointer-events-auto translate-y-[1%] sm:translate-y-[2%]" />
+        <Suspense fallback={<div className="w-[clamp(320px,86vw,420px)] h-[clamp(320px,86vw,420px)] rounded-full bg-white/5" />}>
+          <Globe className="w-[clamp(320px,86vw,420px)] h-[clamp(320px,86vw,420px)] sm:w-[100vw] md:w-[104vw] lg:w-[108vw] xl:w-[112vw] aspect-square max-w-none pointer-events-auto" />
         </Suspense>
       </motion.div>
 
       {/* Cinematic vignette */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,transparent_20%,hsl(215_100%_4%/0.7)_100%)]" />
-        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/80 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-primary/90 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_68%_62%_at_50%_54%,transparent_36%,hsl(215_100%_4%/0.5)_100%)]" />
+        <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-primary/65 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-primary/75 to-transparent" />
       </div>
 
       {/* Content */}
