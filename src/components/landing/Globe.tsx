@@ -31,7 +31,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
     >
       {/* NASA Earth image – extreme zoom on Europe, smooth upward drift */}
       <div
-        className="absolute inset-0 animate-[earthPan_60s_linear_infinite]"
+        className="absolute inset-0 animate-[earthPan_45s_linear_infinite]"
         style={{
           backgroundImage: 'url(/images/earth-night.jpg)',
           backgroundSize: '1200% auto',
@@ -40,7 +40,9 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
           filter: 'brightness(1.8) contrast(1.25) saturate(1.3)',
           imageRendering: 'auto',
           willChange: 'background-position',
-          transform: 'translateZ(0)', // Force GPU layer
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
         }}
       />
 
