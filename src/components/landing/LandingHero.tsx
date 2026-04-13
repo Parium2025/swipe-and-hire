@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Globe = lazy(() => import('./Globe'));
 
@@ -30,21 +31,25 @@ const headlines = [
 
 const LandingHero = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [headlineIdx, setHeadlineIdx] = useState(0);
 
   useEffect(() => {
+    if (isMobile) return;
+
     const timer = setInterval(() => {
       setHeadlineIdx((i) => (i + 1) % headlines.length);
     }, 4500);
+
     return () => clearInterval(timer);
-  }, []);
+  }, [isMobile]);
 
   const goTo = (role: 'job_seeker' | 'employer') => {
     sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth', { state: { mode: 'register', role } });
   };
 
-  const h = headlines[headlineIdx];
+  const h = headlines[isMobile ? 0 : headlineIdx];
 
   return (
     <section
@@ -54,12 +59,12 @@ const LandingHero = () => {
       {/* Globe: cinematic scale-in from blur */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center pointer-events-none will-change-transform"
-        variants={scaleReveal}
-        initial="hidden"
-        animate="show"
+        variants={isMobile ? undefined : scaleReveal}
+        initial={isMobile ? undefined : 'hidden'}
+        animate={isMobile ? undefined : 'show'}
       >
-        <Suspense fallback={<div className="w-[108vw] aspect-square rounded-full bg-white/[0.02] animate-pulse" />}>
-          <Globe className="w-[104vw] sm:w-[108vw] md:w-[112vw] lg:w-[116vw] xl:w-[118vw] aspect-square max-w-none pointer-events-auto translate-y-[2%]" />
+        <Suspense fallback={<div className="w-[92vw] aspect-square rounded-full bg-white/5" />}>
+          <Globe className="w-[92vw] sm:w-[108vw] md:w-[112vw] lg:w-[116vw] xl:w-[118vw] aspect-square max-w-none pointer-events-auto translate-y-[1%] sm:translate-y-[2%]" />
         </Suspense>
       </motion.div>
 
@@ -74,12 +79,12 @@ const LandingHero = () => {
       <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-6 md:px-12 w-full text-center">
         <motion.div
           className="space-y-6 sm:space-y-8"
-          variants={stagger}
-          initial="hidden"
-          animate="show"
+          variants={isMobile ? undefined : stagger}
+          initial={isMobile ? undefined : 'hidden'}
+          animate={isMobile ? undefined : 'show'}
         >
           {/* Badge */}
-          <motion.div variants={fadeUp}>
+          <motion.div variants={isMobile ? undefined : fadeUp}>
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.08] border border-white/[0.12] text-[11px] sm:text-xs font-medium text-white/60 tracking-widest uppercase shadow-[0_12px_40px_rgba(0,0,0,0.24)]">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
@@ -90,29 +95,40 @@ const LandingHero = () => {
           </motion.div>
 
           {/* Rotating headline */}
-          <motion.div variants={fadeUp} className="min-h-[130px] sm:min-h-[170px] md:min-h-[200px] flex items-center justify-center">
-            <AnimatePresence mode="wait">
-              <motion.h1
-                key={headlineIdx}
-                className="text-[2.5rem] leading-[1.05] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6.5rem] font-bold tracking-[-0.04em] text-white [text-shadow:0_4px_40px_rgba(0,0,0,0.8),0_0_80px_rgba(0,0,0,0.4)]"
-                initial={{ opacity: 0, y: 30, scale: 0.97, filter: 'blur(16px)' }}
-                animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: { duration: 0.9, ease } }}
-                exit={{ opacity: 0, y: -24, scale: 1.02, filter: 'blur(10px)', transition: { duration: 0.45, ease } }}
-              >
+          <motion.div variants={isMobile ? undefined : fadeUp} className="min-h-[130px] sm:min-h-[170px] md:min-h-[200px] flex items-center justify-center">
+            {isMobile ? (
+              <h1 className="text-[2.75rem] leading-[1.02] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6.5rem] font-bold tracking-[-0.04em] text-white [text-shadow:0_4px_40px_rgba(0,0,0,0.8),0_0_80px_rgba(0,0,0,0.4)]">
                 {h.main}
                 <br />
                 <span className="text-white/50 font-medium">{h.pre} </span>
-                <span className="bg-gradient-to-r from-secondary via-[hsl(180_80%_65%)] to-secondary bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_ease-in-out_infinite]">
+                <span className="bg-gradient-to-r from-secondary via-[hsl(180_80%_65%)] to-secondary bg-clip-text text-transparent">
                   {h.accent}
                 </span>
-              </motion.h1>
-            </AnimatePresence>
+              </h1>
+            ) : (
+              <AnimatePresence mode="wait">
+                <motion.h1
+                  key={headlineIdx}
+                  className="text-[2.5rem] leading-[1.05] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6.5rem] font-bold tracking-[-0.04em] text-white [text-shadow:0_4px_40px_rgba(0,0,0,0.8),0_0_80px_rgba(0,0,0,0.4)]"
+                  initial={{ opacity: 0, y: 30, scale: 0.97, filter: 'blur(16px)' }}
+                  animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: { duration: 0.9, ease } }}
+                  exit={{ opacity: 0, y: -24, scale: 1.02, filter: 'blur(10px)', transition: { duration: 0.45, ease } }}
+                >
+                  {h.main}
+                  <br />
+                  <span className="text-white/50 font-medium">{h.pre} </span>
+                  <span className="bg-gradient-to-r from-secondary via-[hsl(180_80%_65%)] to-secondary bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_ease-in-out_infinite]">
+                    {h.accent}
+                  </span>
+                </motion.h1>
+              </AnimatePresence>
+            )}
           </motion.div>
 
           {/* Subheadline */}
           <motion.p
             className="text-[15px] sm:text-lg md:text-xl text-white/45 max-w-[560px] mx-auto leading-relaxed [text-shadow:0_2px_20px_rgba(0,0,0,0.7)]"
-            variants={fadeUp}
+            variants={isMobile ? undefined : fadeUp}
           >
             Parium kopplar ihop kandidater och arbetsgivare på{' '}
             <strong className="text-white/75 font-medium">sekunder</strong> — inte veckor.
@@ -122,7 +138,7 @@ const LandingHero = () => {
           {/* CTAs */}
           <motion.div
             className="flex flex-col sm:flex-row gap-3 justify-center pt-2"
-            variants={fadeUp}
+            variants={isMobile ? undefined : fadeUp}
           >
             <button
               onClick={() => goTo('job_seeker')}
@@ -147,7 +163,7 @@ const LandingHero = () => {
           {/* Social proof */}
           <motion.div
             className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-4"
-            variants={fadeUp}
+            variants={isMobile ? undefined : fadeUp}
           >
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2.5">
@@ -173,20 +189,22 @@ const LandingHero = () => {
       </div>
 
       {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 3, duration: 1.5 }}
-      >
+      {!isMobile && (
         <motion.div
-          className="w-6 h-10 rounded-full border-2 border-white/20 flex justify-center pt-2"
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 3, duration: 1.5 }}
         >
-          <div className="w-1 h-2 rounded-full bg-white/40" />
+          <motion.div
+            className="w-6 h-10 rounded-full border-2 border-white/20 flex justify-center pt-2"
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <div className="w-1 h-2 rounded-full bg-white/40" />
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </section>
   );
 };

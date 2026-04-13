@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
 import { initConnectivityManager } from "@/lib/connectivityManager";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 // 🚀 CRITICAL: Keep auth + main app shell synchronous to avoid production chunk-mismatch
 // lockouts after deploys when an old cached bundle still points to stale lazy chunks.
@@ -177,6 +177,33 @@ const AnimatedRoutes = () => {
   );
 };
 
+const AppShell = ({ showHeader }: { showHeader: boolean }) => {
+  const location = useLocation();
+  const isLightweightRoute = ['/', '/auth'].includes(location.pathname);
+
+  return (
+    <>
+      <OfflineIndicator />
+      {!isLightweightRoute && <SystemHealthPanel />}
+      <UnsavedChangesProvider>
+        {!isLightweightRoute && <PushNotificationProvider />}
+        {!isLightweightRoute && <RealtimeKeepAlive />}
+        {location.pathname === '/auth' && <AuthSplashScreen />}
+        <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
+          {!isLightweightRoute && <CriticalAssetPreloads />}
+          <div className="relative z-10">
+            {showHeader && <Header />}
+            <main className={showHeader ? "pt-16" : ""}>
+              <AuthTokenBridge />
+              <AnimatedRoutes />
+            </main>
+          </div>
+        </div>
+      </UnsavedChangesProvider>
+    </>
+  );
+};
+
 const App = () => {
   const showHeader = false; // Header removed for cleaner UI
 
@@ -201,25 +228,8 @@ const App = () => {
         <OnlineStatusProvider>
           <TooltipProvider delayDuration={0}>
             <Toaster position="top-center" />
-            <OfflineIndicator />
-            <SystemHealthPanel />
             <BrowserRouter>
-              <UnsavedChangesProvider>
-                <PushNotificationProvider />
-                <RealtimeKeepAlive />
-                {/* Auth splash screen - visas vid navigering till /auth */}
-                <AuthSplashScreen />
-                <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
-                  <CriticalAssetPreloads />
-                  <div className="relative z-10">
-                    {showHeader && <Header />}
-                    <main className={showHeader ? "pt-16" : ""}>
-                      <AuthTokenBridge />
-                      <AnimatedRoutes />
-                    </main>
-                  </div>
-                </div>
-              </UnsavedChangesProvider>
+              <AppShell showHeader={showHeader} />
             </BrowserRouter>
           </TooltipProvider>
         </OnlineStatusProvider>

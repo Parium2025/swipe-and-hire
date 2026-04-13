@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
@@ -14,6 +14,7 @@ const LandingFooter = lazy(() => import('@/components/landing/LandingFooter'));
 const Landing = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const [showSecondarySections, setShowSecondarySections] = useState(false);
 
   // Redirect authenticated users
   useEffect(() => {
@@ -111,6 +112,33 @@ const Landing = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    const reveal = () => setShowSecondarySections(true);
+    let timeoutId: number | undefined;
+    let idleId: number | undefined;
+
+    if (idleWindow.requestIdleCallback) {
+      idleId = idleWindow.requestIdleCallback(() => reveal(), { timeout: 1200 });
+      timeoutId = window.setTimeout(reveal, 1400);
+    } else {
+      timeoutId = window.setTimeout(reveal, 500);
+    }
+
+    return () => {
+      if (typeof timeoutId === 'number') window.clearTimeout(timeoutId);
+      if (typeof idleId === 'number' && idleWindow.cancelIdleCallback) {
+        idleWindow.cancelIdleCallback(idleId);
+      }
+    };
+  }, []);
+
   const handleLogin = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth');
@@ -129,17 +157,21 @@ const Landing = () => {
         <LandingNav onLoginClick={handleLogin} />
         <main>
           <LandingHero />
-          <Suspense fallback={null}>
-            <LandingStats />
-            <LandingFeatures />
-            <LandingHowItWorks />
-            <LandingTestimonials />
-            <LandingCTA />
-          </Suspense>
+          {showSecondarySections && (
+            <Suspense fallback={null}>
+              <LandingStats />
+              <LandingFeatures />
+              <LandingHowItWorks />
+              <LandingTestimonials />
+              <LandingCTA />
+            </Suspense>
+          )}
         </main>
-        <Suspense fallback={null}>
-          <LandingFooter />
-        </Suspense>
+        {showSecondarySections && (
+          <Suspense fallback={null}>
+            <LandingFooter />
+          </Suspense>
+        )}
       </div>
     </div>
   );
