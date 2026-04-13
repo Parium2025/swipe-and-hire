@@ -58,13 +58,13 @@ const LandingHero = () => {
     >
       {/* Globe: NASA satellite close-up, fills hero */}
       <motion.div
-        className="absolute inset-0 flex items-end justify-center pointer-events-none will-change-transform overflow-hidden"
+        className="absolute inset-0 pointer-events-none will-change-transform overflow-hidden"
         variants={isMobile ? undefined : scaleReveal}
         initial={isMobile ? undefined : 'hidden'}
         animate={isMobile ? undefined : 'show'}
       >
-        <Suspense fallback={<div className="w-[160vw] h-[160vw] rounded-full bg-white/5" />}>
-          <Globe className="w-[160vw] h-[160vw] sm:w-[140vw] md:w-[130vw] lg:w-[120vw] aspect-square max-w-none pointer-events-auto translate-y-[30%]" />
+        <Suspense fallback={null}>
+          <Globe className="absolute inset-0 w-full h-full pointer-events-auto" />
         </Suspense>
       </motion.div>
 
