@@ -1,12 +1,22 @@
 import { lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Globe = lazy(() => import('./Globe'));
 
 const ease = [0.22, 1, 0.36, 1] as const;
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.15, delayChildren: 0.3 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 28, filter: 'blur(8px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.9, ease } },
+};
 
 const LandingHero = () => {
   const navigate = useNavigate();
@@ -27,15 +37,16 @@ const LandingHero = () => {
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary to-transparent pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-5 sm:px-6 md:px-12 lg:px-24 w-full relative z-10">
-        <div className="grid lg:grid-cols-[1fr_1fr] gap-12 lg:gap-8 items-center">
+        <div className="grid lg:grid-cols-[1fr_1fr] gap-8 lg:gap-8 items-center">
           {/* Left: Content */}
-          <div className="space-y-5 sm:space-y-7 order-2 lg:order-1">
+          <motion.div
+            className="space-y-5 sm:space-y-7 order-2 lg:order-1"
+            variants={stagger}
+            initial="hidden"
+            animate="show"
+          >
             {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease }}
-            >
+            <motion.div variants={fadeUp}>
               <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] sm:text-xs font-medium text-white/60 tracking-wide uppercase">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
@@ -48,9 +59,7 @@ const LandingHero = () => {
             {/* Headline */}
             <motion.h1
               className="text-[2.25rem] leading-[1.08] sm:text-5xl md:text-6xl lg:text-[3.75rem] xl:text-7xl font-bold tracking-[-0.03em] text-white"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1, ease }}
+              variants={fadeUp}
             >
               Rekrytering{' '}
               <br className="hidden sm:block" />
@@ -65,9 +74,7 @@ const LandingHero = () => {
             {/* Subheadline */}
             <motion.p
               className="text-[15px] sm:text-base md:text-lg text-white/50 max-w-[480px] leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.25, ease }}
+              variants={fadeUp}
             >
               Parium kopplar ihop kandidater och arbetsgivare på{' '}
               <strong className="text-white/70 font-medium">sekunder</strong> — inte veckor.
@@ -77,9 +84,7 @@ const LandingHero = () => {
             {/* CTAs */}
             <motion.div
               className="flex flex-col sm:flex-row gap-3 pt-1"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.4, ease }}
+              variants={fadeUp}
             >
               <button
                 onClick={() => goTo('job_seeker')}
@@ -104,9 +109,7 @@ const LandingHero = () => {
             {/* Social proof */}
             <motion.div
               className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 pt-6 sm:pt-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.8 }}
+              variants={fadeUp}
             >
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-2.5">
@@ -128,21 +131,21 @@ const LandingHero = () => {
                 <span className="text-white/40 text-[13px] ml-1">4.9/5 betyg</span>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
 
           {/* Right: Globe */}
           <motion.div
             className="relative flex justify-center lg:justify-end order-1 lg:order-2"
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.4, delay: 0.2, ease }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
           >
             <Suspense
               fallback={
-                <div className="w-[280px] sm:w-[360px] md:w-[420px] lg:w-[500px] xl:w-[560px] aspect-square rounded-full bg-white/[0.03] animate-pulse" />
+                <div className="w-[320px] sm:w-[380px] md:w-[440px] lg:w-[500px] xl:w-[560px] aspect-square rounded-full bg-white/[0.03] animate-pulse" />
               }
             >
-              <Globe className="w-[280px] sm:w-[360px] md:w-[420px] lg:w-[500px] xl:w-[560px]" />
+              <Globe className="w-[320px] sm:w-[380px] md:w-[440px] lg:w-[500px] xl:w-[560px]" />
             </Suspense>
           </motion.div>
         </div>
