@@ -1,3 +1,5 @@
+import { motion, useReducedMotion } from 'framer-motion';
+
 const testimonials = [
   {
     quote: 'Det här känns mer som ett produktbolag än ett traditionellt HR-verktyg. Vi fick överblick direkt.',
@@ -48,26 +50,39 @@ const faqs = [
 ];
 
 const LandingTestimonials = () => {
+  const reduceMotion = useReducedMotion();
+
+  const reveal = (delay = 0) => ({
+    initial: { opacity: 0, y: reduceMotion ? 0 : 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.18 },
+    transition: { duration: 0.68, delay, ease: [0.22, 1, 0.36, 1] as const },
+  });
+
   return (
     <section id="faq" className="relative px-5 py-24 sm:px-6 sm:py-32 md:px-12 lg:px-24 lg:py-40" aria-labelledby="testimonials-heading">
       <div className="mx-auto max-w-7xl">
-        <header className="max-w-[46rem]">
+        <motion.header className="max-w-[46rem]" {...reveal()}>
           <span className="landing-eyebrow">Proof & SEO</span>
           <h2 id="testimonials-heading" className="mt-6 text-[clamp(2.35rem,5vw,4.8rem)] font-bold leading-[0.94] tracking-[-0.06em] text-pure-white">
             Social proof för människor. Tydliga svar för Google.
           </h2>
           <p className="mt-6 text-[1rem] leading-8 text-pure-white sm:text-[1.05rem]">
-            Sektionen nedan är skriven för att övertyga två gånger: först visuellt för besökaren, sedan strukturellt för sökmotorer som läser sidan semantiskt.
+            Sektionen är byggd för att övertyga två gånger: först visuellt för besökaren, sedan strukturellt för sökmotorer som läser sidan semantiskt.
           </p>
-        </header>
+        </motion.header>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:gap-6">
           <div className="grid gap-4 md:grid-cols-2">
             {testimonials.map((testimonial, index) => (
-              <blockquote key={testimonial.name} className={`landing-story-card rounded-[1.7rem] p-6 sm:p-7 ${index === 2 ? 'md:col-span-2' : ''}`}>
+              <motion.blockquote
+                key={testimonial.name}
+                className={`landing-quote-card rounded-[1.7rem] p-6 sm:p-7 ${index === 2 ? 'md:col-span-2' : ''}`}
+                {...reveal(index * 0.08)}
+              >
                 <p className="text-lg leading-8 text-pure-white">“{testimonial.quote}”</p>
                 <footer className="mt-6 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[hsl(var(--landing-border)/0.18)] bg-[hsl(var(--landing-panel)/0.84)] text-xs font-semibold text-pure-white">
+                  <div className="landing-showcase-step flex h-11 w-11 items-center justify-center rounded-full text-xs font-semibold text-pure-white">
                     {testimonial.initials}
                   </div>
                   <div>
@@ -75,16 +90,16 @@ const LandingTestimonials = () => {
                     <div className="text-sm text-pure-white">{testimonial.role}</div>
                   </div>
                 </footer>
-              </blockquote>
+              </motion.blockquote>
             ))}
           </div>
 
           <div className="grid gap-4">
-            {faqs.map((faq) => (
-              <article key={faq.question} className="landing-faq-card rounded-[1.5rem] p-5 sm:p-6">
+            {faqs.map((faq, index) => (
+              <motion.article key={faq.question} className="landing-faq-entry rounded-[1.5rem] p-5 sm:p-6" {...reveal(index * 0.05)}>
                 <h3 className="text-lg font-semibold tracking-[-0.03em] text-pure-white">{faq.question}</h3>
                 <p className="mt-3 text-sm leading-7 text-pure-white sm:text-[0.96rem]">{faq.answer}</p>
-              </article>
+              </motion.article>
             ))}
           </div>
         </div>

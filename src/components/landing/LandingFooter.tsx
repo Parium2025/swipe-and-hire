@@ -12,7 +12,7 @@ const LandingFooter = () => {
   return (
     <footer className="relative border-t border-[hsl(var(--landing-border)/0.12)] px-5 py-12 sm:px-6 sm:py-16 md:px-12 lg:px-24" role="contentinfo">
       <div className="mx-auto max-w-7xl">
-        <div className="landing-panel rounded-[1.8rem] p-6 sm:p-8 lg:p-10">
+        <div className="landing-footer-shell rounded-[1.8rem] p-6 sm:p-8 lg:p-10">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:justify-between">
             <div className="max-w-[30rem]">
               <a href="#top" className="inline-flex items-center" aria-label="Tillbaka till toppen">
