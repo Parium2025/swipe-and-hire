@@ -13,11 +13,7 @@
   100% { background-position: -200% center; }
 }
 
-/* NASA Earth: smooth upward drift across Europe, seamless infinite loop */
-@keyframes earthPan {
-  0%   { background-position: 54% 100%; }
-  100% { background-position: 54% 0%; }
-}
+/* earthPan removed – Globe now uses Three.js 3D rendering */
 
 html {
   scrollbar-gutter: stable both-edges;
