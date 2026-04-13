@@ -7,12 +7,10 @@ interface GlobeProps {
 }
 
 /**
- * NASA-style globe focused on Europe.
- * – Keeps the sphere shape (no cropping / rounded-full clipping)
- * – Starts looking at Italy / Mediterranean
- * – Slowly, continuously drifts northward toward Scandinavia
- * – After reaching Scandinavia it keeps a very slow gentle drift
- * – High-contrast bright landmasses on dark oceans (city-lights aesthetic)
+ * NASA-style globe – extreme close-up from space, viewed at an angle.
+ * The globe is scaled way up so you only see part of the sphere (the curvature),
+ * giving the feeling of being in orbit looking down at Europe.
+ * Bright city-lights style landmasses against dark oceans.
  */
 
 const Globe = ({ className = '' }: GlobeProps) => {
@@ -29,33 +27,33 @@ const Globe = ({ className = '' }: GlobeProps) => {
 
     const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
 
-    // Canvas pixel size – the container CSS controls visual size
     const size = isMobile
-      ? Math.min(Math.max(canvas.offsetWidth || 380, 380), 500)
-      : Math.min(Math.max(canvas.offsetWidth || 600, 600), 1000);
+      ? Math.min(Math.max(canvas.offsetWidth || 500, 500), 700)
+      : Math.min(Math.max(canvas.offsetWidth || 800, 800), 1400);
 
-    // ── Coordinate helpers ──
-    // cobe: phi = longitude rotation (radians), theta = latitude tilt (radians)
-    // phi: 0 faces Africa/Europe.  Positive = rotate east (we want ~14-16° E)
-    // theta: 0 = equator.  Positive = tilt north
+    // cobe coordinate helpers
     const lonToPhi = (lon: number) => -(lon * Math.PI) / 180;
     const latToTheta = (lat: number) => (lat * Math.PI) / 180;
 
-    // Journey: Rome → Stockholm
-    const START_PHI = lonToPhi(12);    // Rome longitude
-    const START_THETA = latToTheta(42); // Rome latitude
-    const END_PHI = lonToPhi(18);      // Stockholm longitude  
-    const END_THETA = latToTheta(59);  // Stockholm latitude
+    // Journey: Mediterranean → Scandinavia
+    const START_PHI = lonToPhi(12);     // Rome
+    const START_THETA = latToTheta(38); // Mediterranean  
+    const END_PHI = lonToPhi(16);       // Central Scandinavia
+    const END_THETA = latToTheta(56);   // Scandinavia
 
-    // Slow, cinematic pan – 12s on desktop, 8s on mobile
-    const panDuration = isMobile ? 8000 : 12000;
+    // Slow cinematic pan
+    const panDuration = isMobile ? 10000 : 14000;
 
-    // Smooth ease
     const easeInOut = (t: number) =>
       t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
     let currentPhi = START_PHI;
     let currentTheta = START_THETA;
+
+    // Big scale = zoomed in, like a satellite view
+    // Offset pushes the globe down so you see the curvature at the top
+    const globeScale = isMobile ? 3.2 : 2.8;
+    const globeOffset: [number, number] = isMobile ? [0, 280] : [0, 400];
 
     const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
@@ -63,16 +61,16 @@ const Globe = ({ className = '' }: GlobeProps) => {
       height: size,
       phi: currentPhi,
       theta: currentTheta,
-      scale: 1.0,         // Normal scale – full sphere visible
-      offset: [0, 0],
+      scale: globeScale,
+      offset: globeOffset,
       dark: 1,
-      diffuse: 2.5,
-      mapSamples: isMobile ? 18000 : 28000,
-      mapBrightness: 20,
-      mapBaseBrightness: 0.08,
-      baseColor: [0.01, 0.02, 0.06],     // Very dark ocean
-      markerColor: [0.6, 0.9, 1],
-      glowColor: [0.08, 0.24, 0.6],      // Blue atmospheric glow
+      diffuse: 3,
+      mapSamples: isMobile ? 20000 : 32000,
+      mapBrightness: 30,
+      mapBaseBrightness: 0.05,
+      baseColor: [0.01, 0.015, 0.05],    // Very dark ocean
+      markerColor: [0.7, 0.9, 1],
+      glowColor: [0.05, 0.15, 0.4],      // Subtle blue atmospheric edge
       markers: [],
       arcs: [],
       context: {
@@ -94,17 +92,15 @@ const Globe = ({ className = '' }: GlobeProps) => {
       const elapsed = now - t0;
 
       if (elapsed < panDuration) {
-        // Phase 1: slow cinematic pan from Italy to Scandinavia
+        // Phase 1: slow cinematic drift from Med to Scandinavia
         const p = easeInOut(Math.min(elapsed / panDuration, 1));
         currentPhi = START_PHI + (END_PHI - START_PHI) * p;
         currentTheta = START_THETA + (END_THETA - START_THETA) * p;
       } else {
-        // Phase 2: continuous very slow rotation (NASA drift)
-        const post = (elapsed - panDuration) / 1000; // seconds since intro ended
-        // Slow continuous longitude rotation (~2° per minute)
-        currentPhi = END_PHI - post * 0.0006;
-        // Gentle latitude breathing
-        currentTheta = END_THETA + Math.sin(post * 0.08) * 0.015;
+        // Phase 2: continuous slow NASA drift
+        const post = (elapsed - panDuration) / 1000;
+        currentPhi = END_PHI - post * 0.0004;
+        currentTheta = END_THETA + Math.sin(post * 0.06) * 0.01;
       }
 
       globe.update({ phi: currentPhi, theta: currentTheta });
