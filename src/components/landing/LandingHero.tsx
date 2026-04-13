@@ -56,7 +56,7 @@ const LandingHero = () => {
       className="relative h-[100dvh] flex items-center justify-center overflow-hidden"
       aria-label="Parium – Skandinaviens smartaste rekryteringsplattform"
     >
-      {/* Globe: NASA satellite close-up, fills hero */}
+      {/* Globe: NASA Earth at Night with CSS pan */}
       <motion.div
         className="absolute inset-0 pointer-events-none will-change-transform overflow-hidden"
         variants={isMobile ? undefined : scaleReveal}
@@ -64,7 +64,7 @@ const LandingHero = () => {
         animate={isMobile ? undefined : 'show'}
       >
         <Suspense fallback={null}>
-          <Globe className="absolute inset-0 w-full h-full pointer-events-auto" />
+          <Globe className="absolute inset-0 w-full h-full" />
         </Suspense>
       </motion.div>
 

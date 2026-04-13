@@ -1,100 +1,63 @@
-import { useRef, Suspense } from 'react';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { TextureLoader, Mesh, MathUtils } from 'three';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { memo } from 'react';
 
 interface GlobeProps {
   className?: string;
 }
 
-const EARTH_TEXTURE_URL =
-  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/The_earth_at_night.jpg/2048px-The_earth_at_night.jpg';
-
-function EarthSphere({ isMobile }: { isMobile: boolean }) {
-  const meshRef = useRef<Mesh>(null);
-  const texture = useLoader(TextureLoader, EARTH_TEXTURE_URL);
-  const startTime = useRef(performance.now());
-  const panDuration = isMobile ? 10 : 14;
-
-  useFrame(() => {
-    if (!meshRef.current) return;
-    const elapsed = (performance.now() - startTime.current) / 1000;
-
-    // Longitude: rotate so Europe faces camera
-    // Latitude: tilt from Italy (35°N) upward to Scandinavia (58°N)
-    const startLat = MathUtils.degToRad(35);
-    const endLat = MathUtils.degToRad(58);
-    const euroLon = MathUtils.degToRad(195); // rotate Y to face Europe
-
-    if (elapsed < panDuration) {
-      const t = elapsed / panDuration;
-      const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-      meshRef.current.rotation.x = startLat + (endLat - startLat) * ease;
-      meshRef.current.rotation.y = euroLon + elapsed * 0.002;
-    } else {
-      const post = elapsed - panDuration;
-      meshRef.current.rotation.x = endLat + Math.sin(post * 0.04) * 0.008;
-      meshRef.current.rotation.y = euroLon + panDuration * 0.002 + post * 0.002;
-    }
-  });
-
+/**
+ * NASA Earth-at-night image with CSS animation.
+ * The image is an equirectangular projection. We show a cropped portion
+ * (Europe) and slowly pan upward from Italy to Scandinavia using CSS
+ * keyframe animation. Pure CSS – no WebGL, works perfectly on all devices.
+ */
+const Globe = memo(({ className = '' }: GlobeProps) => {
   return (
-    <mesh
-      ref={meshRef}
-      rotation={[MathUtils.degToRad(35), MathUtils.degToRad(195), MathUtils.degToRad(-23.4)]}
-      position={[0, -1.8, 0]}
+    <div
+      className={`${className} overflow-hidden`}
+      aria-hidden="true"
+      style={{ position: 'relative' }}
     >
-      <sphereGeometry args={[3.5, isMobile ? 64 : 96, isMobile ? 64 : 96]} />
-      <meshStandardMaterial
-        map={texture}
-        emissiveMap={texture}
-        emissive="#ffffff"
-        emissiveIntensity={2}
-        roughness={1}
-        metalness={0}
+      {/* The NASA image, cropped to Europe via object-position animation */}
+      <div
+        className="absolute inset-0 animate-[earthPan_16s_cubic-bezier(0.4,0,0.2,1)_forwards]"
+        style={{
+          backgroundImage: 'url(/images/earth-night.jpg)',
+          backgroundSize: '400% 400%',
+          /* Start position: Southern Europe / Mediterranean */
+          backgroundPosition: '62% 48%',
+          filter: 'brightness(1.4) contrast(1.15) saturate(1.2)',
+        }}
       />
-    </mesh>
-  );
-}
 
-function Atmosphere() {
-  return (
-    <mesh position={[0, -1.8, 0]}>
-      <sphereGeometry args={[3.58, 64, 64]} />
-      <meshBasicMaterial color="#4488ff" transparent opacity={0.06} depthWrite={false} />
-    </mesh>
-  );
-}
-
-const Globe = ({ className = '' }: GlobeProps) => {
-  const isMobile = useIsMobile();
-
-  return (
-    <div className={`${className}`} style={{ minHeight: '100%' }} aria-hidden="true">
-      <Canvas
-        camera={{
-          position: [0, 0, isMobile ? 4.5 : 4],
-          fov: 50,
-          near: 0.1,
-          far: 100,
+      {/* Subtle blue atmospheric glow at the edges */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 80% 70% at 50% 60%, transparent 30%, hsl(215 100% 6% / 0.7) 100%)',
         }}
-        dpr={isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2)}
-        gl={{
-          antialias: !isMobile,
-          alpha: true,
-          powerPreference: isMobile ? 'low-power' : 'high-performance',
+      />
+
+      {/* Curved horizon effect – gradient at the top simulating Earth's atmosphere */}
+      <div
+        className="absolute top-0 left-0 right-0 pointer-events-none"
+        style={{
+          height: '35%',
+          background: 'linear-gradient(to bottom, hsl(215 100% 4% / 0.95) 0%, hsl(210 80% 8% / 0.3) 60%, transparent 100%)',
         }}
-        style={{ background: 'transparent' }}
-      >
-        <ambientLight intensity={0.2} />
-        <directionalLight position={[5, 3, 5]} intensity={0.4} color="#aaccff" />
-        <Suspense fallback={null}>
-          <EarthSphere isMobile={isMobile} />
-        </Suspense>
-        <Atmosphere />
-      </Canvas>
+      />
+
+      {/* Bottom fade to blend into page background */}
+      <div
+        className="absolute bottom-0 left-0 right-0 pointer-events-none"
+        style={{
+          height: '40%',
+          background: 'linear-gradient(to top, hsl(215 100% 4%) 0%, hsl(215 100% 4% / 0.6) 40%, transparent 100%)',
+        }}
+      />
     </div>
   );
-};
+});
+
+Globe.displayName = 'Globe';
 
 export default Globe;
