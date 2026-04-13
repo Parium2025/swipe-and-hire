@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import createGlobe from 'cobe';
+import { useRef, useMemo, Suspense } from 'react';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+import { TextureLoader, Mesh, MathUtils } from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GlobeProps {
@@ -7,128 +8,111 @@ interface GlobeProps {
 }
 
 /**
- * NASA-style globe – extreme close-up from space, viewed at an angle.
- * The globe is scaled way up so you only see part of the sphere (the curvature),
- * giving the feeling of being in orbit looking down at Europe.
- * Bright city-lights style landmasses against dark oceans.
+ * NASA night-lights Earth texture URL (public domain, NASA Visible Earth).
+ * Black Marble 2016 – 2048px equirectangular.
  */
+const EARTH_TEXTURE_URL =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/The_earth_at_night.jpg/2048px-The_earth_at_night.jpg';
 
-const Globe = ({ className = '' }: GlobeProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const isMobile = useIsMobile();
-  const [ready, setReady] = useState(false);
+/** Rotating Earth sphere with NASA texture */
+function EarthSphere({ isMobile }: { isMobile: boolean }) {
+  const meshRef = useRef<Mesh>(null);
+  const texture = useLoader(TextureLoader, EARTH_TEXTURE_URL);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  // Initial rotation: point camera at Europe (lon ~15°E, lat ~42°N start)
+  const initialRotation = useMemo(() => {
+    // Three.js sphere: Y-axis rotation = longitude, X-axis = latitude tilt
+    const lonRad = MathUtils.degToRad(-15);  // Europe longitude
+    const latRad = MathUtils.degToRad(-20);  // Tilt to show Mediterranean initially
+    return { x: latRad, y: lonRad };
+  }, []);
 
-    let raf = 0;
-    const t0 = performance.now();
+  // Animation: slow tilt upward (Med → Scandinavia) + continuous slow rotation
+  const startTime = useRef(performance.now());
+  const panDuration = isMobile ? 10 : 14; // seconds
 
-    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
+  useFrame(() => {
+    if (!meshRef.current) return;
+    const elapsed = (performance.now() - startTime.current) / 1000;
 
-    const size = isMobile
-      ? Math.min(Math.max(canvas.offsetWidth || 500, 500), 700)
-      : Math.min(Math.max(canvas.offsetWidth || 800, 800), 1400);
-
-    // cobe coordinate helpers
-    const lonToPhi = (lon: number) => -(lon * Math.PI) / 180;
-    const latToTheta = (lat: number) => (lat * Math.PI) / 180;
-
-    // Journey: Mediterranean → Scandinavia
-    const START_PHI = lonToPhi(12);     // Rome
-    const START_THETA = latToTheta(38); // Mediterranean  
-    const END_PHI = lonToPhi(16);       // Central Scandinavia
-    const END_THETA = latToTheta(56);   // Scandinavia
-
-    // Slow cinematic pan
-    const panDuration = isMobile ? 10000 : 14000;
-
-    const easeInOut = (t: number) =>
-      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-    let currentPhi = START_PHI;
-    let currentTheta = START_THETA;
-
-    // Big scale = zoomed in, like a satellite view
-    // Offset pushes the globe down so you see the curvature at the top
-    const globeScale = isMobile ? 3.2 : 2.8;
-    const globeOffset: [number, number] = isMobile ? [0, 280] : [0, 400];
-
-    const globe = createGlobe(canvas, {
-      devicePixelRatio: dpr,
-      width: size,
-      height: size,
-      phi: currentPhi,
-      theta: currentTheta,
-      scale: globeScale,
-      offset: globeOffset,
-      dark: 1,
-      diffuse: 3,
-      mapSamples: isMobile ? 20000 : 32000,
-      mapBrightness: 30,
-      mapBaseBrightness: 0.05,
-      baseColor: [0.01, 0.015, 0.05],    // Very dark ocean
-      markerColor: [0.7, 0.9, 1],
-      glowColor: [0.05, 0.15, 0.4],      // Subtle blue atmospheric edge
-      markers: [],
-      arcs: [],
-      context: {
-        antialias: !isMobile,
-        alpha: true,
-        powerPreference: isMobile ? 'low-power' : 'high-performance',
-        preserveDrawingBuffer: false,
-      },
-    });
-
-    requestAnimationFrame(() => setReady(true));
-
-    const animate = (now: number) => {
-      if (document.hidden) {
-        raf = requestAnimationFrame(animate);
-        return;
-      }
-
-      const elapsed = now - t0;
-
-      if (elapsed < panDuration) {
-        // Phase 1: slow cinematic drift from Med to Scandinavia
-        const p = easeInOut(Math.min(elapsed / panDuration, 1));
-        currentPhi = START_PHI + (END_PHI - START_PHI) * p;
-        currentTheta = START_THETA + (END_THETA - START_THETA) * p;
-      } else {
-        // Phase 2: continuous slow NASA drift
-        const post = (elapsed - panDuration) / 1000;
-        currentPhi = END_PHI - post * 0.0004;
-        currentTheta = END_THETA + Math.sin(post * 0.06) * 0.01;
-      }
-
-      globe.update({ phi: currentPhi, theta: currentTheta });
-      raf = requestAnimationFrame(animate);
-    };
-
-    raf = requestAnimationFrame(animate);
-    return () => {
-      cancelAnimationFrame(raf);
-      globe.destroy();
-    };
-  }, [isMobile]);
+    if (elapsed < panDuration) {
+      // Phase 1: tilt upward from Mediterranean to Scandinavia
+      const t = elapsed / panDuration;
+      const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      // Tilt from -20° (Med) to -52° (Scandinavia)
+      const startTilt = MathUtils.degToRad(-20);
+      const endTilt = MathUtils.degToRad(-52);
+      meshRef.current.rotation.x = startTilt + (endTilt - startTilt) * ease;
+      // Slight longitude adjustment
+      const startLon = MathUtils.degToRad(-15);
+      const endLon = MathUtils.degToRad(-18);
+      meshRef.current.rotation.y = startLon + (endLon - startLon) * ease;
+    } else {
+      // Phase 2: continuous slow rotation (NASA ISS drift)
+      const post = elapsed - panDuration;
+      const endTilt = MathUtils.degToRad(-52);
+      meshRef.current.rotation.x = endTilt + Math.sin(post * 0.05) * 0.01;
+      meshRef.current.rotation.y = MathUtils.degToRad(-18) - post * 0.003;
+    }
+  });
 
   return (
-    <div
-      className={`relative ${className}`}
-      aria-hidden="true"
-      style={{
-        opacity: ready ? 1 : 0,
-        transform: ready ? 'scale(1)' : 'scale(0.92)',
-        transition: 'opacity 2s cubic-bezier(0.22,1,0.36,1), transform 2.4s cubic-bezier(0.22,1,0.36,1)',
-      }}
-    >
-      <canvas
-        ref={canvasRef}
-        className="h-full w-full select-none"
-        style={{ contain: 'layout paint size', aspectRatio: '1', display: 'block' }}
+    <mesh ref={meshRef} rotation={[initialRotation.x, initialRotation.y, MathUtils.degToRad(23.4)]}>
+      <sphereGeometry args={[2.5, isMobile ? 64 : 96, isMobile ? 64 : 96]} />
+      <meshStandardMaterial
+        map={texture}
+        emissiveMap={texture}
+        emissive="#ffffff"
+        emissiveIntensity={1.5}
+        roughness={1}
+        metalness={0}
       />
+    </mesh>
+  );
+}
+
+/** Atmospheric glow ring around the Earth */
+function Atmosphere() {
+  return (
+    <mesh>
+      <sphereGeometry args={[2.58, 64, 64]} />
+      <meshBasicMaterial
+        color="#4488ff"
+        transparent
+        opacity={0.08}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
+
+const Globe = ({ className = '' }: GlobeProps) => {
+  const isMobile = useIsMobile();
+
+  return (
+    <div className={`relative ${className}`} aria-hidden="true">
+      <Canvas
+        camera={{
+          position: [0, 0, isMobile ? 4.2 : 3.8],
+          fov: 45,
+          near: 0.1,
+          far: 100,
+        }}
+        dpr={isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2)}
+        gl={{
+          antialias: !isMobile,
+          alpha: true,
+          powerPreference: isMobile ? 'low-power' : 'high-performance',
+        }}
+        style={{ background: 'transparent' }}
+      >
+        <ambientLight intensity={0.15} />
+        <directionalLight position={[5, 3, 5]} intensity={0.3} color="#aaccff" />
+        <Suspense fallback={null}>
+          <EarthSphere isMobile={isMobile} />
+        </Suspense>
+        <Atmosphere />
+      </Canvas>
     </div>
   );
 };
