@@ -1,31 +1,46 @@
-import { memo } from 'react';
+import { memo, useEffect, useRef } from 'react';
 
 interface GlobeProps {
   className?: string;
 }
 
 /**
- * NASA Black Marble – circular globe mask with slow upward pan.
- * Heavily zoomed into Europe (1200%) so the drift is very slow.
- * Circular vignette makes it look like a sphere, not a flat map.
+ * NASA Black Marble – circular globe mask with smooth upward pan.
+ * Heavily zoomed into Europe (1200%) so the drift is cinematic.
+ * Circular vignette creates sphere illusion.
+ * Image is preloaded in index.html + eagerly decoded here for zero pop-in.
  */
 const Globe = memo(({ className = '' }: GlobeProps) => {
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  // Eagerly decode the earth image so the first paint is instant
+  useEffect(() => {
+    const img = new Image();
+    img.src = '/images/earth-night.jpg';
+    imgRef.current = img;
+    if ('decode' in img) {
+      img.decode().catch(() => {});
+    }
+  }, []);
+
   return (
     <div
       className={`${className} overflow-hidden`}
       aria-hidden="true"
       style={{ position: 'relative' }}
     >
-      {/* NASA Earth image – extreme zoom on Europe, very slow upward drift */}
+      {/* NASA Earth image – extreme zoom on Europe, smooth upward drift */}
       <div
-        className="absolute inset-0 animate-[earthPan_90s_linear_infinite]"
+        className="absolute inset-0 animate-[earthPan_60s_linear_infinite]"
         style={{
           backgroundImage: 'url(/images/earth-night.jpg)',
           backgroundSize: '1200% auto',
-          backgroundPosition: '54% 20%',
+          backgroundPosition: '54% 24%',
           backgroundRepeat: 'repeat',
           filter: 'brightness(1.8) contrast(1.25) saturate(1.3)',
           imageRendering: 'auto',
+          willChange: 'background-position',
+          transform: 'translateZ(0)', // Force GPU layer
         }}
       />
 
