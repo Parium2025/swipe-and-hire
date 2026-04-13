@@ -9,10 +9,14 @@ interface GlobeProps {
 const lonToPhiCobe = (lonDeg: number) => -Math.PI / 2 - (lonDeg * Math.PI) / 180;
 const latToThetaCobe = (latDeg: number) => (latDeg * Math.PI) / 180;
 
-const PHI_ITALY = lonToPhiCobe(12.4964);
-const THETA_ITALY = latToThetaCobe(41.9028);
-const PHI_EUROPE_FOCUS = lonToPhiCobe(14.5);
-const THETA_EUROPE_FOCUS = latToThetaCobe(53.8);
+const ROME: [number, number] = [41.9028, 12.4964];
+const COPENHAGEN: [number, number] = [55.6761, 12.5683];
+const STOCKHOLM: [number, number] = [59.3293, 18.0686];
+
+const START_PHI = lonToPhiCobe(ROME[1]);
+const START_THETA = latToThetaCobe(ROME[0]);
+const FOCUS_PHI = lonToPhiCobe(15.6);
+const FOCUS_THETA = latToThetaCobe(55.8);
 
 const Globe = ({ className = '' }: GlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -25,27 +29,30 @@ const Globe = ({ className = '' }: GlobeProps) => {
 
     let animationFrame = 0;
     const startTime = performance.now();
-    const introDuration = isMobile ? 1600 : 2500;
+    const introDuration = isMobile ? 2200 : 3200;
     const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.2);
     const minRenderSize = isMobile ? 320 : 420;
     const maxRenderSize = isMobile ? 420 : 840;
     const renderSize = Math.min(Math.max(canvas.offsetWidth || minRenderSize, minRenderSize), maxRenderSize);
+
     const view = isMobile
       ? {
-          scale: 1.68,
-          offset: [0, 0.085] as [number, number],
-          mapSamples: 9000,
-          mapBrightness: 9.9,
+          scale: 1.28,
+          offset: [0, 0.03] as [number, number],
+          mapSamples: 12000,
+          mapBrightness: 10.4,
+          markerSizes: [0.085, 0.07, 0.095] as const,
         }
       : {
-          scale: 1.38,
-          offset: [0.015, 0.05] as [number, number],
-          mapSamples: 16000,
-          mapBrightness: 10.2,
+          scale: 1.18,
+          offset: [0.012, 0.02] as [number, number],
+          mapSamples: 18000,
+          mapBrightness: 10.6,
+          markerSizes: [0.07, 0.055, 0.08] as const,
         };
 
-    let currentPhi = PHI_ITALY;
-    let currentTheta = THETA_ITALY;
+    let currentPhi = START_PHI;
+    let currentTheta = START_THETA;
 
     const easeInOutCubic = (t: number) =>
       t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -58,15 +65,19 @@ const Globe = ({ className = '' }: GlobeProps) => {
       theta: currentTheta,
       scale: view.scale,
       offset: view.offset,
-      dark: 0.92,
-      diffuse: 1.4,
+      dark: 1,
+      diffuse: 1.25,
       mapSamples: view.mapSamples,
       mapBrightness: view.mapBrightness,
-      mapBaseBrightness: 0.04,
-      baseColor: [0.03, 0.06, 0.14],
-      markerColor: [0.42, 0.88, 1],
-      glowColor: [0.1, 0.34, 0.8],
-      markers: [],
+      mapBaseBrightness: 0.02,
+      baseColor: [0.01, 0.03, 0.08],
+      markerColor: [0.68, 0.93, 1],
+      glowColor: [0.1, 0.38, 0.92],
+      markers: [
+        { location: ROME, size: view.markerSizes[0] },
+        { location: COPENHAGEN, size: view.markerSizes[1] },
+        { location: STOCKHOLM, size: view.markerSizes[2] },
+      ],
       arcs: [],
       context: {
         antialias: false,
@@ -88,8 +99,8 @@ const Globe = ({ className = '' }: GlobeProps) => {
 
       if (elapsed < introDuration) {
         const progress = easeInOutCubic(Math.min(elapsed / introDuration, 1));
-        currentPhi = PHI_ITALY + (PHI_EUROPE_FOCUS - PHI_ITALY) * progress;
-        currentTheta = THETA_ITALY + (THETA_EUROPE_FOCUS - THETA_ITALY) * progress;
+        currentPhi = START_PHI + (FOCUS_PHI - START_PHI) * progress;
+        currentTheta = START_THETA + (FOCUS_THETA - START_THETA) * progress;
 
         globe.update({
           phi: currentPhi,
@@ -100,18 +111,14 @@ const Globe = ({ className = '' }: GlobeProps) => {
         return;
       }
 
-      if (isMobile) {
-        globe.update({
-          phi: PHI_EUROPE_FOCUS,
-          theta: THETA_EUROPE_FOCUS,
-        });
-        return;
-      }
-
       const postIntro = elapsed - introDuration;
+      const floatPhi = Math.sin(postIntro * 0.00008) * 0.0018;
+      const floatTheta = Math.sin(postIntro * 0.00011) * 0.0014;
+      const northDrift = Math.sin(postIntro * 0.000045) * 0.0012;
+
       globe.update({
-        phi: PHI_EUROPE_FOCUS + Math.sin(postIntro * 0.00008) * 0.0022,
-        theta: THETA_EUROPE_FOCUS + Math.sin(postIntro * 0.0001) * 0.0016,
+        phi: FOCUS_PHI + floatPhi,
+        theta: FOCUS_THETA + floatTheta + northDrift,
       });
 
       animationFrame = requestAnimationFrame(animate);
@@ -127,7 +134,7 @@ const Globe = ({ className = '' }: GlobeProps) => {
 
   return (
     <div
-      className={`relative ${className}`}
+      className={`relative isolate overflow-hidden rounded-full ${className}`}
       aria-hidden="true"
       style={{
         opacity: ready ? 1 : 0,
@@ -137,8 +144,8 @@ const Globe = ({ className = '' }: GlobeProps) => {
     >
       <canvas
         ref={canvasRef}
-        className="w-full h-full select-none"
-        style={{ contain: 'layout paint size', aspectRatio: '1' }}
+        className="h-full w-full select-none"
+        style={{ contain: 'layout paint size', aspectRatio: '1', display: 'block' }}
       />
     </div>
   );
