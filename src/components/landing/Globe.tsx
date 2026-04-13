@@ -10,9 +10,9 @@ const lonToPhiCobe = (lonDeg: number) => -Math.PI / 2 - (lonDeg * Math.PI) / 180
 const latToThetaCobe = (latDeg: number) => (latDeg * Math.PI) / 180;
 
 const PHI_ROME = lonToPhiCobe(12.4964);
-const PHI_EUROPE = lonToPhiCobe(16);
+const PHI_EUROPE = lonToPhiCobe(14.5);
 const THETA_ROME = latToThetaCobe(41.9028);
-const THETA_EUROPE = latToThetaCobe(57);
+const THETA_EUROPE = latToThetaCobe(46.5);
 
 const STOCKHOLM: [number, number] = [59.3293, 18.0686];
 const ROME: [number, number] = [41.9028, 12.4964];
@@ -28,7 +28,7 @@ const Globe = ({ className = '' }: GlobeProps) => {
 
     let animationFrame = 0;
     const startTime = performance.now();
-    const introDuration = isMobile ? 1600 : 2600;
+    const introDuration = isMobile ? 1500 : 2400;
     const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.2);
     const minRenderSize = isMobile ? 320 : 420;
     const maxRenderSize = isMobile ? 420 : 840;
@@ -47,25 +47,25 @@ const Globe = ({ className = '' }: GlobeProps) => {
       phi: currentPhi,
       theta: currentTheta,
       scale: isMobile ? 1.04 : 1.08,
-      offset: isMobile ? [0, 0.01] : [0.02, 0.015],
-      dark: 1,
-      diffuse: 1.25,
-      mapSamples: isMobile ? 4200 : 9000,
-      mapBrightness: isMobile ? 6.8 : 7.2,
-      mapBaseBrightness: 0.06,
-      baseColor: [0.03, 0.07, 0.16],
+      offset: isMobile ? [0, 0.015] : [0.02, 0.018],
+      dark: 0.82,
+      diffuse: 1.55,
+      mapSamples: isMobile ? 7800 : 14000,
+      mapBrightness: isMobile ? 8.8 : 9.2,
+      mapBaseBrightness: 0.02,
+      baseColor: [0.04, 0.08, 0.18],
       markerColor: [0.42, 0.88, 1],
-      glowColor: [0.1, 0.36, 0.82],
-      arcColor: [0.36, 0.78, 1],
-      arcWidth: 0.8,
-      arcHeight: 0.12,
-      markerElevation: 0.02,
+      glowColor: [0.08, 0.32, 0.78],
+      arcColor: [0.34, 0.76, 1],
+      arcWidth: 0.7,
+      arcHeight: 0.16,
+      markerElevation: 0.025,
       markers: [
-        { location: STOCKHOLM, size: isMobile ? 0.038 : 0.03, color: [0.76, 0.96, 1] },
-        { location: ROME, size: isMobile ? 0.026 : 0.022, color: [0.32, 0.78, 1] },
+        { location: STOCKHOLM, size: isMobile ? 0.03 : 0.024, color: [0.86, 0.98, 1] },
+        { location: ROME, size: isMobile ? 0.02 : 0.017, color: [0.42, 0.88, 1] },
       ],
       arcs: [
-        { from: ROME, to: STOCKHOLM, color: [0.36, 0.78, 1] },
+        { from: ROME, to: STOCKHOLM, color: [0.34, 0.76, 1] },
       ],
       context: {
         antialias: false,
@@ -109,8 +109,8 @@ const Globe = ({ className = '' }: GlobeProps) => {
 
       const postIntro = elapsed - introDuration;
       globe.update({
-        phi: PHI_EUROPE + Math.sin(postIntro * 0.00008) * 0.004,
-        theta: THETA_EUROPE + Math.sin(postIntro * 0.0001) * 0.0025,
+        phi: PHI_EUROPE + Math.sin(postIntro * 0.00008) * 0.0035,
+        theta: THETA_EUROPE + Math.sin(postIntro * 0.0001) * 0.002,
       });
 
       animationFrame = requestAnimationFrame(animate);
