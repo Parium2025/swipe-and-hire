@@ -25,26 +25,29 @@ function EarthSphere({ isDay }: { isDay: boolean }) {
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
   texture.generateMipmaps = true;
+  texture.colorSpace = THREE.SRGBColorSpace;
 
-  // Slow upward drift (Italy → Scandinavia) + gentle horizontal rotation
+  // Slow upward drift: Italy → Scandinavia, continuous loop
   useFrame((_, delta) => {
     if (meshRef.current) {
-      // Primary: tilt upward continuously (negative x = reveals northern latitudes)
-      meshRef.current.rotation.x -= delta * 0.012;
-      // Secondary: very slow eastward drift for realism
-      meshRef.current.rotation.y += delta * 0.005;
+      // Tilt upward (negative x reveals northern latitudes)
+      meshRef.current.rotation.x -= delta * 0.008;
+      // Very slow eastward drift for realism
+      meshRef.current.rotation.y += delta * 0.003;
     }
   });
 
+  // Initial rotation: Europe/Mediterranean facing camera
+  // x≈0.4 tilts to show ~40°N (Italy), y≈-0.2 centers on ~15°E (Central Europe)
   return (
-    <mesh ref={meshRef} rotation={[0.35, -0.25, 0.08]}>
+    <mesh ref={meshRef} rotation={[0.45, -0.2, 0.05]}>
       <sphereGeometry args={[2, 128, 128]} />
       <meshStandardMaterial
         map={texture}
         emissiveMap={isDay ? undefined : texture}
         emissive={isDay ? '#000000' : '#ffffff'}
-        emissiveIntensity={isDay ? 0 : 0.6}
-        roughness={isDay ? 0.85 : 1}
+        emissiveIntensity={isDay ? 0 : 1.2}
+        roughness={isDay ? 0.8 : 1}
         metalness={isDay ? 0.05 : 0}
         toneMapped={true}
       />
@@ -55,8 +58,6 @@ function EarthSphere({ isDay }: { isDay: boolean }) {
 /* ── atmosphere glow ─────────────────────────────────────── */
 
 function Atmosphere({ isDay }: { isDay: boolean }) {
-  const shaderRef = useRef<THREE.ShaderMaterial>(null!);
-  
   const atmosphereMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       vertexShader: `
@@ -70,12 +71,12 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
         varying vec3 vNormal;
         uniform vec3 glowColor;
         void main() {
-          float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
-          gl_FragColor = vec4(glowColor, intensity * 0.6);
+          float intensity = pow(0.62 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.5);
+          gl_FragColor = vec4(glowColor, intensity * 0.5);
         }
       `,
       uniforms: {
-        glowColor: { value: new THREE.Color(isDay ? '#4488ff' : '#1a3a6a') },
+        glowColor: { value: new THREE.Color(isDay ? '#4488ff' : '#223366') },
       },
       blending: THREE.AdditiveBlending,
       side: THREE.BackSide,
@@ -85,9 +86,9 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
   }, [isDay]);
 
   return (
-    <mesh scale={[1.12, 1.12, 1.12]}>
+    <mesh scale={[1.15, 1.15, 1.15]}>
       <sphereGeometry args={[2, 64, 64]} />
-      <primitive object={atmosphereMaterial} ref={shaderRef} />
+      <primitive object={atmosphereMaterial} />
     </mesh>
   );
 }
@@ -110,7 +111,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
           powerPreference: 'high-performance',
           preserveDrawingBuffer: false,
         }}
-        camera={{ position: [0, 0.3, 4.2], fov: 40 }}
+        camera={{ position: [0, 0, 3.8], fov: 50 }}
         dpr={[1, 2]}
         style={{
           position: 'absolute',
@@ -120,14 +121,14 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
         frameloop="always"
       >
         {/* Lighting */}
-        <ambientLight intensity={isDay ? 0.3 : 0.05} />
+        <ambientLight intensity={isDay ? 0.4 : 0.08} />
         <directionalLight
-          position={isDay ? [5, 3, 5] : [3, 1, 4]}
-          intensity={isDay ? 1.8 : 0.15}
-          color={isDay ? '#fffaf0' : '#334466'}
+          position={isDay ? [5, 3, 5] : [3, 2, 5]}
+          intensity={isDay ? 1.6 : 0.2}
+          color={isDay ? '#fffaf0' : '#445577'}
         />
         {!isDay && (
-          <pointLight position={[0, 0, 5]} intensity={0.3} color="#1a2a4a" />
+          <pointLight position={[0, 0, 6]} intensity={0.4} color="#223355" />
         )}
 
         <Suspense fallback={null}>
@@ -136,11 +137,11 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
         </Suspense>
       </Canvas>
 
-      {/* Top fade to page background */}
+      {/* Top fade */}
       <div
         className="absolute top-0 left-0 right-0 pointer-events-none"
         style={{
-          height: '20%',
+          height: '15%',
           background: isDay
             ? 'linear-gradient(to bottom, hsl(210 60% 8%) 0%, transparent 100%)'
             : 'linear-gradient(to bottom, hsl(215 100% 4%) 0%, transparent 100%)',
@@ -151,7 +152,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
       <div
         className="absolute bottom-0 left-0 right-0 pointer-events-none"
         style={{
-          height: '25%',
+          height: '20%',
           background: isDay
             ? 'linear-gradient(to top, hsl(210 60% 8%) 0%, transparent 100%)'
             : 'linear-gradient(to top, hsl(215 100% 4%) 0%, transparent 100%)',
