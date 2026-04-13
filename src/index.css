@@ -15,8 +15,8 @@
 
 /* NASA Earth: smooth upward drift across Europe, seamless infinite loop */
 @keyframes earthPan {
-  0%   { background-position: 54% 24%; }
-  100% { background-position: 54% 10%; }
+  0%   { background-position: 54% 18%; }
+  100% { background-position: 54% 4%; }
 }
 
 html {

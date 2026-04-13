@@ -35,7 +35,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
         style={{
           backgroundImage: 'url(/images/earth-night.jpg)',
           backgroundSize: '1200% auto',
-          backgroundPosition: '54% 24%',
+          backgroundPosition: '54% 18%',
           backgroundRepeat: 'repeat',
           filter: 'brightness(1.8) contrast(1.25) saturate(1.3)',
           imageRendering: 'auto',
