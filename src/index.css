@@ -13,11 +13,11 @@
   100% { background-position: -200% center; }
 }
 
-/* NASA Earth pan: Italy → Scandinavia, then slow continuous drift */
+/* NASA Earth pan: Italy (28%) → Scandinavia (18%), slow cinematic drift */
 @keyframes earthPan {
-  0%   { background-position: 62% 50%; }
-  60%  { background-position: 61% 44%; }
-  100% { background-position: 60% 42%; }
+  0%   { background-position: 53% 28%; }
+  70%  { background-position: 54% 20%; }
+  100% { background-position: 54% 18%; }
 }
 
 html {

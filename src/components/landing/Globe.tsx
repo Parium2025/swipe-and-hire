@@ -5,10 +5,18 @@ interface GlobeProps {
 }
 
 /**
- * NASA Earth-at-night image with CSS animation.
- * The image is an equirectangular projection. We show a cropped portion
- * (Europe) and slowly pan upward from Italy to Scandinavia using CSS
- * keyframe animation. Pure CSS – no WebGL, works perfectly on all devices.
+ * NASA Black Marble (Earth at Night) – high-res 13500x6750 equirectangular.
+ * 
+ * Equirectangular projection mapping:
+ *   X: 0% = 180°W (Pacific), 50% = 0° (Greenwich), 100% = 180°E
+ *   Y: 0% = 90°N (North Pole), 50% = Equator, 100% = 90°S
+ * 
+ * Europe center (~15°E, ~50°N):
+ *   X = 50% + (15/360)*100% ≈ 54%
+ *   Y = (90-50)/180*100% ≈ 22%
+ * 
+ * Italy (~12°E, ~42°N):  X≈53%, Y≈27%
+ * Scandinavia (~15°E, ~60°N): X≈54%, Y≈17%
  */
 const Globe = memo(({ className = '' }: GlobeProps) => {
   return (
@@ -17,41 +25,42 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
       aria-hidden="true"
       style={{ position: 'relative' }}
     >
-      {/* The NASA image, cropped to Europe via object-position animation */}
+      {/* NASA Earth at night – zoomed to Europe, panning Italy → Scandinavia */}
       <div
-        className="absolute inset-0 animate-[earthPan_16s_cubic-bezier(0.4,0,0.2,1)_forwards]"
+        className="absolute inset-0 animate-[earthPan_18s_cubic-bezier(0.25,0.1,0.25,1)_forwards]"
         style={{
           backgroundImage: 'url(/images/earth-night.jpg)',
-          backgroundSize: '400% 400%',
-          /* Start position: Southern Europe / Mediterranean */
-          backgroundPosition: '62% 48%',
-          filter: 'brightness(1.4) contrast(1.15) saturate(1.2)',
+          backgroundSize: '600% auto',
+          backgroundPosition: '53% 28%',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(1.6) contrast(1.2) saturate(1.3)',
+          imageRendering: 'auto',
         }}
       />
 
-      {/* Subtle blue atmospheric glow at the edges */}
+      {/* Radial vignette for depth */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 80% 70% at 50% 60%, transparent 30%, hsl(215 100% 6% / 0.7) 100%)',
+          background: 'radial-gradient(ellipse 90% 80% at 50% 50%, transparent 20%, hsl(215 100% 4% / 0.6) 80%, hsl(215 100% 4% / 0.95) 100%)',
         }}
       />
 
-      {/* Curved horizon effect – gradient at the top simulating Earth's atmosphere */}
+      {/* Top fade – simulates looking into space above Earth */}
       <div
         className="absolute top-0 left-0 right-0 pointer-events-none"
         style={{
-          height: '35%',
-          background: 'linear-gradient(to bottom, hsl(215 100% 4% / 0.95) 0%, hsl(210 80% 8% / 0.3) 60%, transparent 100%)',
+          height: '30%',
+          background: 'linear-gradient(to bottom, hsl(215 100% 4%) 0%, hsl(215 100% 4% / 0.6) 50%, transparent 100%)',
         }}
       />
 
-      {/* Bottom fade to blend into page background */}
+      {/* Bottom fade – blend into page */}
       <div
         className="absolute bottom-0 left-0 right-0 pointer-events-none"
         style={{
-          height: '40%',
-          background: 'linear-gradient(to top, hsl(215 100% 4%) 0%, hsl(215 100% 4% / 0.6) 40%, transparent 100%)',
+          height: '35%',
+          background: 'linear-gradient(to top, hsl(215 100% 4%) 0%, hsl(215 100% 4% / 0.5) 40%, transparent 100%)',
         }}
       />
     </div>
