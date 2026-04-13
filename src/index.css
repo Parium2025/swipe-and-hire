@@ -239,13 +239,13 @@ All colors MUST be HSL.
 
     /* Pure colors tokens */
     --pure-white: 0 0% 100%;
-    --landing-surface: 215 90% 14%;
-    --landing-surface-strong: 214 88% 17%;
-    --landing-panel: 216 76% 16%;
-    --landing-panel-strong: 214 78% 18%;
-    --landing-border: 200 82% 68%;
+    --landing-surface: 216 80% 10%;
+    --landing-surface-strong: 214 70% 13%;
+    --landing-panel: 216 52% 12%;
+    --landing-panel-strong: 214 58% 15%;
+    --landing-border: 198 82% 64%;
     --landing-shadow: 215 100% 6%;
-    --landing-glow: 200 100% 60%;
+    --landing-glow: 198 100% 66%;
     --landing-grid: 200 70% 80%;
 
     /* Parium Brand Gradients */
@@ -1918,3 +1918,140 @@ All colors MUST be HSL.
   @apply absolute z-50 glass-panel rounded-md mt-1;
 }
 
+
+
+@keyframes landingStageFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
+}
+
+@keyframes landingBeamSweep {
+  0% { transform: translateX(-18%) scaleX(0.95); opacity: 0.24; }
+  50% { transform: translateX(18%) scaleX(1.05); opacity: 0.44; }
+  100% { transform: translateX(-18%) scaleX(0.95); opacity: 0.24; }
+}
+
+@layer components {
+  .landing-premium-shell {
+    background:
+      radial-gradient(circle at 16% 18%, hsl(var(--secondary) / 0.12), transparent 22%),
+      radial-gradient(circle at 84% 16%, hsl(var(--landing-glow) / 0.16), transparent 26%),
+      linear-gradient(180deg, hsl(var(--primary)) 0%, hsl(var(--landing-surface)) 42%, hsl(var(--primary)) 100%);
+  }
+
+  .landing-aurora {
+    background: radial-gradient(circle, hsl(var(--landing-glow) / 0.22) 0%, hsl(var(--landing-glow) / 0) 68%);
+    filter: blur(120px);
+    opacity: 0.7;
+  }
+
+  .landing-aurora-left {
+    transform: rotate(-12deg);
+  }
+
+  .landing-aurora-right {
+    transform: rotate(12deg);
+  }
+
+  .landing-spotlight {
+    background: linear-gradient(180deg, hsl(var(--pure-white) / 0.05), transparent 72%);
+    mask-image: radial-gradient(circle at 50% 0%, black 0%, transparent 78%);
+  }
+
+  .landing-nav-shell {
+    background: hsl(var(--primary) / 0.74);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 24px 70px -46px hsl(var(--landing-shadow) / 0.95);
+  }
+
+  .landing-stage-frame {
+    position: relative;
+    background:
+      radial-gradient(circle at top center, hsl(var(--landing-glow) / 0.16), transparent 28%),
+      linear-gradient(180deg, hsl(var(--landing-panel-strong) / 0.95), hsl(var(--landing-surface) / 0.88));
+    border: 1px solid hsl(var(--landing-border) / 0.14);
+    box-shadow:
+      0 42px 120px -58px hsl(var(--landing-shadow) / 0.98),
+      inset 0 1px 0 hsl(var(--pure-white) / 0.08);
+  }
+
+  .landing-stage-beam {
+    position: absolute;
+    inset: auto 10% 0 10%;
+    height: 10rem;
+    background: radial-gradient(circle at center, hsl(var(--landing-glow) / 0.3), transparent 72%);
+    filter: blur(40px);
+    animation: landingBeamSweep 7s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .landing-command-screen {
+    position: relative;
+    background:
+      linear-gradient(180deg, hsl(var(--landing-panel) / 0.95), hsl(var(--landing-surface-strong) / 0.82));
+    border: 1px solid hsl(var(--landing-border) / 0.14);
+    box-shadow: inset 0 1px 0 hsl(var(--pure-white) / 0.08);
+  }
+
+  .landing-metric-card {
+    background:
+      linear-gradient(180deg, hsl(var(--landing-panel) / 0.9), hsl(var(--landing-surface-strong) / 0.76));
+    border: 1px solid hsl(var(--landing-border) / 0.14);
+    box-shadow:
+      0 26px 70px -46px hsl(var(--landing-shadow) / 0.9),
+      inset 0 1px 0 hsl(var(--pure-white) / 0.08);
+  }
+
+  .landing-story-card {
+    background:
+      linear-gradient(180deg, hsl(var(--landing-panel) / 0.88), hsl(var(--landing-surface) / 0.72));
+    border: 1px solid hsl(var(--landing-border) / 0.12);
+    box-shadow:
+      0 22px 65px -44px hsl(var(--landing-shadow) / 0.9),
+      inset 0 1px 0 hsl(var(--pure-white) / 0.06);
+    animation: landingStageFloat 8s ease-in-out infinite;
+  }
+
+  .landing-role-card {
+    background:
+      linear-gradient(180deg, hsl(var(--landing-panel) / 0.88), hsl(var(--landing-surface-strong) / 0.78));
+    border: 1px solid hsl(var(--landing-border) / 0.14);
+    box-shadow:
+      0 24px 70px -44px hsl(var(--landing-shadow) / 0.9),
+      inset 0 1px 0 hsl(var(--pure-white) / 0.08);
+  }
+
+  .landing-faq-card {
+    background:
+      linear-gradient(180deg, hsl(var(--landing-panel) / 0.84), hsl(var(--landing-surface) / 0.76));
+    border: 1px solid hsl(var(--landing-border) / 0.12);
+    box-shadow:
+      0 20px 56px -42px hsl(var(--landing-shadow) / 0.88),
+      inset 0 1px 0 hsl(var(--pure-white) / 0.06);
+  }
+
+  .landing-cta-shell {
+    background:
+      radial-gradient(circle at top right, hsl(var(--landing-glow) / 0.2), transparent 28%),
+      linear-gradient(180deg, hsl(var(--landing-panel-strong) / 0.96), hsl(var(--landing-surface) / 0.9));
+    border: 1px solid hsl(var(--landing-border) / 0.16);
+    box-shadow:
+      0 44px 130px -62px hsl(var(--landing-shadow) / 0.98),
+      inset 0 1px 0 hsl(var(--pure-white) / 0.1);
+  }
+
+  .landing-footer-link {
+    opacity: 0.84;
+  }
+
+  .landing-footer-link:hover {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-story-card,
+  .landing-stage-beam {
+    animation: none !important;
+  }
+}

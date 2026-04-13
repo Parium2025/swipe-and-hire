@@ -3,11 +3,11 @@ import { useEffect } from 'react';
 const LANDING_URL = 'https://parium-ab.lovable.app';
 const OG_IMAGE = `${LANDING_URL}/lovable-uploads/parium-logo-transparent.png`;
 
-const title = 'Parium | AI-rekrytering & jobbmatchning';
+const title = 'Parium | AI-rekrytering för Norden';
 const description =
-  'AI-rekrytering för Sverige och Norden. Matcha kandidater, jobb och intervjuer snabbare med video, screening och direktmeddelanden i ett flöde.';
+  'Parium är en AI-rekryteringsplattform för Sverige och Norden med jobbmatchning, video, screening och direktdialog för företag och kandidater.';
 const keywords =
-  'AI-rekrytering, rekryteringsplattform, rekryteringsverktyg, jobbmatchning, swipe matchning, video CV, video profiler, direktrekrytering, kandidatmatchning, employer branding, hiring platform, HR tech, recruitment software, rekrytering Sverige, rekrytering Norden, hitta kandidater, hitta jobb, screening, intervjuverktyg, talangplattform';
+  'AI-rekrytering, rekryteringsplattform, rekryteringsverktyg, jobbmatchning, video CV, video profiler, kandidatmatchning, hiring platform, HR tech, recruitment software, rekrytering Sverige, rekrytering Norden, hitta kandidater, hitta jobb, screening, intervjuverktyg, talangplattform, employer branding, direktdialog, rekryteringsapp';
 
 const faqEntities = [
   {
@@ -15,7 +15,7 @@ const faqEntities = [
     name: 'Vad är Parium?',
     acceptedAnswer: {
       '@type': 'Answer',
-      text: 'Parium är en AI-driven rekryteringsplattform för företag och kandidater i Sverige och Norden med swipe-matchning, video-profiler, screening och direktmeddelanden.',
+      text: 'Parium är en AI-driven rekryteringsplattform för företag och kandidater i Sverige och Norden med jobbmatchning, video, screening och direktdialog i samma system.',
     },
   },
   {
@@ -40,6 +40,14 @@ const faqEntities = [
     acceptedAnswer: {
       '@type': 'Answer',
       text: 'Ja, plattformen är byggd för både arbetsgivare och kandidater med separata flöden för att hitta rätt jobb, rätt kandidat och snabbare boka intervju.',
+    },
+  },
+  {
+    '@type': 'Question',
+    name: 'Vad gör Parium annorlunda jämfört med traditionella jobbsajter?',
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: 'Parium kombinerar AI-screening, jobbmatchning, video, direktdialog och intervjuflöden i en mer sammanhängande premiumupplevelse än traditionella jobbsajter och äldre rekryteringssystem.',
     },
   },
 ];
@@ -123,14 +131,7 @@ export const useLandingSeo = () => {
         availability: 'https://schema.org/InStock',
         description: 'Tidigt tillträde till Parium utan kreditkort under lanseringsfasen.',
       },
-      featureList: [
-        'AI-screening',
-        'Swipe-matchning',
-        'Video-profiler',
-        'Direktmeddelanden',
-        'Intervjuflöden',
-        'Nordisk rekrytering',
-      ],
+      featureList: ['AI-screening', 'Jobbmatchning', 'Video-profiler', 'Direktmeddelanden', 'Intervjuflöden', 'Nordisk rekrytering'],
       publisher: {
         '@type': 'Organization',
         name: 'Parium AB',
@@ -168,10 +169,30 @@ export const useLandingSeo = () => {
       url: LANDING_URL,
       description,
       inLanguage: 'sv',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: `${LANDING_URL}/search-jobs?q={search_term_string}`,
+        'query-input': 'required name=search_term_string',
+      },
       publisher: {
         '@type': 'Organization',
         name: 'Parium AB',
       },
+    };
+
+    const webPageSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: title,
+      url: LANDING_URL,
+      description,
+      inLanguage: 'sv-SE',
+      isPartOf: {
+        '@type': 'WebSite',
+        name: 'Parium',
+        url: LANDING_URL,
+      },
+      about: ['AI-rekrytering', 'jobbmatchning', 'rekryteringsplattform', 'video-profiler', 'kandidatdialog'],
     };
 
     const schemas = [
@@ -179,6 +200,7 @@ export const useLandingSeo = () => {
       { id: 'ld-organization', data: organizationSchema },
       { id: 'ld-faq', data: faqSchema },
       { id: 'ld-website', data: websiteSchema },
+      { id: 'ld-webpage', data: webPageSchema },
     ];
 
     schemas.forEach(({ id, data }) => {
