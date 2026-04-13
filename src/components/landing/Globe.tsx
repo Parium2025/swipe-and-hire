@@ -6,12 +6,33 @@ interface GlobeProps {
   className?: string;
 }
 
+// ── Cobe coordinate math (from issue shuding/cobe#101) ──
+// The camera "look-at" direction for a given (phi, theta) is:
+//   m = [-sin(phi)*cos(theta), sin(theta), cos(phi)*cos(theta)]
+// Which maps to geographic coordinates:
+//   lat  = asin(sin(theta))   → theta in radians ≈ latitude in radians
+//   lon  = atan2(-cos(phi)*cos(theta), -sin(phi)*cos(theta))
+//
+// phi=0 → lon = atan2(-1, 0) = -90° (central Americas)
+//
+// To center on a target longitude:
+//   phi = atan2(-cos(lonRad), -sin(lonRad))  (with theta≈0)
+//
+// Stockholm: lon=18°E → 0.314 rad → phi = atan2(-cos(0.314), -sin(0.314))
+//   = atan2(-0.951, -0.309) ≈ -1.884 rad  ✓
+// Rome: lon=12°E → 0.209 rad → phi ≈ -1.78 rad
+
+const lonToPhiCobe = (lonDeg: number): number => {
+  const lonRad = (lonDeg * Math.PI) / 180;
+  return Math.atan2(-Math.cos(lonRad), -Math.sin(lonRad));
+};
+
+// Pre-computed phi values
+const PHI_STOCKHOLM = lonToPhiCobe(18);  // ≈ -1.884
+const PHI_ROME = lonToPhiCobe(12);       // ≈ -1.78
+
 const Globe = ({ className = '' }: GlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // phi = longitude rotation in cobe. ~1.8 rad centers on Europe/Scandinavia
-  // phi ~0.3 rad ≈ 17°E longitude → centers on Scandinavia/Northern Europe
-  const phiRef = useRef(0.3);
-  const thetaRef = useRef(0.15);
   const pointerInteracting = useRef<number | null>(null);
   const pointerDelta = useRef(0);
   const isMobile = useIsMobile();
@@ -47,19 +68,22 @@ const Globe = ({ className = '' }: GlobeProps) => {
     const startTime = performance.now();
     const dpr = isMobile ? 1.5 : 2;
 
-    // Cinematic pan: start zoomed on Mediterranean/Italy, pan up to Scandinavia
-    const INTRO_DURATION = 6000; // ms
-    const THETA_START = 0.15; // Lower view (Mediterranean)
-    const THETA_END = 0.35;   // Higher tilt (Scandinavia)
-    const PHI_START = 0.25;   // Slightly west
-    const PHI_END = 0.3;      // Center on Scandinavia
+    // Cinematic intro: pan from Rome → Stockholm over 6 seconds
+    const INTRO_DURATION = 6000;
+    const THETA_START = 0.15; // slight tilt (lower Europe)
+    const THETA_END = 0.35;   // more northern tilt (Scandinavia)
+
+    let currentPhi = PHI_ROME;
+    let currentTheta = THETA_START;
+
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
     const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
       width: width * dpr,
       height: width * dpr,
-      phi: PHI_START,
-      theta: THETA_START,
+      phi: currentPhi,
+      theta: currentTheta,
       dark: 1,
       diffuse: 6,
       mapSamples: isMobile ? 20000 : 40000,
@@ -67,38 +91,35 @@ const Globe = ({ className = '' }: GlobeProps) => {
       baseColor: [0.05, 0.1, 0.25],
       markerColor: [0.4, 0.9, 1],
       glowColor: [0.08, 0.2, 0.6],
-      markers: [],
+      markers: [], // Clean look, no markers
     });
 
     requestAnimationFrame(() => setReady(true));
-
-    // Easing: cubic ease-out for smooth deceleration
-    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
     const animate = () => {
       const elapsed = performance.now() - startTime;
 
       if (pointerInteracting.current === null) {
         if (elapsed < INTRO_DURATION) {
-          // Cinematic intro: pan from Mediterranean up to Scandinavia
+          // Cinematic pan from Italy to Scandinavia
           const progress = easeOutCubic(Math.min(elapsed / INTRO_DURATION, 1));
-          thetaRef.current = THETA_START + (THETA_END - THETA_START) * progress;
-          phiRef.current = PHI_START + (PHI_END - PHI_START) * progress;
+          currentPhi = PHI_ROME + (PHI_STOCKHOLM - PHI_ROME) * progress;
+          currentTheta = THETA_START + (THETA_END - THETA_START) * progress;
         } else {
           // After intro: ultra-slow drift + subtle breathing
           const postIntro = elapsed - INTRO_DURATION;
-          phiRef.current += 0.0003; // very slow rotation
-          thetaRef.current = THETA_END + Math.sin(postIntro * 0.00012) * 0.015;
+          currentPhi -= 0.0003; // very slow westward drift (negative = eastward in cobe)
+          currentTheta = THETA_END + Math.sin(postIntro * 0.00012) * 0.015;
         }
       } else {
-        phiRef.current += pointerDelta.current / 300;
+        currentPhi += pointerDelta.current / 300;
         pointerDelta.current *= 0.92;
       }
 
       width = canvas.offsetWidth;
       globe.update({
-        phi: phiRef.current,
-        theta: thetaRef.current,
+        phi: currentPhi,
+        theta: currentTheta,
         width: width * dpr,
         height: width * dpr,
       });
