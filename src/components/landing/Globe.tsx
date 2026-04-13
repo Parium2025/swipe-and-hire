@@ -47,17 +47,18 @@ const Globe = ({ className = '' }: GlobeProps) => {
     const startTime = performance.now();
     const dpr = isMobile ? 1.5 : 2;
 
-    // Cinematic pan: start looking at Italy (theta ~0.55), pan up to Scandinavia (theta ~0.35)
-    // over ~6 seconds, then gently breathe
+    // Cinematic pan: start zoomed on Mediterranean/Italy, pan up to Scandinavia
     const INTRO_DURATION = 6000; // ms
-    const THETA_START = 0.55; // Italy region
-    const THETA_END = 0.35;   // Scandinavia region
+    const THETA_START = 0.15; // Lower view (Mediterranean)
+    const THETA_END = 0.35;   // Higher tilt (Scandinavia)
+    const PHI_START = 0.25;   // Slightly west
+    const PHI_END = 0.3;      // Center on Scandinavia
 
     const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
       width: width * dpr,
       height: width * dpr,
-      phi: 1.8,
+      phi: PHI_START,
       theta: THETA_START,
       dark: 1,
       diffuse: 6,
@@ -66,7 +67,7 @@ const Globe = ({ className = '' }: GlobeProps) => {
       baseColor: [0.05, 0.1, 0.25],
       markerColor: [0.4, 0.9, 1],
       glowColor: [0.08, 0.2, 0.6],
-      markers: [], // No markers – clean look
+      markers: [],
     });
 
     requestAnimationFrame(() => setReady(true));
