@@ -79,17 +79,16 @@ const Globe = ({ className = '' }: GlobeProps) => {
       const elapsed = performance.now() - startTime;
 
       if (pointerInteracting.current === null) {
-        // Very slow rotation for cinematic feel
-        phiRef.current += 0.001;
-
         if (elapsed < INTRO_DURATION) {
-          // Cinematic intro: pan from Italy to Scandinavia
+          // Cinematic intro: pan from Mediterranean up to Scandinavia
           const progress = easeOutCubic(Math.min(elapsed / INTRO_DURATION, 1));
           thetaRef.current = THETA_START + (THETA_END - THETA_START) * progress;
+          phiRef.current = PHI_START + (PHI_END - PHI_START) * progress;
         } else {
-          // After intro: subtle breathing motion around Scandinavia
+          // After intro: ultra-slow drift + subtle breathing
           const postIntro = elapsed - INTRO_DURATION;
-          thetaRef.current = THETA_END + Math.sin(postIntro * 0.00015) * 0.02;
+          phiRef.current += 0.0003; // very slow rotation
+          thetaRef.current = THETA_END + Math.sin(postIntro * 0.00012) * 0.015;
         }
       } else {
         phiRef.current += pointerDelta.current / 300;
