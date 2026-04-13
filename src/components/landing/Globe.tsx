@@ -90,7 +90,7 @@ const Globe = ({ className = '' }: GlobeProps) => {
   const isMobile = useIsMobile();
 
   return (
-    <div className={`relative ${className}`} aria-hidden="true">
+    <div className={`${className}`} style={{ minHeight: '100%' }} aria-hidden="true">
       <Canvas
         camera={{
           position: [0, 0, isMobile ? 4.2 : 3.8],
