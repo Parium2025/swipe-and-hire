@@ -47,15 +47,15 @@ const LandingHero = () => {
       aria-label="Parium – Skandinaviens smartaste rekryteringsplattform"
     >
       {/* Globe: zoomed in, positioned low to create a "planet horizon" */}
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-[-35%] sm:bottom-[-40%] md:bottom-[-45%] lg:bottom-[-50%] pointer-events-none">
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-[-30%] sm:bottom-[-35%] md:bottom-[-40%] lg:bottom-[-45%] pointer-events-none">
         <Suspense fallback={<div className="w-[140vw] aspect-square rounded-full bg-white/[0.02] animate-pulse" />}>
           <Globe className="w-[140vw] sm:w-[130vw] md:w-[120vw] lg:w-[110vw] xl:w-[100vw] aspect-square pointer-events-auto" />
         </Suspense>
       </div>
 
-      {/* Gradient overlays for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary via-primary/70 to-transparent pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,hsl(210_80%_12%/0.8),transparent)] pointer-events-none" />
+      {/* Subtle gradient overlays – keep globe visible */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_40%_at_50%_0%,hsl(210_80%_8%/0.6),transparent)] pointer-events-none" />
 
       {/* Content overlay – positioned in upper portion */}
       <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-6 md:px-12 w-full text-center -mt-[10vh] sm:-mt-[12vh]">
