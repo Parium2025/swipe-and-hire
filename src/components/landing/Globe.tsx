@@ -6,13 +6,12 @@ interface GlobeProps {
   className?: string;
 }
 
-const lonToPhiCobe = (lonDeg: number) => -((lonDeg + 90) * Math.PI) / 180;
-const latToThetaCobe = (latDeg: number) => (latDeg * Math.PI) / 180;
-
-const PHI_EUROPE = lonToPhiCobe(16);
-const PHI_ROME = lonToPhiCobe(12);
-const THETA_ROME = latToThetaCobe(42);
-const THETA_EUROPE = latToThetaCobe(55);
+// cobe phi = longitude in radians (0 = Atlantic, positive = east)
+// cobe theta = latitude tilt in radians (positive = north)
+const PHI_ROME = 0.21;      // ~12°E
+const PHI_EUROPE = 0.30;    // ~17°E (Scandinavia)
+const THETA_ROME = 0.25;    // ~42°N
+const THETA_EUROPE = 0.38;  // ~58°N (Stockholm area)
 
 const Globe = ({ className = '' }: GlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -47,7 +46,7 @@ const Globe = ({ className = '' }: GlobeProps) => {
       offset: isMobile ? [0, 0.02] : [0.06, 0.03],
       dark: 1,
       diffuse: 2.1,
-      mapSamples: isMobile ? 1800 : 5600,
+      mapSamples: isMobile ? 8000 : 16000,
       mapBrightness: 8,
       mapBaseBrightness: 0.42,
       baseColor: [0.12, 0.18, 0.34],
