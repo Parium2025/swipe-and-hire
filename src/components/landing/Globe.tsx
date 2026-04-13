@@ -6,17 +6,15 @@ interface GlobeProps {
   className?: string;
 }
 
-const lonToPhiCobe = (lonDeg: number) => -Math.PI / 2 - (lonDeg * Math.PI) / 180;
-const latToThetaCobe = (latDeg: number) => (latDeg * Math.PI) / 180;
+/* cobe coordinate helpers */
+const lonToPhi = (lon: number) => -Math.PI / 2 - (lon * Math.PI) / 180;
+const latToTheta = (lat: number) => (lat * Math.PI) / 180;
 
-const ROME: [number, number] = [41.9028, 12.4964];
-const COPENHAGEN: [number, number] = [55.6761, 12.5683];
-const STOCKHOLM: [number, number] = [59.3293, 18.0686];
-
-const START_PHI = lonToPhiCobe(ROME[1]);
-const START_THETA = latToThetaCobe(ROME[0]);
-const FOCUS_PHI = lonToPhiCobe(15.6);
-const FOCUS_THETA = latToThetaCobe(55.8);
+/* Journey: start looking at southern Europe, slowly pan north to Scandinavia */
+const START_PHI = lonToPhi(14);      // central Europe longitude
+const START_THETA = latToTheta(38);   // Mediterranean
+const END_PHI = lonToPhi(16);        // slightly east toward Stockholm
+const END_THETA = latToTheta(60);    // Scandinavia
 
 const Globe = ({ className = '' }: GlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,57 +25,42 @@ const Globe = ({ className = '' }: GlobeProps) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    let animationFrame = 0;
-    const startTime = performance.now();
-    const introDuration = isMobile ? 2200 : 3200;
+    let raf = 0;
+    const t0 = performance.now();
+    /* Longer pan duration so the upward scroll is clearly visible */
+    const panDuration = isMobile ? 4000 : 5500;
     const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.2);
-    const minRenderSize = isMobile ? 320 : 420;
-    const maxRenderSize = isMobile ? 420 : 840;
-    const renderSize = Math.min(Math.max(canvas.offsetWidth || minRenderSize, minRenderSize), maxRenderSize);
+    const size = isMobile
+      ? Math.min(Math.max(canvas.offsetWidth || 340, 340), 440)
+      : Math.min(Math.max(canvas.offsetWidth || 500, 500), 900);
 
-    const view = isMobile
-      ? {
-          scale: 1.28,
-          offset: [0, 0.03] as [number, number],
-          mapSamples: 12000,
-          mapBrightness: 10.4,
-          markerSizes: [0.085, 0.07, 0.095] as const,
-        }
-      : {
-          scale: 1.18,
-          offset: [0.012, 0.02] as [number, number],
-          mapSamples: 18000,
-          mapBrightness: 10.6,
-          markerSizes: [0.07, 0.055, 0.08] as const,
-        };
+    /* Extreme zoom: scale >2 crops away most of the sphere, showing only
+       the Europe region like a satellite close-up */
+    const globeScale = isMobile ? 2.8 : 2.4;
 
-    let currentPhi = START_PHI;
-    let currentTheta = START_THETA;
-
-    const easeInOutCubic = (t: number) =>
+    const easeInOut = (t: number) =>
       t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    let phi = START_PHI;
+    let theta = START_THETA;
 
     const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
-      width: renderSize,
-      height: renderSize,
-      phi: currentPhi,
-      theta: currentTheta,
-      scale: view.scale,
-      offset: view.offset,
+      width: size,
+      height: size,
+      phi,
+      theta,
+      scale: globeScale,
+      offset: [0, 0],
       dark: 1,
-      diffuse: 1.25,
-      mapSamples: view.mapSamples,
-      mapBrightness: view.mapBrightness,
-      mapBaseBrightness: 0.02,
-      baseColor: [0.01, 0.03, 0.08],
-      markerColor: [0.68, 0.93, 1],
-      glowColor: [0.1, 0.38, 0.92],
-      markers: [
-        { location: ROME, size: view.markerSizes[0] },
-        { location: COPENHAGEN, size: view.markerSizes[1] },
-        { location: STOCKHOLM, size: view.markerSizes[2] },
-      ],
+      diffuse: 1.6,
+      mapSamples: isMobile ? 14000 : 22000,
+      mapBrightness: 12,
+      mapBaseBrightness: 0.01,
+      baseColor: [0.01, 0.02, 0.06],
+      markerColor: [0.5, 0.85, 1],
+      glowColor: [0.08, 0.28, 0.72],
+      markers: [],
       arcs: [],
       context: {
         antialias: false,
@@ -90,56 +73,40 @@ const Globe = ({ className = '' }: GlobeProps) => {
     requestAnimationFrame(() => setReady(true));
 
     const animate = (now: number) => {
-      if (document.hidden) {
-        animationFrame = requestAnimationFrame(animate);
+      if (document.hidden) { raf = requestAnimationFrame(animate); return; }
+
+      const elapsed = now - t0;
+
+      if (elapsed < panDuration) {
+        const p = easeInOut(Math.min(elapsed / panDuration, 1));
+        phi = START_PHI + (END_PHI - START_PHI) * p;
+        theta = START_THETA + (END_THETA - START_THETA) * p;
+        globe.update({ phi, theta });
+        raf = requestAnimationFrame(animate);
         return;
       }
 
-      const elapsed = now - startTime;
-
-      if (elapsed < introDuration) {
-        const progress = easeInOutCubic(Math.min(elapsed / introDuration, 1));
-        currentPhi = START_PHI + (FOCUS_PHI - START_PHI) * progress;
-        currentTheta = START_THETA + (FOCUS_THETA - START_THETA) * progress;
-
-        globe.update({
-          phi: currentPhi,
-          theta: currentTheta,
-        });
-
-        animationFrame = requestAnimationFrame(animate);
-        return;
-      }
-
-      const postIntro = elapsed - introDuration;
-      const floatPhi = Math.sin(postIntro * 0.00008) * 0.0018;
-      const floatTheta = Math.sin(postIntro * 0.00011) * 0.0014;
-      const northDrift = Math.sin(postIntro * 0.000045) * 0.0012;
-
+      /* After pan: gentle breathing / subtle drift */
+      const post = elapsed - panDuration;
       globe.update({
-        phi: FOCUS_PHI + floatPhi,
-        theta: FOCUS_THETA + floatTheta + northDrift,
+        phi: END_PHI + Math.sin(post * 0.00006) * 0.0015,
+        theta: END_THETA + Math.sin(post * 0.00009) * 0.001,
       });
-
-      animationFrame = requestAnimationFrame(animate);
+      raf = requestAnimationFrame(animate);
     };
 
-    animationFrame = requestAnimationFrame(animate);
-
-    return () => {
-      cancelAnimationFrame(animationFrame);
-      globe.destroy();
-    };
+    raf = requestAnimationFrame(animate);
+    return () => { cancelAnimationFrame(raf); globe.destroy(); };
   }, [isMobile]);
 
   return (
     <div
-      className={`relative isolate overflow-hidden rounded-full ${className}`}
+      className={`relative ${className}`}
       aria-hidden="true"
       style={{
         opacity: ready ? 1 : 0,
-        transform: ready ? 'scale(1)' : 'scale(0.95)',
-        transition: 'opacity 1.5s cubic-bezier(0.22,1,0.36,1), transform 1.8s cubic-bezier(0.22,1,0.36,1)',
+        transform: ready ? 'scale(1)' : 'scale(0.92)',
+        transition: 'opacity 1.8s cubic-bezier(0.22,1,0.36,1), transform 2s cubic-bezier(0.22,1,0.36,1)',
       }}
     >
       <canvas
