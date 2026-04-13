@@ -27,11 +27,11 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
     >
       {/* NASA Earth at night – zoomed tight on Europe, scrolls upward continuously */}
       <div
-        className="absolute inset-0 animate-[earthPan_20s_cubic-bezier(0.25,0.1,0.25,1)_infinite]"
+        className="absolute inset-0 animate-[earthPan_24s_linear_infinite]"
         style={{
           backgroundImage: 'url(/images/earth-night.jpg)',
-          backgroundSize: '750% auto',
-          backgroundPosition: '54% 30%',
+          backgroundSize: '900% auto',
+          backgroundPosition: '54% 24%',
           backgroundRepeat: 'repeat',
           filter: 'brightness(1.8) contrast(1.25) saturate(1.3)',
           imageRendering: 'auto',
