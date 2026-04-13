@@ -1,24 +1,27 @@
-import { lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, BriefcaseBusiness, MessageSquareText, ScanSearch, Sparkles } from 'lucide-react';
+import { ArrowRight, BriefcaseBusiness, ShieldCheck, Sparkles, TrendingUp, Workflow } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const Globe = lazy(() => import('./Globe'));
-
-const signalPills = ['AI-screening', 'Swipe-matchning', 'Video-profiler', 'Direktmeddelanden'];
+const signalPills = ['AI-screening', 'Jobbmatchning', 'Video-profiler', 'Direktdialog'];
 
 const trustStats = [
+  { value: '01', label: 'ett flöde för hela rekryteringen' },
+  { value: '60s', label: 'från signal till första kontakt' },
+  { value: '∞', label: 'byggt för mobil, touch och desktop' },
+];
+
+const flowHighlights = [
   {
-    value: '500+',
-    label: 'företag i tidig åtkomst',
+    title: 'Kandidater prioriteras efter faktisk match',
+    detail: 'AI-screening, video och urval i samma vy för snabbare beslut utan tab-kaos.',
   },
   {
-    value: '60 sek',
-    label: 'från signal till första kontakt',
+    title: 'Dialog startar där beslutet redan tas',
+    detail: 'Meddelanden, jobb, kandidatkort och intervju sitter ihop från början.',
   },
   {
-    value: 'Allt i ett',
-    label: 'rekrytering, chat och intervju',
+    title: 'Nordisk känsla i både språk och beteende',
+    detail: 'Designat för Sverige och Norden med hög kontrast, tempo och premiumkänsla.',
   },
 ];
 
@@ -33,32 +36,24 @@ const LandingHero = () => {
   return (
     <section
       id="top"
-      className="relative overflow-hidden px-5 pb-20 pt-28 sm:px-6 sm:pt-32 md:px-12 lg:px-24 lg:pb-24"
+      className="relative overflow-hidden px-5 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 md:px-12 lg:px-24 lg:pb-24"
       aria-label="Parium – AI-driven rekryteringsplattform för kandidater och arbetsgivare i Norden"
     >
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute left-[-12%] top-[8%] h-[28rem] w-[28rem] rounded-full bg-[hsl(var(--secondary)/0.08)] blur-[120px]" />
-        <div className="absolute right-[-10%] top-[12%] h-[34rem] w-[34rem] rounded-full bg-[hsl(var(--secondary)/0.16)] blur-[160px]" />
-        <div className="landing-orbit-ring landing-orbit-spin absolute left-[-8rem] top-[8rem] h-[52rem] w-[52rem] rounded-full" />
-        <div className="landing-orbit-ring landing-orbit-spin-reverse absolute right-[-12rem] top-[-6rem] h-[60rem] w-[60rem] rounded-full" />
-      </div>
-
       <div className="relative z-10 mx-auto max-w-7xl">
-        <div className="grid items-center gap-14 lg:min-h-[calc(100dvh-9rem)] lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)] lg:gap-8">
-          <div className="relative max-w-[42rem]">
+        <div className="grid items-start gap-10 lg:min-h-[calc(100dvh-8rem)] lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:items-center lg:gap-12">
+          <div className="relative max-w-[44rem]">
             <span className="landing-eyebrow">
-              <span className="h-2 w-2 rounded-full bg-[hsl(var(--secondary))] shadow-[0_0_24px_hsl(var(--secondary)/0.65)]" />
+              <span className="h-2 w-2 rounded-full bg-[hsl(var(--secondary))] shadow-[0_0_24px_hsl(var(--secondary)/0.55)]" />
               AI-rekrytering för Sverige och Norden
             </span>
 
-            <h1 className="mt-7 max-w-[10ch] text-[clamp(3.4rem,10vw,7.4rem)] font-bold leading-[0.92] tracking-[-0.07em] text-pure-white">
-              Rekrytering för bolag som bygger före alla andra.
+            <h1 className="mt-7 max-w-[11ch] text-[clamp(3.15rem,10vw,7.6rem)] font-bold leading-[0.9] tracking-[-0.08em] text-pure-white">
+              Rekrytering som känns som en premiumprodukt, inte ett gammalt HR-system.
             </h1>
 
-            <p className="mt-7 max-w-[36rem] text-[1rem] leading-8 text-pure-white sm:text-[1.05rem] lg:text-[1.12rem]">
-              Parium är en AI-driven rekryteringsplattform för företag och kandidater som vill matcha snabbare,
-              anställa smartare och hålla hela flödet i ett system — från jobbannons och swipe-matchning till
-              screening, direktmeddelanden och intervju.
+            <p className="mt-7 max-w-[39rem] text-[1rem] leading-8 text-pure-white sm:text-[1.05rem] lg:text-[1.12rem]">
+              Parium samlar jobb, kandidater, video, AI-screening, direktdialog och intervju i ett sammanhängande flöde
+              för företag och kandidater som vill röra sig snabbare utan att kompromissa med känsla eller kontroll.
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -70,68 +65,96 @@ const LandingHero = () => {
             </div>
 
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Button variant="glass" onClick={() => goTo('employer')} className="landing-primary-button group px-7 text-base font-semibold">
+              <Button variant="glassBlue" onClick={() => goTo('employer')} className="group px-7 text-base font-semibold">
                 <BriefcaseBusiness className="h-4 w-4" />
                 Skapa företagskonto
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
-              <Button variant="glass" onClick={() => goTo('job_seeker')} className="landing-secondary-button group px-7 text-base font-semibold">
+              <Button variant="glass" onClick={() => goTo('job_seeker')} className="group px-7 text-base font-semibold">
                 <Sparkles className="h-4 w-4" />
-                Jag söker jobb
+                Hitta jobb nu
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
             </div>
 
             <p className="mt-5 text-sm leading-7 text-pure-white">
-              Anpassad för touch, mus, Android, iPhone, surfplatta, laptop och stora skärmar — med samma premiumkänsla överallt.
+              Anpassad för Android, iPhone, surfplatta, laptop, stationär dator, touch och mus — med samma premiumkänsla överallt.
             </p>
 
             <dl className="mt-10 grid gap-4 sm:grid-cols-3">
               {trustStats.map((stat) => (
-                <div key={stat.label} className="landing-panel rounded-[1.5rem] p-4 sm:p-5">
-                  <dt className="text-xs uppercase tracking-[0.18em] text-pure-white">{stat.label}</dt>
-                  <dd className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-pure-white">{stat.value}</dd>
+                <div key={stat.label} className="landing-metric-card rounded-[1.6rem] p-4 sm:p-5">
+                  <dd className="text-[1.9rem] font-semibold tracking-[-0.06em] text-pure-white sm:text-[2.2rem]">{stat.value}</dd>
+                  <dt className="mt-2 text-xs uppercase tracking-[0.16em] text-pure-white">{stat.label}</dt>
                 </div>
               ))}
             </dl>
           </div>
 
-          <div className="relative flex min-h-[24rem] items-center justify-center sm:min-h-[31rem] lg:min-h-[44rem]">
-            <div className="absolute inset-0 bg-[radial-gradient(circle,hsl(var(--secondary)/0.14)_0%,hsl(var(--secondary)/0)_68%)] blur-3xl" aria-hidden="true" />
-            <div className="relative mx-auto flex w-full max-w-[46rem] items-center justify-center">
-              <div className="absolute inset-0 rounded-full border border-[hsl(var(--landing-border)/0.08)]" aria-hidden="true" />
-              <div className="relative h-[min(112vw,34rem)] w-[min(112vw,34rem)] sm:h-[min(82vw,44rem)] sm:w-[min(82vw,44rem)] lg:h-[min(74vw,66rem)] lg:w-[min(74vw,66rem)]">
-                <Suspense fallback={<div className="absolute inset-0 rounded-full bg-[hsl(var(--landing-panel)/0.72)]" />}>
-                  <Globe className="h-full w-full" />
-                </Suspense>
+          <div className="relative">
+            <div className="landing-stage-frame mx-auto max-w-[46rem] overflow-hidden rounded-[2rem] p-4 sm:p-5 lg:p-6">
+              <div className="landing-stage-beam" aria-hidden="true" />
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+                <article className="landing-command-screen rounded-[1.7rem] p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-pure-white">Live recruiting signal</p>
+                      <p className="mt-2 text-[1.45rem] font-semibold tracking-[-0.04em] text-pure-white sm:text-[1.75rem]">
+                        Allt viktigt syns innan någon annan ens hunnit öppna nästa verktyg.
+                      </p>
+                    </div>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] border border-[hsl(var(--landing-border)/0.18)] bg-[hsl(var(--landing-panel)/0.82)] text-pure-white">
+                      <Workflow className="h-5 w-5" />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid gap-3">
+                    {flowHighlights.map((item, index) => (
+                      <article key={item.title} className="landing-story-card rounded-[1.35rem] p-4 sm:p-5">
+                        <div className="flex items-start gap-4">
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--landing-border)/0.18)] bg-[hsl(var(--landing-panel)/0.84)] text-xs font-bold tracking-[0.16em] text-pure-white">
+                            0{index + 1}
+                          </span>
+                          <div>
+                            <h2 className="text-base font-semibold tracking-[-0.03em] text-pure-white sm:text-lg">{item.title}</h2>
+                            <p className="mt-2 text-sm leading-7 text-pure-white">{item.detail}</p>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </article>
+
+                <div className="grid gap-4">
+                  <article className="landing-metric-card rounded-[1.6rem] p-5 sm:p-6">
+                    <div className="flex items-center gap-3 text-pure-white">
+                      <ShieldCheck className="h-5 w-5" />
+                      <p className="text-xs uppercase tracking-[0.18em]">Premiumkontroll</p>
+                    </div>
+                    <p className="mt-4 text-[2.6rem] font-semibold leading-none tracking-[-0.08em] text-pure-white">100%</p>
+                    <p className="mt-3 text-sm leading-7 text-pure-white">
+                      Hög kontrast, rena beslutspunkter och en upplevelse som håller ihop på varje skärmstorlek.
+                    </p>
+                  </article>
+
+                  <article className="landing-metric-card rounded-[1.6rem] p-5 sm:p-6">
+                    <div className="flex items-center gap-3 text-pure-white">
+                      <TrendingUp className="h-5 w-5" />
+                      <p className="text-xs uppercase tracking-[0.18em]">Nordic scale</p>
+                    </div>
+                    <div className="mt-4 space-y-3">
+                      <div className="rounded-[1.1rem] border border-[hsl(var(--landing-border)/0.14)] bg-[hsl(var(--landing-panel)/0.62)] px-4 py-3">
+                        <p className="text-sm font-semibold text-pure-white">Företag</p>
+                        <p className="mt-1 text-sm leading-6 text-pure-white">Publicera jobb, screena snabbare, boka intervju direkt.</p>
+                      </div>
+                      <div className="rounded-[1.1rem] border border-[hsl(var(--landing-border)/0.14)] bg-[hsl(var(--landing-panel)/0.62)] px-4 py-3">
+                        <p className="text-sm font-semibold text-pure-white">Kandidater</p>
+                        <p className="mt-1 text-sm leading-6 text-pure-white">Swipea, visa personlighet och gå från intresse till samtal snabbare.</p>
+                      </div>
+                    </div>
+                  </article>
+                </div>
               </div>
-
-              <article className="landing-panel absolute left-[1%] top-[9%] hidden max-w-[15rem] rounded-[1.5rem] p-4 md:block">
-                <p className="text-xs uppercase tracking-[0.18em] text-pure-white">Norden först</p>
-                <p className="mt-3 text-sm leading-6 text-pure-white">
-                  Fokuserad på Sverige och Norden med lokala rekryteringsflöden, språk och beteenden i centrum.
-                </p>
-              </article>
-
-              <article className="landing-panel absolute bottom-[8%] left-[4%] max-w-[16rem] rounded-[1.5rem] p-4 sm:left-[8%]">
-                <div className="flex items-center gap-2 text-pure-white">
-                  <ScanSearch className="h-4 w-4" />
-                  <p className="text-xs uppercase tracking-[0.18em]">AI-screening</p>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-pure-white">
-                  Sortera kandidater snabbare mot rätt kriterier och gå från intresse till intervju utan onödiga mellanled.
-                </p>
-              </article>
-
-              <article className="landing-panel absolute right-[2%] top-[18%] hidden max-w-[15rem] rounded-[1.5rem] p-4 lg:block">
-                <div className="flex items-center gap-2 text-pure-white">
-                  <MessageSquareText className="h-4 w-4" />
-                  <p className="text-xs uppercase tracking-[0.18em]">Direktdialog</p>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-pure-white">
-                  Kandidat, jobb, meddelanden och intervju i samma premiumflöde — utan splittrade verktyg.
-                </p>
-              </article>
             </div>
           </div>
         </div>

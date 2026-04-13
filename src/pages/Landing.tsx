@@ -31,17 +31,16 @@ const Landing = () => {
 
   return (
     <div className="fixed inset-0 w-full overflow-x-hidden overflow-y-auto bg-primary text-pure-white" style={{ WebkitOverflowScrolling: 'touch' } as any}>
-      <div className="landing-page-surface fixed inset-0 pointer-events-none" aria-hidden="true" />
+      <div className="landing-premium-shell fixed inset-0 pointer-events-none" aria-hidden="true" />
       <div className="landing-grid-lines fixed inset-0 pointer-events-none" aria-hidden="true" />
       <div className="landing-noise fixed inset-0 pointer-events-none" aria-hidden="true" />
-      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute left-[-8rem] top-[8rem] h-[28rem] w-[28rem] rounded-full bg-[hsl(var(--secondary)/0.08)] blur-[140px]" />
-        <div className="absolute bottom-[-10rem] right-[-8rem] h-[32rem] w-[32rem] rounded-full bg-[hsl(var(--secondary)/0.1)] blur-[180px]" />
-      </div>
+      <div className="landing-aurora landing-aurora-left fixed inset-y-0 left-[-18%] w-[48rem] pointer-events-none" aria-hidden="true" />
+      <div className="landing-aurora landing-aurora-right fixed inset-y-0 right-[-18%] w-[48rem] pointer-events-none" aria-hidden="true" />
+      <div className="landing-spotlight fixed inset-x-0 top-0 h-[24rem] pointer-events-none" aria-hidden="true" />
 
       <div className="relative z-10">
         <LandingNav onLoginClick={handleLogin} />
-        <main className="overflow-hidden">
+        <main className="relative overflow-hidden">
           <LandingHero />
           <LandingStats />
           <LandingFeatures />
