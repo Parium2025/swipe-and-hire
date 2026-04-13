@@ -13,10 +13,10 @@
   100% { background-position: -200% center; }
 }
 
-/* NASA Earth: continuous upward scroll, Italy → Scandinavia, infinite loop */
+/* NASA Earth: continuous smooth upward scroll, seamless loop via repeat-y */
 @keyframes earthPan {
-  0%   { background-position: 54% 24%; }
-  100% { background-position: 54% 14%; }
+  0%   { background-position: 54% 0%; }
+  100% { background-position: 54% -100%; }
 }
 
 html {
