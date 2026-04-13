@@ -25,15 +25,15 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
       aria-hidden="true"
       style={{ position: 'relative' }}
     >
-      {/* NASA Earth at night – zoomed to Europe, panning Italy → Scandinavia */}
+      {/* NASA Earth at night – starts at Italy, pans to Scandinavia, then drifts continuously */}
       <div
-        className="absolute inset-0 animate-[earthPan_18s_cubic-bezier(0.25,0.1,0.25,1)_forwards]"
+        className="absolute inset-0 animate-[earthPan_60s_linear_infinite]"
         style={{
           backgroundImage: 'url(/images/earth-night.jpg)',
-          backgroundSize: '600% auto',
-          backgroundPosition: '53% 28%',
-          backgroundRepeat: 'no-repeat',
-          filter: 'brightness(1.6) contrast(1.2) saturate(1.3)',
+          backgroundSize: '500% auto',
+          backgroundPosition: '53% 24%',
+          backgroundRepeat: 'repeat-x',
+          filter: 'brightness(1.8) contrast(1.25) saturate(1.3)',
           imageRendering: 'auto',
         }}
       />
