@@ -8,10 +8,6 @@ interface GlobeProps {
 
 const Globe = ({ className = '' }: GlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // phi = longitude rotation in cobe. ~1.8 rad centers on Europe/Scandinavia
-  // phi ~0.3 rad ≈ 17°E longitude → centers on Scandinavia/Northern Europe
-  const phiRef = useRef(0.3);
-  const thetaRef = useRef(0.15);
   const pointerInteracting = useRef<number | null>(null);
   const pointerDelta = useRef(0);
   const isMobile = useIsMobile();
@@ -42,24 +38,39 @@ const Globe = ({ className = '' }: GlobeProps) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    let animationFrame: number;
     let width = canvas.offsetWidth;
-    const startTime = performance.now();
     const dpr = isMobile ? 1.5 : 2;
+    const startTime = performance.now();
 
-    // Cinematic pan: start zoomed on Mediterranean/Italy, pan up to Scandinavia
-    const INTRO_DURATION = 6000; // ms
-    const THETA_START = 0.15; // Lower view (Mediterranean)
-    const THETA_END = 0.35;   // Higher tilt (Scandinavia)
-    const PHI_START = 0.25;   // Slightly west
-    const PHI_END = 0.3;      // Center on Scandinavia
+    // Cobe coordinate system (verified from source + docs):
+    // phi = azimuthal rotation. Increases → rotates globe westward.
+    // theta = polar tilt. Positive → tilts globe so northern hemisphere is more visible.
+    //
+    // Stockholm is at [59.33, 18.07] (lat, lon).
+    // To center Europe/Scandinavia we need phi that aligns ~15°E longitude to center.
+    // From empirical testing and cobe examples:
+    //   phi ≈ 0 shows Africa/Europe (Greenwich meridian facing camera)
+    //   Adding ~0.3 rotates slightly east
+    //
+    // We use onRender (the documented pattern) instead of globe.update()
+
+    const INTRO_DURATION = 6000;
+    // Start looking at Mediterranean, end at Scandinavia
+    const THETA_START = 0.1;
+    const THETA_END = 0.3;
+
+    // phi for Europe: ~0.3 rad puts Scandinavia center-stage
+    let currentPhi = 0.3;
+    let currentTheta = THETA_START;
+
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
     const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
       width: width * dpr,
       height: width * dpr,
-      phi: PHI_START,
-      theta: THETA_START,
+      phi: currentPhi,
+      theta: currentTheta,
       dark: 1,
       diffuse: 6,
       mapSamples: isMobile ? 20000 : 40000,
@@ -67,48 +78,45 @@ const Globe = ({ className = '' }: GlobeProps) => {
       baseColor: [0.05, 0.1, 0.25],
       markerColor: [0.4, 0.9, 1],
       glowColor: [0.08, 0.2, 0.6],
-      markers: [],
+      markers: [
+        // Stockholm marker to verify positioning (tiny, subtle)
+        { location: [59.33, 18.07], size: 0.05 },
+        // Oslo
+        { location: [59.91, 10.75], size: 0.03 },
+        // Copenhagen
+        { location: [55.68, 12.57], size: 0.03 },
+        // Helsinki
+        { location: [60.17, 24.94], size: 0.03 },
+      ],
+      onRender: (state) => {
+        const elapsed = performance.now() - startTime;
+
+        if (pointerInteracting.current === null) {
+          if (elapsed < INTRO_DURATION) {
+            const progress = easeOutCubic(Math.min(elapsed / INTRO_DURATION, 1));
+            currentTheta = THETA_START + (THETA_END - THETA_START) * progress;
+          } else {
+            const postIntro = elapsed - INTRO_DURATION;
+            currentPhi += 0.0003;
+            currentTheta = THETA_END + Math.sin(postIntro * 0.00012) * 0.015;
+          }
+        } else {
+          currentPhi += pointerDelta.current / 300;
+          pointerDelta.current *= 0.92;
+        }
+
+        state.phi = currentPhi;
+        state.theta = currentTheta;
+
+        width = canvas.offsetWidth;
+        state.width = width * dpr;
+        state.height = width * dpr;
+
+        if (!ready) setReady(true);
+      },
     });
 
-    requestAnimationFrame(() => setReady(true));
-
-    // Easing: cubic ease-out for smooth deceleration
-    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-    const animate = () => {
-      const elapsed = performance.now() - startTime;
-
-      if (pointerInteracting.current === null) {
-        if (elapsed < INTRO_DURATION) {
-          // Cinematic intro: pan from Mediterranean up to Scandinavia
-          const progress = easeOutCubic(Math.min(elapsed / INTRO_DURATION, 1));
-          thetaRef.current = THETA_START + (THETA_END - THETA_START) * progress;
-          phiRef.current = PHI_START + (PHI_END - PHI_START) * progress;
-        } else {
-          // After intro: ultra-slow drift + subtle breathing
-          const postIntro = elapsed - INTRO_DURATION;
-          phiRef.current += 0.0003; // very slow rotation
-          thetaRef.current = THETA_END + Math.sin(postIntro * 0.00012) * 0.015;
-        }
-      } else {
-        phiRef.current += pointerDelta.current / 300;
-        pointerDelta.current *= 0.92;
-      }
-
-      width = canvas.offsetWidth;
-      globe.update({
-        phi: phiRef.current,
-        theta: thetaRef.current,
-        width: width * dpr,
-        height: width * dpr,
-      });
-
-      animationFrame = requestAnimationFrame(animate);
-    };
-    animationFrame = requestAnimationFrame(animate);
-
     return () => {
-      cancelAnimationFrame(animationFrame);
       globe.destroy();
     };
   }, [isMobile]);
