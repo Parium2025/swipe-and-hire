@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
@@ -79,12 +79,17 @@ const storySteps: StoryStep[] = [
   },
 ];
 
-const LandingHero = () => {
+type LandingHeroProps = {
+  scrollContainerRef: RefObject<HTMLDivElement>;
+};
+
+const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const [activeStep, setActiveStep] = useState(0);
 
   const { scrollYProgress } = useScroll({
+    container: scrollContainerRef,
     target: sectionRef,
     offset: ['start start', 'end end'],
   });
@@ -99,7 +104,8 @@ const LandingHero = () => {
 
   useEffect(() => {
     const unsubscribe = scrollYProgress.on('change', (value) => {
-      const nextStep = Math.min(storySteps.length - 1, Math.floor(value * storySteps.length));
+      const clampedValue = Math.max(0, Math.min(value, 0.9999));
+      const nextStep = Math.floor(clampedValue * storySteps.length);
       setActiveStep(nextStep);
     });
 
