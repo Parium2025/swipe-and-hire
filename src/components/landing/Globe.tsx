@@ -30,17 +30,17 @@ function EarthSphere({ isDay }: { isDay: boolean }) {
   // Slow upward drift: Italy → Scandinavia, continuous loop
   useFrame((_, delta) => {
     if (meshRef.current) {
-      // Tilt upward (negative x reveals northern latitudes)
-      meshRef.current.rotation.x -= delta * 0.008;
+      // Positive x rotation = upward drift (reveals northern latitudes)
+      meshRef.current.rotation.x += delta * 0.008;
       // Very slow eastward drift for realism
       meshRef.current.rotation.y += delta * 0.003;
     }
   });
 
-  // Initial rotation: Europe/Mediterranean facing camera
-  // x≈0.4 tilts to show ~40°N (Italy), y≈-0.2 centers on ~15°E (Central Europe)
+  // Initial rotation: Mediterranean/Italy facing camera
+  // Negative x to start southern, positive drift moves north
   return (
-    <mesh ref={meshRef} rotation={[0.45, -0.2, 0.05]}>
+    <mesh ref={meshRef} rotation={[-0.3, -0.2, 0.05]}>
       <sphereGeometry args={[2, 128, 128]} />
       <meshStandardMaterial
         map={texture}
@@ -111,7 +111,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
           powerPreference: 'high-performance',
           preserveDrawingBuffer: false,
         }}
-        camera={{ position: [0, 0, 3.8], fov: 50 }}
+        camera={{ position: [0, 0, 4.8], fov: 45 }}
         dpr={[1, 2]}
         style={{
           position: 'absolute',
