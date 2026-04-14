@@ -3,8 +3,6 @@ import { useRef, useEffect, useState, memo } from 'react';
 import { Zap, Brain, Smartphone } from 'lucide-react';
 import { StaggerReveal, StaggerItem } from './ScrollReveal';
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
 const AnimatedValue = memo(({ value, suffix }: { value: number; suffix: string }) => {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
@@ -37,37 +35,37 @@ const LandingFeatures = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] });
 
-  const headerY = useTransform(scrollYProgress, [0, 0.3], [60, 0]);
+  const headerY = useTransform(scrollYProgress, [0, 0.3], [80, 0]);
   const headerOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
 
   return (
-    <section ref={sectionRef} id="funktioner" className="relative py-24 sm:py-32 lg:py-40 px-5 sm:px-6 md:px-12 lg:px-24" aria-labelledby="features-heading">
+    <section ref={sectionRef} id="funktioner" className="relative py-28 sm:py-36 lg:py-48 px-5 sm:px-6 md:px-12 lg:px-24" aria-labelledby="features-heading">
       <div className="max-w-[1400px] mx-auto">
-        <motion.div className="mb-16 sm:mb-24" style={{ y: headerY, opacity: headerOpacity }}>
+        <motion.div className="mb-20 sm:mb-28" style={{ y: headerY, opacity: headerOpacity }}>
           <span className="inline-flex items-center gap-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.3em] uppercase text-secondary/50">
-            <span className="w-8 sm:w-12 h-px bg-gradient-to-r from-secondary to-transparent" />
+            <span className="w-10 sm:w-14 h-px bg-gradient-to-r from-secondary to-transparent" />
             Varför Parium
           </span>
-          <h2 id="features-heading" className="mt-4 text-3xl sm:text-5xl md:text-6xl font-black tracking-[-0.04em] text-white uppercase">
-            Rekrytering,<span className="text-white/15"> reinvented.</span>
+          <h2 id="features-heading" className="mt-5 text-4xl sm:text-5xl md:text-7xl font-black tracking-[-0.04em] text-white uppercase">
+            Rekrytering,<span className="text-white/10"> reinvented.</span>
           </h2>
         </motion.div>
 
-        <StaggerReveal className="grid md:grid-cols-3 gap-4 sm:gap-6">
+        <StaggerReveal className="grid md:grid-cols-3 gap-5 sm:gap-8">
           {features.map((f) => {
             const Icon = f.icon;
             return (
               <StaggerItem key={f.title}>
-                <div className="group relative bg-white/[0.015] p-8 sm:p-10 rounded-2xl sm:rounded-3xl border border-white/[0.04] hover:border-secondary/20 hover:bg-white/[0.04] transition-all duration-500 overflow-hidden">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-8 border bg-secondary/[0.08] border-secondary/15">
-                    <Icon className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                <div className="group relative bg-white/[0.015] p-8 sm:p-12 rounded-2xl sm:rounded-3xl border border-white/[0.04] hover:border-secondary/20 hover:bg-white/[0.04] transition-all duration-700 overflow-hidden">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-10 border bg-secondary/[0.08] border-secondary/15">
+                    <Icon className="w-6 h-6 text-secondary" strokeWidth={1.5} />
                   </div>
-                  <div className="text-[4rem] sm:text-[5rem] font-black leading-none tracking-[-0.06em] bg-gradient-to-b from-white to-white/30 bg-clip-text text-transparent mb-4">
+                  <div className="text-[4.5rem] sm:text-[6rem] font-black leading-none tracking-[-0.06em] bg-gradient-to-b from-white to-white/25 bg-clip-text text-transparent mb-5">
                     <AnimatedValue value={f.metric} suffix={f.suffix} />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2 tracking-tight uppercase">{f.title}</h3>
-                  <p className="text-white/35 text-sm leading-relaxed">{f.description}</p>
-                  <div className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-secondary/[0.08]" />
+                  <h3 className="text-xl sm:text-2xl font-black text-white mb-3 tracking-tight uppercase">{f.title}</h3>
+                  <p className="text-white/30 text-sm leading-relaxed">{f.description}</p>
+                  <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-secondary/[0.06]" />
                 </div>
               </StaggerItem>
             );
