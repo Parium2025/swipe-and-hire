@@ -61,7 +61,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const img3Opacity = useTransform(scrollYProgress, [0.75 - fade, 0.75 + fade / 2, 1], [0, 1, 1]);
 
   // Ken Burns zoom
-  const img0Scale = useTransform(scrollYProgress, [0, 0.25], [0.85, 1.0]);
+  const img0Scale = useTransform(scrollYProgress, [0, 0.25], [1, 1.12]);
   const img1Scale = useTransform(scrollYProgress, [0.25, 0.5], [1, 1.12]);
   const img2Scale = useTransform(scrollYProgress, [0.5, 0.75], [1, 1.12]);
   const img3Scale = useTransform(scrollYProgress, [0.75, 1], [1, 1.12]);
