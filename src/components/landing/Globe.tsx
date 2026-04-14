@@ -14,7 +14,7 @@ const isDaytime = (): boolean => {
 };
 
 const GLOBE_STAGE_SIZE = 'min(88vw, 88vh)';
-const CAMERA_POS: [number, number, number] = [0, 2.6, 3.2]; // elevated orbital view
+const CAMERA_POS: [number, number, number] = [0, 4.2, 0.8]; // pilot top-down view
 
 /* ── rotating sphere ────────────────────────────────────── */
 
