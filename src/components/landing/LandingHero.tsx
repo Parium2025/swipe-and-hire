@@ -1,31 +1,20 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import storyDiscover from '@/assets/landing-story-discover.jpg';
 import storyMatch from '@/assets/landing-story-match.jpg';
 import storyChat from '@/assets/landing-story-chat.jpg';
 import storyHire from '@/assets/landing-story-hire.jpg';
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
-type StoryStep = {
-  id: string;
-  label: string;
-  headline: string;
-  sub: string;
-  image: string;
-  alt: string;
-};
-
-const steps: StoryStep[] = [
+const steps = [
   {
     id: 'discover',
     label: '01 — Upptäck',
     headline: 'Se rätt match direkt.',
     sub: 'Parium gör första intrycket visuellt, snabbt och premium.',
     image: storyDiscover,
-    alt: 'Professionell kvinna i stadsmiljö med cyan belysning',
+    alt: 'Professionella människor som går på en stadsgata vid solnedgång',
   },
   {
     id: 'match',
@@ -33,7 +22,7 @@ const steps: StoryStep[] = [
     headline: 'Rätt person. Rätt tajming.',
     sub: 'Två krafter möts — kandidat och arbetsgivare i en exakt träff.',
     image: storyMatch,
-    alt: 'Två professionella skakar hand framför stadspanorama',
+    alt: 'Två professionella skakar hand i modernt kontor',
   },
   {
     id: 'chat',
@@ -41,7 +30,7 @@ const steps: StoryStep[] = [
     headline: 'Dialog utan fördröjning.',
     sub: 'Samtalet startar sömlöst, medan intresset fortfarande brinner.',
     image: storyChat,
-    alt: 'Person chattar på smartphone i mörkt kontorsmiljö',
+    alt: 'Kvinna tittar på smartphone i café',
   },
   {
     id: 'hire',
@@ -49,9 +38,9 @@ const steps: StoryStep[] = [
     headline: 'Från match till anställning.',
     sub: 'Hela resan, i en plattform. Resultat du kan mäta.',
     image: storyHire,
-    alt: 'Team firar ny anställning med konfetti',
+    alt: 'Team firar med high-five på kontor',
   },
-];
+] as const;
 
 type LandingHeroProps = {
   scrollContainerRef: RefObject<HTMLDivElement>;
@@ -60,7 +49,6 @@ type LandingHeroProps = {
 const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
-  const [activeStep, setActiveStep] = useState(0);
 
   const { scrollYProgress } = useScroll({
     container: scrollContainerRef,
@@ -68,15 +56,47 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
     offset: ['start start', 'end end'],
   });
 
-  const progressScale = useTransform(scrollYProgress, [0, 1], [0.08, 1]);
+  // Each image gets a continuous opacity driven directly by scroll position
+  // 4 steps → each occupies 25% of scroll. Crossfade in the overlap zones.
+  const fade = 0.08; // crossfade overlap (8% of total scroll)
 
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on('change', (v) => {
-      const clamped = Math.max(0, Math.min(v, 0.9999));
-      setActiveStep(Math.floor(clamped * steps.length));
-    });
-    return unsubscribe;
-  }, [scrollYProgress]);
+  const img0Opacity = useTransform(scrollYProgress, [0, 0.25 - fade, 0.25], [1, 1, 0]);
+  const img1Opacity = useTransform(scrollYProgress, [0.25 - fade, 0.25, 0.5 - fade, 0.5], [0, 1, 1, 0]);
+  const img2Opacity = useTransform(scrollYProgress, [0.5 - fade, 0.5, 0.75 - fade, 0.75], [0, 1, 1, 0]);
+  const img3Opacity = useTransform(scrollYProgress, [0.75 - fade, 0.75, 1], [0, 1, 1]);
+
+  // Subtle Ken Burns zoom per image driven by scroll
+  const img0Scale = useTransform(scrollYProgress, [0, 0.25], [1, 1.08]);
+  const img1Scale = useTransform(scrollYProgress, [0.25, 0.5], [1, 1.08]);
+  const img2Scale = useTransform(scrollYProgress, [0.5, 0.75], [1, 1.08]);
+  const img3Scale = useTransform(scrollYProgress, [0.75, 1], [1, 1.08]);
+
+  // Text content opacity — each step's text fades in/out
+  const text0Opacity = useTransform(scrollYProgress, [0, 0.05, 0.2, 0.25], [0, 1, 1, 0]);
+  const text1Opacity = useTransform(scrollYProgress, [0.25, 0.3, 0.45, 0.5], [0, 1, 1, 0]);
+  const text2Opacity = useTransform(scrollYProgress, [0.5, 0.55, 0.7, 0.75], [0, 1, 1, 0]);
+  const text3Opacity = useTransform(scrollYProgress, [0.75, 0.8, 0.95, 1], [0, 1, 1, 1]);
+
+  // Text Y translation for parallax feel
+  const text0Y = useTransform(scrollYProgress, [0, 0.05, 0.2, 0.25], [30, 0, 0, -20]);
+  const text1Y = useTransform(scrollYProgress, [0.25, 0.3, 0.45, 0.5], [30, 0, 0, -20]);
+  const text2Y = useTransform(scrollYProgress, [0.5, 0.55, 0.7, 0.75], [30, 0, 0, -20]);
+  const text3Y = useTransform(scrollYProgress, [0.75, 0.8, 0.95, 1], [30, 0, 0, 0]);
+
+  // Progress bar
+  const progressScale = useTransform(scrollYProgress, [0, 1], [0.02, 1]);
+
+  // Step indicator driven by scroll
+  const stepIndicatorOpacity0 = useTransform(scrollYProgress, [0, 0.25], [1, 1]);
+  const stepIndicatorOpacity1 = useTransform(scrollYProgress, [0.24, 0.26], [0.2, 1]);
+  const stepIndicatorOpacity2 = useTransform(scrollYProgress, [0.49, 0.51], [0.2, 1]);
+  const stepIndicatorOpacity3 = useTransform(scrollYProgress, [0.74, 0.76], [0.2, 1]);
+
+  const imgOpacities = [img0Opacity, img1Opacity, img2Opacity, img3Opacity];
+  const imgScales = [img0Scale, img1Scale, img2Scale, img3Scale];
+  const textOpacities = [text0Opacity, text1Opacity, text2Opacity, text3Opacity];
+  const textYs = [text0Y, text1Y, text2Y, text3Y];
+  const stepOpacities = [stepIndicatorOpacity0, stepIndicatorOpacity1, stepIndicatorOpacity2, stepIndicatorOpacity3];
 
   // Preload images
   useEffect(() => {
@@ -86,8 +106,6 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
     });
   }, []);
 
-  const current = steps[activeStep];
-
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth', { state: { mode: 'register' } });
@@ -95,77 +113,77 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
 
   return (
     <section ref={sectionRef} className="relative" style={{ height: '400vh' }}>
-      {/* Sticky full-viewport container – NO animated background here, pure imagery */}
       <div className="sticky top-0 h-[100dvh] overflow-hidden">
-        {/* Full-bleed background image */}
-        <AnimatePresence mode="wait">
+        {/* All 4 images stacked — opacity driven by scroll continuously */}
+        {steps.map((step, i) => (
           <motion.img
-            key={current.id}
-            src={current.image}
-            alt={current.alt}
-            loading="eager"
-            className="absolute inset-0 h-full w-full object-cover"
-            initial={{ opacity: 0, scale: 1.06 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.97 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            key={step.id}
+            src={step.image}
+            alt={step.alt}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            className="absolute inset-0 h-full w-full object-cover will-change-transform"
+            style={{
+              opacity: imgOpacities[i],
+              scale: imgScales[i],
+              zIndex: i,
+            }}
           />
-        </AnimatePresence>
+        ))}
 
-        {/* Gradient overlays for text readability */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/50" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/40 to-transparent lg:from-black/60" />
+        {/* Gradient overlays */}
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/80 via-black/30 to-black/50" />
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-black/40 to-transparent lg:from-black/60" />
 
         {/* Content */}
         <div className="relative z-10 flex h-full flex-col justify-between">
-          {/* Text content – bottom aligned on mobile, center-left on desktop */}
           <div className="flex flex-1 flex-col justify-end px-6 pb-24 lg:justify-center lg:px-16 lg:pb-0 lg:max-w-[55%]">
+            {/* Badge */}
             <motion.span
               className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-white/70 backdrop-blur-xl"
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease }}
+              transition={{ duration: 0.6 }}
             >
               Parium
             </motion.span>
 
+            {/* Main heading */}
             <motion.h1
               className="max-w-[10ch] text-[clamp(3rem,9vw,7rem)] font-black uppercase leading-[0.88] tracking-[-0.04em] text-white"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.05, ease }}
+              transition={{ duration: 0.8, delay: 0.05 }}
             >
               Rekrytering. I rörelse.
             </motion.h1>
 
-            {/* Animated step content */}
+            {/* Scroll-driven step text — all 4 layered, opacity controlled by scroll */}
             <div className="relative mt-6 min-h-[7rem]">
-              <AnimatePresence mode="wait">
+              {steps.map((step, i) => (
                 <motion.div
-                  key={current.id}
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -14 }}
-                  transition={{ duration: 0.45, ease }}
+                  key={step.id}
+                  className="absolute inset-0"
+                  style={{ opacity: textOpacities[i], y: textYs[i] }}
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
-                    {current.label}
+                    {step.label}
                   </p>
                   <h2 className="mt-2 text-[clamp(1.4rem,3.5vw,2.4rem)] font-semibold leading-tight tracking-[-0.02em] text-white">
-                    {current.headline}
+                    {step.headline}
                   </h2>
                   <p className="mt-2 max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
-                    {current.sub}
+                    {step.sub}
                   </p>
                 </motion.div>
-              </AnimatePresence>
+              ))}
             </div>
 
+            {/* CTA */}
             <motion.div
               className="mt-6 flex items-center gap-4"
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.15, ease }}
+              transition={{ duration: 0.7, delay: 0.15 }}
             >
               <motion.button
                 type="button"
@@ -180,19 +198,20 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
             </motion.div>
           </div>
 
-          {/* Step indicators */}
+          {/* Step indicators — glow driven by scroll */}
           <div className="relative z-20 flex items-center gap-3 px-6 pb-5 lg:px-16 lg:pb-8">
             {steps.map((step, i) => (
-              <div
+              <motion.div
                 key={step.id}
-                className={`h-1 flex-1 rounded-full transition-colors duration-500 ${
-                  i <= activeStep ? 'bg-secondary' : 'bg-white/15'
-                }`}
-              />
+                className="h-1 flex-1 rounded-full bg-white/15"
+                style={{ opacity: 1 }}
+              >
+                <motion.div
+                  className="h-full w-full rounded-full bg-secondary"
+                  style={{ opacity: stepOpacities[i] }}
+                />
+              </motion.div>
             ))}
-            <span className="ml-2 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-white/40">
-              {activeStep + 1}/{steps.length}
-            </span>
           </div>
         </div>
 
