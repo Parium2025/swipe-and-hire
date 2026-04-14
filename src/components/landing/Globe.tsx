@@ -14,7 +14,6 @@ const isDaytime = (): boolean => {
 };
 
 const GLOBE_STAGE_SIZE = 'min(88vw, 88vh)';
-const CAMERA_POS: [number, number, number] = [0, 3.6, 2.0]; // steep pilot view with visible curvature
 
 /* ── rotating sphere ────────────────────────────────────── */
 
@@ -89,7 +88,7 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
   }, [isDay]);
 
   return (
-    <mesh scale={[1.12, 1.12, 1.12]}>
+    <mesh scale={[1.1, 1.1, 1.1]}>
       <sphereGeometry args={[2, 64, 64]} />
       <primitive object={atmosphereMaterial} />
     </mesh>
@@ -114,8 +113,6 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
           height: GLOBE_STAGE_SIZE,
           maxWidth: '980px',
           maxHeight: '980px',
-          borderRadius: '50%',
-          overflow: 'hidden',
         }}
       >
         <Canvas
@@ -125,7 +122,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
             powerPreference: 'high-performance',
             preserveDrawingBuffer: false,
           }}
-          camera={{ position: CAMERA_POS, fov: 42 }}
+          camera={{ position: [0, 0, 5.8], fov: 42 }}
           dpr={[1, 2]}
           style={{
             position: 'absolute',
