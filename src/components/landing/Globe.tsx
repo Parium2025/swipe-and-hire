@@ -13,7 +13,7 @@ const isDaytime = (): boolean => {
   return hour >= 6 && hour < 20;
 };
 
-const GLOBE_STAGE_SIZE = 'min(96vw, 96vh)';
+const GLOBE_STAGE_SIZE = 'min(88vw, 88vh)';
 
 /* ── rotating sphere ────────────────────────────────────── */
 
