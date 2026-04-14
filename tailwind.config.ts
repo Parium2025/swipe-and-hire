@@ -171,18 +171,61 @@ export default {
 					'50%': { transform: 'translateY(50vh) translateX(0)' },
 					'75%': { transform: 'translateY(75vh) translateX(calc(var(--sway, 10px) * -1))' },
 					'100%': { transform: 'translateY(105vh) translateX(0)' },
-				}
+				},
+				/* Landing page hero animations — CSS-only for 60fps */
+				'landing-blob-1': {
+					'0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+					'33%': { transform: 'translate(30px, -20px) scale(1.05)' },
+					'66%': { transform: 'translate(-15px, 15px) scale(0.97)' },
+				},
+				'landing-blob-2': {
+					'0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+					'33%': { transform: 'translate(-35px, 25px) scale(0.95)' },
+					'66%': { transform: 'translate(20px, -10px) scale(1.04)' },
+				},
+				'landing-draw': {
+					'0%': { 'stroke-dasharray': '0 2000', opacity: '0' },
+					'10%': { opacity: '1' },
+					'100%': { 'stroke-dasharray': '2000 0', opacity: '1' },
+				},
+				'landing-glow-spin': {
+					'0%': { transform: 'rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg)' },
+				},
+				'landing-shimmer': {
+					'0%': { transform: 'translateX(-100%)' },
+					'100%': { transform: 'translateX(200%)' },
+				},
+				'landing-cta-pulse': {
+					'0%, 100%': { transform: 'scale(1)', opacity: '0.5' },
+					'50%': { transform: 'scale(1.15)', opacity: '0' },
+				},
+				'landing-scroll-dot': {
+					'0%, 100%': { transform: 'translateY(0)', opacity: '1' },
+					'50%': { transform: 'translateY(8px)', opacity: '0.3' },
+				},
+				'landing-scroll-border': {
+					'0%, 100%': { borderColor: 'rgba(255,255,255,0.1)' },
+					'50%': { borderColor: 'hsl(200 100% 60% / 0.3)' },
+				},
 			},
 				animation: {
 					'accordion-down': 'accordion-down 0.2s ease-out',
 					'accordion-up': 'accordion-up 0.2s ease-out',
 					'fade-in': 'fade-in 0.4s ease-out forwards',
-					
 					'scale-in': 'scale-in 0.3s ease-out',
 					'gradient': 'gradient 15s ease infinite',
-					// Override default Tailwind bounce globally to our soft bounce
 					'bounce': 'soft-bounce 2s ease-in-out infinite',
-					'soft-bounce': 'soft-bounce 2s ease-in-out infinite'
+					'soft-bounce': 'soft-bounce 2s ease-in-out infinite',
+					/* Landing page */
+					'landing-blob-1': 'landing-blob-1 18s ease-in-out infinite',
+					'landing-blob-2': 'landing-blob-2 22s ease-in-out infinite',
+					'landing-draw': 'landing-draw 3s ease forwards',
+					'landing-glow-spin': 'landing-glow-spin 8s linear infinite',
+					'landing-shimmer': 'landing-shimmer 4s ease-in-out infinite 5s',
+					'landing-cta-pulse': 'landing-cta-pulse 2s ease-in-out infinite',
+					'landing-scroll-dot': 'landing-scroll-dot 1.5s ease-in-out infinite',
+					'landing-scroll-border': 'landing-scroll-border 2s ease-in-out infinite',
 				},
 		minHeight: {
 			'touch': '44px', // Apple's minimum recommendation
