@@ -159,7 +159,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
 
           {/* CTA — pinned to bottom, centered */}
           <motion.div
-             className="flex justify-center px-6 pb-12 lg:justify-center lg:px-16 lg:pb-12"
+             className="absolute inset-x-0 bottom-20 z-20 flex justify-center px-6 sm:bottom-24 md:bottom-28 lg:relative lg:inset-auto lg:bottom-auto lg:z-auto lg:justify-center lg:px-16 lg:pb-12"
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
