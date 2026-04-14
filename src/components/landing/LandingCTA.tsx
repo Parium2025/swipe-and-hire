@@ -10,11 +10,11 @@ const LandingCTA = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] });
 
-  const y = useTransform(scrollYProgress, [0, 0.4], [100, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.4], [120, 0]);
   const opacity = useTransform(scrollYProgress, [0, 0.25], [0, 1]);
-  const scale = useTransform(scrollYProgress, [0, 0.4], [0.85, 1]);
-  const glowScale = useTransform(scrollYProgress, [0.2, 0.6], [0.5, 1.2]);
-  const glowOpacity = useTransform(scrollYProgress, [0.2, 0.5], [0, 0.08]);
+  const scale = useTransform(scrollYProgress, [0, 0.4], [0.82, 1]);
+  const glowScale = useTransform(scrollYProgress, [0.15, 0.6], [0.3, 1.3]);
+  const glowOpacity = useTransform(scrollYProgress, [0.15, 0.5], [0, 0.1]);
 
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
@@ -22,38 +22,41 @@ const LandingCTA = () => {
   };
 
   return (
-    <section ref={sectionRef} className="relative py-32 sm:py-40 lg:py-52 px-5 sm:px-6 md:px-12 lg:px-24 overflow-hidden" aria-label="Kom igång">
-      {/* Animated background glow */}
+    <section ref={sectionRef} className="relative py-36 sm:py-48 lg:py-64 px-5 sm:px-6 md:px-12 lg:px-24 overflow-hidden" aria-label="Kom igång">
+      {/* Background glow */}
       <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-secondary rounded-full pointer-events-none"
-        style={{ scale: glowScale, opacity: glowOpacity, filter: 'blur(160px)' }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px] bg-secondary rounded-full pointer-events-none"
+        style={{ scale: glowScale, opacity: glowOpacity, filter: 'blur(180px)' }}
         aria-hidden="true"
       />
 
       <div className="max-w-[1400px] mx-auto relative z-10">
         <motion.div style={{ y, opacity, scale }}>
-          <div className="overflow-hidden mb-8">
+          <div className="overflow-hidden mb-10">
             <motion.h2
-              className="text-[2rem] sm:text-[3rem] md:text-[4.5rem] lg:text-[6rem] xl:text-[7.5rem] font-black tracking-[-0.05em] text-white uppercase leading-[0.9]"
-              initial={{ y: '100%' }}
+              className="text-[2.2rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] xl:text-[8.5rem] font-black tracking-[-0.05em] text-white uppercase leading-[0.88]"
+              initial={{ y: '110%' }}
               whileInView={{ y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 1, ease }}
+              transition={{ duration: 1.2, ease }}
             >
               Redo att<br />
               <span className="bg-gradient-to-r from-secondary via-[hsl(190_100%_55%)] to-secondary bg-clip-text text-transparent">förändra</span><br />
-              <span className="text-white/15">allt?</span>
+              <span className="text-white/10">allt?</span>
             </motion.h2>
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <button onClick={handleStart}
-              className="group flex items-center gap-3 px-8 py-4 rounded-full bg-white text-primary font-bold text-base
-                hover:shadow-[0_0_100px_rgba(255,255,255,0.12)] active:scale-[0.97] transition-all duration-300">
-              Gå med i väntelistan
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
+              className="group relative flex items-center gap-3 px-9 py-4.5 rounded-full bg-white text-primary font-bold text-base
+                hover:shadow-[0_0_120px_rgba(255,255,255,0.1)] active:scale-[0.97] transition-all duration-300">
+              <span className="absolute inset-0 rounded-full bg-white/20 animate-landing-cta-pulse" />
+              <span className="relative z-10 flex items-center gap-3">
+                Gå med i väntelistan
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              </span>
             </button>
-            <span className="text-white/20 text-xs tracking-wide">Ingen kreditkort · Gratis under beta</span>
+            <span className="text-white/18 text-xs tracking-wider">Ingen kreditkort · Gratis under beta</span>
           </div>
         </motion.div>
       </div>

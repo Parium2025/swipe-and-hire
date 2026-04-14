@@ -10,7 +10,7 @@ const AnimatedNumber = memo(({ value, suffix }: { value: number; suffix: string 
 
   useEffect(() => {
     if (!inView) return;
-    const duration = 2000;
+    const duration = 2200;
     const start = performance.now();
     const tick = (now: number) => {
       const progress = Math.min((now - start) / duration, 1);
@@ -36,12 +36,12 @@ const LandingStats = () => {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
 
-  const y = useTransform(scrollYProgress, [0, 0.4], [60, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.4], [80, 0]);
   const opacity = useTransform(scrollYProgress, [0, 0.25], [0, 1]);
-  const scale = useTransform(scrollYProgress, [0, 0.4], [0.9, 1]);
+  const scale = useTransform(scrollYProgress, [0, 0.4], [0.88, 1]);
 
   return (
-    <section ref={ref} className="relative py-20 sm:py-28 px-5 sm:px-6 md:px-12 lg:px-24" aria-label="Statistik">
+    <section ref={ref} className="relative py-24 sm:py-32 px-5 sm:px-6 md:px-12 lg:px-24" aria-label="Statistik">
       <div className="max-w-[1400px] mx-auto">
         <motion.div
           style={{ y, opacity, scale }}
@@ -50,16 +50,16 @@ const LandingStats = () => {
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
-              className="bg-primary p-6 sm:p-10 text-center hover:bg-white/[0.02] transition-colors duration-500"
-              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              className="bg-primary p-8 sm:p-12 text-center hover:bg-white/[0.02] transition-colors duration-500"
+              initial={{ opacity: 0, y: 40, scale: 0.88 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1, ease }}
+              transition={{ duration: 0.7, delay: i * 0.12, ease }}
             >
-              <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-[-0.04em] mb-2 leading-none">
+              <div className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-[-0.05em] mb-3 leading-none">
                 <AnimatedNumber value={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="text-white/30 text-[10px] sm:text-xs font-semibold tracking-[0.15em] uppercase">{stat.label}</div>
+              <div className="text-white/25 text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase">{stat.label}</div>
             </motion.div>
           ))}
         </motion.div>
