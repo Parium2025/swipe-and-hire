@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
-import LandingStars from '@/components/landing/LandingStars';
 
-const LandingStats = lazy(() => import('@/components/landing/LandingStats'));
-const LandingFeatures = lazy(() => import('@/components/landing/LandingFeatures'));
 const LandingHowItWorks = lazy(() => import('@/components/landing/LandingHowItWorks'));
+const LandingFeatures = lazy(() => import('@/components/landing/LandingFeatures'));
+const LandingForUsers = lazy(() => import('@/components/landing/LandingForUsers'));
+const LandingStats = lazy(() => import('@/components/landing/LandingStats'));
 const LandingTestimonials = lazy(() => import('@/components/landing/LandingTestimonials'));
 const LandingCTA = lazy(() => import('@/components/landing/LandingCTA'));
 const LandingFooter = lazy(() => import('@/components/landing/LandingFooter'));
@@ -15,9 +15,8 @@ const LandingFooter = lazy(() => import('@/components/landing/LandingFooter'));
 const Landing = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const [showSecondarySections, setShowSecondarySections] = useState(false);
+  const [showSections, setShowSections] = useState(false);
 
-  // Redirect authenticated users
   useEffect(() => {
     if (user && profile) {
       const role = (profile as any)?.role;
@@ -25,11 +24,10 @@ const Landing = () => {
     }
   }, [user, profile, navigate]);
 
-  // SEO: Title, meta, JSON-LD
+  // SEO
   useEffect(() => {
-    document.title = 'Parium – Skandinaviens smartaste rekryteringsplattform | Swipea till din nästa match';
+    document.title = 'Parium – Rekrytering. På 60 sekunder.';
 
-    // Meta description
     const setMeta = (name: string, content: string, attr = 'name') => {
       let el = document.querySelector(`meta[${attr}="${name}"]`);
       if (!el) {
@@ -40,23 +38,20 @@ const Landing = () => {
       el.setAttribute('content', content);
     };
 
-    const desc = 'Parium matchar kandidater och arbetsgivare på sekunder – inte veckor. Swipea, matcha och anställ med AI-driven rekrytering. Gratis under lanseringsperioden.';
+    const desc = 'Parium matchar kandidater och arbetsgivare på sekunder. Swipea, matcha och anställ – Tinder för jobb.';
     setMeta('description', desc);
-    setMeta('og:title', 'Parium – Rekrytering, reinvented', 'property');
+    setMeta('og:title', 'Parium – Rekrytering. På 60 sekunder.', 'property');
     setMeta('og:description', desc, 'property');
     setMeta('og:type', 'website', 'property');
     setMeta('og:locale', 'sv_SE', 'property');
     setMeta('og:site_name', 'Parium', 'property');
     setMeta('og:url', 'https://parium-ab.lovable.app', 'property');
-    setMeta('twitter:title', 'Parium – Rekrytering, reinvented');
+    setMeta('twitter:title', 'Parium – Rekrytering. På 60 sekunder.');
     setMeta('twitter:description', desc);
     setMeta('twitter:card', 'summary_large_image');
-
-    // Additional SEO meta
     setMeta('robots', 'index, follow, max-image-preview:large');
-    setMeta('keywords', 'rekrytering, jobb, jobbsökning, swipe, matchning, AI rekrytering, hitta jobb, rekryteringsverktyg, Sverige, Skandinavien, arbetsgivare, kandidater, video CV');
+    setMeta('keywords', 'rekrytering, jobb, swipe, matchning, AI, hitta jobb, Sverige, kandidater');
 
-    // Canonical
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
     if (!canonical) {
       canonical = document.createElement('link');
@@ -65,7 +60,6 @@ const Landing = () => {
     }
     canonical.href = 'https://parium-ab.lovable.app';
 
-    // JSON-LD structured data
     const jsonLd = {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
@@ -74,27 +68,8 @@ const Landing = () => {
       operatingSystem: 'Web, iOS, Android',
       description: desc,
       url: 'https://parium-ab.lovable.app',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'SEK',
-        description: 'Gratis under lanseringsperioden',
-      },
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: '4.9',
-        ratingCount: '127',
-        bestRating: '5',
-      },
-      author: {
-        '@type': 'Organization',
-        name: 'Parium AB',
-        url: 'https://parium-ab.lovable.app',
-        address: {
-          '@type': 'PostalAddress',
-          addressCountry: 'SE',
-        },
-      },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' },
+      author: { '@type': 'Organization', name: 'Parium AB' },
     };
 
     let script = document.querySelector('#landing-jsonld') as HTMLScriptElement;
@@ -106,7 +81,6 @@ const Landing = () => {
     }
     script.textContent = JSON.stringify(jsonLd);
 
-    // Cleanup
     return () => {
       script?.remove();
       canonical?.remove();
@@ -114,30 +88,8 @@ const Landing = () => {
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const idleWindow = window as Window & {
-      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
-      cancelIdleCallback?: (handle: number) => void;
-    };
-
-    const reveal = () => setShowSecondarySections(true);
-    let timeoutId: number | undefined;
-    let idleId: number | undefined;
-
-    if (idleWindow.requestIdleCallback) {
-      idleId = idleWindow.requestIdleCallback(() => reveal(), { timeout: 1200 });
-      timeoutId = window.setTimeout(reveal, 1400);
-    } else {
-      timeoutId = window.setTimeout(reveal, 500);
-    }
-
-    return () => {
-      if (typeof timeoutId === 'number') window.clearTimeout(timeoutId);
-      if (typeof idleId === 'number' && idleWindow.cancelIdleCallback) {
-        idleWindow.cancelIdleCallback(idleId);
-      }
-    };
+    const timer = setTimeout(() => setShowSections(true), 400);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleLogin = () => {
@@ -146,31 +98,23 @@ const Landing = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-primary text-white overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
-      {/* Deep layered gradient background */}
-      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-30%,hsl(210_80%_15%/0.6),transparent)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_80%_50%,hsl(200_90%_12%/0.3),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-[50vh] bg-[radial-gradient(ellipse_100%_100%_at_50%_100%,hsl(215_100%_8%/0.5),transparent)]" />
-      </div>
-
-      <LandingStars />
-
+    <div className="relative min-h-screen w-full bg-[hsl(220_20%_4%)] text-white overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="relative z-10">
         <LandingNav onLoginClick={handleLogin} />
         <main>
           <LandingHero />
-          {showSecondarySections && (
+          {showSections && (
             <Suspense fallback={null}>
-              <LandingStats />
-              <LandingFeatures />
               <LandingHowItWorks />
+              <LandingFeatures />
+              <LandingForUsers />
+              <LandingStats />
               <LandingTestimonials />
               <LandingCTA />
             </Suspense>
           )}
         </main>
-        {showSecondarySections && (
+        {showSections && (
           <Suspense fallback={null}>
             <LandingFooter />
           </Suspense>
