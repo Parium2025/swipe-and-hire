@@ -99,8 +99,11 @@ const Landing = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[hsl(220_20%_4%)] text-white overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
-      <div className="relative z-10">
+    <div
+      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-[hsl(220_20%_4%)] text-white"
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
+      <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
         <main>
           <LandingHero />
