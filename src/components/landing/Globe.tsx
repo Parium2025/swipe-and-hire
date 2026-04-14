@@ -101,9 +101,9 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
 
   return (
     <div
-      className={`${className} overflow-hidden flex items-center justify-center`}
+      className={`${className} overflow-hidden`}
       aria-hidden="true"
-      style={{ position: 'relative', aspectRatio: '1 / 1', maxWidth: '100vmin', maxHeight: '100vmin', margin: '0 auto' }}
+      style={{ position: 'relative' }}
     >
       <Canvas
         gl={{
