@@ -123,7 +123,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
             powerPreference: 'high-performance',
             preserveDrawingBuffer: false,
           }}
-          camera={{ position: [0, 0, CAMERA_Z], fov: 42 }}
+          camera={{ position: CAMERA_POS, fov: 42 }}
           dpr={[1, 2]}
           style={{
             position: 'absolute',
