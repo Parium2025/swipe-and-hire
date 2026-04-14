@@ -14,6 +14,7 @@ const isDaytime = (): boolean => {
 };
 
 const GLOBE_STAGE_SIZE = 'min(88vw, 88vh)';
+const CAMERA_Z = 4.0; // closer to zoom into Europe
 
 /* ── rotating sphere ────────────────────────────────────── */
 
@@ -88,7 +89,7 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
   }, [isDay]);
 
   return (
-    <mesh scale={[1.1, 1.1, 1.1]}>
+    <mesh scale={[1.12, 1.12, 1.12]}>
       <sphereGeometry args={[2, 64, 64]} />
       <primitive object={atmosphereMaterial} />
     </mesh>
@@ -122,7 +123,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
             powerPreference: 'high-performance',
             preserveDrawingBuffer: false,
           }}
-          camera={{ position: [0, 0, 5.8], fov: 42 }}
+          camera={{ position: [0, 0, CAMERA_Z], fov: 42 }}
           dpr={[1, 2]}
           style={{
             position: 'absolute',

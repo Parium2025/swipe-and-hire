@@ -58,7 +58,8 @@ const LandingHero = () => {
     >
       {/* Globe: NASA Earth at Night with CSS pan */}
       <motion.div
-        className="absolute inset-0 pointer-events-none will-change-transform overflow-hidden flex items-center justify-center"
+        className="absolute inset-0 pointer-events-none will-change-transform overflow-hidden flex items-start justify-center"
+        style={{ paddingTop: '4vh' }}
         variants={isMobile ? undefined : scaleReveal}
         initial={isMobile ? undefined : 'hidden'}
         animate={isMobile ? undefined : 'show'}
