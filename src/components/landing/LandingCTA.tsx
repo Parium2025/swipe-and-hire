@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
+const ease = [0.22, 1, 0.36, 1] as const;
+
 const LandingCTA = () => {
   const navigate = useNavigate();
 
@@ -11,44 +13,51 @@ const LandingCTA = () => {
   };
 
   return (
-    <section className="relative py-24 sm:py-32 lg:py-40 px-5 sm:px-6 md:px-12 lg:px-24" aria-label="Kom igång">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 max-w-lg h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    <section className="relative py-32 sm:py-40 lg:py-52 px-5 sm:px-6 md:px-12 lg:px-24 overflow-hidden" aria-label="Kom igång">
+      {/* Background glow */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-[hsl(250_60%_40%/0.1)] rounded-full blur-[160px]" />
+      </div>
 
-      <div className="max-w-4xl mx-auto text-center relative">
-        {/* Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[400px] bg-[hsl(250_60%_50%/0.08)] rounded-full blur-[120px] pointer-events-none" aria-hidden="true" />
-
+      <div className="max-w-[1400px] mx-auto relative z-10">
         <motion.div
-          className="relative z-10"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.8, ease }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.03em] text-white mb-5 sm:mb-6">
-            Redo att förändra
-            <br />
-            <span className="bg-gradient-to-r from-[hsl(250_80%_70%)] via-[hsl(200_90%_70%)] to-[hsl(170_80%_60%)] bg-clip-text text-transparent">
-              hur du hittar jobb?
+          {/* Giant CTA headline */}
+          <div className="overflow-hidden mb-8">
+            <motion.h2
+              className="text-[2rem] sm:text-[3rem] md:text-[4.5rem] lg:text-[6rem] xl:text-[7.5rem] font-black tracking-[-0.05em] text-white uppercase leading-[0.9]"
+              initial={{ y: '100%' }}
+              whileInView={{ y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, ease }}
+            >
+              Redo att
+              <br />
+              <span className="bg-gradient-to-r from-[hsl(250_80%_70%)] via-[hsl(200_90%_70%)] to-[hsl(170_80%_60%)] bg-clip-text text-transparent">
+                förändra
+              </span>
+              <br />
+              <span className="text-white/15">allt?</span>
+            </motion.h2>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <button
+              onClick={handleStart}
+              className="group flex items-center gap-3 px-8 py-4 rounded-full bg-white text-[hsl(220_40%_10%)] font-bold text-base
+                hover:shadow-[0_0_100px_rgba(255,255,255,0.12)] active:scale-[0.97] transition-all duration-300"
+            >
+              Gå med i väntelistan
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
+            </button>
+            <span className="text-white/15 text-xs tracking-wide">
+              Ingen kreditkort · Gratis under beta
             </span>
-          </h2>
-          <p className="text-white/35 text-base sm:text-lg max-w-lg mx-auto mb-8 sm:mb-10 leading-relaxed">
-            Gå med hundratals företag och jobbsökare som redan upptäckt framtidens rekrytering.
-          </p>
-
-          <button
-            onClick={handleStart}
-            className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-white text-[hsl(220_40%_13%)] font-semibold text-base sm:text-lg
-              hover:shadow-[0_0_60px_rgba(255,255,255,0.1)] active:scale-[0.97]
-              transition-all duration-300 min-h-[52px]"
-          >
-            Gå med i väntelistan
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-200" />
-          </button>
-
-          <p className="text-white/20 text-xs mt-5">
-            Ingen kreditkort krävs · Gratis under hela beta-perioden
-          </p>
+          </div>
         </motion.div>
       </div>
     </section>

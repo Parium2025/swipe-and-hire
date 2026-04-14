@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
 
+const LandingMarquee = lazy(() => import('@/components/landing/LandingMarquee'));
 const LandingHowItWorks = lazy(() => import('@/components/landing/LandingHowItWorks'));
 const LandingFeatures = lazy(() => import('@/components/landing/LandingFeatures'));
 const LandingForUsers = lazy(() => import('@/components/landing/LandingForUsers'));
@@ -88,7 +89,7 @@ const Landing = () => {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSections(true), 400);
+    const timer = setTimeout(() => setShowSections(true), 300);
     return () => clearTimeout(timer);
   }, []);
 
@@ -105,6 +106,7 @@ const Landing = () => {
           <LandingHero />
           {showSections && (
             <Suspense fallback={null}>
+              <LandingMarquee />
               <LandingHowItWorks />
               <LandingFeatures />
               <LandingForUsers />
