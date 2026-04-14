@@ -13,6 +13,8 @@ const isDaytime = (): boolean => {
   return hour >= 6 && hour < 20;
 };
 
+const GLOBE_STAGE_SIZE = 'min(96vw, 96vh)';
+
 /* ── rotating sphere ────────────────────────────────────── */
 
 function EarthSphere({ isDay }: { isDay: boolean }) {
@@ -27,29 +29,26 @@ function EarthSphere({ isDay }: { isDay: boolean }) {
   texture.generateMipmaps = true;
   texture.colorSpace = THREE.SRGBColorSpace;
 
-  // Slow upward drift: Italy → Scandinavia
+  // Premium drift: starts in Italy / Central Europe and glides north toward Scandinavia
   useFrame((_, delta) => {
     if (meshRef.current) {
-      // Increase x rotation = tilt north pole toward camera = reveal more northern latitudes
-      meshRef.current.rotation.x += delta * 0.005;
-      // Very slow eastward drift for realism
-      meshRef.current.rotation.y += delta * 0.002;
+      meshRef.current.rotation.x += delta * 0.0052;
+      meshRef.current.rotation.y += delta * 0.0009;
     }
   });
 
-  // Initial rotation: Europe/Italy centered
-  // x = 0.85 ≈ 49° tilt shows Mediterranean/Italy region clearly
-  // y = 0.3 rotates Europe to center horizontally  
+  // Sphere textures in Three.js default toward the Americas at y=0.
+  // This rotation locks the starting view around Italy / Central Europe.
   return (
-    <mesh ref={meshRef} rotation={[0.85, 0.3, -0.15]}>
+    <mesh ref={meshRef} rotation={[0.68, -1.82, 0.08]}>
       <sphereGeometry args={[2, 128, 128]} />
       <meshStandardMaterial
         map={texture}
         emissiveMap={isDay ? undefined : texture}
-        emissive={isDay ? '#000000' : '#ffffff'}
-        emissiveIntensity={isDay ? 0 : 3.0}
-        roughness={isDay ? 0.7 : 0.8}
-        metalness={isDay ? 0.05 : 0}
+        emissive={isDay ? 'hsl(0 0% 0%)' : 'hsl(0 0% 100%)'}
+        emissiveIntensity={isDay ? 0 : 4.2}
+        roughness={isDay ? 0.58 : 0.72}
+        metalness={isDay ? 0.02 : 0}
         toneMapped={false}
       />
     </mesh>
@@ -73,11 +72,13 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
         uniform vec3 glowColor;
         void main() {
           float intensity = pow(0.62 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.5);
-          gl_FragColor = vec4(glowColor, intensity * 0.5);
+          gl_FragColor = vec4(glowColor, intensity * 0.72);
         }
       `,
       uniforms: {
-        glowColor: { value: new THREE.Color(isDay ? '#6699ff' : '#4477cc') },
+        glowColor: {
+          value: new THREE.Color(isDay ? 'hsl(205 100% 72%)' : 'hsl(214 100% 74%)'),
+        },
       },
       blending: THREE.AdditiveBlending,
       side: THREE.BackSide,
@@ -87,7 +88,7 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
   }, [isDay]);
 
   return (
-    <mesh scale={[1.15, 1.15, 1.15]}>
+    <mesh scale={[1.1, 1.1, 1.1]}>
       <sphereGeometry args={[2, 64, 64]} />
       <primitive object={atmosphereMaterial} />
     </mesh>
@@ -101,61 +102,88 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
 
   return (
     <div
-      className={`${className} overflow-hidden`}
+      className={`${className} flex items-center justify-center overflow-hidden`}
       aria-hidden="true"
       style={{ position: 'relative' }}
     >
-      <Canvas
-        gl={{
-          antialias: true,
-          alpha: true,
-          powerPreference: 'high-performance',
-          preserveDrawingBuffer: false,
-        }}
-        camera={{ position: [0, 0, 4.2], fov: 50 }}
-        dpr={[1, 2]}
+      <div
+        className="relative"
         style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'transparent',
+          width: GLOBE_STAGE_SIZE,
+          height: GLOBE_STAGE_SIZE,
+          maxWidth: '980px',
+          maxHeight: '980px',
         }}
-        frameloop="always"
       >
-        <ambientLight intensity={isDay ? 1.0 : 0.8} />
-        <directionalLight
-          position={isDay ? [5, 3, 5] : [3, 2, 5]}
-          intensity={isDay ? 2.5 : 2.0}
-          color={isDay ? '#fffaf0' : '#ccddff'}
+        <Canvas
+          gl={{
+            antialias: true,
+            alpha: true,
+            powerPreference: 'high-performance',
+            preserveDrawingBuffer: false,
+          }}
+          camera={{ position: [0, 0, 5.35], fov: 42 }}
+          dpr={[1, 2]}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'transparent',
+          }}
+          frameloop="always"
+        >
+          <ambientLight intensity={isDay ? 1.35 : 1.1} />
+          <hemisphereLight
+            color={isDay ? 'hsl(202 100% 88%)' : 'hsl(215 100% 78%)'}
+            groundColor={isDay ? 'hsl(210 50% 22%)' : 'hsl(223 46% 16%)'}
+            intensity={isDay ? 0.85 : 0.5}
+          />
+          <directionalLight
+            position={isDay ? [5, 2.8, 5.5] : [4, 2.4, 5.5]}
+            intensity={isDay ? 2.4 : 1.35}
+            color={isDay ? 'hsl(45 100% 96%)' : 'hsl(213 100% 88%)'}
+          />
+          <pointLight
+            position={[0, 1.6, 5.6]}
+            intensity={isDay ? 0.65 : 0.8}
+            color="hsl(204 100% 84%)"
+          />
+          <pointLight
+            position={[-3.8, 0.2, 4.2]}
+            intensity={isDay ? 0.3 : 0.46}
+            color="hsl(212 100% 79%)"
+          />
+          <pointLight
+            position={[3.6, -0.6, 4.4]}
+            intensity={isDay ? 0.28 : 0.42}
+            color="hsl(195 100% 82%)"
+          />
+
+          <Suspense fallback={null}>
+            <EarthSphere isDay={isDay} />
+            <Atmosphere isDay={isDay} />
+          </Suspense>
+        </Canvas>
+
+        <div
+          className="absolute top-0 left-0 right-0 pointer-events-none"
+          style={{
+            height: '7%',
+            background: isDay
+              ? 'linear-gradient(to bottom, hsl(208 60% 12% / 0.16) 0%, transparent 100%)'
+              : 'linear-gradient(to bottom, hsl(220 70% 10% / 0.12) 0%, transparent 100%)',
+          }}
         />
-        <pointLight position={[0, 1, 5]} intensity={isDay ? 0.5 : 1.0} color="#ddeeff" />
-        <pointLight position={[-3, 0, 4]} intensity={isDay ? 0.3 : 0.8} color="#aaccff" />
-        <pointLight position={[3, -1, 3]} intensity={isDay ? 0.2 : 0.6} color="#bbddff" />
 
-        <Suspense fallback={null}>
-          <EarthSphere isDay={isDay} />
-          <Atmosphere isDay={isDay} />
-        </Suspense>
-      </Canvas>
-
-      <div
-        className="absolute top-0 left-0 right-0 pointer-events-none"
-        style={{
-          height: '10%',
-          background: isDay
-            ? 'linear-gradient(to bottom, hsl(210 60% 10% / 0.4) 0%, transparent 100%)'
-            : 'linear-gradient(to bottom, hsl(217 78% 8% / 0.25) 0%, transparent 100%)',
-        }}
-      />
-
-      <div
-        className="absolute bottom-0 left-0 right-0 pointer-events-none"
-        style={{
-          height: '12%',
-          background: isDay
-            ? 'linear-gradient(to top, hsl(210 60% 10% / 0.5) 0%, transparent 100%)'
-            : 'linear-gradient(to top, hsl(217 78% 8% / 0.3) 0%, transparent 100%)',
-        }}
-      />
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none"
+          style={{
+            height: '8%',
+            background: isDay
+              ? 'linear-gradient(to top, hsl(208 60% 12% / 0.2) 0%, transparent 100%)'
+              : 'linear-gradient(to top, hsl(220 70% 10% / 0.14) 0%, transparent 100%)',
+          }}
+        />
+      </div>
     </div>
   );
 });

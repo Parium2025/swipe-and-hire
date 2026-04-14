@@ -70,9 +70,9 @@ const LandingHero = () => {
 
       {/* Cinematic vignette */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_68%_62%_at_50%_54%,transparent_50%,hsl(215_100%_4%/0.35)_100%)]" />
-        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-primary/40 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-primary/50 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_68%_62%_at_50%_54%,transparent_46%,hsl(220_55%_10%/0.16)_100%)]" />
+        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-primary/20 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-primary/28 to-transparent" />
       </div>
 
       {/* Content */}
