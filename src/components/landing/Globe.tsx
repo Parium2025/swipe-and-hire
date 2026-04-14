@@ -111,7 +111,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
           powerPreference: 'high-performance',
           preserveDrawingBuffer: false,
         }}
-        camera={{ position: [0, 0, 4.8], fov: 45 }}
+        camera={{ position: [0, 0, 5.8], fov: 48 }}
         dpr={[1, 2]}
         style={{
           position: 'absolute',
@@ -120,16 +120,14 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
         }}
         frameloop="always"
       >
-        {/* Lighting */}
-        <ambientLight intensity={isDay ? 0.4 : 0.08} />
+        <ambientLight intensity={isDay ? 0.62 : 0.22} />
         <directionalLight
-          position={isDay ? [5, 3, 5] : [3, 2, 5]}
-          intensity={isDay ? 1.6 : 0.2}
-          color={isDay ? '#fffaf0' : '#445577'}
+          position={isDay ? [5, 3, 5] : [4, 2, 6]}
+          intensity={isDay ? 1.8 : 0.42}
+          color={isDay ? '#fffaf0' : '#7aa6ff'}
         />
-        {!isDay && (
-          <pointLight position={[0, 0, 6]} intensity={0.4} color="#223355" />
-        )}
+        <pointLight position={[0, 1.5, 5.5]} intensity={isDay ? 0.28 : 0.36} color="#9fc5ff" />
+        <pointLight position={[-3, -1, 4]} intensity={isDay ? 0.16 : 0.22} color="#6f95ff" />
 
         <Suspense fallback={null}>
           <EarthSphere isDay={isDay} />
@@ -137,25 +135,23 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
         </Suspense>
       </Canvas>
 
-      {/* Top fade */}
       <div
         className="absolute top-0 left-0 right-0 pointer-events-none"
         style={{
           height: '15%',
           background: isDay
-            ? 'linear-gradient(to bottom, hsl(210 60% 8%) 0%, transparent 100%)'
-            : 'linear-gradient(to bottom, hsl(215 100% 4%) 0%, transparent 100%)',
+            ? 'linear-gradient(to bottom, hsl(210 60% 10% / 0.68) 0%, transparent 100%)'
+            : 'linear-gradient(to bottom, hsl(217 78% 8% / 0.42) 0%, transparent 100%)',
         }}
       />
 
-      {/* Bottom fade */}
       <div
         className="absolute bottom-0 left-0 right-0 pointer-events-none"
         style={{
           height: '20%',
           background: isDay
-            ? 'linear-gradient(to top, hsl(210 60% 8%) 0%, transparent 100%)'
-            : 'linear-gradient(to top, hsl(215 100% 4%) 0%, transparent 100%)',
+            ? 'linear-gradient(to top, hsl(210 60% 10% / 0.76) 0%, transparent 100%)'
+            : 'linear-gradient(to top, hsl(217 78% 8% / 0.48) 0%, transparent 100%)',
         }}
       />
     </div>
