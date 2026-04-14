@@ -11,42 +11,108 @@ import { useState, useCallback, useRef } from 'react';
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-/* ─── CSS-only ambient blobs (GPU-accelerated, no JS) ─── */
-const AmbientGlow = () => (
+/* ─── Aurora mesh — cinematic flowing gradient behind everything ─── */
+const AuroraMesh = () => (
   <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+    {/* Primary aurora — large cyan */}
     <div
-      className="absolute w-[500px] h-[500px] md:w-[800px] md:h-[800px] rounded-full animate-landing-blob-1"
+      className="absolute w-[600px] h-[600px] md:w-[900px] md:h-[900px] rounded-full animate-landing-aurora"
       style={{
-        background: 'radial-gradient(circle, hsl(var(--secondary) / 0.18) 0%, hsl(var(--secondary) / 0.04) 55%, transparent 70%)',
-        top: '-15%',
-        left: '-10%',
-        filter: 'blur(60px)',
+        background: 'radial-gradient(circle, hsl(200 100% 60% / 0.25) 0%, hsl(200 100% 50% / 0.08) 40%, transparent 70%)',
+        top: '-20%',
+        left: '-15%',
+        filter: 'blur(80px)',
         willChange: 'transform',
       }}
     />
+    {/* Secondary aurora — deeper blue */}
     <div
-      className="absolute w-[400px] h-[400px] md:w-[600px] md:h-[600px] rounded-full animate-landing-blob-2"
+      className="absolute w-[500px] h-[500px] md:w-[700px] md:h-[700px] rounded-full animate-landing-aurora-2"
       style={{
-        background: 'radial-gradient(circle, hsl(var(--primary-glow) / 0.15) 0%, transparent 65%)',
-        bottom: '-20%',
-        right: '-5%',
+        background: 'radial-gradient(circle, hsl(210 100% 50% / 0.2) 0%, hsl(220 100% 40% / 0.06) 45%, transparent 70%)',
+        bottom: '-10%',
+        right: '-10%',
+        filter: 'blur(90px)',
+        willChange: 'transform',
+      }}
+    />
+    {/* Accent aurora — teal highlight */}
+    <div
+      className="absolute w-[350px] h-[350px] md:w-[500px] md:h-[500px] rounded-full animate-landing-aurora-3"
+      style={{
+        background: 'radial-gradient(circle, hsl(190 100% 55% / 0.18) 0%, transparent 60%)',
+        top: '30%',
+        left: '50%',
+        transform: 'translateX(-50%)',
         filter: 'blur(70px)',
         willChange: 'transform',
       }}
     />
-    {/* Self-drawing SVG accent */}
+
+    {/* Light streaks — diagonal rays */}
+    <div
+      className="absolute w-[2px] h-[300px] md:h-[500px] animate-landing-streak opacity-[0.08]"
+      style={{
+        background: 'linear-gradient(to bottom, transparent, hsl(200 100% 70%), transparent)',
+        top: '0',
+        left: '30%',
+        filter: 'blur(1px)',
+      }}
+    />
+    <div
+      className="absolute w-[1px] h-[250px] md:h-[400px] animate-landing-streak opacity-[0.06]"
+      style={{
+        background: 'linear-gradient(to bottom, transparent, hsl(190 100% 60%), transparent)',
+        top: '10%',
+        left: '60%',
+        filter: 'blur(1px)',
+        animationDelay: '2s',
+      }}
+    />
+    <div
+      className="absolute w-[1.5px] h-[200px] md:h-[350px] animate-landing-streak opacity-[0.05]"
+      style={{
+        background: 'linear-gradient(to bottom, transparent, hsl(210 100% 65%), transparent)',
+        top: '5%',
+        left: '80%',
+        filter: 'blur(1px)',
+        animationDelay: '4s',
+      }}
+    />
+
+    {/* Horizontal scan line */}
+    <div
+      className="absolute w-full h-[1px] animate-landing-scanline opacity-[0.07]"
+      style={{
+        background: 'linear-gradient(90deg, transparent 10%, hsl(200 100% 60% / 0.4) 50%, transparent 90%)',
+        top: '0',
+        left: '0',
+      }}
+    />
+
+    {/* Grid overlay */}
+    <div
+      className="absolute inset-0 opacity-[0.02]"
+      style={{
+        backgroundImage: 'linear-gradient(hsl(200 100% 60% / 0.4) 1px, transparent 1px), linear-gradient(90deg, hsl(200 100% 60% / 0.4) 1px, transparent 1px)',
+        backgroundSize: '60px 60px',
+      }}
+    />
+
+    {/* Self-drawing ring accent */}
     <svg
       className="absolute w-full h-full opacity-[0.04]"
       viewBox="0 0 1200 800"
       fill="none"
       preserveAspectRatio="xMidYMid slice"
     >
-      <circle cx="600" cy="400" r="280" stroke="hsl(var(--secondary))" strokeWidth="0.6" className="animate-landing-draw" />
+      <circle cx="600" cy="400" r="280" stroke="hsl(200 100% 60%)" strokeWidth="0.6" className="animate-landing-draw" />
+      <circle cx="600" cy="400" r="200" stroke="hsl(190 100% 55%)" strokeWidth="0.3" className="animate-landing-draw" style={{ animationDelay: '0.5s' }} />
     </svg>
   </div>
 );
 
-/* ─── Word reveal (much lighter than letter-by-letter) ─── */
+/* ─── Word reveal ─── */
 const WordReveal = ({
   words,
   className,
@@ -71,7 +137,7 @@ const WordReveal = ({
   </span>
 );
 
-/* ─── Swipe phone mockup (simplified, fewer motion instances) ─── */
+/* ─── Swipe phone mockup with floating animation ─── */
 const demoJobs = [
   { title: 'Frontend Developer', company: 'TechCorp AB', location: 'Stockholm', type: 'Heltid', gradient: 'from-secondary to-primary' },
   { title: 'UX Designer', company: 'Design Studio', location: 'Göteborg', type: 'Heltid', gradient: 'from-[hsl(190_90%_45%)] to-primary' },
@@ -106,23 +172,35 @@ const PhoneMockup = ({ scrollYProgress }: { scrollYProgress: any }) => {
 
   return (
     <motion.div
-      className="relative w-[220px] h-[400px] sm:w-[260px] sm:h-[460px] lg:w-[280px] lg:h-[500px]"
+      className="relative w-[220px] h-[400px] sm:w-[260px] sm:h-[460px] lg:w-[280px] lg:h-[500px] animate-landing-phone-float"
       style={{ y: phoneY }}
       initial={{ opacity: 0, y: 60, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 1.2, delay: 0.6, ease }}
     >
-      {/* Glow ring — CSS animation, not framer */}
+      {/* Glow ring — CSS animation */}
       <div
         className="absolute -inset-5 rounded-[3rem] animate-landing-glow-spin"
         style={{
-          background: 'conic-gradient(from 0deg, hsl(var(--secondary) / 0.2), transparent 40%, hsl(var(--secondary) / 0.15), transparent 80%)',
+          background: 'conic-gradient(from 0deg, hsl(200 100% 60% / 0.25), transparent 30%, hsl(190 100% 55% / 0.2), transparent 60%, hsl(210 100% 50% / 0.15), transparent 90%)',
           filter: 'blur(25px)',
         }}
       />
 
+      {/* Outer glow halo */}
+      <div
+        className="absolute -inset-10 rounded-[4rem] opacity-30"
+        style={{
+          background: 'radial-gradient(ellipse, hsl(200 100% 60% / 0.15) 0%, transparent 70%)',
+          filter: 'blur(30px)',
+        }}
+      />
+
       {/* Phone frame */}
-      <div className="absolute inset-0 rounded-[2.5rem] bg-primary border border-white/[0.1] shadow-[0_0_50px_hsl(var(--secondary)/0.12),0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden">
+      <div className="absolute inset-0 rounded-[2.5rem] bg-primary border border-white/[0.12] shadow-[0_0_60px_hsl(200_100%_60%/0.15),0_0_120px_hsl(200_100%_50%/0.08),0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden">
+        {/* Inner edge highlight */}
+        <div className="absolute inset-0 rounded-[2.5rem] border border-white/[0.05]" />
+        
         {/* Status bar */}
         <div className="flex justify-between items-center px-5 pt-3 pb-2">
           <span className="text-[9px] text-white/30 font-medium">9:41</span>
@@ -212,17 +290,8 @@ const LandingHero = () => {
       ref={heroRef}
       className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden pt-16 pb-8 sm:pt-20 sm:pb-12"
     >
-      <AmbientGlow />
-
-      {/* Grid overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.015]"
-        aria-hidden="true"
-        style={{
-          backgroundImage: 'linear-gradient(hsl(var(--secondary) / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--secondary) / 0.3) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-        }}
-      />
+      {/* Aurora mesh background */}
+      <AuroraMesh />
 
       <motion.div
         style={{ y: textY }}
@@ -269,7 +338,7 @@ const LandingHero = () => {
                 >
                   På 60 sekunder
                   <motion.span
-                    className="inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-secondary flex-shrink-0"
+                    className="inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-secondary flex-shrink-0 shadow-[0_0_12px_hsl(200_100%_60%/0.5)]"
                     initial={{ scale: 0 }}
                     animate={{ scale: [0, 1.4, 1] }}
                     transition={{ duration: 0.5, delay: 1.2, ease }}
@@ -301,7 +370,7 @@ const LandingHero = () => {
               <button
                 onClick={goTo}
                 className="group relative flex items-center gap-3 px-7 py-3.5 rounded-full bg-secondary text-primary font-bold text-sm w-fit
-                  hover:bg-[hsl(200_100%_65%)] active:scale-[0.97] transition-all duration-300 shadow-[0_0_40px_hsl(var(--secondary)/0.3)]"
+                  hover:bg-[hsl(200_100%_65%)] active:scale-[0.97] transition-all duration-300 shadow-[0_0_40px_hsl(200_100%_60%/0.3),0_0_80px_hsl(200_100%_60%/0.1)]"
               >
                 {/* Pulsing glow ring */}
                 <span className="absolute inset-0 rounded-full bg-secondary/40 animate-landing-cta-pulse" />
@@ -346,7 +415,7 @@ const LandingHero = () => {
       <motion.div
         className="absolute bottom-0 left-0 right-0 h-px"
         style={{
-          background: 'linear-gradient(90deg, transparent, hsl(var(--secondary) / 0.2), transparent)',
+          background: 'linear-gradient(90deg, transparent, hsl(200 100% 60% / 0.2), transparent)',
         }}
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
