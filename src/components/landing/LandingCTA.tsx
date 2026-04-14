@@ -16,7 +16,15 @@ const LandingCTA = () => {
     <section className="relative py-32 sm:py-40 lg:py-52 px-5 sm:px-6 md:px-12 lg:px-24 overflow-hidden" aria-label="Kom igång">
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-[hsl(250_60%_40%/0.1)] rounded-full blur-[160px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-[hsl(250_60%_40%/0.08)] rounded-full blur-[160px]" />
+      </div>
+
+      {/* Flowing SVG lines */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]" aria-hidden="true">
+        <svg className="w-full h-full" viewBox="0 0 800 400" fill="none" preserveAspectRatio="xMidYMid slice">
+          <path d="M0,200 Q200,50 400,200 T800,200" stroke="hsl(250 80% 70%)" strokeWidth="0.6" />
+          <circle cx="400" cy="200" r="150" stroke="hsl(200 90% 70%)" strokeWidth="0.4" />
+        </svg>
       </div>
 
       <div className="max-w-[1400px] mx-auto relative z-10">
@@ -26,7 +34,6 @@ const LandingCTA = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease }}
         >
-          {/* Giant CTA headline */}
           <div className="overflow-hidden mb-8">
             <motion.h2
               className="text-[2rem] sm:text-[3rem] md:text-[4.5rem] lg:text-[6rem] xl:text-[7.5rem] font-black tracking-[-0.05em] text-white uppercase leading-[0.9]"

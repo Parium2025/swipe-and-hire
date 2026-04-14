@@ -49,36 +49,57 @@ const LandingTestimonials = () => (
         </h2>
       </motion.div>
 
-      {/* Editorial testimonial blocks */}
-      <div className="space-y-4 sm:space-y-6">
-        {testimonials.map((t, i) => (
+      {/* Asymmetric grid layout */}
+      <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+        {/* Large featured testimonial */}
+        <motion.blockquote
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease }}
+          className="relative p-8 sm:p-10 rounded-2xl sm:rounded-3xl border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.025] hover:border-white/[0.08] transition-all duration-500 md:row-span-2 flex flex-col justify-between"
+        >
+          <div>
+            <div className="text-[6rem] font-black leading-none text-white/[0.04] select-none -mt-4 mb-2">
+              "
+            </div>
+            <p className="text-white/50 text-lg sm:text-xl md:text-2xl leading-relaxed mb-8 font-medium italic">
+              {testimonials[0].quote}
+            </p>
+          </div>
+          <footer className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[hsl(250_60%_50%/0.3)] to-[hsl(200_80%_50%/0.3)] border border-white/[0.06] flex items-center justify-center text-white text-sm font-bold">
+              {testimonials[0].initials}
+            </div>
+            <div>
+              <div className="text-white text-sm font-semibold">{testimonials[0].name}</div>
+              <div className="text-white/20 text-xs">{testimonials[0].role}</div>
+            </div>
+          </footer>
+        </motion.blockquote>
+
+        {/* Smaller testimonials */}
+        {testimonials.slice(1).map((t, i) => (
           <motion.blockquote
             key={t.name}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: i * 0.1, ease }}
-            className="relative flex flex-col sm:flex-row items-start gap-6 sm:gap-10 p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.025] hover:border-white/[0.08] transition-all duration-500"
+            transition={{ duration: 0.6, delay: (i + 1) * 0.1, ease }}
+            className="relative p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.025] hover:border-white/[0.08] transition-all duration-500"
           >
-            {/* Large quote mark */}
-            <div className="text-[5rem] sm:text-[8rem] font-black leading-none text-white/[0.03] select-none flex-shrink-0 -mt-4 sm:-mt-6">
-              "
-            </div>
-
-            <div className="flex-1">
-              <p className="text-white/50 text-base sm:text-lg md:text-xl leading-relaxed mb-6 font-medium italic">
-                {t.quote}
-              </p>
-              <footer className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[hsl(250_60%_50%/0.25)] to-[hsl(200_80%_50%/0.25)] border border-white/[0.06] flex items-center justify-center text-white text-xs font-bold">
-                  {t.initials}
-                </div>
-                <div>
-                  <div className="text-white text-sm font-semibold">{t.name}</div>
-                  <div className="text-white/20 text-xs">{t.role}</div>
-                </div>
-              </footer>
-            </div>
+            <p className="text-white/40 text-sm sm:text-base leading-relaxed mb-6 font-medium italic">
+              "{t.quote}"
+            </p>
+            <footer className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[hsl(250_60%_50%/0.25)] to-[hsl(200_80%_50%/0.25)] border border-white/[0.06] flex items-center justify-center text-white text-xs font-bold">
+                {t.initials}
+              </div>
+              <div>
+                <div className="text-white text-sm font-semibold">{t.name}</div>
+                <div className="text-white/20 text-xs">{t.role}</div>
+              </div>
+            </footer>
           </motion.blockquote>
         ))}
       </div>

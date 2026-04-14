@@ -26,7 +26,15 @@ const LandingForUsers = () => {
 
   return (
     <section className="relative py-24 sm:py-32 lg:py-40 px-5 sm:px-6 md:px-12 lg:px-24" aria-labelledby="for-users-heading">
-      <div className="max-w-[1400px] mx-auto">
+      {/* Background line art */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.02]" aria-hidden="true">
+        <svg className="w-full h-full" viewBox="0 0 800 600" fill="none" preserveAspectRatio="xMidYMid slice">
+          <circle cx="200" cy="300" r="200" stroke="white" strokeWidth="0.5" />
+          <circle cx="600" cy="300" r="200" stroke="white" strokeWidth="0.5" />
+        </svg>
+      </div>
+
+      <div className="max-w-[1400px] mx-auto relative z-10">
         <motion.div
           className="mb-16 sm:mb-24"
           initial={{ opacity: 0, x: -20 }}
@@ -56,7 +64,6 @@ const LandingForUsers = () => {
             transition={{ duration: 0.6, ease }}
             className="relative p-8 sm:p-10 lg:p-14 rounded-3xl border border-white/[0.04] bg-white/[0.01] hover:border-[hsl(200_80%_50%/0.15)] transition-all duration-500 overflow-hidden group"
           >
-            {/* Background accent */}
             <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[hsl(200_80%_50%/0.03)] rounded-full blur-[80px] pointer-events-none group-hover:bg-[hsl(200_80%_50%/0.06)] transition-colors duration-700" />
 
             <div className="relative z-10">
@@ -100,7 +107,7 @@ const LandingForUsers = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1, ease }}
-            className="relative p-8 sm:p-10 lg:p-14 rounded-3xl border border-white/[0.04] bg-white/[0.01] hover:border-[hsl(250_60%_50%/0.15)] transition-all duration-500 overflow-hidden group"
+            className="relative p-8 sm:p-10 lg:p-14 rounded-3xl border border-white/[0.04] bg-white/[0.01] hover:border-[hsl(250_60%_50%/0.15)] transition-all duration-500 overflow-hidden group md:mt-12"
           >
             <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[hsl(250_60%_50%/0.03)] rounded-full blur-[80px] pointer-events-none group-hover:bg-[hsl(250_60%_50%/0.06)] transition-colors duration-700" />
 
