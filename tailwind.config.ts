@@ -230,6 +230,7 @@ export default {
 					'landing-cta-pulse': 'landing-cta-pulse 2s ease-in-out infinite',
 					'landing-scroll-dot': 'landing-scroll-dot 1.5s ease-in-out infinite',
 					'landing-scroll-border': 'landing-scroll-border 2s ease-in-out infinite',
+					'landing-marquee': 'landing-marquee 20s linear infinite',
 				},
 		minHeight: {
 			'touch': '44px', // Apple's minimum recommendation
