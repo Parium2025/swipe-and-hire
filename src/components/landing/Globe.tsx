@@ -114,6 +114,8 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
           height: GLOBE_STAGE_SIZE,
           maxWidth: '980px',
           maxHeight: '980px',
+          borderRadius: '50%',
+          overflow: 'hidden',
         }}
       >
         <Canvas
