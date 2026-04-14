@@ -30,24 +30,25 @@ function EarthSphere({ isDay }: { isDay: boolean }) {
   // Slow upward drift: Italy → Scandinavia, continuous loop
   useFrame((_, delta) => {
     if (meshRef.current) {
-      // Positive x rotation = upward drift (reveals northern latitudes)
-      meshRef.current.rotation.x += delta * 0.008;
+      // Negative x rotation = upward drift (tilts north into view)
+      meshRef.current.rotation.x -= delta * 0.006;
       // Very slow eastward drift for realism
-      meshRef.current.rotation.y += delta * 0.003;
+      meshRef.current.rotation.y += delta * 0.002;
     }
   });
 
-  // Initial rotation: Mediterranean/Italy facing camera
-  // Negative x to start southern, positive drift moves north
+  // Initial rotation: Europe/Mediterranean centered
+  // x ≈ 0.55 tilts to show ~40-45°N (Italy/Mediterranean)
+  // y ≈ -0.15 rotates to center Europe horizontally
   return (
-    <mesh ref={meshRef} rotation={[-0.3, -0.2, 0.05]}>
+    <mesh ref={meshRef} rotation={[0.55, -0.15, 0.0]}>
       <sphereGeometry args={[2, 128, 128]} />
       <meshStandardMaterial
         map={texture}
         emissiveMap={isDay ? undefined : texture}
         emissive={isDay ? '#000000' : '#ffffff'}
-        emissiveIntensity={isDay ? 0 : 1.2}
-        roughness={isDay ? 0.8 : 1}
+        emissiveIntensity={isDay ? 0 : 2.0}
+        roughness={isDay ? 0.7 : 0.9}
         metalness={isDay ? 0.05 : 0}
         toneMapped={true}
       />
@@ -76,7 +77,7 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
         }
       `,
       uniforms: {
-        glowColor: { value: new THREE.Color(isDay ? '#4488ff' : '#223366') },
+        glowColor: { value: new THREE.Color(isDay ? '#6699ff' : '#4477cc') },
       },
       blending: THREE.AdditiveBlending,
       side: THREE.BackSide,
@@ -100,9 +101,9 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
 
   return (
     <div
-      className={`${className} overflow-hidden`}
+      className={`${className} overflow-hidden flex items-center justify-center`}
       aria-hidden="true"
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', aspectRatio: '1 / 1', maxWidth: '100vmin', maxHeight: '100vmin', margin: '0 auto' }}
     >
       <Canvas
         gl={{
@@ -111,7 +112,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
           powerPreference: 'high-performance',
           preserveDrawingBuffer: false,
         }}
-        camera={{ position: [0, 0, 5.8], fov: 48 }}
+        camera={{ position: [0, 0, 4.2], fov: 50 }}
         dpr={[1, 2]}
         style={{
           position: 'absolute',
@@ -120,14 +121,15 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
         }}
         frameloop="always"
       >
-        <ambientLight intensity={isDay ? 0.62 : 0.22} />
+        <ambientLight intensity={isDay ? 0.8 : 0.5} />
         <directionalLight
-          position={isDay ? [5, 3, 5] : [4, 2, 6]}
-          intensity={isDay ? 1.8 : 0.42}
-          color={isDay ? '#fffaf0' : '#7aa6ff'}
+          position={isDay ? [5, 3, 5] : [3, 2, 5]}
+          intensity={isDay ? 2.0 : 1.2}
+          color={isDay ? '#fffaf0' : '#aaccff'}
         />
-        <pointLight position={[0, 1.5, 5.5]} intensity={isDay ? 0.28 : 0.36} color="#9fc5ff" />
-        <pointLight position={[-3, -1, 4]} intensity={isDay ? 0.16 : 0.22} color="#6f95ff" />
+        <pointLight position={[0, 1.5, 5]} intensity={isDay ? 0.4 : 0.7} color="#bbddff" />
+        <pointLight position={[-3, -1, 4]} intensity={isDay ? 0.2 : 0.5} color="#8ab4ff" />
+        <pointLight position={[2, -2, 3]} intensity={isDay ? 0.15 : 0.4} color="#99bbff" />
 
         <Suspense fallback={null}>
           <EarthSphere isDay={isDay} />
