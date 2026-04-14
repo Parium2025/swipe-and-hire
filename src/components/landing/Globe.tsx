@@ -77,7 +77,7 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
       `,
       uniforms: {
         glowColor: {
-          value: new THREE.Color(isDay ? 'hsl(205 100% 72%)' : 'hsl(214 100% 74%)'),
+          value: new THREE.Color(isDay ? 'hsl(200 60% 92%)' : 'hsl(210 40% 88%)'),
         },
       },
       blending: THREE.AdditiveBlending,
@@ -88,7 +88,7 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
   }, [isDay]);
 
   return (
-    <mesh scale={[1.1, 1.1, 1.1]}>
+    <mesh scale={[1.12, 1.12, 1.12]}>
       <sphereGeometry args={[2, 64, 64]} />
       <primitive object={atmosphereMaterial} />
     </mesh>
