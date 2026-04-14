@@ -88,7 +88,7 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
   }, [isDay]);
 
   return (
-    <mesh scale={[1.1, 1.1, 1.1]}>
+    <mesh scale={[1.12, 1.12, 1.12]}>
       <sphereGeometry args={[2, 64, 64]} />
       <primitive object={atmosphereMaterial} />
     </mesh>
