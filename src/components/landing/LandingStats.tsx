@@ -50,7 +50,7 @@ const LandingStats = () => {
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
-              className="bg-primary p-8 sm:p-12 text-center hover:bg-white/[0.02] transition-colors duration-500"
+              className="bg-[hsl(215_80%_8%)] p-8 sm:p-12 text-center hover:bg-white/[0.03] transition-colors duration-500"
               initial={{ opacity: 0, y: 40, scale: 0.88 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
