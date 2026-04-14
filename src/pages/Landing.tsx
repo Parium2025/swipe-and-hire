@@ -5,6 +5,7 @@ import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
 
 const LandingMarquee = lazy(() => import('@/components/landing/LandingMarquee'));
+const LandingStatement = lazy(() => import('@/components/landing/LandingStatement'));
 const LandingHowItWorks = lazy(() => import('@/components/landing/LandingHowItWorks'));
 const LandingFeatures = lazy(() => import('@/components/landing/LandingFeatures'));
 const LandingForUsers = lazy(() => import('@/components/landing/LandingForUsers'));
@@ -110,6 +111,7 @@ const Landing = () => {
           {showSections && (
             <Suspense fallback={null}>
               <LandingMarquee />
+              <LandingStatement />
               <LandingHowItWorks />
               <LandingFeatures />
               <LandingForUsers />
