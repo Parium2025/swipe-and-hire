@@ -14,7 +14,7 @@ const isDaytime = (): boolean => {
 };
 
 const GLOBE_STAGE_SIZE = 'min(88vw, 88vh)';
-const CAMERA_Z = 4.0; // closer to zoom into Europe
+const CAMERA_POS: [number, number, number] = [0, 2.6, 3.2]; // elevated orbital view
 
 /* ── rotating sphere ────────────────────────────────────── */
 
