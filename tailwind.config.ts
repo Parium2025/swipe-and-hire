@@ -172,7 +172,7 @@ export default {
 					'75%': { transform: 'translateY(75vh) translateX(calc(var(--sway, 10px) * -1))' },
 					'100%': { transform: 'translateY(105vh) translateX(0)' },
 				},
-				/* Landing page hero animations — CSS-only for 60fps */
+			/* Landing page hero animations — CSS-only for 60fps */
 				'landing-blob-1': {
 					'0%, 100%': { transform: 'translate(0, 0) scale(1)' },
 					'33%': { transform: 'translate(30px, -20px) scale(1.05)' },
@@ -212,6 +212,48 @@ export default {
 					'0%': { transform: 'translateX(0)' },
 					'100%': { transform: 'translateX(-50%)' },
 				},
+				/* Aurora mesh — flowing gradient behind text */
+				'landing-aurora': {
+					'0%': { transform: 'translate(0, 0) rotate(0deg) scale(1)' },
+					'25%': { transform: 'translate(80px, -60px) rotate(45deg) scale(1.15)' },
+					'50%': { transform: 'translate(-40px, 40px) rotate(90deg) scale(0.9)' },
+					'75%': { transform: 'translate(60px, 20px) rotate(135deg) scale(1.1)' },
+					'100%': { transform: 'translate(0, 0) rotate(180deg) scale(1)' },
+				},
+				'landing-aurora-2': {
+					'0%': { transform: 'translate(0, 0) rotate(0deg) scale(1.1)' },
+					'25%': { transform: 'translate(-70px, 50px) rotate(-60deg) scale(0.85)' },
+					'50%': { transform: 'translate(50px, -30px) rotate(-120deg) scale(1.2)' },
+					'75%': { transform: 'translate(-30px, -60px) rotate(-180deg) scale(0.95)' },
+					'100%': { transform: 'translate(0, 0) rotate(-360deg) scale(1.1)' },
+				},
+				'landing-aurora-3': {
+					'0%': { transform: 'translate(0, 0) scale(1)', opacity: '0.6' },
+					'33%': { transform: 'translate(100px, -40px) scale(1.3)', opacity: '0.8' },
+					'66%': { transform: 'translate(-60px, 60px) scale(0.8)', opacity: '0.5' },
+					'100%': { transform: 'translate(0, 0) scale(1)', opacity: '0.6' },
+				},
+				/* Phone float — gentle breathing */
+				'landing-phone-float': {
+					'0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+					'25%': { transform: 'translateY(-12px) rotate(0.5deg)' },
+					'50%': { transform: 'translateY(-6px) rotate(-0.3deg)' },
+					'75%': { transform: 'translateY(-14px) rotate(0.2deg)' },
+				},
+				/* Light streak across screen */
+				'landing-streak': {
+					'0%': { transform: 'translateX(-100%) translateY(100%) rotate(-45deg)', opacity: '0' },
+					'10%': { opacity: '1' },
+					'90%': { opacity: '1' },
+					'100%': { transform: 'translateX(200%) translateY(-200%) rotate(-45deg)', opacity: '0' },
+				},
+				/* Horizontal scan line */
+				'landing-scanline': {
+					'0%': { transform: 'translateY(-100%)', opacity: '0' },
+					'10%': { opacity: '0.6' },
+					'90%': { opacity: '0.6' },
+					'100%': { transform: 'translateY(600%)', opacity: '0' },
+				},
 			},
 				animation: {
 					'accordion-down': 'accordion-down 0.2s ease-out',
@@ -221,7 +263,7 @@ export default {
 					'gradient': 'gradient 15s ease infinite',
 					'bounce': 'soft-bounce 2s ease-in-out infinite',
 					'soft-bounce': 'soft-bounce 2s ease-in-out infinite',
-					/* Landing page */
+				/* Landing page */
 					'landing-blob-1': 'landing-blob-1 18s ease-in-out infinite',
 					'landing-blob-2': 'landing-blob-2 22s ease-in-out infinite',
 					'landing-draw': 'landing-draw 3s ease forwards',
@@ -231,6 +273,12 @@ export default {
 					'landing-scroll-dot': 'landing-scroll-dot 1.5s ease-in-out infinite',
 					'landing-scroll-border': 'landing-scroll-border 2s ease-in-out infinite',
 					'landing-marquee': 'landing-marquee 20s linear infinite',
+					'landing-aurora': 'landing-aurora 12s ease-in-out infinite',
+					'landing-aurora-2': 'landing-aurora-2 15s ease-in-out infinite',
+					'landing-aurora-3': 'landing-aurora-3 10s ease-in-out infinite',
+					'landing-phone-float': 'landing-phone-float 6s ease-in-out infinite',
+					'landing-streak': 'landing-streak 6s ease-in-out infinite',
+					'landing-scanline': 'landing-scanline 4s ease-in-out infinite',
 				},
 		minHeight: {
 			'touch': '44px', // Apple's minimum recommendation
