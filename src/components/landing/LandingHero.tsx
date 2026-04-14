@@ -126,7 +126,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
 
         {/* Content */}
         <div className="relative z-10 flex h-full flex-col justify-between">
-          <div className="flex flex-1 flex-col justify-end px-6 pb-28 lg:justify-center lg:px-16 lg:pb-0 lg:max-w-[55%]">
+          <div className="flex flex-1 flex-col justify-center px-6 pb-0 lg:justify-center lg:px-16 lg:pb-0 lg:max-w-[55%]">
             {/* Badge */}
             <motion.span
               className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-white/70 backdrop-blur-xl"
