@@ -83,6 +83,8 @@ export default defineConfig(({ mode }) => ({
       'use-sync-external-store',
       'use-sync-external-store/shim',
       'use-sync-external-store/shim/index.js',
+      'use-sync-external-store/shim/with-selector',
+      'use-sync-external-store/shim/with-selector.js',
     ],
   },
 }));
