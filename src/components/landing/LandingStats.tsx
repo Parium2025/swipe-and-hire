@@ -43,7 +43,7 @@ const LandingStats = () => (
         {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
-            className="bg-[hsl(220_20%_4%)] p-6 sm:p-10 text-center hover:bg-white/[0.015] transition-colors duration-500"
+            className="bg-primary p-6 sm:p-10 text-center hover:bg-white/[0.02] transition-colors duration-500"
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -52,7 +52,7 @@ const LandingStats = () => (
             <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-[-0.04em] mb-2 leading-none">
               <AnimatedNumber value={stat.value} suffix={stat.suffix} />
             </div>
-            <div className="text-white/20 text-[10px] sm:text-xs font-semibold tracking-[0.15em] uppercase">
+            <div className="text-white/30 text-[10px] sm:text-xs font-semibold tracking-[0.15em] uppercase">
               {stat.label}
             </div>
           </motion.div>

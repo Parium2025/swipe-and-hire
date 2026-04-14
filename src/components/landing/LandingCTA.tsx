@@ -16,15 +16,7 @@ const LandingCTA = () => {
     <section className="relative py-32 sm:py-40 lg:py-52 px-5 sm:px-6 md:px-12 lg:px-24 overflow-hidden" aria-label="Kom igång">
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-[hsl(250_60%_40%/0.08)] rounded-full blur-[160px]" />
-      </div>
-
-      {/* Flowing SVG lines */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03]" aria-hidden="true">
-        <svg className="w-full h-full" viewBox="0 0 800 400" fill="none" preserveAspectRatio="xMidYMid slice">
-          <path d="M0,200 Q200,50 400,200 T800,200" stroke="hsl(250 80% 70%)" strokeWidth="0.6" />
-          <circle cx="400" cy="200" r="150" stroke="hsl(200 90% 70%)" strokeWidth="0.4" />
-        </svg>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-secondary/[0.06] rounded-full blur-[160px]" />
       </div>
 
       <div className="max-w-[1400px] mx-auto relative z-10">
@@ -44,7 +36,7 @@ const LandingCTA = () => {
             >
               Redo att
               <br />
-              <span className="bg-gradient-to-r from-[hsl(250_80%_70%)] via-[hsl(200_90%_70%)] to-[hsl(170_80%_60%)] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-secondary via-[hsl(190_100%_55%)] to-secondary bg-clip-text text-transparent">
                 förändra
               </span>
               <br />
@@ -55,13 +47,13 @@ const LandingCTA = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <button
               onClick={handleStart}
-              className="group flex items-center gap-3 px-8 py-4 rounded-full bg-white text-[hsl(220_40%_10%)] font-bold text-base
+              className="group flex items-center gap-3 px-8 py-4 rounded-full bg-white text-primary font-bold text-base
                 hover:shadow-[0_0_100px_rgba(255,255,255,0.12)] active:scale-[0.97] transition-all duration-300"
             >
               Gå med i väntelistan
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
             </button>
-            <span className="text-white/15 text-xs tracking-wide">
+            <span className="text-white/20 text-xs tracking-wide">
               Ingen kreditkort · Gratis under beta
             </span>
           </div>

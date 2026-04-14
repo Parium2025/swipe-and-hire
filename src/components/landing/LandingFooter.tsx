@@ -17,8 +17,8 @@ const socialLinks = [
 ];
 
 const LandingFooter = () => (
-  <footer className="relative overflow-hidden border-t border-white/[0.03]" role="contentinfo">
-    {/* Large bold statement — like landonorris.com's "ALWAYS BRINGING THE FIGHT" */}
+  <footer className="relative overflow-hidden border-t border-white/[0.04]" role="contentinfo">
+    {/* Large bold statement */}
     <div className="py-16 sm:py-24 px-5 sm:px-6 md:px-12 lg:px-24">
       <div className="max-w-[1400px] mx-auto">
         <motion.div
@@ -31,7 +31,7 @@ const LandingFooter = () => (
           <p className="text-[1.5rem] sm:text-[2.5rem] md:text-[4rem] lg:text-[5rem] font-black tracking-[-0.04em] text-white/[0.06] uppercase leading-[0.95] select-none">
             Alltid redo.
             <br />
-            <span className="bg-gradient-to-r from-[hsl(250_80%_70%/0.15)] to-[hsl(200_90%_70%/0.15)] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-secondary/20 to-[hsl(190_100%_55%/0.20)] bg-clip-text text-transparent">
               Alltid matchande.
             </span>
           </p>
@@ -53,19 +53,19 @@ const LandingFooter = () => (
               width={128}
               height={128}
             />
-            <p className="text-white/15 text-xs tracking-wide">Framtidens rekrytering, idag.</p>
+            <p className="text-white/20 text-xs tracking-wide">Framtidens rekrytering, idag.</p>
           </div>
 
           {/* Navigation */}
           <div className="text-center">
-            <p className="text-white/20 text-[10px] font-semibold tracking-[0.2em] uppercase mb-4">Sidor</p>
+            <p className="text-white/25 text-[10px] font-semibold tracking-[0.2em] uppercase mb-4">Sidor</p>
             <nav aria-label="Sidfot-navigation">
               <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm list-none">
                 {links.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-white/25 hover:text-white/50 transition-colors text-[13px] font-medium"
+                      className="text-white/30 hover:text-secondary transition-colors text-[13px] font-medium"
                     >
                       {link.label}
                     </a>
@@ -77,13 +77,13 @@ const LandingFooter = () => (
 
           {/* Social */}
           <div className="text-center md:text-right">
-            <p className="text-white/20 text-[10px] font-semibold tracking-[0.2em] uppercase mb-4">Följ oss</p>
+            <p className="text-white/25 text-[10px] font-semibold tracking-[0.2em] uppercase mb-4">Följ oss</p>
             <div className="flex justify-center md:justify-end gap-6">
               {socialLinks.map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
-                  className="text-white/25 hover:text-white/50 transition-colors text-sm font-semibold uppercase tracking-wide"
+                  className="text-white/30 hover:text-secondary transition-colors text-sm font-semibold uppercase tracking-wide"
                 >
                   {link.label}
                 </a>
@@ -92,7 +92,7 @@ const LandingFooter = () => (
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-white/[0.02] flex flex-col sm:flex-row justify-between items-center gap-3 text-white/10 text-xs tracking-wide">
+        <div className="mt-12 pt-6 border-t border-white/[0.03] flex flex-col sm:flex-row justify-between items-center gap-3 text-white/15 text-xs tracking-wide">
           <p>© {new Date().getFullYear()} Parium AB. Alla rättigheter reserverade.</p>
           <p>Byggd i Sverige 🇸🇪</p>
         </div>

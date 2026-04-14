@@ -26,14 +26,6 @@ const LandingForUsers = () => {
 
   return (
     <section className="relative py-24 sm:py-32 lg:py-40 px-5 sm:px-6 md:px-12 lg:px-24" aria-labelledby="for-users-heading">
-      {/* Background line art */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.02]" aria-hidden="true">
-        <svg className="w-full h-full" viewBox="0 0 800 600" fill="none" preserveAspectRatio="xMidYMid slice">
-          <circle cx="200" cy="300" r="200" stroke="white" strokeWidth="0.5" />
-          <circle cx="600" cy="300" r="200" stroke="white" strokeWidth="0.5" />
-        </svg>
-      </div>
-
       <div className="max-w-[1400px] mx-auto relative z-10">
         <motion.div
           className="mb-16 sm:mb-24"
@@ -42,8 +34,8 @@ const LandingForUsers = () => {
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6, ease }}
         >
-          <span className="inline-flex items-center gap-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.3em] uppercase text-white/30">
-            <span className="w-8 sm:w-12 h-px bg-gradient-to-r from-[hsl(250_80%_70%)] to-transparent" />
+          <span className="inline-flex items-center gap-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.3em] uppercase text-secondary/50">
+            <span className="w-8 sm:w-12 h-px bg-gradient-to-r from-secondary to-transparent" />
             Byggd för alla
           </span>
           <h2
@@ -62,12 +54,12 @@ const LandingForUsers = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease }}
-            className="relative p-8 sm:p-10 lg:p-14 rounded-3xl border border-white/[0.04] bg-white/[0.01] hover:border-[hsl(200_80%_50%/0.15)] transition-all duration-500 overflow-hidden group"
+            className="relative p-8 sm:p-10 lg:p-14 rounded-3xl border border-white/[0.04] bg-white/[0.015] hover:border-secondary/20 transition-all duration-500 overflow-hidden group"
           >
-            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[hsl(200_80%_50%/0.03)] rounded-full blur-[80px] pointer-events-none group-hover:bg-[hsl(200_80%_50%/0.06)] transition-colors duration-700" />
+            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-secondary/[0.03] rounded-full blur-[80px] pointer-events-none group-hover:bg-secondary/[0.06] transition-colors duration-700" />
 
             <div className="relative z-10">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(200_80%_50%/0.08)] border border-[hsl(200_80%_50%/0.15)] text-[hsl(200_80%_70%)] text-[10px] sm:text-xs font-semibold tracking-wider uppercase mb-8">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/[0.08] border border-secondary/15 text-secondary text-[10px] sm:text-xs font-semibold tracking-wider uppercase mb-8">
                 Jobbsökare
               </span>
 
@@ -75,7 +67,7 @@ const LandingForUsers = () => {
                 Hitta dröm
                 <span className="text-white/20">jobbet</span>
               </h3>
-              <p className="text-white/25 text-sm leading-relaxed mb-8 max-w-md">
+              <p className="text-white/35 text-sm leading-relaxed mb-8 max-w-md">
                 Sluta scrolla genom oändliga listor. Swipea till jobb som faktiskt matchar dig.
               </p>
 
@@ -83,8 +75,8 @@ const LandingForUsers = () => {
                 {jobSeekerFeatures.map((f) => {
                   const Icon = f.icon;
                   return (
-                    <li key={f.text} className="flex items-center gap-3 text-white/40 text-sm">
-                      <Icon className="w-4 h-4 text-[hsl(200_80%_70%)] flex-shrink-0" strokeWidth={1.5} />
+                    <li key={f.text} className="flex items-center gap-3 text-white/50 text-sm">
+                      <Icon className="w-4 h-4 text-secondary flex-shrink-0" strokeWidth={1.5} />
                       {f.text}
                     </li>
                   );
@@ -93,7 +85,7 @@ const LandingForUsers = () => {
 
               <button
                 onClick={() => goTo('job_seeker')}
-                className="group/btn flex items-center gap-2 text-white font-semibold text-sm hover:text-[hsl(200_80%_70%)] transition-colors"
+                className="group/btn flex items-center gap-2 text-white font-semibold text-sm hover:text-secondary transition-colors"
               >
                 Kom igång
                 <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -107,12 +99,12 @@ const LandingForUsers = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1, ease }}
-            className="relative p-8 sm:p-10 lg:p-14 rounded-3xl border border-white/[0.04] bg-white/[0.01] hover:border-[hsl(250_60%_50%/0.15)] transition-all duration-500 overflow-hidden group md:mt-12"
+            className="relative p-8 sm:p-10 lg:p-14 rounded-3xl border border-white/[0.04] bg-white/[0.015] hover:border-secondary/20 transition-all duration-500 overflow-hidden group md:mt-12"
           >
-            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[hsl(250_60%_50%/0.03)] rounded-full blur-[80px] pointer-events-none group-hover:bg-[hsl(250_60%_50%/0.06)] transition-colors duration-700" />
+            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-secondary/[0.03] rounded-full blur-[80px] pointer-events-none group-hover:bg-secondary/[0.06] transition-colors duration-700" />
 
             <div className="relative z-10">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(250_60%_50%/0.08)] border border-[hsl(250_60%_50%/0.15)] text-[hsl(250_80%_70%)] text-[10px] sm:text-xs font-semibold tracking-wider uppercase mb-8">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/[0.08] border border-secondary/15 text-secondary text-[10px] sm:text-xs font-semibold tracking-wider uppercase mb-8">
                 Arbetsgivare
               </span>
 
@@ -120,7 +112,7 @@ const LandingForUsers = () => {
                 Hitta rätt
                 <span className="text-white/20"> talang</span>
               </h3>
-              <p className="text-white/25 text-sm leading-relaxed mb-8 max-w-md">
+              <p className="text-white/35 text-sm leading-relaxed mb-8 max-w-md">
                 Sluta vänta veckor på ansökningar. Få AI-matchade kandidater direkt i fickan.
               </p>
 
@@ -128,8 +120,8 @@ const LandingForUsers = () => {
                 {employerFeatures.map((f) => {
                   const Icon = f.icon;
                   return (
-                    <li key={f.text} className="flex items-center gap-3 text-white/40 text-sm">
-                      <Icon className="w-4 h-4 text-[hsl(250_80%_70%)] flex-shrink-0" strokeWidth={1.5} />
+                    <li key={f.text} className="flex items-center gap-3 text-white/50 text-sm">
+                      <Icon className="w-4 h-4 text-secondary flex-shrink-0" strokeWidth={1.5} />
                       {f.text}
                     </li>
                   );
@@ -138,7 +130,7 @@ const LandingForUsers = () => {
 
               <button
                 onClick={() => goTo('employer')}
-                className="group/btn flex items-center gap-2 text-white font-semibold text-sm hover:text-[hsl(250_80%_70%)] transition-colors"
+                className="group/btn flex items-center gap-2 text-white font-semibold text-sm hover:text-secondary transition-colors"
               >
                 Kom igång
                 <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
