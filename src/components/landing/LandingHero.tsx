@@ -120,9 +120,9 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
           />
         ))}
 
-        {/* Gradient overlays for text readability */}
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-black/30 to-transparent lg:from-black/40" />
+        {/* Gradient overlays — minimal, only where text sits */}
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/50 via-transparent to-black/25" />
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-black/15 to-transparent lg:from-black/20" />
 
         {/* Content */}
         <div className="relative z-10 flex h-full flex-col justify-between">
