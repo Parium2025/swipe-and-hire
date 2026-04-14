@@ -38,7 +38,6 @@ const features = [
     title: 'Snabbare',
     description: 'Från ansökan till anställning på dagar — inte veckor.',
     icon: Zap,
-    accent: 'hsl(250 80% 70%)',
   },
   {
     metric: 94,
@@ -46,7 +45,6 @@ const features = [
     title: 'Matchning',
     description: 'Algoritmerna lär sig vad du letar efter. Varje swipe gör matchningen smartare.',
     icon: Brain,
-    accent: 'hsl(200 90% 70%)',
   },
   {
     metric: 100,
@@ -54,7 +52,6 @@ const features = [
     title: 'Mobilt',
     description: 'Byggt för mobilen först. Rekrytera var du än är.',
     icon: Smartphone,
-    accent: 'hsl(170 80% 60%)',
   },
 ];
 
@@ -72,8 +69,8 @@ const LandingFeatures = () => (
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.6, ease }}
       >
-        <span className="inline-flex items-center gap-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.3em] uppercase text-white/30">
-          <span className="w-8 sm:w-12 h-px bg-gradient-to-r from-[hsl(250_80%_70%)] to-transparent" />
+        <span className="inline-flex items-center gap-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.3em] uppercase text-secondary/50">
+          <span className="w-8 sm:w-12 h-px bg-gradient-to-r from-secondary to-transparent" />
           Varför Parium
         </span>
         <h2
@@ -91,38 +88,29 @@ const LandingFeatures = () => (
           return (
             <motion.div
               key={f.title}
-              className="group relative bg-white/[0.015] p-8 sm:p-10 rounded-2xl sm:rounded-3xl border border-white/[0.04] hover:border-white/[0.10] hover:bg-white/[0.03] transition-all duration-500 overflow-hidden"
+              className="group relative bg-white/[0.015] p-8 sm:p-10 rounded-2xl sm:rounded-3xl border border-white/[0.04] hover:border-secondary/20 hover:bg-white/[0.04] transition-all duration-500 overflow-hidden"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.1, ease }}
             >
               {/* Icon */}
-              <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center mb-8 border"
-                style={{
-                  backgroundColor: `${f.accent.replace(')', ' / 0.08)')}`,
-                  borderColor: `${f.accent.replace(')', ' / 0.15)')}`,
-                }}
-              >
-                <Icon className="w-5 h-5" style={{ color: f.accent }} strokeWidth={1.5} />
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-8 border bg-secondary/[0.08] border-secondary/15">
+                <Icon className="w-5 h-5 text-secondary" strokeWidth={1.5} />
               </div>
 
               {/* Metric */}
-              <div className="text-[4rem] sm:text-[5rem] font-black leading-none tracking-[-0.06em] bg-gradient-to-b from-white to-white/20 bg-clip-text text-transparent mb-4">
+              <div className="text-[4rem] sm:text-[5rem] font-black leading-none tracking-[-0.06em] bg-gradient-to-b from-white to-white/30 bg-clip-text text-transparent mb-4">
                 <AnimatedValue value={f.metric} suffix={f.suffix} />
               </div>
 
               <h3 className="text-lg sm:text-xl font-bold text-white mb-2 tracking-tight uppercase">
                 {f.title}
               </h3>
-              <p className="text-white/25 text-sm leading-relaxed">{f.description}</p>
+              <p className="text-white/35 text-sm leading-relaxed">{f.description}</p>
 
               {/* Hover glow */}
-              <div
-                className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                style={{ backgroundColor: `${f.accent.replace(')', ' / 0.08)')}` }}
-              />
+              <div className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-secondary/[0.08]" />
             </motion.div>
           );
         })}
