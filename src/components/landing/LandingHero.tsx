@@ -58,13 +58,13 @@ const LandingHero = () => {
     >
       {/* Globe: NASA Earth at Night with CSS pan */}
       <motion.div
-        className="absolute inset-0 pointer-events-none will-change-transform overflow-hidden"
+        className="absolute inset-0 pointer-events-none will-change-transform overflow-hidden flex items-center justify-center"
         variants={isMobile ? undefined : scaleReveal}
         initial={isMobile ? undefined : 'hidden'}
         animate={isMobile ? undefined : 'show'}
       >
         <Suspense fallback={null}>
-          <Globe className="absolute inset-0 w-full h-full" />
+          <Globe className="w-full h-full absolute inset-0" />
         </Suspense>
       </motion.div>
 
