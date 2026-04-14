@@ -77,7 +77,7 @@ function Atmosphere({ isDay }: { isDay: boolean }) {
       `,
       uniforms: {
         glowColor: {
-          value: new THREE.Color(isDay ? 'hsl(205 100% 72%)' : 'hsl(214 100% 74%)'),
+          value: new THREE.Color(isDay ? 'hsl(200 60% 92%)' : 'hsl(210 40% 88%)'),
         },
       },
       blending: THREE.AdditiveBlending,
