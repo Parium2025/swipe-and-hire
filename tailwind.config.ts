@@ -208,6 +208,10 @@ export default {
 					'0%, 100%': { borderColor: 'rgba(255,255,255,0.1)' },
 					'50%': { borderColor: 'hsl(200 100% 60% / 0.3)' },
 				},
+				'landing-marquee': {
+					'0%': { transform: 'translateX(0)' },
+					'100%': { transform: 'translateX(-50%)' },
+				},
 			},
 				animation: {
 					'accordion-down': 'accordion-down 0.2s ease-out',
