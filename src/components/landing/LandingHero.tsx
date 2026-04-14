@@ -111,7 +111,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
             width={1920}
             height={1080}
             loading={i === 0 ? 'eager' : 'lazy'}
-            className="absolute inset-0 h-full w-full object-cover will-change-transform"
+            className="absolute inset-0 h-full w-full object-cover will-change-transform scale-[1.25] lg:scale-100"
             style={{
               opacity: imgOpacities[i],
               scale: imgScales[i],
@@ -159,7 +159,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
 
           {/* CTA — pinned to bottom, centered */}
           <motion.div
-            className="flex justify-center px-6 pb-12 lg:justify-start lg:px-16 lg:pb-10"
+            className="flex justify-center px-6 pb-6 lg:justify-start lg:px-16 lg:pb-10"
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
