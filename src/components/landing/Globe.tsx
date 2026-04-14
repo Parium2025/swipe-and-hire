@@ -133,7 +133,7 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
         >
           <ambientLight intensity={isDay ? 1.35 : 1.1} />
           <hemisphereLight
-            skyColor={isDay ? 'hsl(202 100% 88%)' : 'hsl(215 100% 78%)'}
+            color={isDay ? 'hsl(202 100% 88%)' : 'hsl(215 100% 78%)'}
             groundColor={isDay ? 'hsl(210 50% 22%)' : 'hsl(223 46% 16%)'}
             intensity={isDay ? 0.85 : 0.5}
           />
