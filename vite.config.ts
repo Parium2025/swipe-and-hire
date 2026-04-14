@@ -80,6 +80,9 @@ export default defineConfig(({ mode }) => ({
       'embla-carousel-react',
       'react-day-picker',
       'react-resizable-panels',
+      'use-sync-external-store',
+      'use-sync-external-store/shim',
+      'use-sync-external-store/shim/index.js',
     ],
   },
 }));
