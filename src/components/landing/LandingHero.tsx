@@ -111,7 +111,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
             width={1920}
             height={1080}
             loading={i === 0 ? 'eager' : 'lazy'}
-            className="absolute inset-0 h-full w-full object-cover object-center will-change-transform scale-[1.42] md:scale-[1.16] lg:scale-100"
+            className="absolute inset-0 h-full w-full object-cover will-change-transform scale-[1.25] lg:scale-100"
             style={{
               opacity: imgOpacities[i],
               scale: imgScales[i],
@@ -127,7 +127,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
         {/* Content */}
         <div className="relative z-10 flex h-full flex-col justify-between">
           {/* Top text area — centered horizontally */}
-          <div className="flex flex-col items-center px-6 pt-12 text-center lg:items-start lg:text-left lg:px-16 lg:pt-0 lg:max-w-[55%] lg:flex-1 lg:justify-center">
+          <div className="flex flex-col items-center px-6 pt-16 text-center lg:items-center lg:text-center lg:px-16 lg:flex-1 lg:justify-start">
             {/* Main heading */}
             <motion.h1
               className="text-[clamp(2.8rem,8vw,6.5rem)] font-black uppercase leading-[0.88] tracking-[-0.04em] text-white"
@@ -159,7 +159,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
 
           {/* CTA — pinned to bottom, centered */}
           <motion.div
-             className="flex justify-center px-6 pb-2 sm:pb-3 md:pb-6 lg:justify-start lg:px-16 lg:pb-10"
+             className="flex justify-center px-6 pb-12 lg:justify-center lg:px-16 lg:pb-12"
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
