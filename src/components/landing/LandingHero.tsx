@@ -126,20 +126,11 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
 
         {/* Content */}
         <div className="relative z-10 flex h-full flex-col justify-between">
-          <div className="flex flex-1 flex-col justify-start px-6 pt-20 lg:justify-center lg:px-16 lg:pb-0 lg:pt-0 lg:max-w-[55%]">
-            {/* Badge */}
-            <motion.span
-              className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-white/70 backdrop-blur-xl"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              Parium
-            </motion.span>
-
+          {/* Top text area — centered horizontally */}
+          <div className="flex flex-col items-center px-6 pt-16 text-center lg:items-start lg:text-left lg:px-16 lg:pt-0 lg:max-w-[55%] lg:flex-1 lg:justify-center">
             {/* Main heading */}
             <motion.h1
-              className="max-w-[12ch] text-[clamp(2.8rem,8vw,6.5rem)] font-black uppercase leading-[0.88] tracking-[-0.04em] text-white"
+              className="text-[clamp(2.8rem,8vw,6.5rem)] font-black uppercase leading-[0.88] tracking-[-0.04em] text-white"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.05 }}
@@ -148,11 +139,11 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
             </motion.h1>
 
             {/* Scroll-driven text — layered, fading smoothly */}
-            <div className="relative mt-6 min-h-[6rem]">
+            <div className="relative mt-4 min-h-[5rem] w-full">
               {steps.map((step, i) => (
                 <motion.div
                   key={step.id}
-                  className="absolute inset-0"
+                  className="absolute inset-0 flex flex-col items-center lg:items-start"
                   style={{ opacity: textOpacities[i], y: textYs[i] }}
                 >
                   <h2 className="text-[clamp(1.3rem,3.2vw,2.2rem)] font-semibold leading-tight tracking-[-0.02em] text-white">
@@ -164,26 +155,26 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
                 </motion.div>
               ))}
             </div>
-
-            {/* CTA */}
-            <motion.div
-              className="mt-6 flex items-center gap-4"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.15 }}
-            >
-              <motion.button
-                type="button"
-                onPointerDown={handleStart}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="group inline-flex min-h-touch items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-secondary-foreground shadow-[0_16px_48px_hsl(var(--secondary)/0.35)] transition-shadow hover:shadow-[0_20px_60px_hsl(var(--secondary)/0.45)]"
-              >
-                Kom igång gratis
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </motion.button>
-            </motion.div>
           </div>
+
+          {/* CTA — pinned to bottom, centered */}
+          <motion.div
+            className="flex justify-center px-6 pb-12 lg:justify-start lg:px-16 lg:pb-10"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+          >
+            <motion.button
+              type="button"
+              onPointerDown={handleStart}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="group inline-flex min-h-touch items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-secondary-foreground shadow-[0_16px_48px_hsl(var(--secondary)/0.35)] transition-shadow hover:shadow-[0_20px_60px_hsl(var(--secondary)/0.45)]"
+            >
+              Kom igång gratis
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </motion.button>
+          </motion.div>
 
           {/* Minimal progress bar instead of step indicators */}
           <div className="relative z-20 px-6 pb-5 lg:px-16 lg:pb-8">
