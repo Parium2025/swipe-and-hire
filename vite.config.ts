@@ -9,18 +9,11 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     headers: {
-      // Prevent stale module/deps caching in preview/dev that can cause black screen
       "Cache-Control": "no-store",
     },
-    // Lovable preview kör appen bakom en HTTPS-proxy.
-    // Utan dessa inställningar kan Vite-klienten försöka ansluta HMR till
-    // `localhost:8080` (som inte är nåbart från webbläsaren) och då får man
-    // `[vite] failed to connect to websocket`.
     hmr: {
       protocol: "wss",
       clientPort: 443,
-      // Tom sträng gör att Vite-klienten faller tillbaka till importMetaUrl.hostname
-      // (dvs. samma host som preview-sidan) istället för att hårdkoda "localhost".
       host: "",
     },
   },
@@ -41,11 +34,52 @@ export default defineConfig(({ mode }) => ({
     ],
   },
   optimizeDeps: {
-    // Rebuild pre-bundled deps from scratch to avoid stale/missing chunk refs
     force: true,
-    // Preview stability: avoid auto-optimizing a large dep graph that can create
-    // stale/missing chunk references in proxied preview sessions.
     noDiscovery: true,
-    include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+    include: [
+      'react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime',
+      'react-dom/client',
+      'recharts',
+      'lodash',
+      'attr-accept',
+      'react-dropzone',
+      '@supabase/supabase-js',
+      '@tanstack/react-query',
+      'react-router-dom',
+      'framer-motion',
+      'lucide-react',
+      '@radix-ui/react-toast',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-select',
+      '@radix-ui/react-slot',
+      '@radix-ui/react-label',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-switch',
+      '@radix-ui/react-checkbox',
+      '@radix-ui/react-radio-group',
+      '@radix-ui/react-scroll-area',
+      '@radix-ui/react-accordion',
+      '@radix-ui/react-collapsible',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-alert-dialog',
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-progress',
+      '@radix-ui/react-slider',
+      '@radix-ui/react-navigation-menu',
+      'class-variance-authority',
+      'clsx',
+      'tailwind-merge',
+      'cmdk',
+      'sonner',
+      'date-fns',
+      'input-otp',
+      'vaul',
+      'embla-carousel-react',
+      'react-day-picker',
+      'react-resizable-panels',
+    ],
   },
 }));
