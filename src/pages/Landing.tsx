@@ -101,11 +101,8 @@ const Landing = () => {
 
   return (
     <div
-      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden text-white"
-      style={{
-        WebkitOverflowScrolling: 'touch',
-        background: 'linear-gradient(180deg, hsl(215 80% 14%) 0%, hsl(215 90% 8%) 30%, hsl(220 100% 5%) 100%)',
-      }}
+      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-gradient-parium text-white"
+      style={{ WebkitOverflowScrolling: 'touch' }}
     >
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
