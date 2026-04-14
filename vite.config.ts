@@ -46,6 +46,13 @@ export default defineConfig(({ mode }) => ({
     // Preview stability: avoid auto-optimizing a large dep graph that can create
     // stale/missing chunk references in proxied preview sessions.
     noDiscovery: true,
-    include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+    include: [
+      'react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime',
+      'lodash', 'lodash/get', 'lodash/isEqual', 'lodash/throttle', 'lodash/isNil',
+      'lodash/isFunction', 'lodash/isString', 'lodash/isNumber', 'lodash/isObject',
+      'lodash/upperFirst', 'lodash/sortBy', 'lodash/range', 'lodash/max', 'lodash/min',
+      'lodash/uniqBy', 'lodash/every', 'lodash/some', 'lodash/flatMap', 'lodash/mapValues',
+      'recharts',
+    ],
   },
 }));
