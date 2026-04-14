@@ -27,30 +27,30 @@ function EarthSphere({ isDay }: { isDay: boolean }) {
   texture.generateMipmaps = true;
   texture.colorSpace = THREE.SRGBColorSpace;
 
-  // Slow upward drift: Italy → Scandinavia, continuous loop
+  // Slow upward drift: Italy → Scandinavia
   useFrame((_, delta) => {
     if (meshRef.current) {
-      // Negative x rotation = upward drift (tilts north into view)
-      meshRef.current.rotation.x -= delta * 0.006;
+      // Increase x rotation = tilt north pole toward camera = reveal more northern latitudes
+      meshRef.current.rotation.x += delta * 0.005;
       // Very slow eastward drift for realism
       meshRef.current.rotation.y += delta * 0.002;
     }
   });
 
-  // Initial rotation: Europe/Mediterranean centered
-  // x ≈ 0.55 tilts to show ~40-45°N (Italy/Mediterranean)
-  // y ≈ -0.15 rotates to center Europe horizontally
+  // Initial rotation: Europe/Italy centered
+  // x = 0.85 ≈ 49° tilt shows Mediterranean/Italy region clearly
+  // y = 0.3 rotates Europe to center horizontally  
   return (
-    <mesh ref={meshRef} rotation={[0.55, -0.15, 0.0]}>
+    <mesh ref={meshRef} rotation={[0.85, 0.3, -0.15]}>
       <sphereGeometry args={[2, 128, 128]} />
       <meshStandardMaterial
         map={texture}
         emissiveMap={isDay ? undefined : texture}
         emissive={isDay ? '#000000' : '#ffffff'}
-        emissiveIntensity={isDay ? 0 : 2.0}
-        roughness={isDay ? 0.7 : 0.9}
+        emissiveIntensity={isDay ? 0 : 3.0}
+        roughness={isDay ? 0.7 : 0.8}
         metalness={isDay ? 0.05 : 0}
-        toneMapped={true}
+        toneMapped={false}
       />
     </mesh>
   );
@@ -121,15 +121,15 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
         }}
         frameloop="always"
       >
-        <ambientLight intensity={isDay ? 0.8 : 0.5} />
+        <ambientLight intensity={isDay ? 1.0 : 0.8} />
         <directionalLight
           position={isDay ? [5, 3, 5] : [3, 2, 5]}
-          intensity={isDay ? 2.0 : 1.2}
-          color={isDay ? '#fffaf0' : '#aaccff'}
+          intensity={isDay ? 2.5 : 2.0}
+          color={isDay ? '#fffaf0' : '#ccddff'}
         />
-        <pointLight position={[0, 1.5, 5]} intensity={isDay ? 0.4 : 0.7} color="#bbddff" />
-        <pointLight position={[-3, -1, 4]} intensity={isDay ? 0.2 : 0.5} color="#8ab4ff" />
-        <pointLight position={[2, -2, 3]} intensity={isDay ? 0.15 : 0.4} color="#99bbff" />
+        <pointLight position={[0, 1, 5]} intensity={isDay ? 0.5 : 1.0} color="#ddeeff" />
+        <pointLight position={[-3, 0, 4]} intensity={isDay ? 0.3 : 0.8} color="#aaccff" />
+        <pointLight position={[3, -1, 3]} intensity={isDay ? 0.2 : 0.6} color="#bbddff" />
 
         <Suspense fallback={null}>
           <EarthSphere isDay={isDay} />
@@ -140,20 +140,20 @@ const Globe = memo(({ className = '' }: GlobeProps) => {
       <div
         className="absolute top-0 left-0 right-0 pointer-events-none"
         style={{
-          height: '15%',
+          height: '10%',
           background: isDay
-            ? 'linear-gradient(to bottom, hsl(210 60% 10% / 0.68) 0%, transparent 100%)'
-            : 'linear-gradient(to bottom, hsl(217 78% 8% / 0.42) 0%, transparent 100%)',
+            ? 'linear-gradient(to bottom, hsl(210 60% 10% / 0.4) 0%, transparent 100%)'
+            : 'linear-gradient(to bottom, hsl(217 78% 8% / 0.25) 0%, transparent 100%)',
         }}
       />
 
       <div
         className="absolute bottom-0 left-0 right-0 pointer-events-none"
         style={{
-          height: '20%',
+          height: '12%',
           background: isDay
-            ? 'linear-gradient(to top, hsl(210 60% 10% / 0.76) 0%, transparent 100%)'
-            : 'linear-gradient(to top, hsl(217 78% 8% / 0.48) 0%, transparent 100%)',
+            ? 'linear-gradient(to top, hsl(210 60% 10% / 0.5) 0%, transparent 100%)'
+            : 'linear-gradient(to top, hsl(217 78% 8% / 0.3) 0%, transparent 100%)',
         }}
       />
     </div>
