@@ -35,7 +35,6 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     force: true,
-    noDiscovery: true,
     include: [
       'react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime',
       'react-dom/client',
@@ -85,6 +84,10 @@ export default defineConfig(({ mode }) => ({
       'use-sync-external-store/shim/index.js',
       'use-sync-external-store/shim/with-selector',
       'use-sync-external-store/shim/with-selector.js',
+      'hoist-non-react-statics',
+      '@tiptap/react',
+      '@tiptap/core',
+      '@tiptap/pm',
     ],
   },
 }));
