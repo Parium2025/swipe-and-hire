@@ -29,18 +29,18 @@ function EarthSphere({ isDay }: { isDay: boolean }) {
   texture.generateMipmaps = true;
   texture.colorSpace = THREE.SRGBColorSpace;
 
-  // Premium drift: starts in southern Europe and glides toward Scandinavia
+  // Premium drift: starts in Italy / Central Europe and glides north toward Scandinavia
   useFrame((_, delta) => {
     if (meshRef.current) {
-      meshRef.current.rotation.x += delta * 0.0038;
-      meshRef.current.rotation.y += delta * 0.0012;
+      meshRef.current.rotation.x += delta * 0.0052;
+      meshRef.current.rotation.y += delta * 0.0009;
     }
   });
 
-  // Three.js spheres default closer to the Americas at y=0.
-  // This rotation recenters the globe around Italy / Central Europe.
+  // Sphere textures in Three.js default toward the Americas at y=0.
+  // This rotation locks the starting view around Italy / Central Europe.
   return (
-    <mesh ref={meshRef} rotation={[0.42, -1.82, 0.16]}>
+    <mesh ref={meshRef} rotation={[0.68, -1.82, 0.08]}>
       <sphereGeometry args={[2, 128, 128]} />
       <meshStandardMaterial
         map={texture}
