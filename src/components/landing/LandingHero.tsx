@@ -240,17 +240,17 @@ const LandingHero = () => {
                 <div className="relative overflow-hidden rounded-[2rem] border border-foreground/10 bg-background/30 shadow-[0_30px_120px_hsl(var(--primary)/0.55)] backdrop-blur-sm">
                   <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-br from-secondary/18 via-transparent to-transparent" />
 
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="popLayout">
                     <motion.img
                       key={currentStep.image}
                       src={currentStep.image}
                       alt={currentStep.alt}
                       loading="eager"
                       className="relative z-0 aspect-[4/5] w-full object-cover"
-                      initial={{ opacity: 0, scale: 1.08, filter: 'blur(8px)' }}
-                      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                      exit={{ opacity: 0, scale: 0.98, filter: 'blur(6px)' }}
-                      transition={{ duration: 0.7, ease }}
+                      initial={{ opacity: 0, scale: 1.15, y: 40, filter: 'blur(12px)' }}
+                      animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                      exit={{ opacity: 0, scale: 0.92, y: -30, filter: 'blur(10px)' }}
+                      transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
                     />
                   </AnimatePresence>
 
