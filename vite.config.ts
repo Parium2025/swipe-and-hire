@@ -85,9 +85,6 @@ export default defineConfig(({ mode }) => ({
       'use-sync-external-store/shim/with-selector',
       'use-sync-external-store/shim/with-selector.js',
       'hoist-non-react-statics',
-      '@tiptap/react',
-      '@tiptap/core',
-      '@tiptap/pm',
     ],
   },
 }));
