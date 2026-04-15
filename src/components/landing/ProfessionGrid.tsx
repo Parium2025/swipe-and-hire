@@ -15,6 +15,13 @@ import florist from '@/assets/professions/florist.jpg';
 import barista from '@/assets/professions/barista.jpg';
 import construction from '@/assets/professions/construction.jpg';
 import photographer from '@/assets/professions/photographer.jpg';
+import plumber from '@/assets/professions/plumber.jpg';
+import tailor from '@/assets/professions/tailor.jpg';
+import warehouse from '@/assets/professions/warehouse.jpg';
+import painter from '@/assets/professions/painter.jpg';
+import delivery from '@/assets/professions/delivery.jpg';
+import gardener from '@/assets/professions/gardener.jpg';
+import cleaner from '@/assets/professions/cleaner.jpg';
 
 const professions = [
   { src: welder, alt: 'Svetsare' },
@@ -34,24 +41,25 @@ const professions = [
   { src: farmer, alt: 'Bonde' },
   { src: baker, alt: 'Bagare' },
   { src: photographer, alt: 'Fotograf' },
-  // Repeat a few to fill 18 cells (3 rows × 6 cols) — pick the most visually distinct
+  { src: plumber, alt: 'Rörmokare' },
+  { src: tailor, alt: 'Skräddare' },
+  { src: warehouse, alt: 'Lagerarbetare' },
+  { src: painter, alt: 'Konstnär' },
+  { src: delivery, alt: 'Leveransbud' },
+  { src: gardener, alt: 'Trädgårdsmästare' },
+  { src: cleaner, alt: 'Städare' },
 ];
 
 const ProfessionGrid = () => {
-  // 18 images in a 6×3 grid fills the screen perfectly
-  const gridItems = professions.length < 18
-    ? [...professions, professions[0]] // pad to 18 if needed
-    : professions.slice(0, 18);
-
   return (
     <div
       className="absolute inset-0 grid h-full w-full"
       style={{
         gridTemplateColumns: 'repeat(6, 1fr)',
-        gridTemplateRows: 'repeat(3, 1fr)',
+        gridTemplateRows: 'repeat(4, 1fr)',
       }}
     >
-      {gridItems.map((p, i) => (
+      {professions.map((p, i) => (
         <div key={i} className="relative overflow-hidden">
           <img
             src={p.src}
