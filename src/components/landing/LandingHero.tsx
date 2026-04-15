@@ -111,7 +111,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
             width={i === 0 ? 1080 : 1920}
             height={i === 0 ? 1920 : 1080}
             loading={i === 0 ? 'eager' : 'lazy'}
-            className="absolute inset-0 h-full w-full object-cover will-change-transform"
+            className={`absolute inset-0 h-full w-full will-change-transform ${i === 0 ? 'object-contain' : 'object-cover'}`}
             style={{
               opacity: imgOpacities[i],
               scale: imgScales[i],
