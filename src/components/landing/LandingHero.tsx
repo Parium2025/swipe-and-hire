@@ -12,31 +12,31 @@ const steps = [
     id: 'discover',
     headline: 'Vi finns här för er.',
     sub: 'Oavsett om du söker jobb eller rätt kandidat — Parium kopplar samman er.',
-    image: storyDiscover,
-    alt: 'Diversifierade professionella som går framåt på en stadsgata vid solnedgång',
+    image: null as string | null,
+    alt: 'Collage av olika yrken',
   },
   {
     id: 'match',
     headline: 'Rätt person. Rätt tajming.',
     sub: 'Kandidat och arbetsgivare möts i en exakt, meningsfull matchning.',
-    image: storyMatch,
+    image: storyMatch as string | null,
     alt: 'Två professionella skakar hand framför en stadsutsikt',
   },
   {
     id: 'chat',
     headline: 'Dialog utan fördröjning.',
     sub: 'Samtalet startar sömlöst, medan intresset fortfarande brinner.',
-    image: storyChat,
+    image: storyChat as string | null,
     alt: 'Kvinna använder smartphone i modernt café',
   },
   {
     id: 'hire',
     headline: 'Från match till anställning.',
     sub: 'Hela resan, i en plattform. Resultat du kan mäta.',
-    image: storyHire,
+    image: storyHire as string | null,
     alt: 'Team firar med high-five på modernt kontor',
   },
-] as const;
+];
 
 type LandingHeroProps = {
   scrollContainerRef: RefObject<HTMLDivElement>;
