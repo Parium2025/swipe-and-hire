@@ -2,7 +2,7 @@ import { useEffect, useRef, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import storyDiscover from '@/assets/landing-story-discover-v2.jpg';
+import storyDiscover from '@/assets/landing-story-discover-v3.jpg';
 import storyMatch from '@/assets/landing-story-match.jpg';
 import storyChat from '@/assets/landing-story-chat.jpg';
 import storyHire from '@/assets/landing-story-hire.jpg';
