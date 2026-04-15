@@ -64,6 +64,7 @@ const JobApplication = lazyWithRetry(() => import("./pages/JobApplication"));
 const JobView = lazyWithRetry(() => import("./pages/JobView"));
 const CvTunnel = lazyWithRetry(() => import("./pages/CvTunnel"));
 const MediaMigration = lazyWithRetry(() => import("./pages/MediaMigration"));
+const Showcase3D = lazyWithRetry(() => import("./pages/Showcase3D"));
 
 import { AuthProvider } from "@/hooks/useAuth";
 import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
@@ -170,6 +171,7 @@ const AnimatedRoutes = () => {
           <Route path="/reset-redirect" element={<ResetRedirect />} />
           <Route path="/migrate-media" element={<MediaMigration />} />
           <Route path="/cv-tunnel" element={<CvTunnel />} />
+          <Route path="/3d" element={<Showcase3D />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
