@@ -16,82 +16,82 @@ import florist from '@/assets/professions/florist.jpg';
 import barista from '@/assets/professions/barista.jpg';
 import construction from '@/assets/professions/construction.jpg';
 import tailor from '@/assets/professions/tailor.jpg';
+import surgeon from '@/assets/professions/surgeon.jpg';
+import plumber from '@/assets/professions/plumber.jpg';
 import photographer from '@/assets/professions/photographer.jpg';
-import painter from '@/assets/professions/painter.jpg';
+import painterArtist from '@/assets/professions/painter_artist.jpg';
 import scientist from '@/assets/professions/scientist.jpg';
 import warehouse from '@/assets/professions/warehouse.jpg';
 import trucker from '@/assets/professions/trucker.jpg';
-import musician from '@/assets/professions/musician.jpg';
+import musicianGuitar from '@/assets/professions/musician_guitar.jpg';
 import pottery from '@/assets/professions/pottery.jpg';
-import surgeon from '@/assets/professions/surgeon.jpg';
-import plumber from '@/assets/professions/plumber.jpg';
-import yogaInstructor from '@/assets/professions/yoga_instructor.jpg';
+import yoga from '@/assets/professions/yoga.jpg';
 import personalTrainer from '@/assets/professions/personal_trainer.jpg';
 import cashier from '@/assets/professions/cashier.jpg';
 import delivery from '@/assets/professions/delivery.jpg';
-import librarian from '@/assets/professions/librarian.jpg';
+import librarianPerson from '@/assets/professions/librarian_person.jpg';
 import dj from '@/assets/professions/dj.jpg';
-import fisherman from '@/assets/professions/fisherman.jpg';
+import fishermanPerson from '@/assets/professions/fisherman_person.jpg';
 import gardener from '@/assets/professions/gardener.jpg';
-import pilot from '@/assets/professions/pilot.jpg';
+import pilotCockpit from '@/assets/professions/pilot_cockpit.jpg';
 import glassblower from '@/assets/professions/glassblower.jpg';
-import solarInstaller from '@/assets/professions/solar_installer.jpg';
+import solar from '@/assets/professions/solar.jpg';
 import winemaker from '@/assets/professions/winemaker.jpg';
 import cleaner from '@/assets/professions/cleaner.jpg';
 import receptionist from '@/assets/professions/receptionist.jpg';
 import pharmacist from '@/assets/professions/pharmacist.jpg';
 import graphicDesigner from '@/assets/professions/graphic_designer.jpg';
-import makeupArtist from '@/assets/professions/makeup_artist.jpg';
+import makeup from '@/assets/professions/makeup.jpg';
 import waiter from '@/assets/professions/waiter.jpg';
-import tattooArtist from '@/assets/professions/tattoo_artist.jpg';
+import tattoo from '@/assets/professions/tattoo.jpg';
 
 const professions = [
   { src: forklift, alt: 'Truckförare' },
-  { src: dentist, alt: 'Tandläkare' },
+  { src: surgeon, alt: 'Kirurg' },
   { src: programmer, alt: 'Programmerare' },
   { src: chef, alt: 'Kock' },
-  { src: nurse, alt: 'Sjuksköterska' },
-  { src: mechanic, alt: 'Mekaniker' },
+  { src: construction, alt: 'Byggnadsarbetare' },
+  { src: hairdresser, alt: 'Frisör' },
   { src: teacher, alt: 'Lärare' },
   { src: electrician, alt: 'Elektriker' },
-  { src: architect, alt: 'Arkitekt' },
-  { src: hairdresser, alt: 'Frisör' },
+  { src: dentist, alt: 'Tandläkare' },
   { src: welder, alt: 'Svetsare' },
-  { src: carpenter, alt: 'Snickare' },
-  { src: baker, alt: 'Bagare' },
-  { src: farmer, alt: 'Bonde' },
   { src: florist, alt: 'Florist' },
+  { src: mechanic, alt: 'Mekaniker' },
+  { src: baker, alt: 'Bagare' },
+  { src: carpenter, alt: 'Snickare' },
+  { src: nurse, alt: 'Sjuksköterska' },
   { src: barista, alt: 'Barista' },
-  { src: construction, alt: 'Byggnadsarbetare' },
-  { src: tailor, alt: 'Skräddare' },
-  { src: surgeon, alt: 'Kirurg' },
+  { src: architect, alt: 'Arkitekt' },
+  { src: farmer, alt: 'Bonde' },
   { src: plumber, alt: 'Rörmokare' },
+  { src: tailor, alt: 'Skräddare' },
   { src: photographer, alt: 'Fotograf' },
-  { src: painter, alt: 'Konstnär' },
+  { src: painterArtist, alt: 'Konstnär' },
   { src: scientist, alt: 'Forskare' },
   { src: warehouse, alt: 'Lagerarbetare' },
   { src: trucker, alt: 'Lastbilschaufför' },
-  { src: musician, alt: 'Musiker' },
+  { src: musicianGuitar, alt: 'Musiker' },
   { src: pottery, alt: 'Keramiker' },
-  { src: yogaInstructor, alt: 'Yogainstruktör' },
+  { src: yoga, alt: 'Yogainstruktör' },
   { src: personalTrainer, alt: 'Personlig tränare' },
   { src: cashier, alt: 'Kassör' },
   { src: delivery, alt: 'Leveransbud' },
-  { src: librarian, alt: 'Bibliotekarie' },
+  { src: librarianPerson, alt: 'Bibliotekarie' },
   { src: dj, alt: 'DJ' },
-  { src: fisherman, alt: 'Fiskare' },
+  { src: fishermanPerson, alt: 'Fiskare' },
   { src: gardener, alt: 'Trädgårdsmästare' },
-  { src: pilot, alt: 'Pilot' },
+  { src: pilotCockpit, alt: 'Pilot' },
   { src: glassblower, alt: 'Glasblåsare' },
-  { src: solarInstaller, alt: 'Solcellsmontör' },
+  { src: solar, alt: 'Solcellsmontör' },
   { src: winemaker, alt: 'Vinmakare' },
   { src: cleaner, alt: 'Städare' },
   { src: receptionist, alt: 'Receptionist' },
   { src: pharmacist, alt: 'Apotekare' },
   { src: graphicDesigner, alt: 'Grafisk designer' },
-  { src: makeupArtist, alt: 'Makeupartist' },
+  { src: makeup, alt: 'Makeupartist' },
   { src: waiter, alt: 'Servitör' },
-  { src: tattooArtist, alt: 'Tatuerare' },
+  { src: tattoo, alt: 'Tatuerare' },
 ];
 
 const ProfessionGrid = () => {
