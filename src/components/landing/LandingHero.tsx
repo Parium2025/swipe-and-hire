@@ -89,8 +89,10 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   // Preload images
   useEffect(() => {
     steps.forEach(({ image }) => {
-      const img = new Image();
-      img.src = image;
+      if (image) {
+        const img = new Image();
+        img.src = image;
+      }
     });
   }, []);
 
