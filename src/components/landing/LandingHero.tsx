@@ -102,24 +102,38 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   return (
     <section ref={sectionRef} className="relative" style={{ height: '400vh' }}>
       <div className="sticky top-0 h-[100dvh] overflow-hidden">
-        {/* Stacked images — continuous crossfade */}
-        {steps.map((step, i) => (
-          <motion.img
-            key={step.id}
-            src={step.image}
-            alt={step.alt}
-            width={i === 0 ? 1080 : 1920}
-            height={i === 0 ? 1920 : 1080}
-            loading={i === 0 ? 'eager' : 'lazy'}
-            className="absolute inset-0 h-full w-full object-cover will-change-transform"
-            style={{
-              opacity: imgOpacities[i],
-              scale: imgScales[i],
-              zIndex: i,
-              objectPosition: i === 0 ? 'center top' : 'center center',
-            }}
-          />
-        ))}
+        {/* First slide: profession grid */}
+        <motion.div
+          className="absolute inset-0 will-change-transform"
+          style={{
+            opacity: imgOpacities[0],
+            scale: imgScales[0],
+            zIndex: 0,
+          }}
+        >
+          <ProfessionGrid />
+        </motion.div>
+
+        {/* Remaining slides: regular images */}
+        {steps.slice(1).map((step, idx) => {
+          const i = idx + 1;
+          return (
+            <motion.img
+              key={step.id}
+              src={step.image!}
+              alt={step.alt}
+              width={1920}
+              height={1080}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover will-change-transform"
+              style={{
+                opacity: imgOpacities[i],
+                scale: imgScales[i],
+                zIndex: i,
+              }}
+            />
+          );
+        })}
 
         {/* Gradient overlays for text readability */}
         <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
