@@ -116,6 +116,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
               opacity: imgOpacities[i],
               scale: imgScales[i],
               zIndex: i,
+              objectPosition: i === 0 ? 'center top' : 'center center',
             }}
           />
         ))}
