@@ -108,8 +108,8 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
             key={step.id}
             src={step.image}
             alt={step.alt}
-            width={1920}
-            height={1080}
+            width={i === 0 ? 1080 : 1920}
+            height={i === 0 ? 1920 : 1080}
             loading={i === 0 ? 'eager' : 'lazy'}
             className="absolute inset-0 h-full w-full object-cover will-change-transform"
             style={{
