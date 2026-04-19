@@ -33,9 +33,9 @@ const IMAGE_PATTERNS = [
 ];
 
 // API-anrop som ska cachas för offline support
+// Viktigt: cacha INTE job_postings eller profiles eftersom de måste vara färska
+// för att företagsnamn/logga ska uppdateras direkt i jobbsökarvyer.
 const API_PATTERNS = [
-  /\/rest\/v1\/job_postings/,
-  /\/rest\/v1\/profiles/,
   /\/rest\/v1\/job_applications/,
   /\/rest\/v1\/organizations/,
   /\/rest\/v1\/job_questions/,
@@ -185,6 +185,12 @@ self.addEventListener('fetch', (event) => {
         }
       })
     );
+    return;
+  }
+
+  // Känsliga live-data endpoints ska aldrig serveras från API-cache
+  if (/\/rest\/v1\/(job_postings|profiles)/.test(url)) {
+    event.respondWith(fetch(request));
     return;
   }
 
