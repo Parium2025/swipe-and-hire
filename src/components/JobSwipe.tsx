@@ -10,7 +10,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info, Briefcase, Gift, CalendarClock, Hash } from 'lucide-react';
 import JobApplicationDialog from './JobApplicationDialog';
 import { toast } from '@/hooks/use-toast';
-import { preloadImages } from '@/lib/serviceWorkerManager';
+import { preloadImages, clearImageCache } from '@/lib/serviceWorkerManager';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 
@@ -104,6 +104,7 @@ const JobSwipe = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    clearImageCache().catch(() => {});
     fetchJobs();
   }, []);
 
