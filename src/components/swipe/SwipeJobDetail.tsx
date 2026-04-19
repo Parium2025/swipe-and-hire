@@ -406,10 +406,10 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                         </div>
                       )}
 
-                      {detail.workplace_name && (
+                      {(job.company_name || detail.workplace_name) && (
                         <div className="text-white text-sm">
                           <span className="mr-1.5">Bolagsnamn:</span>
-                          <span className="font-medium">{cap(detail.workplace_name)}</span>
+                          <span className="font-medium">{cap(job.company_name || detail.workplace_name || '')}</span>
                         </div>
                       )}
 
