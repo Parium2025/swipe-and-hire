@@ -307,11 +307,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true;
     let sessionInitialized = false;
 
+    const finishInitialization = () => {
+      isInitializingRef.current = false;
+    };
+
     const scheduleLoggedOutCacheClear = (event: string) => {
       try {
         const isInitial = event === 'INITIAL_SESSION';
         if (isInitial) {
-          // On cold start while logged out: don't block first paint.
           if (didInitialLoggedOutCleanupRef.current) return;
           didInitialLoggedOutCleanupRef.current = true;
         }
@@ -323,11 +326,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             clearAllAppCaches();
           } catch {
-            // ignore
           }
         };
 
-        // On /auth we defer aggressively; on other routes we can clear next tick.
         if (isAuthRoute) {
           const ric = (window as any).requestIdleCallback as
             | ((cb: () => void, opts?: any) => void)
@@ -341,38 +342,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setTimeout(run, 0);
         }
       } catch {
-        // Last-resort fallback
         setTimeout(() => {
           try { clearAllAppCaches(); } catch {}
         }, 0);
       }
     };
 
-    // Set up auth state listener FIRST to avoid missing events and deadlocks
+    const hydrateRecoveredSession = async (): Promise<boolean> => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const recoveredSession = data.session;
+
+        if (!recoveredSession || !mounted) return false;
+
+        currentUserIdRef.current = recoveredSession.user.id;
+        setSession(recoveredSession);
+        setUser(recoveredSession.user);
+        finishInitialization();
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mounted) return;
-        
-        // 🔄 Detect cross-tab session changes (different user logged in)
+
         const newUserId = session?.user?.id ?? null;
         const previousUserId = currentUserIdRef.current;
-        
-        // Check if user changed (not initial load and not manual sign-in/out)
+
         if (
-          previousUserId !== null && 
-          newUserId !== null && 
+          previousUserId !== null &&
+          newUserId !== null &&
           previousUserId !== newUserId &&
           !isManualSignOutRef.current &&
           !isSigningInRef.current
         ) {
-          // Different user logged in from another tab
           console.log('🔄 Session changed in another tab - different user detected');
           toast({
             title: 'Sessionen har ändrats',
             description: 'Du har loggats in med ett annat konto i en annan flik. Sidan laddas om.',
             duration: 4000,
           });
-          // Clear all caches and reload after a short delay
           setTimeout(() => {
             clearAllAppCaches();
             clearSessionToken();
@@ -380,118 +392,144 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }, 1500);
           return;
         }
-        
-        // Check if user was logged out from another tab (but not manually)
+
         if (
-          previousUserId !== null && 
+          previousUserId !== null &&
           newUserId === null &&
           !isManualSignOutRef.current &&
           !isSessionKickRef.current &&
           event !== 'INITIAL_SESSION'
         ) {
-          // Distinguish inactivity timeout from cross-tab logout
-          // Check BOTH flags: useInactivityTimeout sets one, authStorage sets the other
           if (isInactivityLogout() || isInactivityLogoutFromStorage()) {
             console.log('⏰ Inactivity timeout logout detected in onAuthStateChange');
             clearInactivityLogoutFlag();
             clearInactivityLogoutFromStorage();
             clearAllAppCaches();
             clearSessionToken();
+            finishInitialization();
             window.location.href = '/auth';
             return;
           }
-          
-          // 🛡️ RESILIENCE: Before accepting an unexpected logout, attempt session recovery.
-          // Guard against multiple concurrent recovery attempts (network jitter).
+
+          if (isInitializingRef.current) {
+            console.log('⏳ Ignoring transient logout during auth initialization');
+            return;
+          }
+
+          if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            console.log('📡 Unexpected SIGNED_OUT while offline — waiting for reconnection before forcing logout');
+            return;
+          }
+
           if (isRecoveringSessionRef.current) {
             console.log('🛡️ Recovery already in progress — skipping duplicate SIGNED_OUT');
             return;
           }
           isRecoveringSessionRef.current = true;
-          
-          console.log('⚠️ Unexpected SIGNED_OUT — attempting session recovery…');
-          (async () => {
-            if (!mounted) { isRecoveringSessionRef.current = false; return; }
-            try {
-              const isMobileLike = typeof navigator !== 'undefined' && (
-                navigator.maxTouchPoints > 0 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)
-              );
 
-              if (isMobileLike && typeof document !== 'undefined' && document.visibilityState === 'hidden') {
-                console.log('📱 SIGNED_OUT while app is backgrounded on mobile — waiting for foreground before recovery');
+          setTimeout(() => {
+            (async () => {
+              if (!mounted) {
                 isRecoveringSessionRef.current = false;
                 return;
               }
 
-              // Attempt 1: refreshSession uses the stored refresh token
-              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-              if (!refreshError && refreshData?.session) {
-                console.log('✅ Session recovered after transient SIGNED_OUT — ignoring logout');
-                isRecoveringSessionRef.current = false;
-                return;
-              }
-              
-              // Attempt 2: Short delay + retry (covers brief network blips)
-              await new Promise(r => setTimeout(r, 2000));
-              if (!mounted) { isRecoveringSessionRef.current = false; return; }
-              const { data: retryData, error: retryError } = await supabase.auth.refreshSession();
-              if (!retryError && retryData?.session) {
-                console.log('✅ Session recovered on retry — ignoring logout');
-                isRecoveringSessionRef.current = false;
-                return;
-              }
-              
-              const { data: finalSessionCheck } = await supabase.auth.getSession();
-              if (finalSessionCheck?.session) {
-                console.log('🛡️ Session still exists after failed refresh attempts — aborting forced logout');
-                isRecoveringSessionRef.current = false;
-                return;
-              }
+              try {
+                if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+                  console.log('📱 SIGNED_OUT while app is backgrounded — waiting for foreground before recovery');
+                  isRecoveringSessionRef.current = false;
+                  return;
+                }
 
-              console.log('🔄 Session recovery failed — proceeding with logout');
-              isRecoveringSessionRef.current = false;
-              if (!mounted) return;
-              toast({
-                title: 'Du har loggats ut',
-                description: 'Sessionen avslutades.',
-                duration: 4000,
-              });
-              setTimeout(() => {
+                if (await hydrateRecoveredSession()) {
+                  console.log('🛡️ Session still exists locally after SIGNED_OUT — aborting forced logout');
+                  isRecoveringSessionRef.current = false;
+                  return;
+                }
+
+                const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+                if (!refreshError && refreshData?.session) {
+                  currentUserIdRef.current = refreshData.session.user.id;
+                  setSession(refreshData.session);
+                  setUser(refreshData.session.user);
+                  finishInitialization();
+                  console.log('✅ Session recovered after transient SIGNED_OUT — ignoring logout');
+                  isRecoveringSessionRef.current = false;
+                  return;
+                }
+
+                await new Promise((r) => setTimeout(r, 2000));
+                if (!mounted) {
+                  isRecoveringSessionRef.current = false;
+                  return;
+                }
+
+                if (await hydrateRecoveredSession()) {
+                  console.log('🛡️ Session restored after retry window — aborting forced logout');
+                  isRecoveringSessionRef.current = false;
+                  return;
+                }
+
+                const { data: retryData, error: retryError } = await supabase.auth.refreshSession();
+                if (!retryError && retryData?.session) {
+                  currentUserIdRef.current = retryData.session.user.id;
+                  setSession(retryData.session);
+                  setUser(retryData.session.user);
+                  finishInitialization();
+                  console.log('✅ Session recovered on retry — ignoring logout');
+                  isRecoveringSessionRef.current = false;
+                  return;
+                }
+
+                if (await hydrateRecoveredSession()) {
+                  console.log('🛡️ Session exists after failed refresh attempts — aborting forced logout');
+                  isRecoveringSessionRef.current = false;
+                  return;
+                }
+
+                console.log('🔄 Session recovery failed — proceeding with logout');
+                isRecoveringSessionRef.current = false;
+                if (!mounted) return;
+                finishInitialization();
+                toast({
+                  title: 'Du har loggats ut',
+                  description: 'Sessionen avslutades.',
+                  duration: 4000,
+                });
+                setTimeout(() => {
+                  clearAllAppCaches();
+                  clearSessionToken();
+                  window.location.href = '/auth';
+                }, 1500);
+              } catch (recoveryErr) {
+                console.warn('Session recovery error:', recoveryErr);
+                const recovered = await hydrateRecoveredSession();
+                isRecoveringSessionRef.current = false;
+                if (!mounted || recovered) return;
+                finishInitialization();
                 clearAllAppCaches();
                 clearSessionToken();
                 window.location.href = '/auth';
-              }, 1500);
-            } catch (recoveryErr) {
-              console.warn('Session recovery error:', recoveryErr);
-              const { data: finalSessionCheck } = await supabase.auth.getSession();
-              isRecoveringSessionRef.current = false;
-              if (!mounted || finalSessionCheck?.session) return;
-              clearAllAppCaches();
-              clearSessionToken();
-              window.location.href = '/auth';
-            }
-          })();
+              }
+            })();
+          }, 0);
           return;
         }
-        
-        // Update tracking refs
+
         currentUserIdRef.current = newUserId;
-        
-        // Update session and user state for all events
         setSession(session);
         setUser(session?.user ?? null);
 
+        if (event !== 'INITIAL_SESSION') {
+          finishInitialization();
+        }
+
         if (session?.user) {
-          // Skip fetching user data again for INITIAL_SESSION to avoid duplication
-          // The initial getSession() call below handles this
           if (event !== 'INITIAL_SESSION') {
-            // Defer any Supabase calls to avoid blocking the callback
             setTimeout(() => {
               if (!mounted) return;
               fetchUserData(session.user!.id).then(() => {
-                // Om vi inte är i en aktiv email-inloggning hanterar vi loading här
                 if (!isSigningInRef.current) {
-                  // 🎯 Vänta på att media är klar innan vi släpper loading
                   const checkMediaReady = setInterval(() => {
                     if (mediaPreloadCompleteRef.current) {
                       clearInterval(checkMediaReady);
@@ -501,8 +539,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                       }
                     }
                   }, 50);
-                  
-                  // Timeout efter max ~2 sekunder (fallback om media är seg)
+
                   setTimeout(() => {
                     clearInterval(checkMediaReady);
                     if (mounted) {
@@ -519,19 +556,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserRole(null);
           setOrganization(null);
           setMediaPreloadComplete(false);
-          profileLoadedRef.current = false; // 🔧 Reset profile loaded flag on logout
+          profileLoadedRef.current = false;
           setPreloadedAvatarUrl(null);
           setPreloadedCoverUrl(null);
           setPreloadedVideoUrl(null);
-          // Rensa sessionStorage-cache vid utloggning
           try {
             sessionStorage.removeItem(AVATAR_CACHE_KEY);
             sessionStorage.removeItem(COVER_CACHE_KEY);
             sessionStorage.removeItem(VIDEO_CACHE_KEY);
           } catch {}
           try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch {}
-          // 🗑️ Rensa ALLA app-cacher så inget gammalt visas vid nästa login
-          // Defer on /auth to avoid blocking first paint / causing visible jank.
           scheduleLoggedOutCacheClear(event);
           if (event !== 'INITIAL_SESSION') {
             setLoading(false);
@@ -540,17 +574,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted || sessionInitialized) return;
       sessionInitialized = true;
+      finishInitialization();
 
+      currentUserIdRef.current = session?.user?.id ?? null;
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user) {
         fetchUserData(session.user.id).then(() => {
-          // 🎯 Vänta på media innan vi släpper initial loading (använd ref, inte state - undvik stale closure)
           const checkMediaReady = setInterval(() => {
             if (mediaPreloadCompleteRef.current) {
               clearInterval(checkMediaReady);
@@ -560,8 +594,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             }
           }, 50);
-          
-          // Timeout efter max 1.1 sekunder för initial load (fallback om media är seg)
+
           setTimeout(() => {
             clearInterval(checkMediaReady);
             if (mounted) {
