@@ -237,13 +237,12 @@ const MyApplications = () => {
               const job = application.job_postings;
               if (!job) return null;
 
-              const company = job.profiles;
               const location = job.workplace_city || job.location || '';
 
               const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
               const isExpiredOrDeleted = !!(job.deleted_at || timeInfo.isExpired);
 
-              const companyName = company?.company_name || 'Okänt företag';
+              const companyName = job.workplace_name || 'Okänt företag';
 
               // Build status badge
               const statusBadgeEl = (

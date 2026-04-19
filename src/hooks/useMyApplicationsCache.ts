@@ -24,10 +24,7 @@ interface Application {
     views_count: number | null;
     job_image_url: string | null;
     positions_count: number | null;
-    profiles: {
-      company_name: string | null;
-      company_logo_url: string | null;
-    } | null;
+    workplace_name: string | null;
   } | null;
 }
 
