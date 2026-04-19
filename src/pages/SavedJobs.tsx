@@ -355,7 +355,7 @@ const SavedJobs = () => {
       sourceJobs
         .flatMap((job) => [
           resolveStorageUrl('job-images', job?.job_image_url),
-          resolveStorageUrl('company-logos', job?.profiles?.company_logo_url),
+          resolveStorageUrl('company-logos', job?.company_logo_url),
         ])
         .filter((url): url is string => !!url)
     )).slice(0, 6);
@@ -469,10 +469,8 @@ const SavedJobs = () => {
               <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
                 {sortedJobs.map((savedJob, index) => {
                   const job = savedJob.job_postings!;
-                  const companyName =
-                    job.profiles?.company_name ||
-                    `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim() ||
-                    'Företag';
+                  // 🚇 SINGLE TUNNEL: workplace_name + company_logo_url come from job_postings.
+                  const companyName = job.workplace_name?.trim() || 'Företag';
 
                   return (
                     <CardErrorBoundary key={job.id}>
@@ -490,7 +488,7 @@ const SavedJobs = () => {
                           job_image_url: job.job_image_url || undefined,
                           image_focus_position: job.image_focus_position || undefined,
                           company_name: companyName,
-                          company_logo_url: job.profiles?.company_logo_url || undefined,
+                          company_logo_url: job.company_logo_url || undefined,
                           positions_count: job.positions_count || undefined,
                           salary_min: job.salary_min,
                           salary_max: job.salary_max,
@@ -538,10 +536,8 @@ const SavedJobs = () => {
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${filteredSkippedJobs.length === 1 ? ' job-card-grid-single' : filteredSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {filteredSkippedJobs.map((skippedJob, index) => {
                 const job = skippedJob.job_postings!;
-                const companyName =
-                  job.profiles?.company_name ||
-                  `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim() ||
-                  'Företag';
+                // 🚇 SINGLE TUNNEL
+                const companyName = job.workplace_name?.trim() || 'Företag';
 
                 return (
                   <CardErrorBoundary key={job.id}>
@@ -560,7 +556,7 @@ const SavedJobs = () => {
                           job_image_url: job.job_image_url || undefined,
                           image_focus_position: job.image_focus_position || undefined,
                           company_name: companyName,
-                          company_logo_url: job.profiles?.company_logo_url || undefined,
+                          company_logo_url: job.company_logo_url || undefined,
                           positions_count: job.positions_count || undefined,
                           salary_min: job.salary_min,
                           salary_max: job.salary_max,

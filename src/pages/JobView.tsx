@@ -41,7 +41,7 @@ interface JobPosting {
   positions_count?: number;
   requirements?: string;
   occupation?: string;
-  workplace_name?: string;
+  workplace_name?: string | null;
   workplace_city?: string;
   workplace_county?: string;
   workplace_municipality?: string;
@@ -52,7 +52,6 @@ interface JobPosting {
   employer_id: string;
   job_image_url?: string;
   job_image_desktop_url?: string;
-  workplace_name?: string | null;
   company_logo_url?: string | null;
   // Legacy: callers may still pass profiles; we no longer query it.
   profiles?: {
@@ -269,9 +268,9 @@ const JobView = () => {
         }
       }
 
-      // Prefetch company logo
-      if (data.profiles?.company_logo_url) {
-        const rawLogo = data.profiles.company_logo_url;
+      // Prefetch company logo (from job_postings — single tunnel)
+      const rawLogo = (data as any).company_logo_url;
+      if (rawLogo) {
         setCompanyLogoUrl(imageCache.getCachedUrl(rawLogo) || rawLogo);
         imageCache.loadImage(rawLogo).then(blobUrl => {
           setCompanyLogoUrl(blobUrl);
