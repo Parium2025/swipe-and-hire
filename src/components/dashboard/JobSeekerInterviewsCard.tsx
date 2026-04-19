@@ -108,10 +108,7 @@ export const JobSeekerInterviewsCard = memo(() => {
                 const timeUntil = getTimeUntil(interview.scheduled_at);
                 const isUrgent = timeUntil.includes('min') || timeUntil.includes('tim');
                 
-                const employerProfile = interview.job_postings?.profiles ?? (interview as any).profiles;
-                const companyName = employerProfile?.company_name ||
-                  `${employerProfile?.first_name || ''} ${employerProfile?.last_name || ''}`.trim() ||
-                  'Okänt företag';
+                const companyName = interview.job_postings?.workplace_name?.trim() || 'Okänt företag';
                 
                 return (
                   <motion.div

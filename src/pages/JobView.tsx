@@ -494,8 +494,6 @@ const JobView = () => {
                 <AvatarFallback className="bg-white/20 text-white font-semibold text-sm" delayMs={150}>
                   {getDisplayCompanyName(job)
                     ? getDisplayCompanyName(job).substring(0, 2).toUpperCase()
-                    : job.profiles?.first_name && job.profiles?.last_name
-                    ? `${job.profiles.first_name[0]}${job.profiles.last_name[0]}`.toUpperCase()
                     : 'FÖ'}
                 </AvatarFallback>
               </Avatar>

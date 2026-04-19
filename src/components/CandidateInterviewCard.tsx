@@ -35,11 +35,7 @@ interface CandidateInterviewCardProps {
     job_postings?: {
       title: string;
       employer_id: string;
-      profiles?: {
-        company_name: string | null;
-        first_name: string | null;
-        last_name: string | null;
-      } | null;
+      workplace_name?: string | null;
     } | null;
   };
 }
@@ -63,16 +59,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
     return format(scheduledDate, 'EEEE d MMMM', { locale: sv });
   };
 
-  // Get company/employer name from job_postings -> profiles
-  const getEmployerName = () => {
-    const profile = interview.job_postings?.profiles;
-    
-    if (profile?.company_name) return profile.company_name;
-    if (profile?.first_name) {
-      return `${profile.first_name} ${profile.last_name || ''}`.trim();
-    }
-    return 'Arbetsgivare';
-  };
+  const getEmployerName = () => interview.job_postings?.workplace_name?.trim() || 'Arbetsgivare';
 
   // Handle video link click
   const handleJoinVideo = () => {
