@@ -386,9 +386,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       return (data || []) as SearchJob[];
     },
     enabled,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    staleTime: 30 * 1000,
     gcTime: Infinity,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 
@@ -480,8 +480,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       return result;
     },
     enabled: employerIds.length > 0,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    staleTime: 0,
     gcTime: Infinity,
+    refetchOnMount: true,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (employerIds.length === 0) return {};
@@ -497,10 +498,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       });
       return hasAny ? filtered : undefined;
     },
-    initialDataUpdatedAt: () => {
-      // Trigger background refetch after 30 seconds
-      return Date.now() - 30000;
-    },
+    initialDataUpdatedAt: () => Date.now() - 1,
   });
 
   // Enrich jobs with company data and filter expired
@@ -508,7 +506,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     const jobs = rawJobs
       .map(job => ({
         ...job,
-        company_name: companyData[job.employer_id]?.name || 'Okänt företag',
+        company_name: companyData[job.employer_id]?.name || job.workplace_name || 'Okänt företag',
         company_logo_url: companyData[job.employer_id]?.logo,
         company_avg_rating: companyData[job.employer_id]?.avgRating,
         company_review_count: companyData[job.employer_id]?.reviewCount || 0,
@@ -586,7 +584,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
           }
 
           queryClient.invalidateQueries({ queryKey: ['company-data-batch'] });
+          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
           queryClient.refetchQueries({ queryKey: ['company-data-batch'] });
+          queryClient.refetchQueries({ queryKey: ['optimized-job-search'] });
         }
       )
       .subscribe();
