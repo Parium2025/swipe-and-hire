@@ -458,9 +458,19 @@ const CompanyProfile = () => {
         if (jobSyncError) throw jobSyncError;
 
         try {
-          localStorage.removeItem(`parium_employer_jobs_v3_${user.id}`);
-          localStorage.removeItem(`job_seeker_applications_${user.id}`);
-          localStorage.removeItem('job_seeker_available_jobs_');
+          const cachePrefixes = [
+            `parium_employer_jobs_v3_${user.id}`,
+            `job_seeker_applications_${user.id}`,
+            'job_seeker_available_jobs_',
+          ];
+
+          for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+            const key = localStorage.key(i);
+            if (!key) continue;
+            if (cachePrefixes.some((prefix) => key === prefix || key.startsWith(prefix))) {
+              localStorage.removeItem(key);
+            }
+          }
         } catch {
           // ignore cache cleanup errors
         }
