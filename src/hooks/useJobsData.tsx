@@ -36,14 +36,13 @@ export interface JobPosting {
   expires_at?: string;
   employer_id: string;
   job_image_url?: string;
+  company_logo_url?: string;
   image_focus_position?: string;
   job_image_card_url?: string;
   job_image_desktop_url?: string;
   employer_profile?: {
     first_name: string;
     last_name: string;
-    company_name: string | null;
-    company_logo_url: string | null;
   };
 }
 
@@ -133,9 +132,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             *,
             employer_profile:profiles!job_postings_employer_id_fkey (
               first_name,
-              last_name,
-              company_name,
-              company_logo_url
+              last_name
             )
           `)
           .in('employer_id', userIds)
@@ -153,9 +150,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             *,
             employer_profile:profiles!job_postings_employer_id_fkey (
               first_name,
-              last_name,
-              company_name,
-              company_logo_url
+              last_name
             )
           `)
           .eq('employer_id', user.id)
