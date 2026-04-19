@@ -33,6 +33,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 function JobDetailsSection({ job }: { job: SwipeJob }) {
+  const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
   const salaryLabel = (() => {
     if (!job.salary_min && !job.salary_max && !job.salary_transparency) return null;
     if (job.salary_transparency === 'after_interview' || job.salary_transparency === 'not_specified') {
@@ -53,7 +54,7 @@ function JobDetailsSection({ job }: { job: SwipeJob }) {
       <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
         {job.employment_type && <DetailRow label="Anställning" value={getEmploymentTypeLabel(job.employment_type)} />}
         {job.location && <DetailRow label="Ort" value={job.location} />}
-        {job.company_name && <DetailRow label="Bolagsnamn" value={job.company_name} />}
+        {displayCompanyName && <DetailRow label="Bolagsnamn" value={displayCompanyName} />}
         {job.occupation && <DetailRow label="Yrke" value={job.occupation} />}
         {job.work_location_type && (
           <DetailRow label="Platstyp" value={job.work_location_type === 'on_site' ? 'På plats' : job.work_location_type === 'hybrid' ? 'Hybrid' : job.work_location_type === 'remote' ? 'Distans' : job.work_location_type} />

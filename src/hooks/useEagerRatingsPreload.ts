@@ -82,7 +82,13 @@ const clearAllAppCachesSync = () => {
     JOB_TEMPLATES_CACHE_KEY,
   ];
   
-  const exactKeysToRemove = [WEATHER_CACHE_KEY];
+  const exactKeysToRemove = [
+    WEATHER_CACHE_KEY,
+    'parium_company_data_cache_v2',
+    'parium_company_data_cache_v3',
+    'parium_company_logo_url',
+    'parium_cached_profile',
+  ];
   
   try {
     // Rensa exakta nycklar
