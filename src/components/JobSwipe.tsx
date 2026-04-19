@@ -81,6 +81,7 @@ interface JobPosting {
   workplace_city?: string;
   workplace_county?: string;
   workplace_address?: string;
+  workplace_name?: string;
   created_at: string;
   employer_id: string;
   job_image_url?: string;
