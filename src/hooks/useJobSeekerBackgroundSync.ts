@@ -122,14 +122,12 @@ export const useJobSeekerBackgroundSync = () => {
           employment_type,
           workplace_city,
           workplace_county,
+          workplace_name,
           is_active,
           created_at,
           expires_at,
           applications_count,
-          profiles:employer_id (
-            company_name,
-            company_logo_url
-          )
+          company_logo_url
         )
       `)
       .eq('applicant_id', userId)
@@ -228,12 +226,11 @@ export const useJobSeekerBackgroundSync = () => {
         expires_at,
         is_active,
         job_image_url,
-        profiles:employer_id (
-          company_name,
-          company_logo_url
-        )
+        workplace_name,
+        company_logo_url
       `)
       .eq('is_active', true)
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(100);
 
