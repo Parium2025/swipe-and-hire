@@ -568,11 +568,11 @@ const JobView = () => {
             </div>
 
             {/* Details */}
-            <JobViewDetails
+             <JobViewDetails
               employmentType={job.employment_type}
               workSchedule={job.work_schedule}
               location={job.location}
-              workplaceName={job.workplace_name}
+               workplaceName={job.profiles?.company_name || job.workplace_name}
               workplaceAddress={job.workplace_address}
               workplacePostalCode={job.workplace_postal_code}
               workplaceCity={job.workplace_city}
