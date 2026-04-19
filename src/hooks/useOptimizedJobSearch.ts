@@ -386,10 +386,11 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       return (data || []) as SearchJob[];
     },
     enabled,
-    staleTime: 30 * 1000,
+    staleTime: 0,
     gcTime: Infinity,
     refetchOnMount: true,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   // Fetch company data for enrichment (parallel query)
@@ -398,7 +399,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   }, [rawJobs]);
 
   // 🔥 localStorage cache for instant company data - eliminates "Okänt företag" flash
-  const COMPANY_CACHE_KEY = 'parium_company_data_cache';
+  const COMPANY_CACHE_KEY = 'parium_company_data_cache_v2';
   
   const readCompanyCache = useCallback((): Record<string, { name: string; logo?: string; avgRating?: number; reviewCount: number }> => {
     try {
@@ -506,11 +507,11 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     const jobs = rawJobs
       .map(job => {
         const syncedCompanyName = job.workplace_name?.trim();
-        const cachedCompanyName = companyData[job.employer_id]?.name?.trim();
+        const liveCompanyName = companyData[job.employer_id]?.name?.trim();
 
         return {
           ...job,
-          company_name: syncedCompanyName || cachedCompanyName || 'Okänt företag',
+          company_name: liveCompanyName || syncedCompanyName || 'Okänt företag',
           company_logo_url: companyData[job.employer_id]?.logo,
           company_avg_rating: companyData[job.employer_id]?.avgRating,
           company_review_count: companyData[job.employer_id]?.reviewCount || 0,

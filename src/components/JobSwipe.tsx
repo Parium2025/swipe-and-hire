@@ -91,6 +91,14 @@ interface JobPosting {
   };
 }
 
+const getJobCompanyName = (job?: JobPosting | null) => {
+  if (!job) return 'Företag';
+  const syncedCompanyName = job.workplace_name?.trim();
+  const profileCompanyName = job.profiles?.company_name?.trim();
+  const recruiterName = `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim();
+  return syncedCompanyName || profileCompanyName || recruiterName || 'Företag';
+};
+
 const JobSwipe = () => {
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [currentJobIndex, setCurrentJobIndex] = useState(0);
@@ -288,7 +296,7 @@ const JobSwipe = () => {
         applicant_email: email || user?.email || profile?.email || '',
         applicant_first_name: first_name || profile?.first_name || 'Jobbsökare',
         job_title: currentJob.title,
-        company_name: currentJob.profiles?.company_name || 'Företaget',
+        company_name: getJobCompanyName(currentJob),
       };
       console.log('📧 Sending application confirmation email:', { to: emailPayload.applicant_email, job: emailPayload.job_title });
       supabase.functions.invoke('send-application-confirmation', { body: emailPayload })
@@ -444,7 +452,7 @@ const JobSwipe = () => {
             <div className="relative w-full h-48 md:h-56 overflow-hidden">
               <img
                 src={currentJobImageUrl}
-                alt={`${currentJob.title} hos ${currentJob.profiles?.company_name || 'företaget'}`}
+                alt={`${currentJob.title} hos ${getJobCompanyName(currentJob)}`}
                 className="w-full h-full object-cover"
                 loading="eager"
                 fetchPriority="high"
@@ -457,9 +465,7 @@ const JobSwipe = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <Building2 className="h-4 w-4 text-white" />
                   <span className="text-white text-sm font-medium">
-                    {currentJob.profiles?.company_name || 
-                     `${currentJob.profiles?.first_name} ${currentJob.profiles?.last_name}` || 
-                     'Företag'}
+                    {getJobCompanyName(currentJob)}
                   </span>
                 </div>
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">{currentJob.title}</h3>
@@ -473,9 +479,7 @@ const JobSwipe = () => {
               <div className="flex items-center gap-2 mb-4">
                 <Building2 className="h-5 w-5 text-white" />
                 <span className="font-medium text-white">
-                  {currentJob.profiles?.company_name || 
-                   `${currentJob.profiles?.first_name} ${currentJob.profiles?.last_name}` || 
-                   'Företag'}
+                  {getJobCompanyName(currentJob)}
                 </span>
               </div>
             )}

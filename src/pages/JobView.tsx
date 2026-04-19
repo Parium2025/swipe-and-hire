@@ -60,6 +60,14 @@ interface JobPosting {
   };
 }
 
+const getDisplayCompanyName = (job: JobPosting | null) => {
+  if (!job) return 'Företag';
+  const syncedCompanyName = job.workplace_name?.trim();
+  const profileCompanyName = job.profiles?.company_name?.trim();
+  const recruiterName = `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim();
+  return syncedCompanyName || profileCompanyName || recruiterName || 'Företag';
+};
+
 // Module-level cache: survives component remounts during viewport resizes
 const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean }>();
 
@@ -489,11 +497,11 @@ const JobView = () => {
               <Avatar className="h-10 w-10">
                 <AvatarImage 
                   src={companyLogoUrl || ''} 
-                  alt={job.profiles?.company_name || 'Företagslogga'}
+                  alt={getDisplayCompanyName(job)}
                 />
                 <AvatarFallback className="bg-white/20 text-white font-semibold text-sm" delayMs={150}>
-                  {job.profiles?.company_name
-                    ? job.profiles.company_name.substring(0, 2).toUpperCase()
+                  {getDisplayCompanyName(job)
+                    ? getDisplayCompanyName(job).substring(0, 2).toUpperCase()
                     : job.profiles?.first_name && job.profiles?.last_name
                     ? `${job.profiles.first_name[0]}${job.profiles.last_name[0]}`.toUpperCase()
                     : 'FÖ'}
@@ -501,9 +509,7 @@ const JobView = () => {
               </Avatar>
               <div className="text-left">
                 <h3 className="text-white font-bold text-sm">
-                  {job.profiles?.company_name || 
-                   `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
-                   'Företag'}
+                  {getDisplayCompanyName(job)}
                 </h3>
                 <div className="flex items-center text-[10px] mt-0.5 text-white">
                   <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
@@ -517,7 +523,7 @@ const JobView = () => {
                 const shareUrl = `${window.location.origin}/job/${jobId}`;
                 const shareData = {
                   title: job.title,
-                  text: `${job.title} hos ${job.profiles?.company_name || 'Företag'} – ${job.location || ''}`,
+                  text: `${job.title} hos ${getDisplayCompanyName(job)} – ${job.location || ''}`,
                   url: shareUrl,
                 };
                 if (navigator.share) {
@@ -545,7 +551,7 @@ const JobView = () => {
             <JobViewHero
               title={job.title}
               imageUrl={imageUrl}
-              companyName={job.profiles?.company_name || 'Okänt företag'}
+              companyName={getDisplayCompanyName(job)}
               location={job.location}
               employmentType={job.employment_type}
               positionsCount={job.positions_count}
@@ -572,7 +578,7 @@ const JobView = () => {
               employmentType={job.employment_type}
               workSchedule={job.work_schedule}
               location={job.location}
-               workplaceName={job.profiles?.company_name || job.workplace_name}
+                workplaceName={getDisplayCompanyName(job)}
               workplaceAddress={job.workplace_address}
               workplacePostalCode={job.workplace_postal_code}
               workplaceCity={job.workplace_city}
