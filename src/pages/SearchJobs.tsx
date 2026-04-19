@@ -48,6 +48,7 @@ interface Job {
   id: string;
   title: string;
   company_name: string;
+  workplace_name?: string;
   company_logo_url?: string;
   company_avg_rating?: number;
   company_review_count?: number;

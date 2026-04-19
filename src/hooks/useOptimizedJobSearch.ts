@@ -511,7 +511,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
 
         return {
           ...job,
-          company_name: liveCompanyName || syncedCompanyName || 'Okänt företag',
+          company_name: syncedCompanyName || liveCompanyName || 'Okänt företag',
           company_logo_url: companyData[job.employer_id]?.logo,
           company_avg_rating: companyData[job.employer_id]?.avgRating,
           company_review_count: companyData[job.employer_id]?.reviewCount || 0,
