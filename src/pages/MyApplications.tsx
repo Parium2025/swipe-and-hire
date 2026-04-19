@@ -267,6 +267,8 @@ const MyApplications = () => {
                     expires_at: job.expires_at || undefined,
                     job_image_url: job.job_image_url || undefined,
                     company_name: companyName,
+                    workplace_name: job.workplace_name || undefined,
+                    company_logo_url: job.company_logo_url || undefined,
                     positions_count: job.positions_count || undefined,
                   }}
                   onDeleteClick={handleDeleteClick}
