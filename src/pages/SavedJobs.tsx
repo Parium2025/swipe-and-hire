@@ -261,6 +261,11 @@ const SavedJobs = () => {
                   job_postings: {
                     ...savedJob.job_postings,
                     applications_count: payload.new.applications_count,
+                    workplace_name: payload.new.workplace_name,
+                    company_logo_url: payload.new.company_logo_url,
+                    is_active: payload.new.is_active,
+                    expires_at: payload.new.expires_at,
+                    deleted_at: payload.new.deleted_at,
                   },
                 };
               }
