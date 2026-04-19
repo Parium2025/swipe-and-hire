@@ -736,7 +736,14 @@ const CompanyProfile = () => {
         }}
         imageSrc={pendingImageSrc}
         onSave={handleLogoSave}
-        onRestoreOriginal={handleRestoreOriginal}
+        // Endast tillåt "återställ original" när vi redigerar en redan sparad/redigerad logga.
+        // Vid första uppladdning av en ny bild ska den nya bilden alltid sparas, även om
+        // användaren inte zoomar/flyttar (annars triggas felaktigt "Bild återställd").
+        onRestoreOriginal={
+          (logoIsEdited || (formData.company_logo_url && !originalLogoFile))
+            ? handleRestoreOriginal
+            : undefined
+        }
         aspectRatio={1}
         isCircular={true}
       />
