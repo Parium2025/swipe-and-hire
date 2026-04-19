@@ -38,11 +38,7 @@ interface JobPosting {
   title: string;
   description: string;
   location: string;
-  profiles: {
-    first_name?: string;
-    last_name?: string;
-    company_name?: string;
-  };
+  workplace_name?: string | null;
 }
 
 interface JobQuestion {
@@ -192,14 +188,7 @@ const JobApplication = () => {
       // Fetch job details
       const { data: jobData, error: jobError } = await supabase
         .from('job_postings')
-        .select(`
-          *,
-          profiles!job_postings_employer_id_fkey (
-            first_name,
-            last_name,
-            company_name
-          )
-        `)
+        .select('*')
         .eq('id', jobId)
         .eq('is_active', true)
         .single();
@@ -554,9 +543,7 @@ const JobApplication = () => {
     );
   }
 
-  const companyName = job.profiles?.company_name || 
-    `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
-    'Företag';
+  const companyName = job.workplace_name?.trim() || 'Företag';
 
   const occupationOptions = [
     'Heltidsanställd',
