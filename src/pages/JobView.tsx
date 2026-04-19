@@ -60,6 +60,14 @@ interface JobPosting {
   };
 }
 
+const getDisplayCompanyName = (job: JobPosting | null) => {
+  if (!job) return 'Företag';
+  const syncedCompanyName = job.workplace_name?.trim();
+  const profileCompanyName = job.profiles?.company_name?.trim();
+  const recruiterName = `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim();
+  return syncedCompanyName || profileCompanyName || recruiterName || 'Företag';
+};
+
 // Module-level cache: survives component remounts during viewport resizes
 const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean }>();
 
