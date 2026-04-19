@@ -44,7 +44,10 @@ interface JobQuestion {
 interface JobPosting {
   id: string;
   title: string;
-  profiles: {
+  workplace_name?: string | null;
+  company_logo_url?: string | null;
+  // Legacy: kept optional for backward compat with callers still passing profiles.
+  profiles?: {
     first_name?: string;
     last_name?: string;
     company_name?: string;
@@ -461,8 +464,11 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
     return labels[type] || type;
   };
 
-  const companyName = job.profiles?.company_name || 
-    `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
+  // 🚇 SINGLE TUNNEL: workplace_name from job_postings is source of truth.
+  const companyName =
+    job.workplace_name?.trim() ||
+    job.profiles?.company_name ||
+    `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim() ||
     'Företag';
 
   const canSubmit = () => {

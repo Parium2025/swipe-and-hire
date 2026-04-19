@@ -50,12 +50,8 @@ interface SavedJob {
     salary_type: string | null;
     salary_transparency: string | null;
     benefits: string[] | null;
-    profiles: {
-      company_name: string | null;
-      company_logo_url?: string | null;
-      first_name: string | null;
-      last_name: string | null;
-    } | null;
+    workplace_name: string | null;
+    company_logo_url: string | null;
   } | null;
 }
 
@@ -83,16 +79,13 @@ interface SkippedJob {
     salary_type: string | null;
     salary_transparency: string | null;
     benefits: string[] | null;
-    profiles: {
-      company_name: string | null;
-      company_logo_url?: string | null;
-      first_name: string | null;
-      last_name: string | null;
-    } | null;
+    workplace_name: string | null;
+    company_logo_url: string | null;
   } | null;
 }
 
 const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
+  // 🚇 SINGLE TUNNEL: read workplace_name + company_logo_url straight from job_postings.
   const { data, error } = await supabase
     .from('saved_jobs')
     .select(`
@@ -119,12 +112,8 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
         salary_type,
         salary_transparency,
         benefits,
-        profiles (
-          company_name,
-          company_logo_url,
-          first_name,
-          last_name
-        )
+        workplace_name,
+        company_logo_url
       )
     `)
     .eq('user_id', userId)
@@ -135,6 +124,7 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
 };
 
 const fetchSkippedJobs = async (userId: string): Promise<SkippedJob[]> => {
+  // 🚇 SINGLE TUNNEL: read workplace_name + company_logo_url straight from job_postings.
   const { data, error } = await supabase
     .from('swipe_actions')
     .select(`
@@ -161,12 +151,8 @@ const fetchSkippedJobs = async (userId: string): Promise<SkippedJob[]> => {
         salary_type,
         salary_transparency,
         benefits,
-        profiles (
-          company_name,
-          company_logo_url,
-          first_name,
-          last_name
-        )
+        workplace_name,
+        company_logo_url
       )
     `)
     .eq('user_id', userId)

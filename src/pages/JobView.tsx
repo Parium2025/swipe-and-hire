@@ -52,7 +52,10 @@ interface JobPosting {
   employer_id: string;
   job_image_url?: string;
   job_image_desktop_url?: string;
-  profiles: {
+  workplace_name?: string | null;
+  company_logo_url?: string | null;
+  // Legacy: callers may still pass profiles; we no longer query it.
+  profiles?: {
     first_name?: string;
     last_name?: string;
     company_name?: string;
@@ -62,10 +65,8 @@ interface JobPosting {
 
 const getDisplayCompanyName = (job: JobPosting | null) => {
   if (!job) return 'Företag';
-  const syncedCompanyName = job.workplace_name?.trim();
-  const profileCompanyName = job.profiles?.company_name?.trim();
-  const recruiterName = `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim();
-  return syncedCompanyName || profileCompanyName || recruiterName || 'Företag';
+  // 🚇 SINGLE TUNNEL: workplace_name on job_postings is source of truth.
+  return job.workplace_name?.trim() || 'Företag';
 };
 
 // Module-level cache: survives component remounts during viewport resizes
@@ -114,10 +115,8 @@ const JobView = () => {
     ...prefetched,
     description: prefetched.description || '',
     location: prefetched.location || '',
-    profiles: {
-      company_name: prefetched.company_name,
-      company_logo_url: prefetched.company_logo_url,
-    },
+    workplace_name: prefetched.workplace_name || prefetched.company_name,
+    company_logo_url: prefetched.company_logo_url,
   } as JobPosting : null);
 
   const [job, setJob] = useState<JobPosting | null>(initialJob);
@@ -146,7 +145,7 @@ const JobView = () => {
     return imageCache.getCachedUrl(resolved) || resolved;
   });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
-    const rawLogo = initialJob?.profiles?.company_logo_url;
+    const rawLogo = initialJob?.company_logo_url || initialJob?.profiles?.company_logo_url;
     return rawLogo ? (imageCache.getCachedUrl(rawLogo) || rawLogo) : null;
   });
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
@@ -171,18 +170,12 @@ const JobView = () => {
 
   const fetchJob = async (retryCount = 0) => {
     try {
+      // 🚇 SINGLE TUNNEL: workplace_name + company_logo_url come straight from job_postings
+      // (kept in sync via DB trigger sync_company_name_to_jobs).
       const [jobResult, questionsResult, applicationResult] = await Promise.all([
         supabase
           .from('job_postings')
-          .select(`
-            *,
-            profiles!job_postings_employer_id_fkey (
-              first_name,
-              last_name,
-              company_name,
-              company_logo_url
-            )
-          `)
+          .select('*')
           .eq('id', jobId)
           .is('deleted_at', null)
           .maybeSingle(),
@@ -411,7 +404,7 @@ const JobView = () => {
           applicant_email: applicantEmail,
           applicant_first_name: profile?.first_name || 'Sökande',
           job_title: job?.title || 'Tjänst',
-          company_name: job?.profiles?.company_name || 'Företag',
+          company_name: job?.workplace_name || 'Företag',
         };
         console.log('📧 Sending application confirmation email:', { to: emailPayload.applicant_email, job: emailPayload.job_title });
         supabase.functions.invoke('send-application-confirmation', { body: emailPayload })
