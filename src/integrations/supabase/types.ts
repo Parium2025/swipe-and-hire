@@ -1054,6 +1054,7 @@ export type Database = {
           auto_close_notified_at: string | null
           benefits: string[] | null
           category: string | null
+          company_logo_url: string | null
           contact_email: string | null
           created_at: string
           deleted_at: string | null
@@ -1100,6 +1101,7 @@ export type Database = {
           auto_close_notified_at?: string | null
           benefits?: string[] | null
           category?: string | null
+          company_logo_url?: string | null
           contact_email?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -1146,6 +1148,7 @@ export type Database = {
           auto_close_notified_at?: string | null
           benefits?: string[] | null
           category?: string | null
+          company_logo_url?: string | null
           contact_email?: string | null
           created_at?: string
           deleted_at?: string | null

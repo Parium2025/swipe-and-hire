@@ -82,6 +82,14 @@ export function useMyApplicationsCache() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    try {
+      localStorage.removeItem('job_seeker_applications_' + (user?.id || ''));
+    } catch {
+      // ignore legacy cache cleanup errors
+    }
+  }, [user?.id]);
+
 
   const { data: applications = [], isLoading: queryLoading, error, refetch } = useQuery({
     queryKey: ['my-applications', user?.id],
@@ -111,10 +119,7 @@ export function useMyApplicationsCache() {
             views_count,
             job_image_url,
             positions_count,
-            profiles:employer_id (
-              company_name,
-              company_logo_url
-            )
+            workplace_name
           )
         `)
         .eq('applicant_id', user.id)
