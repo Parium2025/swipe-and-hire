@@ -478,9 +478,12 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         );
       });
     });
-  }, [rawJobs, companyData, selectedLocations]);
+  }, [rawJobs, reviewsData, selectedLocations]);
 
-  // Real-time subscription for job updates
+  // Real-time subscription for job updates.
+  // job_postings is the SINGLE TUNNEL — when company info changes on profiles,
+  // the DB trigger sync_company_name_to_jobs updates job_postings, which fires
+  // this same channel. No need to subscribe to profiles separately.
   useEffect(() => {
     const channel = supabase
       .channel('optimized-search-realtime')
@@ -488,39 +491,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'job_postings' },
         () => {
-          // Invalidate search results when jobs change
           queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'profiles' },
-        (payload) => {
-          // Company name/logo updated — bust localStorage cache for that employer
-          // and refetch company data so swipe view reflects the change live
-          const newRow: any = payload.new;
-          const oldRow: any = payload.old;
-          const nameChanged = newRow?.company_name !== oldRow?.company_name;
-          const logoChanged = newRow?.company_logo_url !== oldRow?.company_logo_url;
-          if (!nameChanged && !logoChanged) return;
-
-          try {
-            const raw = localStorage.getItem(COMPANY_CACHE_KEY);
-            if (raw) {
-              const cached = JSON.parse(raw);
-              if (newRow?.user_id && cached[newRow.user_id]) {
-                delete cached[newRow.user_id];
-                safeSetItem(COMPANY_CACHE_KEY, JSON.stringify(cached));
-              }
-            }
-          } catch {
-            // ignore cache errors
-          }
-
-          queryClient.invalidateQueries({ queryKey: ['company-data-batch'] });
-          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-          queryClient.refetchQueries({ queryKey: ['company-data-batch'] });
-          queryClient.refetchQueries({ queryKey: ['optimized-job-search'] });
         }
       )
       .subscribe();
