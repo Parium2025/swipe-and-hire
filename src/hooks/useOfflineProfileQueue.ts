@@ -121,6 +121,36 @@ export function useOfflineProfileQueue(userId: string | undefined) {
         .eq('user_id', item.userId);
 
       if (error) throw error;
+
+      const hasCompanyNameUpdate = Object.prototype.hasOwnProperty.call(item.updates, 'company_name');
+      const hasCompanyLogoUpdate = Object.prototype.hasOwnProperty.call(item.updates, 'company_logo_url');
+
+      if (hasCompanyNameUpdate || hasCompanyLogoUpdate) {
+        const jobPostingSyncUpdates: Record<string, string | null> = {};
+
+        if (hasCompanyNameUpdate) {
+          jobPostingSyncUpdates.workplace_name = typeof item.updates.company_name === 'string'
+            ? item.updates.company_name.trim() || null
+            : item.updates.company_name ?? null;
+        }
+
+        if (hasCompanyLogoUpdate) {
+          jobPostingSyncUpdates.company_logo_url = typeof item.updates.company_logo_url === 'string'
+            ? item.updates.company_logo_url.trim() || null
+            : item.updates.company_logo_url ?? null;
+        }
+
+        if (Object.keys(jobPostingSyncUpdates).length > 0) {
+          const { error: jobSyncError } = await supabase
+            .from('job_postings')
+            .update(jobPostingSyncUpdates)
+            .eq('employer_id', item.userId)
+            .is('deleted_at', null);
+
+          if (jobSyncError) throw jobSyncError;
+        }
+      }
+
       return true;
     } catch (error) {
       console.error('Failed to sync queued profile update:', error);

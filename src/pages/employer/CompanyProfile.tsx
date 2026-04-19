@@ -443,38 +443,6 @@ const CompanyProfile = () => {
       await updateProfile(sanitizedFormData as any);
 
       if (user) {
-        const syncedCompanyName = sanitizedFormData.company_name.trim() || null;
-        const syncedCompanyLogoUrl = sanitizedFormData.company_logo_url.trim() || null;
-
-        const { error: jobSyncError } = await supabase
-          .from('job_postings')
-          .update({
-            workplace_name: syncedCompanyName,
-            company_logo_url: syncedCompanyLogoUrl,
-          })
-          .eq('employer_id', user.id)
-          .is('deleted_at', null);
-
-        if (jobSyncError) throw jobSyncError;
-
-        try {
-          const cachePrefixes = [
-            `parium_employer_jobs_v3_${user.id}`,
-            `job_seeker_applications_${user.id}`,
-            'job_seeker_available_jobs_',
-          ];
-
-          for (let i = localStorage.length - 1; i >= 0; i -= 1) {
-            const key = localStorage.key(i);
-            if (!key) continue;
-            if (cachePrefixes.some((prefix) => key === prefix || key.startsWith(prefix))) {
-              localStorage.removeItem(key);
-            }
-          }
-        } catch {
-          // ignore cache cleanup errors
-        }
-
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['jobs'] }),
           queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] }),
