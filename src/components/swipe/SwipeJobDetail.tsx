@@ -285,6 +285,8 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     };
   }, [open, job.id]);
 
+  const displayCompanyName = detail?.workplace_name || job.workplace_name || job.company_name || 'Företag';
+
   return (
     <AnimatePresence>
       {open && (
@@ -345,7 +347,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             >
               <div className="px-1 pr-12 pb-1">
                 <div className="flex items-center gap-2 mt-1 text-white text-sm">
-                  <span className="font-medium">{job.company_name}</span>
+                  <span className="font-medium">{displayCompanyName}</span>
                   {job.location && (
                     <>
                       <span className="text-white/50">·</span>
@@ -406,10 +408,10 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                         </div>
                       )}
 
-                      {(job.company_name || detail.workplace_name) && (
+                      {displayCompanyName && (
                         <div className="text-white text-sm">
                           <span className="mr-1.5">Bolagsnamn:</span>
-                          <span className="font-medium">{cap(job.company_name || detail.workplace_name || '')}</span>
+                          <span className="font-medium">{cap(displayCompanyName)}</span>
                         </div>
                       )}
 

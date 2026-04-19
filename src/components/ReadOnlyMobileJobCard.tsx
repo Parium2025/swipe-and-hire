@@ -24,6 +24,7 @@ interface ReadOnlyMobileJobCardProps {
     job_image_url?: string;
     image_focus_position?: string;
     company_name?: string;
+    workplace_name?: string;
     company_logo_url?: string;
     positions_count?: number;
     salary_min?: number | null;
@@ -145,7 +146,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
     };
   }, [resolvedUrl]);
 
-  const companyName = job.company_name || job.employer_profile?.company_name || job.profiles?.company_name || 'Okänt företag';
+  const companyName = job.workplace_name || job.company_name || job.employer_profile?.company_name || job.profiles?.company_name || 'Okänt företag';
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
