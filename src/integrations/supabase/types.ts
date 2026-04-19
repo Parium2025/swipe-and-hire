@@ -2719,6 +2719,7 @@ export type Database = {
           applications_count: number
           benefits: string[]
           category: string
+          company_logo_url: string
           contact_email: string
           created_at: string
           description: string
