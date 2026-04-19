@@ -393,120 +393,56 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     refetchOnReconnect: true,
   });
 
-  // Fetch company data for enrichment (parallel query)
+  // 🚇 SINGLE TUNNEL: workplace_name + company_logo_url comes directly from job_postings
+  // (kept in sync via DB trigger sync_company_name_to_jobs). We only fetch company reviews
+  // here — never company name/logo from the profiles table, to avoid stale overrides.
   const employerIds = useMemo(() => {
     return [...new Set(rawJobs.map(job => job.employer_id).filter(Boolean))];
   }, [rawJobs]);
 
-  // Keep a versioned cache key so stale company names/logos can be invalidated safely.
-  const COMPANY_CACHE_KEY = 'parium_company_data_cache_v3';
-  
-  const readCompanyCache = useCallback((): Record<string, { name: string; logo?: string; avgRating?: number; reviewCount: number }> => {
-    try {
-      const raw = localStorage.getItem(COMPANY_CACHE_KEY);
-      if (!raw) return {};
-      return JSON.parse(raw);
-    } catch {
-      return {};
-    }
-  }, []);
-
-  const writeCompanyCache = useCallback((data: Record<string, { name: string; logo?: string; avgRating?: number; reviewCount: number }>) => {
-    try {
-      // Merge with existing cache (max 500 companies)
-      const existing = readCompanyCache();
-      const merged = { ...existing, ...data };
-      const keys = Object.keys(merged);
-      if (keys.length > 500) {
-        // Keep only latest 500
-        const toKeep = keys.slice(-500);
-        const trimmed: typeof merged = {};
-        toKeep.forEach(k => { trimmed[k] = merged[k]; });
-        safeSetItem(COMPANY_CACHE_KEY, JSON.stringify(trimmed));
-      } else {
-        safeSetItem(COMPANY_CACHE_KEY, JSON.stringify(merged));
-      }
-    } catch {
-      // Storage full - ignore
-    }
-  }, [readCompanyCache]);
-
-  useEffect(() => {
-    try {
-      localStorage.removeItem('parium_company_data_cache_v2');
-    } catch {
-      // ignore storage errors
-    }
-  }, []);
-
-  const { data: companyData = {}, isLoading: isLoadingCompanies } = useQuery({
-    queryKey: ['company-data-batch', employerIds],
+  const { data: reviewsData = {} } = useQuery({
+    queryKey: ['company-reviews-batch', employerIds],
     queryFn: async () => {
       if (employerIds.length === 0) return {};
 
-      // Fetch profiles and reviews in parallel
-      const [profilesRes, reviewsRes] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('user_id, company_name, company_logo_url')
-          .in('user_id', employerIds),
-        supabase
-          .from('company_reviews')
-          .select('company_id, rating')
-          .in('company_id', employerIds)
-      ]);
+      const { data } = await supabase
+        .from('company_reviews')
+        .select('company_id, rating')
+        .in('company_id', employerIds);
 
-      // Calculate average ratings per company
-      const ratingsMap: Record<string, { total: number; count: number }> = {};
-      if (reviewsRes.data) {
-        reviewsRes.data.forEach(review => {
-          if (!ratingsMap[review.company_id]) {
-            ratingsMap[review.company_id] = { total: 0, count: 0 };
-          }
-          ratingsMap[review.company_id].total += review.rating;
-          ratingsMap[review.company_id].count++;
+      const ratingsMap: Record<string, { avgRating?: number; reviewCount: number }> = {};
+      if (data) {
+        const acc: Record<string, { total: number; count: number }> = {};
+        data.forEach(r => {
+          if (!acc[r.company_id]) acc[r.company_id] = { total: 0, count: 0 };
+          acc[r.company_id].total += r.rating;
+          acc[r.company_id].count++;
+        });
+        Object.keys(acc).forEach(id => {
+          ratingsMap[id] = {
+            avgRating: acc[id].total / acc[id].count,
+            reviewCount: acc[id].count,
+          };
         });
       }
-
-      const result: Record<string, { name: string; logo?: string; avgRating?: number; reviewCount: number }> = {};
-      if (profilesRes.data) {
-        profilesRes.data.forEach(p => {
-          if (p.company_name) {
-            const ratingData = ratingsMap[p.user_id];
-            result[p.user_id] = {
-              name: p.company_name,
-              logo: p.company_logo_url || undefined,
-              avgRating: ratingData ? ratingData.total / ratingData.count : undefined,
-              reviewCount: ratingData?.count || 0
-            };
-          }
-        });
-      }
-
-      // 🔥 Update localStorage cache for instant load next time
-      writeCompanyCache(result);
-
-      return result;
+      return ratingsMap;
     },
     enabled: employerIds.length > 0,
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000,
     gcTime: Infinity,
-    refetchOnMount: true,
   });
 
-  // Enrich jobs with company data and filter expired
+  // Enrich jobs with review data and filter expired.
+  // company_name/company_logo_url come straight from the RPC (single tunnel).
   const enrichedJobs = useMemo(() => {
     const jobs = rawJobs
       .map(job => {
-        const syncedCompanyName = job.workplace_name?.trim();
-        const liveCompanyName = companyData[job.employer_id]?.name?.trim();
-
         return {
           ...job,
-          company_name: syncedCompanyName || liveCompanyName || 'Okänt företag',
-          company_logo_url: companyData[job.employer_id]?.logo,
-          company_avg_rating: companyData[job.employer_id]?.avgRating,
-          company_review_count: companyData[job.employer_id]?.reviewCount || 0,
+          company_name: job.workplace_name?.trim() || 'Okänt företag',
+          company_logo_url: (job as any).company_logo_url || undefined,
+          company_avg_rating: reviewsData[job.employer_id]?.avgRating,
+          company_review_count: reviewsData[job.employer_id]?.reviewCount || 0,
           views_count: job.views_count || 0,
           applications_count: job.applications_count || 0,
         };
