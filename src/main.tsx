@@ -6,6 +6,7 @@ import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import { initSyncEngine } from './lib/offlineSyncEngine'
+import { nukeStaleCaches } from './lib/cacheNuke'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
@@ -100,6 +101,10 @@ function redirectAuthTokensIfNeeded() {
 async function bootstrap() {
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
+
+  // 🧹 Nuke stale caches from before the "single tunnel" architecture.
+  // Runs once per cache version bump — instant, no network calls.
+  nukeStaleCaches();
 
   // ✅ Preview hygiene: ensure we are never stuck on an old cached bundle/UI.
   // The preview environment should always reflect the latest code immediately.
