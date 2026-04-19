@@ -38,7 +38,6 @@ interface ReadOnlyMobileJobCardProps {
     employer_profile?: {
       first_name: string;
       last_name: string;
-      company_name: string | null;
     };
   };
   hasApplied?: boolean;
