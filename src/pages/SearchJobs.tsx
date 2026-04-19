@@ -375,7 +375,7 @@ const SearchJobs = memo(() => {
       .map(job => ({
       id: job.id,
       title: job.title,
-      company_name: job.company_name,
+      company_name: job.workplace_name || job.company_name,
       location: job.workplace_city || job.location,
       employment_type: job.employment_type,
       job_image_url: job.job_image_url,
@@ -728,6 +728,7 @@ const SearchJobs = memo(() => {
                       job_image_url: job.job_image_url,
                       image_focus_position: job.image_focus_position,
                       company_name: job.company_name,
+                      workplace_name: job.workplace_name,
                       company_logo_url: job.company_logo_url,
                       salary_min: job.salary_min,
                       salary_max: job.salary_max,
