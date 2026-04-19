@@ -85,7 +85,9 @@ interface JobPosting {
   created_at: string;
   employer_id: string;
   job_image_url?: string;
-  profiles: {
+  company_logo_url?: string | null;
+  // Legacy optional: most reads now use workplace_name + company_logo_url directly.
+  profiles?: {
     first_name?: string;
     last_name?: string;
     company_name?: string;
@@ -94,10 +96,8 @@ interface JobPosting {
 
 const getJobCompanyName = (job?: JobPosting | null) => {
   if (!job) return 'Företag';
-  const syncedCompanyName = job.workplace_name?.trim();
-  const profileCompanyName = job.profiles?.company_name?.trim();
-  const recruiterName = `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim();
-  return syncedCompanyName || profileCompanyName || recruiterName || 'Företag';
+  // 🚇 SINGLE TUNNEL: workplace_name on job_postings is source of truth.
+  return job.workplace_name?.trim() || 'Företag';
 };
 
 const JobSwipe = () => {
@@ -165,17 +165,13 @@ const JobSwipe = () => {
 
   const fetchJobs = async () => {
     try {
+      // 🚇 SINGLE TUNNEL: read workplace_name + company_logo_url straight from job_postings.
+      // No profiles join — that table is only the source upstream of the sync trigger.
       const { data, error } = await supabase
         .from('job_postings')
-        .select(`
-          *,
-          profiles!job_postings_employer_id_fkey (
-            first_name,
-            last_name,
-            company_name
-          )
-        `)
+        .select('*')
         .eq('is_active', true)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -187,7 +183,7 @@ const JobSwipe = () => {
         return;
       }
 
-      setJobs(data || []);
+      setJobs((data as any) || []);
     } catch (error) {
       toast({
         title: "Ett fel uppstod",

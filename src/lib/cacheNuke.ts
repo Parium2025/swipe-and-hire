@@ -6,11 +6,13 @@
  * Bump CACHE_VERSION whenever you need to force-evict old caches for all users.
  */
 
-const CACHE_VERSION = 'v3-2026-04-19-single-tunnel';
+const CACHE_VERSION = 'v4-2026-04-19-single-tunnel-final';
 const VERSION_KEY = 'parium_cache_version';
 
 const STALE_PREFIXES = [
   'parium_my_applications_cache',
+  'parium_company_data_cache_v2',
+  'parium_company_data_cache_v3',
   'job_seeker_applications_',
   'job_seeker_available_jobs_',
   'job_seeker_messages_',
