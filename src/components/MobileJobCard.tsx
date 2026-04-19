@@ -55,7 +55,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   const isDraft = isEmployerJobDraft(job);
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
-  const companyName = job.employer_profile?.company_name || 'Okänt företag';
+  const companyName = job.workplace_name?.trim() || 'Okänt företag';
   const recruiterName = job.employer_profile?.first_name && job.employer_profile?.last_name
     ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
     : null;
@@ -106,11 +106,11 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const rawLogoUrl = useMemo(() => {
-    const url = job.employer_profile?.company_logo_url;
+    const url = job.company_logo_url;
     if (!url) return null;
     if (url.startsWith('http')) return url;
     return supabase.storage.from('company-logos').getPublicUrl(url).data?.publicUrl || null;
-  }, [job.employer_profile?.company_logo_url]);
+  }, [job.company_logo_url]);
   const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
   const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
   const [logoBlobFailed, setLogoBlobFailed] = useState(false);

@@ -464,12 +464,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
     return labels[type] || type;
   };
 
-  // 🚇 SINGLE TUNNEL: workplace_name from job_postings is source of truth.
-  const companyName =
-    job.workplace_name?.trim() ||
-    job.profiles?.company_name ||
-    `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim() ||
-    'Företag';
+  const companyName = job.workplace_name?.trim() || 'Företag';
 
   const canSubmit = () => {
     // Check all required standard questions

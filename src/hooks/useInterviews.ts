@@ -226,7 +226,7 @@ export const useCandidateInterviews = () => {
           job_postings(
             title,
             employer_id,
-            profiles:employer_id(company_name, first_name, last_name)
+            workplace_name
           )
         `)
         .eq('applicant_id', user.id)

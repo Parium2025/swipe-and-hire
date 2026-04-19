@@ -15,6 +15,7 @@ interface EmployerJobCardProps {
     id: string;
     title: string;
     location: string;
+    workplace_name?: string;
     employment_type?: string;
     is_active: boolean;
     views_count: number;
@@ -64,7 +65,7 @@ function getCompanyInitials(name: string): string {
 export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCardProps) => {
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
-  const companyName = job.employer_profile?.company_name || 'Okänt företag';
+  const companyName = job.workplace_name?.trim() || 'Okänt företag';
   const recruiterName = job.employer_profile?.first_name && job.employer_profile?.last_name
     ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
     : null;
