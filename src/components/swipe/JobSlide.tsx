@@ -122,6 +122,7 @@ export const JobSlide = memo(function JobSlide({
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
+  const nextDisplayCompanyName = nextJob?.workplace_name || nextJob?.company_name || 'Okänt företag';
   const imageUrl = resolveImageUrl(job.job_image_url);
   const nextImageUrl = useMemo(() => resolveImageUrl(nextJob?.job_image_url), [nextJob?.job_image_url]);
   const rawLogoUrl = useMemo(() => resolveImageUrl(job.company_logo_url, 'company-logos'), [job.company_logo_url]);
@@ -509,7 +510,7 @@ export const JobSlide = memo(function JobSlide({
             >
               <div className="mx-auto w-full max-w-[21rem]">
                 {/* Company logo or initials — same logic as active card */}
-                {(!nextImageUrl || nextJob.company_logo_url) && (nextJob.workplace_name || nextJob.company_name) && (
+                {(!nextImageUrl || nextJob.company_logo_url) && nextDisplayCompanyName && (
                   <div className="flex justify-center mb-4">
                     {nextJob.company_logo_url ? (
                       <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg">
@@ -523,13 +524,13 @@ export const JobSlide = memo(function JobSlide({
                     ) : (
                       <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
                         <span className="text-xl font-bold text-white/40 tracking-wide select-none">
-                          {nextJob.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                          {nextDisplayCompanyName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                         </span>
                       </div>
                     )}
                   </div>
                 )}
-                <p className="text-lg font-bold text-white">{nextJob.workplace_name || nextJob.company_name}</p>
+                <p className="text-lg font-bold text-white">{nextDisplayCompanyName}</p>
                 <h3 className="mt-1 line-clamp-2 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold leading-[1.08] tracking-tight text-white">
                   {nextJob.title}
                 </h3>
@@ -707,7 +708,7 @@ export const JobSlide = memo(function JobSlide({
         <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.4)' }}>
           <div className="mx-auto w-full max-w-[21rem]">
             {/* Company logo or initials fallback */}
-            {(logoUrl || !imageUrl) && job.company_name && (
+            {(logoUrl || !imageUrl) && displayCompanyName && (
               <div className="flex justify-center mb-4">
                 {logoUrl ? (
                   <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg">
@@ -722,13 +723,13 @@ export const JobSlide = memo(function JobSlide({
                 ) : (
                   <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
                     <span className="text-xl font-bold text-white/40 tracking-wide select-none">
-                      {job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                      {displayCompanyName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                     </span>
                   </div>
                 )}
               </div>
             )}
-            <p className="text-white font-bold text-lg">{job.company_name}</p>
+            <p className="text-white font-bold text-lg">{displayCompanyName}</p>
             <h2
               ref={titleRef}
               data-title-tap-zone

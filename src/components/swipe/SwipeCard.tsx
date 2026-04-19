@@ -56,6 +56,7 @@ const VELOCITY_THRESHOLD = 500;
 const EXIT_X = typeof window !== 'undefined' ? window.innerWidth * 1.5 : 600;
 
 export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSwipeComplete, onTap, dragEnabled }: CardProps) {
+  const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 0, 300], [-12, 0, 12]);
   const likeOpacity = useTransform(x, [0, 80, 150], [0, 0.5, 1]);
@@ -158,8 +159,8 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
           <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)] flex items-center justify-center">
             <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
               <span className="text-3xl font-bold text-white/50 tracking-wide select-none">
-                {job.company_name
-                  ? job.company_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+                {displayCompanyName
+                  ? displayCompanyName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
                   : ''}
               </span>
             </div>
@@ -202,7 +203,7 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
 
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-        <p className="text-white/80 font-medium text-sm">{job.company_name}</p>
+        <p className="text-white/80 font-medium text-sm">{displayCompanyName}</p>
         <h2
           className="text-xl font-bold text-white leading-snug tracking-tight mt-0.5"
           style={{

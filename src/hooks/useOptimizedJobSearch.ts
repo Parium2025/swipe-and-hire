@@ -398,8 +398,8 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     return [...new Set(rawJobs.map(job => job.employer_id).filter(Boolean))];
   }, [rawJobs]);
 
-  // 🔥 localStorage cache for instant company data - eliminates "Okänt företag" flash
-  const COMPANY_CACHE_KEY = 'parium_company_data_cache_v2';
+  // Keep a versioned cache key so stale company names/logos can be invalidated safely.
+  const COMPANY_CACHE_KEY = 'parium_company_data_cache_v3';
   
   const readCompanyCache = useCallback((): Record<string, { name: string; logo?: string; avgRating?: number; reviewCount: number }> => {
     try {
@@ -430,6 +430,14 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       // Storage full - ignore
     }
   }, [readCompanyCache]);
+
+  useEffect(() => {
+    try {
+      localStorage.removeItem('parium_company_data_cache_v2');
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
 
   const { data: companyData = {}, isLoading: isLoadingCompanies } = useQuery({
     queryKey: ['company-data-batch', employerIds],
@@ -484,22 +492,6 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     staleTime: 0,
     gcTime: Infinity,
     refetchOnMount: true,
-    // 🔥 Instant-load from localStorage cache
-    initialData: () => {
-      if (employerIds.length === 0) return {};
-      const cached = readCompanyCache();
-      // Return only data for requested employer IDs
-      const filtered: typeof cached = {};
-      let hasAny = false;
-      employerIds.forEach(id => {
-        if (cached[id]) {
-          filtered[id] = cached[id];
-          hasAny = true;
-        }
-      });
-      return hasAny ? filtered : undefined;
-    },
-    initialDataUpdatedAt: () => Date.now() - 1,
   });
 
   // Enrich jobs with company data and filter expired
