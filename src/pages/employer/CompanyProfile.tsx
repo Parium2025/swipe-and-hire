@@ -13,6 +13,7 @@ import { useOnline } from '@/hooks/useOnlineStatus';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Extracted sub-components
 import { CompanyLogoSection } from './companyProfile/CompanyLogoSection';
@@ -23,9 +24,10 @@ import { EMPLOYEE_COUNT_OPTIONS } from './companyProfile/types';
 import type { SocialMediaLink, CompanyFormData } from './companyProfile/types';
 
 const CompanyProfile = () => {
-  const { profile, updateProfile } = useAuth();
+  const { profile, updateProfile, user } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
@@ -439,6 +441,39 @@ const CompanyProfile = () => {
     try {
       setLoading(true);
       await updateProfile(sanitizedFormData as any);
+
+      if (user) {
+        const syncedCompanyName = sanitizedFormData.company_name.trim() || null;
+        const syncedCompanyLogoUrl = sanitizedFormData.company_logo_url.trim() || null;
+
+        const { error: jobSyncError } = await supabase
+          .from('job_postings')
+          .update({
+            workplace_name: syncedCompanyName,
+            company_logo_url: syncedCompanyLogoUrl,
+          })
+          .eq('employer_id', user.id)
+          .is('deleted_at', null);
+
+        if (jobSyncError) throw jobSyncError;
+
+        try {
+          localStorage.removeItem(`parium_employer_jobs_v3_${user.id}`);
+          localStorage.removeItem(`job_seeker_applications_${user.id}`);
+          localStorage.removeItem('job_seeker_available_jobs_');
+        } catch {
+          // ignore cache cleanup errors
+        }
+
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] }),
+          queryClient.invalidateQueries({ queryKey: ['saved-jobs'] }),
+          queryClient.invalidateQueries({ queryKey: ['skipped-jobs'] }),
+          queryClient.invalidateQueries({ queryKey: ['available-jobs'] }),
+          queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] }),
+        ]);
+      }
 
       const updatedValues = {
         ...sanitizedFormData,

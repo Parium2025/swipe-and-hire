@@ -25,6 +25,7 @@ interface Application {
     job_image_url: string | null;
     positions_count: number | null;
     workplace_name: string | null;
+    company_logo_url: string | null;
   } | null;
 }
 
@@ -116,7 +117,8 @@ export function useMyApplicationsCache() {
             views_count,
             job_image_url,
             positions_count,
-            workplace_name
+            workplace_name,
+            company_logo_url
           )
         `)
         .eq('applicant_id', user.id)
@@ -197,6 +199,8 @@ export function useMyApplicationsCache() {
                     is_active: payload.new.is_active,
                     expires_at: payload.new.expires_at,
                     deleted_at: payload.new.deleted_at,
+                    workplace_name: payload.new.workplace_name,
+                    company_logo_url: payload.new.company_logo_url,
                   }
                 };
               }
