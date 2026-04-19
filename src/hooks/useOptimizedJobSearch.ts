@@ -504,15 +504,20 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   // Enrich jobs with company data and filter expired
   const enrichedJobs = useMemo(() => {
     const jobs = rawJobs
-      .map(job => ({
-        ...job,
-        company_name: companyData[job.employer_id]?.name || job.workplace_name || 'Okänt företag',
-        company_logo_url: companyData[job.employer_id]?.logo,
-        company_avg_rating: companyData[job.employer_id]?.avgRating,
-        company_review_count: companyData[job.employer_id]?.reviewCount || 0,
-        views_count: job.views_count || 0,
-        applications_count: job.applications_count || 0,
-      }))
+      .map(job => {
+        const syncedCompanyName = job.workplace_name?.trim();
+        const cachedCompanyName = companyData[job.employer_id]?.name?.trim();
+
+        return {
+          ...job,
+          company_name: syncedCompanyName || cachedCompanyName || 'Okänt företag',
+          company_logo_url: companyData[job.employer_id]?.logo,
+          company_avg_rating: companyData[job.employer_id]?.avgRating,
+          company_review_count: companyData[job.employer_id]?.reviewCount || 0,
+          views_count: job.views_count || 0,
+          applications_count: job.applications_count || 0,
+        };
+      })
       .filter(job => !getTimeRemaining(job.created_at, job.expires_at).isExpired);
 
     if (selectedLocations.length === 0) {
