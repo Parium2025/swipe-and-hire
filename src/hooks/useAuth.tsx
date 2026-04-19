@@ -1328,6 +1328,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         cleanedUpdates.profile_file_name = cleanedUpdates.cv_filename;
         delete cleanedUpdates.cv_filename;
       }
+
+      const hasCompanyNameUpdate = Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_name');
+      const hasCompanyLogoUpdate = Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_logo_url');
       
       const { error } = await supabase
         .from('profiles')
@@ -1342,6 +1345,72 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           variant: "destructive"
         });
         return { error };
+      }
+
+      if (hasCompanyNameUpdate || hasCompanyLogoUpdate) {
+        const jobPostingSyncUpdates: Record<string, string | null> = {};
+
+        if (hasCompanyNameUpdate) {
+          jobPostingSyncUpdates.workplace_name = typeof cleanedUpdates.company_name === 'string'
+            ? cleanedUpdates.company_name.trim() || null
+            : cleanedUpdates.company_name ?? null;
+        }
+
+        if (hasCompanyLogoUpdate) {
+          const nextCompanyLogo = typeof cleanedUpdates.company_logo_url === 'string'
+            ? cleanedUpdates.company_logo_url.trim() || null
+            : cleanedUpdates.company_logo_url ?? null;
+
+          jobPostingSyncUpdates.company_logo_url = nextCompanyLogo;
+          setPreloadedCompanyLogoUrl(nextCompanyLogo);
+
+          try {
+            if (nextCompanyLogo) sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, nextCompanyLogo);
+            else sessionStorage.removeItem(COMPANY_LOGO_CACHE_KEY);
+          } catch {
+            // ignore sessionStorage failures
+          }
+        }
+
+        if (Object.keys(jobPostingSyncUpdates).length > 0) {
+          const { error: jobSyncError } = await supabase
+            .from('job_postings')
+            .update(jobPostingSyncUpdates)
+            .eq('employer_id', user.id)
+            .is('deleted_at', null);
+
+          if (jobSyncError) {
+            console.error('Job posting company sync error:', jobSyncError);
+            return { error: jobSyncError };
+          }
+        }
+
+        try {
+          const cachePrefixes = [
+            `parium_employer_jobs_v3_${user.id}`,
+            `parium_employer_interviews_${user.id}`,
+            `parium_my_candidates_${user.id}`,
+            'job_seeker_available_jobs_',
+            'job_seeker_saved_jobs_',
+            'job_seeker_applications_',
+            'job_seeker_interviews_',
+            'parium_my_applications_cache_v2',
+            'parium_conversations_cache',
+            'parium_company_logo_url',
+          ];
+
+          for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+            const key = localStorage.key(i);
+            if (!key) continue;
+            if (cachePrefixes.some((prefix) => key === prefix || key.startsWith(prefix))) {
+              localStorage.removeItem(key);
+            }
+          }
+
+          localStorage.removeItem(CACHED_PROFILE_KEY);
+        } catch {
+          // ignore cache cleanup failures
+        }
       }
 
       // Refresh profile
