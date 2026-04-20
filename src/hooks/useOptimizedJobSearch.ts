@@ -4,401 +4,113 @@ import { supabase } from '@/integrations/supabase/client';
 import { useMemo, useEffect, useCallback, useRef } from 'react';
 import { getTimeRemaining } from '@/lib/date';
 import { expandSearchTerms, detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
+...
+  const employerIds = useMemo(() => {
+    return [...new Set(rawJobs.map(job => job.employer_id).filter(Boolean))];
+  }, [rawJobs]);
 
-export interface SearchJob {
-  id: string;
-  title: string;
-  description: string | null;
-  location: string | null;
-  workplace_city: string | null;
-  workplace_county: string | null;
-  workplace_municipality: string | null;
-  workplace_address: string | null;
-  workplace_name: string | null;
-  workplace_postal_code: string | null;
-  employment_type: string | null;
-  work_schedule: string | null;
-  salary_min: number | null;
-  salary_max: number | null;
-  salary_type: string | null;
-  salary_transparency: string | null;
-  positions_count: number | null;
-  occupation: string | null;
-  category: string | null;
-  pitch: string | null;
-  requirements: string | null;
-  benefits: string[] | null;
-  remote_work_possible: string | null;
-  work_location_type: string | null;
-  contact_email: string | null;
-  application_instructions: string | null;
-  job_image_url: string | null;
-  job_image_desktop_url: string | null;
-  employer_id: string;
-  is_active: boolean;
-  views_count: number;
-  applications_count: number;
-  created_at: string;
-  updated_at: string;
-  expires_at: string | null;
-  search_rank: number;
-  image_focus_position: string;
-  // Added after enrichment
-  company_name: string;
-  company_logo_url?: string;
-  company_avg_rating?: number;
-  company_review_count?: number;
-}
+  const jobIds = useMemo(() => {
+    return [...new Set(rawJobs.map(job => job.id).filter(Boolean))];
+  }, [rawJobs]);
 
-interface UseOptimizedJobSearchOptions {
-  searchQuery: string;
-  city: string;
-  employmentTypes: string[];
-  category: string;
-  subcategories: string[];
-  enabled?: boolean;
-}
-
-// ============================================
-// FUZZY SEARCH UTILITIES
-// ============================================
-
-// Normalize Swedish characters for fuzzy matching
-const normalizeSwedish = (text: string): string => {
-  return text
-    .toLowerCase()
-    .replace(/å/g, 'a')
-    .replace(/ä/g, 'a')
-    .replace(/ö/g, 'o')
-    .replace(/é/g, 'e')
-    .replace(/è/g, 'e');
-};
-
-// Levenshtein distance for typo tolerance
-const levenshteinDistance = (a: string, b: string): number => {
-  const matrix: number[][] = [];
-  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-  
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1
-        );
-      }
-    }
-  }
-  return matrix[b.length][a.length];
-};
-
-// Common Swedish job-related typo corrections
-const typoCorrections: Record<string, string[]> = {
-  // Yrkesrelaterade
-  'utveklare': ['utvecklare'],
-  'utvekalre': ['utvecklare'],
-  'utvecklre': ['utvecklare'],
-  'saljare': ['säljare'],
-  'saeljare': ['säljare'],
-  'seljare': ['säljare'],
-  'ingenjor': ['ingenjör'],
-  'ingenior': ['ingenjör'],
-  'ingenjorr': ['ingenjör'],
-  'sjukskotare': ['sjuksköterska'],
-  'sjukskoetrska': ['sjuksköterska'],
-  'sjukskoterska': ['sjuksköterska'],
-  'larare': ['lärare'],
-  'laerare': ['lärare'],
-  'lerare': ['lärare'],
-  'ekonom': ['ekonom', 'ekonomi'],
-  'bokforing': ['bokföring'],
-  'marknadsforing': ['marknadsföring'],
-  'projektledning': ['projektledare'],
-  'kundtjanst': ['kundtjänst'],
-  'lastbilschauffor': ['lastbilschaufför', 'lastbilsförare'],
-  'chauffeur': ['chaufför', 'förare'],
-  'forare': ['förare'],
-  'programerare': ['programmerare'],
-  'programmare': ['programmerare'],
-  'adminstrator': ['administratör'],
-  'assitent': ['assistent'],
-  'konsullt': ['konsult'],
-  'recptionist': ['receptionist'],
-  'chef': ['chef'],
-  'cheff': ['chef'],
-  'ledre': ['ledare'],
-  'teknker': ['tekniker'],
-  
-  // Stadsnamn-typos
-  'stocholm': ['stockholm', 'stockholms'],
-  'stockolm': ['stockholm', 'stockholms'],
-  'stokholm': ['stockholm', 'stockholms'],
-  'goteborg': ['göteborg', 'göteborgs'],
-  'goeteborg': ['göteborg', 'göteborgs'],
-  'malmo': ['malmö'],
-  'malmoe': ['malmö'],
-  'helsingbrog': ['helsingborg'],
-  'hellsingborg': ['helsingborg'],
-  'helsingbourg': ['helsingborg'],
-  'linkoping': ['linköping'],
-  'linkoepping': ['linköping'],
-  'jonkoping': ['jönköping'],
-  'jonkoeping': ['jönköping'],
-  'norrkoping': ['norrköping'],
-  'norkoping': ['norrköping'],
-  'orebro': ['örebro'],
-  'oerebro': ['örebro'],
-  'vasteras': ['västerås'],
-  'vaesteras': ['västerås'],
-  'umea': ['umeå'],
-  'lulea': ['luleå'],
-  'sundvall': ['sundsvall'],
-  'karlsatd': ['karlstad'],
-  'vaxjo': ['växjö'],
-  'vaexjoe': ['växjö'],
-  'uppsla': ['uppsala'],
-  'uppsal': ['uppsala'],
-};
-
-// Expand search with fuzzy matching for typos
-const expandSearchWithFuzzy = (searchTerm: string): string[] => {
-  const normalizedTerm = normalizeSwedish(searchTerm.trim());
-  const expandedTerms = new Set(expandSearchTerms(searchTerm));
-  
-  // Check for typo matches using Levenshtein distance
-  for (const [typo, corrections] of Object.entries(typoCorrections)) {
-    // Allow 1-2 character differences depending on word length
-    const maxDistance = normalizedTerm.length <= 4 ? 1 : 2;
-    if (levenshteinDistance(normalizedTerm, typo) <= maxDistance) {
-      corrections.forEach(c => expandedTerms.add(c));
-    }
-  }
-  
-  // Also check if any typo is a substring match (only for longer terms to avoid false matches)
-  if (normalizedTerm.length >= 4) {
-    for (const [typo, corrections] of Object.entries(typoCorrections)) {
-      if (normalizedTerm.includes(typo) || typo.includes(normalizedTerm)) {
-        corrections.forEach(c => expandedTerms.add(c));
-      }
-    }
-  }
-  
-  return [...expandedTerms];
-};
-
-// ============================================
-// MAIN HOOK
-// ============================================
-
-/**
- * High-performance job search hook using PostgreSQL full-text search.
- * Designed to handle 100,000+ jobs with sub-100ms query times.
- * 
- * Features:
- * - Full-text search with GIN indexes
- * - Fuzzy matching (typo tolerance)
- * - Category filtering at database level
- * - Salary filtering at database level
- * - Cursor-based pagination
- * - Real-time cache invalidation
- */
-export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
-  const { searchQuery, city, employmentTypes, category, subcategories, enabled = true } = options;
-  const queryClient = useQueryClient();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const selectedLocations = useMemo(
-    () => city.split(' | ').map((value) => value.trim()).filter(Boolean),
-    [city]
-  );
-  const hasMultipleLocations = selectedLocations.length > 1;
-  const primaryLocation = selectedLocations[0] || '';
-
-  // Determine if city is a county (län) for optimized query
-  // detectedLocationSearch is computed below but we need it here — use a ref pattern
-  const isCounty = primaryLocation.endsWith(' län');
-  const baseCityFilter = hasMultipleLocations ? '' : isCounty ? '' : primaryLocation;
-  const baseCountyFilter = hasMultipleLocations ? '' : isCounty ? primaryLocation : '';
-
-  // Detect if the search query is purely a location search
-  // Uses the comprehensive set of ALL known Swedish locations from smartSearch
-  // Supports PREFIX matching: "skån" → "skåne", "far" → "farsta", "lul" → "luleå"
-  const detectedLocationSearch = useMemo(() => {
-    const trimmed = searchQuery.trim().toLowerCase();
-    if (!trimmed || trimmed.length < 3) return null; // Need at least 3 chars for prefix
-
-    // 1. Exact match — fastest path
-    if (allKnownLocationTerms.has(trimmed)) return trimmed;
-
-    // 2. Prefix match — find the best (shortest) location that starts with the query
-    let bestMatch: string | null = null;
-    for (const term of allKnownLocationTerms) {
-      if (term.startsWith(trimmed) && (!bestMatch || term.length < bestMatch.length)) {
-        bestMatch = term;
-      }
-    }
-    if (bestMatch) return bestMatch;
-
-    // 3. Typo corrections for city names
-    const normalized = normalizeSwedish(trimmed);
-    for (const [typo, corrections] of Object.entries(typoCorrections)) {
-      if (normalized === typo || levenshteinDistance(normalized, typo) <= 1) {
-        for (const correction of corrections) {
-          if (allKnownLocationTerms.has(correction)) return correction;
-        }
-      }
-    }
-
-    // 4. Prefix match on normalized form (handles å/ä/ö typos like "skan" → "skåne")
-    for (const term of allKnownLocationTerms) {
-      if (normalizeSwedish(term).startsWith(normalized) && (!bestMatch || term.length < bestMatch.length)) {
-        bestMatch = term;
-      }
-    }
-    if (bestMatch) return bestMatch;
-
-    return null;
-  }, [searchQuery]);
-
-  // Detect salary search and expand terms with fuzzy matching
-  const { expandedSearchQuery, salarySearch } = useMemo(() => {
-    if (!searchQuery.trim()) return { expandedSearchQuery: '', salarySearch: null };
-    
-    // If it's a location search, don't use it as a text query — it goes to city/county filter
-    if (detectedLocationSearch) {
-      return { expandedSearchQuery: '', salarySearch: null };
-    }
-
-    // Check if it's a salary search first
-    const salaryResult = detectSalarySearch(searchQuery);
-    if (salaryResult.isSalarySearch) {
-      return { 
-        expandedSearchQuery: '', 
-        salarySearch: salaryResult 
-      };
-    }
-    
-    // Expand with fuzzy matching for typos
-    const expanded = expandSearchWithFuzzy(searchQuery);
-    return { 
-      expandedSearchQuery: expanded.join(' '),
-      salarySearch: null
-    };
-  }, [searchQuery, detectedLocationSearch]);
-
-  // Map employment type values to database codes
-  const employmentCodes = useMemo(() => {
-    return employmentTypes.map(type => {
-      const typeMap: Record<string, string> = {
-        'heltid': 'heltid',
-        'deltid': 'deltid',
-        'vikariat': 'vikariat',
-        'provanstallning': 'provanstallning',
-        'praktik': 'praktik',
-        'sommarjobb': 'sommarjobb',
-        'timanstallning': 'timanstallning',
-      };
-      return typeMap[type] || type;
-    });
-  }, [employmentTypes]);
-
-  // Build category filter for database
-  const categoryFilter = useMemo(() => {
-    // Use main category for database filter - handle both 'all' and 'all-categories'
-    if (category && category !== 'all' && category !== 'all-categories') {
-      return category;
-    }
-    return '';
-  }, [category]);
-
-  // Build category search terms for subcategories (added to full-text search)
-  const categorySearchTerms = useMemo(() => {
-    if (subcategories.length > 0) {
-      return subcategories.join(' ');
-    }
-    return '';
-  }, [subcategories]);
-
-  // Merge detected location search into city/county filters
-  const cityFilter = useMemo(() => {
-    if (detectedLocationSearch && !baseCityFilter) {
-      // If the detected location ends with "län", it's a county — don't use as city
-      if (detectedLocationSearch.endsWith(' län')) return '';
-      return detectedLocationSearch;
-    }
-    return baseCityFilter;
-  }, [detectedLocationSearch, baseCityFilter]);
-
-  const countyFilter = useMemo(() => {
-    if (detectedLocationSearch && !baseCountyFilter) {
-      if (detectedLocationSearch.endsWith(' län')) return detectedLocationSearch;
-    }
-    return baseCountyFilter;
-  }, [detectedLocationSearch, baseCountyFilter]);
-
-  // Combine all search terms
-  const fullSearchQuery = useMemo(() => {
-    const terms = [expandedSearchQuery, categorySearchTerms].filter(Boolean);
-    return terms.join(' ');
-  }, [expandedSearchQuery, categorySearchTerms]);
-
-  // Main search query using the optimized database function
-  const { data: rawJobs = [], isLoading, error, refetch } = useQuery({
-    queryKey: [
-      'optimized-job-search', 
-      fullSearchQuery, 
-      cityFilter, 
-      countyFilter, 
-      employmentCodes, 
-      categoryFilter,
-      salarySearch?.targetSalary,
-      salarySearch?.isMinimumSearch
-    ],
+  const { data: liveJobBranding = {} } = useQuery({
+    queryKey: ['search-job-live-branding', jobIds],
     queryFn: async () => {
-      // Cancel any in-flight request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      abortControllerRef.current = new AbortController();
+      if (jobIds.length === 0) return {};
 
-      // Use the optimized RPC function with all filters at database level
-      const { data, error } = await supabase.rpc('search_jobs', {
-        p_search_query: fullSearchQuery || null,
-        p_city: cityFilter || null,
-        p_county: countyFilter || null,
-        p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
-        p_category: categoryFilter || null,
-        p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
-        p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
-        p_limit: 100,
-        p_offset: 0,
-        p_cursor_created_at: null,
-      });
+      const { data, error } = await supabase
+        .from('job_postings')
+        .select(`
+          id,
+          title,
+          location,
+          workplace_city,
+          workplace_county,
+          workplace_municipality,
+          workplace_address,
+          workplace_name,
+          workplace_postal_code,
+          job_image_url,
+          job_image_desktop_url,
+          company_logo_url,
+          image_focus_position,
+          employment_type,
+          salary_min,
+          salary_max,
+          salary_type,
+          salary_transparency,
+          positions_count,
+          occupation,
+          work_schedule,
+          remote_work_possible,
+          work_location_type,
+          benefits,
+          description,
+          pitch,
+          requirements,
+          contact_email,
+          application_instructions,
+          updated_at,
+          created_at,
+          expires_at,
+          views_count,
+          applications_count,
+          is_active,
+          employer_id
+        `)
+        .in('id', jobIds);
 
-      if (error) {
-        console.error('Search jobs error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      return (data || []) as SearchJob[];
+      return (data || []).reduce<Record<string, Partial<SearchJob>>>((acc, job) => {
+        acc[job.id] = {
+          id: job.id,
+          title: job.title,
+          location: job.location,
+          workplace_city: job.workplace_city,
+          workplace_county: job.workplace_county,
+          workplace_municipality: job.workplace_municipality,
+          workplace_address: job.workplace_address,
+          workplace_name: job.workplace_name,
+          workplace_postal_code: job.workplace_postal_code,
+          job_image_url: job.job_image_url,
+          job_image_desktop_url: job.job_image_desktop_url,
+          company_logo_url: job.company_logo_url || undefined,
+          image_focus_position: job.image_focus_position,
+          employment_type: job.employment_type,
+          salary_min: job.salary_min,
+          salary_max: job.salary_max,
+          salary_type: job.salary_type,
+          salary_transparency: job.salary_transparency,
+          positions_count: job.positions_count,
+          occupation: job.occupation,
+          work_schedule: job.work_schedule,
+          remote_work_possible: job.remote_work_possible,
+          work_location_type: job.work_location_type,
+          benefits: job.benefits,
+          description: job.description,
+          pitch: job.pitch,
+          requirements: job.requirements,
+          contact_email: job.contact_email,
+          application_instructions: job.application_instructions,
+          updated_at: job.updated_at,
+          created_at: job.created_at,
+          expires_at: job.expires_at,
+          views_count: job.views_count || 0,
+          applications_count: job.applications_count || 0,
+          is_active: !!job.is_active,
+          employer_id: job.employer_id,
+        };
+        return acc;
+      }, {});
     },
-    enabled,
+    enabled: jobIds.length > 0,
     staleTime: 0,
     gcTime: Infinity,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   });
-
-  // 🚇 SINGLE TUNNEL: workplace_name + company_logo_url comes directly from job_postings
-  // (kept in sync via DB trigger sync_company_name_to_jobs). We only fetch company reviews
-  // here — never company name/logo from the profiles table, to avoid stale overrides.
-  const employerIds = useMemo(() => {
-    return [...new Set(rawJobs.map(job => job.employer_id).filter(Boolean))];
-  }, [rawJobs]);
 
   const { data: reviewsData = {} } = useQuery({
     queryKey: ['company-reviews-batch', employerIds],
@@ -432,19 +144,24 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     gcTime: Infinity,
   });
 
-  // Enrich jobs with review data and filter expired.
-  // company_name/company_logo_url come straight from the RPC (single tunnel).
+  // Enrich jobs with live job_postings data first, then reviews, then filter expired.
   const enrichedJobs = useMemo(() => {
     const jobs = rawJobs
       .map(job => {
-        return {
+        const liveJob = liveJobBranding[job.id] || {};
+        const mergedJob = {
           ...job,
-          company_name: job.workplace_name?.trim() || 'Okänt företag',
-          company_logo_url: (job as any).company_logo_url || undefined,
-          company_avg_rating: reviewsData[job.employer_id]?.avgRating,
-          company_review_count: reviewsData[job.employer_id]?.reviewCount || 0,
-          views_count: job.views_count || 0,
-          applications_count: job.applications_count || 0,
+          ...liveJob,
+        } as SearchJob;
+
+        return {
+          ...mergedJob,
+          company_name: mergedJob.workplace_name?.trim() || 'Okänt företag',
+          company_logo_url: mergedJob.company_logo_url || undefined,
+          company_avg_rating: reviewsData[mergedJob.employer_id]?.avgRating,
+          company_review_count: reviewsData[mergedJob.employer_id]?.reviewCount || 0,
+          views_count: mergedJob.views_count || 0,
+          applications_count: mergedJob.applications_count || 0,
         };
       })
       .filter(job => !getTimeRemaining(job.created_at, job.expires_at).isExpired);
@@ -453,12 +170,10 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       return jobs;
     }
 
-    // Single location: DB already filtered via cityFilter/countyFilter — skip client filter
     if (selectedLocations.length === 1) {
       return jobs;
     }
 
-    // Multiple locations: DB only filters on primary, client-filter the rest
     return jobs.filter((job) => {
       const searchableFields = [
         job.location,
@@ -478,7 +193,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         );
       });
     });
-  }, [rawJobs, reviewsData, selectedLocations]);
+  }, [rawJobs, liveJobBranding, reviewsData, selectedLocations]);
 
   // Real-time subscription for job updates.
   // job_postings is the SINGLE TUNNEL — when company info changes on profiles,
