@@ -181,6 +181,21 @@ class ImageCache {
   }
 
   /**
+   * Evict alla cache-poster vars URL innehåller ett substring (t.ex. user_id-mapp)
+   */
+  evictByPattern(pattern: string): number {
+    let count = 0;
+    for (const [key, cached] of this.cache.entries()) {
+      if (key.includes(pattern)) {
+        URL.revokeObjectURL(cached.objectUrl);
+        this.cache.delete(key);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /**
    * Rensa hela cachen (använd försiktigt)
    */
   clear(): void {
