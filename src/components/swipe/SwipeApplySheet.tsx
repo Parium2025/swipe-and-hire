@@ -33,7 +33,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
         tooltipSide="top"
         style={{
           display: '-webkit-box',
-          WebkitLineClamp: 3,
+          WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical',
           overflow: 'hidden',
         }}
