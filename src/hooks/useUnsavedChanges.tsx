@@ -57,14 +57,29 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
       setPendingNavigation(targetPath);
       setShowUnsavedDialog(true);
 
-      // BrowserRouter cannot truly block browser-back, so we immediately step
-      // forward again to keep the user on the editing page while the dialog is open.
+      // BrowserRouter cannot truly block browser-back/forward, so we immediately
+      // step back to the origin to keep the user on the editing page while the
+      // dialog is open. Using pushState avoids the brief URL flicker that
+      // history.go(1) can cause and works for both back and forward gestures.
       skipNextPopRef.current = true;
-      window.history.go(1);
+      window.history.pushState(null, '', originPath);
+    };
+
+    // Guard against tab close / reload while there are unsaved changes.
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChangesRef.current) {
+        e.preventDefault();
+        // Required for legacy browsers to actually show the prompt.
+        e.returnValue = '';
+      }
     };
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   const checkBeforeNavigation = (targetUrl: string): boolean => {
