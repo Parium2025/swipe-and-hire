@@ -123,6 +123,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [contactEmail, setContactEmail] = useState<string | undefined>();
+  const [extraDetails, setExtraDetails] = useState<ExtraJobDetails | null>(null);
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -138,7 +139,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch questions + contact email + check if already applied — in parallel
+        // Fetch questions + extended job details + check if already applied — in parallel
         const [questionsRes, jobRes, applicationRes] = await Promise.all([
           supabase
             .from('job_questions')
@@ -147,7 +148,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
             .order('order_index'),
           supabase
             .from('job_postings')
-            .select('contact_email')
+            .select('contact_email, workplace_address, workplace_postal_code, workplace_city, workplace_municipality, workplace_county, work_start_time, work_end_time')
             .eq('id', jobId)
             .single(),
           user ? supabase
@@ -161,8 +162,17 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
         if (questionsRes.data) {
           setQuestions(questionsRes.data as (JobQuestion & { id: string })[]);
         }
-        if (jobRes.data?.contact_email) {
-          setContactEmail(jobRes.data.contact_email);
+        if (jobRes.data) {
+          if (jobRes.data.contact_email) setContactEmail(jobRes.data.contact_email);
+          setExtraDetails({
+            workplace_address: jobRes.data.workplace_address,
+            workplace_postal_code: jobRes.data.workplace_postal_code,
+            workplace_city: jobRes.data.workplace_city,
+            workplace_municipality: jobRes.data.workplace_municipality,
+            workplace_county: jobRes.data.workplace_county,
+            work_start_time: jobRes.data.work_start_time,
+            work_end_time: jobRes.data.work_end_time,
+          });
         }
         if (applicationRes.data) {
           setHasAlreadyApplied(true);
