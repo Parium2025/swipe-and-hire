@@ -319,7 +319,7 @@ const SearchJobs = memo(() => {
 
   const searchJobIds = useMemo(() => searchJobs.map((job) => job.id).filter(Boolean), [searchJobs]);
 
-  const { data: liveJobRows = [] } = useQuery({
+  const { data: liveJobRows = [], isFetched: liveRowsFetched } = useQuery({
     queryKey: ['search-jobs-direct-rows', searchJobIds],
     queryFn: async (): Promise<LiveSearchJobRow[]> => {
       if (searchJobIds.length === 0) return [];
@@ -341,34 +341,38 @@ const SearchJobs = memo(() => {
     refetchOnReconnect: true,
   });
 
+  const isLiveRowsReady = searchJobIds.length === 0 || liveRowsFetched;
+
   const jobs = useMemo(() => {
-    if (searchJobs.length === 0) return searchJobs;
+    if (searchJobs.length === 0 || !isLiveRowsReady) return [];
 
     const liveRowsById = new Map(liveJobRows.map((job) => [job.id, job]));
 
-    return searchJobs.map((job) => {
+    return searchJobs.flatMap((job) => {
       const liveRow = liveRowsById.get(job.id);
-      if (!liveRow) return job;
+      if (!liveRow) return [];
 
       const workplaceName = liveRow.workplace_name?.trim() || job.workplace_name?.trim() || job.company_name;
 
-      return {
+      return [{
         ...job,
         ...liveRow,
         workplace_name: workplaceName,
         company_name: workplaceName || 'Okänt företag',
         company_logo_url: liveRow.company_logo_url ?? job.company_logo_url,
-      };
+      }];
     });
-  }, [searchJobs, liveJobRows]);
+  }, [searchJobs, liveJobRows, isLiveRowsReady]);
+
+  const isSearchResultsLoading = isLoading || !isLiveRowsReady;
 
   // Mark initial load as done once jobs finish loading for the first time
   useEffect(() => {
-    if (!isLoading && !initialLoadDone) {
+    if (!isSearchResultsLoading && !initialLoadDone) {
       const t = setTimeout(() => setInitialLoadDone(true), 150);
       return () => clearTimeout(t);
     }
-  }, [isLoading, initialLoadDone]);
+  }, [isSearchResultsLoading, initialLoadDone]);
 
   // Prefetch reviews and company profiles for all companies in results for instant dialog load
   const prefetchReviews = useBatchPrefetchReviews();
