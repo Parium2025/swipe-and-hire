@@ -129,17 +129,15 @@ const SearchJobs = memo(() => {
     setJobToUnsave(null);
   }, [jobToUnsave, unsaveJob]);
 
-  // Handler to apply a saved search - sets all the filter states
-  // 🔥 PREMIUM: Sätter BÅDE searchInput OCH debouncedSearch direkt för omedelbar respons
+  // Apply a saved search: set both searchInput and debouncedSearch immediately
+  // to bypass the 300ms debounce delay for instant results.
   const handleApplySavedSearch = useCallback((criteria: SearchCriteria) => {
-    // Invalidera cache
     queryClient.removeQueries({ queryKey: ['optimized-job-search'] });
-    
+
     const newSearchQuery = criteria.search_query || '';
-    
-    // 🔥 CRITICAL: Sätt BÅDA för att skippa debounce-fördröjning
+
     setSearchInput(newSearchQuery);
-    setDebouncedSearch(newSearchQuery); // Omedelbar sökning utan 300ms väntan
+    setDebouncedSearch(newSearchQuery);
     
     // City/county: if saved search has county, set it as city (useOptimizedJobSearch detects " län" suffix)
     const cityValue = criteria.county || criteria.city || '';
@@ -316,7 +314,7 @@ const SearchJobs = memo(() => {
     }
   }, [jobImageUrls]);
 
-  // 🔥 PREFETCH: Seed job data into React Query cache for instant JobView rendering
+  // Seed job data into React Query cache for instant JobView rendering
   useEffect(() => {
     if (jobs.length > 0) {
       seedJobsFromSearch(jobs);
@@ -399,9 +397,9 @@ const SearchJobs = memo(() => {
     }));
   }, [filteredAndSortedJobs, skippedJobIds]);
 
-  // Find matching companies for smart search suggestion
-  // 🔥 CRITICAL: Använd debouncedSearch OCH kontrollera att det matchar searchInput
-  // Detta förhindrar blinkande företagsförslag vid sparad sökning
+  // Find matching companies for smart search suggestion.
+  // Use debouncedSearch and verify it matches searchInput to prevent
+  // flickering company suggestions when applying a saved search.
   const matchingCompany = useMemo(() => {
     // Visa bara om debounce är klar (debouncedSearch === searchInput)
     // och vi inte är mitt i en sökning
