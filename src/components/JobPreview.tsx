@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Clock, Euro, Building2, Users, Heart, X, FileText, Video, CheckSquare, List } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { formatSalary as formatSalaryShared } from '@/lib/jobViewHelpers';
 
 interface JobQuestion {
   id?: string;
@@ -56,14 +57,11 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
   };
 
 
-  const formatSalary = (min?: string, max?: string) => {
-    if (min && max) {
-      return `${parseInt(min).toLocaleString()} - ${parseInt(max).toLocaleString()} kr/mån`;
-    }
-    if (min) return `Från ${parseInt(min).toLocaleString()} kr/mån`;
-    if (max) return `Upp till ${parseInt(max).toLocaleString()} kr/mån`;
-    return null;
-  };
+  const formatSalary = (min?: string, max?: string) =>
+    formatSalaryShared(
+      min ? parseInt(min) : undefined,
+      max ? parseInt(max) : undefined
+    );
 
   const renderQuestionInput = (question: JobQuestion) => {
     const questionId = question.id || `temp_${question.order_index}`;
