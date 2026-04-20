@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
-import { getMediaUrl, type MediaType } from '@/lib/mediaManager';
+import { getMediaUrl, type MediaType, type ImageTransformOptions } from '@/lib/mediaManager';
 import { imageCache } from '@/lib/imageCache';
 
 // In-memory cache för signed URLs (överlever re-renders och tab switches)
@@ -8,9 +8,13 @@ const signedUrlMemoryCache = new Map<string, { url: string; expiresAt: number }>
 // Track pågående laddningar globalt för att undvika duplicerade requests
 const ongoingLoads = new Map<string, Promise<string | null>>();
 
-// LocalStorage cache key
-const getCacheKey = (storagePath: string, mediaType: MediaType) => 
-  `media_url_${mediaType}_${storagePath}`;
+// Bygg en kort signatur av transform-options för cache-key
+const transformSig = (t?: ImageTransformOptions) =>
+  t ? `_w${t.width ?? ''}h${t.height ?? ''}q${t.quality ?? ''}r${t.resize ?? ''}` : '';
+
+// LocalStorage cache key (transform ingår så samma bild i olika storlekar inte krockar)
+const getCacheKey = (storagePath: string, mediaType: MediaType, transform?: ImageTransformOptions) => 
+  `media_url_${mediaType}${transformSig(transform)}_${storagePath}`;
 
 const shouldWarmBlobCache = (mediaType: MediaType) =>
   mediaType === 'profile-image' ||
