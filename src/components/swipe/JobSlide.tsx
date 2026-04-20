@@ -402,11 +402,12 @@ export const JobSlide = memo(function JobSlide({
       return;
     }
 
-    // Check if tap was on the title area
+    // Check if tap was on the title or company name area
     const isTapOnTitle = event.target instanceof Element && Boolean(event.target.closest('[data-title-tap-zone]'));
+    const isTapOnCompany = event.target instanceof Element && Boolean(event.target.closest('[data-company-tap-zone]'));
 
-    if (isTapOnTitle) {
-      // Tap on title → show tooltip (don't open job info)
+    if (isTapOnTitle || isTapOnCompany) {
+      // Tap on title/company → show tooltip (don't open job info)
       armTapHint();
       return;
     }
@@ -539,8 +540,15 @@ export const JobSlide = memo(function JobSlide({
                     <Building2 className="h-3.5 w-3.5 shrink-0" />
                     <TruncatedText
                       text={nextDisplayCompanyName}
-                      className="min-w-0 flex-1 whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium"
+                      className="min-w-0 flex-1 text-sm font-medium"
                       tooltipSide="bottom"
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                      }}
                     />
                   </Badge>
                 </div>
@@ -743,13 +751,20 @@ export const JobSlide = memo(function JobSlide({
                 )}
               </div>
             )}
-            <div className="flex justify-center">
+            <div className="flex justify-center" data-company-tap-zone>
               <Badge variant="glass" className="inline-flex max-w-[80%] min-w-0 items-center gap-1.5 border-white/15 px-3 py-1 text-white">
                 <Building2 className="h-3.5 w-3.5 shrink-0" />
                 <TruncatedText
                   text={displayCompanyName}
-                  className="min-w-0 flex-1 whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium"
+                  className="min-w-0 flex-1 text-sm font-medium"
                   tooltipSide="bottom"
+                  style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    wordBreak: 'break-word',
+                  }}
                 />
               </Badge>
             </div>
