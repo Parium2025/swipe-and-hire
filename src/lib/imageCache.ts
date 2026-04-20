@@ -39,10 +39,13 @@ class ImageCache {
         typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
       );
       const isStorageObject = parsed.pathname.includes('/storage/v1/object/');
+      const version = parsed.searchParams.get('v') || parsed.searchParams.get('version') || parsed.searchParams.get('t');
 
       // För storage-bilder ignorerar vi query/hash så samma fil får samma cache-nyckel
       if (isStorageObject) {
-        return `${parsed.origin}${parsed.pathname}`;
+        return version
+          ? `${parsed.origin}${parsed.pathname}?v=${version}`
+          : `${parsed.origin}${parsed.pathname}`;
       }
 
       // För andra URL:er behåll full URL (inkl query) för säkerhet
