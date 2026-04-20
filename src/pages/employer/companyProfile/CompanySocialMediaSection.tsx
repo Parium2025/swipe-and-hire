@@ -198,7 +198,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
           </div>
 
           <Input
-            placeholder="Klistra in din sociala medier länk här"
+            placeholder="Klistra in din länk"
             value={newSocialLink.url}
             onChange={(e) => setNewSocialLink(prev => ({ ...prev, url: e.target.value }))}
             className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
