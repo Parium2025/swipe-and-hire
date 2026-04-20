@@ -560,7 +560,7 @@ const Index = () => {
     );
   }
 
-  // Show job seeker swipe view for job seekers
+  // Fallback for job seekers: use the same live job pipeline as /search-jobs
   return (
     <div className="min-h-screen smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
@@ -595,7 +595,7 @@ const Index = () => {
       </header>
       
       <main className="py-8">
-        <JobSwipe />
+        <SearchJobs />
       </main>
     </div>
   );
