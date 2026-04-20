@@ -285,56 +285,9 @@ const SearchJobs = memo(() => {
     enabled: true,
   });
 
-  const searchJobIds = useMemo(() => searchJobs.map((job) => job.id).filter(Boolean), [searchJobs]);
-
-  const { data: liveJobRows = [], isFetched: liveRowsFetched } = useQuery({
-    queryKey: ['search-jobs-direct-rows', searchJobIds],
-    queryFn: async (): Promise<LiveSearchJobRow[]> => {
-      if (searchJobIds.length === 0) return [];
-
-      const { data, error } = await supabase
-        .from('job_postings')
-        .select('id, title, description, location, workplace_city, employment_type, salary_min, salary_max, salary_type, occupation, work_schedule, remote_work_possible, positions_count, workplace_name, work_location_type, salary_transparency, benefits, company_logo_url, job_image_url, image_focus_position, employer_id, is_active, views_count, applications_count, created_at, updated_at, expires_at')
-        .in('id', searchJobIds)
-        .is('deleted_at', null);
-
-      if (error) throw error;
-      return (data || []) as LiveSearchJobRow[];
-    },
-    enabled: searchJobIds.length > 0,
-    staleTime: 0,
-    gcTime: 5 * 60 * 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
-  });
-
-  // Merge live DB rows in when they land — but never block initial render.
-  // This keeps the original instant-cache behavior while still overriding
-  // stale branding (workplace_name / company_logo_url) when fresh data arrives.
-  const jobs = useMemo(() => {
-    if (searchJobs.length === 0) return [];
-
-    const liveRowsById = new Map(liveJobRows.map((job) => [job.id, job]));
-
-    return searchJobs.map((job) => {
-      const liveRow = liveRowsById.get(job.id);
-      if (!liveRow) return job;
-
-      const workplaceName =
-        liveRow.workplace_name?.trim() ||
-        job.workplace_name?.trim() ||
-        job.company_name;
-
-      return {
-        ...job,
-        ...liveRow,
-        workplace_name: workplaceName,
-        company_name: workplaceName || job.company_name || 'Okänt företag',
-        company_logo_url: liveRow.company_logo_url ?? job.company_logo_url,
-      };
-    });
-  }, [searchJobs, liveJobRows]);
+  // Branding (workplace_name, company_logo_url) is already merged in by
+  // useOptimizedJobSearch via useLiveJobBranding — no extra fetch needed here.
+  const jobs = searchJobs;
 
   const isSearchResultsLoading = isLoading;
 
