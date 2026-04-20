@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyReviewsCache } from "@/hooks/useCompanyReviewsCache";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { TruncatedText } from "@/components/TruncatedText";
 
 interface CompanyProfileDialogProps {
   open: boolean;
@@ -472,9 +473,20 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                         </div>
                       </div>
                       {review.comment && (
-                        <p className="text-sm text-white mt-2 break-words [overflow-wrap:anywhere] overflow-hidden">
-                          <span className="text-white">Kommentar:</span> {review.comment}
-                        </p>
+                        <div className="text-sm text-white mt-2">
+                          <span className="text-white">Kommentar: </span>
+                          <TruncatedText
+                            text={review.comment}
+                            className="text-white inline-block align-bottom max-w-full [overflow-wrap:anywhere]"
+                            tooltipSide="top"
+                            style={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}
+                          />
+                        </div>
                       )}
                     </div>
                   ))

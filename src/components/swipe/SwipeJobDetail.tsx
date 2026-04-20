@@ -353,7 +353,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                     tooltipSide="bottom"
                     style={{
                       display: '-webkit-box',
-                      WebkitLineClamp: 3,
+                      WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                     }}
@@ -427,7 +427,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                             tooltipSide="top"
                             style={{
                               display: '-webkit-box',
-                              WebkitLineClamp: 3,
+                              WebkitLineClamp: 2,
                               WebkitBoxOrient: 'vertical',
                               overflow: 'hidden',
                             }}
