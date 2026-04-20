@@ -451,13 +451,15 @@ export const useJobSeekerBackgroundSync = () => {
       )
       .subscribe();
 
-    // Realtime för nya jobb (så jobbsökare ser nya annonser direkt)
+    // Realtime för jobb (INSERT + UPDATE + DELETE) - så företagsnamn/logo
+    // som ändras via DB-triggern sync_company_name_to_jobs propageras direkt
+    // till alla jobblistor (sök, swipe, sparade jobb, mina ansökningar).
     const newJobsChannel = supabase
       .channel('job-seeker-new-jobs')
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'job_postings',
         },
@@ -465,8 +467,49 @@ export const useJobSeekerBackgroundSync = () => {
           // Force refresh available jobs cache
           localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
           preloadAvailableJobs();
+          // Refetch ansökningar (job_postings joinas in där) så company_logo_url uppdateras
+          preloadMyApplications(user.id);
           queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
           queryClient.invalidateQueries({ queryKey: ['jobs'] });
+          queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
+          // Sök-sidan och swipe lyssnar via 'optimized-job-search' nyckeln
+          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
+          // Job-detail prefetch cache (per-job snapshot)
+          queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
+          queryClient.invalidateQueries({ queryKey: ['job-details'] });
+        }
+      )
+      .subscribe();
+
+    // Realtime för profiles - om arbetsgivaren ändrar namn/logo i sin profil
+    // triggas DB-funktionen sync_company_name_to_jobs som uppdaterar job_postings,
+    // men vi lyssnar även här direkt för att vara dubbelt säkra.
+    const employerProfilesChannel = supabase
+      .channel('job-seeker-employer-profiles')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+        },
+        (payload: any) => {
+          const newRow = payload?.new ?? {};
+          const oldRow = payload?.old ?? {};
+          const brandingChanged =
+            newRow.company_name !== oldRow.company_name ||
+            newRow.company_logo_url !== oldRow.company_logo_url;
+          if (!brandingChanged) return;
+
+          localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
+          preloadAvailableJobs();
+          preloadMyApplications(user.id);
+          queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
+          queryClient.invalidateQueries({ queryKey: ['jobs'] });
+          queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
+          queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
+          queryClient.invalidateQueries({ queryKey: ['job-details'] });
         }
       )
       .subscribe();
@@ -493,6 +536,7 @@ export const useJobSeekerBackgroundSync = () => {
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(newJobsChannel);
+      supabase.removeChannel(employerProfilesChannel);
       supabase.removeChannel(interviewsChannel);
     };
   }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadAvailableJobs, preloadCandidateInterviews, queryClient]);
