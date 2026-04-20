@@ -319,7 +319,7 @@ const SearchJobs = memo(() => {
 
   const searchJobIds = useMemo(() => searchJobs.map((job) => job.id).filter(Boolean), [searchJobs]);
 
-  const { data: liveJobRows = [] } = useQuery({
+  const { data: liveJobRows = [], isFetched: liveRowsFetched } = useQuery({
     queryKey: ['search-jobs-direct-rows', searchJobIds],
     queryFn: async (): Promise<LiveSearchJobRow[]> => {
       if (searchJobIds.length === 0) return [];
@@ -341,34 +341,38 @@ const SearchJobs = memo(() => {
     refetchOnReconnect: true,
   });
 
+  const isLiveRowsReady = searchJobIds.length === 0 || liveRowsFetched;
+
   const jobs = useMemo(() => {
-    if (searchJobs.length === 0) return searchJobs;
+    if (searchJobs.length === 0 || !isLiveRowsReady) return [];
 
     const liveRowsById = new Map(liveJobRows.map((job) => [job.id, job]));
 
-    return searchJobs.map((job) => {
+    return searchJobs.flatMap((job) => {
       const liveRow = liveRowsById.get(job.id);
-      if (!liveRow) return job;
+      if (!liveRow) return [];
 
       const workplaceName = liveRow.workplace_name?.trim() || job.workplace_name?.trim() || job.company_name;
 
-      return {
+      return [{
         ...job,
         ...liveRow,
         workplace_name: workplaceName,
         company_name: workplaceName || 'Okänt företag',
         company_logo_url: liveRow.company_logo_url ?? job.company_logo_url,
-      };
+      }];
     });
-  }, [searchJobs, liveJobRows]);
+  }, [searchJobs, liveJobRows, isLiveRowsReady]);
+
+  const isSearchResultsLoading = isLoading || !isLiveRowsReady;
 
   // Mark initial load as done once jobs finish loading for the first time
   useEffect(() => {
-    if (!isLoading && !initialLoadDone) {
+    if (!isSearchResultsLoading && !initialLoadDone) {
       const t = setTimeout(() => setInitialLoadDone(true), 150);
       return () => clearTimeout(t);
     }
-  }, [isLoading, initialLoadDone]);
+  }, [isSearchResultsLoading, initialLoadDone]);
 
   // Prefetch reviews and company profiles for all companies in results for instant dialog load
   const prefetchReviews = useBatchPrefetchReviews();
@@ -488,7 +492,7 @@ const SearchJobs = memo(() => {
     // och vi inte är mitt i en sökning
     if (!debouncedSearch.trim() || debouncedSearch.length < 2) return null;
     if (debouncedSearch !== searchInput) return null; // Debounce pågår - visa inget
-    if (isLoading) return null; // Fortfarande laddar - visa inget
+    if (isSearchResultsLoading) return null; // Fortfarande laddar - visa inget
     
     const searchLower = debouncedSearch.toLowerCase().trim();
     
@@ -519,7 +523,7 @@ const SearchJobs = memo(() => {
     // Return first matching company
     const matches = Array.from(uniqueCompanies.values());
     return matches.length > 0 ? matches[0] : null;
-  }, [jobs, debouncedSearch, searchInput, isLoading]);
+  }, [jobs, debouncedSearch, searchInput, isSearchResultsLoading]);
 
   // Company data for dropdown-selected company filters
   const selectedCompaniesData = useMemo(() => {
@@ -753,7 +757,7 @@ const SearchJobs = memo(() => {
           )}
         </div>
         
-        {isLoading ? (
+        {isSearchResultsLoading ? (
           // Show skeletons during any loading state (initial, back-navigation, filter change)
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -876,7 +880,7 @@ const SearchJobs = memo(() => {
         {!initialLoadDone && !(isTouchCapable && swipeModeActive) && <JobListSkeleton key="list-skel" />}
       </AnimatePresence>
       {/* Swipe Mode Fullscreen Overlay */}
-      {isTouchCapable && swipeModeActive && !isLoading && (
+      {isTouchCapable && swipeModeActive && !isSearchResultsLoading && (
         <SwipeFullscreen
           jobs={swipeJobs}
           appliedJobIds={appliedJobIds}
