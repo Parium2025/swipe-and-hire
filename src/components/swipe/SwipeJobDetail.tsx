@@ -346,12 +346,16 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
               onTouchCancel={handleTouchEnd}
             >
               <div className="px-1 pr-12 pb-1">
-                <div className="flex items-center gap-2 mt-1 text-white text-sm">
-                  <span className="font-medium">{displayCompanyName}</span>
+                <div className="flex items-start gap-2 mt-1 text-white text-sm min-w-0">
+                  <TruncatedText
+                    text={displayCompanyName}
+                    className="font-medium line-clamp-3 break-words min-w-0"
+                    tooltipSide="bottom"
+                  />
                   {job.location && (
                     <>
-                      <span className="text-white/50">·</span>
-                      <span>{job.location}</span>
+                      <span className="text-white/50 shrink-0">·</span>
+                      <span className="shrink-0">{job.location}</span>
                     </>
                   )}
                 </div>
@@ -409,9 +413,13 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                       )}
 
                       {displayCompanyName && (
-                        <div className="text-white text-sm">
+                        <div className="text-white text-sm min-w-0">
                           <span className="mr-1.5">Bolagsnamn:</span>
-                          <span className="font-medium">{cap(displayCompanyName)}</span>
+                          <TruncatedText
+                            text={cap(displayCompanyName)}
+                            className="font-medium line-clamp-3 break-words inline-block align-bottom min-w-0"
+                            tooltipSide="top"
+                          />
                         </div>
                       )}
 

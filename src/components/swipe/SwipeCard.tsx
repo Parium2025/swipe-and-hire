@@ -5,6 +5,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
+import { TruncatedText } from '@/components/TruncatedText';
 
 export interface SwipeJob {
   id: string;
@@ -205,7 +206,12 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
 
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-        <p className="text-white/80 font-medium text-sm">{displayCompanyName}</p>
+        <TruncatedText
+          text={displayCompanyName}
+          className="text-white/80 font-medium text-sm line-clamp-3 break-words"
+          tooltipSide="top"
+        />
+
         <h2
           className="text-xl font-bold text-white leading-snug tracking-tight mt-0.5"
           style={{
