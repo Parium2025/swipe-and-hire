@@ -16,6 +16,8 @@ import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
 import { authSplashEvents } from '@/lib/authSplashEvents';
 import { useSessionManager, clearSessionToken } from '@/hooks/useSessionManager';
+import { useQueryClient } from '@tanstack/react-query';
+import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -157,6 +159,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
  
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const CACHED_PROFILE_KEY = 'parium_cached_profile';
