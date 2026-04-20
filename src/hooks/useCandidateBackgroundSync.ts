@@ -424,14 +424,15 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
     });
   }
 
-  // Förladda bilder
+  // Förladda bilder — matcha CandidateAvatar (40px, 2x retina)
+  const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
   const imagePaths = items
     .map((i) => i.profile_image_url)
     .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
     .slice(0, 25);
 
   if (imagePaths.length > 0) {
-    Promise.all(imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {}))).catch(() => {});
+    Promise.all(imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}))).catch(() => {});
   }
 }
 
