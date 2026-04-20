@@ -139,17 +139,17 @@ const SearchJobs = memo(() => {
     setJobToUnsave(null);
   }, [jobToUnsave, unsaveJob]);
 
-  // Handler to apply a saved search - sets all the filter states.
-  // Sets BOTH searchInput AND debouncedSearch directly to skip the 300ms debounce.
+  // Handler to apply a saved search - sets all the filter states
+  // 🔥 PREMIUM: Sätter BÅDE searchInput OCH debouncedSearch direkt för omedelbar respons
   const handleApplySavedSearch = useCallback((criteria: SearchCriteria) => {
-    // Invalidate cache so a stale result doesn't flash
+    // Invalidera cache
     queryClient.removeQueries({ queryKey: ['optimized-job-search'] });
-
+    
     const newSearchQuery = criteria.search_query || '';
-
-    // Set both states to bypass the debounce delay
+    
+    // 🔥 CRITICAL: Sätt BÅDA för att skippa debounce-fördröjning
     setSearchInput(newSearchQuery);
-    setDebouncedSearch(newSearchQuery);
+    setDebouncedSearch(newSearchQuery); // Omedelbar sökning utan 300ms väntan
     
     // City/county: if saved search has county, set it as city (useOptimizedJobSearch detects " län" suffix)
     const cityValue = criteria.county || criteria.city || '';
@@ -326,7 +326,7 @@ const SearchJobs = memo(() => {
     }
   }, [jobImageUrls]);
 
-  // Seed job data into React Query cache for instant JobView rendering
+  // 🔥 PREFETCH: Seed job data into React Query cache for instant JobView rendering
   useEffect(() => {
     if (jobs.length > 0) {
       seedJobsFromSearch(jobs);
@@ -409,9 +409,9 @@ const SearchJobs = memo(() => {
     }));
   }, [filteredAndSortedJobs, skippedJobIds]);
 
-  // Find matching companies for smart search suggestion.
-  // Use debouncedSearch AND verify it matches searchInput to prevent
-  // company suggestions from flashing when applying a saved search.
+  // Find matching companies for smart search suggestion
+  // 🔥 CRITICAL: Använd debouncedSearch OCH kontrollera att det matchar searchInput
+  // Detta förhindrar blinkande företagsförslag vid sparad sökning
   const matchingCompany = useMemo(() => {
     // Visa bara om debounce är klar (debouncedSearch === searchInput)
     // och vi inte är mitt i en sökning
@@ -487,12 +487,6 @@ const SearchJobs = memo(() => {
     setSortBy('newest');
   }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, setSortBy]);
 
-  // Reset the load-more lock as soon as React commits the new displayCount.
-  // This is more reliable than a setTimeout, which could race with fast scrolling.
-  useEffect(() => {
-    isLoadingMoreRef.current = false;
-  }, [displayCount]);
-
   // Infinite scroll with IntersectionObserver
   useEffect(() => {
     const trigger = loadMoreTriggerRef.current;
@@ -503,12 +497,17 @@ const SearchJobs = memo(() => {
         const [entry] = entries;
         if (entry.isIntersecting && hasMoreJobs && !isLoadingMoreRef.current) {
           isLoadingMoreRef.current = true;
-          setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
+          setDisplayCount(prev => {
+            const next = Math.min(prev + loadMoreSize, filteredAndSortedJobs.length);
+            // Reset loading flag after state update
+            setTimeout(() => { isLoadingMoreRef.current = false; }, 100);
+            return next;
+          });
         }
       },
-      {
+      { 
         rootMargin: '200px', // Start loading 200px before reaching the trigger
-        threshold: 0.1,
+        threshold: 0.1 
       }
     );
 
