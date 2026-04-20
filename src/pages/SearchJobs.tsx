@@ -76,17 +76,7 @@ interface Job {
   };
 }
 
-// Pure utility — moved outside component to avoid re-creation on every render
-const formatSalary = (min?: number, max?: number) => {
-  if (min && max) {
-    return `${min.toLocaleString()} - ${max.toLocaleString()} kr/mån`;
-  } else if (min) {
-    return `Från ${min.toLocaleString()} kr/mån`;
-  } else if (max) {
-    return `Upp till ${max.toLocaleString()} kr/mån`;
-  }
-  return 'Enligt överenskommelse';
-};
+// formatSalary is centralized in @/lib/jobViewHelpers — no local copy needed.
 
 const SEARCH_JOBS_DISPLAY_COUNT_KEY = 'parium-search-display-count';
 
