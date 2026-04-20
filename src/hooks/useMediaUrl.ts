@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
-import { getMediaUrl, type MediaType } from '@/lib/mediaManager';
+import { getMediaUrl, type MediaType, type ImageTransformOptions } from '@/lib/mediaManager';
 import { imageCache } from '@/lib/imageCache';
 
 // In-memory cache för signed URLs (överlever re-renders och tab switches)
@@ -8,9 +8,13 @@ const signedUrlMemoryCache = new Map<string, { url: string; expiresAt: number }>
 // Track pågående laddningar globalt för att undvika duplicerade requests
 const ongoingLoads = new Map<string, Promise<string | null>>();
 
-// LocalStorage cache key
-const getCacheKey = (storagePath: string, mediaType: MediaType) => 
-  `media_url_${mediaType}_${storagePath}`;
+// Bygg en kort signatur av transform-options för cache-key
+const transformSig = (t?: ImageTransformOptions) =>
+  t ? `_w${t.width ?? ''}h${t.height ?? ''}q${t.quality ?? ''}r${t.resize ?? ''}` : '';
+
+// LocalStorage cache key (transform ingår så samma bild i olika storlekar inte krockar)
+const getCacheKey = (storagePath: string, mediaType: MediaType, transform?: ImageTransformOptions) => 
+  `media_url_${mediaType}${transformSig(transform)}_${storagePath}`;
 
 const shouldWarmBlobCache = (mediaType: MediaType) =>
   mediaType === 'profile-image' ||
@@ -40,14 +44,15 @@ function storeSignedUrlCache(
 function getOrCreateSignedUrlLoad(
   storagePath: string,
   mediaType: MediaType,
-  expiresInSeconds: number
+  expiresInSeconds: number,
+  transform?: ImageTransformOptions
 ) {
-  const cacheKey = getCacheKey(storagePath, mediaType);
+  const cacheKey = getCacheKey(storagePath, mediaType, transform);
   const existing = ongoingLoads.get(cacheKey);
   if (existing) return existing;
 
   const now = Date.now();
-  const promise = getMediaUrl(storagePath, mediaType, expiresInSeconds)
+  const promise = getMediaUrl(storagePath, mediaType, expiresInSeconds, transform)
     .then((signedUrl) => {
       if (signedUrl) {
         storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now);
@@ -63,8 +68,8 @@ function getOrCreateSignedUrlLoad(
 }
 
 // Hämta cached URL synkront (för initial render utan flicker)
-function getCachedUrlSync(storagePath: string, mediaType: MediaType): string | null {
-  const cacheKey = getCacheKey(storagePath, mediaType);
+function getCachedUrlSync(storagePath: string, mediaType: MediaType, transform?: ImageTransformOptions): string | null {
+  const cacheKey = getCacheKey(storagePath, mediaType, transform);
   const now = Date.now();
 
   const resolveSignedUrl = (signedUrl: string | null | undefined): string | null => {
@@ -113,12 +118,21 @@ function getCachedUrlSync(storagePath: string, mediaType: MediaType): string | n
   return null;
 }
 
-export function useMediaUrl(storagePath: string | null | undefined, mediaType: MediaType, expiresInSeconds: number = 86400) {
+export function useMediaUrl(
+  storagePath: string | null | undefined,
+  mediaType: MediaType,
+  expiresInSeconds: number = 86400,
+  transform?: ImageTransformOptions
+) {
+  // Stabil signatur för att undvika onödiga re-fetches när transform-objektet ändrar referens
+  const transformKey = transformSig(transform);
+
   // Hämta cached URL synkront för initial render (INGEN flicker vid tab switch)
   const cachedUrl = useMemo(() => {
     if (!storagePath) return null;
-    return getCachedUrlSync(storagePath, mediaType);
-  }, [storagePath, mediaType]);
+    return getCachedUrlSync(storagePath, mediaType, transform);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storagePath, mediaType, transformKey]);
   
   const [url, setUrl] = useState<string | null>(cachedUrl);
   const mountedRef = useRef(true);
@@ -145,7 +159,7 @@ export function useMediaUrl(storagePath: string | null | undefined, mediaType: M
       return;
     }
 
-    const cacheKey = getCacheKey(storagePath, mediaType);
+    const cacheKey = getCacheKey(storagePath, mediaType, transform);
     
     const memCached = signedUrlMemoryCache.get(cacheKey);
     const now = Date.now();
@@ -164,7 +178,7 @@ export function useMediaUrl(storagePath: string | null | undefined, mediaType: M
 
     (async () => {
       try {
-        const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds);
+        const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform);
         
         if (!signedUrl || !mountedRef.current) {
           return;
@@ -191,7 +205,8 @@ export function useMediaUrl(storagePath: string | null | undefined, mediaType: M
       }
     })();
 
-  }, [storagePath, mediaType, expiresInSeconds, cachedUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storagePath, mediaType, expiresInSeconds, cachedUrl, transformKey]);
 
   return url;
 }
@@ -200,15 +215,13 @@ export function useMediaUrl(storagePath: string | null | undefined, mediaType: M
 export async function prefetchMediaUrl(
   storagePath: string | null | undefined,
   mediaType: MediaType,
-  expiresInSeconds: number = 86400
+  expiresInSeconds: number = 86400,
+  transform?: ImageTransformOptions
 ): Promise<void> {
   if (!storagePath) return;
 
-  const cacheKey = getCacheKey(storagePath, mediaType);
-  const now = Date.now();
-
   // Om vi redan har en cached signed URL (eller blob) → bara säkerställ blob
-  const cached = getCachedUrlSync(storagePath, mediaType);
+  const cached = getCachedUrlSync(storagePath, mediaType, transform);
   if (cached) {
     if (shouldWarmBlobCache(mediaType) && !cached.startsWith('blob:')) {
       await imageCache.loadImage(cached).catch(() => {});
@@ -217,7 +230,7 @@ export async function prefetchMediaUrl(
   }
 
   try {
-    const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds);
+    const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform);
     if (!signedUrl) return;
 
     // Preloada till blob-cache (så UI kan visa direkt)

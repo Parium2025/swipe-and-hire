@@ -21,13 +21,16 @@ function TeamMemberAvatarBase({
   size = 'sm',
   className,
 }: TeamMemberAvatarProps) {
-  const resolvedUrl = useResolvedTeamMemberUrl(profileImageUrl);
-  const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || '?';
-
   const sizeClasses = {
     xs: 'h-5 w-5',
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
+  };
+
+  const sizePx = {
+    xs: 20,
+    sm: 32,
+    md: 40,
   };
 
   const textSizes = {
@@ -35,6 +38,14 @@ function TeamMemberAvatarBase({
     sm: 'text-xs',
     md: 'text-sm',
   };
+
+  // Be Supabase om en bild i exakt rätt storlek (2x för retina automatiskt)
+  const resolvedUrl = useResolvedTeamMemberUrl(profileImageUrl, {
+    width: sizePx[size],
+    height: sizePx[size],
+    resize: 'cover',
+  });
+  const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || '?';
 
   return (
     <Avatar className={cn(sizeClasses[size], className)}>
