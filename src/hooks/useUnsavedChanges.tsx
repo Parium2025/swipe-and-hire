@@ -17,31 +17,21 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  // Track current and previous safe paths so "Avbryt" can return the user
-  // to the page where the unsaved changes actually live (e.g. when a browser
-  // back-gesture has already navigated away before the dialog opens).
-  const currentSafePathRef = useRef<string>(location.pathname + location.search);
-  const previousSafePathRef = useRef<string>(location.pathname + location.search);
+  // Snapshot of the path at the moment the dialog opened. If the URL has
+  // changed by the time the user clicks "Avbryt" (e.g. browser back/forward
+  // already navigated away), we restore this path so the user returns to the
+  // page that actually holds their unsaved changes.
+  const pathAtDialogOpenRef = useRef<string | null>(null);
 
   const setHasUnsavedChanges = (value: boolean) => {
     hasUnsavedChangesRef.current = value;
     _setHasUnsavedChanges(value);
   };
 
-  // Update path tracking on every navigation (when dialog is closed).
-  // When the dialog opens we freeze these refs so we can recover the origin path.
-  useEffect(() => {
-    if (!showUnsavedDialog) {
-      const newPath = location.pathname + location.search;
-      if (newPath !== currentSafePathRef.current) {
-        previousSafePathRef.current = currentSafePathRef.current;
-        currentSafePathRef.current = newPath;
-      }
-    }
-  }, [location.pathname, location.search, showUnsavedDialog]);
-
   const checkBeforeNavigation = (targetUrl: string): boolean => {
     if (hasUnsavedChangesRef.current) {
+      // Snapshot current path BEFORE blocking — this is the page with unsaved changes
+      pathAtDialogOpenRef.current = location.pathname + location.search;
       setPendingNavigation(targetUrl);
       setShowUnsavedDialog(true);
       return false; // Block navigation initially
@@ -55,6 +45,7 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     // Close dialog first
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
+    pathAtDialogOpenRef.current = null;
 
     // Notify listeners (e.g., forms) to reset their state
     window.dispatchEvent(new CustomEvent('unsaved-confirm'));
@@ -68,15 +59,16 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   };
 
   const handleCancelLeave = () => {
+    const originPath = pathAtDialogOpenRef.current;
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
+    pathAtDialogOpenRef.current = null;
     // Notify listeners (e.g., sidebar) to close on cancel
     window.dispatchEvent(new CustomEvent('unsaved-cancel'));
 
-    // If a browser back/forward gesture already navigated us away from the
-    // page that holds the unsaved changes, return the user to that origin page.
+    // Only navigate back if the URL actually changed since the dialog opened
+    // (e.g. a browser back/forward gesture pulled the user away).
     const currentPath = location.pathname + location.search;
-    const originPath = previousSafePathRef.current;
     if (originPath && originPath !== currentPath) {
       navigate(originPath);
     }
