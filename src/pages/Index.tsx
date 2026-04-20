@@ -16,7 +16,6 @@ import Dashboard from '@/components/Dashboard';
 import EmployerDashboard from '@/components/EmployerDashboard';
 import EmployerHome from '@/components/EmployerHome';
 import JobSeekerHome from '@/components/JobSeekerHome';
-import JobSwipe from '@/components/JobSwipe';
 // ProfileSetup removed - employers use EmployerWelcomeTunnel only
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
@@ -438,7 +437,7 @@ const Index = () => {
   // isAdmin is now from database via useIsOrgAdmin hook
 
   // Render sidebar layout for profile pages and employer routes
-  const sidebarRoutes = ['/home', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
+  const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute && role !== 'employer') {
@@ -451,6 +450,8 @@ const Index = () => {
       switch (path) {
         case '/home':
           return <JobSeekerHome />;
+        case '/index':
+          return <SearchJobs />;
         case '/profile':
           return <Profile />;
         case '/profile-preview':
@@ -559,7 +560,7 @@ const Index = () => {
     );
   }
 
-  // Show job seeker swipe view for job seekers
+  // Fallback for job seekers: use the same live job pipeline as /search-jobs
   return (
     <div className="min-h-screen smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
@@ -594,7 +595,7 @@ const Index = () => {
       </header>
       
       <main className="py-8">
-        <JobSwipe />
+        <SearchJobs />
       </main>
     </div>
   );
