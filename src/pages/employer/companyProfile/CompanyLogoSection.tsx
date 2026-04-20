@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trash2 } from 'lucide-react';
 
 interface CompanyLogoSectionProps {
@@ -10,6 +11,15 @@ interface CompanyLogoSectionProps {
   onLogoDelete: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
+
+// Generate up to 2 initials from the company name (first letter of first 2 words).
+const getCompanyInitials = (name: string): string => {
+  const trimmed = name?.trim();
+  if (!trimmed) return '?';
+  const words = trimmed.split(/\s+/).filter(Boolean);
+  const initials = words.slice(0, 2).map((w) => w[0]?.toUpperCase() || '').join('');
+  return initials || '?';
+};
 
 export const CompanyLogoSection = ({
   companyLogoUrl,
@@ -28,31 +38,26 @@ export const CompanyLogoSection = ({
       </div>
 
       <div className="flex flex-col items-center space-y-4 py-6">
+        {/* Avatar – matchar profilbildens stil exakt */}
         <div className="relative">
-          {companyLogoUrl ? (
-            <div 
-              className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer"
-              onClick={onUploadClick}
+          <div className="cursor-pointer" onClick={onUploadClick}>
+            <Avatar
+              key={companyLogoUrl || 'no-company-logo'}
+              className="h-32 w-32 border-4 border-white/10"
             >
-              <img 
-                src={companyLogoUrl} 
-                alt="Företagslogga" 
-                className="w-full h-full object-cover"
+              <AvatarImage
+                src={companyLogoUrl || ''}
+                alt="Företagslogga"
+                className="object-cover"
               />
-            </div>
-          ) : (
-            <div 
-              className="w-32 h-32 md:w-44 md:h-44 rounded-full bg-white/5 border border-dashed border-white flex items-center justify-center cursor-pointer"
-              onClick={onUploadClick}
-            >
-              <div className="text-2xl md:text-3xl font-semibold text-white">
-                {companyName ? 
-                  companyName.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) : 
-                  'HM'
-                }
-              </div>
-            </div>
-          )}
+              <AvatarFallback
+                className="text-4xl font-semibold bg-white/20 text-white"
+                delayMs={150}
+              >
+                {getCompanyInitials(companyName)}
+              </AvatarFallback>
+            </Avatar>
+          </div>
 
           {companyLogoUrl && !isUploadingLogo && (
             <button
@@ -71,8 +76,8 @@ export const CompanyLogoSection = ({
         </div>
 
         <div className="space-y-2 text-center">
-          <label 
-            htmlFor="logo-upload" 
+          <label
+            htmlFor="logo-upload"
             className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
           >
             Klicka för att ladda upp • Max 5MB
@@ -90,7 +95,7 @@ export const CompanyLogoSection = ({
               <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
                 Bild uppladdad!
               </Badge>
-              <button 
+              <button
                 type="button"
                 onClick={onEditExistingLogo}
                 className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
