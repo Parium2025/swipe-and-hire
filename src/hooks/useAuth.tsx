@@ -15,6 +15,7 @@ import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
 import { authSplashEvents } from '@/lib/authSplashEvents';
+import { forceConnectivityCheck, getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { useSessionManager, clearSessionToken } from '@/hooks/useSessionManager';
 import { useQueryClient } from '@tanstack/react-query';
 import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
@@ -368,6 +369,111 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    const recoverUnexpectedSignOut = async () => {
+      try {
+        if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+          console.log('📱 SIGNED_OUT while app is backgrounded — deferring recovery until foreground');
+          return;
+        }
+
+        const confirmedOnline = getIsOnline() || await forceConnectivityCheck().catch(() => false);
+        if (!confirmedOnline) {
+          console.log('📡 Connectivity still offline/unstable — aborting forced logout for now');
+          return;
+        }
+
+        if (await hydrateRecoveredSession()) {
+          console.log('🛡️ Session still exists locally after SIGNED_OUT — aborting forced logout');
+          return;
+        }
+
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        if (!refreshError && refreshData?.session) {
+          currentUserIdRef.current = refreshData.session.user.id;
+          setSession(refreshData.session);
+          setUser(refreshData.session.user);
+          finishInitialization();
+          console.log('✅ Session recovered after transient SIGNED_OUT — ignoring logout');
+          return;
+        }
+
+        await new Promise((r) => setTimeout(r, 2000));
+        if (!mounted) {
+          return;
+        }
+
+        if (await hydrateRecoveredSession()) {
+          console.log('🛡️ Session restored after retry window — aborting forced logout');
+          return;
+        }
+
+        const { data: retryData, error: retryError } = await supabase.auth.refreshSession();
+        if (!retryError && retryData?.session) {
+          currentUserIdRef.current = retryData.session.user.id;
+          setSession(retryData.session);
+          setUser(retryData.session.user);
+          finishInitialization();
+          console.log('✅ Session recovered on retry — ignoring logout');
+          return;
+        }
+
+        if (await hydrateRecoveredSession()) {
+          console.log('🛡️ Session exists after failed refresh attempts — aborting forced logout');
+          return;
+        }
+
+        const stillOnline = getIsOnline() || await forceConnectivityCheck().catch(() => false);
+        if (!stillOnline) {
+          console.log('📡 Connectivity dropped during session recovery — aborting forced logout');
+          return;
+        }
+
+        console.log('🔄 Session recovery failed — proceeding with logout');
+        if (!mounted) return;
+        finishInitialization();
+        toast({
+          title: 'Du har loggats ut',
+          description: 'Sessionen avslutades.',
+          duration: 4000,
+        });
+        setTimeout(() => {
+          clearAllAppCaches();
+          clearSessionToken();
+          window.location.href = '/auth';
+        }, 1500);
+      } catch (recoveryErr) {
+        console.warn('Session recovery error:', recoveryErr);
+        const recovered = await hydrateRecoveredSession();
+        if (!mounted || recovered) return;
+
+        const stillOnline = getIsOnline() || await forceConnectivityCheck().catch(() => false);
+        if (!stillOnline) {
+          console.log('📡 Recovery errored while offline/unstable — keeping session alive locally');
+          return;
+        }
+
+        finishInitialization();
+        clearAllAppCaches();
+        clearSessionToken();
+        window.location.href = '/auth';
+      } finally {
+        isRecoveringSessionRef.current = false;
+      }
+    };
+
+    const retryDeferredSessionRecovery = () => {
+      if (!mounted) return;
+      if (isManualSignOutRef.current || isSessionKickRef.current || isRecoveringSessionRef.current) return;
+      if (isInitializingRef.current || currentUserIdRef.current === null) return;
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      if (!getIsOnline()) return;
+
+      isRecoveringSessionRef.current = true;
+      setTimeout(() => {
+        void recoverUnexpectedSignOut();
+      }, 0);
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mounted) return;
@@ -419,7 +525,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
 
-          if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+          if (!getIsOnline()) {
             console.log('📡 Unexpected SIGNED_OUT while offline — waiting for reconnection before forcing logout');
             return;
           }
@@ -431,90 +537,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isRecoveringSessionRef.current = true;
 
           setTimeout(() => {
-            (async () => {
-              if (!mounted) {
-                isRecoveringSessionRef.current = false;
-                return;
-              }
-
-              try {
-                if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
-                  console.log('📱 SIGNED_OUT while app is backgrounded — waiting for foreground before recovery');
-                  isRecoveringSessionRef.current = false;
-                  return;
-                }
-
-                if (await hydrateRecoveredSession()) {
-                  console.log('🛡️ Session still exists locally after SIGNED_OUT — aborting forced logout');
-                  isRecoveringSessionRef.current = false;
-                  return;
-                }
-
-                const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-                if (!refreshError && refreshData?.session) {
-                  currentUserIdRef.current = refreshData.session.user.id;
-                  setSession(refreshData.session);
-                  setUser(refreshData.session.user);
-                  finishInitialization();
-                  console.log('✅ Session recovered after transient SIGNED_OUT — ignoring logout');
-                  isRecoveringSessionRef.current = false;
-                  return;
-                }
-
-                await new Promise((r) => setTimeout(r, 2000));
-                if (!mounted) {
-                  isRecoveringSessionRef.current = false;
-                  return;
-                }
-
-                if (await hydrateRecoveredSession()) {
-                  console.log('🛡️ Session restored after retry window — aborting forced logout');
-                  isRecoveringSessionRef.current = false;
-                  return;
-                }
-
-                const { data: retryData, error: retryError } = await supabase.auth.refreshSession();
-                if (!retryError && retryData?.session) {
-                  currentUserIdRef.current = retryData.session.user.id;
-                  setSession(retryData.session);
-                  setUser(retryData.session.user);
-                  finishInitialization();
-                  console.log('✅ Session recovered on retry — ignoring logout');
-                  isRecoveringSessionRef.current = false;
-                  return;
-                }
-
-                if (await hydrateRecoveredSession()) {
-                  console.log('🛡️ Session exists after failed refresh attempts — aborting forced logout');
-                  isRecoveringSessionRef.current = false;
-                  return;
-                }
-
-                console.log('🔄 Session recovery failed — proceeding with logout');
-                isRecoveringSessionRef.current = false;
-                if (!mounted) return;
-                finishInitialization();
-                toast({
-                  title: 'Du har loggats ut',
-                  description: 'Sessionen avslutades.',
-                  duration: 4000,
-                });
-                setTimeout(() => {
-                  clearAllAppCaches();
-                  clearSessionToken();
-                  window.location.href = '/auth';
-                }, 1500);
-              } catch (recoveryErr) {
-                console.warn('Session recovery error:', recoveryErr);
-                const recovered = await hydrateRecoveredSession();
-                isRecoveringSessionRef.current = false;
-                if (!mounted || recovered) return;
-                finishInitialization();
-                clearAllAppCaches();
-                clearSessionToken();
-                window.location.href = '/auth';
-              }
-            })();
+            void recoverUnexpectedSignOut();
           }, 0);
           return;
         }
@@ -611,8 +634,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
+    const removeConnectivityRecoveryListener = onConnectivityChange((online) => {
+      if (online) {
+        retryDeferredSessionRecovery();
+      }
+    });
+
+    const handleDeferredRecoveryVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        retryDeferredSessionRecovery();
+      }
+    };
+    document.addEventListener('visibilitychange', handleDeferredRecoveryVisibility);
+
     return () => {
       mounted = false;
+      removeConnectivityRecoveryListener();
+      document.removeEventListener('visibilitychange', handleDeferredRecoveryVisibility);
       subscription.unsubscribe();
     };
   }, []);
