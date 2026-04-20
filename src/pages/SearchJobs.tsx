@@ -76,38 +76,6 @@ interface Job {
   };
 }
 
-type LiveSearchJobRow = Pick<
-  Job,
-  | 'id'
-  | 'title'
-  | 'description'
-  | 'location'
-  | 'workplace_city'
-  | 'employment_type'
-  | 'salary_min'
-  | 'salary_max'
-  | 'job_image_url'
-  | 'image_focus_position'
-  | 'employer_id'
-  | 'created_at'
-  | 'expires_at'
-  | 'is_active'
-  | 'views_count'
-  | 'applications_count'
-> & {
-  updated_at?: string;
-  workplace_name?: string | null;
-  company_logo_url?: string | null;
-  salary_type?: string | null;
-  occupation?: string | null;
-  work_schedule?: string | null;
-  remote_work_possible?: string | null;
-  positions_count?: number | null;
-  work_location_type?: string | null;
-  salary_transparency?: string | null;
-  benefits?: string[] | null;
-};
-
 // Pure utility — moved outside component to avoid re-creation on every render
 const formatSalary = (min?: number, max?: number) => {
   if (min && max) {
