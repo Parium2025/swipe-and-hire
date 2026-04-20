@@ -253,14 +253,15 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
     console.log('🔄 Candidate sync: updated applications cache (ratings included)');
   }
 
-  // Förladda bilder i bakgrunden
+  // Förladda bilder i bakgrunden — matcha CandidateAvatar (40px, 2x retina)
+  const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
   const imagePaths = items
     .map((i: any) => i.profile_image_url)
     .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '')
     .slice(0, 25);
 
   if (imagePaths.length > 0) {
-    Promise.all(imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {}))).catch(() => {});
+    Promise.all(imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}))).catch(() => {});
   }
 
   // Uppdatera localStorage snapshot för instant first paint
