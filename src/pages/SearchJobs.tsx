@@ -487,6 +487,12 @@ const SearchJobs = memo(() => {
     setSortBy('newest');
   }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, setSortBy]);
 
+  // Reset loading flag deterministically when displayCount actually changes
+  // (replaces the previous setTimeout-based unlock that could race on fast scroll).
+  useEffect(() => {
+    isLoadingMoreRef.current = false;
+  }, [displayCount]);
+
   // Infinite scroll with IntersectionObserver
   useEffect(() => {
     const trigger = loadMoreTriggerRef.current;
@@ -497,17 +503,12 @@ const SearchJobs = memo(() => {
         const [entry] = entries;
         if (entry.isIntersecting && hasMoreJobs && !isLoadingMoreRef.current) {
           isLoadingMoreRef.current = true;
-          setDisplayCount(prev => {
-            const next = Math.min(prev + loadMoreSize, filteredAndSortedJobs.length);
-            // Reset loading flag after state update
-            setTimeout(() => { isLoadingMoreRef.current = false; }, 100);
-            return next;
-          });
+          setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
         }
       },
-      { 
+      {
         rootMargin: '200px', // Start loading 200px before reaching the trigger
-        threshold: 0.1 
+        threshold: 0.1
       }
     );
 
