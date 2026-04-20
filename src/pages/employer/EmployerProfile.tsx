@@ -896,6 +896,7 @@ const EmployerProfile = () => {
                 disabled={loading || !hasUnsavedChanges}
                 variant="glass"
                 className="h-11 !min-h-0 px-6 text-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                onClick={(event) => event.currentTarget.blur()}
               >
                 {loading ? (
                   <>
