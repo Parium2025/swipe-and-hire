@@ -10,6 +10,7 @@ import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
 import type { SwipeJob } from './SwipeCard';
+import { TruncatedText } from '@/components/TruncatedText';
 
 function resolveImageUrl(url?: string, bucket = 'job-images'): string | null {
   if (!url) return null;
@@ -532,7 +533,12 @@ export const JobSlide = memo(function JobSlide({
                     )}
                   </div>
                 )}
-                <p className="text-lg font-bold text-white">{nextDisplayCompanyName}</p>
+                <TruncatedText
+                  text={nextDisplayCompanyName}
+                  className="text-lg font-bold text-white line-clamp-3 break-words"
+                  tooltipSide="bottom"
+                />
+
                 <h3 className="mt-1 line-clamp-2 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold leading-[1.08] tracking-tight text-white">
                   {nextJob.title}
                 </h3>
@@ -731,7 +737,12 @@ export const JobSlide = memo(function JobSlide({
                 )}
               </div>
             )}
-            <p className="text-white font-bold text-lg">{displayCompanyName}</p>
+            <TruncatedText
+              text={displayCompanyName}
+              className="text-white font-bold text-lg line-clamp-3 break-words"
+              tooltipSide="bottom"
+            />
+
             <h2
               ref={titleRef}
               data-title-tap-zone
