@@ -5,6 +5,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
+import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
@@ -125,7 +126,7 @@ export const JobSlide = memo(function JobSlide({
   const nextDisplayCompanyName = nextJob?.workplace_name || nextJob?.company_name || 'Okänt företag';
   const imageUrl = resolveImageUrl(job.job_image_url);
   const nextImageUrl = useMemo(() => resolveImageUrl(nextJob?.job_image_url), [nextJob?.job_image_url]);
-  const rawLogoUrl = useMemo(() => resolveImageUrl(job.company_logo_url, 'company-logos'), [job.company_logo_url]);
+  const rawLogoUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(job.company_logo_url, 'company-logos'), job.updated_at), [job.company_logo_url, job.updated_at]);
   const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
   const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
   const [logoBlobFailed, setLogoBlobFailed] = useState(false);

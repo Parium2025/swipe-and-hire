@@ -9,6 +9,7 @@ export interface SwipeJob {
   id: string;
   title: string;
   company_name: string;
+  updated_at?: string;
   location: string;
   employment_type?: string;
   job_image_url?: string;
