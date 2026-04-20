@@ -536,6 +536,7 @@ export const useJobSeekerBackgroundSync = () => {
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(newJobsChannel);
+      supabase.removeChannel(employerProfilesChannel);
       supabase.removeChannel(interviewsChannel);
     };
   }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadAvailableJobs, preloadCandidateInterviews, queryClient]);
