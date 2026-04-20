@@ -443,6 +443,28 @@ const CompanyProfile = () => {
       await updateProfile(sanitizedFormData as any);
 
       if (user) {
+        // Rensa bild-cache för denna användares loggor (alla versioner)
+        try {
+          const { imageCache } = await import('@/lib/imageCache');
+          imageCache.evictByPattern(`/company-logos/${user.id}/`);
+        } catch {}
+
+        // Rensa Service Worker cache för loggor
+        try {
+          if ('caches' in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(async (k) => {
+              const cache = await caches.open(k);
+              const reqs = await cache.keys();
+              await Promise.all(
+                reqs
+                  .filter((r) => r.url.includes(`/company-logos/${user.id}/`))
+                  .map((r) => cache.delete(r))
+              );
+            }));
+          }
+        } catch {}
+
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['jobs'] }),
           queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] }),
@@ -450,6 +472,8 @@ const CompanyProfile = () => {
           queryClient.invalidateQueries({ queryKey: ['skipped-jobs'] }),
           queryClient.invalidateQueries({ queryKey: ['available-jobs'] }),
           queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] }),
+          queryClient.invalidateQueries({ queryKey: ['profile'] }),
+          queryClient.invalidateQueries({ queryKey: ['company-profile'] }),
         ]);
       }
 
