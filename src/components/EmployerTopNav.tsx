@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -88,6 +88,20 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
     return null;
   })();
   const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
+
+  // Preload avatar in <head> so the topnav image renders without a flicker
+  useEffect(() => {
+    if (!resolvedProfileImageUrl) return;
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = resolvedProfileImageUrl;
+    link.fetchPriority = 'high';
+    document.head.appendChild(link);
+    return () => {
+      if (link.parentNode) link.parentNode.removeChild(link);
+    };
+  }, [resolvedProfileImageUrl]);
   
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [candidatesOpen, setCandidatesOpen] = useState(false);
