@@ -16,7 +16,6 @@ import Dashboard from '@/components/Dashboard';
 import EmployerDashboard from '@/components/EmployerDashboard';
 import EmployerHome from '@/components/EmployerHome';
 import JobSeekerHome from '@/components/JobSeekerHome';
-import JobSwipe from '@/components/JobSwipe';
 // ProfileSetup removed - employers use EmployerWelcomeTunnel only
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
