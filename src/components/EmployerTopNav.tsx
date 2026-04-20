@@ -201,14 +201,14 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
           <DropdownMenu open={dashboardOpen} onOpenChange={setDashboardOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="relative flex items-baseline gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+                className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
                     isDropdownActive(dashboardItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
-                <LayoutDashboard className="h-4 w-4 relative z-10 self-center" />
+                <LayoutDashboard className="h-4 w-4 relative z-10" />
                 <span className="relative z-10">Annonser</span>
                 {getDashboardCount() && (
                   <span className="text-white text-xs relative z-10">({getDashboardCount()})</span>
@@ -240,19 +240,19 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
             <DropdownMenuTrigger asChild>
               <button
                 onMouseEnter={prefetchApplications}
-                className="relative flex items-baseline gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+                className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
                     isDropdownActive(candidateItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
-                <Users className="h-4 w-4 relative z-10 self-center" />
+                <Users className="h-4 w-4 relative z-10" />
                 <span className="relative z-10">Kandidater</span>
                 {getCandidatesCount() && (
                   <span className="text-white text-xs relative z-10">({getCandidatesCount()})</span>
                 )}
-                <ChevronDown className="h-3 w-3 text-white relative z-10 self-center" />
+                <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
@@ -289,7 +289,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
             {/* Chattar Button */}
             <button
               onClick={() => handleNavigation('/messages')}
-              className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+              className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
             >
               <span 
                 className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
@@ -305,7 +305,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
           <DropdownMenu open={businessOpen} onOpenChange={setBusinessOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+                className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
@@ -316,16 +316,16 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                   <img 
                     src={preloadedCompanyLogoUrl} 
                     alt="Företagslogo" 
-                    className="h-7 w-7 rounded-full object-cover relative z-10"
+                    className="h-6 w-6 rounded-full object-cover relative z-10"
                   />
                 ) : profile?.company_name ? (
-                  <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white relative z-10">
+                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-semibold text-white relative z-10">
                     {profile.company_name.substring(0, 2).toUpperCase()}
                   </div>
                 ) : profile ? (
                   <Building className="h-4 w-4 relative z-10" />
                 ) : (
-                  <div className="h-7 w-7 rounded-full bg-white/10 animate-pulse relative z-10" />
+                  <div className="h-6 w-6 rounded-full bg-white/10 animate-pulse relative z-10" />
                 )}
                 <span className="relative z-10">Företag</span>
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
@@ -355,20 +355,20 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors hover:bg-white/10"
+                className="flex items-center gap-1.5 px-3 h-10 rounded-lg transition-colors hover:bg-white/10"
               >
                 {resolvedProfileImageUrl ? (
                   <img 
                     src={resolvedProfileImageUrl} 
                     alt={getUserDisplayName()} 
-                    className="h-7 w-7 rounded-full object-cover"
+                    className="h-6 w-6 rounded-full object-cover"
                   />
                 ) : profile ? (
-                  <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white">
+                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-semibold text-white">
                     {getUserInitials()}
                   </div>
                 ) : (
-                  <div className="h-7 w-7 rounded-full bg-white/10 animate-pulse" />
+                  <div className="h-6 w-6 rounded-full bg-white/10 animate-pulse" />
                 )}
                 <ChevronDown className="h-3.5 w-3.5 text-white" />
               </button>
