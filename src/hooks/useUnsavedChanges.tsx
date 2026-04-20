@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
-import { useNavigate, useLocation, useBlocker } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 
 interface UnsavedChangesContextType {
@@ -14,36 +14,62 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const [hasUnsavedChanges, _setHasUnsavedChanges] = useState(false);
   const hasUnsavedChangesRef = useRef(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const showUnsavedDialogRef = useRef(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const pendingNavigationSourceRef = useRef<'app' | 'browser-pop' | null>(null);
+  const skipNextPopRef = useRef(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const blocker = useBlocker(hasUnsavedChanges);
+  const currentPathRef = useRef(`${location.pathname}${location.search}`);
 
   const setHasUnsavedChanges = (value: boolean) => {
     hasUnsavedChangesRef.current = value;
     _setHasUnsavedChanges(value);
   };
 
-  // React Router blocker catches browser back/forward and any navigation that
-  // bypasses our manual checkBeforeNavigation helper.
   useEffect(() => {
-    if (blocker.state !== 'blocked') return;
+    currentPathRef.current = `${location.pathname}${location.search}`;
+  }, [location.pathname, location.search]);
 
-    const targetPath = `${blocker.location.pathname}${blocker.location.search}`;
-    const currentPath = `${location.pathname}${location.search}`;
+  useEffect(() => {
+    showUnsavedDialogRef.current = showUnsavedDialog;
+  }, [showUnsavedDialog]);
 
-    // Ignore no-op navigations to the same URL.
-    if (targetPath === currentPath) {
-      blocker.reset();
-      return;
-    }
+  useEffect(() => {
+    const handlePopState = () => {
+      if (skipNextPopRef.current) {
+        skipNextPopRef.current = false;
+        return;
+      }
 
-    setPendingNavigation(targetPath);
-    setShowUnsavedDialog(true);
-  }, [blocker, location.pathname, location.search]);
+      if (!hasUnsavedChangesRef.current || showUnsavedDialogRef.current) {
+        return;
+      }
+
+      const originPath = currentPathRef.current;
+      const targetPath = `${window.location.pathname}${window.location.search}`;
+
+      if (targetPath === originPath) {
+        return;
+      }
+
+      pendingNavigationSourceRef.current = 'browser-pop';
+      setPendingNavigation(targetPath);
+      setShowUnsavedDialog(true);
+
+      // BrowserRouter cannot truly block browser-back, so we immediately step
+      // forward again to keep the user on the editing page while the dialog is open.
+      skipNextPopRef.current = true;
+      window.history.go(1);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const checkBeforeNavigation = (targetUrl: string): boolean => {
     if (hasUnsavedChangesRef.current) {
+      pendingNavigationSourceRef.current = 'app';
       setPendingNavigation(targetUrl);
       setShowUnsavedDialog(true);
       return false;
@@ -53,31 +79,25 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
 
   const handleConfirmLeave = () => {
     const target = pendingNavigation;
+    const source = pendingNavigationSourceRef.current;
 
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
+    pendingNavigationSourceRef.current = null;
 
     window.dispatchEvent(new CustomEvent('unsaved-confirm'));
     setHasUnsavedChanges(false);
 
-    if (blocker.state === 'blocked') {
-      blocker.proceed();
-      return;
-    }
-
     if (target) {
-      navigate(target);
+      navigate(target, { replace: source === 'browser-pop' });
     }
   };
 
   const handleCancelLeave = () => {
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
+    pendingNavigationSourceRef.current = null;
     window.dispatchEvent(new CustomEvent('unsaved-cancel'));
-
-    if (blocker.state === 'blocked') {
-      blocker.reset();
-    }
   };
 
   return (
@@ -104,3 +124,4 @@ export function useUnsavedChanges() {
   }
   return context;
 }
+
