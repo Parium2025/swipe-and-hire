@@ -21,12 +21,13 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
     });
 
     // Force check for updates on load
-    registration.update().catch(() => {
-      // Ignore
-    });
+    registration.update().catch(() => {});
 
     // When a new SW takes control, hard-reload to ensure fresh UI/assets
+    let hasReloaded = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hasReloaded) return;
+      hasReloaded = true;
       window.location.reload();
     });
 
@@ -41,11 +42,28 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
       if (newWorker) {
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Activate update immediately
+            // Activate update immediately (controllerchange will reload)
             newWorker.postMessage({ type: 'SKIP_WAITING' });
           }
         });
       }
+    });
+
+    // Periodisk update-check var 60:e sekund
+    setInterval(() => {
+      registration?.update().catch(() => {});
+    }, 60_000);
+
+    // Check vid tab-fokus
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        registration?.update().catch(() => {});
+      }
+    });
+
+    // Check vid återansluten
+    window.addEventListener('online', () => {
+      registration?.update().catch(() => {});
     });
 
     return registration;
