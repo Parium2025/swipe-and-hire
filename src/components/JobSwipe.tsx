@@ -66,6 +66,8 @@ interface JobPosting {
   title: string;
   description: string;
   location: string;
+  is_active?: boolean;
+  deleted_at?: string | null;
   salary_min?: number;
   salary_max?: number;
   salary_type?: string;
