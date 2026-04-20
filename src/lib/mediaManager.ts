@@ -171,10 +171,23 @@ export async function uploadMedia(
  * - Private buckets: Genererar signed URL med expiration
  * - Backward compatibility: Fallback till gamla profile-media bucket
  */
+/**
+ * Optional image transform options for Supabase Image Transformations.
+ * Only applied when present — never changes default visual output.
+ * width/height are CSS pixels; we automatically render at 2x for retina.
+ */
+export interface ImageTransformOptions {
+  width?: number;
+  height?: number;
+  quality?: number; // 1-100, default 80
+  resize?: 'cover' | 'contain' | 'fill';
+}
+
 export async function getMediaUrl(
   storagePath: string,
   mediaType: MediaType,
-  expiresInSeconds: number = 86400 // 24 timmar default
+  expiresInSeconds: number = 86400, // 24 timmar default
+  transform?: ImageTransformOptions
 ): Promise<string | null> {
   if (!storagePath) return null;
   
@@ -202,18 +215,31 @@ export async function getMediaUrl(
     }
   }
   
-  // Public bucket → returnera public URL
+  // Build transform payload (only for image types) — retina-aware (2x)
+  const isImageType =
+    mediaType === 'profile-image' ||
+    mediaType === 'cover-image' ||
+    mediaType === 'company-logo' ||
+    mediaType === 'job-image';
+  const t = transform && isImageType ? {
+    ...(transform.width ? { width: Math.round(transform.width * 2) } : {}),
+    ...(transform.height ? { height: Math.round(transform.height * 2) } : {}),
+    quality: transform.quality ?? 80,
+    ...(transform.resize ? { resize: transform.resize } : { resize: 'cover' as const }),
+  } : undefined;
+  
+  // Public bucket → returnera public URL (med ev. transform)
   if (config.isPublic) {
     const { data } = supabase.storage
       .from(config.bucket)
-      .getPublicUrl(cleanPath);
+      .getPublicUrl(cleanPath, t ? { transform: t } : undefined);
     return data.publicUrl;
   }
   
-  // Private bucket → generera signed URL
+  // Private bucket → generera signed URL (med ev. transform)
   const { data, error } = await supabase.storage
     .from(config.bucket)
-    .createSignedUrl(cleanPath, expiresInSeconds);
+    .createSignedUrl(cleanPath, expiresInSeconds, t ? { transform: t } : undefined);
   
   if (error) {
     console.error(`Error creating signed URL for ${mediaType}:`, error);
