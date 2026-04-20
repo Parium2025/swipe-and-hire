@@ -102,7 +102,7 @@ const getJobCompanyName = (job?: JobPosting | null) => {
   return job.workplace_name?.trim() || 'Företag';
 };
 
-const isLiveJobVisible = (job?: Partial<JobPosting> | null) => Boolean(job?.is_active && !('deleted_at' in (job || {}) && (job as { deleted_at?: string | null }).deleted_at));
+const isLiveJobVisible = (job?: (JobPosting & { deleted_at?: string | null }) | null) => Boolean(job?.is_active && !job?.deleted_at);
 
 const JobSwipe = () => {
   const [jobs, setJobs] = useState<JobPosting[]>([]);
