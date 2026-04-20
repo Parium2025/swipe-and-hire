@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, animate, PanInfo } from 'framer-motion';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Building2 } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { TruncatedText } from '@/components/TruncatedText';
+import { Badge } from '@/components/ui/badge';
 
 export interface SwipeJob {
   id: string;
@@ -206,11 +207,16 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
 
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-        <TruncatedText
-          text={displayCompanyName}
-          className="text-white/80 font-medium text-sm line-clamp-3 break-words"
-          tooltipSide="top"
-        />
+        <div className="flex justify-center sm:justify-start">
+          <Badge variant="glass" className="inline-flex max-w-[80%] min-w-0 items-center gap-1.5 border-white/15 px-3 py-1 text-white">
+            <Building2 className="h-3.5 w-3.5 shrink-0" />
+            <TruncatedText
+              text={displayCompanyName}
+              className="min-w-0 flex-1 whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium"
+              tooltipSide="top"
+            />
+          </Badge>
+        </div>
 
         <h2
           className="text-xl font-bold text-white leading-snug tracking-tight mt-0.5"

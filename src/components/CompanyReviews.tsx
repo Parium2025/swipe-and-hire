@@ -356,8 +356,14 @@ const CompanyReviews = () => {
                       <span className="text-white">Kommentar: </span>
                       <TruncatedText
                         text={review.comment}
-                        className="text-white line-clamp-3 break-words [overflow-wrap:anywhere] inline-block align-bottom max-w-full"
+                        className="text-white inline-block align-bottom max-w-full"
                         tooltipSide="top"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
                       />
                     </div>
                   )}

@@ -349,8 +349,14 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                 <div className="flex items-start gap-2 mt-1 text-white text-sm min-w-0">
                   <TruncatedText
                     text={displayCompanyName}
-                    className="font-medium line-clamp-3 break-words min-w-0"
+                    className="font-medium min-w-0 max-w-full"
                     tooltipSide="bottom"
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
                   />
                   {job.location && (
                     <>
@@ -417,8 +423,14 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                           <span className="mr-1.5">Bolagsnamn:</span>
                           <TruncatedText
                             text={cap(displayCompanyName)}
-                            className="font-medium line-clamp-3 break-words inline-block align-bottom min-w-0"
+                            className="font-medium inline-block align-bottom min-w-0 max-w-full"
                             tooltipSide="top"
+                            style={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 3,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}
                           />
                         </div>
                       )}
