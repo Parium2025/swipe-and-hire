@@ -235,7 +235,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
                 </div>
                 <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] overflow-hidden">
                   <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
-                  <span className="leading-snug truncate font-medium text-white">{companyName}</span>
+                  <TruncatedText
+                    text={companyName}
+                    className="leading-snug truncate font-medium text-white"
+                  />
                 </Badge>
               </>
             ) : (
@@ -316,7 +319,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           {(displayUrl || !logoUrl) && (
             <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[55%] overflow-hidden text-white">
               <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
-              <span className="leading-snug truncate font-medium">{companyName}</span>
+              <TruncatedText
+                text={companyName}
+                className="leading-snug truncate font-medium"
+              />
             </Badge>
           )}
           <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[42%] overflow-hidden text-white">
