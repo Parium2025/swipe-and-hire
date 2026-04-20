@@ -349,7 +349,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
           </DropdownMenu>
 
           {/* Notification Center */}
-          <NotificationCenter />
+          <NotificationCenter variant="rect" />
 
           {/* Profil Dropdown */}
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>

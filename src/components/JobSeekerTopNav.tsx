@@ -309,7 +309,7 @@ function JobSeekerTopNav() {
             </DropdownMenuContent>
           </DropdownMenu>
           {/* Notification Center */}
-          <NotificationCenter />
+          <NotificationCenter variant="rect" />
 
           {/* Profil Dropdown - after Support, with avatar/video */}
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
