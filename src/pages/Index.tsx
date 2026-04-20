@@ -438,7 +438,7 @@ const Index = () => {
   // isAdmin is now from database via useIsOrgAdmin hook
 
   // Render sidebar layout for profile pages and employer routes
-  const sidebarRoutes = ['/home', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
+  const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute && role !== 'employer') {
@@ -451,6 +451,8 @@ const Index = () => {
       switch (path) {
         case '/home':
           return <JobSeekerHome />;
+        case '/index':
+          return <SearchJobs />;
         case '/profile':
           return <Profile />;
         case '/profile-preview':
