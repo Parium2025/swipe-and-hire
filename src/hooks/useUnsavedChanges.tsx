@@ -17,19 +17,28 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const lastSafePathRef = useRef<string>(location.pathname);
+  // Track current and previous safe paths so "Avbryt" can return the user
+  // to the page where the unsaved changes actually live (e.g. when a browser
+  // back-gesture has already navigated away before the dialog opens).
+  const currentSafePathRef = useRef<string>(location.pathname + location.search);
+  const previousSafePathRef = useRef<string>(location.pathname + location.search);
 
   const setHasUnsavedChanges = (value: boolean) => {
     hasUnsavedChangesRef.current = value;
     _setHasUnsavedChanges(value);
   };
 
-  // Track the last safe path (where the user currently is) to return on cancel
+  // Update path tracking on every navigation (when dialog is closed).
+  // When the dialog opens we freeze these refs so we can recover the origin path.
   useEffect(() => {
     if (!showUnsavedDialog) {
-      lastSafePathRef.current = location.pathname;
+      const newPath = location.pathname + location.search;
+      if (newPath !== currentSafePathRef.current) {
+        previousSafePathRef.current = currentSafePathRef.current;
+        currentSafePathRef.current = newPath;
+      }
     }
-  }, [location.pathname, showUnsavedDialog]);
+  }, [location.pathname, location.search, showUnsavedDialog]);
 
   const checkBeforeNavigation = (targetUrl: string): boolean => {
     if (hasUnsavedChangesRef.current) {
@@ -63,7 +72,14 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     setPendingNavigation(null);
     // Notify listeners (e.g., sidebar) to close on cancel
     window.dispatchEvent(new CustomEvent('unsaved-cancel'));
-    // Don't navigate anywhere - just stay on the current page with unsaved changes
+
+    // If a browser back/forward gesture already navigated us away from the
+    // page that holds the unsaved changes, return the user to that origin page.
+    const currentPath = location.pathname + location.search;
+    const originPath = previousSafePathRef.current;
+    if (originPath && originPath !== currentPath) {
+      navigate(originPath);
+    }
   };
 
   return (
