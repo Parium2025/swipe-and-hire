@@ -2010,11 +2010,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               p_employer_id: user.id,
             });
 
+            // Matcha CandidateAvatar (40px, 2x retina) så cache-key blir samma
+            const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
             const paths = (batchMediaData || [])
               .map((row: any) => row.profile_image_url)
               .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '');
             if (paths.length > 0) {
-              await Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {})));
+              await Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {})));
             }
           }
 
@@ -2044,11 +2046,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               p_employer_id: user.id,
             });
 
+            const myCandAvatarTransform = { width: 40, height: 40, resize: 'cover' as const };
             const myCandPaths = (myCandMediaData || [])
               .map((row: any) => row.profile_image_url)
               .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '');
             if (myCandPaths.length > 0) {
-              await Promise.all(myCandPaths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {})));
+              await Promise.all(myCandPaths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, myCandAvatarTransform).catch(() => {})));
             }
           }
         } catch {
