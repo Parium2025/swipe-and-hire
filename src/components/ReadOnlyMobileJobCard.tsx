@@ -119,6 +119,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const [blobFailed, setBlobFailed] = useState(false);
 
   useEffect(() => {
+    setLoadedBlobUrl(null);
+    setBlobFailed(false);
+  }, [resolvedUrl]);
+
+  useEffect(() => {
     if (!resolvedUrl || cachedBlobUrl) {
       setLoadedBlobUrl(null);
       return;
@@ -160,6 +165,12 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
   const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
   const [logoBlobFailed, setLogoBlobFailed] = useState(false);
+
+  useEffect(() => {
+    setLoadedLogoBlob(null);
+    setLogoBlobFailed(false);
+  }, [rawLogoUrl]);
+
   useEffect(() => {
     if (!rawLogoUrl || cachedLogoBlob) { setLoadedLogoBlob(null); return; }
     setLogoBlobFailed(false);
