@@ -409,7 +409,9 @@ export const useApplicationsData = (searchQuery: string = '') => {
 
       // 🔥 Prefetch signed URLs + blob-cache för kandidatbilder i bakgrunden
       // Detta körs asynkront och blockerar inte returnering av data
+      // Matcha CandidateAvatar (40px, 2x retina) så cache-key blir samma
       (async () => {
+        const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
         const storagePaths = items
           .map((i) => i.profile_image_url)
           .filter((p): p is string => typeof p === 'string' && p.trim() !== '');
@@ -418,7 +420,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
 
         // Begränsa för att undvika att spamma (samtidigt som /candidates känns instant)
         await Promise.all(
-          storagePaths.slice(0, 25).map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {}))
+          storagePaths.slice(0, 25).map((p) => prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}))
         );
       })();
 

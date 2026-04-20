@@ -76,14 +76,15 @@ export const usePrefetchApplications = () => {
           };
         });
 
-        // Prefetch avatars in background
+        // Prefetch avatars in background — matcha CandidateAvatar (40px, 2x retina)
+        const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
         setTimeout(() => {
           const paths = (items as any[])
             .map((i) => i.profile_image_url)
             .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
             .slice(0, 25);
           if (paths.length > 0) {
-            Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {}))).catch(() => {});
+            Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}))).catch(() => {});
           }
         }, 0);
 
