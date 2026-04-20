@@ -417,6 +417,26 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   const { enabled = true } = options;
   const queryClient = useQueryClient();
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // 🧹 GUARANTEED FRESH BRANDING: clear stale localStorage caches that may
+  // contain outdated workplace_name/company_logo_url before they get a chance
+  // to render. Runs once per mount of the search/swipe hook.
+  useEffect(() => {
+    try {
+      const keysToPurge = [
+        'job_seeker_available_jobs_',
+        'parium_employer_jobs_v3_',
+      ];
+      Object.keys(localStorage).forEach((key) => {
+        if (keysToPurge.some((prefix) => key === prefix || key.startsWith(prefix))) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
   const {
     selectedLocations,
     cityFilter,
