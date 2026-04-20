@@ -304,7 +304,7 @@ export const CandidateProfileDialog = ({
             style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
             onClick={() => onOpenChange(false)}
             aria-label="Stäng"
-            className={cn(dialogCloseButtonClassName, 'static')}
+            className={cn(dialogCloseButtonClassName, 'static mr-2 shrink-0')}
           >
             <X className={dialogCloseIconClassName} />
           </button>}
