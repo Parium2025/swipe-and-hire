@@ -301,16 +301,16 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                   <img 
                     src={preloadedCompanyLogoUrl} 
                     alt="Företagslogo" 
-                    className="h-6 w-6 rounded-full object-cover relative z-10"
+                    className="h-7 w-7 rounded-full object-cover relative z-10"
                   />
                 ) : profile?.company_name ? (
-                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white relative z-10">
+                  <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white relative z-10">
                     {profile.company_name.substring(0, 2).toUpperCase()}
                   </div>
                 ) : profile ? (
                   <Building className="h-4 w-4 relative z-10" />
                 ) : (
-                  <div className="h-6 w-6 rounded-full bg-white/10 animate-pulse relative z-10" />
+                  <div className="h-7 w-7 rounded-full bg-white/10 animate-pulse relative z-10" />
                 )}
                 <span className="relative z-10">Företag</span>
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
