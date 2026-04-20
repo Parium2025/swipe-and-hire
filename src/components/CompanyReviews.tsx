@@ -18,6 +18,7 @@ import {
   Instagram,
   ExternalLink
 } from 'lucide-react';
+import { TruncatedText } from '@/components/TruncatedText';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -351,9 +352,14 @@ const CompanyReviews = () => {
                     </div>
                   </div>
                   {review.comment && (
-                    <p className="text-sm text-white mt-2 break-words [overflow-wrap:anywhere] overflow-hidden">
-                      <span className="text-white">Kommentar:</span> {review.comment}
-                    </p>
+                    <div className="text-sm text-white mt-2">
+                      <span className="text-white">Kommentar: </span>
+                      <TruncatedText
+                        text={review.comment}
+                        className="text-white line-clamp-3 break-words [overflow-wrap:anywhere] inline-block align-bottom max-w-full"
+                        tooltipSide="top"
+                      />
+                    </div>
                   )}
                 </div>
               ))

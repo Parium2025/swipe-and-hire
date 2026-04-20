@@ -27,7 +27,11 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
       <span className="text-white font-medium">{label}: </span>
-      <span className="text-white font-medium">{value}</span>
+      <TruncatedText
+        text={value}
+        className="text-white font-medium line-clamp-3 break-words inline-block align-bottom min-w-0 max-w-full"
+        tooltipSide="top"
+      />
     </div>
   );
 }
@@ -372,7 +376,11 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
 
             {/* Header — compact, with tap-to-preview on truncated title */}
             <div className="px-4 pr-14 pb-1 shrink-0">
-              <p className="text-white text-sm font-medium mt-1">{companyName}</p>
+              <TruncatedText
+                text={companyName}
+                className="text-white text-sm font-medium mt-1 line-clamp-3 break-words"
+                tooltipSide="bottom"
+              />
               <TruncatedText
                 text={jobTitle}
                 className="text-xl font-bold text-white leading-tight tracking-tight mt-0.5 line-clamp-2"
