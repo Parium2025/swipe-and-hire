@@ -891,22 +891,20 @@ const EmployerProfile = () => {
             </div>
 
             <div className="flex justify-center pt-1">
-              <Button 
+              <button
                 type="submit"
                 disabled={loading || !hasUnsavedChanges}
-                variant="glass"
-                className="h-11 !min-h-0 px-6 text-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                onClick={(event) => event.currentTarget.blur()}
+                className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-6 h-11 !min-h-0 text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
-                    <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                    <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full"></div>
                     Sparar...
                   </>
                 ) : (
                   'Spara ändringar'
                 )}
-              </Button>
+              </button>
             </div>
           </form>
       </div>

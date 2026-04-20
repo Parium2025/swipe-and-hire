@@ -2261,15 +2261,13 @@ const Profile = () => {
 
               {hasUnsavedChanges && (
                 <div className="flex justify-center">
-                  <Button 
-                    type="submit" 
-                    variant="glassGreen"
-                    className="h-11 !min-h-0 px-8 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
+                  <button
+                    type="submit"
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-8 h-11 !min-h-0 text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={loading || isUploadingMedia || isUploadingCover}
-                    onClick={(event) => event.currentTarget.blur()}
                   >
                     {loading ? 'Sparar...' : 'Spara ändringar'}
-                  </Button>
+                  </button>
                 </div>
               )}
             </form>

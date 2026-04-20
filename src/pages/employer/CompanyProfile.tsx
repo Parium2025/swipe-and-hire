@@ -753,15 +753,13 @@ const CompanyProfile = () => {
             />
 
             <div className="flex justify-center pt-6">
-              <Button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading || !hasUnsavedChanges}
-                variant="glass"
-                className="h-9 px-6 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                onClick={(event) => event.currentTarget.blur()}
+                className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-6 h-9 text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Sparar...' : 'Spara ändringar'}
-              </Button>
+              </button>
             </div>
           </form>
         </div>
