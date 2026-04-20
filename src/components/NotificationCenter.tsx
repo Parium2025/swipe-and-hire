@@ -115,10 +115,10 @@ function NotificationCenter() {
       <button
         ref={triggerRef}
         onClick={() => setOpen(v => !v)}
-        className="relative flex items-center justify-center h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] shrink-0 aspect-square rounded-full text-white hover:bg-white/10 transition-colors"
+        className="md:relative md:flex md:items-center md:justify-center md:px-3 md:py-2 md:rounded-lg md:text-white md:hover:bg-white/10 md:transition-colors md:h-auto md:w-auto md:aspect-auto relative flex items-center justify-center h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] shrink-0 aspect-square rounded-full text-white hover:bg-white/10 transition-colors"
         aria-label="Notifikationer"
       >
-        <Bell className="h-[18px] w-[18px]" />
+        <Bell className="h-[18px] w-[18px] md:h-4 md:w-4" />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30">
             {unreadCount > 9 ? '9+' : unreadCount}
