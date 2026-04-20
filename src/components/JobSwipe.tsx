@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { preloadImages, clearImageCache } from '@/lib/serviceWorkerManager';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
+import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 
 // Map benefit keys to Swedish labels
 const getBenefitLabel = (benefit: string): string => {
@@ -83,6 +84,7 @@ interface JobPosting {
   workplace_address?: string;
   workplace_name?: string;
   created_at: string;
+  updated_at?: string;
   employer_id: string;
   job_image_url?: string;
   company_logo_url?: string | null;
@@ -100,6 +102,8 @@ const getJobCompanyName = (job?: JobPosting | null) => {
   return job.workplace_name?.trim() || 'Företag';
 };
 
+const isLiveJobVisible = (job?: Partial<JobPosting> | null) => Boolean(job?.is_active && !('deleted_at' in (job || {}) && (job as { deleted_at?: string | null }).deleted_at));
+
 const JobSwipe = () => {
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [currentJobIndex, setCurrentJobIndex] = useState(0);
@@ -112,58 +116,7 @@ const JobSwipe = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    clearImageCache().catch(() => {});
-    fetchJobs();
-  }, []);
-
-  // Förladdda alla jobbbilder via Service Worker
-  const jobImageUrls = jobs
-    .map(job => job.job_image_url)
-    .filter(Boolean) as string[];
-  
-  useEffect(() => {
-    if (jobImageUrls.length > 0) {
-      preloadImages(jobImageUrls);
-    }
-  }, [jobImageUrls]);
-
-  // Load current job image
-  useEffect(() => {
-    const loadCurrentJobImage = async () => {
-      const currentJob = jobs[currentJobIndex];
-      if (!currentJob?.job_image_url) {
-        setCurrentJobImageUrl(null);
-        return;
-      }
-
-      try {
-        // If already a full URL, use as-is
-        if (currentJob.job_image_url.startsWith('http')) {
-          setCurrentJobImageUrl(currentJob.job_image_url);
-          return;
-        }
-
-        // Get public URL from job-images bucket
-        const { data } = supabase.storage
-          .from('job-images')
-          .getPublicUrl(currentJob.job_image_url);
-        
-        if (data?.publicUrl) {
-          setCurrentJobImageUrl(data.publicUrl);
-        } else {
-          setCurrentJobImageUrl(null);
-        }
-      } catch (err) {
-        console.error('Error loading job image:', err);
-        setCurrentJobImageUrl(null);
-      }
-    };
-
-    loadCurrentJobImage();
-  }, [jobs, currentJobIndex]);
-
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     try {
       // 🚇 SINGLE TUNNEL: read workplace_name + company_logo_url straight from job_postings.
       // No profiles join — that table is only the source upstream of the sync trigger.
@@ -193,7 +146,110 @@ const JobSwipe = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    clearImageCache().catch(() => {});
+    fetchJobs();
+  }, [fetchJobs]);
+
+  // Förladdda alla jobbbilder via Service Worker
+  const jobImageUrls = jobs
+    .map(job => job.job_image_url)
+    .filter(Boolean) as string[];
+  
+  useEffect(() => {
+    if (jobImageUrls.length > 0) {
+      preloadImages(jobImageUrls);
+    }
+  }, [jobImageUrls]);
+
+  // Load current job image
+  useEffect(() => {
+    const loadCurrentJobImage = async () => {
+      const currentJob = jobs[currentJobIndex];
+      if (!currentJob?.job_image_url) {
+        setCurrentJobImageUrl(null);
+        return;
+      }
+
+      try {
+        // If already a full URL, use as-is
+        if (currentJob.job_image_url.startsWith('http')) {
+          setCurrentJobImageUrl(appendVersionToUrl(currentJob.job_image_url, currentJob.updated_at) || currentJob.job_image_url);
+          return;
+        }
+
+        // Get public URL from job-images bucket
+        const { data } = supabase.storage
+          .from('job-images')
+          .getPublicUrl(currentJob.job_image_url);
+        
+        if (data?.publicUrl) {
+          setCurrentJobImageUrl(appendVersionToUrl(data.publicUrl, currentJob.updated_at) || data.publicUrl);
+        } else {
+          setCurrentJobImageUrl(null);
+        }
+      } catch (err) {
+        console.error('Error loading job image:', err);
+        setCurrentJobImageUrl(null);
+      }
+    };
+
+    loadCurrentJobImage();
+  }, [jobs, currentJobIndex]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('job-swipe-live-jobs')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_postings',
+        },
+        (payload) => {
+          const nextRow = payload.new as JobPosting & { deleted_at?: string | null };
+          const previousRow = payload.old as JobPosting & { deleted_at?: string | null };
+
+          setJobs((currentJobs) => {
+            if (payload.eventType === 'DELETE') {
+              return currentJobs.filter((job) => job.id !== previousRow.id);
+            }
+
+            if (!isLiveJobVisible(nextRow)) {
+              return currentJobs.filter((job) => job.id !== nextRow.id);
+            }
+
+            const existingIndex = currentJobs.findIndex((job) => job.id === nextRow.id);
+
+            if (existingIndex === -1) {
+              return [nextRow, ...currentJobs].sort(
+                (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+              );
+            }
+
+            const updatedJobs = [...currentJobs];
+            updatedJobs[existingIndex] = {
+              ...updatedJobs[existingIndex],
+              ...nextRow,
+            };
+
+            return updatedJobs;
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
+    setCurrentJobIndex((prev) => Math.min(prev, Math.max(jobs.length - 1, 0)));
+  }, [jobs.length]);
 
   const handleSwipe = async (jobId: string, liked: boolean) => {
     if (swiping) return;
