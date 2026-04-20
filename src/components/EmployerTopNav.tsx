@@ -301,7 +301,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                   <img 
                     src={preloadedCompanyLogoUrl} 
                     alt="Företagslogo" 
-                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30 relative z-10"
+                    className="h-6 w-6 rounded-full object-cover relative z-10"
                   />
                 ) : profile?.company_name ? (
                   <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white relative z-10">
