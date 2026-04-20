@@ -242,9 +242,11 @@ const CompanyProfile = () => {
       const fileExt = 'webp';
       
       const croppedFileName = `${user.data.user.id}/${timestamp}-company-logo.${fileExt}`;
+      const { compressImageBlob, LONG_CACHE_UPLOAD_OPTIONS } = await import('@/lib/imageUploadOptimization');
+      const optimizedBlob = await compressImageBlob(editedBlob, { maxDimension: 1024, quality: 0.9 });
       const { error: uploadError } = await supabase.storage
         .from('company-logos')
-        .upload(croppedFileName, editedBlob);
+        .upload(croppedFileName, optimizedBlob, LONG_CACHE_UPLOAD_OPTIONS);
 
       if (uploadError) throw uploadError;
 
@@ -256,7 +258,7 @@ const CompanyProfile = () => {
         const originalFileName = `${user.data.user.id}/${timestamp}-company-logo-original.${origExt}`;
         const { error: originalUploadError } = await supabase.storage
           .from('company-logos')
-          .upload(originalFileName, originalLogoFile);
+          .upload(originalFileName, originalLogoFile, LONG_CACHE_UPLOAD_OPTIONS);
 
         if (!originalUploadError) {
           const { data: { publicUrl: originalPublicUrl } } = supabase.storage

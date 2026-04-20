@@ -44,12 +44,15 @@ const ProfileSetup = () => {
 
   const uploadProfileImage = async (file: File) => {
     try {
-      const fileExt = file.name.split('.').pop();
+      const { compressImageBlob, LONG_CACHE_UPLOAD_OPTIONS } = await import('@/lib/imageUploadOptimization');
+      const optimized = await compressImageBlob(file, { maxDimension: 1024, quality: 0.9 });
+      const isOptimized = optimized !== file;
+      const fileExt = isOptimized ? 'webp' : (file.name.split('.').pop() || 'jpg');
       const fileName = `${user?.id}/${Date.now()}-profile-image.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('profile-media')
-        .upload(fileName, file);
+        .upload(fileName, optimized, LONG_CACHE_UPLOAD_OPTIONS);
 
       if (uploadError) throw uploadError;
 

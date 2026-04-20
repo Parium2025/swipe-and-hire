@@ -304,9 +304,10 @@ const EmployerProfile = () => {
           const timestamp = Date.now();
           const originalFileName = `${user.id}/original-${timestamp}.${fileExt}`;
           
+          const { LONG_CACHE_UPLOAD_OPTIONS } = await import('@/lib/imageUploadOptimization');
           const { error: origError } = await supabase.storage
             .from('job-applications')
-            .upload(originalFileName, originalProfileImageFile);
+            .upload(originalFileName, originalProfileImageFile, LONG_CACHE_UPLOAD_OPTIONS);
           
           if (!origError) {
             setOriginalProfileImageStoragePath(originalFileName);
