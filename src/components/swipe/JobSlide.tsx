@@ -124,9 +124,10 @@ export const JobSlide = memo(function JobSlide({
 
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
   const nextDisplayCompanyName = nextJob?.workplace_name || nextJob?.company_name || 'Okänt företag';
-  const imageUrl = resolveImageUrl(job.job_image_url);
-  const nextImageUrl = useMemo(() => resolveImageUrl(nextJob?.job_image_url), [nextJob?.job_image_url]);
+  const imageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(job.job_image_url), job.updated_at), [job.job_image_url, job.updated_at]);
+  const nextImageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(nextJob?.job_image_url), nextJob?.updated_at), [nextJob?.job_image_url, nextJob?.updated_at]);
   const rawLogoUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(job.company_logo_url, 'company-logos'), job.updated_at), [job.company_logo_url, job.updated_at]);
+  const nextLogoUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(nextJob?.company_logo_url, 'company-logos'), nextJob?.updated_at), [nextJob?.company_logo_url, nextJob?.updated_at]);
   const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
   const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
   const [logoBlobFailed, setLogoBlobFailed] = useState(false);
@@ -516,7 +517,7 @@ export const JobSlide = memo(function JobSlide({
                     {nextJob.company_logo_url ? (
                       <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg">
                         <img
-                          src={resolveImageUrl(nextJob.company_logo_url, 'company-logos') || ''}
+                            src={nextLogoUrl || ''}
                           alt=""
                           className="w-full h-full object-cover"
                           draggable={false}

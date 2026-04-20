@@ -4,6 +4,7 @@ import { CheckCircle } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
+import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 
 export interface SwipeJob {
   id: string;
@@ -65,7 +66,7 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
   const scale = isTop ? 1 : 0.95;
   const yOffset = isTop ? 0 : 8;
 
-  const rawImageUrl = useMemo(() => resolveImageUrl(job.job_image_url), [job.job_image_url]);
+  const rawImageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(job.job_image_url), job.updated_at), [job.job_image_url, job.updated_at]);
 
   // Blob cache: try sync first, then load async
   const cachedBlob = useMemo(() => rawImageUrl ? imageCache.getCachedUrl(rawImageUrl) : null, [rawImageUrl]);

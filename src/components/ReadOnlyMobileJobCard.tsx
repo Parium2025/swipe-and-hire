@@ -102,10 +102,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   // Resolve the raw storage path to a public URL
   const resolvedUrl = useMemo(() => {
     if (!job.job_image_url) return null;
-    if (job.job_image_url.startsWith('http')) return job.job_image_url;
+    if (job.job_image_url.startsWith('http')) return appendVersionToUrl(job.job_image_url, job.updated_at);
     const { data } = supabase.storage.from('job-images').getPublicUrl(job.job_image_url);
-    return data?.publicUrl || null;
-  }, [job.job_image_url]);
+    return appendVersionToUrl(data?.publicUrl, job.updated_at);
+  }, [job.job_image_url, job.updated_at]);
 
   // Synchronous cache check — computed every render, zero-delay on remount
   const cachedBlobUrl = useMemo(() => {
@@ -158,7 +158,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const rawLogoUrl = useMemo(() => {
     if (!job.company_logo_url) return null;
-    if (job.company_logo_url.startsWith('http')) return job.company_logo_url;
+    if (job.company_logo_url.startsWith('http')) return appendVersionToUrl(job.company_logo_url, job.updated_at);
     const publicUrl = supabase.storage.from('company-logos').getPublicUrl(job.company_logo_url).data?.publicUrl || null;
     return appendVersionToUrl(publicUrl, job.updated_at);
   }, [job.company_logo_url, job.updated_at]);

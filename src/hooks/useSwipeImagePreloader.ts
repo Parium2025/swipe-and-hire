@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
+import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 
 interface PreloadableJob {
   job_image_url?: string;
   company_logo_url?: string;
+  updated_at?: string;
 }
 
 function resolveUrl(url: string | undefined, bucket: string): string | null {
@@ -30,8 +32,8 @@ export function useSwipeImagePreloader(
 
     for (let i = currentIndex + 1; i <= Math.min(currentIndex + lookahead, jobs.length - 1); i++) {
       const job = jobs[i];
-      const imgUrl = resolveUrl(job.job_image_url, 'job-images');
-      const logoUrl = resolveUrl(job.company_logo_url, 'company-logos');
+      const imgUrl = appendVersionToUrl(resolveUrl(job.job_image_url, 'job-images'), job.updated_at);
+      const logoUrl = appendVersionToUrl(resolveUrl(job.company_logo_url, 'company-logos'), job.updated_at);
 
       if (imgUrl && !loadedRef.current.has(imgUrl)) urls.push(imgUrl);
       if (logoUrl && !loadedRef.current.has(logoUrl)) urls.push(logoUrl);
