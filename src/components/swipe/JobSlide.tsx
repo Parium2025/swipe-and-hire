@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState, useMemo, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
-import { CheckCircle, X, Bookmark, Heart, Users, Gift, Undo2 } from 'lucide-react';
+import { CheckCircle, X, Bookmark, Heart, Users, Gift, Undo2, Building2 } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +11,7 @@ import { sv } from 'date-fns/locale';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
 import type { SwipeJob } from './SwipeCard';
 import { TruncatedText } from '@/components/TruncatedText';
+import { Badge } from '@/components/ui/badge';
 
 function resolveImageUrl(url?: string, bucket = 'job-images'): string | null {
   if (!url) return null;
@@ -533,11 +534,16 @@ export const JobSlide = memo(function JobSlide({
                     )}
                   </div>
                 )}
-                <TruncatedText
-                  text={nextDisplayCompanyName}
-                  className="text-lg font-bold text-white line-clamp-3 break-words"
-                  tooltipSide="bottom"
-                />
+                <div className="flex justify-center">
+                  <Badge variant="glass" className="inline-flex max-w-[80%] min-w-0 items-center gap-1.5 border-white/15 px-3 py-1 text-white">
+                    <Building2 className="h-3.5 w-3.5 shrink-0" />
+                    <TruncatedText
+                      text={nextDisplayCompanyName}
+                      className="min-w-0 flex-1 whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium"
+                      tooltipSide="bottom"
+                    />
+                  </Badge>
+                </div>
 
                 <h3 className="mt-1 line-clamp-2 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold leading-[1.08] tracking-tight text-white">
                   {nextJob.title}
@@ -737,11 +743,16 @@ export const JobSlide = memo(function JobSlide({
                 )}
               </div>
             )}
-            <TruncatedText
-              text={displayCompanyName}
-              className="text-white font-bold text-lg line-clamp-3 break-words"
-              tooltipSide="bottom"
-            />
+            <div className="flex justify-center">
+              <Badge variant="glass" className="inline-flex max-w-[80%] min-w-0 items-center gap-1.5 border-white/15 px-3 py-1 text-white">
+                <Building2 className="h-3.5 w-3.5 shrink-0" />
+                <TruncatedText
+                  text={displayCompanyName}
+                  className="min-w-0 flex-1 whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium"
+                  tooltipSide="bottom"
+                />
+              </Badge>
+            </div>
 
             <h2
               ref={titleRef}

@@ -11,6 +11,7 @@ interface TruncatedTextProps {
   onClick?: () => void;
   forceClosed?: boolean;
   instantClose?: boolean;
+  style?: React.CSSProperties;
 }
 
 /**
@@ -26,6 +27,7 @@ export function TruncatedText({
   onClick,
   forceClosed = false,
   instantClose = false,
+  style,
 }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const tooltipContentRef = useRef<HTMLDivElement>(null);
@@ -166,6 +168,7 @@ export function TruncatedText({
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
+    ...style,
   };
 
   // If not showing tooltip, render simple element
