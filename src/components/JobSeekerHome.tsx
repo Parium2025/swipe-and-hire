@@ -8,10 +8,10 @@ import GpsPrompt from '@/components/GpsPrompt';
 
 const getGreeting = (): { text: string; isEvening: boolean; isDaytime: boolean } => {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 9) return { text: 'God morgon', isEvening: false, isDaytime: true };
-  if (hour >= 9 && hour < 12) return { text: 'God förmiddag', isEvening: false, isDaytime: true };
+  if (hour >= 5 && hour < 10) return { text: 'God morgon', isEvening: false, isDaytime: true };
+  if (hour >= 10 && hour < 12) return { text: 'God förmiddag', isEvening: false, isDaytime: true };
   if (hour >= 12 && hour < 17) return { text: 'God eftermiddag', isEvening: false, isDaytime: true };
-  if (hour >= 17 && hour < 21) return { text: 'God kväll', isEvening: true, isDaytime: false };
+  if (hour >= 17 && hour < 22) return { text: 'God kväll', isEvening: true, isDaytime: false };
   return { text: 'God natt', isEvening: true, isDaytime: false };
 };
 
