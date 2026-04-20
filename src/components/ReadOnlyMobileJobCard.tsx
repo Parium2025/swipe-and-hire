@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { imageCache } from '@/lib/imageCache';
 import { TruncatedText } from '@/components/TruncatedText';
+import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 
 interface ReadOnlyMobileJobCardProps {
   job: {
@@ -26,6 +27,7 @@ interface ReadOnlyMobileJobCardProps {
     company_name?: string;
     workplace_name?: string;
     company_logo_url?: string;
+    updated_at?: string;
     positions_count?: number;
     salary_min?: number | null;
     salary_max?: number | null;
@@ -152,8 +154,9 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const rawLogoUrl = useMemo(() => {
     if (!job.company_logo_url) return null;
     if (job.company_logo_url.startsWith('http')) return job.company_logo_url;
-    return supabase.storage.from('company-logos').getPublicUrl(job.company_logo_url).data?.publicUrl || null;
-  }, [job.company_logo_url]);
+    const publicUrl = supabase.storage.from('company-logos').getPublicUrl(job.company_logo_url).data?.publicUrl || null;
+    return appendVersionToUrl(publicUrl, job.updated_at);
+  }, [job.company_logo_url, job.updated_at]);
   const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
   const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
   const [logoBlobFailed, setLogoBlobFailed] = useState(false);
