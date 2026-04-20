@@ -2266,6 +2266,7 @@ const Profile = () => {
                     variant="glassGreen"
                     className="h-11 !min-h-0 px-8 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
                     disabled={loading || isUploadingMedia || isUploadingCover}
+                    onClick={(event) => event.currentTarget.blur()}
                   >
                     {loading ? 'Sparar...' : 'Spara ändringar'}
                   </Button>

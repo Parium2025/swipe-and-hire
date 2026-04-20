@@ -758,6 +758,7 @@ const CompanyProfile = () => {
                 disabled={loading || !hasUnsavedChanges}
                 variant="glass"
                 className="h-9 px-6 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                onClick={(event) => event.currentTarget.blur()}
               >
                 {loading ? 'Sparar...' : 'Spara ändringar'}
               </Button>
