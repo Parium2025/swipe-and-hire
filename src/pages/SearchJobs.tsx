@@ -341,30 +341,34 @@ const SearchJobs = memo(() => {
     refetchOnReconnect: true,
   });
 
-  const isLiveRowsReady = searchJobIds.length === 0 || liveRowsFetched;
-
+  // Merge live DB rows in when they land — but never block initial render.
+  // This keeps the original instant-cache behavior while still overriding
+  // stale branding (workplace_name / company_logo_url) when fresh data arrives.
   const jobs = useMemo(() => {
-    if (searchJobs.length === 0 || !isLiveRowsReady) return [];
+    if (searchJobs.length === 0) return [];
 
     const liveRowsById = new Map(liveJobRows.map((job) => [job.id, job]));
 
-    return searchJobs.flatMap((job) => {
+    return searchJobs.map((job) => {
       const liveRow = liveRowsById.get(job.id);
-      if (!liveRow) return [];
+      if (!liveRow) return job;
 
-      const workplaceName = liveRow.workplace_name?.trim() || job.workplace_name?.trim() || job.company_name;
+      const workplaceName =
+        liveRow.workplace_name?.trim() ||
+        job.workplace_name?.trim() ||
+        job.company_name;
 
-      return [{
+      return {
         ...job,
         ...liveRow,
         workplace_name: workplaceName,
-        company_name: workplaceName || 'Okänt företag',
+        company_name: workplaceName || job.company_name || 'Okänt företag',
         company_logo_url: liveRow.company_logo_url ?? job.company_logo_url,
-      }];
+      };
     });
-  }, [searchJobs, liveJobRows, isLiveRowsReady]);
+  }, [searchJobs, liveJobRows]);
 
-  const isSearchResultsLoading = isLoading || !isLiveRowsReady;
+  const isSearchResultsLoading = isLoading;
 
   // Mark initial load as done once jobs finish loading for the first time
   useEffect(() => {
