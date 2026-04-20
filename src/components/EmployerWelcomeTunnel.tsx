@@ -124,12 +124,14 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
-      const fileExt = 'png';
+      const { compressImageBlob, LONG_CACHE_UPLOAD_OPTIONS } = await import('@/lib/imageUploadOptimization');
+      const optimizedBlob = await compressImageBlob(editedBlob, { maxDimension: 1024, quality: 0.9 });
+      const fileExt = optimizedBlob.type === 'image/webp' ? 'webp' : 'png';
       const fileName = `${user.data.user.id}/${Date.now()}-company-logo.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('company-logos')
-        .upload(fileName, editedBlob, { upsert: true });
+        .upload(fileName, optimizedBlob, LONG_CACHE_UPLOAD_OPTIONS);
 
       if (uploadError) throw uploadError;
 

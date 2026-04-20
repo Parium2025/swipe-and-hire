@@ -142,10 +142,10 @@ export async function uploadMedia(
   const fileExt = file.name.split('.').pop();
   const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
   
-  // Ladda upp till rätt bucket
+  // Ladda upp till rätt bucket — long cacheControl since we version-bust URLs via updated_at
   const { error: uploadError } = await supabase.storage
     .from(config.bucket)
-    .upload(fileName, file);
+    .upload(fileName, file, { cacheControl: '31536000', upsert: true });
   
   if (uploadError) {
     console.error(`Upload error for ${mediaType}:`, uploadError);
