@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 
