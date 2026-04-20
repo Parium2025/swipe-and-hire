@@ -1352,23 +1352,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (hasCompanyNameUpdate || hasCompanyLogoUpdate) {
         const jobPostingSyncUpdates: Record<string, string | null> = {};
+        const normalizedCompanyName = hasCompanyNameUpdate
+          ? (typeof cleanedUpdates.company_name === 'string'
+              ? cleanedUpdates.company_name.trim() || null
+              : cleanedUpdates.company_name ?? null)
+          : undefined;
+        const normalizedCompanyLogo = hasCompanyLogoUpdate
+          ? (typeof cleanedUpdates.company_logo_url === 'string'
+              ? cleanedUpdates.company_logo_url.trim() || null
+              : cleanedUpdates.company_logo_url ?? null)
+          : undefined;
 
         if (hasCompanyNameUpdate) {
-          jobPostingSyncUpdates.workplace_name = typeof cleanedUpdates.company_name === 'string'
-            ? cleanedUpdates.company_name.trim() || null
-            : cleanedUpdates.company_name ?? null;
+          jobPostingSyncUpdates.workplace_name = normalizedCompanyName ?? null;
         }
 
         if (hasCompanyLogoUpdate) {
-          const nextCompanyLogo = typeof cleanedUpdates.company_logo_url === 'string'
-            ? cleanedUpdates.company_logo_url.trim() || null
-            : cleanedUpdates.company_logo_url ?? null;
-
-          jobPostingSyncUpdates.company_logo_url = nextCompanyLogo;
-          setPreloadedCompanyLogoUrl(nextCompanyLogo);
+          jobPostingSyncUpdates.company_logo_url = normalizedCompanyLogo ?? null;
+          setPreloadedCompanyLogoUrl(normalizedCompanyLogo ?? null);
 
           try {
-            if (nextCompanyLogo) sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, nextCompanyLogo);
+            if (normalizedCompanyLogo) sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, normalizedCompanyLogo);
             else sessionStorage.removeItem(COMPANY_LOGO_CACHE_KEY);
           } catch {
             // ignore sessionStorage failures
@@ -1388,6 +1392,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
 
+        queryClient.setQueriesData({ queryKey: ['optimized-job-search'] }, (existingData: unknown) => {
+          if (!Array.isArray(existingData)) return existingData;
+
+          return existingData.map((job: any) => {
+            if (!job || job.employer_id !== user.id) return job;
+
+            const nextWorkplaceName = normalizedCompanyName !== undefined
+              ? normalizedCompanyName
+              : (job.workplace_name ?? null);
+            const nextCompanyLogo = normalizedCompanyLogo !== undefined
+              ? normalizedCompanyLogo
+              : (job.company_logo_url ?? null);
+
+            return {
+              ...job,
+              workplace_name: nextWorkplaceName,
+              company_name: nextWorkplaceName || job.company_name || 'Okänt företag',
+              company_logo_url: nextCompanyLogo,
+            };
+          });
+        });
+
+        queryClient.setQueriesData({ queryKey: ['available-jobs'] }, (existingData: unknown) => {
+          if (!Array.isArray(existingData)) return existingData;
+
+          return existingData.map((job: any) => {
+            if (!job || job.employer_id !== user.id) return job;
+
+            return {
+              ...job,
+              workplace_name: normalizedCompanyName !== undefined
+                ? normalizedCompanyName
+                : (job.workplace_name ?? null),
+              company_logo_url: normalizedCompanyLogo !== undefined
+                ? normalizedCompanyLogo
+                : (job.company_logo_url ?? null),
+            };
+          });
+        });
+
+        patchPrefetchedJobsByEmployer(queryClient, user.id, {
+          companyName: normalizedCompanyName,
+          companyLogoUrl: normalizedCompanyLogo,
+        });
+
+        queryClient.removeQueries({ queryKey: ['company-profile'] });
+
         try {
           const cachePrefixes = [
             `parium_employer_jobs_v3_${user.id}`,
@@ -1400,6 +1451,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             'parium_my_applications_cache_v2',
             'parium_conversations_cache',
             'parium_company_logo_url',
+            'parium_company_data_cache_v2',
+            'parium_company_data_cache_v3',
           ];
 
           for (let i = localStorage.length - 1; i >= 0; i -= 1) {
