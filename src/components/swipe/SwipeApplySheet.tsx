@@ -32,7 +32,22 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function JobDetailsSection({ job }: { job: SwipeJob }) {
+interface ExtraJobDetails {
+  workplace_address?: string | null;
+  workplace_postal_code?: string | null;
+  workplace_city?: string | null;
+  workplace_municipality?: string | null;
+  workplace_county?: string | null;
+  work_start_time?: string | null;
+  work_end_time?: string | null;
+}
+
+function cap(s?: string | null) {
+  if (!s) return '';
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDetails | null }) {
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
   const salaryLabel = (() => {
     if (!job.salary_min && !job.salary_max && !job.salary_transparency) return null;
@@ -48,21 +63,49 @@ function JobDetailsSection({ job }: { job: SwipeJob }) {
     return null;
   })();
 
+  const addressLabel = (() => {
+    if (!extra?.workplace_address) return null;
+    let v = extra.workplace_address;
+    if (extra.workplace_postal_code) v += `, ${extra.workplace_postal_code}`;
+    if (extra.workplace_city) v += ` ${extra.workplace_city}`;
+    if (extra.workplace_municipality && extra.workplace_municipality !== extra.workplace_city) v += ` (${extra.workplace_municipality})`;
+    return v;
+  })();
+
+  const cityLabel = (() => {
+    if (!extra?.workplace_city || extra.workplace_city === job.location || extra.workplace_address) return null;
+    let v = extra.workplace_city;
+    if (extra.workplace_municipality && extra.workplace_municipality !== extra.workplace_city) v += `, ${extra.workplace_municipality}`;
+    if (extra.workplace_county) v += `, ${extra.workplace_county}`;
+    return v;
+  })();
+
+  const showMunicipalityOnly =
+    extra?.workplace_municipality && !extra.workplace_address && (!extra.workplace_city || extra.workplace_city === job.location);
+
+  const workTimeLabel = (extra?.work_start_time || extra?.work_end_time)
+    ? `${extra?.work_start_time ?? ''} – ${extra?.work_end_time ?? ''}`
+    : null;
+
   return (
     <div className="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
       <h3 className="text-white font-bold text-base">Detaljer om tjänsten</h3>
       <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
         {job.employment_type && <DetailRow label="Anställning" value={getEmploymentTypeLabel(job.employment_type)} />}
-        {job.location && <DetailRow label="Ort" value={job.location} />}
-        {displayCompanyName && <DetailRow label="Bolagsnamn" value={displayCompanyName} />}
+        {job.location && <DetailRow label="Ort" value={cap(job.location)} />}
+        {displayCompanyName && <DetailRow label="Bolagsnamn" value={cap(displayCompanyName)} />}
         {job.occupation && <DetailRow label="Yrke" value={job.occupation} />}
+        {addressLabel && <DetailRow label="Adress" value={addressLabel} />}
+        {cityLabel && <DetailRow label="Stad" value={cityLabel} />}
+        {showMunicipalityOnly && <DetailRow label="Kommun" value={extra!.workplace_municipality!} />}
         {job.work_location_type && (
           <DetailRow label="Platstyp" value={job.work_location_type === 'on_site' ? 'På plats' : job.work_location_type === 'hybrid' ? 'Hybrid' : job.work_location_type === 'remote' ? 'Distans' : job.work_location_type} />
         )}
         {job.remote_work_possible && (
           <DetailRow label="Distans" value={job.remote_work_possible === 'yes' ? 'Ja' : job.remote_work_possible === 'no' ? 'Nej' : job.remote_work_possible} />
         )}
-        {job.work_schedule && <DetailRow label="Schema" value={job.work_schedule} />}
+        {job.work_schedule && <DetailRow label="Schema" value={cap(job.work_schedule)} />}
+        {workTimeLabel && <DetailRow label="Arbetstid" value={workTimeLabel} />}
         {salaryLabel && <DetailRow label="Lön" value={salaryLabel} />}
         {job.positions_count && job.positions_count > 0 && <DetailRow label="Antal tjänster" value={`${job.positions_count} st`} />}
       </div>
