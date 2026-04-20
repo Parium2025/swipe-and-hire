@@ -492,7 +492,7 @@ const SearchJobs = memo(() => {
     // och vi inte är mitt i en sökning
     if (!debouncedSearch.trim() || debouncedSearch.length < 2) return null;
     if (debouncedSearch !== searchInput) return null; // Debounce pågår - visa inget
-    if (isLoading) return null; // Fortfarande laddar - visa inget
+    if (isSearchResultsLoading) return null; // Fortfarande laddar - visa inget
     
     const searchLower = debouncedSearch.toLowerCase().trim();
     
@@ -523,7 +523,7 @@ const SearchJobs = memo(() => {
     // Return first matching company
     const matches = Array.from(uniqueCompanies.values());
     return matches.length > 0 ? matches[0] : null;
-  }, [jobs, debouncedSearch, searchInput, isLoading]);
+  }, [jobs, debouncedSearch, searchInput, isSearchResultsLoading]);
 
   // Company data for dropdown-selected company filters
   const selectedCompaniesData = useMemo(() => {
@@ -757,7 +757,7 @@ const SearchJobs = memo(() => {
           )}
         </div>
         
-        {isLoading ? (
+        {isSearchResultsLoading ? (
           // Show skeletons during any loading state (initial, back-navigation, filter change)
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -880,7 +880,7 @@ const SearchJobs = memo(() => {
         {!initialLoadDone && !(isTouchCapable && swipeModeActive) && <JobListSkeleton key="list-skel" />}
       </AnimatePresence>
       {/* Swipe Mode Fullscreen Overlay */}
-      {isTouchCapable && swipeModeActive && !isLoading && (
+      {isTouchCapable && swipeModeActive && !isSearchResultsLoading && (
         <SwipeFullscreen
           jobs={swipeJobs}
           appliedJobIds={appliedJobIds}
