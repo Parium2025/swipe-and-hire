@@ -405,7 +405,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
               ) : (
                 <>
                   {/* Details section — above questions */}
-                  {job && <div className="mb-6"><JobDetailsSection job={job} /></div>}
+                  {job && <div className="mb-6"><JobDetailsSection job={job} extra={extraDetails} /></div>}
 
                   {questions.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
