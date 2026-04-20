@@ -19,7 +19,8 @@ interface ShareCandidateDialogProps {
 }
 
 function TeamMemberAvatar({ imageUrl }: { imageUrl: string | null }) {
-  const resolvedUrl = useMediaUrl(imageUrl, 'profile-image');
+  // Liten avatar (40px) → be om optimerad version
+  const resolvedUrl = useMediaUrl(imageUrl, 'profile-image', 86400, { width: 40, height: 40, resize: 'cover' });
   return (
     <Avatar className="h-10 w-10">
       <AvatarImage src={resolvedUrl || ''} />

@@ -87,7 +87,8 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
     }
     return null;
   })();
-  const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
+  // TopNav-avatar är alltid liten (~32-40px) → be om optimerad version (2x för retina automatiskt)
+  const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image', 86400, { width: 40, height: 40, resize: 'cover' });
 
   // Preload avatar in <head> so the topnav image renders without a flicker
   useEffect(() => {

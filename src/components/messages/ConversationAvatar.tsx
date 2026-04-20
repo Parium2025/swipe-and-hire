@@ -25,8 +25,9 @@ export function ConversationAvatar({
   className,
   fallbackClassName,
 }: ConversationAvatarProps) {
-  // Resolve the avatar URL
-  const resolvedUrl = useResolvedAvatarUrl(profile);
+  // Avatarer i meddelandelistan är små (32-48px) → be om optimerad version
+  const sizePx = size === 'sm' ? 32 : size === 'md' ? 40 : 48;
+  const resolvedUrl = useResolvedAvatarUrl(profile, { width: sizePx, height: sizePx, resize: 'cover' });
 
   const getInitials = () => {
     if (isGroup && groupName) {
