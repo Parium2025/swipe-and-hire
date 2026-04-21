@@ -484,10 +484,9 @@ const JobView = () => {
           
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
-              onClick={(e) => {
-                // On touch devices: first tap shows the tooltip (handled by TruncatedText
-                // child via stopPropagation), second tap navigates to company profile.
-                // On hover-capable devices (desktop): always navigate immediately.
+              onClick={() => {
+                // Touch devices: first tap = show tooltip (kept open ~3s), second tap = navigate.
+                // Hover-capable devices (desktop): navigate immediately.
                 const isTouchDevice =
                   typeof window !== 'undefined' &&
                   window.matchMedia('(hover: none)').matches;
@@ -495,15 +494,22 @@ const JobView = () => {
                   setShowCompanyProfile(true);
                   return;
                 }
-                // Touch: this fires only when the tap is OUTSIDE the truncated text
-                // (e.g. on the avatar or "Se företagsprofil" row), or on the second tap
-                // after the tooltip closed. Either way, navigate.
-                if (companyTapRef.current) {
+                if (companyTapArmedRef.current) {
+                  companyTapArmedRef.current = false;
+                  if (companyTapTimeoutRef.current) {
+                    clearTimeout(companyTapTimeoutRef.current);
+                    companyTapTimeoutRef.current = null;
+                  }
                   setShowCompanyProfile(true);
-                  companyTapRef.current = false;
                 } else {
-                  // First tap on the button area (not on truncated text) → navigate directly
-                  setShowCompanyProfile(true);
+                  companyTapArmedRef.current = true;
+                  setShowCompanyTooltip(true);
+                  if (companyTapTimeoutRef.current) clearTimeout(companyTapTimeoutRef.current);
+                  companyTapTimeoutRef.current = setTimeout(() => {
+                    companyTapArmedRef.current = false;
+                    setShowCompanyTooltip(false);
+                    companyTapTimeoutRef.current = null;
+                  }, 3000);
                 }
               }}
               className="flex min-w-0 flex-1 items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
