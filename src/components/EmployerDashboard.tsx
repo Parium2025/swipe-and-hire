@@ -447,7 +447,7 @@ const EmployerDashboard = memo(() => {
                 { key: 'expired', jobs: pagedBuckets.expired },
                 { key: 'draft', jobs: pagedBuckets.draft },
               ]}
-              estimateRowHeight={460}
+              gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
                   <MobileJobCard
@@ -508,8 +508,8 @@ const EmployerDashboard = memo(() => {
                 { key: 'expired', jobs: pagedBuckets.expired },
                 { key: 'draft', jobs: pagedBuckets.draft },
               ]}
-              estimateRowHeight={460}
               className="pb-24"
+              gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => {
                 const isExpired = isEmployerJobExpired(job);
                 const isDraft = isEmployerJobDraft(job);
