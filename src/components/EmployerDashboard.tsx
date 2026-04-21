@@ -137,12 +137,20 @@ const EmployerDashboard = memo(() => {
   
   // Tab state synkad med URL (?tab=active|expired|draft)
   const tabParam = searchParams.get('tab') as JobStatusTab | null;
-  const activeTab: JobStatusTab = tabParam === 'expired' || tabParam === 'draft' ? tabParam : 'active';
+  const urlTab: JobStatusTab = tabParam === 'expired' || tabParam === 'draft' ? tabParam : 'active';
+
+  // Optimistic local tab — uppdaterar indikatorn omedelbart vid klick.
+  // Utan detta blockerar startTransition indikator-renderingen (låg-prio)
+  // och tabben markeras inte förrän nästa interaktion triggar en ny render.
+  const [optimisticTab, setOptimisticTab] = useState<JobStatusTab>(urlTab);
+  useEffect(() => { setOptimisticTab(urlTab); }, [urlTab]);
+
+  const activeTab = optimisticTab;
+  // Defer den dyra tab-flaggan till listan så indikator-animationen aldrig blockeras
+  const listActiveTab = useDeferredValue(activeTab);
+
   const setActiveTab = useCallback((tab: JobStatusTab) => {
-    // startTransition: tab indicator updates instantly (high-prio), list
-    // re-render is marked as a transition so React keeps the UI responsive
-    // and can interrupt rendering if another input arrives.
-    // This is what makes the tab feel "Gmail-snappy".
+    setOptimisticTab(tab); // 0ms visuell respons för indikatorn
     startTransition(() => {
       setSearchParams(prev => {
         const next = new URLSearchParams(prev);
