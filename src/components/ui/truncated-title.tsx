@@ -6,6 +6,7 @@ interface TruncatedTitleProps {
   fullText: string;
   className?: string;
   style?: React.CSSProperties;
+  side?: "top" | "right" | "bottom" | "left";
 }
 
 /**
