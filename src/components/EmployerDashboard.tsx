@@ -182,9 +182,10 @@ const EmployerDashboard = memo(() => {
     const expired: JobPosting[] = [];
     const draft: JobPosting[] = [];
     for (const j of filteredAndSortedJobs) {
-      if (isEmployerJobDraft(j)) draft.push(j);
-      else if (isEmployerJobExpired(j)) expired.push(j);
-      else if (isEmployerJobActive(j)) active.push(j);
+      const jp = j as JobPosting;
+      if (isEmployerJobDraft(jp)) draft.push(jp);
+      else if (isEmployerJobExpired(jp)) expired.push(jp);
+      else if (isEmployerJobActive(jp)) active.push(jp);
     }
     return { active, expired, draft };
   }, [filteredAndSortedJobs]);
