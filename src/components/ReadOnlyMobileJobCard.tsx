@@ -1,15 +1,13 @@
-import { memo, useState, useEffect, useMemo, type ReactNode } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2, Gift, Banknote } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
-import { supabase } from '@/integrations/supabase/client';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
-import { imageCache } from '@/lib/imageCache';
+import { useCardImage } from '@/hooks/useCardImage';
 import { TruncatedText } from '@/components/TruncatedText';
-import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 
 interface ReadOnlyMobileJobCardProps {
   job: {
