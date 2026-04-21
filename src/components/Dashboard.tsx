@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useRef, useEffect, useCallback, startTransition, useDeferredValue } from 'react';
+import { memo, useMemo, useState, useRef, useEffect, useCallback, startTransition } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Briefcase, Users, Eye, TrendingUp } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
@@ -57,8 +57,10 @@ const Dashboard = memo(() => {
   useEffect(() => { setOptimisticTab(urlTab); }, [urlTab]);
 
   const activeTab = optimisticTab;
-  // Defer den dyra tab-flaggan till listan så indikator-animationen aldrig blockeras
-  const listActiveTab = useDeferredValue(activeTab);
+  // Använd samma värde till listan — DOM-persistens i VirtualJobGrid gör tab-bytet billigt.
+  // useDeferredValue introducerade en mellan-render där "gamla tabben" fortfarande var aktiv,
+  // vilket orsakade dubbelblink (båda paneler animerade synlighet samtidigt).
+  const listActiveTab = activeTab;
 
   const setActiveTab = useCallback((tab: JobStatusTab) => {
     setOptimisticTab(tab); // 0ms visuell respons

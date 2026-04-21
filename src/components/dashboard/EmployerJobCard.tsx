@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users } from 'lucide-react';
+import { Eye, Users, Building2 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
@@ -22,6 +22,7 @@ interface EmployerJobCardProps {
     created_at: string;
     expires_at?: string;
     job_image_url?: string;
+    company_logo_url?: string;
     image_focus_position?: string;
     employer_profile?: {
       first_name: string;
@@ -71,6 +72,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
 
   // Centraliserad bild-hantering — eliminerar 4 hooks per kort
   const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url, 'job-images');
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos');
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 
@@ -102,9 +104,21 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
           </>
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-2 pb-6`}>
-            <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-              <span className="text-xl font-bold text-white/50 tracking-wide">{initials}</span>
-            </div>
+            {logoUrl ? (
+              <>
+                <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
+                  <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} />
+                </div>
+                <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] overflow-hidden">
+                  <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
+                  <span className="leading-snug truncate font-medium text-white">{companyName}</span>
+                </Badge>
+              </>
+            ) : (
+              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
+                <span className="text-xl font-bold text-white/50 tracking-wide">{initials}</span>
+              </div>
+            )}
           </div>
         )}
 
