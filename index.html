@@ -11,7 +11,7 @@
     <meta name="description" content="Parium">
     <meta name="author" content="Lovable" />
     <meta http-equiv="Content-Language" content="sv-SE" />
-    <meta name="build-version" content="2026-01-03T21:15Z" />
+    <!-- build-version sätts dynamiskt från hashade asset-URL:er nedan så att varje ny deploy triggar reload-logiken automatiskt -->
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -299,27 +299,48 @@
     <div id="root"></div>
     <script>
       try {
-        const meta = document.querySelector('meta[name="build-version"]');
-        const v = meta?.getAttribute('content') || '';
-        const key = 'parium_build_version';
-        const prev = localStorage.getItem(key);
-        if (!prev) {
-          localStorage.setItem(key, v);
-        } else if (prev !== v) {
-          localStorage.setItem(key, v);
-          // Best-effort purge of runtime caches to fight iOS PWA sticky caching
-          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-            navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
-          }
-          if (window.caches && caches.keys) {
-            caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(() => {});
-          }
-          const url = new URL(window.location.href);
-          url.searchParams.set('v', v.replace(/\D/g, '').slice(0, 12));
-          if (window.location.href !== url.toString()) {
-            window.location.replace(url.toString());
-          } else {
-            window.location.reload();
+        // Compute a build signature from the hashed asset URLs Vite injects.
+        // Varje ny deploy → nya hashar → ny signatur → reload triggas automatiskt.
+        const computeSig = function() {
+          try {
+            const scripts = Array.from(document.querySelectorAll('script[src]'))
+              .map(function(s){ return s.getAttribute('src') || ''; })
+              .filter(function(src){ return /\/assets\/.+\.(js|mjs)/.test(src); });
+            const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"][href]'))
+              .map(function(l){ return l.getAttribute('href') || ''; })
+              .filter(function(href){ return /\/assets\/.+\.css/.test(href); });
+            const all = scripts.concat(styles).sort();
+            return all.length > 0 ? all.join('|') : '';
+          } catch (e) { return ''; }
+        };
+
+        const v = computeSig();
+        if (!v) {
+          // Inga hashade assets ännu (t.ex. dev) — gör inget.
+        } else {
+          const key = 'parium_build_version';
+          const prev = localStorage.getItem(key);
+          if (!prev) {
+            localStorage.setItem(key, v);
+          } else if (prev !== v) {
+            localStorage.setItem(key, v);
+            // Best-effort purge of runtime caches to fight iOS PWA sticky caching
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+              navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); }).catch(function(){});
+            }
+            if (window.caches && caches.keys) {
+              caches.keys().then(function(keys){ return Promise.all(keys.map(function(k){ return caches.delete(k); })); }).catch(function(){});
+            }
+            const url = new URL(window.location.href);
+            // Använd en kort hash av signaturen som cache-bust param
+            let hash = 0;
+            for (let i = 0; i < v.length; i++) { hash = ((hash << 5) - hash + v.charCodeAt(i)) | 0; }
+            url.searchParams.set('v', String(Math.abs(hash)).slice(0, 10));
+            if (window.location.href !== url.toString()) {
+              window.location.replace(url.toString());
+            } else {
+              window.location.reload();
+            }
           }
         }
       } catch (e) { /* noop */ }
