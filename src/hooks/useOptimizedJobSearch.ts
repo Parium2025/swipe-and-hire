@@ -5,7 +5,6 @@ import { getTimeRemaining } from '@/lib/date';
 import { expandSearchTerms, detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
 import { safeSetItem } from '@/lib/safeStorage';
 import { imageCache } from '@/lib/imageCache';
-import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
 // 🔥 Offline-cache: senaste lyckade sökresultat per query-nyckel.
 // Används som fallback när nätverket är borta så att jobbkort fortfarande
