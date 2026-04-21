@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { memo } from 'react';
+import { memo, useRef, useState, useLayoutEffect, useCallback } from 'react';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -18,62 +18,61 @@ const tabColors: Record<JobStatusTab, string> = {
   draft: 'text-amber-400',
 };
 
-/**
- * Tab switcher with a sliding indicator.
- *
- * Performance design — mirrors InterviewTypeTabs (Video/Kontor) which feels instant:
- *  - Buttons live in a CSS Grid with N equal columns.
- *  - Indicator is positioned with `left/width` as percentages of the rail and
- *    moved with `transform: translateX(N * 100%)`.
- *  - Zero DOM measurement: no refs, no offsetLeft/offsetWidth, no useLayoutEffect,
- *    no resize listener, no setState during animation.
- *  - The animation is a pure GPU transform, so it never has to wait for React
- *    commits, layout reads, or job-card re-renders that happen on tab change.
- */
-export const JobStatusTabs = memo(function JobStatusTabs({
-  activeTab,
-  onTabChange,
-  activeCount,
-  expiredCount,
-  draftCount,
-  showDrafts = false,
-}: JobStatusTabsProps) {
-  const tabs: JobStatusTab[] = showDrafts ? ['active', 'expired', 'draft'] : ['active', 'expired'];
-  const activeIndex = Math.max(0, tabs.indexOf(activeTab));
-  const columnCount = tabs.length;
-  // Each grid column = 100% / columnCount of the rail's content box.
-  // Move indicator by `activeIndex` columns (translateX in % is relative to its own width).
-  const indicatorXPercent = activeIndex * 100;
+export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChange, activeCount, expiredCount, draftCount, showDrafts = false }: JobStatusTabsProps) {
+  const railRef = useRef<HTMLDivElement>(null);
+  const activeRef = useRef<HTMLButtonElement>(null);
+  const expiredRef = useRef<HTMLButtonElement>(null);
+  const draftRef = useRef<HTMLButtonElement>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
+
+  const updateIndicator = useCallback(() => {
+    const refs: Record<JobStatusTab, React.RefObject<HTMLButtonElement>> = {
+      active: activeRef,
+      expired: expiredRef,
+      draft: draftRef,
+    };
+    const ref = refs[activeTab]?.current;
+    if (ref) {
+      setIndicatorStyle({
+        x: ref.offsetLeft,
+        width: ref.offsetWidth,
+      });
+    }
+  }, [activeTab]);
+
+  useLayoutEffect(() => {
+    updateIndicator();
+    // Ensure measurement after fonts/layout settle
+    const raf = requestAnimationFrame(updateIndicator);
+    const fallback = setTimeout(updateIndicator, 100);
+    window.addEventListener('resize', updateIndicator);
+    return () => {
+      window.removeEventListener('resize', updateIndicator);
+      cancelAnimationFrame(raf);
+      clearTimeout(fallback);
+    };
+  }, [updateIndicator, activeCount, expiredCount, draftCount]);
 
   return (
     <div className="dashboard-tabs-viewport mx-auto">
-      <div
-        className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
-          gap: 0,
-        }}
-      >
-        {/* Sliding background — pure transform animation, no DOM measurement. */}
+      <div ref={railRef} className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
+        {/* Sliding background — uses GPU-accelerated transform instead of layout-triggering left */}
         <motion.div
-          className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] pointer-events-none will-change-transform"
-          style={{
-            left: 0,
-            width: `${100 / columnCount}%`,
-          }}
+          className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] will-change-transform"
+          style={{ width: indicatorStyle.width, left: 0 }}
           initial={false}
-          animate={{ x: `${indicatorXPercent}%` }}
+          animate={{ x: indicatorStyle.x }}
           transition={{
-            type: 'spring',
-            stiffness: 320,
+            type: "spring",
+            stiffness: 380,
             damping: 34,
-            mass: 0.7,
+            mass: 0.6,
           }}
         />
-
-        {/* Buttons — each lives in one grid column => identical widths. */}
+        
+        {/* Buttons */}
         <button
+          ref={activeRef}
           type="button"
           onClick={() => onTabChange('active')}
           className={`dashboard-tab-button relative z-10 rounded-[7px] font-medium transition-colors whitespace-nowrap ${tabColors.active}`}
@@ -81,6 +80,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({
           Aktiva ({activeCount})
         </button>
         <button
+          ref={expiredRef}
           type="button"
           onClick={() => onTabChange('expired')}
           className={`dashboard-tab-button relative z-10 rounded-[7px] font-medium transition-colors whitespace-nowrap ${tabColors.expired}`}
@@ -89,6 +89,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({
         </button>
         {showDrafts && (
           <button
+            ref={draftRef}
             type="button"
             onClick={() => onTabChange('draft')}
             className={`dashboard-tab-button relative z-10 rounded-[7px] font-medium transition-colors whitespace-nowrap ${tabColors.draft}`}

@@ -10,10 +10,9 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
+import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
-import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
-
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -96,28 +95,32 @@ const Dashboard = memo(() => {
     filteredAndSortedJobs,
   } = useJobFiltering(jobs);
 
-  // Stable navigation callback for cards (referential equality => memoised cards don't re-render).
-  const handleCardClick = useCallback((jobId: string) => {
-    navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } });
-  }, [navigate, activeTab]);
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  const listTopRef = useRef<HTMLDivElement>(null);
+  const didMountRef = useRef(false);
 
-  // Stable per-item renderers for VirtualJobGrid.
-  const renderDesktopCard = useCallback((job: any) => (
-    <EmployerJobCard
-      job={job}
-      activeTab={activeTab}
-      onClick={handleCardClick}
-    />
-  ), [activeTab, handleCardClick]);
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / pageSize));
+  const pageJobs = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredAndSortedJobs.slice(start, start + pageSize);
+  }, [filteredAndSortedJobs, page]);
 
-  const renderMobileCard = useCallback((job: any) => (
-    <ReadOnlyMobileJobCard
-      job={job}
-      hideSaveButton
-      onCardClick={handleCardClick}
-    />
-  ), [handleCardClick]);
+  // Reset page when tab or filters change
+  useEffect(() => { setPage(1); }, [activeTab]);
+  useEffect(() => { setPage(1); }, [searchTerm, sortBy, selectedRecruiterId]);
 
+  // Scroll to top when page changes (but not on initial mount)
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (listTopRef.current) {
+      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [page]);
 
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : filteredStats.totalJobs, loading: false },
@@ -181,30 +184,32 @@ const Dashboard = memo(() => {
         />
       </div>
 
-      {/* Desktop: Virtualised card grid — only renders visible rows for 60fps tab switching */}
+      {/* Desktop: Card grid */}
       <div className="hidden md:block">
+        <div ref={listTopRef} />
         {filteredAndSortedJobs.length === 0 ? (
           <div className="text-center text-white py-12 font-medium text-sm">
             {getEmptyMessage(searchTerm, activeTab)}
           </div>
         ) : (
-          <VirtualJobGrid
-            items={filteredAndSortedJobs as any[]}
-            renderItem={renderDesktopCard}
-            estimateRowHeight={540}
-            overscan={2}
-            className="job-card-grid"
-          />
+          <>
+            <div key={activeTab} className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+              {pageJobs.map((job) => (
+                <EmployerJobCard
+                  key={job.id}
+                  job={job as any}
+                  activeTab={activeTab}
+                  onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
+                />
+              ))}
+            </div>
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          </>
         )}
       </div>
 
-      {/* Mobile: Virtualised single-column list */}
-      <div
-        className="block md:hidden touch-pan-y"
-        onTouchStart={tabSwipeHandlers.onTouchStart}
-        onTouchMove={tabSwipeHandlers.onTouchMove}
-        onTouchEnd={tabSwipeHandlers.onTouchEnd}
-      >
+      {/* Mobile: Card list view */}
+      <div className="block md:hidden touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -228,14 +233,18 @@ const Dashboard = memo(() => {
             <span>{getEmptyMessage(searchTerm, activeTab)}</span>
           </div>
         ) : (
-          <VirtualJobGrid
-            items={filteredAndSortedJobs as any[]}
-            renderItem={renderMobileCard}
-            estimateRowHeight={540}
-            overscan={2}
-            singleColumn
-            className="job-card-grid"
-          />
+          <div key={activeTab} className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+            {pageJobs.map((job) => (
+              <ReadOnlyMobileJobCard
+                key={job.id}
+                job={job as any}
+                hideSaveButton
+                onCardClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
+              />
+            ))}
+
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
+          </div>
         )}
       </div>
     </div>
