@@ -204,5 +204,370 @@ const EmployerDashboard = memo(() => {
     return tabFilteredJobs.slice(start, start + pageSize);
   }, [tabFilteredJobs, page]);
 
-  // 🚀 Chunked rendering: first 6 cards instant, rest in next idle frame.
-  // Eliminates the "cold mount" hack when switching to a tab with many cards.
+  
+  // Scroll to top when page changes (but not on initial mount)
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (listTopRef.current) {
+      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [page]);
+
+  const handleDeleteClick = (job: JobPosting) => {
+    setJobToDelete(job);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteJob = async () => {
+    if (!jobToDelete) return;
+    
+    try {
+      // Optimistic: remove from react-query cache immediately
+      queryClient.setQueriesData({ queryKey: ['jobs'] }, (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((j: any) => j.id !== jobToDelete.id);
+      });
+
+      // Soft delete in DB
+      const { error } = await supabase
+        .from('job_postings')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', jobToDelete.id);
+
+      if (error) {
+        // Rollback on error
+        invalidateJobs();
+        toast({
+          title: "Fel vid borttagning",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Annons borttagen",
+        description: "Jobbannonsen har tagits bort."
+      });
+
+      setDeleteDialogOpen(false);
+      setJobToDelete(null);
+      // Background refetch to sync with server
+      invalidateJobs();
+    } catch (error) {
+      invalidateJobs();
+      toast({
+        title: "Ett fel uppstod",
+        description: "Kunde inte ta bort annonsen.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEditJob = (job: JobPosting) => {
+    setEditingJob(job);
+    setEditDialogOpen(true);
+  };
+
+  // Handle editing draft jobs - use the same edit dialog flow as published jobs
+  const handleEditDraft = (job: JobPosting) => {
+    setEditingJob(job);
+    setEditDialogOpen(true);
+  };
+
+  const handlePremiumEditOpen = useCallback((job: JobPosting) => {
+    if (pendingEditJobId) return;
+
+    setPendingEditJobId(job.id);
+
+    if (editLaunchTimeoutRef.current) {
+      window.clearTimeout(editLaunchTimeoutRef.current);
+    }
+
+    editLaunchTimeoutRef.current = window.setTimeout(() => {
+      handleEditJob(job);
+
+      setPendingEditJobId(null);
+      editLaunchTimeoutRef.current = null;
+    }, 150);
+  }, [pendingEditJobId]);
+
+  // Handle row click - drafts open wizard, active jobs go to details
+  const handleJobRowClick = (job: JobPosting) => {
+    if (!job.is_active) {
+      handleEditDraft(job);
+    } else {
+      navigate(`/job-details/${job.id}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
+    }
+  };
+
+  // Count active/expired/draft jobs consistently across employer views
+  const activeJobs = useMemo(() => 
+    jobs.filter(j => isEmployerJobActive(j)), 
+    [jobs]
+  );
+  
+  const expiredJobsCount = useMemo(() => 
+    jobs.filter(j => isEmployerJobExpired(j)).length, 
+    [jobs]
+  );
+  
+  const draftJobsCount = useMemo(() => 
+    jobs.filter(j => isEmployerJobDraft(j)).length, 
+    [jobs]
+  );
+  
+  const statsCards = useMemo(() => [
+    { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : jobs.length, loading: false },
+    { 
+      icon: TrendingUp, 
+      title: 'Aktiva', 
+      value: loading ? preloadedEmployerActiveJobs : activeJobs.length, 
+      loading: false,
+      subItems: [
+        { label: 'Utgångna', value: expiredJobsCount },
+        { label: 'Utkast', value: draftJobsCount },
+      ]
+    },
+    { icon: Eye, title: 'Visningar', value: loading ? preloadedEmployerTotalViews : activeJobs.reduce((s, j) => s + j.views_count, 0), loading: false },
+    { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : activeJobs.reduce((s, j) => s + j.applications_count, 0), loading: false },
+  ], [jobs, activeJobs, expiredJobsCount, draftJobsCount, loading, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
+
+  // Wait for data AND minimum delay before showing content with fade
+  if (loading || !showContent) {
+    return (
+       <div className="space-y-4 responsive-container-wide opacity-0" aria-hidden="true">
+        {/* Invisible placeholder to prevent layout shift */}
+      </div>
+    );
+  }
+
+  // Always fade in on mount — symmetric with dashboard
+  const fadeClass = 'animate-fade-in';
+
+  return (
+     <div className={`space-y-4 responsive-container-wide ${fadeClass}`}>
+      <div className="flex justify-center items-center mb-6">
+        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Mina jobbannonser</h1>
+      </div>
+
+      <StatsGrid stats={statsCards} />
+
+      <JobSearchBar
+        searchInput={searchInput}
+        onSearchChange={setSearchInput}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        companyName={profile?.company_name || 'företaget'}
+        hasDrafts={hasDrafts}
+      />
+
+      {/* Status tabs: Aktiva / Utgångna / Utkast */}
+      <div className="flex justify-center">
+        <JobStatusTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          activeCount={activeJobs.length}
+          expiredCount={expiredJobsCount}
+          draftCount={draftJobsCount}
+          showDrafts
+        />
+      </div>
+
+      {/* Result indicator */}
+      {searchTerm && (
+        <div className="text-sm text-white mb-4">
+          {tabFilteredJobs.length === 0 ? (
+            <span>Inga annonser matchar din sökning</span>
+          ) : (
+            <span>
+              Visar {tabFilteredJobs.length} av {jobs.length} annonser
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Desktop: Card grid */}
+      <div className="hidden md:block">
+        {tabFilteredJobs.length === 0 ? (
+          <div className="text-center text-white py-12 font-medium text-sm">
+            {searchTerm.trim() 
+              ? 'Inga annonser matchar din sökning' 
+              : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
+              : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
+              : 'Inga utkast.'}
+          </div>
+        ) : (
+          <>
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+              {pageJobs.map((job, idx) => (
+                <CardErrorBoundary key={job.id}>
+                  <MobileJobCard
+                    job={job as JobPosting}
+                    onEdit={(j) => handleEditJob(j)}
+                    onDelete={(j) => handleDeleteClick(j)}
+                    onEditDraft={(j) => handleEditDraft(j)}
+                    onPrefetch={(id) => prefetchJob(id)}
+                    cardIndex={idx}
+                  />
+                </CardErrorBoundary>
+              ))}
+            </div>
+            {totalPages > 1 && (
+              <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-4" />
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Mobile: Card view — outside Card wrapper for edge-to-edge layout */}
+      <div className="md:hidden touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
+            {loading ? (
+              <div className="space-y-3 px-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                    <div className="flex items-start gap-3">
+                      <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4 bg-white/10" />
+                        <Skeleton className="h-3 w-1/2 bg-white/10" />
+                        <div className="flex gap-2 mt-2">
+                          <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
+                          <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : tabFilteredJobs.length === 0 ? (
+              <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh]  flex items-center justify-center">
+                <span>
+                {searchTerm.trim() 
+                  ? 'Inga annonser matchar din sökning' 
+                  : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
+                  : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
+                  : 'Inga utkast.'}
+                </span>
+              </div>
+            ) : (
+              <>
+                <div ref={listTopRef} />
+                    <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+                      {pageJobs.map((job, idx) => {
+                        const jobPosting = job as JobPosting;
+                        const isExpired = isEmployerJobExpired(jobPosting);
+                        const isDraft = isEmployerJobDraft(jobPosting);
+                        return (
+                          <CardErrorBoundary key={job.id}>
+                            <ReadOnlyMobileJobCard
+                              job={job as JobPosting & { company_name?: string }}
+                              cardIndex={idx}
+                              hideSaveButton
+                              onCardClick={(jobId) => {
+                                if (isDraft) {
+                                  handleEditDraft(jobPosting);
+                                } else {
+                                  navigate(`/job-details/${jobId}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
+                                }
+                              }}
+                              footer={
+                                <div className={`flex items-center gap-2 pt-0.5 ${isExpired && !isDraft ? 'justify-center' : ''}`}>
+                                  {(!isExpired || isDraft) && (
+                                    <button
+                                      className={`flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-[transform,opacity,background-color] duration-200 active:scale-[0.97] md:hover:bg-white/10 ${pendingEditJobId === job.id ? 'pointer-events-none opacity-70' : ''}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                          handlePremiumEditOpen(jobPosting);
+                                      }}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                      {pendingEditJobId === job.id ? 'Öppnar...' : 'Redigera'}
+                                    </button>
+                                  )}
+                                  <button
+                                    className={`${isExpired && !isDraft ? 'px-8' : 'flex-1 px-4'} inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/20 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteClick(jobPosting);
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Ta bort
+                                  </button>
+                                </div>
+                              }
+                            />
+                          </CardErrorBoundary>
+                        );
+                      })}
+                    </div>
+
+                {totalPages > 1 && (
+                  <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-3" />
+                )}
+              </>
+            )}
+          </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContentNoFocus 
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col"
+        >
+          <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-white" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort jobbannons
+              </AlertDialogTitle>
+            </div>
+          </AlertDialogHeader>
+          <div className="overflow-y-auto flex-1 my-4">
+            <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
+              {jobToDelete && (
+                <>
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
+                </>
+              )}
+            </AlertDialogDescription>
+          </div>
+          <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
+            <AlertDialogCancel 
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setJobToDelete(null);
+              }}
+              className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteJob}
+              variant="destructiveSoft"
+              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
+
+      <EditJobDialog
+        job={editingJob}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onJobUpdated={invalidateJobs}
+      />
+    </div>
+  );
+});
+
+EmployerDashboard.displayName = 'EmployerDashboard';
+
+export default EmployerDashboard;
