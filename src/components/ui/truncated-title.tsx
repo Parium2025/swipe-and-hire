@@ -162,8 +162,9 @@ export function TruncatedTitle({
           side="top"
           sideOffset={8}
           avoidCollisions={false}
+          allowOutsidePointerEvents
           className="z-[999999] max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain bg-slate-900/95 border border-white/20 shadow-2xl p-3 pointer-events-auto rounded-lg"
-          onPointerDownOutside={(e) => e.preventDefault()}
+          onPointerDownOutside={() => setIsOpen(false)}
           onMouseDown={(e) => e.stopPropagation()}
           onWheel={(e) => e.stopPropagation()}
         >
