@@ -319,28 +319,40 @@
           // Inga hashade assets ännu (t.ex. dev) — gör inget.
         } else {
           const key = 'parium_build_version';
+          const lockKey = 'parium_reload_lock';
           const prev = localStorage.getItem(key);
           if (!prev) {
             localStorage.setItem(key, v);
           } else if (prev !== v) {
-            localStorage.setItem(key, v);
-            // Best-effort purge of runtime caches to fight iOS PWA sticky caching
-            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-              navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); }).catch(function(){});
-            }
-            if (window.caches && caches.keys) {
-              caches.keys().then(function(keys){ return Promise.all(keys.map(function(k){ return caches.delete(k); })); }).catch(function(){});
-            }
-            const url = new URL(window.location.href);
-            // Använd en kort hash av signaturen som cache-bust param
-            let hash = 0;
-            for (let i = 0; i < v.length; i++) { hash = ((hash << 5) - hash + v.charCodeAt(i)) | 0; }
-            url.searchParams.set('v', String(Math.abs(hash)).slice(0, 10));
-            if (window.location.href !== url.toString()) {
-              window.location.replace(url.toString());
+            // Reload-lock: undvik loop om något skulle gå fel under reload
+            const lock = sessionStorage.getItem(lockKey);
+            const now = Date.now();
+            if (lock && (now - parseInt(lock, 10)) < 10_000) {
+              // En reload startades nyss — uppdatera bara versionen och vänta
+              localStorage.setItem(key, v);
             } else {
-              window.location.reload();
+              sessionStorage.setItem(lockKey, String(now));
+              localStorage.setItem(key, v);
+              // Best-effort purge of runtime caches to fight iOS PWA sticky caching
+              if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+                navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); }).catch(function(){});
+              }
+              if (window.caches && caches.keys) {
+                caches.keys().then(function(keys){ return Promise.all(keys.map(function(k){ return caches.delete(k); })); }).catch(function(){});
+              }
+              const url = new URL(window.location.href);
+              let hash = 0;
+              for (let i = 0; i < v.length; i++) { hash = ((hash << 5) - hash + v.charCodeAt(i)) | 0; }
+              url.searchParams.set('v', String(Math.abs(hash)).slice(0, 10));
+              if (window.location.href !== url.toString()) {
+                window.location.replace(url.toString());
+              } else {
+                window.location.reload();
+              }
             }
+          } else {
+            // Versionerna matchar — släpp ev. lock
+            sessionStorage.removeItem(lockKey);
           }
         }
       } catch (e) { /* noop */ }
