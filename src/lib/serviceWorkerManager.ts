@@ -82,6 +82,9 @@ const startVersionPolling = () => {
   // Initial baseline från det som faktiskt körs i sidan
   cachedEntrySignature = computeCurrentEntrySignature();
 
+  // Kontrollera direkt om servern redan har en nyare deploy än den som körs lokalt
+  void checkForNewVersion();
+
   // Poll var 60:e sekund
   setInterval(() => { void checkForNewVersion(); }, 60_000);
 
