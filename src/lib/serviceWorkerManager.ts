@@ -171,23 +171,38 @@ export const isServiceWorkerActive = (): boolean => {
 };
 
 /**
- * Vänta på att service worker blir aktiv
+ * Vänta på att service worker blir aktiv (med timeout för att undvika hängande pollers)
  */
-export const waitForServiceWorker = (): Promise<void> => {
+export const waitForServiceWorker = (timeoutMs: number = 5000): Promise<void> => {
   return new Promise((resolve) => {
     if (isServiceWorkerActive()) {
       resolve();
       return;
     }
 
+    let resolved = false;
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      resolve();
+    };
+
+    const deadline = Date.now() + timeoutMs;
     const checkActive = () => {
+      if (resolved) return;
       if (isServiceWorkerActive()) {
-        resolve();
-      } else {
-        setTimeout(checkActive, 100);
+        finish();
+        return;
       }
+      if (Date.now() >= deadline) {
+        // Ge upp tyst — preloading är inte kritiskt
+        finish();
+        return;
+      }
+      setTimeout(checkActive, 100);
     };
 
     checkActive();
   });
 };
+
