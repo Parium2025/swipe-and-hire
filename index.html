@@ -298,64 +298,111 @@
     <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
     <div id="root"></div>
     <script>
-      try {
-        // Compute a build signature from the hashed asset URLs Vite injects.
-        // Varje ny deploy → nya hashar → ny signatur → reload triggas automatiskt.
-        const computeSig = function() {
-          try {
-            const scripts = Array.from(document.querySelectorAll('script[src]'))
-              .map(function(s){ return s.getAttribute('src') || ''; })
-              .filter(function(src){ return /\/assets\/.+\.(js|mjs)/.test(src); });
-            const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"][href]'))
-              .map(function(l){ return l.getAttribute('href') || ''; })
-              .filter(function(href){ return /\/assets\/.+\.css/.test(href); });
-            const all = scripts.concat(styles).sort();
-            return all.length > 0 ? all.join('|') : '';
-          } catch (e) { return ''; }
-        };
+      // Build-version detection — kör tyst, reload först när användaren är idle/navigerar.
+      // Ingen visuell påverkan; ingen avbruten interaktion.
+      (function() {
+        try {
+          var computeSig = function() {
+            try {
+              var scripts = Array.from(document.querySelectorAll('script[src]'))
+                .map(function(s){ return s.getAttribute('src') || ''; })
+                .filter(function(src){ return /\/assets\/.+\.(js|mjs)/.test(src); });
+              var styles = Array.from(document.querySelectorAll('link[rel="stylesheet"][href]'))
+                .map(function(l){ return l.getAttribute('href') || ''; })
+                .filter(function(href){ return /\/assets\/.+\.css/.test(href); });
+              var all = scripts.concat(styles).sort();
+              return all.length > 0 ? all.join('|') : '';
+            } catch (e) { return ''; }
+          };
 
-        const v = computeSig();
-        if (!v) {
-          // Inga hashade assets ännu (t.ex. dev) — gör inget.
-        } else {
-          const key = 'parium_build_version';
-          const lockKey = 'parium_reload_lock';
-          const prev = localStorage.getItem(key);
+          var v = computeSig();
+          if (!v) return; // dev — inga hashade assets
+
+          var key = 'parium_build_version';
+          var lockKey = 'parium_reload_lock';
+          var prev = localStorage.getItem(key);
+
           if (!prev) {
             localStorage.setItem(key, v);
-          } else if (prev !== v) {
-            // Reload-lock: undvik loop om något skulle gå fel under reload
-            const lock = sessionStorage.getItem(lockKey);
-            const now = Date.now();
-            if (lock && (now - parseInt(lock, 10)) < 10_000) {
-              // En reload startades nyss — uppdatera bara versionen och vänta
-              localStorage.setItem(key, v);
-            } else {
-              sessionStorage.setItem(lockKey, String(now));
-              localStorage.setItem(key, v);
-              // Best-effort purge of runtime caches to fight iOS PWA sticky caching
+            return;
+          }
+          if (prev === v) {
+            // Versionerna matchar — släpp ev. lock från tidigare reload
+            try { sessionStorage.removeItem(lockKey); } catch (e) {}
+            return;
+          }
+
+          // Versionsskifte upptäckt — uppdatera direkt så vi inte upptäcker det igen,
+          // men SCHEMALÄGG reload tyst (vid navigation, tab return, eller 30s idle).
+          localStorage.setItem(key, v);
+
+          var lock = sessionStorage.getItem(lockKey);
+          var now = Date.now();
+          if (lock && (now - parseInt(lock, 10)) < 10000) return; // pågående reload
+
+          var executed = false;
+          var fire = function() {
+            if (executed) return;
+            executed = true;
+            try { sessionStorage.setItem(lockKey, String(Date.now())); } catch (e) {}
+            // Purge runtime caches (best effort)
+            try {
               if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-                navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); }).catch(function(){});
+                navigator.serviceWorker.getRegistrations().then(function(rs){
+                  rs.forEach(function(r){ try { r.unregister(); } catch(e){} });
+                }).catch(function(){});
               }
+            } catch (e) {}
+            try {
               if (window.caches && caches.keys) {
-                caches.keys().then(function(keys){ return Promise.all(keys.map(function(k){ return caches.delete(k); })); }).catch(function(){});
+                caches.keys().then(function(keys){
+                  return Promise.all(keys.map(function(k){ return caches.delete(k); }));
+                }).catch(function(){});
               }
-              const url = new URL(window.location.href);
-              let hash = 0;
-              for (let i = 0; i < v.length; i++) { hash = ((hash << 5) - hash + v.charCodeAt(i)) | 0; }
+            } catch (e) {}
+            // Cache-bust query param
+            try {
+              var url = new URL(window.location.href);
+              var hash = 0;
+              for (var i = 0; i < v.length; i++) { hash = ((hash << 5) - hash + v.charCodeAt(i)) | 0; }
               url.searchParams.set('v', String(Math.abs(hash)).slice(0, 10));
               if (window.location.href !== url.toString()) {
                 window.location.replace(url.toString());
-              } else {
-                window.location.reload();
+                return;
               }
+            } catch (e) {}
+            try { window.location.reload(); } catch (e) {}
+          };
+
+          // 1. SPA-navigation
+          try { window.addEventListener('popstate', fire, { once: true }); } catch (e) {}
+
+          // 2. Tab hidden → visible (användaren har lämnat och kommer tillbaka)
+          try {
+            var visHandler = function() {
+              if (document.visibilityState === 'hidden') {
+                var onReturn = function() {
+                  document.removeEventListener('visibilitychange', onReturn);
+                  fire();
+                };
+                document.addEventListener('visibilitychange', onReturn);
+              }
+            };
+            document.addEventListener('visibilitychange', visHandler);
+          } catch (e) {}
+
+          // 3. Idle fallback — efter 30s av inaktivitet
+          try {
+            if ('requestIdleCallback' in window) {
+              window.requestIdleCallback(function() { setTimeout(fire, 30000); }, { timeout: 35000 });
+            } else {
+              setTimeout(fire, 30000);
             }
-          } else {
-            // Versionerna matchar — släpp ev. lock
-            sessionStorage.removeItem(lockKey);
+          } catch (e) {
+            setTimeout(fire, 30000);
           }
-        }
-      } catch (e) { /* noop */ }
+        } catch (e) { /* noop */ }
+      })();
     </script>
     <script>
       (function() {
