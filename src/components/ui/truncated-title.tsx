@@ -18,6 +18,7 @@ export function TruncatedTitle({
   fullText, 
   className = "", 
   style,
+  side = "top",
 }: TruncatedTitleProps) {
   const ref = useRef<HTMLHeadingElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
