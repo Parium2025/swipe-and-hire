@@ -34,29 +34,23 @@ const Dashboard = memo(() => {
   const { profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
   
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(() => !isLoading);
+  const dataWasCached = useRef(!isLoading);
   useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => setShowContent(true), 150);
-      return () => clearTimeout(timer);
+    if (!isLoading && !showContent) {
+      if (dataWasCached.current) {
+        setShowContent(true);
+      } else {
+        const timer = setTimeout(() => setShowContent(true), 100);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [isLoading]);
+  }, [isLoading, showContent]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as JobStatusTab | null;
-  const urlTab: JobStatusTab = tabParam === 'expired' ? 'expired' : 'active';
-  // Optimistisk lokal tab — uppdateras direkt så indikatorn animerar utan att vänta på listan
-  const [optimisticTab, setOptimisticTab] = useState<JobStatusTab>(urlTab);
-  const [, startTransition] = useTransition();
-
-  // Synka om URL ändras externt (t.ex. browser back/forward)
-  useEffect(() => {
-    setOptimisticTab(urlTab);
-  }, [urlTab]);
-
-  const activeTab = optimisticTab;
+  const activeTab: JobStatusTab = tabParam === 'expired' ? 'expired' : 'active';
   const setActiveTab = useCallback((tab: JobStatusTab) => {
-    setOptimisticTab(tab); // sync → animerar tab-indikatorn omedelbart
     startTransition(() => {
       setSearchParams(prev => {
         const next = new URLSearchParams(prev);
