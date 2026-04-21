@@ -1,13 +1,14 @@
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 
 const IMAGE_CACHE = `parium-images-${CACHE_VERSION}`;
 const STATIC_CACHE = `parium-static-${CACHE_VERSION}`;
 const API_CACHE = `parium-api-${CACHE_VERSION}`;
 
-// Kritiska assets som alltid ska cachas (offline-fallback)
+// Kritiska assets som alltid ska cachas (offline-fallback).
+// VIKTIGT: Vi cachar INTE '/' eller '/index.html' här — HTML/JS/CSS hämtas
+// alltid färskt från nätet (se fetch handler nedan). Detta ser till att
+// nya deploys syns omedelbart utan hard refresh.
 const CRITICAL_ASSETS = [
-  '/',
-  '/index.html',
   '/favicon-parium.png',
 ];
 
