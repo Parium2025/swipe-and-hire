@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import { memo, useMemo, useState, useRef, useEffect, useCallback, useTransition } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Briefcase, Users, Eye, TrendingUp } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
@@ -42,17 +42,30 @@ const Dashboard = memo(() => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as JobStatusTab | null;
-  const activeTab: JobStatusTab = tabParam === 'expired' ? 'expired' : 'active';
+  const urlTab: JobStatusTab = tabParam === 'expired' ? 'expired' : 'active';
+  // Optimistisk lokal tab — uppdateras direkt så indikatorn animerar utan att vänta på listan
+  const [optimisticTab, setOptimisticTab] = useState<JobStatusTab>(urlTab);
+  const [, startTransition] = useTransition();
+
+  // Synka om URL ändras externt (t.ex. browser back/forward)
+  useEffect(() => {
+    setOptimisticTab(urlTab);
+  }, [urlTab]);
+
+  const activeTab = optimisticTab;
   const setActiveTab = useCallback((tab: JobStatusTab) => {
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev);
-      if (tab === 'active') {
-        next.delete('tab');
-      } else {
-        next.set('tab', tab);
-      }
-      return next;
-    }, { replace: true });
+    setOptimisticTab(tab); // sync → animerar tab-indikatorn omedelbart
+    startTransition(() => {
+      setSearchParams(prev => {
+        const next = new URLSearchParams(prev);
+        if (tab === 'active') {
+          next.delete('tab');
+        } else {
+          next.set('tab', tab);
+        }
+        return next;
+      }, { replace: true });
+    });
   }, [setSearchParams]);
 
   // Swipe between tabs on mobile
@@ -193,12 +206,12 @@ const Dashboard = memo(() => {
           </div>
         ) : (
           <>
-            <div key={activeTab} className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {pageJobs.map((job) => (
                 <EmployerJobCard
                   key={job.id}
                   job={job as any}
-                  activeTab={activeTab}
+                  activeTab={activeTab as 'active' | 'expired'}
                   onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                 />
               ))}
@@ -233,7 +246,7 @@ const Dashboard = memo(() => {
             <span>{getEmptyMessage(searchTerm, activeTab)}</span>
           </div>
         ) : (
-          <div key={activeTab} className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
+          <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
             {pageJobs.map((job) => (
               <ReadOnlyMobileJobCard
                 key={job.id}
