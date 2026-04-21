@@ -5,6 +5,7 @@ interface TruncatedTitleProps {
   children: ReactNode;
   fullText: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 /**
@@ -15,6 +16,7 @@ export function TruncatedTitle({
   children, 
   fullText, 
   className = "", 
+  style,
 }: TruncatedTitleProps) {
   const ref = useRef<HTMLHeadingElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
@@ -121,6 +123,7 @@ export function TruncatedTitle({
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
+    ...style,
   };
 
   // If not truncated, just return the element without tooltip wrapper

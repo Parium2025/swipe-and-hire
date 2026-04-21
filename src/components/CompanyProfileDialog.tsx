@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCompanyReviewsCache } from "@/hooks/useCompanyReviewsCache";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { TruncatedText } from "@/components/TruncatedText";
+import { TruncatedTitle } from "@/components/ui/truncated-title";
 
 interface CompanyProfileDialogProps {
   open: boolean;
@@ -264,17 +265,30 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
         <ScrollArea className="max-h-[90vh] [&>div>div]:!overflow-y-scroll [&>div>div]:scrollbar-hide">
           <div className="p-6 text-white">
             <DialogHeader className="mb-6">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
+              <div className="flex items-center gap-4 min-w-0">
+                <Avatar className="h-16 w-16 shrink-0">
                   <AvatarImage src={company.company_logo_url || ''} alt={company.company_name} />
                   <AvatarFallback className="bg-white/20 text-white text-xl font-bold" delayMs={150}>
                     {company.company_name?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() || 'AB'}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <DialogTitle className="text-2xl text-white">{company.company_name}</DialogTitle>
+                <div className="min-w-0 flex-1 pr-8">
+                  <DialogTitle asChild>
+                    <TruncatedTitle
+                      fullText={company.company_name}
+                      className="text-2xl font-semibold text-white leading-tight"
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      } as React.CSSProperties}
+                    >
+                      {company.company_name}
+                    </TruncatedTitle>
+                  </DialogTitle>
                   <div className="flex items-center gap-2 mt-1">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 shrink-0" />
                     <span className="text-sm text-white">
                       {averageRating} ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
                     </span>
