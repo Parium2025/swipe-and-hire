@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 
 const IMAGE_CACHE = `parium-images-${CACHE_VERSION}`;
 const STATIC_CACHE = `parium-static-${CACHE_VERSION}`;
@@ -226,25 +226,36 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first for app shell
+  // Network-first for app shell — ALWAYS bypass HTTP cache for navigations & HTML
+  // so mobile users get the latest version without a hard refresh.
+  const urlPath = new URL(url).pathname;
+  const isNavigation = request.mode === 'navigate';
+  const isHtml = /\.html?(\?|$)/.test(urlPath) || urlPath === '/';
   const isAppShell =
-    request.mode === 'navigate' ||
+    isNavigation ||
+    isHtml ||
     request.destination === 'script' ||
     request.destination === 'style' ||
     request.destination === 'worker' ||
-    /\.(js|css|html)(\?|$)/.test(new URL(url).pathname);
+    /\.(js|css)(\?|$)/.test(urlPath);
 
   if (isAppShell) {
     event.respondWith(
-      fetch(new Request(request, { cache: 'reload' })).catch(async () => {
-        const cached = await caches.match(request);
-        if (cached) return cached;
-        if (request.mode === 'navigate') {
-          const offlineShell = await caches.match('/index.html');
-          if (offlineShell) return offlineShell;
+      (async () => {
+        try {
+          // Force a fresh fetch — bypass both browser HTTP cache and any SW cache.
+          const fresh = await fetch(new Request(request, { cache: 'no-store' }));
+          return fresh;
+        } catch {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          if (isNavigation) {
+            const offlineShell = await caches.match('/index.html');
+            if (offlineShell) return offlineShell;
+          }
+          throw new Error('Network error and no cache');
         }
-        throw new Error('Network error and no cache');
-      })
+      })()
     );
     return;
   }
