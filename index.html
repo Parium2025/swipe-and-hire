@@ -332,9 +332,10 @@
             return;
           }
 
-          // Versionsskifte upptäckt — uppdatera direkt så vi inte upptäcker det igen,
-          // men SCHEMALÄGG reload tyst (vid navigation, tab return, eller 30s idle).
-          localStorage.setItem(key, v);
+          // Versionsskifte upptäckt — SCHEMALÄGG reload tyst (vid navigation, tab return, eller 30s idle).
+          // VIKTIGT: Vi uppdaterar INTE localStorage här — bara när reload faktiskt körs.
+          // Annars riskerar vi att iPhone Safari stänger tabben innan deferred-reload hinner fyra,
+          // och nästa öppning ser "matchande version" → sidan blir permanent stale.
 
           var lock = sessionStorage.getItem(lockKey);
           var now = Date.now();
@@ -344,6 +345,7 @@
           var fire = function() {
             if (executed) return;
             executed = true;
+            try { localStorage.setItem(key, v); } catch (e) {}
             try { sessionStorage.setItem(lockKey, String(Date.now())); } catch (e) {}
             // Purge runtime caches (best effort)
             try {
