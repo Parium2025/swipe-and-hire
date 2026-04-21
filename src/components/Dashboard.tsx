@@ -242,16 +242,20 @@ const Dashboard = memo(() => {
           </div>
         ) : (
           <>
-            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-              {pageJobs.map((job) => (
+            <VirtualJobGrid
+              activeTab={activeTab}
+              tabs={[
+                { key: 'active', jobs: pagedBuckets.active },
+                { key: 'expired', jobs: pagedBuckets.expired },
+              ]}
+              renderCard={(job) => (
                 <EmployerJobCard
-                  key={job.id}
                   job={job as any}
                   activeTab={activeTab as 'active' | 'expired'}
                   onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                 />
-              ))}
-            </div>
+              )}
+            />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </>
         )}
@@ -282,18 +286,23 @@ const Dashboard = memo(() => {
             <span>{getEmptyMessage(searchTerm, activeTab)}</span>
           </div>
         ) : (
-          <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-            {pageJobs.map((job) => (
-              <ReadOnlyMobileJobCard
-                key={job.id}
-                job={job as any}
-                hideSaveButton
-                onCardClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
-              />
-            ))}
-
+          <>
+            <VirtualJobGrid
+              activeTab={activeTab}
+              tabs={[
+                { key: 'active', jobs: pagedBuckets.active },
+                { key: 'expired', jobs: pagedBuckets.expired },
+              ]}
+              renderCard={(job) => (
+                <ReadOnlyMobileJobCard
+                  job={job as any}
+                  hideSaveButton
+                  onCardClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
+                />
+              )}
+            />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
-          </div>
+          </>
         )}
       </div>
     </div>
