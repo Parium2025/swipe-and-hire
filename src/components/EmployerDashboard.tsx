@@ -174,43 +174,72 @@ const EmployerDashboard = memo(() => {
   // Check if there are any drafts
   const hasDrafts = useMemo(() => jobs.some(job => isEmployerJobDraft(job)), [jobs]);
   
-  // Filter jobs by active tab BEFORE pagination
-  const tabFilteredJobs = useMemo(() => {
-    switch (activeTab) {
-      case 'active':
-        return filteredAndSortedJobs.filter(j => isEmployerJobActive(j));
-      case 'expired':
-        return filteredAndSortedJobs.filter(j => isEmployerJobExpired(j));
-      case 'draft':
-        return filteredAndSortedJobs.filter(j => isEmployerJobDraft(j));
-      default:
-        return filteredAndSortedJobs;
+  // Beräkna ALLA tre tabbars data samtidigt — gör DOM-persistens möjlig.
+  // VirtualJobGrid håller alla tre i DOM:en (display:none för inaktiva)
+  // så tab-byte blir en CSS-toggle istället för en full React-remount.
+  const tabBuckets = useMemo(() => {
+    const active: JobPosting[] = [];
+    const expired: JobPosting[] = [];
+    const draft: JobPosting[] = [];
+    for (const j of filteredAndSortedJobs) {
+      if (isEmployerJobDraft(j)) draft.push(j);
+      else if (isEmployerJobExpired(j)) expired.push(j);
+      else if (isEmployerJobActive(j)) active.push(j);
     }
-  }, [filteredAndSortedJobs, activeTab]);
+    return { active, expired, draft };
+  }, [filteredAndSortedJobs]);
+
+  const tabFilteredJobs = activeTab === 'expired'
+    ? tabBuckets.expired
+    : activeTab === 'draft'
+      ? tabBuckets.draft
+      : tabBuckets.active;
 
   // Ordered tabs for swipe navigation
   const tabOrder: JobStatusTab[] = useMemo(() => hasDrafts ? ['active', 'expired', 'draft'] : ['active', 'expired'], [hasDrafts]);
-  
+
   const swipeToNextTab = useCallback(() => {
     const idx = tabOrder.indexOf(activeTab);
     if (idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
   }, [activeTab, tabOrder, setActiveTab]);
-  
+
   const swipeToPrevTab = useCallback(() => {
     const idx = tabOrder.indexOf(activeTab);
     if (idx > 0) setActiveTab(tabOrder[idx - 1]);
   }, [activeTab, tabOrder, setActiveTab]);
-  
+
   const tabSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextTab, onSwipeRight: swipeToPrevTab, threshold: 50 });
-  
+
   // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
-  
+
   const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
-  const pageJobs = useMemo(() => {
+
+  // Pre-warm blob-cache för alla synliga jobb i bakgrunden — eliminerar
+  // createObjectURL-jobb (~72ms) under tab-switch.
+  const prewarmEntries = useMemo(() => {
+    const all = [...tabBuckets.active, ...tabBuckets.expired, ...tabBuckets.draft];
+    const entries: Array<{ path?: string | null; bucket: 'job-images' | 'company-logos' }> = [];
+    for (const j of all) {
+      if (j.job_image_url) entries.push({ path: j.job_image_url, bucket: 'job-images' });
+      if (j.company_logo_url) entries.push({ path: j.company_logo_url, bucket: 'company-logos' });
+    }
+    return entries;
+  }, [tabBuckets]);
+  useBlobCachePrewarm(prewarmEntries);
+
+  // Sida-slice för respektive tab så pagineringen funkar oberoende.
+  const sliceToPage = useCallback((arr: JobPosting[]) => {
     const start = (page - 1) * pageSize;
-    return tabFilteredJobs.slice(start, start + pageSize);
-  }, [tabFilteredJobs, page]);
+    return arr.slice(start, start + pageSize);
+  }, [page]);
+
+  const pageJobs = useMemo(() => sliceToPage(tabFilteredJobs), [sliceToPage, tabFilteredJobs]);
+  const pagedBuckets = useMemo(() => ({
+    active: sliceToPage(tabBuckets.active),
+    expired: sliceToPage(tabBuckets.expired),
+    draft: sliceToPage(tabBuckets.draft),
+  }), [sliceToPage, tabBuckets]);
 
   
   // Scroll to top when page changes (but not on initial mount)
