@@ -6,9 +6,100 @@
 let registration: ServiceWorkerRegistration | null = null;
 
 /**
+ * Version poll: jämför hashade asset-länkar i /index.html mot vad som körs nu.
+ * Detta gör att även deploys utan sw.js-ändring (nya hashade JS/CSS) upptäcks
+ * och triggar en automatisk reload — även på vanliga webben, där SW annars
+ * inte ger någon "controllerchange" eftersom sw.js är oförändrad.
+ */
+let cachedEntrySignature: string | null = null;
+let versionPollStarted = false;
+let versionReloadTriggered = false;
+
+const computeCurrentEntrySignature = (): string | null => {
+  try {
+    // Samla alla hashade bundle-länkar som faktiskt körs/rendrats av Vite
+    const scripts = Array.from(document.querySelectorAll('script[src]'))
+      .map((s) => (s as HTMLScriptElement).src)
+      .filter((src) => /\/assets\/.+\.(js|mjs)$/.test(src));
+    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"][href]'))
+      .map((l) => (l as HTMLLinkElement).href)
+      .filter((href) => /\/assets\/.+\.css$/.test(href));
+    const all = [...scripts, ...styles].sort();
+    return all.length > 0 ? all.join('|') : null;
+  } catch {
+    return null;
+  }
+};
+
+const extractEntrySignatureFromHtml = (html: string): string | null => {
+  try {
+    const matches: string[] = [];
+    const scriptRe = /<script[^>]+src=["']([^"']*\/assets\/[^"']+\.(?:js|mjs))["']/gi;
+    const linkRe = /<link[^>]+href=["']([^"']*\/assets\/[^"']+\.css)["']/gi;
+    let m: RegExpExecArray | null;
+    while ((m = scriptRe.exec(html)) !== null) matches.push(new URL(m[1], window.location.origin).href);
+    while ((m = linkRe.exec(html)) !== null) matches.push(new URL(m[1], window.location.origin).href);
+    matches.sort();
+    return matches.length > 0 ? matches.join('|') : null;
+  } catch {
+    return null;
+  }
+};
+
+const checkForNewVersion = async (): Promise<void> => {
+  if (versionReloadTriggered) return;
+  try {
+    const res = await fetch('/index.html', {
+      cache: 'no-store',
+      credentials: 'same-origin',
+      headers: { 'cache-control': 'no-cache' },
+    });
+    if (!res.ok) return;
+    const html = await res.text();
+    const remoteSig = extractEntrySignatureFromHtml(html);
+    if (!remoteSig) return;
+    if (!cachedEntrySignature) {
+      cachedEntrySignature = computeCurrentEntrySignature() || remoteSig;
+      return;
+    }
+    if (remoteSig !== cachedEntrySignature) {
+      versionReloadTriggered = true;
+      console.log('[SW] New app version detected — reloading');
+      // Liten delay så vi inte avbryter pågående interaktion mitt i ett klick
+      setTimeout(() => {
+        try { window.location.reload(); } catch { /* ignore */ }
+      }, 300);
+    }
+  } catch {
+    // ignore — offline eller transient fel
+  }
+};
+
+const startVersionPolling = () => {
+  if (versionPollStarted) return;
+  versionPollStarted = true;
+
+  // Initial baseline från det som faktiskt körs i sidan
+  cachedEntrySignature = computeCurrentEntrySignature();
+
+  // Poll var 60:e sekund
+  setInterval(() => { void checkForNewVersion(); }, 60_000);
+
+  // Vid tab-focus och online → snabb check
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') void checkForNewVersion();
+  });
+  window.addEventListener('online', () => { void checkForNewVersion(); });
+  window.addEventListener('focus', () => { void checkForNewVersion(); });
+};
+
+/**
  * Registrera service worker
  */
 export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration | null> => {
+  // Starta versionspoll oavsett om SW finns/lyckas — fungerar även utan SW.
+  startVersionPolling();
+
   if (!('serviceWorker' in navigator)) {
     console.log('Service Worker not supported');
     return null;
