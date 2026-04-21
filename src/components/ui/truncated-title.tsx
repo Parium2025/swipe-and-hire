@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, ReactNode } from "react";
+import React, { useRef, useState, useEffect, useCallback, ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TruncatedTitleProps {
@@ -9,143 +9,129 @@ interface TruncatedTitleProps {
   side?: "top" | "right" | "bottom" | "left";
 }
 
+const detectEnv = () => {
+  if (typeof window === "undefined") {
+    return { isTouch: false, supportsHover: true };
+  }
+  const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  const supportsHover =
+    "matchMedia" in window
+      ? window.matchMedia("(hover: hover)").matches ||
+        window.matchMedia("(pointer: fine)").matches
+      : true;
+  return { isTouch, supportsHover };
+};
+
+const ENV = detectEnv();
+
 /**
- * Renders text with automatic tooltip on hover - only when text is actually truncated.
- * Uses line-clamp detection to determine if tooltip should show.
+ * Lazy-measuring truncated title. Same perf model as TruncatedText:
+ * no DOM cloning, no eager reflow — measure only on hover/touch/focus.
  */
-export function TruncatedTitle({ 
-  children, 
-  fullText, 
-  className = "", 
+export function TruncatedTitle({
+  children,
+  fullText,
+  className = "",
   style,
   side = "top",
 }: TruncatedTitleProps) {
   const ref = useRef<HTMLHeadingElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
-  const [isTouch, setIsTouch] = useState(false);
+  const [hasMeasured, setHasMeasured] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [supportsHover, setSupportsHover] = useState(true);
+  const { isTouch, supportsHover } = ENV;
 
+  // Reset measurement when text changes
   useEffect(() => {
-    setIsTouch(typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0));
-  }, []);
+    setHasMeasured(false);
+    setIsTruncated(false);
+  }, [fullText]);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && "matchMedia" in window) {
-      const mqHover = window.matchMedia("(hover: hover)");
-      const mqFine = window.matchMedia("(pointer: fine)");
-      const update = () => setSupportsHover(mqHover.matches || mqFine.matches);
-      update();
-      mqHover.addEventListener?.("change", update);
-      mqFine.addEventListener?.("change", update);
-      return () => {
-        mqHover.removeEventListener?.("change", update);
-        mqFine.removeEventListener?.("change", update);
-      };
+  const measureTruncation = useCallback(() => {
+    if (hasMeasured) return;
+    const element = ref.current;
+    if (!element) return;
+
+    const styles = window.getComputedStyle(element);
+    const webkitLineClamp = (styles.getPropertyValue("-webkit-line-clamp") || "").trim();
+    const hasClamp = webkitLineClamp !== "" && webkitLineClamp !== "none";
+
+    let truncated = false;
+    if (hasClamp) {
+      const originalLineClamp = (element.style as any).webkitLineClamp;
+      const originalDisplay = element.style.display;
+      const originalMaxHeight = element.style.maxHeight;
+      const originalOverflow = element.style.overflow;
+
+      const currentHeight = element.clientHeight;
+
+      // @ts-ignore - vendor property
+      element.style.webkitLineClamp = "unset";
+      element.style.display = "block";
+      element.style.maxHeight = "none";
+      element.style.overflow = "visible";
+
+      const naturalHeight = element.scrollHeight;
+
+      // @ts-ignore - vendor property
+      element.style.webkitLineClamp = originalLineClamp;
+      element.style.display = originalDisplay;
+      element.style.maxHeight = originalMaxHeight;
+      element.style.overflow = originalOverflow;
+
+      truncated = naturalHeight > currentHeight + 1;
     } else {
-      setSupportsHover(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    const checkTruncation = () => {
-      const element = ref.current;
-      if (!element) return;
-
-      // Robust detection including multi-line clamp (-webkit-line-clamp)
-      const styles = window.getComputedStyle(element);
-      const webkitLineClamp = (styles.getPropertyValue("-webkit-line-clamp") || "").trim();
-      const hasClamp = webkitLineClamp !== "" && webkitLineClamp !== "none";
-
-      let truncated = false;
-      if (hasClamp) {
-        // Measure natural height without clamp by cloning the element offscreen
-        const clone = element.cloneNode(true) as HTMLElement;
-        clone.style.position = "absolute";
-        clone.style.visibility = "hidden";
-        clone.style.pointerEvents = "none";
-        // @ts-ignore - vendor property
-        clone.style.webkitLineClamp = "unset";
-        clone.style.display = "block";
-        clone.style.maxHeight = "none";
-        clone.style.overflow = "visible";
-        clone.style.width = `${element.clientWidth}px`;
-        element.parentElement?.appendChild(clone);
-        const naturalHeight = Math.ceil(clone.scrollHeight);
-        element.parentElement?.removeChild(clone);
-        const currentHeight = Math.ceil(element.clientHeight);
-        truncated = naturalHeight > currentHeight + 1;
-      } else {
-        truncated =
-          Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||
-          Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth);
-      }
-
-      setIsTruncated(truncated);
-    };
-
-    // Run immediately and schedule a few short re-checks
-    checkTruncation();
-    const raf = requestAnimationFrame(checkTruncation);
-    const timeouts = [
-      setTimeout(checkTruncation, 50),
-      setTimeout(checkTruncation, 150),
-      setTimeout(checkTruncation, 300),
-    ];
-
-    // Also check on resize of the element
-    const resizeObserver = new ResizeObserver(() => {
-      setTimeout(checkTruncation, 50);
-    });
-
-    if (ref.current) {
-      resizeObserver.observe(ref.current);
+      truncated =
+        Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||
+        Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth);
     }
 
-    return () => {
-      cancelAnimationFrame(raf);
-      timeouts.forEach(clearTimeout);
-      resizeObserver.disconnect();
-    };
-  }, [fullText, children]);
+    setIsTruncated(truncated);
+    setHasMeasured(true);
+  }, [hasMeasured]);
 
   const handleTap = () => {
-    if (!supportsHover && isTouch) setIsOpen((o) => !o);
-  };
-
-  // Stop propagation to prevent parent onClick from firing when interacting with tooltip
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
     if (!supportsHover && isTouch) {
-      handleTap();
+      measureTruncation();
+      setIsOpen((o) => !o);
     }
   };
 
-  // Explicit styles for word breaking that preserve word integrity
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!supportsHover && isTouch) handleTap();
+  };
+
+  const handleMouseEnter = () => {
+    if (supportsHover) measureTruncation();
+  };
+
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
     ...style,
   };
 
-  // If not truncated, just return the element without tooltip wrapper
   if (!isTruncated) {
     return (
       <h3
         ref={ref}
         className={className}
         style={wordBreakStyles}
+        onMouseEnter={handleMouseEnter}
+        onTouchStart={isTouch && !supportsHover ? measureTruncation : undefined}
+        onFocus={measureTruncation}
+        title={hasMeasured ? undefined : fullText}
       >
         {children}
       </h3>
     );
   }
 
-  // Wrap in tooltip when truncated
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
-      <Tooltip 
-        open={!supportsHover ? isOpen : undefined} 
+      <Tooltip
+        open={!supportsHover ? isOpen : undefined}
         onOpenChange={!supportsHover ? setIsOpen : undefined}
         disableHoverableContent={false}
       >
@@ -155,6 +141,7 @@ export function TruncatedTitle({
             className={`${className} cursor-pointer pointer-events-auto`}
             style={wordBreakStyles}
             onClick={handleClick}
+            onMouseEnter={handleMouseEnter}
             onMouseDown={(e) => e.stopPropagation()}
           >
             {children}
