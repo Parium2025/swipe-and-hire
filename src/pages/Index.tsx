@@ -49,6 +49,26 @@ import MyCandidates from '@/pages/MyCandidates';
 import Messages from '@/pages/Messages';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
 
+// 🔥 Persistent-mount routes — these pages stay alive across navigation so that
+// data + DOM is loaded once per session and re-visiting feels instant.
+// Pages NOT listed here mount/unmount normally (e.g. JobDetails, ProfilePreview
+// which depend on URL params, or rare pages where freshness matters more).
+const EMPLOYER_KEEP_KEYS = [
+  '/home',
+  '/dashboard',
+  '/my-jobs',
+  '/candidates',
+  '/my-candidates',
+  '/messages',
+];
+const JOB_SEEKER_KEEP_KEYS = [
+  '/home',
+  '/search-jobs',
+  '/saved-jobs',
+  '/my-applications',
+  '/messages',
+];
+
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
