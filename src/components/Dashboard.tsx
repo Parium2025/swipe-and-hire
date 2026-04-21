@@ -122,6 +122,39 @@ const Dashboard = memo(() => {
     return filteredAndSortedJobs.slice(start, start + pageSize);
   }, [filteredAndSortedJobs, page]);
 
+  // Beräkna båda tabbars listor (filtrerade + sorterade) så DOM-persistens funkar.
+  // Vi kör samma sök/filter-pipeline för respektive bucket.
+  const filteredActive = useMemo(
+    () => filteredAndSortedJobs.filter(j => isEmployerJobActive(j)),
+    [filteredAndSortedJobs]
+  );
+  const filteredExpired = useMemo(
+    () => filteredAndSortedJobs.filter(j => isEmployerJobExpired(j)),
+    [filteredAndSortedJobs]
+  );
+
+  const sliceToPage = useCallback(<T,>(arr: T[]) => {
+    const start = (page - 1) * pageSize;
+    return arr.slice(start, start + pageSize);
+  }, [page]);
+
+  const pagedBuckets = useMemo(() => ({
+    active: sliceToPage(filteredActive),
+    expired: sliceToPage(filteredExpired),
+  }), [sliceToPage, filteredActive, filteredExpired]);
+
+  // Pre-warm blob-cache i bakgrunden — eliminerar createObjectURL-spike vid tab-byte
+  const prewarmEntries = useMemo(() => {
+    const all = [...filteredActive, ...filteredExpired];
+    const entries: Array<{ path?: string | null; bucket: 'job-images' | 'company-logos' }> = [];
+    for (const j of all) {
+      if (j.job_image_url) entries.push({ path: j.job_image_url, bucket: 'job-images' });
+      if (j.company_logo_url) entries.push({ path: j.company_logo_url, bucket: 'company-logos' });
+    }
+    return entries;
+  }, [filteredActive, filteredExpired]);
+  useBlobCachePrewarm(prewarmEntries);
+
   // Reset page when tab or filters change
   useEffect(() => { setPage(1); }, [activeTab]);
   useEffect(() => { setPage(1); }, [searchTerm, sortBy, selectedRecruiterId]);
