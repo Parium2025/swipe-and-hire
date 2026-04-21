@@ -13,6 +13,7 @@ import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
+import { useChunkedList } from '@/hooks/useChunkedList';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -119,6 +120,9 @@ const Dashboard = memo(() => {
     const start = (page - 1) * pageSize;
     return filteredAndSortedJobs.slice(start, start + pageSize);
   }, [filteredAndSortedJobs, page]);
+
+  // 🚀 Chunked rendering: first 6 cards instant, rest in next idle frame
+  const visibleJobs = useChunkedList(pageJobs, 6);
 
   // Reset page when tab or filters change
   useEffect(() => { setPage(1); }, [activeTab]);
