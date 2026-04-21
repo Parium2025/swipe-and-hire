@@ -39,22 +39,24 @@ export function useChunkedList<T>(items: T[], initialCount = 6): T[] {
       if (!cancelled) setShowAll(true);
     };
 
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const id = (window as any).requestIdleCallback(reveal, { timeout: 200 });
-      return () => {
-        cancelled = true;
-        (window as any).cancelIdleCallback?.(id);
-      };
-    }
-
-    if (typeof window === 'undefined') {
+    const w: any = typeof window !== 'undefined' ? window : null;
+    if (!w) {
       setShowAll(true);
       return;
     }
-    const id = window.setTimeout(reveal, 16);
+
+    if ('requestIdleCallback' in w) {
+      const id = w.requestIdleCallback(reveal, { timeout: 200 });
+      return () => {
+        cancelled = true;
+        w.cancelIdleCallback?.(id);
+      };
+    }
+
+    const id = w.setTimeout(reveal, 16);
     return () => {
       cancelled = true;
-      window.clearTimeout(id);
+      w.clearTimeout(id);
     };
   }, [itemsKey, items.length, initialCount, showAll]);
 
