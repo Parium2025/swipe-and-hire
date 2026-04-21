@@ -17,7 +17,8 @@ export type ReloadReason =
   | 'chunk-error'
   | 'user-action'
   | 'gps-permission'
-  | 'cv-retry';
+  | 'cv-retry'
+  | 'bfcache-restore';
 
 interface ReloadOptions {
   /** Vänta tills användaren är idle eller navigerar (Spotify-style). Default: false */
