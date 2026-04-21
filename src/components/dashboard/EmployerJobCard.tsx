@@ -22,6 +22,7 @@ interface EmployerJobCardProps {
     created_at: string;
     expires_at?: string;
     job_image_url?: string;
+    company_logo_url?: string;
     image_focus_position?: string;
     employer_profile?: {
       first_name: string;
