@@ -76,15 +76,13 @@ const Dashboard = memo(() => {
   }, [activeTab, setActiveTab]);
   const tabSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextTab, onSwipeRight: swipeToPrevTab, threshold: 50 });
 
-  const activeJobs = useMemo(() => allJobs.filter(job => 
+  const activeJobs = useMemo(() => allJobs.filter(job =>
     isEmployerJobActive(job)
   ), [allJobs]);
 
-  const expiredJobs = useMemo(() => allJobs.filter(job => 
+  const expiredJobs = useMemo(() => allJobs.filter(job =>
     isEmployerJobExpired(job)
   ), [allJobs]);
-
-  const jobs = activeTab === 'active' ? activeJobs : expiredJobs;
 
   const filteredStats = useMemo(() => ({
     totalJobs: activeJobs.length + expiredJobs.length,
@@ -93,6 +91,9 @@ const Dashboard = memo(() => {
     totalApplications: activeJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0),
   }), [activeJobs, expiredJobs]);
 
+  // VIKTIGT: skicka ALLA jobs in i filter/sort — inte tab-filtrerade.
+  // Annars trigger varje tab-byte en ny filter/sort-pass och DOM-persistens
+  // i VirtualJobGrid blir meningslös (alla buckets räknas om).
   const {
     searchInput,
     setSearchInput,
@@ -102,7 +103,7 @@ const Dashboard = memo(() => {
     selectedRecruiterId,
     setSelectedRecruiterId,
     filteredAndSortedJobs,
-  } = useJobFiltering(jobs);
+  } = useJobFiltering(allJobs);
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -110,36 +111,37 @@ const Dashboard = memo(() => {
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
 
-  const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / pageSize));
-  const pageJobs = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredAndSortedJobs.slice(start, start + pageSize);
-  }, [filteredAndSortedJobs, page]);
+  // Beräkna båda tabbars buckets EN gång från den filtrerade/sorterade listan.
+  // Detta är samma mönster som EmployerDashboard använder.
+  const tabBuckets = useMemo(() => {
+    const active: typeof filteredAndSortedJobs = [];
+    const expired: typeof filteredAndSortedJobs = [];
+    for (const j of filteredAndSortedJobs) {
+      if (isEmployerJobExpired(j)) expired.push(j);
+      else if (isEmployerJobActive(j)) active.push(j);
+    }
+    return { active, expired };
+  }, [filteredAndSortedJobs]);
 
-  // Beräkna båda tabbars listor (filtrerade + sorterade) så DOM-persistens funkar.
-  // Vi kör samma sök/filter-pipeline för respektive bucket.
-  const filteredActive = useMemo(
-    () => filteredAndSortedJobs.filter(j => isEmployerJobActive(j)),
-    [filteredAndSortedJobs]
-  );
-  const filteredExpired = useMemo(
-    () => filteredAndSortedJobs.filter(j => isEmployerJobExpired(j)),
-    [filteredAndSortedJobs]
-  );
+  const tabFilteredJobs = activeTab === 'expired' ? tabBuckets.expired : tabBuckets.active;
+
+  const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
 
   const sliceToPage = useCallback(<T,>(arr: T[]) => {
     const start = (page - 1) * pageSize;
     return arr.slice(start, start + pageSize);
   }, [page]);
 
+  const pageJobs = useMemo(() => sliceToPage(tabFilteredJobs), [sliceToPage, tabFilteredJobs]);
+
   const pagedBuckets = useMemo(() => ({
-    active: sliceToPage(filteredActive),
-    expired: sliceToPage(filteredExpired),
-  }), [sliceToPage, filteredActive, filteredExpired]);
+    active: sliceToPage(tabBuckets.active),
+    expired: sliceToPage(tabBuckets.expired),
+  }), [sliceToPage, tabBuckets]);
 
   // Pre-warm blob-cache i bakgrunden — eliminerar createObjectURL-spike vid tab-byte
   const prewarmEntries = useMemo(() => {
-    const all = [...filteredActive, ...filteredExpired];
+    const all = [...tabBuckets.active, ...tabBuckets.expired];
     const entries: Array<{ path?: string | null; bucket: 'job-images' | 'company-logos' }> = [];
     for (const job of all) {
       const j = job as { job_image_url?: string | null; company_logo_url?: string | null };
@@ -147,7 +149,7 @@ const Dashboard = memo(() => {
       if (j.company_logo_url) entries.push({ path: j.company_logo_url, bucket: 'company-logos' });
     }
     return entries;
-  }, [filteredActive, filteredExpired]);
+  }, [tabBuckets]);
   useBlobCachePrewarm(prewarmEntries);
 
   // Reset page when tab or filters change
