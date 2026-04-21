@@ -11,12 +11,36 @@ interface CachedImage {
 }
 
 class ImageCache {
+  // Map preserverar insättningsordning → används för LRU
   private cache = new Map<string, CachedImage>();
   private loading = new Map<string, Promise<CachedImage>>();
   private readonly CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 dagar
+  // LRU-tak: håll minnesförbrukning under kontroll på low-end devices
+  private readonly MAX_ENTRIES = 200;
   
   // Filändelser som aldrig ska blob-cachas (stora/binära dokument)
   private readonly SKIP_EXTENSIONS = ['.avi', '.mkv'];
+
+  /**
+   * Markera en post som "nyligen använd" (flytta till slutet av Map)
+   */
+  private touch(cacheKey: string, cached: CachedImage): void {
+    this.cache.delete(cacheKey);
+    this.cache.set(cacheKey, cached);
+  }
+
+  /**
+   * Evictar äldsta posten/poster tills vi är under MAX_ENTRIES
+   */
+  private enforceLimit(): void {
+    while (this.cache.size > this.MAX_ENTRIES) {
+      const oldestKey = this.cache.keys().next().value;
+      if (!oldestKey) break;
+      const oldest = this.cache.get(oldestKey);
+      if (oldest) URL.revokeObjectURL(oldest.objectUrl);
+      this.cache.delete(oldestKey);
+    }
+  }
 
   /**
    * Kontrollera om URL:en pekar på en fil som inte ska cachas
@@ -71,6 +95,7 @@ class ImageCache {
     if (cached) {
       // Kontrollera om cachen fortfarande är giltig
       if (Date.now() - cached.timestamp < this.CACHE_DURATION) {
+        this.touch(cacheKey, cached); // LRU: markera som nyligen använd
         return cached.objectUrl;
       } else {
         // Cache utgången, rensa
@@ -123,6 +148,7 @@ class ImageCache {
       };
 
       this.cache.set(cacheKey, cached);
+      this.enforceLimit(); // LRU-evict om vi överskrider taket
       
       return cached;
     } catch (error) {
@@ -156,6 +182,7 @@ class ImageCache {
     const cacheKey = this.getCacheKey(url);
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      this.touch(cacheKey, cached); // LRU: markera som nyligen använd
       return cached.objectUrl;
     }
     return null;

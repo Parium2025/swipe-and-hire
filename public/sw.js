@@ -1,8 +1,29 @@
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7';
 
 const IMAGE_CACHE = `parium-images-${CACHE_VERSION}`;
 const STATIC_CACHE = `parium-static-${CACHE_VERSION}`;
 const API_CACHE = `parium-api-${CACHE_VERSION}`;
+
+/**
+ * Normalisera bild-URL för cache-nyckel:
+ * - Strippar rotating signed-URL tokens (token, X-Amz-*, etc.) så att samma fil
+ *   inte cachas flera gånger när Supabase signerar om URL:en.
+ * - Behåller versions-parametrar (v, version, t) som vi använder för cache-busting.
+ */
+const normalizeImageRequest = (request) => {
+  try {
+    const url = new URL(request.url);
+    const isStorageObject = url.pathname.includes('/storage/v1/object/');
+    if (!isStorageObject) return request;
+
+    const version = url.searchParams.get('v') || url.searchParams.get('version') || url.searchParams.get('t');
+    // Bygg ren URL utan query, lägg sedan tillbaka endast versions-param om den finns
+    const cleanUrl = `${url.origin}${url.pathname}${version ? `?v=${version}` : ''}`;
+    return new Request(cleanUrl, { method: 'GET', mode: request.mode, credentials: request.credentials });
+  } catch {
+    return request;
+  }
+};
 
 // Kritiska assets som alltid ska cachas (offline-fallback).
 // VIKTIGT: Vi cachar INTE '/' eller '/index.html' här — HTML/JS/CSS hämtas
@@ -156,17 +177,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for images
+  // Cache-first for images (med normaliserad cache-nyckel för att undvika dubletter)
   if (isImageRequest(url)) {
+    const cacheKey = normalizeImageRequest(request);
     event.respondWith(
       caches.open(IMAGE_CACHE).then(async (cache) => {
-        const cachedResponse = await cache.match(request);
+        const cachedResponse = await cache.match(cacheKey);
         
         if (cachedResponse) {
-          // Stale-while-revalidate
+          // Stale-while-revalidate (använd original request för faktisk fetch)
           fetch(request).then((networkResponse) => {
             if (networkResponse && networkResponse.status === 200) {
-              cache.put(request, networkResponse.clone());
+              cache.put(cacheKey, networkResponse.clone());
             }
           }).catch(() => {});
           
@@ -177,7 +199,7 @@ self.addEventListener('fetch', (event) => {
           const networkResponse = await fetch(request);
           
           if (networkResponse && networkResponse.status === 200) {
-            cache.put(request, networkResponse.clone());
+            cache.put(cacheKey, networkResponse.clone());
           }
           
           return networkResponse;
