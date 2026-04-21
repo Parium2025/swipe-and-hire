@@ -487,7 +487,11 @@ const Index = () => {
 
     return (
       <JobSeekerLayout developerView={developerView} onViewChange={setDeveloperView}>
-        <KeepAlive activeKey={location.pathname} render={(key) => renderSidebarContent(key)} />
+        <KeepAlive
+          activeKey={location.pathname}
+          render={(key) => renderSidebarContent(key)}
+          keepKeys={JOB_SEEKER_KEEP_KEYS}
+        />
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
         )}
@@ -552,7 +556,11 @@ const Index = () => {
 
     return (
       <EmployerLayout developerView={developerView} onViewChange={setDeveloperView}>
-        <KeepAlive activeKey={location.pathname} render={(key) => renderEmployerContent(key)} />
+        <KeepAlive
+          activeKey={location.pathname}
+          render={(key) => renderEmployerContent(key)}
+          keepKeys={EMPLOYER_KEEP_KEYS}
+        />
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
         )}
