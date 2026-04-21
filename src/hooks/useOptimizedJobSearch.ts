@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getTimeRemaining } from '@/lib/date';
 import { expandSearchTerms, detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
 import { safeSetItem } from '@/lib/safeStorage';
+import { imageCache } from '@/lib/imageCache';
 
 // 🔥 Offline-cache: senaste lyckade sökresultat per query-nyckel.
 // Används som fallback när nätverket är borta så att jobbkort fortfarande
@@ -38,11 +39,66 @@ function readSearchCache(key: string): SearchJob[] | null {
   }
 }
 
+/**
+ * Normalisera en logo-URL till en stabil public-URL som imageCache kan blob-cacha.
+ * - Full http(s)-URL → strippa query (signed-tokens m.m.)
+ * - Storage-path → konvertera via supabase.storage public URL
+ * Returnerar null om vi inte kan ta fram en användbar URL.
+ */
+function normalizeLogoUrl(raw: string | null | undefined): string | null {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed.split('?')[0];
+  }
+  try {
+    const publicUrl = supabase.storage.from('company-logos').getPublicUrl(trimmed).data.publicUrl;
+    return publicUrl ? publicUrl.split('?')[0] : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 🔥 Förvärm blob-cache med arbetsgivares logotyper för givna sökresultat.
+ * Kör i idle/bakgrund — blockerar aldrig render. Effekten:
+ *   - Online: nästa render läser logon synkront från blob-cache → noll flimmer.
+ *   - Offline: SW + blob-cache har redan blobben → logon visas direkt utan nät.
+ */
+function warmCompanyLogos(jobs: SearchJob[]): void {
+  if (!jobs || jobs.length === 0) return;
+
+  const seen = new Set<string>();
+  const urls: string[] = [];
+  for (const job of jobs) {
+    const normalized = normalizeLogoUrl(job.company_logo_url);
+    if (normalized && !seen.has(normalized) && !imageCache.isCached(normalized)) {
+      seen.add(normalized);
+      urls.push(normalized);
+    }
+  }
+  if (urls.length === 0) return;
+
+  const run = () => {
+    void imageCache.preloadImages(urls);
+  };
+
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(run, { timeout: 1500 });
+  } else {
+    setTimeout(run, 0);
+  }
+}
+
 function writeSearchCache(key: string, jobs: SearchJob[]): void {
   if (!jobs || jobs.length === 0) return;
   // Spara max 60 jobb för att hålla localStorage-fotavtrycket litet
-  const payload: CachedSearch = { jobs: jobs.slice(0, 60), timestamp: Date.now() };
+  const trimmed = jobs.slice(0, 60);
+  const payload: CachedSearch = { jobs: trimmed, timestamp: Date.now() };
   safeSetItem(key, JSON.stringify(payload));
+  // 🔥 Förvärm logotyper i bakgrunden så de finns redo offline
+  warmCompanyLogos(trimmed);
 }
 
 export interface SearchJob {
@@ -520,7 +576,11 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       } catch (err) {
         // Vid nätverksfel: använd cachad data om den finns, annars kasta vidare
         const cached = readSearchCache(cacheKey);
-        if (cached && cached.length > 0) return cached;
+        if (cached && cached.length > 0) {
+          // 🔥 Förvärm logotyper även i offline-fallet så blob-cache fylls på
+          warmCompanyLogos(cached);
+          return cached;
+        }
         throw err;
       }
     },
@@ -533,7 +593,12 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     // 🔥 Visa cachad data direkt (offline eller ej) — query refetchar i bakgrunden
     initialData: () => {
       const cached = readSearchCache(cacheKey);
-      return cached && cached.length > 0 ? cached : undefined;
+      if (cached && cached.length > 0) {
+        // 🔥 Förvärm logotyper för cachade kort så de renderas utan flimmer
+        warmCompanyLogos(cached);
+        return cached;
+      }
+      return undefined;
     },
     initialDataUpdatedAt: () => {
       const cached = readSearchCache(cacheKey);
