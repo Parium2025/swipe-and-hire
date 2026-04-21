@@ -207,7 +207,12 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
                   onClick={() => {
                     onClose();
                     navigator.geolocation.getCurrentPosition(
-                      () => window.location.reload(),
+                      () => {
+                        // Användarinitierad reload — central reloader hanterar lock
+                        import('@/lib/appReloader').then(({ requestAppReload }) =>
+                          requestAppReload('gps-permission')
+                        );
+                      },
                       () => {},
                       { timeout: 5000 }
                     );

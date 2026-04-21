@@ -133,7 +133,7 @@ export default function CvTunnel() {
           <div className="h-full flex flex-col items-center justify-center gap-3 p-6 text-center">
             <p className="text-sm">{error}</p>
             <div className="flex gap-2">
-              <Button variant="secondary" onClick={() => window.location.reload()}>Försök igen</Button>
+              <Button variant="secondary" onClick={() => import('@/lib/appReloader').then(({ requestAppReload }) => requestAppReload('cv-retry'))}>Försök igen</Button>
               {ref && (
                 <Button
                   variant="default"

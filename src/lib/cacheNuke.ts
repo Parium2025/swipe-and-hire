@@ -1,12 +1,13 @@
 /**
- * One-time localStorage cleanup to remove stale caches from before the
- * "single tunnel" architecture (where job_postings is the source of truth
- * for workplace_name and company_logo_url).
+ * One-time localStorage cleanup som rensar gamla cache-prefix.
  *
- * Bump CACHE_VERSION whenever you need to force-evict old caches for all users.
+ * Bunden till build-signaturen (Vites asset-hashar) så den triggas automatiskt
+ * vid varje ny deploy — ingen manuell version-bumpning behövs.
+ *
+ * BASE_VERSION används bara som fallback om signaturen inte kan beräknas (dev).
  */
 
-const CACHE_VERSION = 'v4-2026-04-19-single-tunnel-final';
+const BASE_VERSION = 'v5';
 const VERSION_KEY = 'parium_cache_version';
 
 const STALE_PREFIXES = [
@@ -24,25 +25,53 @@ const STALE_PREFIXES = [
   'eager_preload_',
 ];
 
+const computeBuildSig = (): string => {
+  try {
+    if (typeof document === 'undefined') return BASE_VERSION;
+    const scripts = Array.from(document.querySelectorAll('script[src]'))
+      .map((s) => (s as HTMLScriptElement).getAttribute('src') || '')
+      .filter((src) => /\/assets\/.+\.(js|mjs)/.test(src));
+    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"][href]'))
+      .map((l) => (l as HTMLLinkElement).getAttribute('href') || '')
+      .filter((href) => /\/assets\/.+\.css/.test(href));
+    const all = [...scripts, ...styles].sort();
+    if (all.length === 0) return BASE_VERSION;
+    // Kort hash av signaturen
+    let hash = 0;
+    const joined = all.join('|');
+    for (let i = 0; i < joined.length; i++) {
+      hash = ((hash << 5) - hash + joined.charCodeAt(i)) | 0;
+    }
+    return `${BASE_VERSION}-${Math.abs(hash)}`;
+  } catch {
+    return BASE_VERSION;
+  }
+};
+
 export function nukeStaleCaches(): void {
   try {
-    const current = localStorage.getItem(VERSION_KEY);
-    if (current === CACHE_VERSION) return;
+    const currentVersion = computeBuildSig();
+    const stored = localStorage.getItem(VERSION_KEY);
+    if (stored === currentVersion) return;
 
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (!key) continue;
-      if (STALE_PREFIXES.some(prefix => key.startsWith(prefix))) {
+      if (STALE_PREFIXES.some((prefix) => key.startsWith(prefix))) {
         keysToRemove.push(key);
       }
     }
 
-    keysToRemove.forEach(key => {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
+    keysToRemove.forEach((key) => {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        /* ignore */
+      }
     });
 
-    localStorage.setItem(VERSION_KEY, CACHE_VERSION);
+    localStorage.setItem(VERSION_KEY, currentVersion);
 
     if (keysToRemove.length > 0) {
       console.log(`[cacheNuke] Cleared ${keysToRemove.length} stale cache entries`);
