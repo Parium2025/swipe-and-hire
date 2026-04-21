@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { memo, useRef, useState, useLayoutEffect, useCallback } from 'react';
+import { memo } from 'react';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -18,60 +18,59 @@ const tabColors: Record<JobStatusTab, string> = {
   draft: 'text-amber-400',
 };
 
-export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChange, activeCount, expiredCount, draftCount, showDrafts = false }: JobStatusTabsProps) {
-  const railRef = useRef<HTMLDivElement>(null);
-  const activeRef = useRef<HTMLButtonElement>(null);
-  const expiredRef = useRef<HTMLButtonElement>(null);
-  const draftRef = useRef<HTMLButtonElement>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
-
-  const updateIndicator = useCallback(() => {
-    const refs: Record<JobStatusTab, React.RefObject<HTMLButtonElement>> = {
-      active: activeRef,
-      expired: expiredRef,
-      draft: draftRef,
-    };
-    const ref = refs[activeTab]?.current;
-    if (ref) {
-      setIndicatorStyle({
-        x: ref.offsetLeft,
-        width: ref.offsetWidth,
-      });
-    }
-  }, [activeTab]);
-
-  useLayoutEffect(() => {
-    updateIndicator();
-    // Ensure measurement after fonts/layout settle
-    const raf = requestAnimationFrame(updateIndicator);
-    const fallback = setTimeout(updateIndicator, 100);
-    window.addEventListener('resize', updateIndicator);
-    return () => {
-      window.removeEventListener('resize', updateIndicator);
-      cancelAnimationFrame(raf);
-      clearTimeout(fallback);
-    };
-  }, [updateIndicator, activeCount, expiredCount, draftCount]);
+/**
+ * Tab switcher with a sliding indicator.
+ *
+ * Performance design:
+ *  - Buttons live inside a CSS Grid with equal-width columns. The indicator
+ *    occupies one full column and is moved with `transform: translateX(N * 100%)`.
+ *  - This avoids ALL DOM measurement (no refs, no offsetLeft/offsetWidth, no
+ *    useLayoutEffect, no resize listeners). The animation is pure GPU
+ *    transform — same pattern as InterviewTypeTabs (Video/Kontor) which feels
+ *    instant. The animation never has to wait for React commits or layout reads
+ *    while the rest of the dashboard re-renders job cards.
+ */
+export const JobStatusTabs = memo(function JobStatusTabs({
+  activeTab,
+  onTabChange,
+  activeCount,
+  expiredCount,
+  draftCount,
+  showDrafts = false,
+}: JobStatusTabsProps) {
+  const tabs: JobStatusTab[] = showDrafts ? ['active', 'expired', 'draft'] : ['active', 'expired'];
+  const activeIndex = Math.max(0, tabs.indexOf(activeTab));
+  const columnCount = tabs.length;
+  // The indicator is one column wide; move it by N column widths (= N * 100%).
+  const indicatorXPercent = activeIndex * 100;
 
   return (
     <div className="dashboard-tabs-viewport mx-auto">
-      <div ref={railRef} className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
-        {/* Sliding background — animates x AND width together for smooth tab transitions */}
+      <div
+        className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto grid"
+        style={{
+          gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+        }}
+      >
+        {/* Sliding background — pure transform animation, no DOM measurement. */}
         <motion.div
-          className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] will-change-transform"
-          style={{ left: 0, transform: 'translateZ(0)' }}
+          className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] pointer-events-none will-change-transform"
+          style={{
+            left: '0.25rem',
+            width: `calc((100% - 0.5rem) / ${columnCount})`,
+          }}
           initial={false}
-          animate={{ x: indicatorStyle.x, width: indicatorStyle.width }}
+          animate={{ x: `${indicatorXPercent}%` }}
           transition={{
-            type: 'tween',
-            duration: 0.22,
-            ease: [0.32, 0.72, 0, 1],
+            type: 'spring',
+            stiffness: 320,
+            damping: 34,
+            mass: 0.7,
           }}
         />
-        
-        {/* Buttons */}
+
+        {/* Buttons (each lives in one grid column => identical widths). */}
         <button
-          ref={activeRef}
           type="button"
           onClick={() => onTabChange('active')}
           className={`dashboard-tab-button relative z-10 rounded-[7px] font-medium transition-colors whitespace-nowrap ${tabColors.active}`}
@@ -79,7 +78,6 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
           Aktiva ({activeCount})
         </button>
         <button
-          ref={expiredRef}
           type="button"
           onClick={() => onTabChange('expired')}
           className={`dashboard-tab-button relative z-10 rounded-[7px] font-medium transition-colors whitespace-nowrap ${tabColors.expired}`}
@@ -88,7 +86,6 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
         </button>
         {showDrafts && (
           <button
-            ref={draftRef}
             type="button"
             onClick={() => onTabChange('draft')}
             className={`dashboard-tab-button relative z-10 rounded-[7px] font-medium transition-colors whitespace-nowrap ${tabColors.draft}`}
