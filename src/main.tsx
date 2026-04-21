@@ -7,7 +7,7 @@ import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import { initSyncEngine } from './lib/offlineSyncEngine'
 import { nukeStaleCaches } from './lib/cacheNuke'
-import { installBfcacheGuard } from './lib/appReloader'
+import { installBfcacheGuard, persistBuildSignature } from './lib/appReloader'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
@@ -169,6 +169,10 @@ async function bootstrap() {
       <App />
     </GlobalErrorBoundary>
   );
+
+  setTimeout(() => {
+    persistBuildSignature();
+  }, 0);
 }
 
 void bootstrap();
