@@ -482,10 +482,10 @@ const JobView = () => {
             </button>
           )}
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
               onClick={() => setShowCompanyProfile(true)}
-              className="flex min-w-0 items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
+              className="flex min-w-0 flex-1 items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
             >
               <Avatar className="h-10 w-10">
                 <AvatarImage 
