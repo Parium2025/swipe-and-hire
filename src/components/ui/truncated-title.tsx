@@ -161,7 +161,7 @@ export function TruncatedTitle({
           </h3>
         </TooltipTrigger>
         <TooltipContent
-          side="top"
+          side={side}
           sideOffset={8}
           avoidCollisions={false}
           allowOutsidePointerEvents
