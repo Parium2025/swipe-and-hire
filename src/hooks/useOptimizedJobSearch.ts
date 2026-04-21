@@ -53,7 +53,7 @@ function normalizeLogoUrl(raw: string | null | undefined): string | null {
     return trimmed.split('?')[0];
   }
   try {
-    const publicUrl = supabaseClient.storage.from('company-logos').getPublicUrl(trimmed).data.publicUrl;
+    const publicUrl = supabase.storage.from('company-logos').getPublicUrl(trimmed).data.publicUrl;
     return publicUrl ? publicUrl.split('?')[0] : null;
   } catch {
     return null;
