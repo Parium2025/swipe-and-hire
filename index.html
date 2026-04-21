@@ -11,10 +11,62 @@
     <meta name="description" content="Parium">
     <meta name="author" content="Lovable" />
     <meta http-equiv="Content-Language" content="sv-SE" />
-    <!-- build-version sätts dynamiskt från hashade asset-URL:er nedan så att varje ny deploy triggar reload-logiken automatiskt -->
+    <!-- Build-version injiceras av vite.config.ts versionJsonPlugin -->
+    <!--PARIUM_BUILD_VERSION-->
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+    <script>
+      // 🚨 FIRST-PAINT VERSION CHECK
+      // Körs FÖRE allt annat. Om Safari har cachat en gammal index.html men servern
+      // har en ny version → reload omedelbart med cache-bust. Detta är den enda
+      // mekanismen som fungerar mot iOS Safaris aggressiva disk-cache.
+      (function() {
+        try {
+          var meta = document.querySelector('meta[name="parium-build"]');
+          if (!meta) return; // dev — ingen build-version
+          var clientVersion = meta.getAttribute('content');
+          if (!clientVersion) return;
+
+          // Skydd mot loop — max 1 reload per 30s
+          var loopKey = 'parium_version_check_loop';
+          var lastReload = sessionStorage.getItem(loopKey);
+          if (lastReload && (Date.now() - parseInt(lastReload, 10)) < 30000) return;
+
+          fetch('/version.json', { cache: 'no-store', credentials: 'omit' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+              if (!data || !data.version) return;
+              if (data.version === clientVersion) return; // matchar — allt bra
+
+              // Mismatch → Safari serverar gammal index.html. Tvinga färsk hämtning.
+              sessionStorage.setItem(loopKey, String(Date.now()));
+              try {
+                if (window.caches && caches.keys) {
+                  caches.keys().then(function(keys) {
+                    return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+                  }).catch(function() {});
+                }
+              } catch (e) {}
+              try {
+                if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+                  navigator.serviceWorker.getRegistrations().then(function(rs) {
+                    rs.forEach(function(r) { try { r.unregister(); } catch (e) {} });
+                  }).catch(function() {});
+                }
+              } catch (e) {}
+              try {
+                var url = new URL(window.location.href);
+                url.searchParams.set('_v', data.version.slice(0, 10));
+                window.location.replace(url.toString());
+              } catch (e) {
+                try { window.location.reload(); } catch (e2) {}
+              }
+            })
+            .catch(function() { /* offline — strunta */ });
+        } catch (e) { /* noop */ }
+      })();
+    </script>
     <!-- Google Fonts - Inter for premium typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

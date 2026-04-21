@@ -1,7 +1,35 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+
+/**
+ * Generates /version.json at build time with a unique build signature.
+ * Used by index.html's first-paint check to detect stale Safari cache.
+ */
+const versionJsonPlugin = (): Plugin => {
+  let buildVersion = '';
+  return {
+    name: 'parium-version-json',
+    apply: 'build',
+    buildStart() {
+      buildVersion = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    },
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: JSON.stringify({ version: buildVersion, builtAt: new Date().toISOString() }),
+      });
+    },
+    transformIndexHtml(html) {
+      return html.replace(
+        '<!--PARIUM_BUILD_VERSION-->',
+        `<meta name="parium-build" content="${buildVersion}" />`
+      );
+    },
+  };
+};
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -19,6 +47,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
+    versionJsonPlugin(),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
