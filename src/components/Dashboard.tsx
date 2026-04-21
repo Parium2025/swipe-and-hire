@@ -13,6 +13,8 @@ import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
+import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
+import { useBlobCachePrewarm } from '@/hooks/useBlobCachePrewarm';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -120,6 +122,40 @@ const Dashboard = memo(() => {
     return filteredAndSortedJobs.slice(start, start + pageSize);
   }, [filteredAndSortedJobs, page]);
 
+  // Beräkna båda tabbars listor (filtrerade + sorterade) så DOM-persistens funkar.
+  // Vi kör samma sök/filter-pipeline för respektive bucket.
+  const filteredActive = useMemo(
+    () => filteredAndSortedJobs.filter(j => isEmployerJobActive(j)),
+    [filteredAndSortedJobs]
+  );
+  const filteredExpired = useMemo(
+    () => filteredAndSortedJobs.filter(j => isEmployerJobExpired(j)),
+    [filteredAndSortedJobs]
+  );
+
+  const sliceToPage = useCallback(<T,>(arr: T[]) => {
+    const start = (page - 1) * pageSize;
+    return arr.slice(start, start + pageSize);
+  }, [page]);
+
+  const pagedBuckets = useMemo(() => ({
+    active: sliceToPage(filteredActive),
+    expired: sliceToPage(filteredExpired),
+  }), [sliceToPage, filteredActive, filteredExpired]);
+
+  // Pre-warm blob-cache i bakgrunden — eliminerar createObjectURL-spike vid tab-byte
+  const prewarmEntries = useMemo(() => {
+    const all = [...filteredActive, ...filteredExpired];
+    const entries: Array<{ path?: string | null; bucket: 'job-images' | 'company-logos' }> = [];
+    for (const job of all) {
+      const j = job as { job_image_url?: string | null; company_logo_url?: string | null };
+      if (j.job_image_url) entries.push({ path: j.job_image_url, bucket: 'job-images' });
+      if (j.company_logo_url) entries.push({ path: j.company_logo_url, bucket: 'company-logos' });
+    }
+    return entries;
+  }, [filteredActive, filteredExpired]);
+  useBlobCachePrewarm(prewarmEntries);
+
   // Reset page when tab or filters change
   useEffect(() => { setPage(1); }, [activeTab]);
   useEffect(() => { setPage(1); }, [searchTerm, sortBy, selectedRecruiterId]);
@@ -206,16 +242,20 @@ const Dashboard = memo(() => {
           </div>
         ) : (
           <>
-            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-              {pageJobs.map((job) => (
+            <VirtualJobGrid
+              activeTab={activeTab}
+              tabs={[
+                { key: 'active', jobs: pagedBuckets.active as any },
+                { key: 'expired', jobs: pagedBuckets.expired as any },
+              ]}
+              renderCard={(job) => (
                 <EmployerJobCard
-                  key={job.id}
                   job={job as any}
                   activeTab={activeTab as 'active' | 'expired'}
                   onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                 />
-              ))}
-            </div>
+              )}
+            />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </>
         )}
@@ -246,18 +286,23 @@ const Dashboard = memo(() => {
             <span>{getEmptyMessage(searchTerm, activeTab)}</span>
           </div>
         ) : (
-          <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-            {pageJobs.map((job) => (
-              <ReadOnlyMobileJobCard
-                key={job.id}
-                job={job as any}
-                hideSaveButton
-                onCardClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
-              />
-            ))}
-
+          <>
+            <VirtualJobGrid
+              activeTab={activeTab}
+              tabs={[
+                { key: 'active', jobs: pagedBuckets.active as any },
+                { key: 'expired', jobs: pagedBuckets.expired as any },
+              ]}
+              renderCard={(job) => (
+                <ReadOnlyMobileJobCard
+                  job={job as any}
+                  hideSaveButton
+                  onCardClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
+                />
+              )}
+            />
             <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
-          </div>
+          </>
         )}
       </div>
     </div>
