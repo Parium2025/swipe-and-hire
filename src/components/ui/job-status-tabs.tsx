@@ -56,17 +56,16 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
   return (
     <div className="dashboard-tabs-viewport mx-auto">
       <div ref={railRef} className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
-        {/* Sliding background — uses GPU-accelerated transform instead of layout-triggering left */}
+        {/* Sliding background — animates x AND width together for smooth tab transitions */}
         <motion.div
           className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] will-change-transform"
-          style={{ width: indicatorStyle.width, left: 0 }}
+          style={{ left: 0, transform: 'translateZ(0)' }}
           initial={false}
-          animate={{ x: indicatorStyle.x }}
+          animate={{ x: indicatorStyle.x, width: indicatorStyle.width }}
           transition={{
-            type: "spring",
-            stiffness: 380,
-            damping: 34,
-            mass: 0.6,
+            type: 'tween',
+            duration: 0.22,
+            ease: [0.32, 0.72, 0, 1],
           }}
         />
         
