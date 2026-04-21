@@ -17,7 +17,8 @@ export type ReloadReason =
   | 'chunk-error'
   | 'user-action'
   | 'gps-permission'
-  | 'cv-retry';
+  | 'cv-retry'
+  | 'bfcache-restore';
 
 interface ReloadOptions {
   /** Vänta tills användaren är idle eller navigerar (Spotify-style). Default: false */
@@ -222,4 +223,43 @@ export const shortHash = (input: string): string => {
     hash = ((hash << 5) - hash + input.charCodeAt(i)) | 0;
   }
   return String(Math.abs(hash)).slice(0, 10);
+};
+
+/**
+ * Skydd mot iOS Safari bfcache (back-forward cache).
+ * När en sida återställs från bfcache körs ingen JS på nytt — vilket betyder att
+ * versions-detection i index.html aldrig triggar. Den här lyssnaren upptäcker
+ * bfcache-restore via `pageshow.persisted` och kollar om bundle-signaturen
+ * fortfarande matchar lagrad version. Om inte → silent deferred reload.
+ *
+ * Idempotent — säker att kalla flera gånger.
+ */
+let bfcacheGuardInstalled = false;
+export const installBfcacheGuard = (): void => {
+  if (bfcacheGuardInstalled) return;
+  if (typeof window === 'undefined') return;
+  bfcacheGuardInstalled = true;
+
+  try {
+    window.addEventListener('pageshow', (event: PageTransitionEvent) => {
+      if (!event.persisted) return; // bara bfcache-restore
+      try {
+        const sig = computeBuildSignature();
+        if (!sig) return;
+        const stored = localStorage.getItem('parium_build_version');
+        if (stored && stored !== sig) {
+          log('bfcache restore — version mismatch, scheduling reload');
+          requestAppReload('bfcache-restore', {
+            defer: true,
+            purgeCaches: true,
+            cacheBustParam: { key: 'v', value: shortHash(sig) },
+          });
+        }
+      } catch {
+        /* noop */
+      }
+    });
+  } catch {
+    /* noop */
+  }
 };

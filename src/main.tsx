@@ -7,6 +7,7 @@ import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import { initSyncEngine } from './lib/offlineSyncEngine'
 import { nukeStaleCaches } from './lib/cacheNuke'
+import { installBfcacheGuard } from './lib/appReloader'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
@@ -105,6 +106,9 @@ async function bootstrap() {
   // 🧹 Nuke stale caches from before the "single tunnel" architecture.
   // Runs once per cache version bump — instant, no network calls.
   nukeStaleCaches();
+
+  // 🛡️ Installera bfcache-guard (iOS Safari back/forward cache → silent reload vid stale bundle)
+  installBfcacheGuard();
 
   // ✅ Preview hygiene: ensure we are never stuck on an old cached bundle/UI.
   // The preview environment should always reflect the latest code immediately.
