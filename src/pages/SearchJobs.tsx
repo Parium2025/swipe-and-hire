@@ -31,6 +31,7 @@ import { getTimeRemaining } from '@/lib/date'; // kept for swipe jobs mapping
 import { StatsGrid } from '@/components/StatsGrid';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { preloadImages } from '@/lib/serviceWorkerManager';
+import { imageCache } from '@/lib/imageCache';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useOptimizedJobSearch } from '@/hooks/useOptimizedJobSearch';
 import { useSavedSearches, SearchCriteria } from '@/hooks/useSavedSearches';
