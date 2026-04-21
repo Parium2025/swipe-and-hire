@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
+    versionJsonPlugin(),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
