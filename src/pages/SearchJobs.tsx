@@ -31,6 +31,7 @@ import { getTimeRemaining } from '@/lib/date'; // kept for swipe jobs mapping
 import { StatsGrid } from '@/components/StatsGrid';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { preloadImages } from '@/lib/serviceWorkerManager';
+import { imageCache } from '@/lib/imageCache';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useOptimizedJobSearch } from '@/hooks/useOptimizedJobSearch';
 import { useSavedSearches, SearchCriteria } from '@/hooks/useSavedSearches';
@@ -307,12 +308,51 @@ const SearchJobs = memo(() => {
     return jobs.map(job => job.job_image_url).filter(Boolean) as string[];
   }, [jobs]);
 
+  // Premium: preload BOTH job images and company logos into both SW + blob cache.
+  // Logos are aggressively warmed so they appear instantly on every card.
+  const companyLogoUrls = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const job of jobs) {
+      const raw = (job as any).company_logo_url as string | undefined;
+      if (!raw || seen.has(raw)) continue;
+      seen.add(raw);
+      if (raw.startsWith('http')) {
+        out.push(raw);
+      } else {
+        const { data } = supabase.storage.from('company-logos').getPublicUrl(raw);
+        if (data?.publicUrl) out.push(data.publicUrl);
+      }
+    }
+    return out;
+  }, [jobs]);
+
   // Preload via Service Worker när bilder laddas
   useEffect(() => {
     if (jobImageUrls.length > 0) {
       preloadImages(jobImageUrls);
     }
-  }, [jobImageUrls]);
+    if (companyLogoUrls.length > 0) {
+      preloadImages(companyLogoUrls);
+      // Also seed the in-memory blob cache so logos render synchronously
+      const run = () => {
+        const batchSize = 8;
+        let i = 0;
+        const next = () => {
+          if (i >= companyLogoUrls.length) return;
+          const batch = companyLogoUrls.slice(i, i + batchSize);
+          i += batchSize;
+          Promise.allSettled(batch.map(u => imageCache.loadImage(u))).finally(next);
+        };
+        next();
+      };
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(run, { timeout: 500 });
+      } else {
+        setTimeout(run, 100);
+      }
+    }
+  }, [jobImageUrls, companyLogoUrls]);
 
   // Seed job data into React Query cache for instant JobView rendering
   useEffect(() => {
