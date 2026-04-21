@@ -24,6 +24,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
   const expiredRef = useRef<HTMLButtonElement>(null);
   const draftRef = useRef<HTMLButtonElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
+  const [hasMeasured, setHasMeasured] = useState(false);
 
   const updateIndicator = useCallback(() => {
     const refs: Record<JobStatusTab, React.RefObject<HTMLButtonElement>> = {
@@ -32,26 +33,43 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
       draft: draftRef,
     };
     const ref = refs[activeTab]?.current;
-    if (ref) {
+    if (ref && ref.offsetWidth > 0) {
       setIndicatorStyle({
         x: ref.offsetLeft,
         width: ref.offsetWidth,
       });
+      setHasMeasured(true);
     }
   }, [activeTab]);
 
   useLayoutEffect(() => {
     updateIndicator();
-    // Ensure measurement after fonts/layout settle
-    const raf = requestAnimationFrame(updateIndicator);
-    const fallback = setTimeout(updateIndicator, 100);
+    // Multipla retries — fonts/layout kan vara osettlade vid mount,
+    // särskilt när komponenten mountas via tab-byte i parent (Dashboard ↔ Mina annonser)
+    const raf1 = requestAnimationFrame(() => {
+      updateIndicator();
+      const raf2 = requestAnimationFrame(updateIndicator);
+      return () => cancelAnimationFrame(raf2);
+    });
+    const fallback1 = setTimeout(updateIndicator, 50);
+    const fallback2 = setTimeout(updateIndicator, 200);
     window.addEventListener('resize', updateIndicator);
+
+    // ResizeObserver fångar layout-shifts från fonts/parent-container
+    const ro = new ResizeObserver(updateIndicator);
+    if (railRef.current) ro.observe(railRef.current);
+    if (activeRef.current) ro.observe(activeRef.current);
+    if (expiredRef.current) ro.observe(expiredRef.current);
+    if (draftRef.current) ro.observe(draftRef.current);
+
     return () => {
       window.removeEventListener('resize', updateIndicator);
-      cancelAnimationFrame(raf);
-      clearTimeout(fallback);
+      cancelAnimationFrame(raf1);
+      clearTimeout(fallback1);
+      clearTimeout(fallback2);
+      ro.disconnect();
     };
-  }, [updateIndicator, activeCount, expiredCount, draftCount]);
+  }, [updateIndicator, activeCount, expiredCount, draftCount, showDrafts]);
 
   return (
     <div className="dashboard-tabs-viewport mx-auto">
@@ -59,7 +77,12 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
         {/* Sliding background — uses GPU-accelerated transform instead of layout-triggering left */}
         <motion.div
           className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] will-change-transform"
-          style={{ width: indicatorStyle.width, left: 0 }}
+          style={{
+            width: indicatorStyle.width,
+            left: 0,
+            // Dölj tills vi har en giltig mätning — undviker "osynlig indikator vid mount"
+            opacity: hasMeasured ? 1 : 0,
+          }}
           initial={false}
           animate={{ x: indicatorStyle.x }}
           transition={{
@@ -69,7 +92,6 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
             mass: 0.6,
           }}
         />
-        
         {/* Buttons */}
         <button
           ref={activeRef}
