@@ -3,6 +3,47 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-quer
 import { supabase } from '@/integrations/supabase/client';
 import { getTimeRemaining } from '@/lib/date';
 import { expandSearchTerms, detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
+import { safeSetItem } from '@/lib/safeStorage';
+
+// 🔥 Offline-cache: senaste lyckade sökresultat per query-nyckel.
+// Används som fallback när nätverket är borta så att jobbkort fortfarande
+// kan visas. Påverkar inte online-flödet — vi skriver bara över initialData
+// när det finns en cache, query:n hämtar nytt så snart nätet finns.
+const SEARCH_CACHE_PREFIX = 'parium_job_search_cache_v1_';
+const SEARCH_CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 dagar
+
+interface CachedSearch {
+  jobs: SearchJob[];
+  timestamp: number;
+}
+
+function searchCacheKey(parts: unknown[]): string {
+  try {
+    return SEARCH_CACHE_PREFIX + btoa(unescape(encodeURIComponent(JSON.stringify(parts)))).slice(0, 120);
+  } catch {
+    return SEARCH_CACHE_PREFIX + JSON.stringify(parts).slice(0, 120);
+  }
+}
+
+function readSearchCache(key: string): SearchJob[] | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed: CachedSearch = JSON.parse(raw);
+    if (!parsed?.jobs || !Array.isArray(parsed.jobs)) return null;
+    if (Date.now() - parsed.timestamp > SEARCH_CACHE_TTL) return null;
+    return parsed.jobs;
+  } catch {
+    return null;
+  }
+}
+
+function writeSearchCache(key: string, jobs: SearchJob[]): void {
+  if (!jobs || jobs.length === 0) return;
+  // Spara max 60 jobb för att hålla localStorage-fotavtrycket litet
+  const payload: CachedSearch = { jobs: jobs.slice(0, 60), timestamp: Date.now() };
+  safeSetItem(key, JSON.stringify(payload));
+}
 
 export interface SearchJob {
   id: string;
