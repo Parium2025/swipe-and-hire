@@ -6,6 +6,7 @@ interface TruncatedTitleProps {
   fullText: string;
   className?: string;
   style?: React.CSSProperties;
+  side?: "top" | "right" | "bottom" | "left";
 }
 
 /**
@@ -17,6 +18,7 @@ export function TruncatedTitle({
   fullText, 
   className = "", 
   style,
+  side = "top",
 }: TruncatedTitleProps) {
   const ref = useRef<HTMLHeadingElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
@@ -159,7 +161,7 @@ export function TruncatedTitle({
           </h3>
         </TooltipTrigger>
         <TooltipContent
-          side="top"
+          side={side}
           sideOffset={8}
           avoidCollisions={false}
           allowOutsidePointerEvents
