@@ -10,9 +10,10 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
-import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
+import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
+
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
