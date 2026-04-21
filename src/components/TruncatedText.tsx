@@ -74,24 +74,29 @@ export function TruncatedText({
       const el = textRef.current;
       if (!el) return;
 
+      // Skip work entirely if element isn't laid out yet (offscreen, hidden, no width).
+      if (el.clientWidth === 0) return;
+
       const cs = window.getComputedStyle(el);
       const lc = (cs.getPropertyValue('-webkit-line-clamp') || '').trim();
       const hasClamp = lc !== '' && lc !== 'none';
 
       let truncated = false;
       if (hasClamp) {
-        // Toggle clamp off in-place — one reflow — then restore. Much cheaper than cloneNode.
+        // Read current height first (one layout), then toggle clamp off, read natural height,
+        // restore styles in one batch — minimises layout invalidations vs. cloneNode.
+        const currentHeight = el.clientHeight;
+
         const prevDisplay = el.style.display;
         const prevWebkitLineClamp = (el.style as any).webkitLineClamp as string;
         const prevMaxHeight = el.style.maxHeight;
         const prevOverflow = el.style.overflow;
-        const currentHeight = el.clientHeight;
 
         el.style.display = 'block';
         (el.style as any).webkitLineClamp = 'unset';
         el.style.maxHeight = 'none';
         el.style.overflow = 'visible';
-        const naturalHeight = el.scrollHeight;
+        const naturalHeight = el.scrollHeight; // forces layout once
         el.style.display = prevDisplay;
         (el.style as any).webkitLineClamp = prevWebkitLineClamp;
         el.style.maxHeight = prevMaxHeight;
