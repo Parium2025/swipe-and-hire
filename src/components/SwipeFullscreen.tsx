@@ -103,8 +103,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const [canUndo, setCanUndo] = useState(false);
   const [undoEntryJobId, setUndoEntryJobId] = useState<string | null>(null);
 
-  /* ── Image preloading for next 3 cards ─────────────────── */
-  useSwipeImagePreloader(jobs, currentIndex, 3);
+  /* ── Premium image preloading: 10 ahead, 2 back, bulk-25 on mount ── */
+  useSwipeImagePreloader(jobs, currentIndex, 10, 2, 25);
 
   /* ── Clear persisted index on unmount (reset on re-entry) ── */
   useEffect(() => {
