@@ -379,15 +379,17 @@
           // 1. SPA-navigation
           try { window.addEventListener('popstate', fire, { once: true }); } catch (e) {}
 
-          // 2. Tab hidden → visible (användaren har lämnat och kommer tillbaka)
+          // 2. Användaren lämnar tabben → reload omedelbart i bakgrunden så att
+          // sidan är fräsch när de kommer tillbaka (Spotify-style, ingen avbrott).
+          // pagehide är mer pålitlig än visibilitychange på iOS Safari.
+          try {
+            window.addEventListener('pagehide', fire, { once: true });
+          } catch (e) {}
           try {
             var visHandler = function() {
               if (document.visibilityState === 'hidden') {
-                var onReturn = function() {
-                  document.removeEventListener('visibilitychange', onReturn);
-                  fire();
-                };
-                document.addEventListener('visibilitychange', onReturn);
+                document.removeEventListener('visibilitychange', visHandler);
+                fire();
               }
             };
             document.addEventListener('visibilitychange', visHandler);
