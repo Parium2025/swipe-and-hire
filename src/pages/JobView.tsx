@@ -131,6 +131,9 @@ const JobView = () => {
     } catch { return {}; }
   });
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
+  const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
+  const companyTapArmedRef = useRef(false);
+  const companyTapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
     const isDesktopInit = typeof window !== 'undefined' && window.innerWidth >= 1024;
     const rawImg = isDesktopInit
