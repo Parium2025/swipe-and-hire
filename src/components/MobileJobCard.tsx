@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useEffect } from 'react';
+import { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,8 +8,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
 import { isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
-import { supabase } from '@/integrations/supabase/client';
-import { imageCache } from '@/lib/imageCache';
+import { useCardImage } from '@/hooks/useCardImage';
 import type { JobPosting } from '@/hooks/useJobsData';
 
 interface MobileJobCardProps {
@@ -60,77 +59,11 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
     ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
     : null;
 
-  const resolvedUrl = useMemo(() => {
-    if (!job.job_image_url) return null;
-    if (job.job_image_url.startsWith('http')) return job.job_image_url;
-    const { data } = supabase.storage.from('job-images').getPublicUrl(job.job_image_url);
-    return data?.publicUrl || null;
-  }, [job.job_image_url]);
-
-  const cachedBlobUrl = useMemo(() => {
-    if (!resolvedUrl) return null;
-    return imageCache.getCachedUrl(resolvedUrl);
-  }, [resolvedUrl]);
-
-  const [loadedBlobUrl, setLoadedBlobUrl] = useState<string | null>(null);
-  const [blobFailed, setBlobFailed] = useState(false);
-
-  useEffect(() => {
-    if (!resolvedUrl || cachedBlobUrl) {
-      setLoadedBlobUrl(null);
-      return;
-    }
-    setBlobFailed(false);
-    let cancelled = false;
-    imageCache.loadImage(resolvedUrl)
-      .then(blobUrl => {
-        if (!cancelled) setLoadedBlobUrl(blobUrl);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [resolvedUrl, cachedBlobUrl]);
-
-  const displayUrl = blobFailed ? resolvedUrl : (cachedBlobUrl || loadedBlobUrl || resolvedUrl);
-
-  const handleImageError = useMemo(() => {
-    return (e: React.SyntheticEvent<HTMLImageElement>) => {
-      const src = e.currentTarget.src;
-      if (src.startsWith('blob:')) {
-        if (resolvedUrl) imageCache.evict(resolvedUrl);
-        setBlobFailed(true);
-      }
-    };
-  }, [resolvedUrl]);
+  // Centraliserad bild-hantering — eliminerar 14 hooks per kort
+  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url, 'job-images');
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos');
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
-  const rawLogoUrl = useMemo(() => {
-    const url = job.company_logo_url;
-    if (!url) return null;
-    if (url.startsWith('http')) return url;
-    return supabase.storage.from('company-logos').getPublicUrl(url).data?.publicUrl || null;
-  }, [job.company_logo_url]);
-  const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
-  const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
-  const [logoBlobFailed, setLogoBlobFailed] = useState(false);
-  useEffect(() => {
-    if (!rawLogoUrl || cachedLogoBlob) { setLoadedLogoBlob(null); return; }
-    setLogoBlobFailed(false);
-    let cancelled = false;
-    imageCache.loadImage(rawLogoUrl).then(b => { if (!cancelled) setLoadedLogoBlob(b); }).catch(() => {});
-    return () => { cancelled = true; };
-  }, [rawLogoUrl, cachedLogoBlob]);
-  const logoUrl = logoBlobFailed ? rawLogoUrl : (cachedLogoBlob || loadedLogoBlob || rawLogoUrl);
-
-  const handleLogoError = useMemo(() => {
-    return (e: React.SyntheticEvent<HTMLImageElement>) => {
-      if (e.currentTarget.src.startsWith('blob:')) {
-        if (rawLogoUrl) imageCache.evict(rawLogoUrl);
-        setLogoBlobFailed(true);
-      }
-    };
-  }, [rawLogoUrl]);
 
   const handleCardClick = () => {
     if (isDraft && onEditDraft) {

@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useEffect } from 'react';
+import { memo, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Users } from 'lucide-react';
@@ -7,8 +7,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getEmployerJobStatus, isEmployerJobExpired } from '@/lib/jobStatus';
-import { supabase } from '@/integrations/supabase/client';
-import { imageCache } from '@/lib/imageCache';
+import { useCardImage } from '@/hooks/useCardImage';
 
 interface EmployerJobCardProps {
   job: {
@@ -70,43 +69,8 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
     ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
     : null;
 
-  // Image resolution (same pattern as ReadOnlyMobileJobCard)
-  const resolvedUrl = useMemo(() => {
-    if (!job.job_image_url) return null;
-    if (job.job_image_url.startsWith('http')) return job.job_image_url;
-    const { data } = supabase.storage.from('job-images').getPublicUrl(job.job_image_url);
-    return data?.publicUrl || null;
-  }, [job.job_image_url]);
-
-  // Use blob cache if available, otherwise show resolved URL directly (no skeleton wait)
-  const cachedBlobUrl = useMemo(() => {
-    if (!resolvedUrl) return null;
-    return imageCache.getCachedUrl(resolvedUrl);
-  }, [resolvedUrl]);
-
-  const [loadedBlobUrl, setLoadedBlobUrl] = useState<string | null>(null);
-  const [blobFailed, setBlobFailed] = useState(false);
-  useEffect(() => {
-    if (!resolvedUrl || cachedBlobUrl) { setLoadedBlobUrl(null); return; }
-    setBlobFailed(false);
-    let cancelled = false;
-    imageCache.loadImage(resolvedUrl)
-      .then(blobUrl => { if (!cancelled) setLoadedBlobUrl(blobUrl); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [resolvedUrl, cachedBlobUrl]);
-
-  // Show blob if ready, but ALWAYS fall back to resolvedUrl immediately (no skeleton)
-  const displayUrl = blobFailed ? resolvedUrl : (cachedBlobUrl || loadedBlobUrl || resolvedUrl);
-
-  const handleImageError = useMemo(() => {
-    return (e: React.SyntheticEvent<HTMLImageElement>) => {
-      if (e.currentTarget.src.startsWith('blob:')) {
-        if (resolvedUrl) imageCache.evict(resolvedUrl);
-        setBlobFailed(true);
-      }
-    };
-  }, [resolvedUrl]);
+  // Centraliserad bild-hantering — eliminerar 4 hooks per kort
+  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url, 'job-images');
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 
