@@ -534,7 +534,7 @@ const JobView = () => {
                   toast({ title: 'Länk kopierad!', description: 'Annonsens länk har kopierats till urklipp' });
                 }
               }}
-              className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all"
+              className="shrink-0 h-11 w-11 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 active:bg-white/15 active:scale-[0.97] transition-all backdrop-blur-sm border border-white/15 touch-manipulation"
               aria-label="Dela annons"
             >
               <Share2 className="h-5 w-5 text-white" />
