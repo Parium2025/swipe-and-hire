@@ -30,6 +30,7 @@ import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useChunkedList } from '@/hooks/useChunkedList';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -203,6 +204,10 @@ const EmployerDashboard = memo(() => {
     const start = (page - 1) * pageSize;
     return tabFilteredJobs.slice(start, start + pageSize);
   }, [tabFilteredJobs, page]);
+
+  // 🚀 Chunked rendering: first 6 cards instant, rest in next idle frame.
+  // Eliminates the "cold mount" hack when switching to a tab with many cards.
+  const visibleJobs = useChunkedList(pageJobs, 6);
   
   // Scroll to top when page changes (but not on initial mount)
   useEffect(() => {
