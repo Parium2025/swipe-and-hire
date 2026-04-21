@@ -215,7 +215,7 @@ const Dashboard = memo(() => {
 
       {searchTerm && (
         <div className="text-body-sm">
-          Visar {filteredAndSortedJobs.length} av {jobs.length} annonser
+          Visar {tabFilteredJobs.length} av {allJobs.length} annonser
         </div>
       )}
 
