@@ -30,7 +30,6 @@ import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
-import { useChunkedList } from '@/hooks/useChunkedList';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -205,9 +204,6 @@ const EmployerDashboard = memo(() => {
     return tabFilteredJobs.slice(start, start + pageSize);
   }, [tabFilteredJobs, page]);
 
-  // 🚀 Chunked rendering: first 6 cards instant, rest in next idle frame.
-  // Eliminates the "cold mount" hack when switching to a tab with many cards.
-  const visibleJobs = useChunkedList(pageJobs, 6);
   
   // Scroll to top when page changes (but not on initial mount)
   useEffect(() => {
@@ -407,7 +403,7 @@ const EmployerDashboard = memo(() => {
         ) : (
           <>
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-              {visibleJobs.map((job, idx) => (
+              {pageJobs.map((job, idx) => (
                 <CardErrorBoundary key={job.id}>
                   <MobileJobCard
                     job={job as JobPosting}
@@ -461,7 +457,7 @@ const EmployerDashboard = memo(() => {
               <>
                 <div ref={listTopRef} />
                     <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-                      {visibleJobs.map((job, idx) => {
+                      {pageJobs.map((job, idx) => {
                         const jobPosting = job as JobPosting;
                         const isExpired = isEmployerJobExpired(jobPosting);
                         const isDraft = isEmployerJobDraft(jobPosting);

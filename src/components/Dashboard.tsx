@@ -13,7 +13,6 @@ import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
-import { useChunkedList } from '@/hooks/useChunkedList';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -121,9 +120,6 @@ const Dashboard = memo(() => {
     return filteredAndSortedJobs.slice(start, start + pageSize);
   }, [filteredAndSortedJobs, page]);
 
-  // 🚀 Chunked rendering: first 6 cards instant, rest in next idle frame
-  const visibleJobs = useChunkedList(pageJobs, 6);
-
   // Reset page when tab or filters change
   useEffect(() => { setPage(1); }, [activeTab]);
   useEffect(() => { setPage(1); }, [searchTerm, sortBy, selectedRecruiterId]);
@@ -211,7 +207,7 @@ const Dashboard = memo(() => {
         ) : (
           <>
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-              {visibleJobs.map((job) => (
+              {pageJobs.map((job) => (
                 <EmployerJobCard
                   key={job.id}
                   job={job as any}
@@ -251,7 +247,7 @@ const Dashboard = memo(() => {
           </div>
         ) : (
           <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-            {visibleJobs.map((job) => (
+            {pageJobs.map((job) => (
               <ReadOnlyMobileJobCard
                 key={job.id}
                 job={job as any}
