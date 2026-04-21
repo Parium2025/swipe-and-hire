@@ -130,7 +130,8 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
                 if (v === 'bottom') return '80%';
                 return `${v}%`;
               })()}` }}
-              loading="eager"
+              loading="lazy"
+              decoding="async"
               onError={handleImageError}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
