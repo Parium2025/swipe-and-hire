@@ -16,6 +16,7 @@ import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { imageCache } from '@/lib/imageCache';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
+import { TruncatedText } from '@/components/TruncatedText';
 import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 
@@ -484,7 +485,7 @@ const JobView = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowCompanyProfile(true)}
-              className="flex items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
+              className="flex min-w-0 items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
             >
               <Avatar className="h-10 w-10">
                 <AvatarImage 
@@ -497,10 +498,18 @@ const JobView = () => {
                     : 'FÖ'}
                 </AvatarFallback>
               </Avatar>
-              <div className="text-left">
-                <h3 className="text-white font-bold text-sm">
-                  {getDisplayCompanyName(job)}
-                </h3>
+              <div className="min-w-0 flex-1 text-left">
+                <TruncatedText
+                  text={getDisplayCompanyName(job)}
+                  className="text-white font-bold text-sm line-clamp-2 min-w-0 max-w-full leading-tight"
+                  tooltipSide="bottom"
+                  style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                />
                 <div className="flex items-center text-[10px] mt-0.5 text-white">
                   <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
                   Se företagsprofil
