@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
 import { initConnectivityManager } from "@/lib/connectivityManager";
+import { requestAppReload } from "@/lib/appReloader";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 // 🚀 CRITICAL: Keep auth + main app shell synchronous to avoid production chunk-mismatch
@@ -39,16 +40,10 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
 
       if (!alreadyRetried) {
         sessionStorage.setItem(key, '1');
-
-        // Force a cache-busted reload once. If browser blocks reload for any reason,
-        // we still throw so GlobalErrorBoundary can render instead of hanging forever.
-        try {
-          const url = new URL(window.location.href);
-          url.searchParams.set('chunk_retry', Date.now().toString());
-          window.location.replace(url.toString());
-        } catch {
-          window.location.reload();
-        }
+        // Använd central reloader → respekterar globalt lock
+        requestAppReload('chunk-error', {
+          cacheBustParam: { key: 'chunk_retry', value: Date.now().toString() },
+        });
       } else {
         // Already retried once — clear flag for next attempts.
         sessionStorage.removeItem(key);
