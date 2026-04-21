@@ -72,6 +72,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
 
   // Centraliserad bild-hantering — eliminerar 4 hooks per kort
   const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url, 'job-images');
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos');
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 
