@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
 import { initConnectivityManager } from "@/lib/connectivityManager";
-import { requestAppReload } from "@/lib/appReloader";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 // 🚀 CRITICAL: Keep auth + main app shell synchronous to avoid production chunk-mismatch
@@ -35,22 +34,23 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
         if (timeout) clearTimeout(timeout);
       })
       .catch((err) => {
-      const key = 'chunk-reload-' + factory.toString().slice(0, 60);
-      const alreadyRetried = sessionStorage.getItem(key);
+        const key = 'parium-chunk-reload-once';
+        const alreadyRetried = sessionStorage.getItem(key);
 
-      if (!alreadyRetried) {
-        sessionStorage.setItem(key, '1');
-        // Använd central reloader → respekterar globalt lock
-        requestAppReload('chunk-error', {
-          cacheBustParam: { key: 'chunk_retry', value: Date.now().toString() },
-        });
-      } else {
-        // Already retried once — clear flag for next attempts.
-        sessionStorage.removeItem(key);
-      }
+        if (!alreadyRetried && typeof window !== 'undefined') {
+          sessionStorage.setItem(key, '1');
+          try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('_v', Date.now().toString());
+            window.location.replace(url.toString());
+            return new Promise<never>(() => {});
+          } catch {
+            // fall through to surfaced error state
+          }
+        }
 
-      throw err;
-    });
+        throw err;
+      });
   });
 }
 

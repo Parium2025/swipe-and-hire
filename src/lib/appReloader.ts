@@ -217,6 +217,21 @@ export const computeBuildSignature = (): string | null => {
   }
 };
 
+export const persistBuildSignature = (): void => {
+  try {
+    const sig = computeBuildSignature();
+    if (!sig) return;
+    localStorage.setItem('parium_build_version', sig);
+    try {
+      sessionStorage.removeItem(LOCK_KEY);
+    } catch {
+      /* noop */
+    }
+  } catch {
+    /* noop */
+  }
+};
+
 /**
  * Kort hash av en sträng — används för cache-bust query params.
  */
