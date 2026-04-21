@@ -251,7 +251,7 @@ const Dashboard = memo(() => {
           </div>
         ) : (
           <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-            {pageJobs.map((job) => (
+            {visibleJobs.map((job) => (
               <ReadOnlyMobileJobCard
                 key={job.id}
                 job={job as any}
