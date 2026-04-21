@@ -49,10 +49,10 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
       }
     });
 
-    // Periodisk update-check var 60:e sekund
+    // Periodisk update-check var 30:e sekund
     setInterval(() => {
       registration?.update().catch(() => {});
-    }, 60_000);
+    }, 30_000);
 
     // Check vid tab-fokus
     document.addEventListener('visibilitychange', () => {
