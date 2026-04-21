@@ -211,7 +211,7 @@ const Dashboard = memo(() => {
                 <EmployerJobCard
                   key={job.id}
                   job={job as any}
-                  activeTab={activeTab}
+                  activeTab={activeTab as 'active' | 'expired'}
                   onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                 />
               ))}
