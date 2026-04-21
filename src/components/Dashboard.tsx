@@ -277,7 +277,7 @@ const Dashboard = memo(() => {
               </div>
             ))}
           </div>
-        ) : filteredAndSortedJobs.length === 0 ? (
+        ) : tabFilteredJobs.length === 0 ? (
           <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
             <span>{getEmptyMessage(searchTerm, activeTab)}</span>
           </div>
