@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useRef, useEffect, useCallback, useTransition } from 'react';
+import { memo, useMemo, useState, useRef, useEffect, useCallback, startTransition } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Briefcase, Users, Eye, TrendingUp } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
