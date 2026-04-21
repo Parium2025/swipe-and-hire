@@ -14,7 +14,7 @@ const TooltipContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> & {
     allowOutsidePointerEvents?: boolean
   }
->(({ className, sideOffset = 4, allowOutsidePointerEvents = false, onPointerDownOutside, ...props }, ref) => (
+>(({ className, sideOffset = 4, allowOutsidePointerEvents = true, onPointerDownOutside, ...props }, ref) => (
   <TooltipPrimitive.Portal>
     <TooltipPrimitive.Content
       ref={ref}
