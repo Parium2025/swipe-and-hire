@@ -17,6 +17,7 @@ import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { imageCache } from '@/lib/imageCache';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
 import { TruncatedText } from '@/components/TruncatedText';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 
@@ -131,6 +132,9 @@ const JobView = () => {
     } catch { return {}; }
   });
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
+  const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
+  const companyTapArmedRef = useRef(false);
+  const companyTapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
     const isDesktopInit = typeof window !== 'undefined' && window.innerWidth >= 1024;
     const rawImg = isDesktopInit
@@ -484,7 +488,34 @@ const JobView = () => {
           
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
-              onClick={() => setShowCompanyProfile(true)}
+              onClick={() => {
+                // Touch devices: first tap = show tooltip (kept open ~3s), second tap = navigate.
+                // Hover-capable devices (desktop): navigate immediately.
+                const isTouchDevice =
+                  typeof window !== 'undefined' &&
+                  window.matchMedia('(hover: none)').matches;
+                if (!isTouchDevice) {
+                  setShowCompanyProfile(true);
+                  return;
+                }
+                if (companyTapArmedRef.current) {
+                  companyTapArmedRef.current = false;
+                  if (companyTapTimeoutRef.current) {
+                    clearTimeout(companyTapTimeoutRef.current);
+                    companyTapTimeoutRef.current = null;
+                  }
+                  setShowCompanyProfile(true);
+                } else {
+                  companyTapArmedRef.current = true;
+                  setShowCompanyTooltip(true);
+                  if (companyTapTimeoutRef.current) clearTimeout(companyTapTimeoutRef.current);
+                  companyTapTimeoutRef.current = setTimeout(() => {
+                    companyTapArmedRef.current = false;
+                    setShowCompanyTooltip(false);
+                    companyTapTimeoutRef.current = null;
+                  }, 3000);
+                }
+              }}
               className="flex min-w-0 flex-1 items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
             >
               <Avatar className="h-10 w-10">
@@ -499,17 +530,35 @@ const JobView = () => {
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1 text-left">
-                <TruncatedText
-                  text={getDisplayCompanyName(job)}
-                  className="text-white font-bold text-sm line-clamp-2 min-w-0 max-w-full leading-tight"
-                  tooltipSide="bottom"
-                  style={{
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}
-                />
+                <TooltipProvider>
+                  <Tooltip open={showCompanyTooltip} onOpenChange={setShowCompanyTooltip}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="text-white font-bold text-sm line-clamp-2 min-w-0 max-w-full leading-tight"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                        }}
+                      >
+                        {getDisplayCompanyName(job)}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="bottom"
+                      align="start"
+                      sideOffset={8}
+                      className="z-[999999] w-[min(calc(100vw-24px),360px)] max-w-[min(calc(100vw-24px),360px)] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 rounded-lg"
+                    >
+                      <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
+                        {getDisplayCompanyName(job)}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <div className="flex items-center text-[10px] mt-0.5 text-white">
                   <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
                   Se företagsprofil
