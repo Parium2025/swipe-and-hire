@@ -1,4 +1,4 @@
-import { useState, memo, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, memo, useMemo, useRef, useEffect, useCallback, startTransition } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -137,15 +137,21 @@ const EmployerDashboard = memo(() => {
   const tabParam = searchParams.get('tab') as JobStatusTab | null;
   const activeTab: JobStatusTab = tabParam === 'expired' || tabParam === 'draft' ? tabParam : 'active';
   const setActiveTab = useCallback((tab: JobStatusTab) => {
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev);
-      if (tab === 'active') {
-        next.delete('tab');
-      } else {
-        next.set('tab', tab);
-      }
-      return next;
-    }, { replace: true });
+    // startTransition: tab indicator updates instantly (high-prio), list
+    // re-render is marked as a transition so React keeps the UI responsive
+    // and can interrupt rendering if another input arrives.
+    // This is what makes the tab feel "Gmail-snappy".
+    startTransition(() => {
+      setSearchParams(prev => {
+        const next = new URLSearchParams(prev);
+        if (tab === 'active') {
+          next.delete('tab');
+        } else {
+          next.set('tab', tab);
+        }
+        return next;
+      }, { replace: true });
+    });
   }, [setSearchParams]);
   
   // Pagination state for mobile
