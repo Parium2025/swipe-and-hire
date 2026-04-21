@@ -891,16 +891,20 @@ All colors MUST be HSL.
   .job-card-mobile-shell {
     width: min(100%, var(--job-card-mobile-max-width));
     margin-inline: auto;
-    /* Lager 2: skip rendering of off-screen cards → instant tab-switch even after inactivity.
-       Browser reserves ~480px height per card and only paints when scrolled near. */
+    /* content-visibility is great for long single-column lists (saves paint
+       on off-screen cards), but inside a tabbed grid it forces a paint-burst
+       on tab-switch (skip → measure → paint, simultaneously for all cards).
+       We disable it inside .job-card-grid below. */
     content-visibility: auto;
     contain-intrinsic-size: 1px 480px;
   }
 
-  /* In grid context, let cards fill their column */
+  /* In grid context, let cards fill their column AND skip content-visibility
+     so tab-switch doesn't trigger a paint storm. */
   .job-card-grid .job-card-mobile-shell {
     width: 100%;
     max-width: none;
+    content-visibility: visible;
   }
 
   /* Same optimization for desktop search/employer cards */
@@ -909,30 +913,25 @@ All colors MUST be HSL.
     contain-intrinsic-size: 1px 140px;
   }
 
-  /* Staggered fade-in for job cards on tab switch — isolate from parent animate-fade-in */
+  /* SINGLE container fade-in instead of 6+ per-card opacity animations.
+     Why: animating opacity on every card creates 6+ composite layers + 6
+     timing instances simultaneously — exactly the stutter the user feels.
+     One container layer is essentially free for the compositor. */
   .job-card-grid {
+    animation: jobCardGridFadeIn 0.22s ease-out both;
+  }
+  .job-card-grid.job-card-grid-no-entry {
     animation: none !important;
     opacity: 1 !important;
-    transform: none !important;
   }
   .job-card-grid .job-card-mobile-shell {
-    animation: jobCardFadeIn 0.35s ease-out both;
-  }
-  /* When returning from job detail: no card animation at all — instant render, no shake */
-  .job-card-grid.job-card-grid-no-entry .job-card-mobile-shell {
+    /* Per-card animation removed — container handles the fade */
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  .job-card-grid .job-card-mobile-shell:nth-child(1) { animation-delay: 0ms; }
-  .job-card-grid .job-card-mobile-shell:nth-child(2) { animation-delay: 60ms; }
-  .job-card-grid .job-card-mobile-shell:nth-child(3) { animation-delay: 120ms; }
-  .job-card-grid .job-card-mobile-shell:nth-child(4) { animation-delay: 180ms; }
-  .job-card-grid .job-card-mobile-shell:nth-child(5) { animation-delay: 240ms; }
-  .job-card-grid .job-card-mobile-shell:nth-child(6) { animation-delay: 300ms; }
-  .job-card-grid .job-card-mobile-shell:nth-child(n+7) { animation-delay: 350ms; }
 
-  @keyframes jobCardFadeIn {
+  @keyframes jobCardGridFadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }

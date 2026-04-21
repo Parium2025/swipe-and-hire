@@ -1,15 +1,13 @@
-import { memo, useState, useEffect, useMemo, type ReactNode } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2, Gift, Banknote } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
-import { supabase } from '@/integrations/supabase/client';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
-import { imageCache } from '@/lib/imageCache';
+import { useCardImage } from '@/hooks/useCardImage';
 import { TruncatedText } from '@/components/TruncatedText';
-import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 
 interface ReadOnlyMobileJobCardProps {
   job: {
@@ -99,95 +97,15 @@ function getCompanyInitials(name: string): string {
 export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, onDeleteClick, isSavedExternal, onToggleSave, statusBadge, hideSaveButton = false, onCardClick, footer, cardIndex = 0 }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
 
-  // Resolve the raw storage path to a public URL
-  const resolvedUrl = useMemo(() => {
-    if (!job.job_image_url) return null;
-    if (job.job_image_url.startsWith('http')) return appendVersionToUrl(job.job_image_url, job.updated_at);
-    const { data } = supabase.storage.from('job-images').getPublicUrl(job.job_image_url);
-    return appendVersionToUrl(data?.publicUrl, job.updated_at);
-  }, [job.job_image_url, job.updated_at]);
-
-  // Synchronous cache check — computed every render, zero-delay on remount
-  const cachedBlobUrl = useMemo(() => {
-    if (!resolvedUrl) return null;
-    return imageCache.getCachedUrl(resolvedUrl);
-  }, [resolvedUrl]);
-
-  // If not blob-cached yet, load in background
-  const [loadedBlobUrl, setLoadedBlobUrl] = useState<string | null>(null);
-  // Fallback flag: if blob URL becomes invalid (iOS memory pressure), use raw URL
-  const [blobFailed, setBlobFailed] = useState(false);
-
-  useEffect(() => {
-    setLoadedBlobUrl(null);
-    setBlobFailed(false);
-  }, [resolvedUrl]);
-
-  useEffect(() => {
-    if (!resolvedUrl || cachedBlobUrl) {
-      setLoadedBlobUrl(null);
-      return;
-    }
-    setBlobFailed(false);
-    let cancelled = false;
-    imageCache.loadImage(resolvedUrl)
-      .then(blobUrl => { if (!cancelled) setLoadedBlobUrl(blobUrl); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [resolvedUrl, cachedBlobUrl]);
-
-  // Priority: blob from cache (instant) → blob from load → raw URL
-  // If blob failed (revoked by OS), skip blob entirely and use raw URL
-  const displayUrl = blobFailed ? resolvedUrl : (cachedBlobUrl || loadedBlobUrl || resolvedUrl);
-
-  // Handle image load errors (blob URL revocation on iOS)
-  const handleImageError = useMemo(() => {
-    return (e: React.SyntheticEvent<HTMLImageElement>) => {
-      const src = e.currentTarget.src;
-      if (src.startsWith('blob:')) {
-        // Blob was revoked — evict from cache and fall back to raw URL
-        if (resolvedUrl) imageCache.evict(resolvedUrl);
-        setBlobFailed(true);
-      }
-    };
-  }, [resolvedUrl]);
+  // Centraliserad bild-hantering — eliminerar 12 hooks per kort.
+  // Använder samma hook som MobileJobCard så båda korten har identisk render-kostnad.
+  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url ?? null, 'job-images');
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos');
 
   const companyName = job.workplace_name || job.company_name || 'Okänt företag';
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
-  const rawLogoUrl = useMemo(() => {
-    if (!job.company_logo_url) return null;
-    if (job.company_logo_url.startsWith('http')) return appendVersionToUrl(job.company_logo_url, job.updated_at);
-    const publicUrl = supabase.storage.from('company-logos').getPublicUrl(job.company_logo_url).data?.publicUrl || null;
-    return appendVersionToUrl(publicUrl, job.updated_at);
-  }, [job.company_logo_url, job.updated_at]);
-  const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
-  const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
-  const [logoBlobFailed, setLogoBlobFailed] = useState(false);
-
-  useEffect(() => {
-    setLoadedLogoBlob(null);
-    setLogoBlobFailed(false);
-  }, [rawLogoUrl]);
-
-  useEffect(() => {
-    if (!rawLogoUrl || cachedLogoBlob) { setLoadedLogoBlob(null); return; }
-    setLogoBlobFailed(false);
-    let cancelled = false;
-    imageCache.loadImage(rawLogoUrl).then(b => { if (!cancelled) setLoadedLogoBlob(b); }).catch(() => {});
-    return () => { cancelled = true; };
-  }, [rawLogoUrl, cachedLogoBlob]);
-  const logoUrl = logoBlobFailed ? rawLogoUrl : (cachedLogoBlob || loadedLogoBlob || rawLogoUrl);
-
-  const handleLogoError = useMemo(() => {
-    return (e: React.SyntheticEvent<HTMLImageElement>) => {
-      if (e.currentTarget.src.startsWith('blob:')) {
-        if (rawLogoUrl) imageCache.evict(rawLogoUrl);
-        setLogoBlobFailed(true);
-      }
-    };
-  }, [rawLogoUrl]);
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
