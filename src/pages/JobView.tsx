@@ -529,17 +529,35 @@ const JobView = () => {
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1 text-left">
-                <TruncatedText
-                  text={getDisplayCompanyName(job)}
-                  className="text-white font-bold text-sm line-clamp-2 min-w-0 max-w-full leading-tight"
-                  tooltipSide="bottom"
-                  style={{
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}
-                />
+                <TooltipProvider>
+                  <Tooltip open={showCompanyTooltip} onOpenChange={setShowCompanyTooltip}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="text-white font-bold text-sm line-clamp-2 min-w-0 max-w-full leading-tight"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                        }}
+                      >
+                        {getDisplayCompanyName(job)}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="bottom"
+                      align="start"
+                      sideOffset={8}
+                      className="z-[999999] w-[min(calc(100vw-24px),360px)] max-w-[min(calc(100vw-24px),360px)] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 rounded-lg"
+                    >
+                      <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
+                        {getDisplayCompanyName(job)}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <div className="flex items-center text-[10px] mt-0.5 text-white">
                   <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
                   Se företagsprofil
