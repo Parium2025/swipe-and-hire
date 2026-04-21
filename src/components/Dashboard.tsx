@@ -181,32 +181,30 @@ const Dashboard = memo(() => {
         />
       </div>
 
-      {/* Desktop: Card grid */}
+      {/* Desktop: Virtualised card grid — only renders visible rows for 60fps tab switching */}
       <div className="hidden md:block">
-        <div ref={listTopRef} />
         {filteredAndSortedJobs.length === 0 ? (
           <div className="text-center text-white py-12 font-medium text-sm">
             {getEmptyMessage(searchTerm, activeTab)}
           </div>
         ) : (
-          <>
-            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-              {pageJobs.map((job) => (
-                <EmployerJobCard
-                  key={job.id}
-                  job={job as any}
-                  activeTab={activeTab}
-                  onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
-                />
-              ))}
-            </div>
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          </>
+          <VirtualJobGrid
+            items={filteredAndSortedJobs as any[]}
+            renderItem={renderDesktopCard}
+            estimateRowHeight={540}
+            overscan={2}
+            className="job-card-grid"
+          />
         )}
       </div>
 
-      {/* Mobile: Card list view */}
-      <div className="block md:hidden touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
+      {/* Mobile: Virtualised single-column list */}
+      <div
+        className="block md:hidden touch-pan-y"
+        onTouchStart={tabSwipeHandlers.onTouchStart}
+        onTouchMove={tabSwipeHandlers.onTouchMove}
+        onTouchEnd={tabSwipeHandlers.onTouchEnd}
+      >
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -230,18 +228,14 @@ const Dashboard = memo(() => {
             <span>{getEmptyMessage(searchTerm, activeTab)}</span>
           </div>
         ) : (
-          <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-            {pageJobs.map((job) => (
-              <ReadOnlyMobileJobCard
-                key={job.id}
-                job={job as any}
-                hideSaveButton
-                onCardClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
-              />
-            ))}
-
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
-          </div>
+          <VirtualJobGrid
+            items={filteredAndSortedJobs as any[]}
+            renderItem={renderMobileCard}
+            estimateRowHeight={540}
+            overscan={2}
+            singleColumn
+            className="job-card-grid"
+          />
         )}
       </div>
     </div>
