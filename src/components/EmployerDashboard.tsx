@@ -407,7 +407,7 @@ const EmployerDashboard = memo(() => {
         ) : (
           <>
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-              {pageJobs.map((job, idx) => (
+              {visibleJobs.map((job, idx) => (
                 <CardErrorBoundary key={job.id}>
                   <MobileJobCard
                     job={job as JobPosting}
@@ -461,7 +461,7 @@ const EmployerDashboard = memo(() => {
               <>
                 <div ref={listTopRef} />
                     <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-                      {pageJobs.map((job, idx) => {
+                      {visibleJobs.map((job, idx) => {
                         const jobPosting = job as JobPosting;
                         const isExpired = isEmployerJobExpired(jobPosting);
                         const isDraft = isEmployerJobDraft(jobPosting);
