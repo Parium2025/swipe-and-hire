@@ -47,6 +47,10 @@ export function useChunkedList<T>(items: T[], initialCount = 6): T[] {
       };
     }
 
+    if (typeof window === 'undefined') {
+      setShowAll(true);
+      return;
+    }
     const id = window.setTimeout(reveal, 16);
     return () => {
       cancelled = true;
