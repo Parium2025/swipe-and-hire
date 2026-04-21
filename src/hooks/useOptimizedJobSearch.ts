@@ -3,6 +3,47 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-quer
 import { supabase } from '@/integrations/supabase/client';
 import { getTimeRemaining } from '@/lib/date';
 import { expandSearchTerms, detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
+import { safeSetItem } from '@/lib/safeStorage';
+
+// 🔥 Offline-cache: senaste lyckade sökresultat per query-nyckel.
+// Används som fallback när nätverket är borta så att jobbkort fortfarande
+// kan visas. Påverkar inte online-flödet — vi skriver bara över initialData
+// när det finns en cache, query:n hämtar nytt så snart nätet finns.
+const SEARCH_CACHE_PREFIX = 'parium_job_search_cache_v1_';
+const SEARCH_CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 dagar
+
+interface CachedSearch {
+  jobs: SearchJob[];
+  timestamp: number;
+}
+
+function searchCacheKey(parts: unknown[]): string {
+  try {
+    return SEARCH_CACHE_PREFIX + btoa(unescape(encodeURIComponent(JSON.stringify(parts)))).slice(0, 120);
+  } catch {
+    return SEARCH_CACHE_PREFIX + JSON.stringify(parts).slice(0, 120);
+  }
+}
+
+function readSearchCache(key: string): SearchJob[] | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed: CachedSearch = JSON.parse(raw);
+    if (!parsed?.jobs || !Array.isArray(parsed.jobs)) return null;
+    if (Date.now() - parsed.timestamp > SEARCH_CACHE_TTL) return null;
+    return parsed.jobs;
+  } catch {
+    return null;
+  }
+}
+
+function writeSearchCache(key: string, jobs: SearchJob[]): void {
+  if (!jobs || jobs.length === 0) return;
+  // Spara max 60 jobb för att hålla localStorage-fotavtrycket litet
+  const payload: CachedSearch = { jobs: jobs.slice(0, 60), timestamp: Date.now() };
+  safeSetItem(key, JSON.stringify(payload));
+}
 
 export interface SearchJob {
   id: string;
@@ -428,6 +469,20 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     salarySearch,
   } = useSearchParamsState(options);
 
+  const cacheKey = useMemo(
+    () => searchCacheKey([
+      'optimized-job-search',
+      fullSearchQuery,
+      cityFilter,
+      countyFilter,
+      employmentCodes,
+      categoryFilter,
+      salarySearch?.targetSalary,
+      salarySearch?.isMinimumSearch,
+    ]),
+    [fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch]
+  );
+
   const { data: rawJobs = [], isLoading, error, refetch } = useQuery({
     queryKey: [
       'optimized-job-search',
@@ -443,21 +498,31 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       if (abortControllerRef.current) abortControllerRef.current.abort();
       abortControllerRef.current = new AbortController();
 
-      const { data, error } = await supabase.rpc('search_jobs', {
-        p_search_query: fullSearchQuery || null,
-        p_city: cityFilter || null,
-        p_county: countyFilter || null,
-        p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
-        p_category: categoryFilter || null,
-        p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
-        p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
-        p_limit: 100,
-        p_offset: 0,
-        p_cursor_created_at: null,
-      });
+      try {
+        const { data, error } = await supabase.rpc('search_jobs', {
+          p_search_query: fullSearchQuery || null,
+          p_city: cityFilter || null,
+          p_county: countyFilter || null,
+          p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
+          p_category: categoryFilter || null,
+          p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
+          p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
+          p_limit: 100,
+          p_offset: 0,
+          p_cursor_created_at: null,
+        });
 
-      if (error) throw error;
-      return (data || []) as SearchJob[];
+        if (error) throw error;
+        const jobs = (data || []) as SearchJob[];
+        // 🔥 Spara senaste lyckade resultat som offline-fallback
+        writeSearchCache(cacheKey, jobs);
+        return jobs;
+      } catch (err) {
+        // Vid nätverksfel: använd cachad data om den finns, annars kasta vidare
+        const cached = readSearchCache(cacheKey);
+        if (cached && cached.length > 0) return cached;
+        throw err;
+      }
     },
     enabled,
     staleTime: 30 * 1000,
@@ -465,6 +530,16 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
+    // 🔥 Visa cachad data direkt (offline eller ej) — query refetchar i bakgrunden
+    initialData: () => {
+      const cached = readSearchCache(cacheKey);
+      return cached && cached.length > 0 ? cached : undefined;
+    },
+    initialDataUpdatedAt: () => {
+      const cached = readSearchCache(cacheKey);
+      // Sätt äldre timestamp så att refetch triggas direkt när nätet finns
+      return cached && cached.length > 0 ? Date.now() - 60_000 : undefined;
+    },
   });
 
   const employerIds = useMemo(() => [...new Set(rawJobs.map((job) => job.employer_id).filter(Boolean))], [rawJobs]);
