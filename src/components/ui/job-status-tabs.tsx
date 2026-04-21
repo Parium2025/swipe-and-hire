@@ -21,14 +21,14 @@ const tabColors: Record<JobStatusTab, string> = {
 /**
  * Tab switcher with a sliding indicator.
  *
- * Performance design:
- *  - Buttons live inside a CSS Grid with equal-width columns. The indicator
- *    occupies one full column and is moved with `transform: translateX(N * 100%)`.
- *  - This avoids ALL DOM measurement (no refs, no offsetLeft/offsetWidth, no
- *    useLayoutEffect, no resize listeners). The animation is pure GPU
- *    transform — same pattern as InterviewTypeTabs (Video/Kontor) which feels
- *    instant. The animation never has to wait for React commits or layout reads
- *    while the rest of the dashboard re-renders job cards.
+ * Performance design — mirrors InterviewTypeTabs (Video/Kontor) which feels instant:
+ *  - Buttons live in a CSS Grid with N equal columns.
+ *  - Indicator is positioned with `left/width` as percentages of the rail and
+ *    moved with `transform: translateX(N * 100%)`.
+ *  - Zero DOM measurement: no refs, no offsetLeft/offsetWidth, no useLayoutEffect,
+ *    no resize listener, no setState during animation.
+ *  - The animation is a pure GPU transform, so it never has to wait for React
+ *    commits, layout reads, or job-card re-renders that happen on tab change.
  */
 export const JobStatusTabs = memo(function JobStatusTabs({
   activeTab,
@@ -41,23 +41,26 @@ export const JobStatusTabs = memo(function JobStatusTabs({
   const tabs: JobStatusTab[] = showDrafts ? ['active', 'expired', 'draft'] : ['active', 'expired'];
   const activeIndex = Math.max(0, tabs.indexOf(activeTab));
   const columnCount = tabs.length;
-  // The indicator is one column wide; move it by N column widths (= N * 100%).
+  // Each grid column = 100% / columnCount of the rail's content box.
+  // Move indicator by `activeIndex` columns (translateX in % is relative to its own width).
   const indicatorXPercent = activeIndex * 100;
 
   return (
     <div className="dashboard-tabs-viewport mx-auto">
       <div
-        className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto grid"
+        className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto"
         style={{
+          display: 'grid',
           gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+          gap: 0,
         }}
       >
         {/* Sliding background — pure transform animation, no DOM measurement. */}
         <motion.div
           className="absolute top-1 bottom-1 bg-parium-navy rounded-[7px] pointer-events-none will-change-transform"
           style={{
-            left: '0.25rem',
-            width: `calc((100% - 0.5rem) / ${columnCount})`,
+            left: 0,
+            width: `${100 / columnCount}%`,
           }}
           initial={false}
           animate={{ x: `${indicatorXPercent}%` }}
@@ -69,7 +72,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({
           }}
         />
 
-        {/* Buttons (each lives in one grid column => identical widths). */}
+        {/* Buttons — each lives in one grid column => identical widths. */}
         <button
           type="button"
           onClick={() => onTabChange('active')}
