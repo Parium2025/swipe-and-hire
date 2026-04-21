@@ -147,7 +147,8 @@ const Dashboard = memo(() => {
   const prewarmEntries = useMemo(() => {
     const all = [...filteredActive, ...filteredExpired];
     const entries: Array<{ path?: string | null; bucket: 'job-images' | 'company-logos' }> = [];
-    for (const j of all) {
+    for (const job of all) {
+      const j = job as { job_image_url?: string | null; company_logo_url?: string | null };
       if (j.job_image_url) entries.push({ path: j.job_image_url, bucket: 'job-images' });
       if (j.company_logo_url) entries.push({ path: j.company_logo_url, bucket: 'company-logos' });
     }
