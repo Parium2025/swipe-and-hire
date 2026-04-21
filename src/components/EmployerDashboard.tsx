@@ -1,4 +1,4 @@
-import { useState, memo, useMemo, useRef, useEffect, useCallback, startTransition, useDeferredValue } from 'react';
+import { useState, memo, useMemo, useRef, useEffect, useCallback, startTransition } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -146,8 +146,9 @@ const EmployerDashboard = memo(() => {
   useEffect(() => { setOptimisticTab(urlTab); }, [urlTab]);
 
   const activeTab = optimisticTab;
-  // Defer den dyra tab-flaggan till listan så indikator-animationen aldrig blockeras
-  const listActiveTab = useDeferredValue(activeTab);
+  // DOM-persistens i VirtualJobGrid gör tab-bytet billigt — inget behov av useDeferredValue.
+  // Den orsakade dubbelblink (mellan-render med gamla tabben fortfarande aktiv).
+  const listActiveTab = activeTab;
 
   const setActiveTab = useCallback((tab: JobStatusTab) => {
     setOptimisticTab(tab); // 0ms visuell respons för indikatorn
