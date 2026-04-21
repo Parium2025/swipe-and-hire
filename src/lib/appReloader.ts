@@ -135,15 +135,18 @@ const scheduleDeferredReload = (opts: ReloadOptions): void => {
     /* noop */
   }
 
-  // 2. Vid tab hidden → visible övergång (säkrast — användaren är inte mitt i något)
+  // 2. Vid pagehide → reload omedelbart i bakgrunden så att sidan är fräsch när
+  // användaren kommer tillbaka. pagehide är mer pålitlig än visibilitychange
+  // på iOS Safari (fyrar även när tabben byts/stängs).
+  try {
+    window.addEventListener('pagehide', fire, { once: true });
+  } catch {
+    /* noop */
+  }
   const onVisible = () => {
     if (document.visibilityState === 'hidden') {
-      // När de kommer tillbaka, reload
-      const onceVisible = () => {
-        document.removeEventListener('visibilitychange', onceVisible);
-        fire();
-      };
-      document.addEventListener('visibilitychange', onceVisible);
+      document.removeEventListener('visibilitychange', onVisible);
+      fire();
     }
   };
   try {

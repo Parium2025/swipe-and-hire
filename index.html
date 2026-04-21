@@ -332,9 +332,10 @@
             return;
           }
 
-          // Versionsskifte upptäckt — uppdatera direkt så vi inte upptäcker det igen,
-          // men SCHEMALÄGG reload tyst (vid navigation, tab return, eller 30s idle).
-          localStorage.setItem(key, v);
+          // Versionsskifte upptäckt — SCHEMALÄGG reload tyst (vid navigation, tab return, eller 30s idle).
+          // VIKTIGT: Vi uppdaterar INTE localStorage här — bara när reload faktiskt körs.
+          // Annars riskerar vi att iPhone Safari stänger tabben innan deferred-reload hinner fyra,
+          // och nästa öppning ser "matchande version" → sidan blir permanent stale.
 
           var lock = sessionStorage.getItem(lockKey);
           var now = Date.now();
@@ -344,6 +345,7 @@
           var fire = function() {
             if (executed) return;
             executed = true;
+            try { localStorage.setItem(key, v); } catch (e) {}
             try { sessionStorage.setItem(lockKey, String(Date.now())); } catch (e) {}
             // Purge runtime caches (best effort)
             try {
@@ -377,15 +379,17 @@
           // 1. SPA-navigation
           try { window.addEventListener('popstate', fire, { once: true }); } catch (e) {}
 
-          // 2. Tab hidden → visible (användaren har lämnat och kommer tillbaka)
+          // 2. Användaren lämnar tabben → reload omedelbart i bakgrunden så att
+          // sidan är fräsch när de kommer tillbaka (Spotify-style, ingen avbrott).
+          // pagehide är mer pålitlig än visibilitychange på iOS Safari.
+          try {
+            window.addEventListener('pagehide', fire, { once: true });
+          } catch (e) {}
           try {
             var visHandler = function() {
               if (document.visibilityState === 'hidden') {
-                var onReturn = function() {
-                  document.removeEventListener('visibilitychange', onReturn);
-                  fire();
-                };
-                document.addEventListener('visibilitychange', onReturn);
+                document.removeEventListener('visibilitychange', visHandler);
+                fire();
               }
             };
             document.addEventListener('visibilitychange', visHandler);
