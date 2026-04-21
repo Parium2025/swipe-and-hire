@@ -105,7 +105,7 @@ const Dashboard = memo(() => {
   const renderDesktopCard = useCallback((job: any) => (
     <EmployerJobCard
       job={job}
-      activeTab={activeTab === 'draft' ? 'active' : activeTab}
+      activeTab={activeTab}
       onClick={handleCardClick}
     />
   ), [activeTab, handleCardClick]);
