@@ -469,6 +469,20 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     salarySearch,
   } = useSearchParamsState(options);
 
+  const cacheKey = useMemo(
+    () => searchCacheKey([
+      'optimized-job-search',
+      fullSearchQuery,
+      cityFilter,
+      countyFilter,
+      employmentCodes,
+      categoryFilter,
+      salarySearch?.targetSalary,
+      salarySearch?.isMinimumSearch,
+    ]),
+    [fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch]
+  );
+
   const { data: rawJobs = [], isLoading, error, refetch } = useQuery({
     queryKey: [
       'optimized-job-search',
@@ -484,21 +498,31 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       if (abortControllerRef.current) abortControllerRef.current.abort();
       abortControllerRef.current = new AbortController();
 
-      const { data, error } = await supabase.rpc('search_jobs', {
-        p_search_query: fullSearchQuery || null,
-        p_city: cityFilter || null,
-        p_county: countyFilter || null,
-        p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
-        p_category: categoryFilter || null,
-        p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
-        p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
-        p_limit: 100,
-        p_offset: 0,
-        p_cursor_created_at: null,
-      });
+      try {
+        const { data, error } = await supabase.rpc('search_jobs', {
+          p_search_query: fullSearchQuery || null,
+          p_city: cityFilter || null,
+          p_county: countyFilter || null,
+          p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
+          p_category: categoryFilter || null,
+          p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
+          p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
+          p_limit: 100,
+          p_offset: 0,
+          p_cursor_created_at: null,
+        });
 
-      if (error) throw error;
-      return (data || []) as SearchJob[];
+        if (error) throw error;
+        const jobs = (data || []) as SearchJob[];
+        // 🔥 Spara senaste lyckade resultat som offline-fallback
+        writeSearchCache(cacheKey, jobs);
+        return jobs;
+      } catch (err) {
+        // Vid nätverksfel: använd cachad data om den finns, annars kasta vidare
+        const cached = readSearchCache(cacheKey);
+        if (cached && cached.length > 0) return cached;
+        throw err;
+      }
     },
     enabled,
     staleTime: 30 * 1000,
@@ -506,6 +530,16 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
+    // 🔥 Visa cachad data direkt (offline eller ej) — query refetchar i bakgrunden
+    initialData: () => {
+      const cached = readSearchCache(cacheKey);
+      return cached && cached.length > 0 ? cached : undefined;
+    },
+    initialDataUpdatedAt: () => {
+      const cached = readSearchCache(cacheKey);
+      // Sätt äldre timestamp så att refetch triggas direkt när nätet finns
+      return cached && cached.length > 0 ? Date.now() - 60_000 : undefined;
+    },
   });
 
   const employerIds = useMemo(() => [...new Set(rawJobs.map((job) => job.employer_id).filter(Boolean))], [rawJobs]);
