@@ -245,8 +245,8 @@ const Dashboard = memo(() => {
             <VirtualJobGrid
               activeTab={activeTab}
               tabs={[
-                { key: 'active', jobs: pagedBuckets.active },
-                { key: 'expired', jobs: pagedBuckets.expired },
+                { key: 'active', jobs: pagedBuckets.active as any },
+                { key: 'expired', jobs: pagedBuckets.expired as any },
               ]}
               renderCard={(job) => (
                 <EmployerJobCard
@@ -290,8 +290,8 @@ const Dashboard = memo(() => {
             <VirtualJobGrid
               activeTab={activeTab}
               tabs={[
-                { key: 'active', jobs: pagedBuckets.active },
-                { key: 'expired', jobs: pagedBuckets.expired },
+                { key: 'active', jobs: pagedBuckets.active as any },
+                { key: 'expired', jobs: pagedBuckets.expired as any },
               ]}
               renderCard={(job) => (
                 <ReadOnlyMobileJobCard
