@@ -484,7 +484,28 @@ const JobView = () => {
           
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
-              onClick={() => setShowCompanyProfile(true)}
+              onClick={(e) => {
+                // On touch devices: first tap shows the tooltip (handled by TruncatedText
+                // child via stopPropagation), second tap navigates to company profile.
+                // On hover-capable devices (desktop): always navigate immediately.
+                const isTouchDevice =
+                  typeof window !== 'undefined' &&
+                  window.matchMedia('(hover: none)').matches;
+                if (!isTouchDevice) {
+                  setShowCompanyProfile(true);
+                  return;
+                }
+                // Touch: this fires only when the tap is OUTSIDE the truncated text
+                // (e.g. on the avatar or "Se företagsprofil" row), or on the second tap
+                // after the tooltip closed. Either way, navigate.
+                if (companyTapRef.current) {
+                  setShowCompanyProfile(true);
+                  companyTapRef.current = false;
+                } else {
+                  // First tap on the button area (not on truncated text) → navigate directly
+                  setShowCompanyProfile(true);
+                }
+              }}
               className="flex min-w-0 flex-1 items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
             >
               <Avatar className="h-10 w-10">
