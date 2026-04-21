@@ -108,9 +108,13 @@ export const JobViewHero = memo(function JobViewHero({
       {/* Mobile metadata — only show company badge when there's an image */}
       <div className="mt-3.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
         {(hasImage || !hasLogo) && (
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white max-w-full overflow-hidden">
             <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="truncate font-medium">{companyName}</span>
+            <TruncatedText
+              text={companyName}
+              className="truncate font-medium min-w-0"
+              tooltipSide="bottom"
+            />
           </Badge>
         )}
         {location && (
