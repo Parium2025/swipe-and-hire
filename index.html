@@ -350,8 +350,9 @@
     <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
     <div id="root"></div>
     <script>
-      // Build-version detection — kör tyst, reload först när användaren är idle/navigerar.
-      // Ingen visuell påverkan; ingen avbruten interaktion.
+      // Build-version detection — AGGRESSIV reload vid versionsskifte.
+      // Vi accepterar att användaren kan avbrytas mitt i något — det är ett
+      // litet pris för att ALLTID se färsk version (särskilt på iPhone Safari).
       (function() {
         try {
           var computeSig = function() {
@@ -379,84 +380,51 @@
             return;
           }
           if (prev === v) {
-            // Versionerna matchar — släpp ev. lock från tidigare reload
             try { sessionStorage.removeItem(lockKey); } catch (e) {}
             return;
           }
 
-          // Versionsskifte upptäckt — SCHEMALÄGG reload tyst (vid navigation, tab return, eller 30s idle).
-          // VIKTIGT: Vi uppdaterar INTE localStorage här — bara när reload faktiskt körs.
-          // Annars riskerar vi att iPhone Safari stänger tabben innan deferred-reload hinner fyra,
-          // och nästa öppning ser "matchande version" → sidan blir permanent stale.
-
+          // Loop-skydd — max 1 reload per 15s
           var lock = sessionStorage.getItem(lockKey);
           var now = Date.now();
-          if (lock && (now - parseInt(lock, 10)) < 10000) return; // pågående reload
-
-          var executed = false;
-          var fire = function() {
-            if (executed) return;
-            executed = true;
-            try { localStorage.setItem(key, v); } catch (e) {}
-            try { sessionStorage.setItem(lockKey, String(Date.now())); } catch (e) {}
-            // Purge runtime caches (best effort)
-            try {
-              if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-                navigator.serviceWorker.getRegistrations().then(function(rs){
-                  rs.forEach(function(r){ try { r.unregister(); } catch(e){} });
-                }).catch(function(){});
-              }
-            } catch (e) {}
-            try {
-              if (window.caches && caches.keys) {
-                caches.keys().then(function(keys){
-                  return Promise.all(keys.map(function(k){ return caches.delete(k); }));
-                }).catch(function(){});
-              }
-            } catch (e) {}
-            // Cache-bust query param
-            try {
-              var url = new URL(window.location.href);
-              var hash = 0;
-              for (var i = 0; i < v.length; i++) { hash = ((hash << 5) - hash + v.charCodeAt(i)) | 0; }
-              url.searchParams.set('v', String(Math.abs(hash)).slice(0, 10));
-              if (window.location.href !== url.toString()) {
-                window.location.replace(url.toString());
-                return;
-              }
-            } catch (e) {}
-            try { window.location.reload(); } catch (e) {}
-          };
-
-          // 1. SPA-navigation
-          try { window.addEventListener('popstate', fire, { once: true }); } catch (e) {}
-
-          // 2. Användaren lämnar tabben → reload omedelbart i bakgrunden så att
-          // sidan är fräsch när de kommer tillbaka (Spotify-style, ingen avbrott).
-          // pagehide är mer pålitlig än visibilitychange på iOS Safari.
-          try {
-            window.addEventListener('pagehide', fire, { once: true });
-          } catch (e) {}
-          try {
-            var visHandler = function() {
-              if (document.visibilityState === 'hidden') {
-                document.removeEventListener('visibilitychange', visHandler);
-                fire();
-              }
-            };
-            document.addEventListener('visibilitychange', visHandler);
-          } catch (e) {}
-
-          // 3. Idle fallback — efter 30s av inaktivitet
-          try {
-            if ('requestIdleCallback' in window) {
-              window.requestIdleCallback(function() { setTimeout(fire, 30000); }, { timeout: 35000 });
-            } else {
-              setTimeout(fire, 30000);
-            }
-          } catch (e) {
-            setTimeout(fire, 30000);
+          if (lock && (now - parseInt(lock, 10)) < 15000) {
+            // Loop upptäckt — uppdatera localStorage så vi slutar försöka
+            localStorage.setItem(key, v);
+            return;
           }
+
+          // 🔥 OMEDELBAR RELOAD — som det fungerade förut.
+          localStorage.setItem(key, v);
+          try { sessionStorage.setItem(lockKey, String(Date.now())); } catch (e) {}
+
+          // Best-effort cache purge (synkront blockar vi inte på)
+          try {
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+              navigator.serviceWorker.getRegistrations().then(function(rs){
+                rs.forEach(function(r){ try { r.unregister(); } catch(e){} });
+              }).catch(function(){});
+            }
+          } catch (e) {}
+          try {
+            if (window.caches && caches.keys) {
+              caches.keys().then(function(keys){
+                return Promise.all(keys.map(function(k){ return caches.delete(k); }));
+              }).catch(function(){});
+            }
+          } catch (e) {}
+
+          // Cache-bust query param + omedelbar reload
+          try {
+            var url = new URL(window.location.href);
+            var hash = 0;
+            for (var i = 0; i < v.length; i++) { hash = ((hash << 5) - hash + v.charCodeAt(i)) | 0; }
+            url.searchParams.set('v', String(Math.abs(hash)).slice(0, 10));
+            if (window.location.href !== url.toString()) {
+              window.location.replace(url.toString());
+              return;
+            }
+          } catch (e) {}
+          try { window.location.reload(); } catch (e) {}
         } catch (e) { /* noop */ }
       })();
     </script>
