@@ -510,7 +510,7 @@ const EmployerDashboard = memo(() => {
           <>
             <div ref={listTopRef} />
             <VirtualJobGrid
-              activeTab={activeTab}
+              activeTab={listActiveTab}
               tabs={[
                 { key: 'active', jobs: pagedBuckets.active },
                 { key: 'expired', jobs: pagedBuckets.expired },
