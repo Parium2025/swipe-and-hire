@@ -30,6 +30,8 @@ import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
+import { useBlobCachePrewarm } from '@/hooks/useBlobCachePrewarm';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -172,43 +174,73 @@ const EmployerDashboard = memo(() => {
   // Check if there are any drafts
   const hasDrafts = useMemo(() => jobs.some(job => isEmployerJobDraft(job)), [jobs]);
   
-  // Filter jobs by active tab BEFORE pagination
-  const tabFilteredJobs = useMemo(() => {
-    switch (activeTab) {
-      case 'active':
-        return filteredAndSortedJobs.filter(j => isEmployerJobActive(j));
-      case 'expired':
-        return filteredAndSortedJobs.filter(j => isEmployerJobExpired(j));
-      case 'draft':
-        return filteredAndSortedJobs.filter(j => isEmployerJobDraft(j));
-      default:
-        return filteredAndSortedJobs;
+  // Beräkna ALLA tre tabbars data samtidigt — gör DOM-persistens möjlig.
+  // VirtualJobGrid håller alla tre i DOM:en (display:none för inaktiva)
+  // så tab-byte blir en CSS-toggle istället för en full React-remount.
+  const tabBuckets = useMemo(() => {
+    const active: JobPosting[] = [];
+    const expired: JobPosting[] = [];
+    const draft: JobPosting[] = [];
+    for (const j of filteredAndSortedJobs) {
+      const jp = j as JobPosting;
+      if (isEmployerJobDraft(jp)) draft.push(jp);
+      else if (isEmployerJobExpired(jp)) expired.push(jp);
+      else if (isEmployerJobActive(jp)) active.push(jp);
     }
-  }, [filteredAndSortedJobs, activeTab]);
+    return { active, expired, draft };
+  }, [filteredAndSortedJobs]);
+
+  const tabFilteredJobs = activeTab === 'expired'
+    ? tabBuckets.expired
+    : activeTab === 'draft'
+      ? tabBuckets.draft
+      : tabBuckets.active;
 
   // Ordered tabs for swipe navigation
   const tabOrder: JobStatusTab[] = useMemo(() => hasDrafts ? ['active', 'expired', 'draft'] : ['active', 'expired'], [hasDrafts]);
-  
+
   const swipeToNextTab = useCallback(() => {
     const idx = tabOrder.indexOf(activeTab);
     if (idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
   }, [activeTab, tabOrder, setActiveTab]);
-  
+
   const swipeToPrevTab = useCallback(() => {
     const idx = tabOrder.indexOf(activeTab);
     if (idx > 0) setActiveTab(tabOrder[idx - 1]);
   }, [activeTab, tabOrder, setActiveTab]);
-  
+
   const tabSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextTab, onSwipeRight: swipeToPrevTab, threshold: 50 });
-  
+
   // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
-  
+
   const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
-  const pageJobs = useMemo(() => {
+
+  // Pre-warm blob-cache för alla synliga jobb i bakgrunden — eliminerar
+  // createObjectURL-jobb (~72ms) under tab-switch.
+  const prewarmEntries = useMemo(() => {
+    const all = [...tabBuckets.active, ...tabBuckets.expired, ...tabBuckets.draft];
+    const entries: Array<{ path?: string | null; bucket: 'job-images' | 'company-logos' }> = [];
+    for (const j of all) {
+      if (j.job_image_url) entries.push({ path: j.job_image_url, bucket: 'job-images' });
+      if (j.company_logo_url) entries.push({ path: j.company_logo_url, bucket: 'company-logos' });
+    }
+    return entries;
+  }, [tabBuckets]);
+  useBlobCachePrewarm(prewarmEntries);
+
+  // Sida-slice för respektive tab så pagineringen funkar oberoende.
+  const sliceToPage = useCallback((arr: JobPosting[]) => {
     const start = (page - 1) * pageSize;
-    return tabFilteredJobs.slice(start, start + pageSize);
-  }, [tabFilteredJobs, page]);
+    return arr.slice(start, start + pageSize);
+  }, [page]);
+
+  const pageJobs = useMemo(() => sliceToPage(tabFilteredJobs), [sliceToPage, tabFilteredJobs]);
+  const pagedBuckets = useMemo(() => ({
+    active: sliceToPage(tabBuckets.active),
+    expired: sliceToPage(tabBuckets.expired),
+    draft: sliceToPage(tabBuckets.draft),
+  }), [sliceToPage, tabBuckets]);
 
   
   // Scroll to top when page changes (but not on initial mount)
@@ -396,7 +428,7 @@ const EmployerDashboard = memo(() => {
         </div>
       )}
 
-      {/* Desktop: Card grid */}
+      {/* Desktop: Card grid — virtualiserad + DOM-persistent över tabbar */}
       <div className="hidden md:block">
         {tabFilteredJobs.length === 0 ? (
           <div className="text-center text-white py-12 font-medium text-sm">
@@ -408,20 +440,27 @@ const EmployerDashboard = memo(() => {
           </div>
         ) : (
           <>
-            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-              {pageJobs.map((job, idx) => (
-                <CardErrorBoundary key={job.id}>
+            <VirtualJobGrid
+              activeTab={activeTab}
+              tabs={[
+                { key: 'active', jobs: pagedBuckets.active },
+                { key: 'expired', jobs: pagedBuckets.expired },
+                { key: 'draft', jobs: pagedBuckets.draft },
+              ]}
+              gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              renderCard={(job, idx) => (
+                <CardErrorBoundary>
                   <MobileJobCard
-                    job={job as JobPosting}
-                    onEdit={(j) => handleEditJob(j)}
-                    onDelete={(j) => handleDeleteClick(j)}
-                    onEditDraft={(j) => handleEditDraft(j)}
-                    onPrefetch={(id) => prefetchJob(id)}
+                    job={job}
+                    onEdit={handleEditJob}
+                    onDelete={handleDeleteClick}
+                    onEditDraft={handleEditDraft}
+                    onPrefetch={prefetchJob}
                     cardIndex={idx}
                   />
                 </CardErrorBoundary>
-              ))}
-            </div>
+              )}
+            />
             {totalPages > 1 && (
               <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-4" />
             )}
@@ -429,95 +468,101 @@ const EmployerDashboard = memo(() => {
         )}
       </div>
 
-      {/* Mobile: Card view — outside Card wrapper for edge-to-edge layout */}
+      {/* Mobile: Card view — virtualiserad + DOM-persistent över tabbar */}
       <div className="md:hidden touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
-            {loading ? (
-              <div className="space-y-3 px-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
-                    <div className="flex items-start gap-3">
-                      <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-3/4 bg-white/10" />
-                        <Skeleton className="h-3 w-1/2 bg-white/10" />
-                        <div className="flex gap-2 mt-2">
-                          <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
-                          <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
-                        </div>
-                      </div>
+        {loading ? (
+          <div className="space-y-3 px-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                <div className="flex items-start gap-3">
+                  <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4 bg-white/10" />
+                    <Skeleton className="h-3 w-1/2 bg-white/10" />
+                    <div className="flex gap-2 mt-2">
+                      <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
+                      <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            ) : tabFilteredJobs.length === 0 ? (
-              <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh]  flex items-center justify-center">
-                <span>
-                {searchTerm.trim() 
-                  ? 'Inga annonser matchar din sökning' 
-                  : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
-                  : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
-                  : 'Inga utkast.'}
-                </span>
-              </div>
-            ) : (
-              <>
-                <div ref={listTopRef} />
-                    <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24${pageJobs.length === 1 ? ' job-card-grid-single' : pageJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
-                      {pageJobs.map((job, idx) => {
-                        const jobPosting = job as JobPosting;
-                        const isExpired = isEmployerJobExpired(jobPosting);
-                        const isDraft = isEmployerJobDraft(jobPosting);
-                        return (
-                          <CardErrorBoundary key={job.id}>
-                            <ReadOnlyMobileJobCard
-                              job={job as JobPosting & { company_name?: string }}
-                              cardIndex={idx}
-                              hideSaveButton
-                              onCardClick={(jobId) => {
-                                if (isDraft) {
-                                  handleEditDraft(jobPosting);
-                                } else {
-                                  navigate(`/job-details/${jobId}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
-                                }
-                              }}
-                              footer={
-                                <div className={`flex items-center gap-2 pt-0.5 ${isExpired && !isDraft ? 'justify-center' : ''}`}>
-                                  {(!isExpired || isDraft) && (
-                                    <button
-                                      className={`flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-[transform,opacity,background-color] duration-200 active:scale-[0.97] md:hover:bg-white/10 ${pendingEditJobId === job.id ? 'pointer-events-none opacity-70' : ''}`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                          handlePremiumEditOpen(jobPosting);
-                                      }}
-                                    >
-                                      <Edit className="h-4 w-4" />
-                                      {pendingEditJobId === job.id ? 'Öppnar...' : 'Redigera'}
-                                    </button>
-                                  )}
-                                  <button
-                                    className={`${isExpired && !isDraft ? 'px-8' : 'flex-1 px-4'} inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/20 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white`}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteClick(jobPosting);
-                                    }}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                    Ta bort
-                                  </button>
-                                </div>
-                              }
-                            />
-                          </CardErrorBoundary>
-                        );
-                      })}
-                    </div>
-
-                {totalPages > 1 && (
-                  <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-3" />
-                )}
-              </>
-            )}
+            ))}
           </div>
+        ) : tabFilteredJobs.length === 0 ? (
+          <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh]  flex items-center justify-center">
+            <span>
+            {searchTerm.trim() 
+              ? 'Inga annonser matchar din sökning' 
+              : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
+              : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
+              : 'Inga utkast.'}
+            </span>
+          </div>
+        ) : (
+          <>
+            <div ref={listTopRef} />
+            <VirtualJobGrid
+              activeTab={activeTab}
+              tabs={[
+                { key: 'active', jobs: pagedBuckets.active },
+                { key: 'expired', jobs: pagedBuckets.expired },
+                { key: 'draft', jobs: pagedBuckets.draft },
+              ]}
+              className="pb-24"
+              gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              renderCard={(job, idx) => {
+                const isExpired = isEmployerJobExpired(job);
+                const isDraft = isEmployerJobDraft(job);
+                return (
+                  <CardErrorBoundary>
+                    <ReadOnlyMobileJobCard
+                      job={job as JobPosting & { company_name?: string }}
+                      cardIndex={idx}
+                      hideSaveButton
+                      onCardClick={(jobId) => {
+                        if (isDraft) {
+                          handleEditDraft(job);
+                        } else {
+                          navigate(`/job-details/${jobId}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
+                        }
+                      }}
+                      footer={
+                        <div className={`flex items-center gap-2 pt-0.5 ${isExpired && !isDraft ? 'justify-center' : ''}`}>
+                          {(!isExpired || isDraft) && (
+                            <button
+                              className={`flex-1 inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 text-sm font-medium text-white transition-[transform,opacity,background-color] duration-200 active:scale-[0.97] md:hover:bg-white/10 ${pendingEditJobId === job.id ? 'pointer-events-none opacity-70' : ''}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePremiumEditOpen(job);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                              {pendingEditJobId === job.id ? 'Öppnar...' : 'Redigera'}
+                            </button>
+                          )}
+                          <button
+                            className={`${isExpired && !isDraft ? 'px-8' : 'flex-1 px-4'} inline-flex min-h-[var(--control-height-sm)] items-center justify-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/20 text-sm font-medium text-white transition-colors duration-150 active:scale-[0.97] md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick(job);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Ta bort
+                          </button>
+                        </div>
+                      }
+                    />
+                  </CardErrorBoundary>
+                );
+              }}
+            />
+            {totalPages > 1 && (
+              <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-3" />
+            )}
+          </>
+        )}
+      </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus 
