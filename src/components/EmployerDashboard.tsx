@@ -1,4 +1,4 @@
-import { useState, memo, useMemo, useRef, useEffect, useCallback, startTransition } from 'react';
+import { useState, memo, useMemo, useRef, useEffect, useCallback, startTransition, useDeferredValue } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
