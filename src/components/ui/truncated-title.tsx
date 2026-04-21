@@ -5,6 +5,7 @@ interface TruncatedTitleProps {
   children: ReactNode;
   fullText: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 /**
