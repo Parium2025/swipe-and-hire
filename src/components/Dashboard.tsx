@@ -232,7 +232,7 @@ const Dashboard = memo(() => {
       {/* Desktop: Card grid */}
       <div className="hidden md:block">
         <div ref={listTopRef} />
-        {filteredAndSortedJobs.length === 0 ? (
+        {tabFilteredJobs.length === 0 ? (
           <div className="text-center text-white py-12 font-medium text-sm">
             {getEmptyMessage(searchTerm, activeTab)}
           </div>
