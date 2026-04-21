@@ -295,7 +295,7 @@ const Dashboard = memo(() => {
         ) : (
           <>
             <VirtualJobGrid
-              activeTab={activeTab}
+              activeTab={listActiveTab}
               tabs={[
                 { key: 'active', jobs: pagedBuckets.active as any },
                 { key: 'expired', jobs: pagedBuckets.expired as any },
