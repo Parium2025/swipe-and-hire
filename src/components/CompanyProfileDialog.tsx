@@ -276,6 +276,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   <DialogTitle asChild>
                     <TruncatedTitle
                       fullText={company.company_name}
+                      side="bottom"
                       className="text-2xl font-semibold text-white leading-tight"
                       style={{
                         display: '-webkit-box',
