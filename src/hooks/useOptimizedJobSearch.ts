@@ -576,7 +576,11 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       } catch (err) {
         // Vid nätverksfel: använd cachad data om den finns, annars kasta vidare
         const cached = readSearchCache(cacheKey);
-        if (cached && cached.length > 0) return cached;
+        if (cached && cached.length > 0) {
+          // 🔥 Förvärm logotyper även i offline-fallet så blob-cache fylls på
+          warmCompanyLogos(cached);
+          return cached;
+        }
         throw err;
       }
     },
@@ -589,7 +593,12 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     // 🔥 Visa cachad data direkt (offline eller ej) — query refetchar i bakgrunden
     initialData: () => {
       const cached = readSearchCache(cacheKey);
-      return cached && cached.length > 0 ? cached : undefined;
+      if (cached && cached.length > 0) {
+        // 🔥 Förvärm logotyper för cachade kort så de renderas utan flimmer
+        warmCompanyLogos(cached);
+        return cached;
+      }
+      return undefined;
     },
     initialDataUpdatedAt: () => {
       const cached = readSearchCache(cacheKey);
