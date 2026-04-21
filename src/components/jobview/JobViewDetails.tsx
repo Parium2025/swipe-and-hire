@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { TruncatedText } from '@/components/TruncatedText';
 import {
   capitalize as cap,
   getSalaryTypeLabel,
@@ -67,9 +68,18 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
           </div>
         )}
         {workplaceName && (
-          <div className="flex text-white text-sm">
+          <div className="flex text-white text-sm min-w-0">
             <span className="shrink-0 w-[110px]">Bolagsnamn:</span>
-            <span className="font-medium">{cap(workplaceName)}</span>
+            <TruncatedText
+              text={cap(workplaceName)}
+              className="font-medium min-w-0 flex-1 [overflow-wrap:anywhere]"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            />
           </div>
         )}
         {workplaceAddress && (
