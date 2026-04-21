@@ -49,8 +49,19 @@ const Dashboard = memo(() => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as JobStatusTab | null;
-  const activeTab: JobStatusTab = tabParam === 'expired' ? 'expired' : 'active';
+  const urlTab: JobStatusTab = tabParam === 'expired' ? 'expired' : 'active';
+
+  // Optimistic local tab — uppdaterar indikatorn omedelbart vid klick.
+  // URL-uppdateringen körs i transition så list-renderingen inte blockerar UI:t.
+  const [optimisticTab, setOptimisticTab] = useState<JobStatusTab>(urlTab);
+  useEffect(() => { setOptimisticTab(urlTab); }, [urlTab]);
+
+  const activeTab = optimisticTab;
+  // Defer den dyra tab-flaggan till listan så indikator-animationen aldrig blockeras
+  const listActiveTab = useDeferredValue(activeTab);
+
   const setActiveTab = useCallback((tab: JobStatusTab) => {
+    setOptimisticTab(tab); // 0ms visuell respons
     startTransition(() => {
       setSearchParams(prev => {
         const next = new URLSearchParams(prev);
