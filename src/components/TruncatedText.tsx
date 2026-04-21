@@ -58,64 +58,85 @@ export function TruncatedText({
   }, []);
 
   useEffect(() => {
-    const checkTruncation = () => {
-      const element = textRef.current;
-      if (!element) return;
+    const element = textRef.current;
+    if (!element) return;
 
-      // Robust detection including multi-line clamp (-webkit-line-clamp)
-      const styles = window.getComputedStyle(element);
-      const webkitLineClamp = (styles.getPropertyValue("-webkit-line-clamp") || "").trim();
-      const hasClamp = webkitLineClamp !== "" && webkitLineClamp !== "none";
+    let rafId = 0;
+    let lastWidth = 0;
+    let lastTextLen = text?.length ?? 0;
+
+    // High-performance truncation check.
+    // - No DOM cloning (was causing 500+ ms self-time when many cards re-rendered).
+    // - Single rAF-batched measurement; ResizeObserver re-measures only on real width changes.
+    // - For -webkit-line-clamp, measure ONCE in-place by toggling clamp off, reading scrollHeight, restoring.
+    const measure = () => {
+      rafId = 0;
+      const el = textRef.current;
+      if (!el) return;
+
+      // Skip work entirely if element isn't laid out yet (offscreen, hidden, no width).
+      if (el.clientWidth === 0) return;
+
+      const cs = window.getComputedStyle(el);
+      const lc = (cs.getPropertyValue('-webkit-line-clamp') || '').trim();
+      const hasClamp = lc !== '' && lc !== 'none';
 
       let truncated = false;
       if (hasClamp) {
-        // Measure natural height without clamp by cloning the element offscreen
-        const clone = element.cloneNode(true) as HTMLElement;
-        clone.style.position = "absolute";
-        clone.style.visibility = "hidden";
-        clone.style.pointerEvents = "none";
-        // @ts-ignore - vendor property
-        clone.style.webkitLineClamp = "unset";
-        clone.style.display = "block";
-        clone.style.maxHeight = "none";
-        clone.style.overflow = "visible";
-        clone.style.width = `${element.clientWidth}px`;
-        element.parentElement?.appendChild(clone);
-        const naturalHeight = Math.ceil(clone.scrollHeight);
-        element.parentElement?.removeChild(clone);
-        const currentHeight = Math.ceil(element.clientHeight);
+        // Read current height first (one layout), then toggle clamp off, read natural height,
+        // restore styles in one batch — minimises layout invalidations vs. cloneNode.
+        const currentHeight = el.clientHeight;
+
+        const prevDisplay = el.style.display;
+        const prevWebkitLineClamp = (el.style as any).webkitLineClamp as string;
+        const prevMaxHeight = el.style.maxHeight;
+        const prevOverflow = el.style.overflow;
+
+        el.style.display = 'block';
+        (el.style as any).webkitLineClamp = 'unset';
+        el.style.maxHeight = 'none';
+        el.style.overflow = 'visible';
+        const naturalHeight = el.scrollHeight; // forces layout once
+        el.style.display = prevDisplay;
+        (el.style as any).webkitLineClamp = prevWebkitLineClamp;
+        el.style.maxHeight = prevMaxHeight;
+        el.style.overflow = prevOverflow;
+
         truncated = naturalHeight > currentHeight + 1;
       } else {
         truncated =
-          Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||
-          Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth);
+          el.scrollHeight > el.clientHeight + 1 ||
+          el.scrollWidth > el.clientWidth + 1;
       }
 
-      setIsTruncated(truncated);
+      // Only setState if value actually changed — avoids unnecessary re-renders.
+      setIsTruncated(prev => (prev === truncated ? prev : truncated));
     };
 
-    // Run immediately and schedule a few short re-checks
-    checkTruncation();
-    const raf = requestAnimationFrame(checkTruncation);
-    const timeouts = [
-      setTimeout(checkTruncation, 50),
-      setTimeout(checkTruncation, 150),
-      setTimeout(checkTruncation, 300),
-    ];
+    const schedule = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(measure);
+    };
 
-    // Also check on resize of the element
-    const resizeObserver = new ResizeObserver(() => {
-      setTimeout(checkTruncation, 50);
+    // Initial measurement (single rAF — replaces the previous immediate + rAF + 3× setTimeout).
+    schedule();
+
+    // Re-measure only on actual width changes (height changes don't affect line-clamp truncation).
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const w = Math.round(entry.contentRect.width);
+      const newLen = text?.length ?? 0;
+      if (w === lastWidth && newLen === lastTextLen) return;
+      lastWidth = w;
+      lastTextLen = newLen;
+      schedule();
     });
-
-    if (textRef.current) {
-      resizeObserver.observe(textRef.current);
-    }
+    ro.observe(element);
 
     return () => {
-      cancelAnimationFrame(raf);
-      timeouts.forEach(clearTimeout);
-      resizeObserver.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+      ro.disconnect();
     };
   }, [text]);
 
