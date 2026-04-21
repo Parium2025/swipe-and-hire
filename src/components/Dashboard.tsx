@@ -96,32 +96,28 @@ const Dashboard = memo(() => {
     filteredAndSortedJobs,
   } = useJobFiltering(jobs);
 
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const pageSize = 20;
-  const listTopRef = useRef<HTMLDivElement>(null);
-  const didMountRef = useRef(false);
+  // Stable navigation callback for cards (referential equality => memoised cards don't re-render).
+  const handleCardClick = useCallback((jobId: string) => {
+    navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } });
+  }, [navigate, activeTab]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / pageSize));
-  const pageJobs = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredAndSortedJobs.slice(start, start + pageSize);
-  }, [filteredAndSortedJobs, page]);
+  // Stable per-item renderers for VirtualJobGrid.
+  const renderDesktopCard = useCallback((job: any) => (
+    <EmployerJobCard
+      job={job}
+      activeTab={activeTab === 'draft' ? 'active' : activeTab}
+      onClick={handleCardClick}
+    />
+  ), [activeTab, handleCardClick]);
 
-  // Reset page when tab or filters change
-  useEffect(() => { setPage(1); }, [activeTab]);
-  useEffect(() => { setPage(1); }, [searchTerm, sortBy, selectedRecruiterId]);
+  const renderMobileCard = useCallback((job: any) => (
+    <ReadOnlyMobileJobCard
+      job={job}
+      hideSaveButton
+      onCardClick={handleCardClick}
+    />
+  ), [handleCardClick]);
 
-  // Scroll to top when page changes (but not on initial mount)
-  useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-    if (listTopRef.current) {
-      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [page]);
 
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : filteredStats.totalJobs, loading: false },
