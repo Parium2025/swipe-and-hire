@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { CandidateSlide } from './CandidateSlide';
+import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
 interface CandidateSwipeViewerProps {
@@ -28,6 +29,9 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const candidateRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  /* ── Premium media preloading: bulk-25 on open, rolling 10 ahead / 2 back ── */
+  useCandidateMediaPreloader(applications, currentIndex, open, 10, 2, 25);
 
   // Scroll to initial candidate on open
   useEffect(() => {
