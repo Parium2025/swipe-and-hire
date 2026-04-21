@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCompanyReviewsCache } from "@/hooks/useCompanyReviewsCache";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { TruncatedText } from "@/components/TruncatedText";
+import { TruncatedTitle } from "@/components/ui/truncated-title";
 
 interface CompanyProfileDialogProps {
   open: boolean;
