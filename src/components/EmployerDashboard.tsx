@@ -30,6 +30,8 @@ import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
+import { useBlobCachePrewarm } from '@/hooks/useBlobCachePrewarm';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
