@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from "react";
+import React, { useEffect, useState, memo, startTransition } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
@@ -276,7 +276,9 @@ export function EmployerSidebar() {
     // jobbsökarens AppSidebar — ger märkbart mjukare övergångar.
     if (isMobile) {
       setOpenMobile(false);
-      requestAnimationFrame(() => navigate(href));
+      startTransition(() => {
+        navigate(href);
+      });
     } else {
       navigate(href);
     }
