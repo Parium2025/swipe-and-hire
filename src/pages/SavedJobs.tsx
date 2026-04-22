@@ -21,7 +21,7 @@ import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useSwipeActions } from '@/hooks/useSwipeActions';
-import { usePreloadImages } from '@/hooks/useCachedImage';
+
 
 type SortOption = 'newest' | 'oldest';
 type StatusFilter = 'all' | 'active' | 'expired';
