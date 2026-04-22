@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
+import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 
 /**
  * Centraliserad bild-loading för kort.
@@ -14,15 +15,16 @@ import { imageCache } from '@/lib/imageCache';
  */
 export function useCardImage(
   rawPath: string | null | undefined,
-  bucket: 'job-images' | 'company-logos' | 'profile-images'
+  bucket: 'job-images' | 'company-logos' | 'profile-images',
+  version?: string | null | undefined,
 ) {
   // Steg 1: Lös ut publik URL (rent useMemo, ingen render-kostnad efter mount)
   const resolvedUrl = useMemo(() => {
     if (!rawPath) return null;
     if (rawPath.startsWith('http')) return rawPath;
     const { data } = supabase.storage.from(bucket).getPublicUrl(rawPath);
-    return data?.publicUrl || null;
-  }, [rawPath, bucket]);
+    return appendVersionToUrl(data?.publicUrl || null, version);
+  }, [rawPath, bucket, version]);
 
   // Steg 2: Synkron cache-läsning (ingen blink, ingen useEffect)
   const cachedBlobUrl = useMemo(

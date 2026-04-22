@@ -3,8 +3,8 @@ import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'fra
 import { CheckCircle, X, Bookmark, Heart, Users, Gift, Undo2, Building2 } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
+import { useCardImage } from '@/hooks/useCardImage';
 import { supabase } from '@/integrations/supabase/client';
-import { imageCache } from '@/lib/imageCache';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -128,33 +128,8 @@ export const JobSlide = memo(function JobSlide({
   const nextDisplayCompanyName = nextJob?.workplace_name || nextJob?.company_name || 'Okänt företag';
   const imageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(job.job_image_url), job.updated_at), [job.job_image_url, job.updated_at]);
   const nextImageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(nextJob?.job_image_url), nextJob?.updated_at), [nextJob?.job_image_url, nextJob?.updated_at]);
-  const rawLogoUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(job.company_logo_url, 'company-logos'), job.updated_at), [job.company_logo_url, job.updated_at]);
-  const nextLogoUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(nextJob?.company_logo_url, 'company-logos'), nextJob?.updated_at), [nextJob?.company_logo_url, nextJob?.updated_at]);
-  // Synkron cache-läsning vid varje render → ger blob-URL direkt om logon redan är preloadad
-  const cachedLogoBlob = rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null;
-  const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(() => cachedLogoBlob);
-  const [logoBlobFailed, setLogoBlobFailed] = useState(false);
-  useEffect(() => {
-    if (!rawLogoUrl) { setLoadedLogoBlob(null); return; }
-    // Om redan i cache → använd direkt, ingen ny fetch
-    if (cachedLogoBlob) { setLoadedLogoBlob(cachedLogoBlob); return; }
-    setLogoBlobFailed(false);
-    let cancelled = false;
-    imageCache.loadImage(rawLogoUrl).then(b => { if (!cancelled) setLoadedLogoBlob(b); }).catch(() => {});
-    return () => { cancelled = true; };
-  }, [rawLogoUrl, cachedLogoBlob]);
-  // Fallback-kedja: blob först, raw URL ENDAST som sista utväg vid blob-fel.
-  // Tidigare: rawLogoUrl visades direkt → triggade dubbelfetch + flicker.
-  const logoUrl = logoBlobFailed ? rawLogoUrl : (cachedLogoBlob || loadedLogoBlob || null);
-
-  const handleLogoError = useMemo(() => {
-    return (e: React.SyntheticEvent<HTMLImageElement>) => {
-      if (e.currentTarget.src.startsWith('blob:')) {
-        if (rawLogoUrl) imageCache.evict(rawLogoUrl);
-        setLogoBlobFailed(true);
-      }
-    };
-  }, [rawLogoUrl]);
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', job.updated_at);
+  const { displayUrl: nextLogoUrl } = useCardImage(nextJob?.company_logo_url ?? null, 'company-logos', nextJob?.updated_at);
 
   const isTitleTruncated = useCallback(() => {
     const el = titleRef.current;
