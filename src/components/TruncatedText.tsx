@@ -122,6 +122,8 @@ export function TruncatedText({
   useEffect(() => {
     if (forceClosed) {
       setIsOpen(false);
+      setIsDesktopHovering(false);
+      setIsDesktopFocused(false);
     }
   }, [forceClosed]);
 
