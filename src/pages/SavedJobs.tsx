@@ -19,7 +19,7 @@ import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobsCache, type SavedJob } from '@/hooks/useSavedJobsCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
-import { useImagePrewarm } from '@/hooks/useImagePrewarm';
+import { useBlobCachePrewarm } from '@/hooks/useBlobCachePrewarm';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 
@@ -56,11 +56,9 @@ const SavedJobs = () => {
   // när användaren navigerar via sidebaren — då är det bara att rendera).
   // Endast vid kallstart (ingen cachad data) väntar vi på första bilderna
   // för att undvika layout-hopp.
-  // VIKTIGT: starta ALLTID som false så att animate-fade-in får ett
-  // "från-läge" (opacity 0 → 1). Vi flippar i nästa frame när cache finns.
   const hasCachedData = savedJobs.length > 0 || skippedJobs.length > 0;
-  const [showContent, setShowContent] = useState(false);
-  const hasPrimedInitialView = useRef(false);
+  const [showContent, setShowContent] = useState(hasCachedData);
+  const hasPrimedInitialView = useRef(hasCachedData);
 
   // Mouse-drag scrolling for sort chips
   const chipsRef = useRef<HTMLDivElement>(null);
@@ -172,7 +170,7 @@ const SavedJobs = () => {
     });
   }, [activeJobsForMedia]);
 
-  useImagePrewarm(prewarmEntries);
+  useBlobCachePrewarm(prewarmEntries);
 
   const initialPriorityUrls = useMemo(() => {
     return prewarmEntries.slice(0, 4).flatMap((entry) => {
@@ -186,16 +184,6 @@ const SavedJobs = () => {
 
   useEffect(() => {
     if (hasPrimedInitialView.current) return;
-
-    // Snabb-vägen: cache finns redan → flippa i nästa frame så fade-in
-    // animationen får köra från opacity 0 → 1 (annars är den osynlig).
-    if (hasCachedData) {
-      const raf = requestAnimationFrame(() => {
-        hasPrimedInitialView.current = true;
-        setShowContent(true);
-      });
-      return () => cancelAnimationFrame(raf);
-    }
 
     let cancelled = false;
     const fallbackTimer = window.setTimeout(() => {
@@ -223,7 +211,7 @@ const SavedJobs = () => {
       cancelled = true;
       window.clearTimeout(fallbackTimer);
     };
-  }, [initialPriorityUrls, hasCachedData]);
+  }, [initialPriorityUrls]);
 
 
   if (!showContent) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo, useMemo, useCallback, startTransition } from "react";
+import React, { useEffect, useState, memo, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
@@ -55,12 +55,11 @@ export function AppSidebar() {
   const { checkBeforeNavigation } = useUnsavedChanges();
   const prefetchRoute = useSidebarRoutePrefetch();
 
-  // Behåll hover-prefetch på desktop, men undvik touchstart-prefetch på mobil
-  // eftersom det konkurrerar med drawer-stängningen och gör navigeringen trög.
+  // Hover/touchstart-prefetch: varma upp datan innan användaren ens släpper klicket.
+  // Memoiseras så att <SidebarMenuButton> inte re-renderas i onödan.
   const handlePrefetch = useCallback((url: string) => {
-    if (isMobile) return;
     prefetchRoute(url);
-  }, [isMobile, prefetchRoute]);
+  }, [prefetchRoute]);
 
   // Använd preloadedAvatarUrl som primär källa, fallback till profile.profile_image_url, sedan cover_image_url
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
@@ -132,15 +131,15 @@ export function AppSidebar() {
   const handleNavigation = (href: string) => {
     if (!checkBeforeNavigation(href)) return;
 
+    // Stäng sidobaren FÖRST på mobil — så att sidobarens transform-animation
+    // hinner starta innan React börjar montera den nya sidan. Annars konkurrerar
+    // sidans render-arbete (media-gate, prewarm, kort) med sidebar-animationen
+    // och hela övergången känns hackig.
     if (isMobile) {
-      // Stäng drawern först — detta är det enda högprioriterade arbetet.
       setOpenMobile(false);
-      // Markera route-bytet som icke-brådskande så React inte avbryter
-      // drawer-animationen för att börja rendera nästa sida. Resultatet:
-      // drawern glider klart helt mjukt, och nästa sida monteras strax efter.
-      startTransition(() => {
-        navigate(href);
-      });
+      // Vänta ett frame så att sidobaren får börja sin transform innan
+      // routern triggar tung re-render.
+      requestAnimationFrame(() => navigate(href));
     } else {
       navigate(href);
     }

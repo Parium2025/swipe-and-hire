@@ -252,54 +252,19 @@ const SearchJobs = memo(() => {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // 🔥 SCALE: Konvertera selectedCompanies (namn) → employer_ids för DB-filter.
-  // Vi läser ids från redan laddade jobb. När användaren väljer ett företag
-  // som inte finns i nuvarande resultat (t.ex. via sparad sökning) faller vi
-  // tillbaka på namn-filtrering tills ids är kända.
-  const companyNameToIdRef = useRef<Map<string, string>>(new Map());
-  const selectedEmployerIds = useMemo(() => {
-    if (selectedCompanies.length === 0) return undefined;
-    const ids: string[] = [];
-    for (const name of selectedCompanies) {
-      const id = companyNameToIdRef.current.get(name);
-      if (id) ids.push(id);
-    }
-    return ids.length > 0 ? ids : undefined;
-  }, [selectedCompanies]);
-
-  // 🔥 SCALE: Tidsfilter går nu till DB istället för klient-side .filter().
-  const createdAfter = useMemo(() => {
-    if (timeFilter === 'all') return null;
-    const hoursMap = { '12h': 12, '24h': 24, '3d': 72, '7d': 168 } as const;
-    const cutoff = Date.now() - hoursMap[timeFilter] * 60 * 60 * 1000;
-    return new Date(cutoff).toISOString();
-  }, [timeFilter]);
-
   // Use the new optimized job search hook with full-text search
-  const { jobs: searchJobs, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useOptimizedJobSearch({
+  const { jobs: searchJobs, isLoading } = useOptimizedJobSearch({
     searchQuery: debouncedSearch,
     city: selectedCity,
     employmentTypes: selectedEmploymentTypes,
     category: selectedCategory,
     subcategories: selectedSubcategories,
-    employerIds: selectedEmployerIds,
-    createdAfter,
     enabled: true,
   });
 
   // Branding (workplace_name, company_logo_url) is already merged in by
   // useOptimizedJobSearch via useLiveJobBranding — no extra fetch needed here.
   const jobs = searchJobs;
-
-  // Uppdatera namn→id-mapping så att framtida company-val kan filtreras i DB
-  useEffect(() => {
-    for (const j of jobs) {
-      if (j.company_name && j.employer_id && !companyNameToIdRef.current.has(j.company_name)) {
-        companyNameToIdRef.current.set(j.company_name, j.employer_id);
-      }
-    }
-  }, [jobs]);
-
 
   const isSearchResultsLoading = isLoading;
 
@@ -396,14 +361,21 @@ const SearchJobs = memo(() => {
 
   // Realtime hanteras redan av useOptimizedJobSearch — ingen dubbel prenumeration behövs
 
-  // Sort jobs (filtering for company + time is now done in DB for performance)
+  // Sort jobs (filtering is now done in database for performance)
   const filteredAndSortedJobs = useMemo(() => {
     let result = [...jobs];
 
-    // Fallback: om vi har valda företag som ännu saknar id-mapping,
-    // filtrera på namn så användaren inte ser fel jobb under första rendern.
-    if (selectedCompanies.length > 0 && (!selectedEmployerIds || selectedEmployerIds.length < selectedCompanies.length)) {
+    // Company filter
+    if (selectedCompanies.length > 0) {
       result = result.filter(j => selectedCompanies.includes(j.company_name));
+    }
+
+    // Time filter
+    if (timeFilter !== 'all') {
+      const now = Date.now();
+      const hoursMap = { '12h': 12, '24h': 24, '3d': 72, '7d': 168 };
+      const cutoff = now - hoursMap[timeFilter] * 60 * 60 * 1000;
+      result = result.filter(j => new Date(j.created_at).getTime() >= cutoff);
     }
 
     // Sort based on user preference
@@ -420,7 +392,7 @@ const SearchJobs = memo(() => {
     }
 
     return result;
-  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds]);
+  }, [jobs, sortBy, timeFilter, selectedCompanies]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
@@ -547,10 +519,7 @@ const SearchJobs = memo(() => {
     isLoadingMoreRef.current = false;
   }, [displayCount]);
 
-  // Infinite scroll with IntersectionObserver.
-  // 🔥 SCALE: När displayCount når slutet av redan-laddade jobb och DB:n har
-  // fler sidor (hasNextPage), trigga fetchNextPage(). Annars öka bara
-  // displayCount lokalt så att UI revealar nästa batch i den lista vi har.
+  // Infinite scroll with IntersectionObserver
   useEffect(() => {
     const trigger = loadMoreTriggerRef.current;
     if (!trigger) return;
@@ -558,37 +527,24 @@ const SearchJobs = memo(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (!entry.isIntersecting || isLoadingMoreRef.current) return;
-
-        if (hasMoreJobs) {
+        if (entry.isIntersecting && hasMoreJobs && !isLoadingMoreRef.current) {
           isLoadingMoreRef.current = true;
           setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
-        } else if (hasNextPage && !isFetchingNextPage) {
-          isLoadingMoreRef.current = true;
-          fetchNextPage().finally(() => {
-            setDisplayCount(prev => prev + loadMoreSize);
-          });
         }
       },
       {
-        rootMargin: '400px',
-        threshold: 0.1,
+        rootMargin: '200px', // Start loading 200px before reaching the trigger
+        threshold: 0.1
       }
     );
 
     observer.observe(trigger);
     return () => observer.disconnect();
-  }, [hasMoreJobs, filteredAndSortedJobs.length, loadMoreSize, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasMoreJobs, filteredAndSortedJobs.length, loadMoreSize]);
 
   const handleLoadMore = useCallback(() => {
-    if (hasMoreJobs) {
-      setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
-    } else if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage().finally(() => {
-        setDisplayCount(prev => prev + loadMoreSize);
-      });
-    }
-  }, [filteredAndSortedJobs.length, loadMoreSize, hasMoreJobs, hasNextPage, isFetchingNextPage, fetchNextPage]);
+    setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
+  }, [filteredAndSortedJobs.length, loadMoreSize]);
 
   // formatSalary moved to top-level scope for performance
 
@@ -832,19 +788,17 @@ const SearchJobs = memo(() => {
       <div ref={loadMoreTriggerRef} className="h-1" />
       
       {/* Loading indicator with progress */}
-      {(hasMoreJobs || hasNextPage || isFetchingNextPage) && (
+      {hasMoreJobs && (
         <div className="flex justify-center py-4">
           <div className="flex items-center gap-2 text-white/60 text-sm">
             <div className="w-4 h-4 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
-            <span>
-              {isFetchingNextPage ? 'Hämtar fler jobb...' : `Visar ${Math.min(displayCount, filteredAndSortedJobs.length)} av ${filteredAndSortedJobs.length}${hasNextPage ? '+' : ''} jobb`}
-            </span>
+            <span>Visar {displayCount} av {filteredAndSortedJobs.length} jobb</span>
           </div>
         </div>
       )}
       
       {/* Show message when all jobs are loaded */}
-      {!hasMoreJobs && !hasNextPage && !isFetchingNextPage && filteredAndSortedJobs.length > 0 && (
+      {!hasMoreJobs && filteredAndSortedJobs.length > 0 && (
         <div className="text-center pt-2 pb-6">
           <p className="text-white text-sm">
             Alla {filteredAndSortedJobs.length} jobb visas

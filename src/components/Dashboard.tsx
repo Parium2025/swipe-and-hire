@@ -14,7 +14,7 @@ import { DashboardPagination } from '@/components/dashboard/DashboardPagination'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
-import { useImagePrewarm } from '@/hooks/useImagePrewarm';
+import { useBlobCachePrewarm } from '@/hooks/useBlobCachePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
@@ -172,7 +172,7 @@ const Dashboard = memo(() => {
     }
     return entries;
   }, [tabBuckets, activeTab, page, pageSize]);
-  useImagePrewarm(prewarmEntries);
+  useBlobCachePrewarm(prewarmEntries);
 
   // Reset page when tab or filters change
   useEffect(() => { setPage(1); }, [activeTab]);

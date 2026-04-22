@@ -31,7 +31,7 @@ import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
-import { useImagePrewarm } from '@/hooks/useImagePrewarm';
+import { useBlobCachePrewarm } from '@/hooks/useBlobCachePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
@@ -247,7 +247,7 @@ const EmployerDashboard = memo(() => {
     }
     return entries;
   }, [tabBuckets, activeTab, page, pageSize]);
-  useImagePrewarm(prewarmEntries);
+  useBlobCachePrewarm(prewarmEntries);
 
   // Sida-slice för respektive tab så pagineringen funkar oberoende.
   const sliceToPage = useCallback((arr: JobPosting[]) => {
