@@ -178,12 +178,6 @@ const SavedJobs = () => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
-  const [showContent, setShowContent] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowContent(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Mouse-drag scrolling for sort chips
   const chipsRef = useRef<HTMLDivElement>(null);
