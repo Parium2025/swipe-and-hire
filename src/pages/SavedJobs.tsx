@@ -179,6 +179,14 @@ const SavedJobs = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
+  // Delayed fade-in so heavy job cards don't mount during sidebar close animation
+  // (matches MyApplications/SearchJobs pattern — eliminates perceived lag)
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowContent(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Mouse-drag scrolling for sort chips
   const chipsRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -362,6 +370,17 @@ const SavedJobs = () => {
     });
   }, [skippedJobs]);
 
+
+  if (!showContent) {
+    return (
+      <div className="responsive-container-wide opacity-0" aria-hidden="true">
+        <div className="text-center mb-5">
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Sparade Jobb</h1>
+          <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="responsive-container-wide animate-fade-in">
