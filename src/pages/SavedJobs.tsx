@@ -21,7 +21,7 @@ import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useSwipeActions } from '@/hooks/useSwipeActions';
-import { usePreloadImages } from '@/hooks/useCachedImage';
+
 
 type SortOption = 'newest' | 'oldest';
 type StatusFilter = 'all' | 'active' | 'expired';
@@ -178,12 +178,6 @@ const SavedJobs = () => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
-  const [showContent, setShowContent] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowContent(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Mouse-drag scrolling for sort chips
   const chipsRef = useRef<HTMLDivElement>(null);
@@ -246,14 +240,25 @@ const SavedJobs = () => {
     structuralSharing: false,
   });
 
-  // Real-time för applications_count uppdateringar
+  // Real-time för applications_count uppdateringar – endast för jobb som är sparade
+  const savedJobIdsKey = useMemo(
+    () => savedJobs.map(sj => sj.job_id).sort().join(','),
+    [savedJobs]
+  );
+
   useEffect(() => {
+    if (!savedJobIdsKey) return;
+    const ids = new Set(savedJobIdsKey.split(',').filter(Boolean));
+    if (ids.size === 0) return;
+
     const channel = supabase
-      .channel('saved-jobs-applications-count')
+      .channel(`saved-jobs-applications-count-${user?.id ?? 'anon'}`)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'job_postings' },
         (payload) => {
+          // Filter client-side: only react to jobs we actually have saved
+          if (!ids.has(payload.new.id)) return;
           queryClient.setQueryData(['saved-jobs', user?.id], (oldData: SavedJob[] | undefined) => {
             if (!oldData) return oldData;
             return oldData.map(savedJob => {
@@ -279,7 +284,7 @@ const SavedJobs = () => {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [queryClient, user?.id]);
+  }, [queryClient, user?.id, savedJobIdsKey]);
 
   const handleUnsaveClick = (jobId: string, jobTitle: string) => {
     setJobToRemove({ id: jobId, title: jobTitle });
@@ -344,42 +349,6 @@ const SavedJobs = () => {
     });
   }, [skippedJobs]);
 
-  const activeTabPreloadUrls = useMemo(() => {
-    const sourceJobs = activeTab === 'saved'
-      ? sortedJobs.map((entry) => entry.job_postings).filter(Boolean)
-      : filteredSkippedJobs.map((entry) => entry.job_postings).filter(Boolean);
-
-    const resolveStorageUrl = (bucket: 'job-images' | 'company-logos', path?: string | null) => {
-      if (!path) return null;
-      if (path.startsWith('http')) return path;
-      return supabase.storage.from(bucket).getPublicUrl(path).data?.publicUrl || null;
-    };
-
-    return Array.from(new Set(
-      sourceJobs
-        .flatMap((job) => [
-          resolveStorageUrl('job-images', job?.job_image_url),
-          resolveStorageUrl('company-logos', job?.company_logo_url),
-        ])
-        .filter((url): url is string => !!url)
-    )).slice(0, 6);
-  }, [activeTab, sortedJobs, filteredSkippedJobs]);
-
-  const activeTabMediaReady = usePreloadImages(activeTabPreloadUrls);
-
-  if (!showContent) {
-    return (
-      <div className="responsive-container-wide opacity-0" aria-hidden="true">
-        <div className="text-center mb-6">
-          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Sparade Jobb</h1>
-          <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>
-        </div>
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 text-white animate-spin" />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="responsive-container-wide animate-fade-in">
@@ -421,7 +390,7 @@ const SavedJobs = () => {
       {/* ── Saved tab ── */}
       {activeTab === 'saved' && (
         <>
-          {((isLoading && savedJobs.length === 0) || !activeTabMediaReady) ? (
+          {(isLoading && savedJobs.length === 0) ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 text-white animate-spin" />
             </div>
@@ -550,7 +519,7 @@ const SavedJobs = () => {
       {/* ── Skipped tab ── */}
       {activeTab === 'skipped' && (
         <>
-          {(isLoadingSkipped || !activeTabMediaReady) ? (
+          {isLoadingSkipped ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 text-white animate-spin" />
             </div>
