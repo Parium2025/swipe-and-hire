@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,148 +21,13 @@ import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useSwipeActions } from '@/hooks/useSwipeActions';
+import { useSavedJobsCache, type SavedJob } from '@/hooks/useSavedJobsCache';
+import { useQuery } from '@tanstack/react-query';
 
 
 type SortOption = 'newest' | 'oldest';
 type StatusFilter = 'all' | 'active' | 'expired';
 type TabValue = 'saved' | 'skipped';
-
-interface SavedJob {
-  id: string;
-  job_id: string;
-  created_at: string;
-  job_postings: {
-    id: string;
-    title: string;
-    image_focus_position?: string | null;
-    location: string | null;
-    workplace_city: string | null;
-    workplace_county: string | null;
-    employment_type: string | null;
-    job_image_url: string | null;
-    is_active: boolean;
-    created_at: string;
-    expires_at: string | null;
-    applications_count: number | null;
-    views_count: number | null;
-    positions_count: number | null;
-    salary_min: number | null;
-    salary_max: number | null;
-    salary_type: string | null;
-    salary_transparency: string | null;
-    benefits: string[] | null;
-    workplace_name: string | null;
-    company_logo_url: string | null;
-  } | null;
-}
-
-interface SkippedJob {
-  id: string;
-  job_id: string;
-  created_at: string;
-  job_postings: {
-    id: string;
-    title: string;
-    image_focus_position?: string | null;
-    location: string | null;
-    workplace_city: string | null;
-    workplace_county: string | null;
-    employment_type: string | null;
-    job_image_url: string | null;
-    is_active: boolean;
-    created_at: string;
-    expires_at: string | null;
-    applications_count: number | null;
-    views_count: number | null;
-    positions_count: number | null;
-    salary_min: number | null;
-    salary_max: number | null;
-    salary_type: string | null;
-    salary_transparency: string | null;
-    benefits: string[] | null;
-    workplace_name: string | null;
-    company_logo_url: string | null;
-  } | null;
-}
-
-const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
-  // 🚇 SINGLE TUNNEL: read workplace_name + company_logo_url straight from job_postings.
-  const { data, error } = await supabase
-    .from('saved_jobs')
-    .select(`
-      id,
-      job_id,
-      created_at,
-      job_postings (
-        id,
-        title,
-        image_focus_position,
-        location,
-        workplace_city,
-        workplace_county,
-        employment_type,
-        job_image_url,
-        is_active,
-        created_at,
-        expires_at,
-        applications_count,
-        views_count,
-        positions_count,
-        salary_min,
-        salary_max,
-        salary_type,
-        salary_transparency,
-        benefits,
-        workplace_name,
-        company_logo_url
-      )
-    `)
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return (data as unknown as SavedJob[]) || [];
-};
-
-const fetchSkippedJobs = async (userId: string): Promise<SkippedJob[]> => {
-  // 🚇 SINGLE TUNNEL: read workplace_name + company_logo_url straight from job_postings.
-  const { data, error } = await supabase
-    .from('swipe_actions')
-    .select(`
-      id,
-      job_id,
-      created_at,
-      job_postings (
-        id,
-        title,
-        image_focus_position,
-        location,
-        workplace_city,
-        workplace_county,
-        employment_type,
-        job_image_url,
-        is_active,
-        created_at,
-        expires_at,
-        applications_count,
-        views_count,
-        positions_count,
-        salary_min,
-        salary_max,
-        salary_type,
-        salary_transparency,
-        benefits,
-        workplace_name,
-        company_logo_url
-      )
-    `)
-    .eq('user_id', userId)
-    .eq('action', 'skipped')
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return (data as unknown as SkippedJob[]) || [];
-};
 
 const SavedJobs = () => {
   const { user, refreshSidebarCounts } = useAuth();
@@ -178,6 +43,15 @@ const SavedJobs = () => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
+
+  // 🚇 All data + realtime now lives in useSavedJobsCache (mirrors useMyApplicationsCache)
+  const {
+    savedJobs,
+    skippedJobs,
+    isLoadingSaved: isLoading,
+    isLoadingSkipped,
+    removeSavedJobLocally,
+  } = useSavedJobsCache({ enableSkipped: activeTab === 'skipped' });
 
   // Delayed fade-in so heavy job cards don't mount during sidebar close animation
   // (matches MyApplications/SearchJobs pattern — eliminates perceived lag)
@@ -210,26 +84,6 @@ const SavedJobs = () => {
     isDragging.current = false;
   }, []);
 
-  const { data: savedJobs = [], isLoading } = useQuery({
-    queryKey: ['saved-jobs', user?.id],
-    queryFn: () => fetchSavedJobs(user!.id),
-    enabled: !!user,
-    staleTime: 30_000,
-    gcTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
-
-  const { data: skippedJobs = [], isLoading: isLoadingSkipped } = useQuery({
-    queryKey: ['skipped-jobs', user?.id],
-    queryFn: () => fetchSkippedJobs(user!.id),
-    enabled: !!user && activeTab === 'skipped',
-    staleTime: 30_000,
-    gcTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
-
   // Hämta användarens ansökningar för "Redan sökt"-badge
   const { data: appliedJobIds = new Set<string>() } = useQuery({
     queryKey: ['applied-job-ids', user?.id],
@@ -248,61 +102,6 @@ const SavedJobs = () => {
     structuralSharing: false,
   });
 
-  // Real-time för applications_count uppdateringar – endast för jobb som är sparade
-  const savedJobIdsKey = useMemo(
-    () => savedJobs.map(sj => sj.job_id).sort().join(','),
-    [savedJobs]
-  );
-
-  useEffect(() => {
-    if (!user?.id || !savedJobIdsKey) return;
-    const ids = new Set(savedJobIdsKey.split(',').filter(Boolean));
-    if (ids.size === 0) return;
-
-    const channel = supabase
-      .channel(`saved-jobs-applications-count-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'job_postings' },
-        (payload) => {
-          if (!ids.has(payload.new.id)) return;
-          queryClient.setQueryData(['saved-jobs', user.id], (oldData: SavedJob[] | undefined) => {
-            if (!oldData) return oldData;
-            let changed = false;
-            const next = oldData.map(savedJob => {
-              if (!savedJob.job_postings || savedJob.job_postings.id !== payload.new.id) return savedJob;
-              const jp = savedJob.job_postings;
-              if (
-                jp.applications_count === payload.new.applications_count &&
-                jp.workplace_name === payload.new.workplace_name &&
-                jp.company_logo_url === payload.new.company_logo_url &&
-                jp.is_active === payload.new.is_active &&
-                jp.expires_at === payload.new.expires_at
-              ) {
-                return savedJob;
-              }
-              changed = true;
-              return {
-                ...savedJob,
-                job_postings: {
-                  ...jp,
-                  applications_count: payload.new.applications_count,
-                  workplace_name: payload.new.workplace_name,
-                  company_logo_url: payload.new.company_logo_url,
-                  is_active: payload.new.is_active,
-                  expires_at: payload.new.expires_at,
-                },
-              };
-            });
-            return changed ? next : oldData;
-          });
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [queryClient, user?.id, savedJobIdsKey]);
-
   const handleUnsaveClick = (jobId: string, jobTitle: string) => {
     setJobToRemove({ id: jobId, title: jobTitle });
   };
@@ -311,10 +110,8 @@ const SavedJobs = () => {
     if (!jobToRemove) return;
     const removedId = jobToRemove.id;
     setJobToRemove(null);
-    // Optimistic local update — avoids waiting for refetch round-trip
-    queryClient.setQueryData(['saved-jobs', user?.id], (old: SavedJob[] | undefined) =>
-      old ? old.filter(sj => sj.job_id !== removedId) : old
-    );
+    // Optimistic local update via cache hook
+    removeSavedJobLocally(removedId);
     unsaveJob(removedId);
     refreshSidebarCounts();
   };
