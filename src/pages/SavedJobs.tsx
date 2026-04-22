@@ -542,7 +542,7 @@ const SavedJobs = () => {
       {/* ── Skipped tab ── */}
       {activeTab === 'skipped' && (
         <>
-          {(isLoadingSkipped || !activeTabMediaReady) ? (
+          {isLoadingSkipped ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 text-white animate-spin" />
             </div>
