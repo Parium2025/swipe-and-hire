@@ -108,11 +108,12 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     queryFn: async () => {
       if (!user) return [];
       
-      // 🔥 SCALE: Paginerad hämtning i sidor om 1000 → klarar 10k+ jobb per org.
-      // Cap vid 10 000 så vi aldrig blockerar klienten — dashboardens totalsiffror
-      // hämtas separat via get_employer_jobs_counts RPC och visar exakt antal.
+      // 🔥 SCALE: Paginerad hämtning i sidor om 1000.
+      // Cap vid 2 000 så vi aldrig blockerar klienten — dashboardens totalsiffror
+      // hämtas separat via get_employer_jobs_counts RPC och visar exakt antal
+      // (även för orgs med 5k–10k jobb). Listvyn visar de 2 000 senaste.
       const PAGE_SIZE = 1000;
-      const HARD_CAP = 10_000;
+      const HARD_CAP = 2_000;
       let result: JobPosting[] = [];
 
       const baseSelect = `
