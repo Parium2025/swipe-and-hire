@@ -70,7 +70,7 @@ export const useEmployerBackgroundSync = () => {
       .eq('employer_id', userId)
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(INITIAL_PAGE_SIZE);
 
     if (!error && data) {
       safeSetItem(cacheKey, JSON.stringify({
@@ -128,7 +128,7 @@ export const useEmployerBackgroundSync = () => {
       .select('*')
       .eq('recruiter_id', userId)
       .order('updated_at', { ascending: false })
-      .limit(100);
+      .limit(INITIAL_PAGE_SIZE);
 
     if (!error && myCandidates && myCandidates.length > 0) {
       // Hämta application-data
@@ -185,7 +185,7 @@ export const useEmployerBackgroundSync = () => {
       
       // Synka React Query-cachen
       queryClient.setQueryData(['my-candidates', userId, ''], {
-        pages: [{ items, nextCursor: items.length >= 100 ? items[items.length - 1]?.updated_at ?? null : null }],
+        pages: [{ items, nextCursor: items.length >= INITIAL_PAGE_SIZE ? items[items.length - 1]?.updated_at ?? null : null }],
         pageParams: [null],
       });
     }
@@ -208,7 +208,7 @@ export const useEmployerBackgroundSync = () => {
       .select(`*, job:job_id (title)`)
       .in('id', conversationIds)
       .order('last_message_at', { ascending: false, nullsFirst: false })
-      .limit(50);
+      .limit(CONVERSATIONS_INITIAL_PAGE_SIZE);
 
     if (!error && conversations) {
       safeSetItem(CONVERSATIONS_CACHE_KEY, JSON.stringify({
