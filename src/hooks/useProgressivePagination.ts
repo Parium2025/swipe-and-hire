@@ -36,6 +36,28 @@ interface InfinitePageData {
   pageParams: unknown[];
 }
 
+/**
+ * Räkna ut nästa pageParam baserat på senaste sidan.
+ * Stödjer både cursor-baserad (my-candidates → nextCursor)
+ * och index-baserad (applications → pageParam + 1) pagination.
+ */
+function computeNextPageParam(
+  lastPage: InfinitePageData['pages'][number] | undefined,
+  lastPageParam: unknown,
+): unknown | null {
+  if (!lastPage) return null;
+  // Cursor-baserad
+  if (lastPage.nextCursor !== undefined && lastPage.nextCursor !== null) {
+    return lastPage.nextCursor;
+  }
+  // Index-baserad: om lastPageParam är ett tal → öka med 1, annars null
+  if (typeof lastPageParam === 'number') {
+    if (lastPage.hasMore === false) return null;
+    return lastPageParam + 1;
+  }
+  return null;
+}
+
 interface UseProgressivePaginationOptions {
   /** React Query key för en useInfiniteQuery */
   queryKey: QueryKey;
