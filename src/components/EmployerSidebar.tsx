@@ -385,6 +385,7 @@ export function EmployerSidebar() {
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={item.url === '/candidates' ? prefetchApplications : undefined}
+                      onTouchStart={item.url === '/candidates' ? prefetchApplications : undefined}
                       onFocus={item.url === '/candidates' ? prefetchApplications : undefined}
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
