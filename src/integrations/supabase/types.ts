@@ -2506,6 +2506,15 @@ export type Database = {
         Args: { p_applicant_id: string }
         Returns: undefined
       }
+      dispatch_interview_push: {
+        Args: {
+          p_body: string
+          p_metadata: Json
+          p_recipient_id: string
+          p_title: string
+        }
+        Returns: undefined
+      }
       employer_owns_job: { Args: { p_job_id: string }; Returns: boolean }
       employer_owns_job_for_question: {
         Args: { p_job_id: string }
