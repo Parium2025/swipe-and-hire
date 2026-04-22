@@ -209,8 +209,13 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
                   : job
               );
             });
+            // Status (active/expired/draft) kan ha ändrats → uppdatera server-counts
+            queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
+            queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
           } else {
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
+            queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
           }
         }
       )
