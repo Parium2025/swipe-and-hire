@@ -53,6 +53,7 @@ function KeepAliveCached({
   const [, setTick] = React.useState(0);
   const [displayedKey, setDisplayedKey] = React.useState(activeKey);
   const [isEntered, setIsEntered] = React.useState(true);
+  const [isAnimating, setIsAnimating] = React.useState(false);
   const isFirstActivationRef = React.useRef(true);
 
   useEffect(() => {
@@ -60,26 +61,48 @@ function KeepAliveCached({
       isFirstActivationRef.current = false;
       setDisplayedKey(activeKey);
       setIsEntered(true);
+      setIsAnimating(false);
       return;
     }
 
     if (activeKey === displayedKey) {
+      // Säkerhet: garantera att vi alltid är fully entered om vi inte byter route
       setIsEntered(true);
       return;
     }
 
-    let rafId = 0;
-    const timerId = window.setTimeout(() => {
+    let raf1 = 0;
+    let raf2 = 0;
+    let safetyTimer = 0;
+    const delayTimer = window.setTimeout(() => {
+      // 1) Byt synlig nod och sätt start-state (osynlig)
       setDisplayedKey(activeKey);
       setIsEntered(false);
-      rafId = requestAnimationFrame(() => {
-        setIsEntered(true);
+      setIsAnimating(true);
+
+      // 2) Dubbel rAF garanterar att browsern committar start-framen
+      //    innan vi flippar till slut-state. Utan detta kan transitionen
+      //    "hoppas över" under hög last → fade missas.
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
+          setIsEntered(true);
+        });
       });
+
+      // 3) Safety-net: oavsett om transitionend fyrar eller ej, tvinga
+      //    fully entered efter max (delay + 800ms) så att vi aldrig
+      //    fastnar i halvtransparent läge.
+      safetyTimer = window.setTimeout(() => {
+        setIsEntered(true);
+        setIsAnimating(false);
+      }, 800);
     }, enterDelayMs);
 
     return () => {
-      window.clearTimeout(timerId);
-      cancelAnimationFrame(rafId);
+      window.clearTimeout(delayTimer);
+      window.clearTimeout(safetyTimer);
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
     };
   }, [activeKey, displayedKey, enterDelayMs]);
 
