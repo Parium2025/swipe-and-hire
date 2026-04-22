@@ -429,9 +429,9 @@ const EmployerDashboard = memo(() => {
         <JobStatusTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          activeCount={activeJobs.length}
-          expiredCount={expiredJobsCount}
-          draftCount={draftJobsCount}
+          activeCount={serverCounts?.active ?? activeJobs.length}
+          expiredCount={serverCounts?.expired ?? expiredJobsCount}
+          draftCount={serverCounts?.draft ?? draftJobsCount}
           showDrafts
         />
       </div>
