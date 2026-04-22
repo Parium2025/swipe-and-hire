@@ -35,6 +35,58 @@ class ImageCache {
   // Filändelser som aldrig ska blob-cachas (stora/binära dokument)
   private readonly SKIP_EXTENSIONS = ['.avi', '.mkv'];
 
+  // Hydration-promise: resolvar när IDB-restore är klar
+  private readonly hydrationPromise: Promise<void>;
+  private hydrated = false;
+
+  constructor() {
+    this.hydrationPromise = this.hydrateFromIDB();
+  }
+
+  /**
+   * Återställ små persisterade assets (logos) från IDB → in-memory cache.
+   * Körs en gång vid app-start. Synkron `getCachedUrl` fungerar direkt efter detta.
+   */
+  private async hydrateFromIDB(): Promise<void> {
+    try {
+      const items = await loadAllPersisted();
+      let restored = 0;
+      for (const item of items) {
+        // Kolla att vi inte redan har den i minnet (osannolikt vid start, men säkert)
+        if (this.cache.has(item.cacheKey)) continue;
+        try {
+          const objectUrl = URL.createObjectURL(item.blob);
+          this.cache.set(item.cacheKey, {
+            url: item.url,
+            blob: item.blob,
+            objectUrl,
+            timestamp: item.timestamp,
+          });
+          restored++;
+        } catch {
+          // ignore individual blob failures
+        }
+      }
+      this.hydrated = true;
+      if (restored > 0 && typeof window !== 'undefined' && (window as any).__imageCacheDebug) {
+        console.log(`%c[imageCache] 💾 Hydrated ${restored} persisted assets from IndexedDB`, 'color:#22c55e;font-weight:bold');
+      }
+    } catch {
+      this.hydrated = true; // markera som klar även vid fel → app blockeras inte
+    }
+  }
+
+  /**
+   * Vänta tills IDB-hydrering är klar (användbart innan första render).
+   */
+  whenReady(): Promise<void> {
+    return this.hydrationPromise;
+  }
+
+  isHydrated(): boolean {
+    return this.hydrated;
+  }
+
   /**
    * Markera en post som "nyligen använd" (flytta till slutet av Map)
    */
