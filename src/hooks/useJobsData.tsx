@@ -106,60 +106,52 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     queryFn: async () => {
       if (!user) return [];
       
+      // 🔥 SCALE: Paginerad hämtning i sidor om 1000 → klarar 10k+ jobb per org.
+      // Cap vid 10 000 så vi aldrig blockerar klienten — dashboardens totalsiffror
+      // hämtas separat via get_employer_jobs_counts RPC och visar exakt antal.
+      const PAGE_SIZE = 1000;
+      const HARD_CAP = 10_000;
       let result: JobPosting[] = [];
-      
+
+      const baseSelect = `
+        *,
+        employer_profile:profiles!job_postings_employer_id_fkey (
+          first_name,
+          last_name
+        )
+      `;
+
+      // Resolve scope → user-id-set
+      let employerIds: string[] = [user.id];
       if (scope === 'organization' && profile?.organization_id) {
-        // Fetch all jobs from users in the same organization
-        // First get all user_ids in the organization
         const { data: orgUsers, error: orgError } = await supabase
           .from('user_roles')
           .select('user_id')
           .eq('organization_id', profile.organization_id)
           .eq('is_active', true);
-        
         if (orgError) throw orgError;
-        
-        const userIds = orgUsers?.map(u => u.user_id) || [];
-        
-        // If no org users found, fall back to just the current user
-        if (userIds.length === 0) {
-          userIds.push(user.id);
-        }
-        
-        const { data, error } = await supabase
+        const ids = orgUsers?.map(u => u.user_id) ?? [];
+        if (ids.length > 0) employerIds = ids;
+      }
+
+      // Fetch in pages until we run out or hit the cap
+      for (let from = 0; from < HARD_CAP; from += PAGE_SIZE) {
+        const to = Math.min(from + PAGE_SIZE - 1, HARD_CAP - 1);
+        const query = supabase
           .from('job_postings')
-          .select(`
-            *,
-            employer_profile:profiles!job_postings_employer_id_fkey (
-              first_name,
-              last_name
-            )
-          `)
-          .in('employer_id', userIds)
+          .select(baseSelect)
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
-          .limit(500);
+          .range(from, to);
+
+        const { data, error } = scope === 'organization' && employerIds.length > 1
+          ? await query.in('employer_id', employerIds)
+          : await query.eq('employer_id', employerIds[0]);
 
         if (error) throw error;
-        result = data || [];
-      } else {
-        // Personal scope - only current user's jobs (exclude soft-deleted)
-        const { data, error } = await supabase
-          .from('job_postings')
-          .select(`
-            *,
-            employer_profile:profiles!job_postings_employer_id_fkey (
-              first_name,
-              last_name
-            )
-          `)
-          .eq('employer_id', user.id)
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false })
-          .limit(500);
-
-        if (error) throw error;
-        result = data || [];
+        const batch = (data ?? []) as JobPosting[];
+        result.push(...batch);
+        if (batch.length < PAGE_SIZE) break;
       }
 
       // 🔥 Cache for instant-load on next visit
