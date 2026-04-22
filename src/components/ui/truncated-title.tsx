@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback, ReactNode } from "react";
+import React, { useRef, useState, useEffect, useLayoutEffect, useCallback, ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TruncatedTitleProps {
