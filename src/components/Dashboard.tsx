@@ -247,8 +247,8 @@ const Dashboard = memo(() => {
         <JobStatusTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          activeCount={activeJobs.length}
-          expiredCount={expiredJobs.length}
+          activeCount={serverCounts?.active ?? activeJobs.length}
+          expiredCount={serverCounts?.expired ?? expiredJobs.length}
         />
       </div>
 
