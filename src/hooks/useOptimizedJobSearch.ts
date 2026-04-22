@@ -152,6 +152,12 @@ interface UseOptimizedJobSearchOptions {
   category: string;
   subcategories: string[];
   enabled?: boolean;
+  /** 🔥 SCALE: Filtrera på arbetsgivar-ID i DB istället för i klienten. */
+  employerIds?: string[];
+  /** 🔥 SCALE: ISO-timestamp; jobb skapade efter denna tid filtreras i DB. */
+  createdAfter?: string | null;
+  /** Antal jobb per batch. Default 100. */
+  pageSize?: number;
 }
 
 const normalizeSwedish = (text: string): string => {
