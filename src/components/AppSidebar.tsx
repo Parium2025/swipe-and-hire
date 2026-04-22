@@ -121,17 +121,19 @@ export function AppSidebar() {
   // Video-URL hämtas nu från AuthProvider (sessionStorage-cachad) - ingen egen fetch behövs
 
   const handleNavigation = (href: string) => {
-    if (checkBeforeNavigation(href)) {
+    if (!checkBeforeNavigation(href)) return;
+
+    // Stäng sidobaren FÖRST på mobil — så att sidobarens transform-animation
+    // hinner starta innan React börjar montera den nya sidan. Annars konkurrerar
+    // sidans render-arbete (media-gate, prewarm, kort) med sidebar-animationen
+    // och hela övergången känns hackig.
+    if (isMobile) {
+      setOpenMobile(false);
+      // Vänta ett frame så att sidobaren får börja sin transform innan
+      // routern triggar tung re-render.
+      requestAnimationFrame(() => navigate(href));
+    } else {
       navigate(href);
-      // Scrolla till toppen på mobil
-      if (isMobile || window.innerWidth < 768) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-      // Stäng endast mobilsidebaren efter navigation
-      if (isMobile) {
-        setOpenMobile(false);
-      }
-      // På desktop behåller vi sidebarens nuvarande tillstånd
     }
   };
 
@@ -220,18 +222,8 @@ export function AppSidebar() {
           </div>
         </div>
         
-        {/* Hidden preloader - always mounted to keep video/image cached */}
-        <div className="hidden">
-          {avatarUrl && (
-            <img 
-              src={avatarUrl} 
-              alt="Preload" 
-              loading="lazy"
-              decoding="async"
-              fetchPriority="low"
-            />
-          )}
-        </div>
+        {/* Avatar är redan preloadad via Service Worker (preloadImages ovan) —
+            ingen separat dold <img> behövs. */}
 
         <SidebarSeparator className="bg-white/20 mx-4" />
 
