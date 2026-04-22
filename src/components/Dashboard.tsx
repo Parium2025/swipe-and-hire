@@ -15,6 +15,7 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { useBlobCachePrewarm } from '@/hooks/useBlobCachePrewarm';
+import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -31,6 +32,9 @@ const Dashboard = memo(() => {
     scope: 'organization',
     enableRealtime: true 
   });
+  // Server-side truth — skalar till 10k+ jobb utan klient-belastning
+  const { data: serverCounts } = useEmployerJobsCounts('organization');
+  const { data: serverStats } = useEmployerDashboardStats('organization');
   const { profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
   
@@ -180,20 +184,26 @@ const Dashboard = memo(() => {
     }
   }, [page]);
 
-  const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : filteredStats.totalJobs, loading: false },
-    { 
-      icon: TrendingUp, 
-      title: 'Aktiva', 
-      value: isLoading ? preloadedEmployerActiveJobs : filteredStats.activeJobs, 
-      loading: false,
-      subItems: [
-        { label: 'Utgångna', value: expiredJobs.length },
-      ]
-    },
-    { icon: Eye, title: 'Visningar', value: isLoading ? preloadedEmployerTotalViews : filteredStats.totalViews, loading: false },
-    { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : filteredStats.totalApplications, loading: false },
-  ], [filteredStats, expiredJobs.length, isLoading, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
+  const statsCards = useMemo(() => {
+    // Föredra server-counts/stats (exakta även vid 10k+ jobb).
+    const totalJobs = serverCounts?.total ?? filteredStats.totalJobs;
+    const activeCount = serverCounts?.active ?? filteredStats.activeJobs;
+    const expiredCount = serverCounts?.expired ?? expiredJobs.length;
+    const totalViews = serverStats?.total_views ?? filteredStats.totalViews;
+    const totalApplications = serverStats?.total_applications ?? filteredStats.totalApplications;
+    return [
+      { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : totalJobs, loading: false },
+      {
+        icon: TrendingUp,
+        title: 'Aktiva',
+        value: isLoading ? preloadedEmployerActiveJobs : activeCount,
+        loading: false,
+        subItems: [{ label: 'Utgångna', value: expiredCount }],
+      },
+      { icon: Eye, title: 'Visningar', value: isLoading ? preloadedEmployerTotalViews : totalViews, loading: false },
+      { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : totalApplications, loading: false },
+    ];
+  }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
   if (isLoading || !showContent) {
     return (
