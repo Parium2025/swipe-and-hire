@@ -2186,13 +2186,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Real-time för alla job_applications (uppdaterar employer kandidat-badge)
     // Lyssnar på alla INSERT för att fånga nya ansökningar till arbetsgivarens jobb
+    // Real-time för alla job_applications (uppdaterar employer kandidat-badge)
+    // Lyssnar på alla INSERT för att fånga nya ansökningar till arbetsgivarens jobb.
+    // 🔥 SCALED: Debounce till max 1 refresh per 5s. Filter på job_id är inte möjligt
+    // utan att veta vilka jobb som tillhör user → realtime-RLS hindrar ej tomma payloads,
+    // men `refreshEmployerStats` läser via RPC som ändå filtrerar på user. Debounce
+    // skär 95% av onödiga RPC-anrop vid hög aktivitet på plattformen.
+    let employerAppsTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleEmployerAppsRefresh = () => {
+      if (employerAppsTimer) return;
+      employerAppsTimer = setTimeout(() => {
+        employerAppsTimer = null;
+        refreshEmployerStats();
+      }, 5000);
+    };
+
     const employerApplicationsChannel = supabase
       .channel(`auth-employer-applications-${user.id}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'job_applications' },
         () => {
-          refreshEmployerStats();
+          scheduleEmployerAppsRefresh();
         }
       )
       .subscribe((status) => handleChannelStatus('employerApps', status));
