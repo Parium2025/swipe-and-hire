@@ -142,6 +142,25 @@ class ImageCache {
 
   private async fetchAndCache(url: string, cacheKey: string): Promise<CachedImage> {
     try {
+      // Diagnostik: räkna fetches per URL (toggla med window.__imageCacheDebug=true)
+      if (typeof window !== 'undefined') {
+        const w = window as any;
+        w.__imageCacheFetchCount = w.__imageCacheFetchCount || new Map();
+        const prev = w.__imageCacheFetchCount.get(cacheKey) || 0;
+        w.__imageCacheFetchCount.set(cacheKey, prev + 1);
+        if (w.__imageCacheDebug) {
+          const isLogo = url.includes('/company-logos/');
+          console.log(
+            `%c[imageCache] FETCH #${prev + 1} ${isLogo ? '🏢 LOGO' : '🖼️ IMG'}`,
+            `color:${prev > 0 ? '#ef4444' : '#22c55e'};font-weight:bold`,
+            url.substring(url.lastIndexOf('/') + 1),
+          );
+          if (prev > 0) {
+            console.warn('[imageCache] DUBBELHÄMTNING upptäckt!', { url, count: prev + 1 });
+          }
+        }
+      }
+
       // Fetch utan credentials för cross-origin storage URLs (undviker CORS-fel)
       const isStorageUrl = url.includes('/storage/v1/object/');
       const response = await fetch(url, {
