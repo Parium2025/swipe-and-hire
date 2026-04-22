@@ -233,10 +233,10 @@ export function TruncatedText({
         style={wordBreakStyles}
         onClick={onClick}
         onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         onFocus={handleFocus}
+        onBlur={handleBlur}
         onTouchStart={isTouch && !supportsHover ? measureTruncation : undefined}
-        // Native title fallback gives users immediate feedback before our
-        // tooltip wraps the element on next render
         title={hasMeasured ? undefined : text}
       >
         {children || text}
