@@ -59,6 +59,8 @@ export function TruncatedText({
   const [isTruncated, setIsTruncated] = useState(false);
   const [hasMeasured, setHasMeasured] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isDesktopHovering, setIsDesktopHovering] = useState(false);
+  const [isDesktopFocused, setIsDesktopFocused] = useState(false);
 
   const { isTouch, supportsHover } = ENV;
 
