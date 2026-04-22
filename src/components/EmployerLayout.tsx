@@ -10,6 +10,7 @@ import { useCandidateBackgroundSync } from '@/hooks/useCandidateBackgroundSync';
 import { useEagerRatingsPreload } from '@/hooks/useEagerRatingsPreload';
 import { useEmployerBackgroundSync } from '@/hooks/useEmployerBackgroundSync';
 import { useEmployerPrefetch } from '@/hooks/useEmployerPrefetch';
+import { useEmployerWarmupOrchestrator } from '@/hooks/useEmployerWarmupOrchestrator';
 import EmployerDesktopShell from '@/components/employer/EmployerDesktopShell';
 import EmployerMobileShell from '@/components/employer/EmployerMobileShell';
 
@@ -92,6 +93,10 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
 
   // Prefetch templates, company profile, reviews
   useEmployerPrefetch();
+
+  // 🚀 SPOTIFY-NIVÅ: Trappa-prefetch (sida 2-5) + mediawarmup för profilbilder
+  // Ger "warm app"-känsla — inga laddspinners eller popping bilder vid flikbyten
+  useEmployerWarmupOrchestrator();
 
   // Desktop layout with top navigation
   if (isDesktop) {
