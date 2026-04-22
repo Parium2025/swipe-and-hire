@@ -49,4 +49,8 @@ export function useEmployerWarmupOrchestrator() {
 
   // Mediawarmup: profilbilder cachas så fort de dyker upp
   useEmployerMediaWarmup();
+
+  // Notifikations-preload: fyller localStorage så NotificationCenter
+  // öppnas instant utan spinner
+  useNotificationsPreload();
 }
