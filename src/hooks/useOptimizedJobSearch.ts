@@ -610,25 +610,22 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   const employerIds = useMemo(() => [...new Set(rawJobs.map((job) => job.employer_id).filter(Boolean))], [rawJobs]);
   const jobIds = useMemo(() => [...new Set(rawJobs.map((job) => job.id).filter(Boolean))], [rawJobs]);
 
-  const { data: liveJobBranding = {} } = useLiveJobBranding(jobIds);
+  // 🔥 SCALE: useLiveJobBranding togs bort — RPC:n search_jobs returnerar redan
+  // workplace_name + company_logo_url + alla branding-fält. Realtime-listenern
+  // nedan håller datan färsk om en arbetsgivare byter logo eller namn.
   const { data: reviewsData = {} } = useCompanyReviews(employerIds);
 
   const enrichedJobs = useMemo(() => {
     const jobs = rawJobs
       .map((job) => {
-        const mergedJob = {
-          ...job,
-          ...(liveJobBranding[job.id] || {}),
-        } as SearchJob;
-
         return {
-          ...mergedJob,
-          company_name: mergedJob.workplace_name?.trim() || 'Okänt företag',
-          company_logo_url: mergedJob.company_logo_url || undefined,
-          company_avg_rating: reviewsData[mergedJob.employer_id]?.avgRating,
-          company_review_count: reviewsData[mergedJob.employer_id]?.reviewCount || 0,
-          views_count: mergedJob.views_count || 0,
-          applications_count: mergedJob.applications_count || 0,
+          ...job,
+          company_name: job.workplace_name?.trim() || 'Okänt företag',
+          company_logo_url: job.company_logo_url || undefined,
+          company_avg_rating: reviewsData[job.employer_id]?.avgRating,
+          company_review_count: reviewsData[job.employer_id]?.reviewCount || 0,
+          views_count: job.views_count || 0,
+          applications_count: job.applications_count || 0,
         };
       })
       .filter((job) => !getTimeRemaining(job.created_at, job.expires_at).isExpired);
