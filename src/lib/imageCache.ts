@@ -1,7 +1,17 @@
 /**
  * Global bild-cache som håller bilder i minnet hela tiden
- * Överlever component remounts och navigation
+ * Överlever component remounts och navigation.
+ *
+ * Persistens: små assets (≤ 50 KB → typiskt logos) sparas även i IndexedDB
+ * och hydreras vid app-start så att swipe mode kan visa logos utan
+ * nätverksanrop på återbesök / efter full page reload.
  */
+
+import {
+  loadAllPersisted,
+  persistBlob,
+  PERSIST_MAX_BYTES,
+} from './imageCachePersistence';
 
 interface CachedImage {
   url: string;
