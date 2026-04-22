@@ -341,7 +341,8 @@ export const useEmployerBackgroundSync = () => {
   useEffect(() => {
     if (!user || !isEmployer) return;
 
-    // Realtime för jobb
+    // Realtime för jobb - debounced för att hantera bulk-updates
+    let jobsDebounceTimer: ReturnType<typeof setTimeout> | null = null;
     const jobsChannel = supabase
       .channel(`employer-jobs-${user.id}`)
       .on(
@@ -353,8 +354,11 @@ export const useEmployerBackgroundSync = () => {
           filter: `employer_id=eq.${user.id}`
         },
         () => {
-          preloadJobs(user.id, profile?.organization_id || null);
-          queryClient.invalidateQueries({ queryKey: ['jobs'] });
+          if (jobsDebounceTimer) clearTimeout(jobsDebounceTimer);
+          jobsDebounceTimer = setTimeout(() => {
+            preloadJobs(user.id, profile?.organization_id || null);
+            queryClient.invalidateQueries({ queryKey: ['jobs'] });
+          }, 1500);
         }
       )
       .subscribe();
