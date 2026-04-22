@@ -21,26 +21,18 @@ const preloadImageNative = (src: string): Promise<void> => {
 };
 
 /**
- * Batch-fetch all rows from a table (handles >1000 row limit)
+ * Hur många jobb/företag vi maximalt preloadar vid app-start.
+ *
+ * VIKTIGT: Tidigare hämtade vi HELA tabellen vid varje login (fetchAllRows)
+ * vilket gjorde att en login med 10k aktiva jobb laddade ~500 MB i bakgrunden
+ * — varav 90% aldrig visades. Vi cachar bara LRU-200 ändå, så all preload
+ * utöver det evictas omedelbart.
+ *
+ * Resten preloadas on-demand av useSwipeImagePreloader när användaren
+ * faktiskt börjar swipa/scrolla.
  */
-async function fetchAllRows<T>(
-  query: () => ReturnType<ReturnType<typeof supabase.from>['select']>,
-  pageSize = 1000
-): Promise<T[]> {
-  const all: T[] = [];
-  let from = 0;
-  let hasMore = true;
-
-  while (hasMore) {
-    const { data, error } = await (query() as any).range(from, from + pageSize - 1);
-    if (error || !data) break;
-    all.push(...data);
-    hasMore = data.length === pageSize;
-    from += pageSize;
-  }
-
-  return all;
-}
+const PRELOAD_JOBS_LIMIT = 50;
+const PRELOAD_LOGOS_LIMIT = 50;
 
 /**
  * Global hook som förladddar alla kritiska bilder vid app-start
@@ -100,14 +92,16 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
           }
         }
 
-        // 🔥 PRIORITET 2: Alla jobbbilder (public bucket - ingen signering behövs)
-        const allJobs = await fetchAllRows<{ job_image_url: string | null }>(() =>
-          supabase
-            .from('job_postings')
-            .select('job_image_url')
-            .eq('is_active', true)
-            .order('created_at', { ascending: false })
-        );
+        // 🔥 PRIORITET 2: Senaste jobbbilderna (public bucket - ingen signering)
+        // Begränsat till PRELOAD_JOBS_LIMIT — resten preloadas on-demand av
+        // useSwipeImagePreloader när användaren faktiskt swipar.
+        const { data: allJobs } = await supabase
+          .from('job_postings')
+          .select('job_image_url')
+          .eq('is_active', true)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(PRELOAD_JOBS_LIMIT);
 
         const jobImageUrls: string[] = [];
         if (allJobs) {
@@ -147,14 +141,12 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
           }
         }
 
-        // 🔥 PRIORITET 3: Företagslogotyper (public bucket)
-        const allProfiles = await fetchAllRows<{
-          company_logo_url: string | null;
-        }>(() =>
-          supabase
-            .from('profiles')
-            .select('company_logo_url')
-        );
+        // 🔥 PRIORITET 3: Företagslogotyper (public bucket) — begränsat antal
+        const { data: allProfiles } = await supabase
+          .from('profiles')
+          .select('company_logo_url')
+          .not('company_logo_url', 'is', null)
+          .limit(PRELOAD_LOGOS_LIMIT);
 
         const logoUrls: string[] = [];
         if (allProfiles) {
