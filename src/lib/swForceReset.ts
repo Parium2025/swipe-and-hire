@@ -14,8 +14,11 @@
  * Bumpa RESET_VERSION om vi behöver göra det igen i framtiden.
  */
 
-const RESET_VERSION = 'sw-reset-2026-04-22';
+const RESET_VERSION = 'sw-reset-2026-04-22-v2';
 const RESET_KEY = 'parium_sw_force_reset';
+const RESET_ATTEMPT_KEY = 'parium_sw_force_reset_attempt';
+const RESET_QUERY_PARAM = '_sw_reset';
+const ATTEMPT_TTL_MS = 30_000;
 
 export function forceServiceWorkerReset(): void {
   try {
@@ -29,11 +32,34 @@ export function forceServiceWorkerReset(): void {
       host === 'parium-ab.lovable.app';
     if (!isProdDomain) return;
 
+    const url = new URL(window.location.href);
+    const resetMarkerInUrl = url.searchParams.get(RESET_QUERY_PARAM);
     const stored = localStorage.getItem(RESET_KEY);
+
+    if (resetMarkerInUrl === RESET_VERSION) {
+      localStorage.setItem(RESET_KEY, RESET_VERSION);
+      sessionStorage.removeItem(RESET_ATTEMPT_KEY);
+      url.searchParams.delete(RESET_QUERY_PARAM);
+      window.history.replaceState({}, document.title, url.toString());
+      return;
+    }
+
     if (stored === RESET_VERSION) return;
 
-    // Markera direkt så vi inte loopar om reload triggas
-    localStorage.setItem(RESET_KEY, RESET_VERSION);
+    const lastAttemptRaw = sessionStorage.getItem(RESET_ATTEMPT_KEY);
+    if (lastAttemptRaw) {
+      const [attemptVersion, attemptTsRaw] = lastAttemptRaw.split(':');
+      const attemptTs = Number(attemptTsRaw);
+      if (
+        attemptVersion === RESET_VERSION &&
+        Number.isFinite(attemptTs) &&
+        Date.now() - attemptTs < ATTEMPT_TTL_MS
+      ) {
+        return;
+      }
+    }
+
+    sessionStorage.setItem(RESET_ATTEMPT_KEY, `${RESET_VERSION}:${Date.now()}`);
 
     const tasks: Promise<unknown>[] = [];
 
@@ -60,17 +86,18 @@ export function forceServiceWorkerReset(): void {
     Promise.all(tasks)
       .then(() => {
         console.log('[swForceReset] Cleared old service worker + caches, reloading…');
-        // Liten delay så loggen hinner skrivas och localStorage flush:as
         setTimeout(() => {
           try {
-            window.location.reload();
+            const nextUrl = new URL(window.location.href);
+            nextUrl.searchParams.set(RESET_QUERY_PARAM, RESET_VERSION);
+            window.location.replace(nextUrl.toString());
           } catch {
             /* ignore */
           }
         }, 50);
       })
       .catch(() => {
-        // Aldrig blockera appstart om städningen misslyckas
+        sessionStorage.removeItem(RESET_ATTEMPT_KEY);
       });
   } catch {
     // ignore
