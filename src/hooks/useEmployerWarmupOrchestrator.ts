@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useProgressivePagination } from '@/hooks/useProgressivePagination';
 import { useEmployerMediaWarmup } from '@/hooks/useEmployerMediaWarmup';
+import { useNotificationsPreload } from '@/hooks/useNotificationsPreload';
 
 /**
  * 🚀 EMPLOYER WARMUP ORCHESTRATOR
@@ -48,4 +49,8 @@ export function useEmployerWarmupOrchestrator() {
 
   // Mediawarmup: profilbilder cachas så fort de dyker upp
   useEmployerMediaWarmup();
+
+  // Notifikations-preload: fyller localStorage så NotificationCenter
+  // öppnas instant utan spinner
+  useNotificationsPreload();
 }
