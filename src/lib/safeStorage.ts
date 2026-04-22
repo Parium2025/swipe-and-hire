@@ -17,6 +17,9 @@ const EVICTION_KEYS_PREFIX = [
   'parium-employer-analytics:',
   'outreach-studio-cache:',
   'outreach-templates-cache:',
+  'parium_employer_jobs_v3_',
+  'parium_employer_counts_v1_',
+  'parium_employer_stats_v1_',
 ];
 
 /**
