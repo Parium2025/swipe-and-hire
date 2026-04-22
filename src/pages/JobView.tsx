@@ -516,9 +516,9 @@ const JobView = () => {
                   }, 3000);
                 }
               }}
-              className="flex min-w-0 flex-1 items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
+              className="flex min-w-0 flex-1 items-center space-x-2 overflow-hidden hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
             >
-              <Avatar className="h-10 w-10">
+              <Avatar className="h-10 w-10 shrink-0">
                 <AvatarImage 
                   src={companyLogoUrl || ''} 
                   alt={getDisplayCompanyName(job)}
@@ -529,19 +529,20 @@ const JobView = () => {
                     : 'FÖ'}
                 </AvatarFallback>
               </Avatar>
-              <div className="min-w-0 flex-1 text-left">
+              <div className="min-w-0 flex-1 overflow-hidden text-left">
                 <TooltipProvider>
                   <Tooltip open={showCompanyTooltip} onOpenChange={setShowCompanyTooltip}>
                     <TooltipTrigger asChild>
                       <div
-                        className="text-white font-bold text-sm line-clamp-2 min-w-0 max-w-full leading-tight"
+                        className="text-white font-bold text-sm leading-tight"
                         style={{
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
                           WebkitBoxOrient: 'vertical',
                           overflow: 'hidden',
+                          textOverflow: 'ellipsis',
                           wordBreak: 'break-word',
-                          overflowWrap: 'break-word',
+                          overflowWrap: 'anywhere',
                         }}
                       >
                         {getDisplayCompanyName(job)}
