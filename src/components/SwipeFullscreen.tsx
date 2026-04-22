@@ -505,7 +505,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         >
           {jobs.map((job, idx) => (
             <div
-              key={`${job.id}-${job.updated_at ?? ''}-${job.workplace_name ?? job.company_name ?? ''}-${job.company_logo_url ?? ''}`}
+              key={job.id}
               ref={(el) => setSlideRef(el, idx)}
               data-index={idx}
               className="w-full shrink-0 snap-start snap-always"
