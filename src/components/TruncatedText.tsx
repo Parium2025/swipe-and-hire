@@ -131,6 +131,9 @@ export function TruncatedText({
   useEffect(() => {
     setHasMeasured(false);
     setIsTruncated(false);
+    setIsDesktopHovering(false);
+    setIsDesktopFocused(false);
+    setIsOpen(false);
   }, [text]);
 
   // EAGER MEASUREMENT FOR TOUCH DEVICES
