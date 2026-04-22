@@ -129,6 +129,21 @@ export function TruncatedText({
     setIsTruncated(false);
   }, [text]);
 
+  // EAGER MEASUREMENT FOR TOUCH DEVICES
+  // On touch devices there is no hover, so the user's first tap must already
+  // open the tooltip. We measure synchronously after layout so the tooltip
+  // wrapper is wired up on first paint. Desktop still uses lazy measurement
+  // on hover for performance (60+ instances on dashboards).
+  useLayoutEffect(() => {
+    if (tooltipForcedOn) return;
+    if (supportsHover) return; // desktop: stay lazy
+    if (!isTouch) return;
+    if (hasMeasured) return;
+    // Defer one frame so layout (clamp, fonts) is settled
+    const id = requestAnimationFrame(() => measureTruncation());
+    return () => cancelAnimationFrame(id);
+  }, [text, tooltipForcedOn, supportsHover, isTouch, hasMeasured, measureTruncation]);
+
   useEffect(() => {
     if (supportsHover || !isTouch || !isOpen) return;
 
