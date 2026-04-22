@@ -52,8 +52,13 @@ const SavedJobs = () => {
     restoreSkippedJob,
   } = useSavedJobsCache({ enableSkipped: activeTab === 'skipped' });
 
-  const [showContent, setShowContent] = useState(false);
-  const hasPrimedInitialView = useRef(false);
+  // Visa innehållet direkt om vi redan har data i cachen (vanligaste fallet
+  // när användaren navigerar via sidebaren — då är det bara att rendera).
+  // Endast vid kallstart (ingen cachad data) väntar vi på första bilderna
+  // för att undvika layout-hopp.
+  const hasCachedData = savedJobs.length > 0 || skippedJobs.length > 0;
+  const [showContent, setShowContent] = useState(hasCachedData);
+  const hasPrimedInitialView = useRef(hasCachedData);
 
   // Mouse-drag scrolling for sort chips
   const chipsRef = useRef<HTMLDivElement>(null);
