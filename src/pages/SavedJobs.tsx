@@ -176,6 +176,7 @@ const SavedJobs = () => {
     setSearchParams({ tab }, { replace: true });
   }, [setSearchParams]);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
   const [showContent, setShowContent] = useState(false);
 
