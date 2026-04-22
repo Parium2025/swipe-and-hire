@@ -144,12 +144,29 @@ function KeepAliveCached({
     <div className="relative w-full h-full flex flex-col min-h-0">
       {mountedKeysRef.current.map((key) => {
         const isDisplayed = key === displayedKey;
+        const enterClasses = isEntered
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-2 pointer-events-none';
         return (
           <div
             key={key}
-            style={isDisplayed ? undefined : { display: 'none' }}
-            className={isDisplayed ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${isEntered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}` : ''}
+            style={
+              isDisplayed
+                ? { willChange: isAnimating ? 'opacity, transform' : 'auto' }
+                : { display: 'none' }
+            }
+            className={
+              isDisplayed
+                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${enterClasses}`
+                : ''
+            }
             aria-hidden={!isDisplayed}
+            onTransitionEnd={(e) => {
+              if (!isDisplayed) return;
+              if (e.propertyName !== 'opacity') return;
+              setIsAnimating(false);
+              setIsEntered(true);
+            }}
           >
             {cacheRef.current.get(key)}
           </div>
