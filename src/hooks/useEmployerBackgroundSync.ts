@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
+import { createBulletproofChannel } from '@/lib/bulletproofChannel';
 
 const JOBS_CACHE_KEY = 'parium_employer_jobs_v3_';
 const INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
