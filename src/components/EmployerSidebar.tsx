@@ -269,18 +269,20 @@ export function EmployerSidebar() {
   }, [isMobile, setOpenMobile, setOpen]);
 
   const handleNavigation = (href: string) => {
-    if (checkBeforeNavigation(href)) {
+    if (!checkBeforeNavigation(href)) return;
+
+    // Mobil: stäng sidobaren FÖRST så att slide-out-animationen hinner starta
+    // innan React börjar montera den nya sidan. Identiskt mönster som
+    // jobbsökarens AppSidebar — ger märkbart mjukare övergångar.
+    if (isMobile) {
+      setOpenMobile(false);
+      requestAnimationFrame(() => navigate(href));
+    } else {
       navigate(href);
-      // Scrolla till toppen på mobil
-      if (isMobile || window.innerWidth < 768) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-      // Stäng endast mobilsidebaren efter navigation
-      if (isMobile) {
-        setOpenMobile(false);
-      }
-      // På desktop behåller vi sidebarens nuvarande tillstånd
     }
+    // Notera: window.scrollTo är borttagen — appens scroll sker i en inre
+    // <main>-container, så fönster-scroll gör ingen nytta utan bara onödigt
+    // arbete på huvudtråden.
   };
 
   const isActiveUrl = (url: string) => {
