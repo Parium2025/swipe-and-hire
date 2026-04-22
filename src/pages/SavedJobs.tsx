@@ -349,29 +349,6 @@ const SavedJobs = () => {
     });
   }, [skippedJobs]);
 
-  const activeTabPreloadUrls = useMemo(() => {
-    const sourceJobs = activeTab === 'saved'
-      ? sortedJobs.map((entry) => entry.job_postings).filter(Boolean)
-      : filteredSkippedJobs.map((entry) => entry.job_postings).filter(Boolean);
-
-    const resolveStorageUrl = (bucket: 'job-images' | 'company-logos', path?: string | null) => {
-      if (!path) return null;
-      if (path.startsWith('http')) return path;
-      return supabase.storage.from(bucket).getPublicUrl(path).data?.publicUrl || null;
-    };
-
-    return Array.from(new Set(
-      sourceJobs
-        .flatMap((job) => [
-          resolveStorageUrl('job-images', job?.job_image_url),
-          resolveStorageUrl('company-logos', job?.company_logo_url),
-        ])
-        .filter((url): url is string => !!url)
-    )).slice(0, 6);
-  }, [activeTab, sortedJobs, filteredSkippedJobs]);
-
-  const activeTabMediaReady = usePreloadImages(activeTabPreloadUrls);
-
 
   return (
     <div className="responsive-container-wide animate-fade-in">
