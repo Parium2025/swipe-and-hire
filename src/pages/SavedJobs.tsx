@@ -1,7 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,8 +17,6 @@ import { Heart, Loader2, Trash2, AlertTriangle, ArrowDownUp, Undo2, EyeOff } fro
 import { toast } from 'sonner';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
-import { useSavedJobs } from '@/hooks/useSavedJobs';
-import { useSwipeActions } from '@/hooks/useSwipeActions';
 import { useSavedJobsCache, type SavedJob } from '@/hooks/useSavedJobsCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 
@@ -30,11 +26,8 @@ type StatusFilter = 'all' | 'active' | 'expired';
 type TabValue = 'saved' | 'skipped';
 
 const SavedJobs = () => {
-  const { user, refreshSidebarCounts } = useAuth();
+  const { refreshSidebarCounts } = useAuth();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { unsaveJob, isJobSaved, toggleSaveJob } = useSavedJobs();
-  const { undoAction } = useSwipeActions();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab: TabValue = (searchParams.get('tab') === 'skipped' ? 'skipped' : 'saved');
   const setActiveTab = useCallback((tab: TabValue) => {
@@ -50,7 +43,10 @@ const SavedJobs = () => {
     skippedJobs,
     isLoadingSaved: isLoading,
     isLoadingSkipped,
+    savedJobIds,
     removeSavedJobLocally,
+    toggleSavedJob,
+    restoreSkippedJob,
   } = useSavedJobsCache({ enableSkipped: activeTab === 'skipped' });
 
   // Delayed fade-in so heavy job cards don't mount during sidebar close animation
@@ -97,15 +93,20 @@ const SavedJobs = () => {
     setJobToRemove(null);
     // Optimistic local update via cache hook
     removeSavedJobLocally(removedId);
-    unsaveJob(removedId);
+    toggleSavedJob(removedId).catch(() => {
+      toast.error('Kunde inte ta bort jobbet');
+    });
     refreshSidebarCounts();
   };
 
   const handleRestoreSkipped = useCallback(async (jobId: string) => {
-    await undoAction(jobId);
-    queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user?.id] });
-    toast.success('Jobbet har återställts');
-  }, [undoAction, queryClient, user?.id]);
+    try {
+      await restoreSkippedJob(jobId);
+      toast.success('Jobbet har återställts');
+    } catch {
+      toast.error('Kunde inte återställa jobbet');
+    }
+  }, [restoreSkippedJob]);
 
   const isExpired = (expiresAt: string | null) => {
     if (!expiresAt) return false;
@@ -315,7 +316,7 @@ const SavedJobs = () => {
                         cardIndex={index}
                         hasApplied={appliedJobIds.has(job.id)}
                         isSavedExternal={true}
-                        onToggleSave={toggleSaveJob}
+                        onToggleSave={toggleSavedJob}
                         onUnsaveClick={handleUnsaveClick}
                         onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
                       />
@@ -384,8 +385,12 @@ const SavedJobs = () => {
                         }}
                         cardIndex={index}
                         hasApplied={appliedJobIds.has(job.id)}
-                        isSavedExternal={isJobSaved(job.id)}
-                        onToggleSave={toggleSaveJob}
+                        isSavedExternal={savedJobIds.has(job.id)}
+                        onToggleSave={(jobId) => {
+                          void toggleSavedJob(jobId, job).catch(() => {
+                            toast.error('Kunde inte spara jobbet');
+                          });
+                        }}
                         onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
                       />
                       {/* Restore button overlay */}
