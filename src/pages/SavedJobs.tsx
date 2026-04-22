@@ -26,7 +26,7 @@ type StatusFilter = 'all' | 'active' | 'expired';
 type TabValue = 'saved' | 'skipped';
 
 const SavedJobs = () => {
-  const { user, refreshSidebarCounts } = useAuth();
+  const { refreshSidebarCounts } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab: TabValue = (searchParams.get('tab') === 'skipped' ? 'skipped' : 'saved');
@@ -386,7 +386,11 @@ const SavedJobs = () => {
                         cardIndex={index}
                         hasApplied={appliedJobIds.has(job.id)}
                         isSavedExternal={savedJobIds.has(job.id)}
-                        onToggleSave={(jobId) => toggleSavedJob(jobId, job)}
+                        onToggleSave={(jobId) => {
+                          void toggleSavedJob(jobId, job).catch(() => {
+                            toast.error('Kunde inte spara jobbet');
+                          });
+                        }}
                         onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
                       />
                       {/* Restore button overlay */}
