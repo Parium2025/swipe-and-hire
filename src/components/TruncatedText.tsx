@@ -174,11 +174,6 @@ export function TruncatedText({
     };
   }, [isOpen, isTouch, supportsHover]);
 
-  useEffect(() => {
-    if (!supportsHover || forceClosed) return;
-    const wantsOpen = shouldShowTooltip && (isDesktopHovering || isDesktopFocused);
-    setIsOpen(wantsOpen);
-  }, [supportsHover, forceClosed, shouldShowTooltip, isDesktopHovering, isDesktopFocused]);
 
   const handleTap = () => {
     if (!supportsHover && isTouch) {
