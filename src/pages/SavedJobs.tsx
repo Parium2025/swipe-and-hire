@@ -84,26 +84,6 @@ const SavedJobs = () => {
     isDragging.current = false;
   }, []);
 
-  const { data: savedJobs = [], isLoading } = useQuery({
-    queryKey: ['saved-jobs', user?.id],
-    queryFn: () => fetchSavedJobs(user!.id),
-    enabled: !!user,
-    staleTime: 30_000,
-    gcTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
-
-  const { data: skippedJobs = [], isLoading: isLoadingSkipped } = useQuery({
-    queryKey: ['skipped-jobs', user?.id],
-    queryFn: () => fetchSkippedJobs(user!.id),
-    enabled: !!user && activeTab === 'skipped',
-    staleTime: 30_000,
-    gcTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
-
   // Hämta användarens ansökningar för "Redan sökt"-badge
   const { data: appliedJobIds = new Set<string>() } = useQuery({
     queryKey: ['applied-job-ids', user?.id],
@@ -122,61 +102,6 @@ const SavedJobs = () => {
     structuralSharing: false,
   });
 
-  // Real-time för applications_count uppdateringar – endast för jobb som är sparade
-  const savedJobIdsKey = useMemo(
-    () => savedJobs.map(sj => sj.job_id).sort().join(','),
-    [savedJobs]
-  );
-
-  useEffect(() => {
-    if (!user?.id || !savedJobIdsKey) return;
-    const ids = new Set(savedJobIdsKey.split(',').filter(Boolean));
-    if (ids.size === 0) return;
-
-    const channel = supabase
-      .channel(`saved-jobs-applications-count-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'job_postings' },
-        (payload) => {
-          if (!ids.has(payload.new.id)) return;
-          queryClient.setQueryData(['saved-jobs', user.id], (oldData: SavedJob[] | undefined) => {
-            if (!oldData) return oldData;
-            let changed = false;
-            const next = oldData.map(savedJob => {
-              if (!savedJob.job_postings || savedJob.job_postings.id !== payload.new.id) return savedJob;
-              const jp = savedJob.job_postings;
-              if (
-                jp.applications_count === payload.new.applications_count &&
-                jp.workplace_name === payload.new.workplace_name &&
-                jp.company_logo_url === payload.new.company_logo_url &&
-                jp.is_active === payload.new.is_active &&
-                jp.expires_at === payload.new.expires_at
-              ) {
-                return savedJob;
-              }
-              changed = true;
-              return {
-                ...savedJob,
-                job_postings: {
-                  ...jp,
-                  applications_count: payload.new.applications_count,
-                  workplace_name: payload.new.workplace_name,
-                  company_logo_url: payload.new.company_logo_url,
-                  is_active: payload.new.is_active,
-                  expires_at: payload.new.expires_at,
-                },
-              };
-            });
-            return changed ? next : oldData;
-          });
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [queryClient, user?.id, savedJobIdsKey]);
-
   const handleUnsaveClick = (jobId: string, jobTitle: string) => {
     setJobToRemove({ id: jobId, title: jobTitle });
   };
@@ -185,10 +110,8 @@ const SavedJobs = () => {
     if (!jobToRemove) return;
     const removedId = jobToRemove.id;
     setJobToRemove(null);
-    // Optimistic local update — avoids waiting for refetch round-trip
-    queryClient.setQueryData(['saved-jobs', user?.id], (old: SavedJob[] | undefined) =>
-      old ? old.filter(sj => sj.job_id !== removedId) : old
-    );
+    // Optimistic local update via cache hook
+    removeSavedJobLocally(removedId);
     unsaveJob(removedId);
     refreshSidebarCounts();
   };
