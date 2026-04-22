@@ -84,7 +84,9 @@ function readJobsCache(userId: string, scope: string, orgId: string | null): Job
 function writeJobsCache(userId: string, scope: string, orgId: string | null, jobs: JobPosting[]): void {
   const key = EMPLOYER_JOBS_CACHE_KEY + userId;
   const cached: CachedJobs = {
-    jobs: jobs.slice(0, 100), // Max 100 jobs to save space
+    // 🔥 SCALE: 500 jobb täcker 99% av alla orgs utan att spränga 5MB-quotan.
+    // safeStorage evictar äldre cache-entries automatiskt om vi ändå når taket.
+    jobs: jobs.slice(0, 500),
     scope,
     orgId,
     timestamp: Date.now(),
@@ -221,9 +223,31 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       )
       .subscribe();
 
-    // Also listen to job_applications for live count updates
-    // No server-side filter possible here (we don't know all job_ids upfront),
-    // but the client-side update only applies to matching jobs in cache
+    // Also listen to job_applications for live count updates.
+    // 🔥 SCALE: Buffra deltas per job_id och flush max 1×/sek.
+    // Vid en burst (50 ansökningar/sek) får UI:n EN rerender med +50 i stället
+    // för 50 rerenders. Counten är fortfarande exakt — bara batched.
+    const pendingDeltas = new Map<string, number>();
+    let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const flushDeltas = () => {
+      flushTimer = null;
+      if (pendingDeltas.size === 0) return;
+      const deltas = new Map(pendingDeltas);
+      pendingDeltas.clear();
+      queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
+        if (!oldData) return oldData;
+        let mutated = false;
+        const next = oldData.map(job => {
+          const delta = deltas.get(job.id);
+          if (!delta) return job;
+          mutated = true;
+          return { ...job, applications_count: (job.applications_count || 0) + delta };
+        });
+        return mutated ? next : oldData;
+      });
+    };
+
     const applicationsChannel = supabase
       .channel(`job-apps-rt-${channelSuffix}`)
       .on(
@@ -234,19 +258,19 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           table: 'job_applications'
         },
         (payload) => {
-          queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
-            if (!oldData) return oldData;
-            return oldData.map(job => 
-              job.id === payload.new.job_id 
-                ? { ...job, applications_count: job.applications_count + 1 }
-                : job
-            );
-          });
+          const jobId = (payload.new as { job_id?: string })?.job_id;
+          if (!jobId) return;
+          pendingDeltas.set(jobId, (pendingDeltas.get(jobId) || 0) + 1);
+          if (!flushTimer) flushTimer = setTimeout(flushDeltas, 1000);
         }
       )
       .subscribe();
 
     return () => {
+      if (flushTimer) {
+        clearTimeout(flushTimer);
+        flushDeltas();
+      }
       supabase.removeChannel(channel);
       supabase.removeChannel(applicationsChannel);
     };
