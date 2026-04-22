@@ -18,6 +18,7 @@ import NotificationCenter from '@/components/NotificationCenter';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
+import { useJobSeekerWarmupOrchestrator } from '@/hooks/useJobSeekerWarmupOrchestrator';
 import { useDevice } from '@/hooks/use-device';
 
 
@@ -107,7 +108,11 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   
   // 🚀 Background Sync Engine - håller ALL data färsk 24/7
   useJobSeekerBackgroundSync();
-  
+
+  // 🪜 SPOTIFY-NIVÅ: Trappa-prefetch (sökresultat sida 2-3) + mediawarmup
+  // för logos/avatars i listor & meddelanden. Helt additivt — 0 UI/UX-påverkan.
+  useJobSeekerWarmupOrchestrator();
+
 
   // Desktop layout with top navigation
   if (isDesktop) {
