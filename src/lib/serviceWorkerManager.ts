@@ -10,7 +10,10 @@
  * Det är vår enda "source of truth" för uppdateringar — så vi får
  * inga dubbla reloads eller race conditions.
  */
+import { requestAppReload, shortHash } from './appReloader';
+
 let registration: ServiceWorkerRegistration | null = null;
+let controllerChangeHandled = false;
 
 /**
  * Registrera service worker
@@ -22,10 +25,29 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
   }
 
   try {
-    registration = await navigator.serviceWorker.register('/sw.js', {
+    const buildVersion = document
+      .querySelector('meta[name="parium-build"]')
+      ?.getAttribute('content');
+    const serviceWorkerUrl = buildVersion
+      ? `/sw.js?v=${shortHash(buildVersion)}`
+      : '/sw.js';
+
+    registration = await navigator.serviceWorker.register(serviceWorkerUrl, {
       scope: '/',
       updateViaCache: 'none',
     });
+
+    if (!controllerChangeHandled) {
+      controllerChangeHandled = true;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        requestAppReload('build-version', {
+          purgeCaches: true,
+          cacheBustParam: buildVersion
+            ? { key: '_v', value: shortHash(buildVersion) }
+            : undefined,
+        });
+      });
+    }
 
     // Force check for updates on load
     registration.update().catch(() => {});
