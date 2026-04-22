@@ -50,7 +50,10 @@ export function useCardImage(
       .then((blobUrl) => {
         if (!cancelled) setLoadedBlobUrl(blobUrl);
       })
-      .catch(() => {});
+      .catch(() => {
+        // Blob-fetch misslyckades → tillåt fallback till raw URL
+        if (!cancelled) setBlobFailed(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -58,10 +61,15 @@ export function useCardImage(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedUrl, cachedBlobUrl]);
 
-  // Fallback-priority: blob → loaded → original URL (visa alltid något direkt)
+  // KRITISKT: Visa ENDAST blob-URL tills den är klar.
+  // Tidigare returnerades resolvedUrl som fallback → <img> startade en parallell
+  // browser-fetch samtidigt som imageCache.fetchAndCache körde sin egen fetch
+  // (med credentials:'omit' → annan browser-cache-key). Resultat: dubbel hämtning.
+  // Nu: null tills blob finns. Komponenten ansvarar för fallback-UI (initialer).
+  // Endast om blob-fetchen FAILADE faller vi tillbaka till raw URL.
   const displayUrl = blobFailed
     ? resolvedUrl
-    : cachedBlobUrl || loadedBlobUrl || resolvedUrl;
+    : cachedBlobUrl || loadedBlobUrl || null;
 
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
