@@ -421,9 +421,18 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
   const existingTimestamps = existingData?.pages?.[0]?.items?.map((i: any) => i.updated_at)?.join(',');
 
   if (newTimestamps !== existingTimestamps) {
+    // Bevara extra sidor från useProgressivePagination — byt bara ut sida 1
+    const existingPages = existingData?.pages ?? [];
+    const existingPageParams = existingData?.pageParams ?? [null];
+    const newFirstPage = { items, nextCursor: items.length === PAGE_SIZE ? items[items.length - 1].updated_at : null };
+
     queryClient.setQueryData(queryKey, {
-      pages: [{ items, nextCursor: items.length === PAGE_SIZE ? items[items.length - 1].updated_at : null }],
-      pageParams: [null],
+      pages: existingPages.length > 1
+        ? [newFirstPage, ...existingPages.slice(1)]
+        : [newFirstPage],
+      pageParams: existingPageParams.length > 1
+        ? [null, ...existingPageParams.slice(1)]
+        : [null],
     });
   }
 
