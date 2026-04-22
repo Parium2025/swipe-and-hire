@@ -109,9 +109,11 @@ export const useSavedJobs = () => {
     fetchSavedJobs();
   }, [fetchSavedJobs]);
 
-  // Realtime-prenumeration för sparade jobb-uppdateringar
+  // Realtime: cross-tab/device sync only. Local mutations are already optimistic,
+  // so we debounce inbound events and let the next refetch reconcile.
   useEffect(() => {
     if (!user) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
 
     const channel = supabase
       .channel(`saved-jobs-${user.id}`)
@@ -124,12 +126,14 @@ export const useSavedJobs = () => {
           filter: `user_id=eq.${user.id}`
         },
         () => {
-          fetchSavedJobs();
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => fetchSavedJobs(), 400);
         }
       )
       .subscribe();
 
     return () => {
+      if (timer) clearTimeout(timer);
       supabase.removeChannel(channel);
     };
   }, [user, fetchSavedJobs]);
