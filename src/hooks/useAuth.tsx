@@ -2259,6 +2259,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearInterval(reconnectionPollInterval);
         reconnectionPollInterval = null;
       }
+
+      // Clear debounce timers
+      if (jobRefreshTimer) clearTimeout(jobRefreshTimer);
+      if (employerAppsTimer) clearTimeout(employerAppsTimer);
       
       supabase.removeChannel(jobChannel);
       supabase.removeChannel(savedChannel);
