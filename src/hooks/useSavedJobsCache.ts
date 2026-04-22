@@ -147,7 +147,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     enabled: !!user,
     staleTime: 60_000,
     gcTime: Infinity,
-    refetchOnMount: true,
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
     structuralSharing: false,
     placeholderData: () => {
@@ -180,7 +180,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     enabled: !!user && enableSkipped,
     staleTime: 60_000,
     gcTime: Infinity,
-    refetchOnMount: true,
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
     structuralSharing: false,
     placeholderData: () => {
