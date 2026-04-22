@@ -210,6 +210,12 @@ export function TruncatedText({
   const showTooltipTouch = !supportsHover && isTouch && (alwaysShowTooltip === true || isTruncated);
   const shouldShowTooltip = showTooltipDesktop || showTooltipTouch;
 
+  useEffect(() => {
+    if (!supportsHover || forceClosed) return;
+    const wantsOpen = shouldShowTooltip && (isDesktopHovering || isDesktopFocused);
+    setIsOpen(wantsOpen);
+  }, [supportsHover, forceClosed, shouldShowTooltip, isDesktopHovering, isDesktopFocused]);
+
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
