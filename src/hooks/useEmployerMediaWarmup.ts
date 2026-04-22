@@ -89,9 +89,9 @@ export function useEmployerMediaWarmup() {
             prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}),
           ),
         );
-        // Större (för detaljvy / swipe)
+        // Större (för detaljvy / swipe) — cap till 10 för att spara bandbredd
         Promise.allSettled(
-          limitedImages.slice(0, 25).map((p) =>
+          limitedImages.slice(0, 10).map((p) =>
             prefetchMediaUrl(p, 'profile-image', 86400, PROFILE_IMAGE_TRANSFORM).catch(() => {}),
           ),
         );
