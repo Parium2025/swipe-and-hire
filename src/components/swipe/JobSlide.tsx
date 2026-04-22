@@ -130,17 +130,22 @@ export const JobSlide = memo(function JobSlide({
   const nextImageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(nextJob?.job_image_url), nextJob?.updated_at), [nextJob?.job_image_url, nextJob?.updated_at]);
   const rawLogoUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(job.company_logo_url, 'company-logos'), job.updated_at), [job.company_logo_url, job.updated_at]);
   const nextLogoUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(nextJob?.company_logo_url, 'company-logos'), nextJob?.updated_at), [nextJob?.company_logo_url, nextJob?.updated_at]);
-  const cachedLogoBlob = useMemo(() => rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null, [rawLogoUrl]);
-  const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(null);
+  // Synkron cache-läsning vid varje render → ger blob-URL direkt om logon redan är preloadad
+  const cachedLogoBlob = rawLogoUrl ? imageCache.getCachedUrl(rawLogoUrl) : null;
+  const [loadedLogoBlob, setLoadedLogoBlob] = useState<string | null>(() => cachedLogoBlob);
   const [logoBlobFailed, setLogoBlobFailed] = useState(false);
   useEffect(() => {
-    if (!rawLogoUrl || cachedLogoBlob) { setLoadedLogoBlob(null); return; }
+    if (!rawLogoUrl) { setLoadedLogoBlob(null); return; }
+    // Om redan i cache → använd direkt, ingen ny fetch
+    if (cachedLogoBlob) { setLoadedLogoBlob(cachedLogoBlob); return; }
     setLogoBlobFailed(false);
     let cancelled = false;
     imageCache.loadImage(rawLogoUrl).then(b => { if (!cancelled) setLoadedLogoBlob(b); }).catch(() => {});
     return () => { cancelled = true; };
   }, [rawLogoUrl, cachedLogoBlob]);
-  const logoUrl = logoBlobFailed ? rawLogoUrl : (cachedLogoBlob || loadedLogoBlob || rawLogoUrl);
+  // Fallback-kedja: blob först, raw URL ENDAST som sista utväg vid blob-fel.
+  // Tidigare: rawLogoUrl visades direkt → triggade dubbelfetch + flicker.
+  const logoUrl = logoBlobFailed ? rawLogoUrl : (cachedLogoBlob || loadedLogoBlob || null);
 
   const handleLogoError = useMemo(() => {
     return (e: React.SyntheticEvent<HTMLImageElement>) => {
