@@ -23,7 +23,8 @@ import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useSwipeActions } from '@/hooks/useSwipeActions';
 import { usePreloadImages } from '@/hooks/useCachedImage';
 
-type SortOption = 'newest' | 'oldest' | 'expired' | 'active';
+type SortOption = 'newest' | 'oldest';
+type StatusFilter = 'all' | 'active' | 'expired';
 type TabValue = 'saved' | 'skipped';
 
 interface SavedJob {
