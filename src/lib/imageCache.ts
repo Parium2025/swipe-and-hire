@@ -15,8 +15,12 @@ class ImageCache {
   private cache = new Map<string, CachedImage>();
   private loading = new Map<string, Promise<CachedImage>>();
   private readonly CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 dagar
-  // LRU-tak: håll minnesförbrukning under kontroll på low-end devices
-  private readonly MAX_ENTRIES = 200;
+  // LRU-tak: håll minnesförbrukning under kontroll på low-end devices.
+  // Höjt från 200 → 500 för att skydda logos (5–20 KB styck) från att evictas
+  // mellan jobbilder (200–800 KB styck) i swipe-läget.
+  private readonly MAX_ENTRIES = 500;
+  // Logos och små bilder skyddas från LRU-eviction så länge de är under denna gräns
+  private readonly SMALL_ASSET_THRESHOLD_BYTES = 50 * 1024; // 50 KB
   
   // Filändelser som aldrig ska blob-cachas (stora/binära dokument)
   private readonly SKIP_EXTENSIONS = ['.avi', '.mkv'];
@@ -30,9 +34,22 @@ class ImageCache {
   }
 
   /**
-   * Evictar äldsta posten/poster tills vi är under MAX_ENTRIES
+   * Evictar äldsta posten/poster tills vi är under MAX_ENTRIES.
+   * Hoppar över små assets (logos, ikoner) så de aldrig flickar mellan navigeringar.
    */
   private enforceLimit(): void {
+    if (this.cache.size <= this.MAX_ENTRIES) return;
+
+    // Iterera från äldsta → nyaste och evicta endast STORA assets först
+    for (const [key, cached] of this.cache.entries()) {
+      if (this.cache.size <= this.MAX_ENTRIES) break;
+      if (cached.blob.size >= this.SMALL_ASSET_THRESHOLD_BYTES) {
+        URL.revokeObjectURL(cached.objectUrl);
+        this.cache.delete(key);
+      }
+    }
+
+    // Om vi fortfarande är över taket (extremfall: bara små assets) → evicta äldsta oavsett storlek
     while (this.cache.size > this.MAX_ENTRIES) {
       const oldestKey = this.cache.keys().next().value;
       if (!oldestKey) break;

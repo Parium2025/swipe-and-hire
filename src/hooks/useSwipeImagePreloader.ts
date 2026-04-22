@@ -37,19 +37,26 @@ export function useSwipeImagePreloader(
   const didBulkRef = useRef(false);
 
   // One-time bulk preload of the first N jobs as soon as the list is available.
+  // 🚀 LOGOS: bulk-preloada ALLA logos i listan (små filer, ofta återanvända per företag).
+  // 🖼️ JOB-IMAGES: bulk-preloada första `initialBulk` (stora filer, vi vill inte saturera nätverket).
   useEffect(() => {
     if (didBulkRef.current) return;
     if (!jobs || jobs.length === 0) return;
     didBulkRef.current = true;
 
     const urls: string[] = [];
+
+    // ALLA logos (small assets, försumbar minnes-/nätverkskostnad, dedupar via Set i cache)
+    for (let i = 0; i < jobs.length; i++) {
+      const logoUrl = appendVersionToUrl(resolveUrl(jobs[i].company_logo_url, 'company-logos'), jobs[i].updated_at);
+      if (logoUrl && !loadedRef.current.has(logoUrl)) urls.push(logoUrl);
+    }
+
+    // Första N jobbilder (large assets)
     const upper = Math.min(initialBulk, jobs.length);
     for (let i = 0; i < upper; i++) {
-      const job = jobs[i];
-      const imgUrl = appendVersionToUrl(resolveUrl(job.job_image_url, 'job-images'), job.updated_at);
-      const logoUrl = appendVersionToUrl(resolveUrl(job.company_logo_url, 'company-logos'), job.updated_at);
+      const imgUrl = appendVersionToUrl(resolveUrl(jobs[i].job_image_url, 'job-images'), jobs[i].updated_at);
       if (imgUrl && !loadedRef.current.has(imgUrl)) urls.push(imgUrl);
-      if (logoUrl && !loadedRef.current.has(logoUrl)) urls.push(logoUrl);
     }
 
     urls.forEach(u => loadedRef.current.add(u));
