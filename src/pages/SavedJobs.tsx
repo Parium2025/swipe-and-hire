@@ -247,37 +247,46 @@ const SavedJobs = () => {
   );
 
   useEffect(() => {
-    if (!savedJobIdsKey) return;
+    if (!user?.id || !savedJobIdsKey) return;
     const ids = new Set(savedJobIdsKey.split(',').filter(Boolean));
     if (ids.size === 0) return;
 
     const channel = supabase
-      .channel(`saved-jobs-applications-count-${user?.id ?? 'anon'}`)
+      .channel(`saved-jobs-applications-count-${user.id}`)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'job_postings' },
         (payload) => {
-          // Filter client-side: only react to jobs we actually have saved
           if (!ids.has(payload.new.id)) return;
-          queryClient.setQueryData(['saved-jobs', user?.id], (oldData: SavedJob[] | undefined) => {
+          queryClient.setQueryData(['saved-jobs', user.id], (oldData: SavedJob[] | undefined) => {
             if (!oldData) return oldData;
-            return oldData.map(savedJob => {
-              if (savedJob.job_postings && savedJob.job_postings.id === payload.new.id) {
-                return {
-                  ...savedJob,
-                  job_postings: {
-                    ...savedJob.job_postings,
-                    applications_count: payload.new.applications_count,
-                    workplace_name: payload.new.workplace_name,
-                    company_logo_url: payload.new.company_logo_url,
-                    is_active: payload.new.is_active,
-                    expires_at: payload.new.expires_at,
-                    deleted_at: payload.new.deleted_at,
-                  },
-                };
+            let changed = false;
+            const next = oldData.map(savedJob => {
+              if (!savedJob.job_postings || savedJob.job_postings.id !== payload.new.id) return savedJob;
+              const jp = savedJob.job_postings;
+              if (
+                jp.applications_count === payload.new.applications_count &&
+                jp.workplace_name === payload.new.workplace_name &&
+                jp.company_logo_url === payload.new.company_logo_url &&
+                jp.is_active === payload.new.is_active &&
+                jp.expires_at === payload.new.expires_at
+              ) {
+                return savedJob;
               }
-              return savedJob;
+              changed = true;
+              return {
+                ...savedJob,
+                job_postings: {
+                  ...jp,
+                  applications_count: payload.new.applications_count,
+                  workplace_name: payload.new.workplace_name,
+                  company_logo_url: payload.new.company_logo_url,
+                  is_active: payload.new.is_active,
+                  expires_at: payload.new.expires_at,
+                },
+              };
             });
+            return changed ? next : oldData;
           });
         }
       )
@@ -292,9 +301,13 @@ const SavedJobs = () => {
 
   const confirmRemove = () => {
     if (!jobToRemove) return;
-    unsaveJob(jobToRemove.id);
+    const removedId = jobToRemove.id;
     setJobToRemove(null);
-    queryClient.invalidateQueries({ queryKey: ['saved-jobs', user?.id] });
+    // Optimistic local update — avoids waiting for refetch round-trip
+    queryClient.setQueryData(['saved-jobs', user?.id], (old: SavedJob[] | undefined) =>
+      old ? old.filter(sj => sj.job_id !== removedId) : old
+    );
+    unsaveJob(removedId);
     refreshSidebarCounts();
   };
 
