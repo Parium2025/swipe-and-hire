@@ -19,6 +19,9 @@ import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobsCache, type SavedJob } from '@/hooks/useSavedJobsCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
+import { useBlobCachePrewarm } from '@/hooks/useBlobCachePrewarm';
+import { supabase } from '@/integrations/supabase/client';
+import { imageCache } from '@/lib/imageCache';
 
 
 type SortOption = 'newest' | 'oldest';
@@ -49,13 +52,8 @@ const SavedJobs = () => {
     restoreSkippedJob,
   } = useSavedJobsCache({ enableSkipped: activeTab === 'skipped' });
 
-  // Delayed fade-in so heavy job cards don't mount during sidebar close animation
-  // (matches MyApplications/SearchJobs pattern — eliminates perceived lag)
   const [showContent, setShowContent] = useState(false);
-  useEffect(() => {
-    const timer = setTimeout(() => setShowContent(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+  const hasPrimedInitialView = useRef(false);
 
   // Mouse-drag scrolling for sort chips
   const chipsRef = useRef<HTMLDivElement>(null);
@@ -152,6 +150,63 @@ const SavedJobs = () => {
       return true;
     });
   }, [skippedJobs]);
+
+  const activeJobsForMedia = activeTab === 'saved' ? sortedJobs : filteredSkippedJobs;
+
+  const prewarmEntries = useMemo(() => {
+    return activeJobsForMedia.slice(0, 8).flatMap((entry) => {
+      const posting = entry.job_postings;
+      if (!posting) return [];
+
+      return [
+        { path: posting.job_image_url, bucket: 'job-images' as const },
+        { path: posting.company_logo_url, bucket: 'company-logos' as const },
+      ].filter((item) => Boolean(item.path));
+    });
+  }, [activeJobsForMedia]);
+
+  useBlobCachePrewarm(prewarmEntries);
+
+  const initialPriorityUrls = useMemo(() => {
+    return prewarmEntries.slice(0, 4).flatMap((entry) => {
+      if (!entry.path) return [];
+      if (entry.path.startsWith('http')) return [entry.path];
+
+      const { data } = supabase.storage.from(entry.bucket).getPublicUrl(entry.path);
+      return data?.publicUrl ? [data.publicUrl] : [];
+    });
+  }, [prewarmEntries]);
+
+  useEffect(() => {
+    if (hasPrimedInitialView.current) return;
+
+    let cancelled = false;
+    const fallbackTimer = window.setTimeout(() => {
+      if (!cancelled) {
+        hasPrimedInitialView.current = true;
+        setShowContent(true);
+      }
+    }, 220);
+
+    if (initialPriorityUrls.length === 0) {
+      hasPrimedInitialView.current = true;
+      setShowContent(true);
+      window.clearTimeout(fallbackTimer);
+      return () => undefined;
+    }
+
+    Promise.allSettled(initialPriorityUrls.map((url) => imageCache.loadImage(url))).finally(() => {
+      if (cancelled || hasPrimedInitialView.current) return;
+      hasPrimedInitialView.current = true;
+      window.clearTimeout(fallbackTimer);
+      setShowContent(true);
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(fallbackTimer);
+    };
+  }, [initialPriorityUrls]);
 
 
   if (!showContent) {
