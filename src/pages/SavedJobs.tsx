@@ -240,14 +240,25 @@ const SavedJobs = () => {
     structuralSharing: false,
   });
 
-  // Real-time för applications_count uppdateringar
+  // Real-time för applications_count uppdateringar – endast för jobb som är sparade
+  const savedJobIdsKey = useMemo(
+    () => savedJobs.map(sj => sj.job_id).sort().join(','),
+    [savedJobs]
+  );
+
   useEffect(() => {
+    if (!savedJobIdsKey) return;
+    const ids = new Set(savedJobIdsKey.split(',').filter(Boolean));
+    if (ids.size === 0) return;
+
     const channel = supabase
-      .channel('saved-jobs-applications-count')
+      .channel(`saved-jobs-applications-count-${user?.id ?? 'anon'}`)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'job_postings' },
         (payload) => {
+          // Filter client-side: only react to jobs we actually have saved
+          if (!ids.has(payload.new.id)) return;
           queryClient.setQueryData(['saved-jobs', user?.id], (oldData: SavedJob[] | undefined) => {
             if (!oldData) return oldData;
             return oldData.map(savedJob => {
@@ -273,7 +284,7 @@ const SavedJobs = () => {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [queryClient, user?.id]);
+  }, [queryClient, user?.id, savedJobIdsKey]);
 
   const handleUnsaveClick = (jobId: string, jobTitle: string) => {
     setJobToRemove({ id: jobId, title: jobTitle });
