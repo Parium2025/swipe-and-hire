@@ -152,6 +152,12 @@ interface UseOptimizedJobSearchOptions {
   category: string;
   subcategories: string[];
   enabled?: boolean;
+  /** 🔥 SCALE: Filtrera på arbetsgivar-ID i DB istället för i klienten. */
+  employerIds?: string[];
+  /** 🔥 SCALE: ISO-timestamp; jobb skapade efter denna tid filtreras i DB. */
+  createdAfter?: string | null;
+  /** Antal jobb per batch. Default 100. */
+  pageSize?: number;
 }
 
 const normalizeSwedish = (text: string): string => {
@@ -396,10 +402,6 @@ interface JobReviewMap {
   };
 }
 
-interface LiveJobBrandingMap {
-  [jobId: string]: Partial<SearchJob>;
-}
-
 interface RealtimeJobPosting extends Partial<SearchJob> {
   id: string;
   deleted_at?: string | null;
@@ -443,75 +445,8 @@ function useCompanyReviews(employerIds: string[]) {
   });
 }
 
-function useLiveJobBranding(jobIds: string[]) {
-  return useQuery({
-    queryKey: ['search-job-live-branding', jobIds],
-    queryFn: async (): Promise<LiveJobBrandingMap> => {
-      if (jobIds.length === 0) return {};
-
-      const { data, error } = await supabase
-        .from('job_postings')
-        .select(`
-          id,
-          title,
-          description,
-          location,
-          workplace_city,
-          workplace_county,
-          workplace_municipality,
-          workplace_address,
-          workplace_name,
-          workplace_postal_code,
-          employment_type,
-          work_schedule,
-          salary_min,
-          salary_max,
-          salary_type,
-          salary_transparency,
-          positions_count,
-          occupation,
-          pitch,
-          requirements,
-          benefits,
-          remote_work_possible,
-          work_location_type,
-          contact_email,
-          application_instructions,
-          job_image_url,
-          job_image_desktop_url,
-          employer_id,
-          is_active,
-          views_count,
-          applications_count,
-          created_at,
-          updated_at,
-          expires_at,
-          image_focus_position,
-          company_logo_url
-        `)
-        .in('id', jobIds);
-
-      if (error) throw error;
-
-      return (data || []).reduce<LiveJobBrandingMap>((acc, job) => {
-        acc[job.id] = {
-          ...job,
-          company_logo_url: job.company_logo_url || undefined,
-        } as Partial<SearchJob>;
-        return acc;
-      }, {});
-    },
-    enabled: jobIds.length > 0,
-    staleTime: 30 * 1000,
-    gcTime: 5 * 60 * 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
-  });
-}
-
 export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
-  const { enabled = true } = options;
+  const { enabled = true, employerIds: employerIdsFilter, createdAfter, pageSize = 100 } = options;
   const queryClient = useQueryClient();
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -525,6 +460,17 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     salarySearch,
   } = useSearchParamsState(options);
 
+  // Stabil nyckel för employerIds (sortad) så att vi inte triggar refetch
+  // bara för att array-referensen ändras.
+  const employerIdsKey = useMemo(() => {
+    if (!employerIdsFilter || employerIdsFilter.length === 0) return '';
+    return [...employerIdsFilter].sort().join(',');
+  }, [employerIdsFilter]);
+
+  const employerIdsArray = useMemo(() => {
+    return employerIdsKey ? employerIdsKey.split(',') : null;
+  }, [employerIdsKey]);
+
   const cacheKey = useMemo(
     () => searchCacheKey([
       'optimized-job-search',
@@ -535,11 +481,25 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       categoryFilter,
       salarySearch?.targetSalary,
       salarySearch?.isMinimumSearch,
+      employerIdsKey,
+      createdAfter || '',
     ]),
-    [fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch]
+    [fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, employerIdsKey, createdAfter]
   );
 
-  const { data: rawJobs = [], isLoading, error, refetch } = useQuery({
+  // 🔥 SCALE: useInfiniteQuery med cursor-paginering på created_at.
+  // Första sidan visas direkt; fetchNextPage() laddar nästa batch (default 100)
+  // utan att hämta om tidigare sidor. Detta tar bort 100-jobbs-taket och
+  // skalar till miljoner rader eftersom DB:n bara läser pageSize rader per call.
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: [
       'optimized-job-search',
       fullSearchQuery,
@@ -549,8 +509,10 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       categoryFilter,
       salarySearch?.targetSalary,
       salarySearch?.isMinimumSearch,
+      employerIdsKey,
+      createdAfter || '',
     ],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }) => {
       if (abortControllerRef.current) abortControllerRef.current.abort();
       abortControllerRef.current = new AbortController();
 
@@ -563,26 +525,31 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
           p_category: categoryFilter || null,
           p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
           p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
-          p_limit: 100,
+          p_limit: pageSize,
           p_offset: 0,
-          p_cursor_created_at: null,
-        });
+          p_cursor_created_at: (pageParam as string | null) || null,
+          p_employer_ids: employerIdsArray,
+          p_created_after: createdAfter || null,
+        } as any);
 
         if (error) throw error;
-        const jobs = (data || []) as SearchJob[];
-        // 🔥 Spara senaste lyckade resultat som offline-fallback
-        writeSearchCache(cacheKey, jobs);
-        return jobs;
+        return (data || []) as SearchJob[];
       } catch (err) {
-        // Vid nätverksfel: använd cachad data om den finns, annars kasta vidare
-        const cached = readSearchCache(cacheKey);
-        if (cached && cached.length > 0) {
-          // 🔥 Förvärm logotyper även i offline-fallet så blob-cache fylls på
-          warmCompanyLogos(cached);
-          return cached;
+        // Vid första sidan + nätverksfel: använd cachad data om den finns
+        if (!pageParam) {
+          const cached = readSearchCache(cacheKey);
+          if (cached && cached.length > 0) {
+            warmCompanyLogos(cached);
+            return cached;
+          }
         }
         throw err;
       }
+    },
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || lastPage.length < pageSize) return undefined;
+      return lastPage[lastPage.length - 1]?.created_at || undefined;
     },
     enabled,
     staleTime: 30 * 1000,
@@ -590,45 +557,36 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    // 🔥 Visa cachad data direkt (offline eller ej) — query refetchar i bakgrunden
-    initialData: () => {
-      const cached = readSearchCache(cacheKey);
-      if (cached && cached.length > 0) {
-        // 🔥 Förvärm logotyper för cachade kort så de renderas utan flimmer
-        warmCompanyLogos(cached);
-        return cached;
-      }
-      return undefined;
-    },
-    initialDataUpdatedAt: () => {
-      const cached = readSearchCache(cacheKey);
-      // Sätt äldre timestamp så att refetch triggas direkt när nätet finns
-      return cached && cached.length > 0 ? Date.now() - 60_000 : undefined;
-    },
   });
+
+  const rawJobs = useMemo(() => {
+    const flat = data?.pages.flat() || [];
+    // Persistera första sidan som offline-fallback
+    if (flat.length > 0 && (data?.pages.length ?? 0) === 1) {
+      writeSearchCache(cacheKey, flat);
+    }
+    return flat;
+  }, [data, cacheKey]);
 
   const employerIds = useMemo(() => [...new Set(rawJobs.map((job) => job.employer_id).filter(Boolean))], [rawJobs]);
   const jobIds = useMemo(() => [...new Set(rawJobs.map((job) => job.id).filter(Boolean))], [rawJobs]);
 
-  const { data: liveJobBranding = {} } = useLiveJobBranding(jobIds);
+  // 🔥 SCALE: useLiveJobBranding togs bort — RPC:n search_jobs returnerar redan
+  // workplace_name + company_logo_url + alla branding-fält. Realtime-listenern
+  // nedan håller datan färsk om en arbetsgivare byter logo eller namn.
   const { data: reviewsData = {} } = useCompanyReviews(employerIds);
 
   const enrichedJobs = useMemo(() => {
     const jobs = rawJobs
       .map((job) => {
-        const mergedJob = {
-          ...job,
-          ...(liveJobBranding[job.id] || {}),
-        } as SearchJob;
-
         return {
-          ...mergedJob,
-          company_name: mergedJob.workplace_name?.trim() || 'Okänt företag',
-          company_logo_url: mergedJob.company_logo_url || undefined,
-          company_avg_rating: reviewsData[mergedJob.employer_id]?.avgRating,
-          company_review_count: reviewsData[mergedJob.employer_id]?.reviewCount || 0,
-          views_count: mergedJob.views_count || 0,
-          applications_count: mergedJob.applications_count || 0,
+          ...job,
+          company_name: job.workplace_name?.trim() || 'Okänt företag',
+          company_logo_url: job.company_logo_url || undefined,
+          company_avg_rating: reviewsData[job.employer_id]?.avgRating,
+          company_review_count: reviewsData[job.employer_id]?.reviewCount || 0,
+          views_count: job.views_count || 0,
+          applications_count: job.applications_count || 0,
         };
       })
       .filter((job) => !getTimeRemaining(job.created_at, job.expires_at).isExpired);
@@ -652,77 +610,77 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         return searchableFields.some((field) => field === normalizedSelection || field.includes(normalizedSelection));
       });
     });
-  }, [rawJobs, liveJobBranding, reviewsData, selectedLocations]);
+  }, [rawJobs, reviewsData, selectedLocations]);
+
+  // 🔥 SCALE: Realtime-listenern är scope:ad till de jobb som faktiskt visas.
+  // PostgREST in.()-filter cap:as på 200 ids; vi prenumererar på max 200 av
+  // de mest relevanta (första sidan), inte hela det infinitivt växande resultatet.
+  const realtimeJobIdsKey = useMemo(() => {
+    if (jobIds.length === 0) return '';
+    return jobIds.slice(0, 200).sort().join(',');
+  }, [jobIds]);
 
   useEffect(() => {
+    if (!realtimeJobIdsKey) return;
+    const ids = realtimeJobIdsKey.split(',');
+    const filter = `id=in.(${ids.join(',')})`;
+
     const channel = supabase
-      .channel('optimized-search-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, (payload) => {
-        const nextJob = payload.new as RealtimeJobPosting;
-        const previousJob = payload.old as RealtimeJobPosting;
+      .channel(`optimized-search-realtime-${ids.length}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'job_postings', filter },
+        (payload) => {
+          const nextJob = payload.new as RealtimeJobPosting;
+          const previousJob = payload.old as RealtimeJobPosting;
 
-        if (payload.eventType === 'UPDATE') {
-          queryClient.setQueriesData<SearchJob[]>({ queryKey: ['optimized-job-search'] }, (existingJobs) => {
-            if (!existingJobs) return existingJobs;
+          if (payload.eventType === 'UPDATE') {
+            queryClient.setQueriesData<{ pages: SearchJob[][]; pageParams: unknown[] }>(
+              { queryKey: ['optimized-job-search'] },
+              (existing) => {
+                if (!existing?.pages) return existing;
+                return {
+                  ...existing,
+                  pages: existing.pages.map((page) => {
+                    if (!isRealtimeJobVisible(nextJob)) {
+                      return page.filter((job) => job.id !== nextJob.id);
+                    }
+                    return page.map((job) => (
+                      job.id === nextJob.id
+                        ? {
+                            ...job,
+                            ...nextJob,
+                            company_name: nextJob.workplace_name?.trim() || (job as any).company_name || 'Okänt företag',
+                            company_logo_url: nextJob.company_logo_url ?? job.company_logo_url,
+                          }
+                        : job
+                    ));
+                  }),
+                };
+              }
+            );
+          }
 
-            if (!isRealtimeJobVisible(nextJob)) {
-              return existingJobs.filter((job) => job.id !== nextJob.id);
-            }
-
-            return existingJobs.map((job) => (
-              job.id === nextJob.id
-                ? {
-                    ...job,
-                    ...nextJob,
-                    company_name: nextJob.workplace_name?.trim() || job.company_name || 'Okänt företag',
-                    company_logo_url: nextJob.company_logo_url ?? job.company_logo_url,
-                  }
-                : job
-            ));
-          });
-
-          queryClient.setQueriesData<LiveJobBrandingMap>({ queryKey: ['search-job-live-branding'] }, (existingMap) => {
-            if (!existingMap) return existingMap;
-
-            if (!isRealtimeJobVisible(nextJob)) {
-              if (!(nextJob.id in existingMap)) return existingMap;
-              const { [nextJob.id]: _removed, ...rest } = existingMap;
-              return rest;
-            }
-
-            return {
-              ...existingMap,
-              [nextJob.id]: {
-                ...existingMap[nextJob.id],
-                ...nextJob,
-                company_logo_url: nextJob.company_logo_url || undefined,
-              },
-            };
-          });
+          if (payload.eventType === 'DELETE') {
+            queryClient.setQueriesData<{ pages: SearchJob[][]; pageParams: unknown[] }>(
+              { queryKey: ['optimized-job-search'] },
+              (existing) => {
+                if (!existing?.pages) return existing;
+                return {
+                  ...existing,
+                  pages: existing.pages.map((page) => page.filter((job) => job.id !== previousJob.id)),
+                };
+              }
+            );
+          }
         }
-
-        if (payload.eventType === 'DELETE') {
-          queryClient.setQueriesData<SearchJob[]>({ queryKey: ['optimized-job-search'] }, (existingJobs) => {
-            if (!existingJobs) return existingJobs;
-            return existingJobs.filter((job) => job.id !== previousJob.id);
-          });
-
-          queryClient.setQueriesData<LiveJobBrandingMap>({ queryKey: ['search-job-live-branding'] }, (existingMap) => {
-            if (!existingMap || !(previousJob.id in existingMap)) return existingMap;
-            const { [previousJob.id]: _removed, ...rest } = existingMap;
-            return rest;
-          });
-        }
-
-        queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-        queryClient.invalidateQueries({ queryKey: ['search-job-live-branding'] });
-      })
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [queryClient, realtimeJobIdsKey]);
 
   useEffect(() => {
     return () => {
@@ -736,6 +694,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     error,
     refetch,
     totalCount: enrichedJobs.length,
+    fetchNextPage,
+    hasNextPage: !!hasNextPage,
+    isFetchingNextPage,
   };
 }
 

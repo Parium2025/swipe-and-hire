@@ -247,7 +247,7 @@ const Sidebar = React.forwardRef<
           <div
             className={cn(
               "fixed inset-0 z-50 bg-[hsl(215_85%_10%)]/70",
-              transitionsReady && "transition-opacity duration-300",
+              transitionsReady && "transition-opacity duration-[380ms] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]",
               openMobile ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
             onClick={() => setOpenMobile(false)}
@@ -259,8 +259,13 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             data-mobile="true"
                className={cn(
-                "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] max-w-[calc(100vw-0.75rem)] flex-col overflow-hidden border-r border-[hsl(var(--sidebar-foreground)/0.2)] bg-gradient-parium p-0 text-sidebar-foreground ease-out supports-[backdrop-filter]:backdrop-blur-xl",
-              transitionsReady && "transition-transform duration-300 will-change-transform",
+                "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] max-w-[calc(100vw-0.75rem)] flex-col overflow-hidden border-r border-[hsl(var(--sidebar-foreground)/0.2)] bg-gradient-parium p-0 text-sidebar-foreground",
+              // Backdrop-blur är dyrt på mobil GPU och gör slide-animationen
+              // hackig. Aktivera blur ENDAST när drawern är öppen (då syns
+              // den ändå) — under in/ut-animation och när stängd kör vi utan
+              // blur så transform-animationen blir helt mjuk.
+              openMobile && "supports-[backdrop-filter]:backdrop-blur-xl",
+              transitionsReady && "transition-transform duration-[380ms] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] will-change-transform",
               side === "left" ? "left-0" : "right-0",
               openMobile
                 ? "translate-x-0"
@@ -297,7 +302,7 @@ const Sidebar = React.forwardRef<
         {/* This is what handles the sidebar gap on desktop */}
         <div
           className={cn(
-            "duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-linear",
+            "duration-300 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]",
             "group-data-[collapsible=offcanvas]:w-0",
             "group-data-[side=right]:rotate-180",
             variant === "floating" || variant === "inset"
@@ -307,7 +312,7 @@ const Sidebar = React.forwardRef<
         />
         <div
           className={cn(
-            "duration-200 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] ease-linear md:flex",
+            "duration-300 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] md:flex",
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
