@@ -222,27 +222,9 @@ export function TruncatedText({
     ...style,
   };
 
-  // Lightweight initial render: no tooltip wrapper, no measurement.
-  // We attach hover/focus/touch handlers so tooltip is wired the moment
-  // the user actually interacts.
-  if (!shouldShowTooltip) {
-    return (
-      <div
-        ref={textRef}
-        className={className}
-        style={wordBreakStyles}
-        onClick={onClick}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onTouchStart={isTouch && !supportsHover ? measureTruncation : undefined}
-        title={hasMeasured ? undefined : text}
-      >
-        {children || text}
-      </div>
-    );
-  }
+  const showNativeTitle = supportsHover
+    ? (tooltipForcedOn || isTruncated || !hasMeasured ? text : undefined)
+    : undefined;
 
   // Stop propagation to prevent parent onClick from firing when interacting with tooltip
   const handleClick = (e: React.MouseEvent) => {
@@ -275,33 +257,37 @@ export function TruncatedText({
             onMouseLeave={handleMouseLeave}
             onFocus={handleFocus}
             onBlur={handleBlur}
+            onTouchStart={isTouch && !supportsHover ? measureTruncation : undefined}
             onMouseDown={(e) => e.stopPropagation()}
+            title={showNativeTitle}
           >
             {children || text}
           </div>
         </TooltipTrigger>
-        <TooltipContent
-          ref={tooltipContentRef}
-          allowOutsidePointerEvents
-          side={tooltipSide}
-          align="center"
-          sideOffset={8}
-          avoidCollisions={true}
-          collisionPadding={12}
-          sticky="always"
-          className={`z-[999999] w-[min(calc(100vw-24px),360px)] max-w-[min(calc(100vw-24px),360px)] sm:w-auto sm:max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
-          onPointerDown={stopTooltipPropagation}
-          onPointerMove={stopTooltipPropagation}
-          onPointerUp={stopTooltipPropagation}
-          onTouchStart={stopTooltipPropagation}
-          onTouchMove={stopTooltipPropagation}
-          onTouchEnd={stopTooltipPropagation}
-          onMouseDown={(e) => e.stopPropagation()}
-          onWheel={(e) => e.stopPropagation()}
-          onScrollCapture={stopTooltipPropagation}
-        >
-          <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{text}</p>
-        </TooltipContent>
+        {shouldShowTooltip ? (
+          <TooltipContent
+            ref={tooltipContentRef}
+            allowOutsidePointerEvents
+            side={tooltipSide}
+            align="center"
+            sideOffset={8}
+            avoidCollisions={true}
+            collisionPadding={12}
+            sticky="always"
+            className={`z-[999999] w-[min(calc(100vw-24px),360px)] max-w-[min(calc(100vw-24px),360px)] sm:w-auto sm:max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
+            onPointerDown={stopTooltipPropagation}
+            onPointerMove={stopTooltipPropagation}
+            onPointerUp={stopTooltipPropagation}
+            onTouchStart={stopTooltipPropagation}
+            onTouchMove={stopTooltipPropagation}
+            onTouchEnd={stopTooltipPropagation}
+            onMouseDown={(e) => e.stopPropagation()}
+            onWheel={(e) => e.stopPropagation()}
+            onScrollCapture={stopTooltipPropagation}
+          >
+            <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{text}</p>
+          </TooltipContent>
+        ) : null}
       </Tooltip>
     </TooltipProvider>
   );
