@@ -99,8 +99,9 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
   // Centraliserad bild-hantering — eliminerar 12 hooks per kort.
   // Använder samma hook som MobileJobCard så båda korten har identisk render-kostnad.
-  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url ?? null, 'job-images');
-  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos');
+  // 🚀 Transform: kortbild ~600x400 (5-10× mindre), logo ~64px
+  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url ?? null, 'job-images', undefined, { width: 600, height: 400, quality: 75, resize: 'cover' });
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', undefined, { width: 64, height: 64, quality: 80, resize: 'contain' });
 
   const companyName = job.workplace_name || job.company_name || 'Okänt företag';
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);

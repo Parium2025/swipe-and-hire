@@ -60,8 +60,9 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
     : null;
 
   // Centraliserad bild-hantering — eliminerar 14 hooks per kort
-  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url, 'job-images');
-  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos');
+  // 🚀 Transform: kortbild ~600px bred / ~400px hög, logo ~48px → 5-10× mindre filer, snabbare listor
+  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url, 'job-images', undefined, { width: 600, height: 400, quality: 75, resize: 'cover' });
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', undefined, { width: 64, height: 64, quality: 80, resize: 'contain' });
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 
