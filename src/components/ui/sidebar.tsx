@@ -259,7 +259,12 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             data-mobile="true"
                className={cn(
-                "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] max-w-[calc(100vw-0.75rem)] flex-col overflow-hidden border-r border-[hsl(var(--sidebar-foreground)/0.2)] bg-gradient-parium p-0 text-sidebar-foreground ease-out supports-[backdrop-filter]:backdrop-blur-xl",
+                "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] max-w-[calc(100vw-0.75rem)] flex-col overflow-hidden border-r border-[hsl(var(--sidebar-foreground)/0.2)] bg-gradient-parium p-0 text-sidebar-foreground ease-out",
+              // Backdrop-blur är dyrt på mobil GPU och gör slide-animationen
+              // hackig. Aktivera blur ENDAST när drawern är öppen (då syns
+              // den ändå) — under in/ut-animation och när stängd kör vi utan
+              // blur så transform-animationen blir helt mjuk.
+              openMobile && "supports-[backdrop-filter]:backdrop-blur-xl",
               transitionsReady && "transition-transform duration-300 will-change-transform",
               side === "left" ? "left-0" : "right-0",
               openMobile

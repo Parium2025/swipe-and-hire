@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo, useMemo, useCallback } from "react";
+import React, { useEffect, useState, memo, useMemo, useCallback, startTransition } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
@@ -133,8 +133,14 @@ export function AppSidebar() {
     if (!checkBeforeNavigation(href)) return;
 
     if (isMobile) {
+      // Stäng drawern först — detta är det enda högprioriterade arbetet.
       setOpenMobile(false);
-      navigate(href);
+      // Markera route-bytet som icke-brådskande så React inte avbryter
+      // drawer-animationen för att börja rendera nästa sida. Resultatet:
+      // drawern glider klart helt mjukt, och nästa sida monteras strax efter.
+      startTransition(() => {
+        navigate(href);
+      });
     } else {
       navigate(href);
     }
