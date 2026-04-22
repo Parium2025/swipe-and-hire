@@ -92,14 +92,16 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
           }
         }
 
-        // 🔥 PRIORITET 2: Alla jobbbilder (public bucket - ingen signering behövs)
-        const allJobs = await fetchAllRows<{ job_image_url: string | null }>(() =>
-          supabase
-            .from('job_postings')
-            .select('job_image_url')
-            .eq('is_active', true)
-            .order('created_at', { ascending: false })
-        );
+        // 🔥 PRIORITET 2: Senaste jobbbilderna (public bucket - ingen signering)
+        // Begränsat till PRELOAD_JOBS_LIMIT — resten preloadas on-demand av
+        // useSwipeImagePreloader när användaren faktiskt swipar.
+        const { data: allJobs } = await supabase
+          .from('job_postings')
+          .select('job_image_url')
+          .eq('is_active', true)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(PRELOAD_JOBS_LIMIT);
 
         const jobImageUrls: string[] = [];
         if (allJobs) {
@@ -139,14 +141,12 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
           }
         }
 
-        // 🔥 PRIORITET 3: Företagslogotyper (public bucket)
-        const allProfiles = await fetchAllRows<{
-          company_logo_url: string | null;
-        }>(() =>
-          supabase
-            .from('profiles')
-            .select('company_logo_url')
-        );
+        // 🔥 PRIORITET 3: Företagslogotyper (public bucket) — begränsat antal
+        const { data: allProfiles } = await supabase
+          .from('profiles')
+          .select('company_logo_url')
+          .not('company_logo_url', 'is', null)
+          .limit(PRELOAD_LOGOS_LIMIT);
 
         const logoUrls: string[] = [];
         if (allProfiles) {
