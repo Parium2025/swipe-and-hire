@@ -16,7 +16,11 @@ import { Badge } from '@/components/ui/badge';
 function resolveImageUrl(url?: string, bucket = 'job-images'): string | null {
   if (!url) return null;
   if (url.startsWith('http')) return url;
-  const { data } = supabase.storage.from(bucket).getPublicUrl(url);
+  // 🚀 Transform: swipe-bilden täcker viewporten (~400px bred på mobil) → ~800px (2× retina) räcker.
+  // Original kan vara 2-5 MB → transformerad ~80-150 KB (15-30× mindre, snabbare swipe).
+  const { data } = supabase.storage.from(bucket).getPublicUrl(url, {
+    transform: { width: 800, height: 1000, quality: 78, resize: 'cover' },
+  });
   return data?.publicUrl || null;
 }
 
