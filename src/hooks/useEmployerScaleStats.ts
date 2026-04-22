@@ -27,7 +27,7 @@ export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'pers
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_employer_jobs_counts', { p_scope: scope });
       if (error) throw error;
-      return (data as EmployerJobsCounts) ?? { active: 0, expired: 0, draft: 0, total: 0 };
+      return (data as unknown as EmployerJobsCounts) ?? { active: 0, expired: 0, draft: 0, total: 0 };
     },
     enabled: !!user,
     staleTime: 30_000,
@@ -47,7 +47,7 @@ export const useEmployerDashboardStats = (scope: 'personal' | 'organization' = '
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_employer_dashboard_stats', { p_scope: scope });
       if (error) throw error;
-      return (data as EmployerDashboardStats) ?? { active_jobs: 0, total_views: 0, total_applications: 0 };
+      return (data as unknown as EmployerDashboardStats) ?? { active_jobs: 0, total_views: 0, total_applications: 0 };
     },
     enabled: !!user,
     staleTime: 30_000,
