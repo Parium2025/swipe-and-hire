@@ -327,7 +327,7 @@ class ImageCache {
   }
 
   /**
-   * Rensa hela cachen (använd försiktigt)
+   * Rensa hela cachen (använd försiktigt). Rensar även IDB-persistens.
    */
   clear(): void {
     for (const cached of this.cache.values()) {
@@ -335,6 +335,8 @@ class ImageCache {
     }
     this.cache.clear();
     this.loading.clear();
+    // Rensa IDB i bakgrunden
+    import('./imageCachePersistence').then(m => m.clearAllPersisted()).catch(() => {});
   }
 
   /**
