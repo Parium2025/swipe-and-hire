@@ -7,13 +7,17 @@
  * BASE_VERSION används bara som fallback om signaturen inte kan beräknas (dev).
  */
 
-const BASE_VERSION = 'v5';
+const BASE_VERSION = 'v6';
 const VERSION_KEY = 'parium_cache_version';
 
 const STALE_PREFIXES = [
   'parium_my_applications_cache',
   'parium_company_data_cache_v2',
   'parium_company_data_cache_v3',
+  'parium_job_detail_',
+  'parium_job_apps_',
+  'parium_job_search_cache_v1_',
+  'parium_employer_jobs_v3_',
   'job_seeker_applications_',
   'job_seeker_available_jobs_',
   'job_seeker_messages_',
