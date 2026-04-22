@@ -156,17 +156,22 @@ const Dashboard = memo(() => {
     expired: sliceToPage(tabBuckets.expired),
   }), [sliceToPage, tabBuckets]);
 
-  // Pre-warm blob-cache i bakgrunden — eliminerar createObjectURL-spike vid tab-byte
+  // 🔥 HÅL #2: Pre-warma BARA aktuell + nästa sida (~40 bilder), inte alla
+  // tusentals. Tidigare prewarm av 5k bilder mättade nätverket och evictade
+  // sin egen cache i imageCache.ts. Nu: smart, bounded, alltid relevant.
   const prewarmEntries = useMemo(() => {
-    const all = [...tabBuckets.active, ...tabBuckets.expired];
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize * 2; // current + next page
+    const currentBucket = activeTab === 'expired' ? tabBuckets.expired : tabBuckets.active;
+    const window = currentBucket.slice(start, end);
     const entries: Array<{ path?: string | null; bucket: 'job-images' | 'company-logos' }> = [];
-    for (const job of all) {
+    for (const job of window) {
       const j = job as { job_image_url?: string | null; company_logo_url?: string | null };
       if (j.job_image_url) entries.push({ path: j.job_image_url, bucket: 'job-images' });
       if (j.company_logo_url) entries.push({ path: j.company_logo_url, bucket: 'company-logos' });
     }
     return entries;
-  }, [tabBuckets]);
+  }, [tabBuckets, activeTab, page, pageSize]);
   useBlobCachePrewarm(prewarmEntries);
 
   // Reset page when tab or filters change
