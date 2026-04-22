@@ -23,7 +23,8 @@ import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useSwipeActions } from '@/hooks/useSwipeActions';
 import { usePreloadImages } from '@/hooks/useCachedImage';
 
-type SortOption = 'newest' | 'oldest' | 'expired' | 'active';
+type SortOption = 'newest' | 'oldest';
+type StatusFilter = 'all' | 'active' | 'expired';
 type TabValue = 'saved' | 'skipped';
 
 interface SavedJob {
@@ -175,6 +176,7 @@ const SavedJobs = () => {
     setSearchParams({ tab }, { replace: true });
   }, [setSearchParams]);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
   const [showContent, setShowContent] = useState(false);
 
@@ -304,11 +306,20 @@ const SavedJobs = () => {
 
   const sortedJobs = useMemo(() => {
     const withJobs = savedJobs.filter(sj => sj.job_postings !== null);
-    
+
     const isJobExpired = (sj: SavedJob) => !sj.job_postings!.is_active || isExpired(sj.job_postings!.expires_at);
-    
-    const sortWithPriority = (list: SavedJob[], ascending: boolean) => {
-      return [...list].sort((a, b) => {
+
+    // Apply status filter first (independent of sort)
+    const filtered = withJobs.filter(sj => {
+      if (statusFilter === 'active') return !isJobExpired(sj);
+      if (statusFilter === 'expired') return isJobExpired(sj);
+      return true;
+    });
+
+    // When showing "all", keep expired-jobs at the bottom; otherwise plain date sort
+    const ascending = sortBy === 'oldest';
+    if (statusFilter === 'all') {
+      return [...filtered].sort((a, b) => {
         const aExp = isJobExpired(a) ? 1 : 0;
         const bExp = isJobExpired(b) ? 1 : 0;
         if (aExp !== bExp) return aExp - bExp;
@@ -316,25 +327,13 @@ const SavedJobs = () => {
         const dateB = new Date(b.created_at).getTime();
         return ascending ? dateA - dateB : dateB - dateA;
       });
-    };
-    
-    switch (sortBy) {
-      case 'newest':
-        return sortWithPriority(withJobs, false);
-      case 'oldest':
-        return sortWithPriority(withJobs, true);
-      case 'active':
-        return withJobs
-          .filter(sj => !isJobExpired(sj))
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      case 'expired':
-        return withJobs
-          .filter(sj => isJobExpired(sj))
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      default:
-        return withJobs;
     }
-  }, [savedJobs, sortBy]);
+    return [...filtered].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return ascending ? dateA - dateB : dateB - dateA;
+    });
+  }, [savedJobs, sortBy, statusFilter]);
 
   const filteredSkippedJobs = useMemo(() => {
     return skippedJobs.filter(sj => {
@@ -426,7 +425,7 @@ const SavedJobs = () => {
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 text-white animate-spin" />
             </div>
-          ) : sortedJobs.length === 0 ? (
+          ) : savedJobs.filter(sj => sj.job_postings !== null).length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
                 <Heart className="h-12 w-12 text-white mx-auto mb-4" />
@@ -454,8 +453,6 @@ const SavedJobs = () => {
                 {([
                   { key: 'newest', label: 'Nyast först' },
                   { key: 'oldest', label: 'Äldst först' },
-                  { key: 'active', label: 'Visa aktiva' },
-                  { key: 'expired', label: 'Visa utgångna' },
                 ] as const).map(({ key, label }) => (
                   <button
                     key={key}
@@ -469,7 +466,38 @@ const SavedJobs = () => {
                     {label}
                   </button>
                 ))}
+                <span className="shrink-0 w-px h-5 bg-white/15 mx-1" aria-hidden="true" />
+                {([
+                  { key: 'active', label: 'Visa aktiva' },
+                  { key: 'expired', label: 'Visa utgångna' },
+                ] as const).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setStatusFilter(prev => prev === key ? 'all' : key)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                      statusFilter === key
+                        ? 'bg-white/20 text-white border border-white/30'
+                        : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10 md:hover:text-white/80'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
+
+              {sortedJobs.length === 0 ? (
+                <Card className="bg-white/5 border-white/10">
+                  <CardContent className="p-8 text-center">
+                    <Heart className="h-12 w-12 text-white mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-white mb-2">
+                      {statusFilter === 'active' ? 'Inga aktiva jobb' : statusFilter === 'expired' ? 'Inga utgångna jobb' : 'Inga jobb att visa'}
+                    </h3>
+                    <p className="text-white/70 text-sm">
+                      Justera filtret ovan för att visa fler jobb
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
 
               <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${sortedJobs.length === 1 ? ' job-card-grid-single' : sortedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
                 {sortedJobs.map((savedJob, index) => {
@@ -512,7 +540,9 @@ const SavedJobs = () => {
                   );
                 })}
               </div>
+              )}
             </>
+
           )}
         </>
       )}
