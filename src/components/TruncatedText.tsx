@@ -59,6 +59,8 @@ export function TruncatedText({
   const [isTruncated, setIsTruncated] = useState(false);
   const [hasMeasured, setHasMeasured] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isDesktopHovering, setIsDesktopHovering] = useState(false);
+  const [isDesktopFocused, setIsDesktopFocused] = useState(false);
 
   const { isTouch, supportsHover } = ENV;
 
@@ -120,6 +122,8 @@ export function TruncatedText({
   useEffect(() => {
     if (forceClosed) {
       setIsOpen(false);
+      setIsDesktopHovering(false);
+      setIsDesktopFocused(false);
     }
   }, [forceClosed]);
 
@@ -127,6 +131,9 @@ export function TruncatedText({
   useEffect(() => {
     setHasMeasured(false);
     setIsTruncated(false);
+    setIsDesktopHovering(false);
+    setIsDesktopFocused(false);
+    setIsOpen(false);
   }, [text]);
 
   // EAGER MEASUREMENT FOR TOUCH DEVICES
@@ -167,6 +174,7 @@ export function TruncatedText({
     };
   }, [isOpen, isTouch, supportsHover]);
 
+
   const handleTap = () => {
     if (!supportsHover && isTouch) {
       measureTruncation();
@@ -176,17 +184,37 @@ export function TruncatedText({
 
   // Lazy measure on first hover (desktop) or focus (keyboard nav)
   const handleMouseEnter = () => {
-    if (supportsHover) measureTruncation();
+    if (supportsHover) {
+      setIsDesktopHovering(true);
+      measureTruncation();
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (supportsHover) {
+      setIsDesktopHovering(false);
+    }
   };
 
   const handleFocus = () => {
+    setIsDesktopFocused(true);
     measureTruncation();
+  };
+
+  const handleBlur = () => {
+    setIsDesktopFocused(false);
   };
 
   // Determine whether to show tooltip based on environment and props
   const showTooltipDesktop = supportsHover && (tooltipForcedOn || isTruncated);
   const showTooltipTouch = !supportsHover && isTouch && (alwaysShowTooltip === true || isTruncated);
   const shouldShowTooltip = showTooltipDesktop || showTooltipTouch;
+
+  useEffect(() => {
+    if (!supportsHover || forceClosed) return;
+    const wantsOpen = shouldShowTooltip && (isDesktopHovering || isDesktopFocused);
+    setIsOpen(wantsOpen);
+  }, [supportsHover, forceClosed, shouldShowTooltip, isDesktopHovering, isDesktopFocused]);
 
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-word',
@@ -205,10 +233,10 @@ export function TruncatedText({
         style={wordBreakStyles}
         onClick={onClick}
         onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         onFocus={handleFocus}
+        onBlur={handleBlur}
         onTouchStart={isTouch && !supportsHover ? measureTruncation : undefined}
-        // Native title fallback gives users immediate feedback before our
-        // tooltip wraps the element on next render
         title={hasMeasured ? undefined : text}
       >
         {children || text}
@@ -233,8 +261,8 @@ export function TruncatedText({
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
       <Tooltip
-        open={forceClosed ? false : !supportsHover ? isOpen : undefined}
-        onOpenChange={forceClosed ? undefined : !supportsHover ? setIsOpen : undefined}
+        open={forceClosed ? false : isOpen}
+        onOpenChange={forceClosed ? undefined : setIsOpen}
         disableHoverableContent={false}
       >
         <TooltipTrigger asChild>
@@ -244,7 +272,9 @@ export function TruncatedText({
             style={wordBreakStyles}
             onClick={handleClick}
             onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
             onFocus={handleFocus}
+            onBlur={handleBlur}
             onMouseDown={(e) => e.stopPropagation()}
           >
             {children || text}
