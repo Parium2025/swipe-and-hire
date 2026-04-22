@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useProgressivePagination } from '@/hooks/useProgressivePagination';
@@ -14,7 +14,7 @@ import { useProgressivePagination } from '@/hooks/useProgressivePagination';
  *  - Lyssnar på React Query-cachen
  *  - När en ny optimized-job-search-query dyker upp → starta trappan
  *    på exakt den queryKey:n
- *  - Renderkostnad är 0; allt körs via subscribe + idle prefetch
+ *  - Renderkostnad är minimal; allt körs via subscribe + idle prefetch
  *
  * Resultat: när användaren scrollar i SearchJobs har sida 2 (och 3) redan
  * laddats i bakgrunden → ingen vänta på fetchNextPage().
@@ -22,20 +22,18 @@ import { useProgressivePagination } from '@/hooks/useProgressivePagination';
 export function useJobSearchProgressivePagination() {
   const { user, userRole } = useAuth();
   const queryClient = useQueryClient();
-  const activeKeyRef = useRef<string | null>(null);
-  const setActiveKeyRef = useRef<(key: QueryKey | null) => void>(() => {});
-  // Re-render trigger för att flytta hooken nedan till ny queryKey
-  const [activeKey, setActiveKey] = useStateRef<QueryKey | null>(null, setActiveKeyRef);
+  const [activeKey, setActiveKey] = useState<QueryKey | null>(null);
 
   useEffect(() => {
     if (!user) return;
     if (userRole?.role !== 'job_seeker') return;
 
+    let lastKeyStr: string | null = null;
+
     const pickLatest = () => {
       const queries = queryClient.getQueryCache().findAll({
         queryKey: ['optimized-job-search'],
       });
-      // Hitta senast använda query med data
       let best: { key: QueryKey; updated: number } | null = null;
       for (const q of queries) {
         const updated = q.state.dataUpdatedAt ?? 0;
@@ -44,9 +42,9 @@ export function useJobSearchProgressivePagination() {
         }
       }
       const newKeyStr = best ? JSON.stringify(best.key) : null;
-      if (newKeyStr !== activeKeyRef.current) {
-        activeKeyRef.current = newKeyStr;
-        setActiveKeyRef.current(best ? best.key : null);
+      if (newKeyStr !== lastKeyStr) {
+        lastKeyStr = newKeyStr;
+        setActiveKey(best ? best.key : null);
       }
     };
 
@@ -70,16 +68,3 @@ export function useJobSearchProgressivePagination() {
     delayBetweenPages: 1200,
   });
 }
-
-/**
- * Litet helperhook: useState men exponerar setter via ref också,
- * så att en effect kan uppdatera state utan att behöva ha settern i deps.
- */
-function useStateRef<T>(initial: T, setterRef: React.MutableRefObject<(v: T) => void>): [T, (v: T) => void] {
-  const [value, setValue] = useReactState<T>(initial);
-  setterRef.current = setValue;
-  return [value, setValue];
-}
-
-// Lazy import för att undvika circular issues i vissa setups
-import { useState as useReactState } from 'react';
