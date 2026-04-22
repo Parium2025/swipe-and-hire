@@ -396,21 +396,14 @@ const SearchJobs = memo(() => {
 
   // Realtime hanteras redan av useOptimizedJobSearch — ingen dubbel prenumeration behövs
 
-  // Sort jobs (filtering is now done in database for performance)
+  // Sort jobs (filtering for company + time is now done in DB for performance)
   const filteredAndSortedJobs = useMemo(() => {
     let result = [...jobs];
 
-    // Company filter
-    if (selectedCompanies.length > 0) {
+    // Fallback: om vi har valda företag som ännu saknar id-mapping,
+    // filtrera på namn så användaren inte ser fel jobb under första rendern.
+    if (selectedCompanies.length > 0 && (!selectedEmployerIds || selectedEmployerIds.length < selectedCompanies.length)) {
       result = result.filter(j => selectedCompanies.includes(j.company_name));
-    }
-
-    // Time filter
-    if (timeFilter !== 'all') {
-      const now = Date.now();
-      const hoursMap = { '12h': 12, '24h': 24, '3d': 72, '7d': 168 };
-      const cutoff = now - hoursMap[timeFilter] * 60 * 60 * 1000;
-      result = result.filter(j => new Date(j.created_at).getTime() >= cutoff);
     }
 
     // Sort based on user preference
@@ -427,7 +420,7 @@ const SearchJobs = memo(() => {
     }
 
     return result;
-  }, [jobs, sortBy, timeFilter, selectedCompanies]);
+  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
