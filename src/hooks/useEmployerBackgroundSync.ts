@@ -399,6 +399,7 @@ export const useEmployerBackgroundSync = () => {
       .subscribe();
 
     return () => {
+      if (jobsDebounceTimer) clearTimeout(jobsDebounceTimer);
       supabase.removeChannel(jobsChannel);
       supabase.removeChannel(interviewsChannel);
       supabase.removeChannel(candidatesChannel);
