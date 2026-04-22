@@ -44,6 +44,7 @@ import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
 import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPageSkeleton';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
+import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 
 interface Job {
   id: string;
@@ -160,21 +161,8 @@ const SearchJobs = memo(() => {
     listTopRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [queryClient]);
   
-  // Hämta användarens ansökningar för att visa "Redan sökt"-badge
-  const { data: appliedJobIds = new Set<string>() } = useQuery({
-    queryKey: ['applied-job-ids', user?.id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('job_applications')
-        .select('job_id')
-        .eq('applicant_id', user!.id);
-      return new Set((data || []).map(a => a.job_id));
-    },
-    enabled: !!user,
-    staleTime: 0,
-    gcTime: Infinity,
-    structuralSharing: false,
-  });
+  // Delad applied-job-ids query (ingen dubbel-fetch mellan sidor)
+  const { data: appliedJobIds = new Set<string>() } = useAppliedJobIds();
   // --- Session-persistent filter state (survives refresh, resets on app close) ---
   const SS_KEY = 'parium-search-filters';
   const savedFilters = useMemo(() => {
@@ -295,12 +283,22 @@ const SearchJobs = memo(() => {
     return [...new Set(jobs.map(job => job.employer_id).filter(Boolean))] as string[];
   }, [jobs]);
 
-  // Prefetch reviews AND profiles when jobs load
+  // Prefetch reviews AND profiles when jobs load — DEFERRED tills efter mount
+  // så det inte konkurrerar med sidebar-stängningsanimationen om main-tråden.
   useEffect(() => {
-    if (companyIds.length > 0) {
+    if (companyIds.length === 0) return;
+    let cancelled = false;
+    const run = () => {
+      if (cancelled) return;
       prefetchReviews(companyIds);
       prefetchProfiles(companyIds);
+    };
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const id = (window as any).requestIdleCallback(run, { timeout: 800 });
+      return () => { cancelled = true; (window as any).cancelIdleCallback?.(id); };
     }
+    const t = setTimeout(run, 250);
+    return () => { cancelled = true; clearTimeout(t); };
   }, [companyIds, prefetchReviews, prefetchProfiles]);
 
   // Förladdda alla jobbbilder via Service Worker för persistent cache

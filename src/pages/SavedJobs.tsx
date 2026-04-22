@@ -22,7 +22,7 @@ import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useSwipeActions } from '@/hooks/useSwipeActions';
 import { useSavedJobsCache, type SavedJob } from '@/hooks/useSavedJobsCache';
-import { useQuery } from '@tanstack/react-query';
+import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 
 
 type SortOption = 'newest' | 'oldest';
@@ -84,23 +84,8 @@ const SavedJobs = () => {
     isDragging.current = false;
   }, []);
 
-  // Hämta användarens ansökningar för "Redan sökt"-badge
-  const { data: appliedJobIds = new Set<string>() } = useQuery({
-    queryKey: ['applied-job-ids', user?.id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('job_applications')
-        .select('job_id')
-        .eq('applicant_id', user!.id);
-      return new Set((data || []).map(a => a.job_id));
-    },
-    enabled: !!user,
-    staleTime: 30_000,
-    gcTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    structuralSharing: false,
-  });
+  // Delad applied-job-ids query (ingen dubbel-fetch mellan sidor)
+  const { data: appliedJobIds = new Set<string>() } = useAppliedJobIds();
 
   const handleUnsaveClick = (jobId: string, jobTitle: string) => {
     setJobToRemove({ id: jobId, title: jobTitle });
