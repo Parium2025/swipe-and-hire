@@ -72,6 +72,9 @@ const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { jobs, stats, isLoading: loading, invalidateJobs } = useJobsData();
+  // Server-side truth — exakta totaler även vid 10k+ jobb
+  const { data: serverCounts } = useEmployerJobsCounts('personal');
+  const { data: serverStats } = useEmployerDashboardStats('personal');
   const queryClient = useQueryClient();
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -368,21 +371,29 @@ const EmployerDashboard = memo(() => {
     [jobs]
   );
   
-  const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : jobs.length, loading: false },
-    { 
-      icon: TrendingUp, 
-      title: 'Aktiva', 
-      value: loading ? preloadedEmployerActiveJobs : activeJobs.length, 
-      loading: false,
-      subItems: [
-        { label: 'Utgångna', value: expiredJobsCount },
-        { label: 'Utkast', value: draftJobsCount },
-      ]
-    },
-    { icon: Eye, title: 'Visningar', value: loading ? preloadedEmployerTotalViews : activeJobs.reduce((s, j) => s + j.views_count, 0), loading: false },
-    { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : activeJobs.reduce((s, j) => s + j.applications_count, 0), loading: false },
-  ], [jobs, activeJobs, expiredJobsCount, draftJobsCount, loading, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
+  const statsCards = useMemo(() => {
+    const totalJobs = serverCounts?.total ?? jobs.length;
+    const activeCount = serverCounts?.active ?? activeJobs.length;
+    const expiredCount = serverCounts?.expired ?? expiredJobsCount;
+    const draftCount = serverCounts?.draft ?? draftJobsCount;
+    const totalViews = serverStats?.total_views ?? activeJobs.reduce((s, j) => s + j.views_count, 0);
+    const totalApps = serverStats?.total_applications ?? activeJobs.reduce((s, j) => s + j.applications_count, 0);
+    return [
+      { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : totalJobs, loading: false },
+      {
+        icon: TrendingUp,
+        title: 'Aktiva',
+        value: loading ? preloadedEmployerActiveJobs : activeCount,
+        loading: false,
+        subItems: [
+          { label: 'Utgångna', value: expiredCount },
+          { label: 'Utkast', value: draftCount },
+        ],
+      },
+      { icon: Eye, title: 'Visningar', value: loading ? preloadedEmployerTotalViews : totalViews, loading: false },
+      { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : totalApps, loading: false },
+    ];
+  }, [jobs.length, activeJobs, expiredJobsCount, draftJobsCount, loading, serverCounts, serverStats, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
   // Wait for data AND minimum delay before showing content with fade
   if (loading || !showContent) {
