@@ -451,32 +451,45 @@ export const useJobSeekerBackgroundSync = () => {
       )
       .subscribe();
 
-    // Realtime för jobb (INSERT + UPDATE + DELETE) - så företagsnamn/logo
-    // som ändras via DB-triggern sync_company_name_to_jobs propageras direkt
-    // till alla jobblistor (sök, swipe, sparade jobb, mina ansökningar).
+    // Realtime för jobb - 🔥 SCALED: Lyssnar BARA på INSERT (nya jobb).
+    // Tidigare lyssnade vi på * (alla events) globalt, vilket gjorde att VARJE
+    // jobbsökare fick events när VARJE jobb i hela databasen ändrades — och triggade
+    // 6+ cache-invalidations + 2 preloads per event. Vid 500 sökare online och 50
+    // jobb-uppdateringar/h = ~150 000 onödiga refetches/dag.
+    //
+    // UPDATE/DELETE (t.ex. company_logo ändras via DB-trigger) propageras nu via:
+    //  1. employerProfilesChannel nedan (lyssnar på profiles UPDATE → branding)
+    //  2. naturlig refetch via React Query staleTime
+    //
+    // Debounce: max 1 invalidation per 5s vid burst (när många nya jobb postas samtidigt).
+    let newJobsTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleNewJobsRefresh = () => {
+      if (newJobsTimer) return;
+      newJobsTimer = setTimeout(() => {
+        newJobsTimer = null;
+        localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
+        preloadAvailableJobs();
+        preloadMyApplications(user.id);
+        queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
+        queryClient.invalidateQueries({ queryKey: ['jobs'] });
+        queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
+        queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
+        queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
+        queryClient.invalidateQueries({ queryKey: ['job-details'] });
+      }, 5000);
+    };
+
     const newJobsChannel = supabase
       .channel('job-seeker-new-jobs')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'job_postings',
         },
         () => {
-          // Force refresh available jobs cache
-          localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
-          preloadAvailableJobs();
-          // Refetch ansökningar (job_postings joinas in där) så company_logo_url uppdateras
-          preloadMyApplications(user.id);
-          queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
-          queryClient.invalidateQueries({ queryKey: ['jobs'] });
-          queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
-          // Sök-sidan och swipe lyssnar via 'optimized-job-search' nyckeln
-          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-          // Job-detail prefetch cache (per-job snapshot)
-          queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
-          queryClient.invalidateQueries({ queryKey: ['job-details'] });
+          scheduleNewJobsRefresh();
         }
       )
       .subscribe();
@@ -532,6 +545,7 @@ export const useJobSeekerBackgroundSync = () => {
       .subscribe();
 
     return () => {
+      if (newJobsTimer) clearTimeout(newJobsTimer);
       supabase.removeChannel(savedJobsChannel);
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(messagesChannel);

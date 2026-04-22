@@ -553,9 +553,26 @@ export const useApplicationsData = (searchQuery: string = '') => {
       }
     };
 
+    // 🔥 SCALED: Tidigare pollade vi var 60:e sekund, vilket gjorde 60 RPC-anrop/h
+    // per arbetsgivare bara för "senast aktiv"-tider. Eftersom last_active_at i sin tur
+    // bara uppdateras max var 5:e minut (useActivityTracker), var detta 12× mer trafik
+    // än nödvändigt.
+    //
+    // Nu hämtas det:
+    //  1. Direkt vid mount (void fetchLatestActivity ovan)
+    //  2. När kandidat-set ändras (dep applicantIdsKey)
+    //  3. När fönstret återfår fokus (visibilitychange) — viktigt för "kommer tillbaka"-fallet
     void fetchLatestActivity();
-    const interval = window.setInterval(fetchLatestActivity, 60_000);
-    return () => window.clearInterval(interval);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchLatestActivity();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [user, applicantIdsKey, searchQuery, queryClient]);
 
   // Real-time subscription for job_applications changes
