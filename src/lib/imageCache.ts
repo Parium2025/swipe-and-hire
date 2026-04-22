@@ -247,7 +247,13 @@ class ImageCache {
 
       this.cache.set(cacheKey, cached);
       this.enforceLimit(); // LRU-evict om vi överskrider taket
-      
+
+      // Persistera små assets (logos) till IDB i bakgrunden — fire-and-forget.
+      // Stora jobb-bilder (>50 KB) hoppas över för att skydda user-disk.
+      if (blob.size <= PERSIST_MAX_BYTES) {
+        persistBlob(cacheKey, blob, url).catch(() => {});
+      }
+
       return cached;
     } catch (error) {
       // Tyst fel - logga inte varje misslyckad bild
