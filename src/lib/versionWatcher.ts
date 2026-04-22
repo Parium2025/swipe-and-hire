@@ -14,13 +14,11 @@
 import { requestAppReload, shortHash } from './appReloader';
 
 const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000; // 5 minuter
-const VISIBILITY_RECHECK_MS = 2 * 60 * 1000; // bara recheck om borta ≥2 min
 const MIN_CHECK_GAP_MS = 60 * 1000; // dubbletter-skydd: max 1 fetch/min
 
 let installed = false;
 let heartbeatId: ReturnType<typeof setInterval> | null = null;
 let lastCheckAt = 0;
-let lastHiddenAt = 0;
 
 const log = (...args: unknown[]) => {
   try {
@@ -85,16 +83,21 @@ const checkVersion = async (reason: string): Promise<void> => {
 };
 
 const onVisibilityChange = (): void => {
-  if (document.visibilityState === 'hidden') {
-    lastHiddenAt = Date.now();
-    return;
+  if (document.visibilityState === 'visible') {
+    void checkVersion('visibility');
   }
+};
 
-  // visible — kolla om vi varit borta länge nog att det är värt att checka
-  const awayFor = lastHiddenAt > 0 ? Date.now() - lastHiddenAt : 0;
-  if (awayFor >= VISIBILITY_RECHECK_MS) {
-    void checkVersion(`visibility (away ${Math.round(awayFor / 1000)}s)`);
-  }
+const onWindowFocus = (): void => {
+  void checkVersion('focus');
+};
+
+const onPageShow = (event: PageTransitionEvent): void => {
+  void checkVersion(event.persisted ? 'pageshow-bfcache' : 'pageshow');
+};
+
+const onOnline = (): void => {
+  void checkVersion('online');
 };
 
 const startHeartbeat = (): void => {
@@ -113,10 +116,14 @@ export const installVersionWatcher = (): void => {
 
   try {
     document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('focus', onWindowFocus);
+    window.addEventListener('pageshow', onPageShow);
+    window.addEventListener('online', onOnline);
   } catch {
     /* noop */
   }
 
   startHeartbeat();
+  void checkVersion('init');
   log('installed');
 };
