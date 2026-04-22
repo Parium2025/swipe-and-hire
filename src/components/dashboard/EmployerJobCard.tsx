@@ -110,11 +110,11 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
                 <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
                   <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} />
                 </div>
-                <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] overflow-hidden">
+                <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] min-w-0 overflow-hidden">
                   <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
                   <TruncatedText
                     text={companyName}
-                    className="leading-snug truncate font-medium text-white"
+                    className="block min-w-0 flex-1 leading-snug truncate font-medium text-white"
                   />
                 </Badge>
               </>
