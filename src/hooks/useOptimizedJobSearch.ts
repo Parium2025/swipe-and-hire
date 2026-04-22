@@ -403,13 +403,6 @@ interface RealtimeJobPosting extends Partial<SearchJob> {
 
 const isRealtimeJobVisible = (job?: RealtimeJobPosting | null) => Boolean(job?.is_active && !job?.deleted_at);
 
-interface RealtimeJobPosting extends Partial<SearchJob> {
-  id: string;
-  deleted_at?: string | null;
-}
-
-const isRealtimeJobVisible = (job?: RealtimeJobPosting | null) => Boolean(job?.is_active && !job?.deleted_at);
-
 function useCompanyReviews(employerIds: string[]) {
   return useQuery({
     queryKey: ['company-reviews-batch', employerIds],
@@ -443,73 +436,6 @@ function useCompanyReviews(employerIds: string[]) {
     enabled: employerIds.length > 0,
     staleTime: 5 * 60 * 1000,
     gcTime: Infinity,
-  });
-}
-
-function useLiveJobBranding(jobIds: string[]) {
-  return useQuery({
-    queryKey: ['search-job-live-branding', jobIds],
-    queryFn: async (): Promise<LiveJobBrandingMap> => {
-      if (jobIds.length === 0) return {};
-
-      const { data, error } = await supabase
-        .from('job_postings')
-        .select(`
-          id,
-          title,
-          description,
-          location,
-          workplace_city,
-          workplace_county,
-          workplace_municipality,
-          workplace_address,
-          workplace_name,
-          workplace_postal_code,
-          employment_type,
-          work_schedule,
-          salary_min,
-          salary_max,
-          salary_type,
-          salary_transparency,
-          positions_count,
-          occupation,
-          pitch,
-          requirements,
-          benefits,
-          remote_work_possible,
-          work_location_type,
-          contact_email,
-          application_instructions,
-          job_image_url,
-          job_image_desktop_url,
-          employer_id,
-          is_active,
-          views_count,
-          applications_count,
-          created_at,
-          updated_at,
-          expires_at,
-          image_focus_position,
-          company_logo_url
-        `)
-        .in('id', jobIds);
-
-      if (error) throw error;
-
-      return (data || []).reduce<LiveJobBrandingMap>((acc, job) => {
-        acc[job.id] = {
-          ...job,
-          company_logo_url: job.company_logo_url || undefined,
-        } as Partial<SearchJob>;
-        return acc;
-      }, {});
-    },
-    enabled: jobIds.length > 0,
-    staleTime: 30 * 1000,
-    gcTime: 5 * 60 * 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
   });
 }
 
