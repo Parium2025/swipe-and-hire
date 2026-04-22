@@ -84,7 +84,9 @@ function readJobsCache(userId: string, scope: string, orgId: string | null): Job
 function writeJobsCache(userId: string, scope: string, orgId: string | null, jobs: JobPosting[]): void {
   const key = EMPLOYER_JOBS_CACHE_KEY + userId;
   const cached: CachedJobs = {
-    jobs: jobs.slice(0, 100), // Max 100 jobs to save space
+    // 🔥 SCALE: 500 jobb täcker 99% av alla orgs utan att spränga 5MB-quotan.
+    // safeStorage evictar äldre cache-entries automatiskt om vi ändå når taket.
+    jobs: jobs.slice(0, 500),
     scope,
     orgId,
     timestamp: Date.now(),
