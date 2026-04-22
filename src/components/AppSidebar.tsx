@@ -133,14 +133,14 @@ export function AppSidebar() {
     if (!checkBeforeNavigation(href)) return;
 
     if (isMobile) {
-      // Stäng drawern först — detta är det enda högprioriterade arbetet.
+      // Stäng drawern först
       setOpenMobile(false);
-      // Markera route-bytet som icke-brådskande så React inte avbryter
-      // drawer-animationen för att börja rendera nästa sida. Resultatet:
-      // drawern glider klart helt mjukt, och nästa sida monteras strax efter.
-      startTransition(() => {
+      // Vänta tills drawer-animationen (~380ms) hunnit en bit på vägen
+      // innan vi navigerar. Då hinner nästa sidas fade-in synas tydligt
+      // istället för att döljas bakom den stängande drawern.
+      window.setTimeout(() => {
         navigate(href);
-      });
+      }, 220);
     } else {
       navigate(href);
     }
