@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback, ReactNode } from "react";
+import React, { useRef, useState, useEffect, useLayoutEffect, useCallback, ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TruncatedTitleProps {
@@ -89,6 +89,17 @@ export function TruncatedTitle({
     setIsTruncated(truncated);
     setHasMeasured(true);
   }, [hasMeasured]);
+
+  // EAGER MEASUREMENT FOR TOUCH DEVICES
+  // Touch has no hover — first tap must already open the tooltip,
+  // so we wire the truncation state up before the user interacts.
+  useLayoutEffect(() => {
+    if (supportsHover) return; // desktop stays lazy
+    if (!isTouch) return;
+    if (hasMeasured) return;
+    const id = requestAnimationFrame(() => measureTruncation());
+    return () => cancelAnimationFrame(id);
+  }, [fullText, supportsHover, isTouch, hasMeasured, measureTruncation]);
 
   const handleTap = () => {
     if (!supportsHover && isTouch) {
