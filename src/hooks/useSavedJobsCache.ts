@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { safeSetItem } from '@/lib/safeStorage';
@@ -55,6 +55,8 @@ export interface SkippedJob {
   created_at: string;
   job_postings: JobPostingShape | null;
 }
+
+type JobPostingInput = JobPostingShape | null | undefined;
 
 const SAVED_CACHE_KEY = 'parium_saved_jobs_full_cache_v1';
 const SKIPPED_CACHE_KEY = 'parium_skipped_jobs_full_cache_v1';
@@ -143,9 +145,9 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
       return items;
     },
     enabled: !!user,
-    staleTime: 30_000,
-    gcTime: 5 * 60 * 1000,
-    refetchOnMount: 'always',
+    staleTime: 60_000,
+    gcTime: Infinity,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     structuralSharing: false,
     placeholderData: () => {
@@ -176,9 +178,9 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
       return items;
     },
     enabled: !!user && enableSkipped,
-    staleTime: 30_000,
-    gcTime: 5 * 60 * 1000,
-    refetchOnMount: 'always',
+    staleTime: 60_000,
+    gcTime: Infinity,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     structuralSharing: false,
     placeholderData: () => {
@@ -188,6 +190,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
   });
 
   const isLoadingSkipped = enableSkipped && queryLoadingSkipped && skippedJobs.length === 0;
+  const savedJobIds = useMemo(() => new Set(savedJobs.map((job) => job.job_id)), [savedJobs]);
 
   // ── Realtime: job_postings updates for saved jobs only ──
   useEffect(() => {
@@ -258,12 +261,88 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     });
   }, [user?.id, queryClient]);
 
+  const toggleSavedJob = useCallback(async (jobId: string, jobPosting?: JobPostingInput) => {
+    if (!user?.id) return;
+
+    const wasSaved = savedJobIds.has(jobId);
+
+    queryClient.setQueryData(['saved-jobs', user.id], (old: SavedJob[] | undefined) => {
+      const current = old ?? [];
+
+      if (wasSaved) {
+        const next = current.filter((job) => job.job_id !== jobId);
+        writeCache<SavedJob>(SAVED_CACHE_KEY, user.id, next);
+        return next;
+      }
+
+      if (!jobPosting) return current;
+
+      const optimisticJob: SavedJob = {
+        id: `optimistic-${jobId}`,
+        job_id: jobId,
+        created_at: new Date().toISOString(),
+        job_postings: jobPosting,
+      };
+
+      const next = [optimisticJob, ...current.filter((job) => job.job_id !== jobId)];
+      writeCache<SavedJob>(SAVED_CACHE_KEY, user.id, next);
+      return next;
+    });
+
+    try {
+      if (wasSaved) {
+        const { error } = await supabase
+          .from('saved_jobs')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('job_id', jobId);
+
+        if (error) throw error;
+        return;
+      }
+
+      const { error } = await supabase
+        .from('saved_jobs')
+        .insert({ user_id: user.id, job_id: jobId });
+
+      if (error && error.code !== '23505') throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+    } catch (error) {
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+      throw error;
+    }
+  }, [user?.id, queryClient, savedJobIds]);
+
+  const restoreSkippedJob = useCallback(async (jobId: string) => {
+    if (!user?.id) return;
+
+    removeSkippedJobLocally(jobId);
+
+    try {
+      const { error } = await supabase
+        .from('swipe_actions')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('job_id', jobId)
+        .eq('action', 'skipped');
+
+      if (error) throw error;
+    } catch (error) {
+      queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
+      throw error;
+    }
+  }, [user?.id, queryClient, removeSkippedJobLocally]);
+
   return {
     savedJobs,
+    savedJobIds,
     skippedJobs,
     isLoadingSaved,
     isLoadingSkipped,
     removeSavedJobLocally,
     removeSkippedJobLocally,
+    toggleSavedJob,
+    restoreSkippedJob,
   };
 }
