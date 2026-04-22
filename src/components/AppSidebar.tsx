@@ -1,8 +1,9 @@
-import React, { useEffect, useState, memo, useMemo } from "react";
+import React, { useEffect, useState, memo, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { useSidebarRoutePrefetch } from "@/hooks/useSidebarRoutePrefetch";
 import { preloadImages } from "@/lib/serviceWorkerManager";
 
 import {
@@ -52,6 +53,13 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
+  const prefetchRoute = useSidebarRoutePrefetch();
+
+  // Hover/touchstart-prefetch: varma upp datan innan användaren ens släpper klicket.
+  // Memoiseras så att <SidebarMenuButton> inte re-renderas i onödan.
+  const handlePrefetch = useCallback((url: string) => {
+    prefetchRoute(url);
+  }, [prefetchRoute]);
 
   // Använd preloadedAvatarUrl som primär källa, fallback till profile.profile_image_url, sedan cover_image_url
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
