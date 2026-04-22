@@ -19,7 +19,7 @@ import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobsCache, type SavedJob } from '@/hooks/useSavedJobsCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
-import { useBlobCachePrewarm } from '@/hooks/useBlobCachePrewarm';
+import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 
@@ -172,7 +172,7 @@ const SavedJobs = () => {
     });
   }, [activeJobsForMedia]);
 
-  useBlobCachePrewarm(prewarmEntries);
+  useImagePrewarm(prewarmEntries);
 
   const initialPriorityUrls = useMemo(() => {
     return prewarmEntries.slice(0, 4).flatMap((entry) => {
