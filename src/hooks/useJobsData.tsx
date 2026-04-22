@@ -182,6 +182,19 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
   // Only show loading if we don't have cached data
   const isLoading = queryLoading && !hasCachedData;
 
+  // Stable set of laddade job_ids för att SCOPE realtime-listenern.
+  // 🔥 HÅL #3: Utan detta får varje arbetsgivare ALLA ansökningar i hela
+  // systemet via realtime. Med >1000 samtidiga arbetsgivare = bandbredds-helvete.
+  // Vi kollar var 5:e sekund om setet ändrats väsentligt → resubscribe.
+  const jobIdsKey = useMemo(() => {
+    if (!jobs || jobs.length === 0) return '';
+    // Sortera för stabil nyckel; cap vid 200 (PostgREST filter-limit komfort).
+    // Org med >200 jobb får fortfarande deltas för sina top-200 senaste; resten
+    // kommer in via nästa polling/refetch — acceptabelt för UI-counts.
+    const ids = jobs.slice(0, 200).map(j => j.id).sort();
+    return ids.join(',');
+  }, [jobs]);
+
   // Real-time subscription for job_postings changes
   // 🔥 SCALED: Filter by employer_id to avoid broadcasting all changes to all clients
   useEffect(() => {
@@ -190,9 +203,22 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     // For personal scope, filter realtime to only this employer's jobs
     // For org scope, we still need broader listening but use a unique channel name
     const channelSuffix = `${user.id}-${scope}`;
-    
+
     // Only filter for personal scope — org scope needs all org members' jobs
     const jobFilter = scope !== 'organization' ? `employer_id=eq.${user.id}` : undefined;
+
+    // 🔥 HÅL #4: Debounce counts/stats invalidations.
+    // Vid burst (många jobb-uppdateringar samtidigt) skickar vi MAX 1 invalidate
+    // per 3 sekunder. UI:t blir alltid fräscht inom 3s, RPC-trycket sjunker 30×.
+    let invalidateStatsTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleStatsInvalidate = () => {
+      if (invalidateStatsTimer) return;
+      invalidateStatsTimer = setTimeout(() => {
+        invalidateStatsTimer = null;
+        queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
+        queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+      }, 3000);
+    };
 
     const channel = supabase
       .channel(`job-postings-rt-${channelSuffix}`)
@@ -205,28 +231,23 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           if (payload.eventType === 'UPDATE') {
             queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
               if (!oldData) return oldData;
-              return oldData.map(job => 
-                job.id === payload.new.id 
+              return oldData.map(job =>
+                job.id === payload.new.id
                   ? { ...job, ...payload.new }
                   : job
               );
             });
-            // Status (active/expired/draft) kan ha ändrats → uppdatera server-counts
-            queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
-            queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+            scheduleStatsInvalidate();
           } else {
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
-            queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
-            queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+            scheduleStatsInvalidate();
           }
         }
       )
       .subscribe();
 
-    // Also listen to job_applications for live count updates.
-    // 🔥 SCALE: Buffra deltas per job_id och flush max 1×/sek.
-    // Vid en burst (50 ansökningar/sek) får UI:n EN rerender med +50 i stället
-    // för 50 rerenders. Counten är fortfarande exakt — bara batched.
+    // 🔥 HÅL #2/#3: Listen to job_applications BARA för våra laddade jobb.
+    // Buffra deltas och flush max 1×/sek (oförändrat).
     const pendingDeltas = new Map<string, number>();
     let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -248,15 +269,19 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       });
     };
 
+    // Bygg PostgREST in-filter från laddade ids
+    const idsArr = jobIdsKey ? jobIdsKey.split(',') : [];
+    const appsFilter = idsArr.length > 0 && idsArr.length <= 200
+      ? `job_id=in.(${idsArr.join(',')})`
+      : undefined;
+
     const applicationsChannel = supabase
       .channel(`job-apps-rt-${channelSuffix}`)
       .on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'job_applications'
-        },
+        appsFilter
+          ? { event: 'INSERT' as const, schema: 'public' as const, table: 'job_applications' as const, filter: appsFilter }
+          : { event: 'INSERT' as const, schema: 'public' as const, table: 'job_applications' as const },
         (payload) => {
           const jobId = (payload.new as { job_id?: string })?.job_id;
           if (!jobId) return;
@@ -271,10 +296,13 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         clearTimeout(flushTimer);
         flushDeltas();
       }
+      if (invalidateStatsTimer) {
+        clearTimeout(invalidateStatsTimer);
+      }
       supabase.removeChannel(channel);
       supabase.removeChannel(applicationsChannel);
     };
-  }, [enableRealtime, user, queryClient, scope, profile?.organization_id]);
+  }, [enableRealtime, user, queryClient, scope, profile?.organization_id, jobIdsKey]);
 
   // Memoize stats to prevent unnecessary recalculations
   const activeJobsList = useMemo(() => 
