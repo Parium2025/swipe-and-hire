@@ -21,26 +21,18 @@ const preloadImageNative = (src: string): Promise<void> => {
 };
 
 /**
- * Batch-fetch all rows from a table (handles >1000 row limit)
+ * Hur många jobb/företag vi maximalt preloadar vid app-start.
+ *
+ * VIKTIGT: Tidigare hämtade vi HELA tabellen vid varje login (fetchAllRows)
+ * vilket gjorde att en login med 10k aktiva jobb laddade ~500 MB i bakgrunden
+ * — varav 90% aldrig visades. Vi cachar bara LRU-200 ändå, så all preload
+ * utöver det evictas omedelbart.
+ *
+ * Resten preloadas on-demand av useSwipeImagePreloader när användaren
+ * faktiskt börjar swipa/scrolla.
  */
-async function fetchAllRows<T>(
-  query: () => ReturnType<ReturnType<typeof supabase.from>['select']>,
-  pageSize = 1000
-): Promise<T[]> {
-  const all: T[] = [];
-  let from = 0;
-  let hasMore = true;
-
-  while (hasMore) {
-    const { data, error } = await (query() as any).range(from, from + pageSize - 1);
-    if (error || !data) break;
-    all.push(...data);
-    hasMore = data.length === pageSize;
-    from += pageSize;
-  }
-
-  return all;
-}
+const PRELOAD_JOBS_LIMIT = 50;
+const PRELOAD_LOGOS_LIMIT = 50;
 
 /**
  * Global hook som förladddar alla kritiska bilder vid app-start

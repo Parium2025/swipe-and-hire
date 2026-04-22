@@ -6,25 +6,31 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 
-const SYNC_INTERVAL = 10_000; // 10 sekunder som backup-polling
 const PAGE_SIZE = 50; // Större batch för att ha mer data redo
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
+// Debounce-fönster: vid burst av realtime-events (t.ex. bulk-uppdatering)
+// kör vi bara EN sync efter att eventerna lugnat sig.
+const REALTIME_DEBOUNCE_MS = 800;
 
 /**
- * Hook som kontinuerligt förladdar kandidatdata i bakgrunden via:
- * 1. Supabase Realtime - pushar ändringar DIREKT när något ändras i databasen
- * 2. Polling var 10:e sekund som backup
- * 3. Stage-settings prefetch - så Kanban-steg är redo vid navigation
- * 
- * Detta gör att /candidates och /my-candidates alltid har färsk data
- * och visas DIREKT utan laddningsindikator - "bam!"
+ * Hook som håller kandidatdata färsk i bakgrunden via Supabase Realtime.
+ *
+ * STRATEGI (skalbar):
+ * 1. EN initial sync vid mount (ingen polling)
+ * 2. Realtime-subscriptions FILTRERADE på recruiter/employer_id
+ *    → vi får BARA pushar som rör vår egen data
+ * 3. Debounced sync vid burst av events (sparar queries)
+ *
+ * VIKTIGT: Tidigare hade vi setInterval var 10s + ofiltrerad realtime →
+ * 8 queries × 10s × N användare = ohållbart vid skala.
+ * Realtime + filter räcker; tab-focus-recovery hanteras av RealtimeKeepAlive.
  */
 export const useCandidateBackgroundSync = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRunningRef = useRef(false);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -36,14 +42,11 @@ export const useCandidateBackgroundSync = () => {
       isRunningRef.current = true;
 
       try {
-        // Synka all data parallellt för maximal hastighet
-        // Inkluderar nu stage-settings för att eliminera "default steg" flicker
         await Promise.all([
           syncApplicationsData(userId, queryClient),
           syncMyCandidatesData(userId, queryClient),
           syncStageSettings(userId, queryClient),
         ]);
-        // Uppdatera sync-tidsstämpel för offline-indikatorn
         updateLastSyncTime();
       } catch (error) {
         console.warn('Background candidate sync failed:', error);
@@ -52,14 +55,22 @@ export const useCandidateBackgroundSync = () => {
       }
     };
 
-    // Kör DIREKT vid mount
+    // Debouncad sync — coalescar burst av realtime-events till EN sync
+    const scheduleSync = () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        debounceRef.current = null;
+        syncCandidates();
+      }, REALTIME_DEBOUNCE_MS);
+    };
+
+    // Initial sync vid mount
     syncCandidates();
 
-    // Starta kontinuerlig backup-polling (var 10:e sekund)
-    intervalRef.current = setInterval(syncCandidates, SYNC_INTERVAL);
-
-    // Sätt upp Supabase Realtime för INSTANT uppdateringar
-    // När någon ändrar job_applications eller my_candidates pushas det direkt hit
+    // Realtime FILTRERAD på den inloggade användaren.
+    // För job_applications finns ingen direkt employer-kolumn — den syncen
+    // triggas istället via my_candidates/candidate_ratings/notes (alla rör
+    // samma kandidat-pool) samt via useEmployerBackgroundSync för nya ansökningar.
     channelRef.current = supabase
       .channel(`candidate-sync-${userId}`)
       .on(
@@ -67,24 +78,10 @@ export const useCandidateBackgroundSync = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'job_applications',
-        },
-        () => {
-          // Ny ansökan eller uppdatering - synka direkt!
-          syncCandidates();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
           table: 'my_candidates',
+          filter: `recruiter_id=eq.${userId}`,
         },
-        () => {
-          // Kandidat flyttad/tillagd/borttagen - synka direkt!
-          syncCandidates();
-        }
+        scheduleSync
       )
       .on(
         'postgres_changes',
@@ -92,11 +89,9 @@ export const useCandidateBackgroundSync = () => {
           event: '*',
           schema: 'public',
           table: 'candidate_ratings',
+          filter: `recruiter_id=eq.${userId}`,
         },
-        () => {
-          // Betyg ändrat - synka direkt!
-          syncCandidates();
-        }
+        scheduleSync
       )
       .on(
         'postgres_changes',
@@ -104,18 +99,16 @@ export const useCandidateBackgroundSync = () => {
           event: '*',
           schema: 'public',
           table: 'candidate_notes',
+          filter: `employer_id=eq.${userId}`,
         },
-        () => {
-          // Anteckning ändrad - synka direkt!
-          syncCandidates();
-        }
+        scheduleSync
       )
       .subscribe();
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+        debounceRef.current = null;
       }
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
