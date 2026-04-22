@@ -83,11 +83,10 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       if (document.visibilityState === 'visible') invalidateStats();
     };
     document.addEventListener('visibilitychange', handleVisibility);
-    const pollInterval = setInterval(invalidateStats, 60000);
+    // Realtime + visibility-trigger ersätter polling – ingen 60s-interval behövs
     return () => {
       supabase.removeChannel(msgChannel);
       document.removeEventListener('visibilitychange', handleVisibility);
-      clearInterval(pollInterval);
     };
   }, [user?.id, queryClient]);
 

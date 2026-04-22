@@ -123,27 +123,53 @@ export function useTeamMembers() {
   // Only show loading if we don't have cached data
   const isLoading = queryLoading && !hasCachedData;
 
-  // Real-time subscription for team changes
+  // Real-time subscription for team changes - filtered per organization
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel('team-members-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'user_roles',
-        },
-        () => {
+    let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const setup = async () => {
+      // Hämta org-id en gång för att kunna filtrera realtime per organisation
+      const { data: userRole } = await supabase
+        .from('user_roles')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (cancelled || !userRole?.organization_id) return;
+
+      const debouncedInvalidate = () => {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
           queryClient.invalidateQueries({ queryKey: ['team-members', user.id] });
-        }
-      )
-      .subscribe();
+        }, 2000);
+      };
+
+      channel = supabase
+        .channel(`team-members-realtime-${userRole.organization_id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'user_roles',
+            filter: `organization_id=eq.${userRole.organization_id}`,
+          },
+          debouncedInvalidate
+        )
+        .subscribe();
+    };
+
+    setup();
 
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (debounceTimer) clearTimeout(debounceTimer);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [user, queryClient]);
 
