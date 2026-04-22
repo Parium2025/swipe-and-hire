@@ -2134,14 +2134,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    // 🔥 SCALED: Filtrera per användare istället för att lyssna globalt på job_postings.
+    // Tidigare fick varje inloggad användare events för ALLA jobb i hela databasen,
+    // vilket triggade refresh för 1000 användare vid varje jobbändring (kvadratisk skalning).
+    // Nu lyssnar varje användare endast på sina egna jobb (employer_id=eq.user.id).
+    // Counts/stats visar ändå bara egna data, så ingen UI-skillnad.
+    // Debounce: max 1 refresh per 3s vid burst.
+    let jobRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleJobRefresh = () => {
+      if (jobRefreshTimer) return;
+      jobRefreshTimer = setTimeout(() => {
+        jobRefreshTimer = null;
+        refreshSidebarCounts();
+        refreshEmployerStats();
+      }, 3000);
+    };
+
     const jobChannel = supabase
-      .channel('auth-job-count')
+      .channel(`auth-job-count-${user.id}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'job_postings' },
+        { event: '*', schema: 'public', table: 'job_postings', filter: `employer_id=eq.${user.id}` },
         () => {
-          refreshSidebarCounts();
-          refreshEmployerStats();
+          scheduleJobRefresh();
         }
       )
       .subscribe((status) => handleChannelStatus('job', status));
