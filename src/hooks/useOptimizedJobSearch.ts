@@ -396,9 +396,12 @@ interface JobReviewMap {
   };
 }
 
-interface LiveJobBrandingMap {
-  [jobId: string]: Partial<SearchJob>;
+interface RealtimeJobPosting extends Partial<SearchJob> {
+  id: string;
+  deleted_at?: string | null;
 }
+
+const isRealtimeJobVisible = (job?: RealtimeJobPosting | null) => Boolean(job?.is_active && !job?.deleted_at);
 
 interface RealtimeJobPosting extends Partial<SearchJob> {
   id: string;
