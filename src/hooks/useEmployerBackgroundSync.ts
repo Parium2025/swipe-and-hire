@@ -344,72 +344,61 @@ export const useEmployerBackgroundSync = () => {
     };
   }, [user, isEmployer, preloadAllData]);
 
-  // 📡 REALTIME SUBSCRIPTIONS
+  // 📡 BULLETPROOF REALTIME SUBSCRIPTIONS
+  // Auto-reconnect vid CHANNEL_ERROR / TIMED_OUT / CLOSED med exponential backoff.
+  // Vid 1 000+ samtidiga arbetsgivare räddar detta from stale data om WebSocket tappas.
   useEffect(() => {
     if (!user || !isEmployer) return;
 
-    // Realtime för jobb - debounced för att hantera bulk-updates
     let jobsDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const jobsChannel = supabase
-      .channel(`employer-jobs-${user.id}`)
-      .on(
-        'postgres_changes',
+
+    const cleanupJobs = createBulletproofChannel({
+      channelName: `employer-jobs-${user.id}`,
+      subscriptions: [
         {
-          event: '*',
-          schema: 'public',
           table: 'job_postings',
-          filter: `employer_id=eq.${user.id}`
+          filter: `employer_id=eq.${user.id}`,
+          callback: () => {
+            if (jobsDebounceTimer) clearTimeout(jobsDebounceTimer);
+            jobsDebounceTimer = setTimeout(() => {
+              preloadJobs(user.id, profile?.organization_id || null);
+              queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            }, 1500);
+          },
         },
-        () => {
-          if (jobsDebounceTimer) clearTimeout(jobsDebounceTimer);
-          jobsDebounceTimer = setTimeout(() => {
-            preloadJobs(user.id, profile?.organization_id || null);
-            queryClient.invalidateQueries({ queryKey: ['jobs'] });
-          }, 1500);
-        }
-      )
-      .subscribe();
+      ],
+    });
 
-    // Realtime för intervjuer
-    const interviewsChannel = supabase
-      .channel(`employer-interviews-sync-${user.id}`)
-      .on(
-        'postgres_changes',
+    const cleanupInterviews = createBulletproofChannel({
+      channelName: `employer-interviews-sync-${user.id}`,
+      subscriptions: [
         {
-          event: '*',
-          schema: 'public',
           table: 'interviews',
-          filter: `employer_id=eq.${user.id}`
+          filter: `employer_id=eq.${user.id}`,
+          callback: () => preloadInterviews(user.id),
         },
-        () => {
-          preloadInterviews(user.id);
-        }
-      )
-      .subscribe();
+      ],
+    });
 
-    // Realtime för mina kandidater
-    const candidatesChannel = supabase
-      .channel(`employer-candidates-${user.id}`)
-      .on(
-        'postgres_changes',
+    const cleanupCandidates = createBulletproofChannel({
+      channelName: `employer-candidates-${user.id}`,
+      subscriptions: [
         {
-          event: '*',
-          schema: 'public',
           table: 'my_candidates',
-          filter: `recruiter_id=eq.${user.id}`
+          filter: `recruiter_id=eq.${user.id}`,
+          callback: () => {
+            // Bara invalidera - snapshot-cachen hanteras av useMyCandidatesData
+            queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          },
         },
-        () => {
-          // Bara invalidera - snapshot-cachen hanteras av useMyCandidatesData
-          queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
-        }
-      )
-      .subscribe();
+      ],
+    });
 
     return () => {
       if (jobsDebounceTimer) clearTimeout(jobsDebounceTimer);
-      supabase.removeChannel(jobsChannel);
-      supabase.removeChannel(interviewsChannel);
-      supabase.removeChannel(candidatesChannel);
+      cleanupJobs();
+      cleanupInterviews();
+      cleanupCandidates();
     };
   }, [user, isEmployer, profile?.organization_id, preloadJobs, preloadInterviews, queryClient]);
 };
