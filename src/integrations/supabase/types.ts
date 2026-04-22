@@ -2598,8 +2598,23 @@ export type Database = {
         Args: { p_days_back?: number; p_user_id: string }
         Returns: Json
       }
-      get_employer_dashboard_stats: {
-        Args: { p_active_job_ids: string[]; p_user_id: string }
+      get_employer_dashboard_stats:
+        | { Args: { p_scope?: string }; Returns: Json }
+        | {
+            Args: { p_active_job_ids: string[]; p_user_id: string }
+            Returns: Json
+          }
+      get_employer_jobs_counts: { Args: { p_scope?: string }; Returns: Json }
+      get_employer_jobs_page: {
+        Args: {
+          p_page?: number
+          p_page_size?: number
+          p_recruiter_id?: string
+          p_scope?: string
+          p_search?: string
+          p_sort?: string
+          p_status?: string
+        }
         Returns: Json
       }
       get_jobseeker_dashboard_stats: {
