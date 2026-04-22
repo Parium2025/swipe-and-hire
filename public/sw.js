@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v7';
+const CACHE_VERSION = 'v8';
 
 const IMAGE_CACHE = `parium-images-${CACHE_VERSION}`;
 const STATIC_CACHE = `parium-static-${CACHE_VERSION}`;
@@ -314,11 +314,13 @@ self.addEventListener('message', (event) => {
       caches.open(IMAGE_CACHE).then(async (cache) => {
         for (const url of urls) {
           try {
-            const cachedResponse = await cache.match(url);
+            const request = new Request(url, { method: 'GET' });
+            const cacheKey = normalizeImageRequest(request);
+            const cachedResponse = await cache.match(cacheKey);
             if (!cachedResponse) {
-              const response = await fetch(url);
+              const response = await fetch(request);
               if (response && response.status === 200) {
-                await cache.put(url, response);
+                await cache.put(cacheKey, response.clone());
               }
             }
           } catch (error) {
