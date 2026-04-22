@@ -261,8 +261,8 @@ export function TruncatedText({
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
       <Tooltip
-        open={forceClosed ? false : !supportsHover ? isOpen : undefined}
-        onOpenChange={forceClosed ? undefined : !supportsHover ? setIsOpen : undefined}
+        open={forceClosed ? false : isOpen}
+        onOpenChange={forceClosed ? undefined : setIsOpen}
         disableHoverableContent={false}
       >
         <TooltipTrigger asChild>
@@ -272,7 +272,9 @@ export function TruncatedText({
             style={wordBreakStyles}
             onClick={handleClick}
             onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
             onFocus={handleFocus}
+            onBlur={handleBlur}
             onMouseDown={(e) => e.stopPropagation()}
           >
             {children || text}
