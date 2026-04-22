@@ -174,6 +174,12 @@ export function TruncatedText({
     };
   }, [isOpen, isTouch, supportsHover]);
 
+  useEffect(() => {
+    if (!supportsHover || forceClosed) return;
+    const wantsOpen = shouldShowTooltip && (isDesktopHovering || isDesktopFocused);
+    setIsOpen(wantsOpen);
+  }, [supportsHover, forceClosed, shouldShowTooltip, isDesktopHovering, isDesktopFocused]);
+
   const handleTap = () => {
     if (!supportsHover && isTouch) {
       measureTruncation();
@@ -183,11 +189,25 @@ export function TruncatedText({
 
   // Lazy measure on first hover (desktop) or focus (keyboard nav)
   const handleMouseEnter = () => {
-    if (supportsHover) measureTruncation();
+    if (supportsHover) {
+      setIsDesktopHovering(true);
+      measureTruncation();
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (supportsHover) {
+      setIsDesktopHovering(false);
+    }
   };
 
   const handleFocus = () => {
+    setIsDesktopFocused(true);
     measureTruncation();
+  };
+
+  const handleBlur = () => {
+    setIsDesktopFocused(false);
   };
 
   // Determine whether to show tooltip based on environment and props
