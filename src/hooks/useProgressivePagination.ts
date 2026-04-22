@@ -97,9 +97,10 @@ export function useProgressivePagination({
       if (!hasMore) return;
 
       try {
-        await queryClient.fetchInfiniteQuery({
+        await (queryClient as unknown as {
+          fetchInfiniteQuery: (opts: { queryKey: QueryKey; initialPageParam: unknown }) => Promise<unknown>;
+        }).fetchInfiniteQuery({
           queryKey,
-          // @ts-expect-error – React Query infers initialPageParam from existing query
           initialPageParam: undefined,
         });
       } catch {
