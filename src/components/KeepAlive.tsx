@@ -5,6 +5,8 @@ interface KeepAliveProps {
   render: (key: string) => React.ReactNode;
   /** Keys to keep alive across navigation. If not provided, only current key is rendered. */
   keepKeys?: string[];
+  /** Optional enter delay to let surrounding UI transitions finish before content fades in. */
+  enterDelayMs?: number;
 }
 
 /**
@@ -20,7 +22,7 @@ interface KeepAliveProps {
  * verbatim. Previously the active node was re-created on every render, which
  * defeated the whole purpose of caching.
  */
-export function KeepAlive({ activeKey, render, keepKeys }: KeepAliveProps) {
+export function KeepAlive({ activeKey, render, keepKeys, enterDelayMs = 0 }: KeepAliveProps) {
   // No caching mode: just render the active view (legacy behaviour)
   if (!keepKeys || keepKeys.length === 0) {
     return (
@@ -33,7 +35,7 @@ export function KeepAlive({ activeKey, render, keepKeys }: KeepAliveProps) {
   }
 
   return (
-    <KeepAliveCached activeKey={activeKey} render={render} keepKeys={keepKeys} />
+    <KeepAliveCached activeKey={activeKey} render={render} keepKeys={keepKeys} enterDelayMs={enterDelayMs} />
   );
 }
 
@@ -41,13 +43,45 @@ function KeepAliveCached({
   activeKey,
   render,
   keepKeys,
-}: Required<Pick<KeepAliveProps, 'activeKey' | 'render' | 'keepKeys'>>) {
+  enterDelayMs,
+}: Required<Pick<KeepAliveProps, 'activeKey' | 'render' | 'keepKeys' | 'enterDelayMs'>>) {
   // Persistent cache of mounted nodes — survives the entire session
   const cacheRef = useRef<Map<string, React.ReactNode>>(new Map());
   // Track which keys we've ever mounted (so we can render in stable order)
   const mountedKeysRef = useRef<string[]>([]);
   // Force a re-render when we mount a new key
   const [, setTick] = React.useState(0);
+  const [displayedKey, setDisplayedKey] = React.useState(activeKey);
+  const [isEntered, setIsEntered] = React.useState(true);
+  const isFirstActivationRef = React.useRef(true);
+
+  useEffect(() => {
+    if (isFirstActivationRef.current) {
+      isFirstActivationRef.current = false;
+      setDisplayedKey(activeKey);
+      setIsEntered(true);
+      return;
+    }
+
+    if (activeKey === displayedKey) {
+      setIsEntered(true);
+      return;
+    }
+
+    let rafId = 0;
+    const timerId = window.setTimeout(() => {
+      setDisplayedKey(activeKey);
+      setIsEntered(false);
+      rafId = requestAnimationFrame(() => {
+        setIsEntered(true);
+      });
+    }, enterDelayMs);
+
+    return () => {
+      window.clearTimeout(timerId);
+      cancelAnimationFrame(rafId);
+    };
+  }, [activeKey, displayedKey, enterDelayMs]);
 
   // Mount the active key on demand if it isn't cached yet
   useEffect(() => {
@@ -69,7 +103,7 @@ function KeepAliveCached({
 
   // Drop cached nodes that are no longer in keepKeys (and not the active one)
   useEffect(() => {
-    const allowed = new Set([...keepKeys, activeKey]);
+    const allowed = new Set([...keepKeys, activeKey, displayedKey]);
     let changed = false;
     for (const key of Array.from(cacheRef.current.keys())) {
       if (!allowed.has(key)) {
@@ -81,21 +115,18 @@ function KeepAliveCached({
       mountedKeysRef.current = mountedKeysRef.current.filter((k) => allowed.has(k));
       setTick((t) => t + 1);
     }
-  }, [activeKey, keepKeys]);
+  }, [activeKey, displayedKey, keepKeys]);
 
   return (
     <div className="relative w-full h-full flex flex-col min-h-0">
       {mountedKeysRef.current.map((key) => {
-        const isActive = key === activeKey;
+        const isDisplayed = key === displayedKey;
         return (
           <div
             key={key}
-            // `hidden` removes from layout but keeps the React tree + DOM intact.
-            // Using inline style instead of Tailwind `hidden` to be 100% reliable
-            // even when parents apply flex utilities.
-            style={isActive ? undefined : { display: 'none' }}
-            className={isActive ? 'flex-1 min-h-0 flex flex-col' : ''}
-            aria-hidden={!isActive}
+            style={isDisplayed ? undefined : { display: 'none' }}
+            className={isDisplayed ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${isEntered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}` : ''}
+            aria-hidden={!isDisplayed}
           >
             {cacheRef.current.get(key)}
           </div>
