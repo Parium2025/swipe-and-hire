@@ -48,6 +48,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import MyCandidates from '@/pages/MyCandidates';
 import Messages from '@/pages/Messages';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
+import { useDevice } from '@/hooks/use-device';
 
 // 🔥 Persistent-mount routes — these pages stay alive across navigation so that
 // data + DOM is loaded once per session and re-visiting feels instant.
@@ -318,6 +319,8 @@ const Index = () => {
   const [showAuthCTA, setShowAuthCTA] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const device = useDevice();
+  const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
   
   // Borttagen aggressiv fallback till /auth som skapade loopar
   // Vi navigerar nu endast när auth-loading är klar (se effekten nedan)
@@ -511,6 +514,7 @@ const Index = () => {
           activeKey={location.pathname}
           render={(key) => renderSidebarContent(key)}
           keepKeys={JOB_SEEKER_KEEP_KEYS}
+          enterDelayMs={routeEnterDelayMs}
         />
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
@@ -580,6 +584,7 @@ const Index = () => {
           activeKey={location.pathname}
           render={(key) => renderEmployerContent(key)}
           keepKeys={EMPLOYER_KEEP_KEYS}
+          enterDelayMs={routeEnterDelayMs}
         />
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
