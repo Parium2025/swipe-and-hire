@@ -382,7 +382,7 @@ const SavedJobs = () => {
   }
 
   return (
-    <div className="responsive-container-wide">
+    <div className="responsive-container-wide animate-fade-in">
       <div className="text-center mb-5">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">
           {activeTab === 'saved' ? `Sparade Jobb (${sortedJobs.length})` : `Skippade Jobb (${filteredSkippedJobs.length})`}
