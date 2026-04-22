@@ -713,7 +713,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [queryClient, realtimeJobIdsKey]);
 
   useEffect(() => {
     return () => {
