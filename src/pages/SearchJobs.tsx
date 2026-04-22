@@ -252,19 +252,54 @@ const SearchJobs = memo(() => {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  // 🔥 SCALE: Konvertera selectedCompanies (namn) → employer_ids för DB-filter.
+  // Vi läser ids från redan laddade jobb. När användaren väljer ett företag
+  // som inte finns i nuvarande resultat (t.ex. via sparad sökning) faller vi
+  // tillbaka på namn-filtrering tills ids är kända.
+  const companyNameToIdRef = useRef<Map<string, string>>(new Map());
+  const selectedEmployerIds = useMemo(() => {
+    if (selectedCompanies.length === 0) return undefined;
+    const ids: string[] = [];
+    for (const name of selectedCompanies) {
+      const id = companyNameToIdRef.current.get(name);
+      if (id) ids.push(id);
+    }
+    return ids.length > 0 ? ids : undefined;
+  }, [selectedCompanies]);
+
+  // 🔥 SCALE: Tidsfilter går nu till DB istället för klient-side .filter().
+  const createdAfter = useMemo(() => {
+    if (timeFilter === 'all') return null;
+    const hoursMap = { '12h': 12, '24h': 24, '3d': 72, '7d': 168 } as const;
+    const cutoff = Date.now() - hoursMap[timeFilter] * 60 * 60 * 1000;
+    return new Date(cutoff).toISOString();
+  }, [timeFilter]);
+
   // Use the new optimized job search hook with full-text search
-  const { jobs: searchJobs, isLoading } = useOptimizedJobSearch({
+  const { jobs: searchJobs, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useOptimizedJobSearch({
     searchQuery: debouncedSearch,
     city: selectedCity,
     employmentTypes: selectedEmploymentTypes,
     category: selectedCategory,
     subcategories: selectedSubcategories,
+    employerIds: selectedEmployerIds,
+    createdAfter,
     enabled: true,
   });
 
   // Branding (workplace_name, company_logo_url) is already merged in by
   // useOptimizedJobSearch via useLiveJobBranding — no extra fetch needed here.
   const jobs = searchJobs;
+
+  // Uppdatera namn→id-mapping så att framtida company-val kan filtreras i DB
+  useEffect(() => {
+    for (const j of jobs) {
+      if (j.company_name && j.employer_id && !companyNameToIdRef.current.has(j.company_name)) {
+        companyNameToIdRef.current.set(j.company_name, j.employer_id);
+      }
+    }
+  }, [jobs]);
+
 
   const isSearchResultsLoading = isLoading;
 
