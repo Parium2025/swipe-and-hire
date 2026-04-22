@@ -306,11 +306,20 @@ const SavedJobs = () => {
 
   const sortedJobs = useMemo(() => {
     const withJobs = savedJobs.filter(sj => sj.job_postings !== null);
-    
+
     const isJobExpired = (sj: SavedJob) => !sj.job_postings!.is_active || isExpired(sj.job_postings!.expires_at);
-    
-    const sortWithPriority = (list: SavedJob[], ascending: boolean) => {
-      return [...list].sort((a, b) => {
+
+    // Apply status filter first (independent of sort)
+    const filtered = withJobs.filter(sj => {
+      if (statusFilter === 'active') return !isJobExpired(sj);
+      if (statusFilter === 'expired') return isJobExpired(sj);
+      return true;
+    });
+
+    // When showing "all", keep expired-jobs at the bottom; otherwise plain date sort
+    const ascending = sortBy === 'oldest';
+    if (statusFilter === 'all') {
+      return [...filtered].sort((a, b) => {
         const aExp = isJobExpired(a) ? 1 : 0;
         const bExp = isJobExpired(b) ? 1 : 0;
         if (aExp !== bExp) return aExp - bExp;
@@ -318,25 +327,13 @@ const SavedJobs = () => {
         const dateB = new Date(b.created_at).getTime();
         return ascending ? dateA - dateB : dateB - dateA;
       });
-    };
-    
-    switch (sortBy) {
-      case 'newest':
-        return sortWithPriority(withJobs, false);
-      case 'oldest':
-        return sortWithPriority(withJobs, true);
-      case 'active':
-        return withJobs
-          .filter(sj => !isJobExpired(sj))
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      case 'expired':
-        return withJobs
-          .filter(sj => isJobExpired(sj))
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      default:
-        return withJobs;
     }
-  }, [savedJobs, sortBy]);
+    return [...filtered].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return ascending ? dateA - dateB : dateB - dateA;
+    });
+  }, [savedJobs, sortBy, statusFilter]);
 
   const filteredSkippedJobs = useMemo(() => {
     return skippedJobs.filter(sj => {
