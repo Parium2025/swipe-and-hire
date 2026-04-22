@@ -126,6 +126,7 @@ export const JobSlide = memo(function JobSlide({
   const lastTapTimestampRef = useRef(0);
   const touchGestureRef = useRef<TouchGestureState | null>(null);
   const [showTapHint, setShowTapHint] = useState(false);
+  const [tapHintSource, setTapHintSource] = useState<'title' | 'company' | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
@@ -146,14 +147,16 @@ export const JobSlide = memo(function JobSlide({
 
   const clearTapHint = useCallback(() => {
     setShowTapHint(false);
+    setTapHintSource(null);
     if (tapHintTimerRef.current) clearTimeout(tapHintTimerRef.current);
   }, []);
 
-  const armTapHint = useCallback(() => {
+  const armTapHint = useCallback((source: 'title' | 'company') => {
     clearTapHint();
     setShowTapHint(true);
+    setTapHintSource(source);
     // Auto-dismiss only when title is NOT truncated (simple hint text)
-    if (!isTitleTruncated()) {
+    if (source === 'title' && !isTitleTruncated()) {
       tapHintTimerRef.current = setTimeout(() => setShowTapHint(false), 1800);
     }
   }, [clearTapHint, isTitleTruncated]);
@@ -391,9 +394,15 @@ export const JobSlide = memo(function JobSlide({
     const isTapOnTitle = event.target instanceof Element && Boolean(event.target.closest('[data-title-tap-zone]'));
     const isTapOnCompany = event.target instanceof Element && Boolean(event.target.closest('[data-company-tap-zone]'));
 
-    if (isTapOnTitle || isTapOnCompany) {
-      // Tap on title/company → show tooltip (don't open job info)
-      armTapHint();
+    if (isTapOnTitle) {
+      // Tap on title → show title tooltip only
+      armTapHint('title');
+      return;
+    }
+
+    if (isTapOnCompany) {
+      // Tap on company → show company tooltip only (TruncatedText handles its own expansion)
+      armTapHint('company');
       return;
     }
 
@@ -835,7 +844,7 @@ export const JobSlide = memo(function JobSlide({
           </div>
         </div>
 
-        {showTapHint && isTitleTruncated() && (
+        {showTapHint && tapHintSource === 'title' && isTitleTruncated() && (
           <div className="absolute inset-x-4 bottom-24 z-30 pointer-events-none">
             <div
               data-tap-hint-scroll
