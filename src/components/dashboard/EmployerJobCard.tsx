@@ -112,7 +112,10 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
                 </div>
                 <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] overflow-hidden">
                   <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
-                  <span className="leading-snug truncate font-medium text-white">{companyName}</span>
+                  <TruncatedText
+                    text={companyName}
+                    className="leading-snug truncate font-medium text-white"
+                  />
                 </Badge>
               </>
             ) : (
