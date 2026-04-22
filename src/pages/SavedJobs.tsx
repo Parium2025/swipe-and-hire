@@ -425,7 +425,7 @@ const SavedJobs = () => {
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 text-white animate-spin" />
             </div>
-          ) : sortedJobs.length === 0 ? (
+          ) : savedJobs.filter(sj => sj.job_postings !== null).length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
                 <Heart className="h-12 w-12 text-white mx-auto mb-4" />
