@@ -1,7 +1,17 @@
 /**
  * Global bild-cache som håller bilder i minnet hela tiden
- * Överlever component remounts och navigation
+ * Överlever component remounts och navigation.
+ *
+ * Persistens: små assets (≤ 50 KB → typiskt logos) sparas även i IndexedDB
+ * och hydreras vid app-start så att swipe mode kan visa logos utan
+ * nätverksanrop på återbesök / efter full page reload.
  */
+
+import {
+  loadAllPersisted,
+  persistBlob,
+  PERSIST_MAX_BYTES,
+} from './imageCachePersistence';
 
 interface CachedImage {
   url: string;
@@ -24,6 +34,58 @@ class ImageCache {
   
   // Filändelser som aldrig ska blob-cachas (stora/binära dokument)
   private readonly SKIP_EXTENSIONS = ['.avi', '.mkv'];
+
+  // Hydration-promise: resolvar när IDB-restore är klar
+  private readonly hydrationPromise: Promise<void>;
+  private hydrated = false;
+
+  constructor() {
+    this.hydrationPromise = this.hydrateFromIDB();
+  }
+
+  /**
+   * Återställ små persisterade assets (logos) från IDB → in-memory cache.
+   * Körs en gång vid app-start. Synkron `getCachedUrl` fungerar direkt efter detta.
+   */
+  private async hydrateFromIDB(): Promise<void> {
+    try {
+      const items = await loadAllPersisted();
+      let restored = 0;
+      for (const item of items) {
+        // Kolla att vi inte redan har den i minnet (osannolikt vid start, men säkert)
+        if (this.cache.has(item.cacheKey)) continue;
+        try {
+          const objectUrl = URL.createObjectURL(item.blob);
+          this.cache.set(item.cacheKey, {
+            url: item.url,
+            blob: item.blob,
+            objectUrl,
+            timestamp: item.timestamp,
+          });
+          restored++;
+        } catch {
+          // ignore individual blob failures
+        }
+      }
+      this.hydrated = true;
+      if (restored > 0 && typeof window !== 'undefined' && (window as any).__imageCacheDebug) {
+        console.log(`%c[imageCache] 💾 Hydrated ${restored} persisted assets from IndexedDB`, 'color:#22c55e;font-weight:bold');
+      }
+    } catch {
+      this.hydrated = true; // markera som klar även vid fel → app blockeras inte
+    }
+  }
+
+  /**
+   * Vänta tills IDB-hydrering är klar (användbart innan första render).
+   */
+  whenReady(): Promise<void> {
+    return this.hydrationPromise;
+  }
+
+  isHydrated(): boolean {
+    return this.hydrated;
+  }
 
   /**
    * Markera en post som "nyligen använd" (flytta till slutet av Map)
@@ -185,7 +247,13 @@ class ImageCache {
 
       this.cache.set(cacheKey, cached);
       this.enforceLimit(); // LRU-evict om vi överskrider taket
-      
+
+      // Persistera små assets (logos) till IDB i bakgrunden — fire-and-forget.
+      // Stora jobb-bilder (>50 KB) hoppas över för att skydda user-disk.
+      if (blob.size <= PERSIST_MAX_BYTES) {
+        persistBlob(cacheKey, blob, url).catch(() => {});
+      }
+
       return cached;
     } catch (error) {
       // Tyst fel - logga inte varje misslyckad bild
@@ -259,7 +327,7 @@ class ImageCache {
   }
 
   /**
-   * Rensa hela cachen (använd försiktigt)
+   * Rensa hela cachen (använd försiktigt). Rensar även IDB-persistens.
    */
   clear(): void {
     for (const cached of this.cache.values()) {
@@ -267,6 +335,8 @@ class ImageCache {
     }
     this.cache.clear();
     this.loading.clear();
+    // Rensa IDB i bakgrunden
+    import('./imageCachePersistence').then(m => m.clearAllPersisted()).catch(() => {});
   }
 
   /**
