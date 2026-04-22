@@ -36,6 +36,28 @@ interface InfinitePageData {
   pageParams: unknown[];
 }
 
+/**
+ * Räkna ut nästa pageParam baserat på senaste sidan.
+ * Stödjer både cursor-baserad (my-candidates → nextCursor)
+ * och index-baserad (applications → pageParam + 1) pagination.
+ */
+function computeNextPageParam(
+  lastPage: InfinitePageData['pages'][number] | undefined,
+  lastPageParam: unknown,
+): unknown | null {
+  if (!lastPage) return null;
+  // Cursor-baserad
+  if (lastPage.nextCursor !== undefined && lastPage.nextCursor !== null) {
+    return lastPage.nextCursor;
+  }
+  // Index-baserad: om lastPageParam är ett tal → öka med 1, annars null
+  if (typeof lastPageParam === 'number') {
+    if (lastPage.hasMore === false) return null;
+    return lastPageParam + 1;
+  }
+  return null;
+}
+
 interface UseProgressivePaginationOptions {
   /** React Query key för en useInfiniteQuery */
   queryKey: QueryKey;
@@ -78,7 +100,7 @@ export function useProgressivePagination({
 
       const data = queryClient.getQueryData<InfinitePageData>(queryKey);
       if (!data || !data.pages || data.pages.length === 0) {
-        // Sida 1 finns inte än — vänta och försök igen
+        // Sida 1 finns inte än — vänta och försök igen (max 10 sek)
         await new Promise((r) => setTimeout(r, 500));
         if (cancelledRef.current) return;
         return fetchNext(pagesLoadedSoFar);
@@ -88,20 +110,48 @@ export function useProgressivePagination({
       if (data.pages.length >= effectiveMax) return;
 
       const lastPage = data.pages[data.pages.length - 1];
+      const lastPageParam = data.pageParams?.[data.pageParams.length - 1];
 
-      // Avgör om det finns mer att hämta. Stödjer både hasMore och nextCursor.
-      const hasMore =
-        lastPage?.hasMore === true ||
-        (lastPage?.nextCursor !== undefined && lastPage?.nextCursor !== null);
+      // Räkna ut nästa pageParam (cursor eller index)
+      const nextPageParam = computeNextPageParam(lastPage, lastPageParam);
+      if (nextPageParam === null || nextPageParam === undefined) return;
 
-      if (!hasMore) return;
+      // Hitta query-definitionen för att få fram queryFn
+      const queryCache = queryClient.getQueryCache();
+      const existingQuery = queryCache.find({ queryKey });
+      const queryFn = existingQuery?.options?.queryFn as
+        | ((ctx: { queryKey: QueryKey; pageParam: unknown; signal: AbortSignal }) => Promise<unknown>)
+        | undefined;
+
+      if (typeof queryFn !== 'function') {
+        // Ingen queryFn registrerad ännu (komponent inte mountad) — avbryt tyst
+        return;
+      }
 
       try {
-        await (queryClient as unknown as {
-          fetchInfiniteQuery: (opts: { queryKey: QueryKey; initialPageParam: unknown }) => Promise<unknown>;
-        }).fetchInfiniteQuery({
+        const controller = new AbortController();
+        const newPage = await queryFn({
           queryKey,
-          initialPageParam: undefined,
+          pageParam: nextPageParam,
+          signal: controller.signal,
+        });
+
+        if (cancelledRef.current) return;
+
+        // Lägg till sidan i cachen utan att överskriva befintliga sidor
+        queryClient.setQueryData<InfinitePageData>(queryKey, (current) => {
+          if (!current || !current.pages) {
+            return {
+              pages: [newPage as InfinitePageData['pages'][number]],
+              pageParams: [nextPageParam],
+            };
+          }
+          // Skydd mot dubblering om sidan redan finns
+          if (current.pages.length > pagesLoadedSoFar) return current;
+          return {
+            pages: [...current.pages, newPage as InfinitePageData['pages'][number]],
+            pageParams: [...current.pageParams, nextPageParam],
+          };
         });
       } catch {
         // Tyst fail — prefetch är best-effort

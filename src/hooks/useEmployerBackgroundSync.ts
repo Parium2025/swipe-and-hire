@@ -184,10 +184,19 @@ export const useEmployerBackgroundSync = () => {
         timestamp: Date.now(),
       }));
       
-      // Synka React Query-cachen
+      // Synka React Query-cachen — bevara extra sidor som
+      // useProgressivePagination kan ha laddat (sida 2-5)
+      const existingMc: any = queryClient.getQueryData(['my-candidates', userId, '']);
+      const existingMcPages = existingMc?.pages ?? [];
+      const existingMcParams = existingMc?.pageParams ?? [null];
+      const newFirstMcPage = { items, nextCursor: items.length >= INITIAL_PAGE_SIZE ? items[items.length - 1]?.updated_at ?? null : null };
       queryClient.setQueryData(['my-candidates', userId, ''], {
-        pages: [{ items, nextCursor: items.length >= INITIAL_PAGE_SIZE ? items[items.length - 1]?.updated_at ?? null : null }],
-        pageParams: [null],
+        pages: existingMcPages.length > 1
+          ? [newFirstMcPage, ...existingMcPages.slice(1)]
+          : [newFirstMcPage],
+        pageParams: existingMcParams.length > 1
+          ? [null, ...existingMcParams.slice(1)]
+          : [null],
       });
     }
   }, [queryClient]);

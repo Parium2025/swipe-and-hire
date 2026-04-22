@@ -238,10 +238,20 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
     ?.join(',');
 
   if (newSignature !== existingSignature) {
-    // Data har ändrats - uppdatera cache
+    // Data har ändrats - uppdatera cache.
+    // VIKTIGT: Bevara extra sidor som useProgressivePagination kan ha laddat
+    // (sida 2-5). Vi byter bara ut sida 1 + dess pageParam.
+    const existingPages = existingData?.pages ?? [];
+    const existingPageParams = existingData?.pageParams ?? [0];
+    const newFirstPage = { items, hasMore: items.length === PAGE_SIZE, nextCursor: items.length === PAGE_SIZE ? items.length : null };
+
     queryClient.setQueryData(queryKey, {
-      pages: [{ items, hasMore: items.length === PAGE_SIZE, nextCursor: items.length === PAGE_SIZE ? items.length : null }],
-      pageParams: [0],
+      pages: existingPages.length > 1
+        ? [newFirstPage, ...existingPages.slice(1)]
+        : [newFirstPage],
+      pageParams: existingPageParams.length > 1
+        ? [0, ...existingPageParams.slice(1)]
+        : [0],
     });
     console.log('🔄 Candidate sync: updated applications cache (ratings included)');
   }
@@ -411,9 +421,18 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
   const existingTimestamps = existingData?.pages?.[0]?.items?.map((i: any) => i.updated_at)?.join(',');
 
   if (newTimestamps !== existingTimestamps) {
+    // Bevara extra sidor från useProgressivePagination — byt bara ut sida 1
+    const existingPages = existingData?.pages ?? [];
+    const existingPageParams = existingData?.pageParams ?? [null];
+    const newFirstPage = { items, nextCursor: items.length === PAGE_SIZE ? items[items.length - 1].updated_at : null };
+
     queryClient.setQueryData(queryKey, {
-      pages: [{ items, nextCursor: items.length === PAGE_SIZE ? items[items.length - 1].updated_at : null }],
-      pageParams: [null],
+      pages: existingPages.length > 1
+        ? [newFirstPage, ...existingPages.slice(1)]
+        : [newFirstPage],
+      pageParams: existingPageParams.length > 1
+        ? [null, ...existingPageParams.slice(1)]
+        : [null],
     });
   }
 
