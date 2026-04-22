@@ -547,7 +547,10 @@ const SearchJobs = memo(() => {
     isLoadingMoreRef.current = false;
   }, [displayCount]);
 
-  // Infinite scroll with IntersectionObserver
+  // Infinite scroll with IntersectionObserver.
+  // 🔥 SCALE: När displayCount når slutet av redan-laddade jobb och DB:n har
+  // fler sidor (hasNextPage), trigga fetchNextPage(). Annars öka bara
+  // displayCount lokalt så att UI revealar nästa batch i den lista vi har.
   useEffect(() => {
     const trigger = loadMoreTriggerRef.current;
     if (!trigger) return;
@@ -555,24 +558,37 @@ const SearchJobs = memo(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting && hasMoreJobs && !isLoadingMoreRef.current) {
+        if (!entry.isIntersecting || isLoadingMoreRef.current) return;
+
+        if (hasMoreJobs) {
           isLoadingMoreRef.current = true;
           setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
+        } else if (hasNextPage && !isFetchingNextPage) {
+          isLoadingMoreRef.current = true;
+          fetchNextPage().finally(() => {
+            setDisplayCount(prev => prev + loadMoreSize);
+          });
         }
       },
       {
-        rootMargin: '200px', // Start loading 200px before reaching the trigger
-        threshold: 0.1
+        rootMargin: '400px',
+        threshold: 0.1,
       }
     );
 
     observer.observe(trigger);
     return () => observer.disconnect();
-  }, [hasMoreJobs, filteredAndSortedJobs.length, loadMoreSize]);
+  }, [hasMoreJobs, filteredAndSortedJobs.length, loadMoreSize, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleLoadMore = useCallback(() => {
-    setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
-  }, [filteredAndSortedJobs.length, loadMoreSize]);
+    if (hasMoreJobs) {
+      setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
+    } else if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage().finally(() => {
+        setDisplayCount(prev => prev + loadMoreSize);
+      });
+    }
+  }, [filteredAndSortedJobs.length, loadMoreSize, hasMoreJobs, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // formatSalary moved to top-level scope for performance
 
