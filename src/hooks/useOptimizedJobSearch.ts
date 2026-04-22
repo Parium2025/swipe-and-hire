@@ -152,6 +152,12 @@ interface UseOptimizedJobSearchOptions {
   category: string;
   subcategories: string[];
   enabled?: boolean;
+  /** 🔥 SCALE: Filtrera på arbetsgivar-ID i DB istället för i klienten. */
+  employerIds?: string[];
+  /** 🔥 SCALE: ISO-timestamp; jobb skapade efter denna tid filtreras i DB. */
+  createdAfter?: string | null;
+  /** Antal jobb per batch. Default 100. */
+  pageSize?: number;
 }
 
 const normalizeSwedish = (text: string): string => {
@@ -440,7 +446,7 @@ function useCompanyReviews(employerIds: string[]) {
 }
 
 export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
-  const { enabled = true } = options;
+  const { enabled = true, employerIds: employerIdsFilter, createdAfter, pageSize = 100 } = options;
   const queryClient = useQueryClient();
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -454,6 +460,17 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     salarySearch,
   } = useSearchParamsState(options);
 
+  // Stabil nyckel för employerIds (sortad) så att vi inte triggar refetch
+  // bara för att array-referensen ändras.
+  const employerIdsKey = useMemo(() => {
+    if (!employerIdsFilter || employerIdsFilter.length === 0) return '';
+    return [...employerIdsFilter].sort().join(',');
+  }, [employerIdsFilter]);
+
+  const employerIdsArray = useMemo(() => {
+    return employerIdsKey ? employerIdsKey.split(',') : null;
+  }, [employerIdsKey]);
+
   const cacheKey = useMemo(
     () => searchCacheKey([
       'optimized-job-search',
@@ -464,11 +481,25 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       categoryFilter,
       salarySearch?.targetSalary,
       salarySearch?.isMinimumSearch,
+      employerIdsKey,
+      createdAfter || '',
     ]),
-    [fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch]
+    [fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, employerIdsKey, createdAfter]
   );
 
-  const { data: rawJobs = [], isLoading, error, refetch } = useQuery({
+  // 🔥 SCALE: useInfiniteQuery med cursor-paginering på created_at.
+  // Första sidan visas direkt; fetchNextPage() laddar nästa batch (default 100)
+  // utan att hämta om tidigare sidor. Detta tar bort 100-jobbs-taket och
+  // skalar till miljoner rader eftersom DB:n bara läser pageSize rader per call.
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: [
       'optimized-job-search',
       fullSearchQuery,
@@ -478,8 +509,10 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       categoryFilter,
       salarySearch?.targetSalary,
       salarySearch?.isMinimumSearch,
+      employerIdsKey,
+      createdAfter || '',
     ],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }) => {
       if (abortControllerRef.current) abortControllerRef.current.abort();
       abortControllerRef.current = new AbortController();
 
@@ -492,26 +525,31 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
           p_category: categoryFilter || null,
           p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
           p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
-          p_limit: 100,
+          p_limit: pageSize,
           p_offset: 0,
-          p_cursor_created_at: null,
-        });
+          p_cursor_created_at: (pageParam as string | null) || null,
+          p_employer_ids: employerIdsArray,
+          p_created_after: createdAfter || null,
+        } as any);
 
         if (error) throw error;
-        const jobs = (data || []) as SearchJob[];
-        // 🔥 Spara senaste lyckade resultat som offline-fallback
-        writeSearchCache(cacheKey, jobs);
-        return jobs;
+        return (data || []) as SearchJob[];
       } catch (err) {
-        // Vid nätverksfel: använd cachad data om den finns, annars kasta vidare
-        const cached = readSearchCache(cacheKey);
-        if (cached && cached.length > 0) {
-          // 🔥 Förvärm logotyper även i offline-fallet så blob-cache fylls på
-          warmCompanyLogos(cached);
-          return cached;
+        // Vid första sidan + nätverksfel: använd cachad data om den finns
+        if (!pageParam) {
+          const cached = readSearchCache(cacheKey);
+          if (cached && cached.length > 0) {
+            warmCompanyLogos(cached);
+            return cached;
+          }
         }
         throw err;
       }
+    },
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || lastPage.length < pageSize) return undefined;
+      return lastPage[lastPage.length - 1]?.created_at || undefined;
     },
     enabled,
     staleTime: 30 * 1000,
@@ -519,22 +557,16 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    // 🔥 Visa cachad data direkt (offline eller ej) — query refetchar i bakgrunden
-    initialData: () => {
-      const cached = readSearchCache(cacheKey);
-      if (cached && cached.length > 0) {
-        // 🔥 Förvärm logotyper för cachade kort så de renderas utan flimmer
-        warmCompanyLogos(cached);
-        return cached;
-      }
-      return undefined;
-    },
-    initialDataUpdatedAt: () => {
-      const cached = readSearchCache(cacheKey);
-      // Sätt äldre timestamp så att refetch triggas direkt när nätet finns
-      return cached && cached.length > 0 ? Date.now() - 60_000 : undefined;
-    },
   });
+
+  const rawJobs = useMemo(() => {
+    const flat = data?.pages.flat() || [];
+    // Persistera första sidan som offline-fallback
+    if (flat.length > 0 && (data?.pages.length ?? 0) === 1) {
+      writeSearchCache(cacheKey, flat);
+    }
+    return flat;
+  }, [data, cacheKey]);
 
   const employerIds = useMemo(() => [...new Set(rawJobs.map((job) => job.employer_id).filter(Boolean))], [rawJobs]);
   const jobIds = useMemo(() => [...new Set(rawJobs.map((job) => job.id).filter(Boolean))], [rawJobs]);
@@ -581,11 +613,8 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   }, [rawJobs, reviewsData, selectedLocations]);
 
   // 🔥 SCALE: Realtime-listenern är scope:ad till de jobb som faktiskt visas.
-  // Utan detta får varje jobbsökare ALLA job_postings-events i hela systemet
-  // — vid 100k+ jobb och tusentals samtidiga arbetsgivare blir det en
-  // bandbreddsbomb. PostgREST in.()-filter cap:as på 200 ids för att hålla
-  // sig inom rimliga URL-längder; vi visar ändå max 100 jobb åt gången.
-  // Stabil nyckel så vi inte resubscribar på varje render.
+  // PostgREST in.()-filter cap:as på 200 ids; vi prenumererar på max 200 av
+  // de mest relevanta (första sidan), inte hela det infinitivt växande resultatet.
   const realtimeJobIdsKey = useMemo(() => {
     if (jobIds.length === 0) return '';
     return jobIds.slice(0, 200).sort().join(',');
@@ -606,35 +635,44 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
           const previousJob = payload.old as RealtimeJobPosting;
 
           if (payload.eventType === 'UPDATE') {
-            queryClient.setQueriesData<SearchJob[]>({ queryKey: ['optimized-job-search'] }, (existingJobs) => {
-              if (!existingJobs) return existingJobs;
-
-              if (!isRealtimeJobVisible(nextJob)) {
-                return existingJobs.filter((job) => job.id !== nextJob.id);
-              }
-
-              return existingJobs.map((job) => (
-                job.id === nextJob.id
-                  ? {
-                      ...job,
-                      ...nextJob,
-                      company_name: nextJob.workplace_name?.trim() || job.company_name || 'Okänt företag',
-                      company_logo_url: nextJob.company_logo_url ?? job.company_logo_url,
+            queryClient.setQueriesData<{ pages: SearchJob[][]; pageParams: unknown[] }>(
+              { queryKey: ['optimized-job-search'] },
+              (existing) => {
+                if (!existing?.pages) return existing;
+                return {
+                  ...existing,
+                  pages: existing.pages.map((page) => {
+                    if (!isRealtimeJobVisible(nextJob)) {
+                      return page.filter((job) => job.id !== nextJob.id);
                     }
-                  : job
-              ));
-            });
+                    return page.map((job) => (
+                      job.id === nextJob.id
+                        ? {
+                            ...job,
+                            ...nextJob,
+                            company_name: nextJob.workplace_name?.trim() || (job as any).company_name || 'Okänt företag',
+                            company_logo_url: nextJob.company_logo_url ?? job.company_logo_url,
+                          }
+                        : job
+                    ));
+                  }),
+                };
+              }
+            );
           }
 
           if (payload.eventType === 'DELETE') {
-            queryClient.setQueriesData<SearchJob[]>({ queryKey: ['optimized-job-search'] }, (existingJobs) => {
-              if (!existingJobs) return existingJobs;
-              return existingJobs.filter((job) => job.id !== previousJob.id);
-            });
+            queryClient.setQueriesData<{ pages: SearchJob[][]; pageParams: unknown[] }>(
+              { queryKey: ['optimized-job-search'] },
+              (existing) => {
+                if (!existing?.pages) return existing;
+                return {
+                  ...existing,
+                  pages: existing.pages.map((page) => page.filter((job) => job.id !== previousJob.id)),
+                };
+              }
+            );
           }
-
-          // 🔥 Inget invalidateQueries längre — setQueriesData ovan uppdaterar
-          // atomärt utan att trigga refetch (som vid skala = onödig DB-last).
         }
       )
       .subscribe();
@@ -656,6 +694,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     error,
     refetch,
     totalCount: enrichedJobs.length,
+    fetchNextPage,
+    hasNextPage: !!hasNextPage,
+    isFetchingNextPage,
   };
 }
 
