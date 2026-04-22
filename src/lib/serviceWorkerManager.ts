@@ -14,6 +14,7 @@ import { requestAppReload, shortHash } from './appReloader';
 
 let registration: ServiceWorkerRegistration | null = null;
 let controllerChangeHandled = false;
+let lastControllerChangeAt = 0;
 
 /**
  * Registrera service worker
@@ -40,8 +41,17 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
     if (!controllerChangeHandled) {
       controllerChangeHandled = true;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
+        const now = Date.now();
+        if (now - lastControllerChangeAt < 15_000) {
+          return;
+        }
+        lastControllerChangeAt = now;
+
+        if (registration?.waiting) {
+          return;
+        }
+
         requestAppReload('build-version', {
-          purgeCaches: true,
           cacheBustParam: buildVersion
             ? { key: '_v', value: shortHash(buildVersion) }
             : undefined,

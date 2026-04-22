@@ -25,7 +25,7 @@ interface ReloadOptions {
   defer?: boolean;
   /** Cache-bust query param att lägga till URL */
   cacheBustParam?: { key: string; value: string };
-  /** Avregistrera service workers + rensa caches innan reload */
+  /** Rensa runtime-cachar innan reload */
   purgeCaches?: boolean;
 }
 
@@ -67,14 +67,6 @@ const acquireLock = (): boolean => {
 
 const purgeRuntimeCaches = async (): Promise<void> => {
   try {
-    if (
-      typeof navigator !== 'undefined' &&
-      'serviceWorker' in navigator &&
-      navigator.serviceWorker.getRegistrations
-    ) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map((r) => r.unregister().catch(() => false)));
-    }
     if (typeof caches !== 'undefined' && caches.keys) {
       const keys = await caches.keys();
       await Promise.all(keys.map((k) => caches.delete(k).catch(() => false)));
