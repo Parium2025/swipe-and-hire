@@ -17,7 +17,6 @@ import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { imageCache } from '@/lib/imageCache';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
 import { TruncatedText } from '@/components/TruncatedText';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 
@@ -530,36 +529,16 @@ const JobView = () => {
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1 overflow-hidden text-left">
-                <TooltipProvider>
-                  <Tooltip open={showCompanyTooltip} onOpenChange={setShowCompanyTooltip}>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="text-white font-bold text-sm leading-tight"
-                        style={{
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          wordBreak: 'break-word',
-                          overflowWrap: 'anywhere',
-                        }}
-                      >
-                        {getDisplayCompanyName(job)}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="bottom"
-                      align="start"
-                      sideOffset={8}
-                      className="z-[999999] w-[min(calc(100vw-24px),360px)] max-w-[min(calc(100vw-24px),360px)] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 rounded-lg"
-                    >
-                      <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
-                        {getDisplayCompanyName(job)}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <TruncatedText
+                  text={getDisplayCompanyName(job)}
+                  alwaysShowTooltip="desktop-only"
+                  tooltipSide="bottom"
+                  className="block w-full overflow-hidden text-sm font-bold leading-tight text-white line-clamp-2"
+                  style={{
+                    overflowWrap: 'anywhere',
+                    wordBreak: 'break-word',
+                  }}
+                />
                 <div className="flex items-center text-[10px] mt-0.5 text-white">
                   <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
                   Se företagsprofil
