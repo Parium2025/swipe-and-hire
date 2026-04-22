@@ -20,7 +20,6 @@ import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobsCache, type SavedJob } from '@/hooks/useSavedJobsCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
-import { supabase } from '@/integrations/supabase/client';
 
 
 type SortOption = 'newest' | 'oldest';
