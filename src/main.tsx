@@ -109,6 +109,11 @@ async function bootstrap() {
   // Runs once per cache version bump — instant, no network calls.
   nukeStaleCaches();
 
+  // 🔁 Engångs-tvångsrensning av gammal Service Worker + Cache Storage på
+  // publicerade domäner (parium.se / parium-ab.lovable.app). Säkerställer att
+  // användare som var på en gammal SW automatiskt får senaste bundle.
+  forceServiceWorkerReset();
+
   // 🛡️ Installera bfcache-guard (iOS Safari back/forward cache → silent reload vid stale bundle)
   installBfcacheGuard();
 
