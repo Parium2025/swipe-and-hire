@@ -292,9 +292,13 @@ const SavedJobs = () => {
 
   const confirmRemove = () => {
     if (!jobToRemove) return;
-    unsaveJob(jobToRemove.id);
+    const removedId = jobToRemove.id;
     setJobToRemove(null);
-    queryClient.invalidateQueries({ queryKey: ['saved-jobs', user?.id] });
+    // Optimistic local update — avoids waiting for refetch round-trip
+    queryClient.setQueryData(['saved-jobs', user?.id], (old: SavedJob[] | undefined) =>
+      old ? old.filter(sj => sj.job_id !== removedId) : old
+    );
+    unsaveJob(removedId);
     refreshSidebarCounts();
   };
 
