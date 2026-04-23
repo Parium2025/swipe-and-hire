@@ -34,16 +34,45 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
     onViewChange('dashboard');
   };
 
+  // Steg-definitioner per tunnel — används för dev-snabbhopp
+  const jobSeekerSteps: { step: number; label: string }[] = [
+    { step: -1, label: 'Swipe-intro' },
+    { step: 0, label: 'Steg 0 · Introduktion' },
+    { step: 1, label: 'Steg 1 · Personuppgifter' },
+    { step: 2, label: 'Steg 2 · Profilbild & video' },
+    { step: 3, label: 'Steg 3 · CV' },
+    { step: 4, label: 'Steg 4 · Bio' },
+    { step: 5, label: 'Steg 5 · Samtycke' },
+    { step: 6, label: 'Steg 6 · Slutför' },
+    { step: 7, label: 'Steg 7 · Färdigt' },
+  ];
+
+  const employerSteps: { step: number; label: string }[] = [
+    { step: 0, label: 'Steg 0 · Välkommen' },
+    { step: 1, label: 'Steg 1 · Företagslogga' },
+    { step: 2, label: 'Steg 2 · Instruktioner' },
+    { step: 3, label: 'Steg 3 · Slutför' },
+  ];
+
+  const jumpToTunnelStep = async (
+    tunnel: 'welcome_tunnel' | 'employer_welcome_tunnel',
+    step: number
+  ) => {
+    // Säkerställ rätt roll utan att reloada — hoppa direkt in i tunneln
+    if (tunnel === 'welcome_tunnel' && userRole?.role !== 'job_seeker') {
+      await switchRole('job_seeker');
+    }
+    if (tunnel === 'employer_welcome_tunnel' && userRole?.role !== 'employer') {
+      await switchRole('employer');
+    }
+    onViewChange(`${tunnel}:${step}`);
+  };
+
   const handleViewChange = async (view: string) => {
     if (view === 'welcome_tunnel') {
-      // Reset onboarding to show welcome tunnel
-      await updateProfile({ onboarding_completed: false });
-      window.location.reload();
+      await jumpToTunnelStep('welcome_tunnel', -1);
     } else if (view === 'employer_welcome_tunnel') {
-      // Reset onboarding for employer welcome tunnel
-      await switchRole('employer');
-      await updateProfile({ onboarding_completed: false });
-      window.location.reload();
+      await jumpToTunnelStep('employer_welcome_tunnel', 0);
     } else if (view === 'profile_setup') {
       // Clear profile data to show setup
       await updateProfile({ 
