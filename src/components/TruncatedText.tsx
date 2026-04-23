@@ -72,13 +72,33 @@ export function TruncatedText({
 }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const tooltipContentRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<number | null>(null);
   const [isTruncated, setIsTruncated] = useState(false);
   const [hasMeasured, setHasMeasured] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isDesktopHovering, setIsDesktopHovering] = useState(false);
   const [isDesktopFocused, setIsDesktopFocused] = useState(false);
+  const [isTooltipHovered, setIsTooltipHovered] = useState(false);
 
   const { isTouch, supportsHover } = ENV;
+
+  const clearCloseTimeout = useCallback(() => {
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleDesktopClose = useCallback(() => {
+    if (!supportsHover) return;
+    clearCloseTimeout();
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setIsDesktopHovering(false);
+      setIsDesktopFocused(false);
+      setIsTooltipHovered(false);
+      setIsOpen(false);
+    }, 140);
+  }, [clearCloseTimeout, supportsHover]);
 
   // Lazy truncation measurement — runs only the first time the user
   // hovers/touches the element. Cheap on first paint, accurate on demand.
@@ -132,25 +152,32 @@ export function TruncatedText({
 
   // Close tooltip immediately when component unmounts (e.g. sheet closing)
   useEffect(() => {
-    return () => setIsOpen(false);
-  }, []);
+    return () => {
+      clearCloseTimeout();
+      setIsOpen(false);
+    };
+  }, [clearCloseTimeout]);
 
   useEffect(() => {
     if (forceClosed) {
+      clearCloseTimeout();
       setIsOpen(false);
       setIsDesktopHovering(false);
       setIsDesktopFocused(false);
+      setIsTooltipHovered(false);
     }
-  }, [forceClosed]);
+  }, [forceClosed, clearCloseTimeout]);
 
   // Reset measurement when text content changes
   useEffect(() => {
+    clearCloseTimeout();
     setHasMeasured(false);
     setIsTruncated(false);
     setIsDesktopHovering(false);
     setIsDesktopFocused(false);
+    setIsTooltipHovered(false);
     setIsOpen(false);
-  }, [text]);
+  }, [text, clearCloseTimeout]);
 
   // EAGER MEASUREMENT FOR TOUCH DEVICES
   // On touch devices there is no hover, so the user's first tap must already
@@ -201,24 +228,30 @@ export function TruncatedText({
   // Lazy measure on first hover (desktop) or focus (keyboard nav)
   const handleMouseEnter = () => {
     if (supportsHover) {
+      clearCloseTimeout();
       setIsDesktopHovering(true);
       measureTruncation();
     }
   };
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
     if (supportsHover) {
-      setIsDesktopHovering(false);
+      const nextTarget = event.relatedTarget;
+      if (nextTarget instanceof Node && tooltipContentRef.current?.contains(nextTarget)) {
+        return;
+      }
+      scheduleDesktopClose();
     }
   };
 
   const handleFocus = () => {
+    clearCloseTimeout();
     setIsDesktopFocused(true);
     measureTruncation();
   };
 
   const handleBlur = () => {
-    setIsDesktopFocused(false);
+    scheduleDesktopClose();
   };
 
   // Determine whether to show tooltip based on environment and props
@@ -228,17 +261,19 @@ export function TruncatedText({
 
   useEffect(() => {
     if (!supportsHover || forceClosed) return;
-    const wantsOpen = shouldShowTooltip && (isDesktopHovering || isDesktopFocused);
+    const wantsOpen = shouldShowTooltip && (isDesktopHovering || isDesktopFocused || isTooltipHovered);
     setIsOpen(wantsOpen);
-  }, [supportsHover, forceClosed, shouldShowTooltip, isDesktopHovering, isDesktopFocused]);
+  }, [supportsHover, forceClosed, shouldShowTooltip, isDesktopHovering, isDesktopFocused, isTooltipHovered]);
 
   // Singleton: ensure only one TruncatedText tooltip is open at a time globally.
   // When this tooltip opens, close any other one. When it closes, unregister.
   const closeSelf = useCallback(() => {
+    clearCloseTimeout();
     setIsOpen(false);
     setIsDesktopHovering(false);
     setIsDesktopFocused(false);
-  }, []);
+    setIsTooltipHovered(false);
+  }, [clearCloseTimeout]);
 
   useEffect(() => {
     if (isOpen) {
@@ -267,6 +302,22 @@ export function TruncatedText({
 
   const stopTooltipPropagation = (event: React.SyntheticEvent) => {
     event.stopPropagation();
+  };
+
+  const handleTooltipMouseEnter = () => {
+    if (!supportsHover) return;
+    clearCloseTimeout();
+    setIsTooltipHovered(true);
+  };
+
+  const handleTooltipMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!supportsHover) return;
+    const nextTarget = event.relatedTarget;
+    if (nextTarget instanceof Node && textRef.current?.contains(nextTarget)) {
+      setIsTooltipHovered(false);
+      return;
+    }
+    scheduleDesktopClose();
   };
 
   return (
@@ -305,6 +356,8 @@ export function TruncatedText({
             collisionPadding={12}
             sticky="always"
             className={`z-[999999] w-fit max-w-[min(calc(100vw-24px),360px)] sm:max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
+            onMouseEnter={handleTooltipMouseEnter}
+            onMouseLeave={handleTooltipMouseLeave}
             onPointerDown={stopTooltipPropagation}
             onPointerMove={stopTooltipPropagation}
             onPointerUp={stopTooltipPropagation}
