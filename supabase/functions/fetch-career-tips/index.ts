@@ -13,7 +13,6 @@ const corsHeaders = {
 const RSS_SOURCES = [
   // Career & work life focused
   { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
-  { url: 'https://www.unionen.se/rss.xml', name: 'Unionen' },
   { url: 'https://www.va.se/rss/', name: 'Veckans Affärer' },
   { url: 'https://arbetet.se/feed/', name: 'Arbetet' },
   { url: 'https://www.svt.se/nyheter/ekonomi/rss.xml', name: 'SVT Ekonomi' },
