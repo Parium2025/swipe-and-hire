@@ -355,11 +355,11 @@ export function EmployerSidebar() {
               <div className="flex-1 min-w-0">
                 <TruncatedText
                   text={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
-                  className="font-medium text-white text-sm"
+                  className="font-medium text-white text-sm truncate block"
                 />
                 <TruncatedText
                   text={profile?.industry || 'Admin'}
-                  className="text-sm text-white"
+                  className="text-sm text-white truncate block"
                 />
               </div>
             </div>
