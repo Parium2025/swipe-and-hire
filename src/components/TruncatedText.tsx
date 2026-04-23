@@ -33,6 +33,22 @@ const detectEnv = () => {
 
 const ENV = detectEnv();
 
+// Singleton tracker — only one TruncatedText tooltip can be open at a time.
+// This prevents the "double tooltip" bug where two cards' tooltips overlap
+// when the user moves the mouse from one card to an adjacent one.
+let activeCloseFn: (() => void) | null = null;
+const registerOpenTooltip = (closeFn: () => void) => {
+  if (activeCloseFn && activeCloseFn !== closeFn) {
+    activeCloseFn();
+  }
+  activeCloseFn = closeFn;
+};
+const unregisterOpenTooltip = (closeFn: () => void) => {
+  if (activeCloseFn === closeFn) {
+    activeCloseFn = null;
+  }
+};
+
 /**
  * Component that automatically detects if text is truncated and shows
  * a tooltip with the full text on hover.
