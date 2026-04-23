@@ -114,22 +114,50 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
         
         {/* Visa jobbsökar-alternativ endast när man inte är employer */}
         {userRole?.role !== 'employer' && (
-          <DropdownMenuItem 
-            onClick={() => handleViewChange('welcome_tunnel')}
-            className="cursor-pointer hover:bg-white/10"
-          >
-            <UserCheck className="mr-2 h-4 w-4" />
-            Välkomsttunnel (Jobbsökare)
-          </DropdownMenuItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="cursor-pointer hover:bg-white/10">
+              <UserCheck className="mr-2 h-4 w-4" />
+              Välkomsttunnel (Jobbsökare)
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="glass-panel">
+              <DropdownMenuLabel className="text-xs font-medium text-white/70">
+                Hoppa direkt till steg
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-white/10" />
+              {jobSeekerSteps.map(({ step, label }) => (
+                <DropdownMenuItem
+                  key={`js-${step}`}
+                  onClick={() => jumpToTunnelStep('welcome_tunnel', step)}
+                  className="cursor-pointer hover:bg-white/10"
+                >
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
         )}
-        
-        <DropdownMenuItem 
-          onClick={() => handleViewChange('employer_welcome_tunnel')}
-          className="cursor-pointer hover:bg-white/10"
-        >
-          <Building className="mr-2 h-4 w-4" />
-          Välkomsttunnel (Arbetsgivare)
-        </DropdownMenuItem>
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="cursor-pointer hover:bg-white/10">
+            <Building className="mr-2 h-4 w-4" />
+            Välkomsttunnel (Arbetsgivare)
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="glass-panel">
+            <DropdownMenuLabel className="text-xs font-medium text-white/70">
+              Hoppa direkt till steg
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-white/10" />
+            {employerSteps.map(({ step, label }) => (
+              <DropdownMenuItem
+                key={`emp-${step}`}
+                onClick={() => jumpToTunnelStep('employer_welcome_tunnel', step)}
+                className="cursor-pointer hover:bg-white/10"
+              >
+                {label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         
         <DropdownMenuItem 
           onClick={() => {
