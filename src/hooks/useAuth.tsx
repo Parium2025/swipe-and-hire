@@ -1648,44 +1648,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return { error: 'No user logged in' };
 
     try {
-      // Deactivate current role
-      if (userRole) {
-        await supabase
-          .from('user_roles')
-          .update({ is_active: false })
-          .eq('id', userRole.id);
-      }
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('user_id', user.id);
 
-      // Activate or create new role
-      const { data: existingRole, error: fetchError } = await supabase
-        .from('user_roles')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('role', newRole)
-        .maybeSingle();
-
-      if (fetchError) return { error: fetchError };
-
-      if (existingRole) {
-        // Activate existing role
-        const { error: updateError } = await supabase
-          .from('user_roles')
-          .update({ is_active: true })
-          .eq('id', existingRole.id);
-
-        if (updateError) return { error: updateError };
-      } else {
-        // Create new role
-        const { error: insertError } = await supabase
-          .from('user_roles')
-          .insert([{
-            user_id: user.id,
-            role: newRole,
-            is_active: true
-          }]);
-
-        if (insertError) return { error: insertError };
-      }
+      if (updateError) return { error: updateError };
 
       // Refresh user data
       await fetchUserData(user.id);
