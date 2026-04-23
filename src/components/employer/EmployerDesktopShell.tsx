@@ -39,6 +39,7 @@ const EmployerDesktopShell = ({
                   <DeveloperControls
                     onViewChange={onViewChange}
                     currentView={developerView}
+                    forceVisible={isOrgAdmin}
                   />
                 )}
                 <CreateJobSimpleDialog

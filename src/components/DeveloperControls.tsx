@@ -19,9 +19,10 @@ import { useNavigate } from 'react-router-dom';
 interface DeveloperControlsProps {
   onViewChange: (view: string) => void;
   currentView: string;
+  forceVisible?: boolean;
 }
 
-const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, currentView }) => {
+const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, currentView, forceVisible = false }) => {
   const { user, userRole, switchRole, updateProfile } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
   const [switching, setSwitching] = useState(false);
@@ -87,7 +88,7 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
     }
   };
 
-  if (adminLoading || !isAdmin) {
+  if (!forceVisible && (adminLoading || !isAdmin)) {
     return null;
   }
 

@@ -62,6 +62,7 @@ const EmployerMobileShell = ({
                   <DeveloperControls
                     onViewChange={onViewChange}
                     currentView={developerView}
+                    forceVisible={isOrgAdmin}
                   />
                 </div>
               )}

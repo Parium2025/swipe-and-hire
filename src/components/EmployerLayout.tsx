@@ -18,11 +18,13 @@ interface EmployerLayoutProps {
   children: ReactNode;
   developerView: string;
   onViewChange: (view: string) => void;
+  isOrgAdmin?: boolean;
 }
 
 // Inner component that uses the KanbanLayout context
-const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: EmployerLayoutProps) => {
-  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
+const EmployerLayoutInner = memo(({ children, developerView, onViewChange, isOrgAdmin: isOrgAdminProp }: EmployerLayoutProps) => {
+  const { isAdmin: isOrgAdminFromHook } = useIsOrgAdmin();
+  const isOrgAdmin = isOrgAdminProp ?? isOrgAdminFromHook;
   const { invalidateJobs } = useJobsData();
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
@@ -133,10 +135,10 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
 EmployerLayoutInner.displayName = 'EmployerLayoutInner';
 
 // Wrapper component that provides the KanbanLayout context
-const EmployerLayout = memo(({ children, developerView, onViewChange }: EmployerLayoutProps) => {
+const EmployerLayout = memo(({ children, developerView, onViewChange, isOrgAdmin }: EmployerLayoutProps) => {
   return (
     <KanbanLayoutProvider>
-      <EmployerLayoutInner developerView={developerView} onViewChange={onViewChange}>
+      <EmployerLayoutInner developerView={developerView} onViewChange={onViewChange} isOrgAdmin={isOrgAdmin}>
         {children}
       </EmployerLayoutInner>
     </KanbanLayoutProvider>

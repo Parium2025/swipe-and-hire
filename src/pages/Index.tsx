@@ -578,7 +578,7 @@ const Index = () => {
     };
 
     return (
-      <EmployerLayout developerView={developerView} onViewChange={setDeveloperView}>
+      <EmployerLayout developerView={developerView} onViewChange={setDeveloperView} isOrgAdmin={isAdmin}>
         <KeepAlive
           activeKey={location.pathname}
           render={(key) => renderEmployerContent(key)}
