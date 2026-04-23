@@ -274,7 +274,12 @@ export function TruncatedText({
             avoidCollisions={true}
             collisionPadding={12}
             sticky="always"
-            className={`z-[999999] w-fit max-w-[min(calc(100vw-24px),360px)] sm:max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
+            className={`z-[999999] w-fit max-w-[min(calc(100vw-24px),360px)] sm:max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 rounded-lg ${
+              // Desktop: pointer-events:none så tooltipen aldrig blockerar muspekaren
+              // (förhindrar att intilliggande kort triggar en andra tooltip).
+              // Touch: pointer-events:auto så användaren kan scrolla i lång text.
+              supportsHover ? 'pointer-events-none' : 'pointer-events-auto'
+            } ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
             onPointerDown={stopTooltipPropagation}
             onPointerMove={stopTooltipPropagation}
             onPointerUp={stopTooltipPropagation}
