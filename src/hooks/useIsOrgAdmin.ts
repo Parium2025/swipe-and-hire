@@ -3,12 +3,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 const CACHE_KEY = 'parium_is_org_admin_';
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-function readCache(userId: string): boolean | null {
+type CachedEntry = { isAdmin: boolean; timestamp: number };
+
+function readCache(userId: string): CachedEntry | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY + userId);
     if (raw === null) return null;
-    return JSON.parse(raw).isAdmin === true;
+    const parsed = JSON.parse(raw);
+    if (typeof parsed?.isAdmin !== 'boolean' || typeof parsed?.timestamp !== 'number') {
+      return null;
+    }
+    return parsed as CachedEntry;
   } catch {
     return null;
   }
@@ -20,17 +27,25 @@ function writeCache(userId: string, isAdmin: boolean): void {
   } catch { /* storage full */ }
 }
 
+function isFresh(entry: CachedEntry | null): boolean {
+  return !!entry && Date.now() - entry.timestamp < CACHE_TTL_MS;
+}
+
 /**
  * Hook to check if the current user is an admin of their organization.
- * Uses React Query with Infinity staleTime — the result is cached permanently
- * during the session to avoid redundant RPC calls on every navigation.
+ * Cache is valid for 5 minutes; after that we always re-fetch fresh from the server.
+ * A negative cached value (isAdmin=false) is treated as stale on mount so newly granted
+ * admin rights show up without manual cache clearing.
  */
 export const useIsOrgAdmin = () => {
   const { user } = useAuth();
 
-  const cachedValue = user ? readCache(user.id) : null;
+  const cached = user ? readCache(user.id) : null;
+  // Only trust a fresh positive cache as initial value to avoid showing the menu
+  // to non-admins from stale data, and to ensure newly-granted admins see it on next load.
+  const trustedInitial = cached && isFresh(cached) && cached.isAdmin ? true : undefined;
 
-  const { data: isAdmin = cachedValue ?? false, isLoading: queryLoading } = useQuery({
+  const { data: isAdmin = false, isLoading: queryLoading } = useQuery({
     queryKey: ['is-org-admin', user?.id],
     queryFn: async () => {
       if (!user?.id) return false;
@@ -49,23 +64,14 @@ export const useIsOrgAdmin = () => {
       return result;
     },
     enabled: !!user?.id,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    refetchOnMount: false,
+    staleTime: CACHE_TTL_MS,
+    gcTime: CACHE_TTL_MS,
+    refetchOnMount: 'always',
     refetchOnWindowFocus: false,
-    initialData: () => {
-      if (!user?.id) return undefined;
-      const cached = readCache(user.id);
-      return cached !== null ? cached : undefined;
-    },
-    initialDataUpdatedAt: () => {
-      if (!user?.id) return undefined;
-      const cached = readCache(user.id);
-      return cached !== null ? Date.now() - 60000 : undefined;
-    },
+    initialData: trustedInitial,
   });
 
-  const loading = queryLoading && cachedValue === null;
+  const loading = queryLoading && trustedInitial === undefined;
 
   return { isAdmin, loading };
 };
