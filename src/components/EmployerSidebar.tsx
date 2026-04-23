@@ -18,6 +18,7 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { CompanyAvatar } from "@/components/CompanyAvatar";
+import { TruncatedText } from "@/components/TruncatedText";
 import { Button } from "@/components/ui/button";
 import { 
   Building, 
@@ -352,12 +353,14 @@ export function EmployerSidebar() {
                 initials={getCompanyInitials()}
               />
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-white text-sm truncate">
-                  {profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
-                </p>
-                <p className="text-sm text-white truncate">
-                  {profile?.industry || 'Admin'}
-                </p>
+                <TruncatedText
+                  text={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
+                  className="font-medium text-white text-sm"
+                />
+                <TruncatedText
+                  text={profile?.industry || 'Admin'}
+                  className="text-sm text-white"
+                />
               </div>
             </div>
           )}
