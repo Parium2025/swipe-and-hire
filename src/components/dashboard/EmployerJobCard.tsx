@@ -110,14 +110,12 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick }: EmployerJobCar
                 <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
                   <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} />
                 </div>
-                <div
-                  className="text-[11px] px-2 py-0.5 border border-white/15 bg-white/10 text-white leading-snug inline-flex items-center max-w-[80%] min-w-0 overflow-hidden rounded-full cursor-default"
-                  title={companyName}
-                >
+                <div className="text-[11px] px-2 py-0.5 border border-white/15 bg-white/10 text-white leading-snug inline-flex items-center max-w-[80%] min-w-0 overflow-hidden rounded-full">
                   <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />
-                  <span className="block min-w-0 flex-1 truncate leading-snug font-medium text-white">
-                    {companyName}
-                  </span>
+                  <TruncatedText
+                    text={companyName}
+                    className="block min-w-0 flex-1 truncate leading-snug font-medium text-white"
+                  />
                 </div>
               </>
             ) : (
