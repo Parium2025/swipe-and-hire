@@ -28,12 +28,16 @@ export const clearEmployerWelcomeDraft = () => {
 
 interface EmployerWelcomeTunnelProps {
   onComplete: () => void;
+  /** Developer-only: jump directly to a given step on mount */
+  initialStep?: number;
 }
 
-const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
+const EmployerWelcomeTunnel = ({ onComplete, initialStep }: EmployerWelcomeTunnelProps) => {
   const { profile, updateProfile, user } = useAuth();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(
+    typeof initialStep === 'number' ? initialStep : 0
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);

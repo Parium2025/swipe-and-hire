@@ -24,12 +24,16 @@ import { useMediaUrl } from '@/hooks/useMediaUrl';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
+  /** Developer-only: jump directly to a given step on mount */
+  initialStep?: number;
 }
 
-const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
+const WelcomeTunnel = ({ onComplete, initialStep }: WelcomeTunnelProps) => {
   const { profile, updateProfile, user, signOut } = useAuth();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(-1); // Start with SwipeIntro (-1)
+  const [currentStep, setCurrentStep] = useState(
+    typeof initialStep === 'number' ? initialStep : -1
+  ); // Start with SwipeIntro (-1) unless dev override provided
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
