@@ -26,9 +26,11 @@ interface WelcomeTunnelProps {
   onComplete: () => void;
   /** Developer-only: jump directly to a given step on mount */
   initialStep?: number;
+  /** Developer-only: when true, no data is written to the database (Spara is mocked) */
+  previewMode?: boolean;
 }
 
-const WelcomeTunnel = ({ onComplete, initialStep }: WelcomeTunnelProps) => {
+const WelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: WelcomeTunnelProps) => {
   const { profile, updateProfile, user, signOut } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(
@@ -942,6 +944,19 @@ const WelcomeTunnel = ({ onComplete, initialStep }: WelcomeTunnelProps) => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
+      // 🛠️ Preview mode (DeveloperControls) – do NOT touch the database
+      if (previewMode) {
+        setCurrentStep(totalSteps - 1);
+        setTimeout(() => {
+          toast({
+            title: "Förhandsgranskning",
+            description: "Sparat (preview) – ingen data skrevs till databasen."
+          });
+          onComplete();
+        }, 1500);
+        return;
+      }
+
       console.log('Starting profile update with data:', {
         first_name: formData.firstName,
         last_name: formData.lastName,

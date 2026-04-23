@@ -30,9 +30,11 @@ interface EmployerWelcomeTunnelProps {
   onComplete: () => void;
   /** Developer-only: jump directly to a given step on mount */
   initialStep?: number;
+  /** Developer-only: when true, no data is written to the database (Spara is mocked) */
+  previewMode?: boolean;
 }
 
-const EmployerWelcomeTunnel = ({ onComplete, initialStep }: EmployerWelcomeTunnelProps) => {
+const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }: EmployerWelcomeTunnelProps) => {
   const { profile, updateProfile, user } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(
@@ -175,6 +177,16 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep }: EmployerWelcomeTunne
 
     setIsSubmitting(true);
     try {
+      // 🛠️ Preview mode (DeveloperControls) – do NOT touch the database
+      if (previewMode) {
+        toast({
+          title: "Förhandsgranskning",
+          description: "Sparat (preview) – ingen data skrevs till databasen."
+        });
+        onComplete();
+        return;
+      }
+
       await updateProfile({
         company_logo_url: formData.companyLogoUrl,
         onboarding_completed: true
