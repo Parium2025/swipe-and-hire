@@ -406,11 +406,26 @@ const Index = () => {
   
   // Developer overrides for admin users (database-based check)
   if (isAdmin) {
-    if (developerView === 'welcome_tunnel') {
-      return <WelcomeTunnel onComplete={() => setDeveloperView('dashboard')} />;
+    // Support "welcome_tunnel:<step>" / "employer_welcome_tunnel:<step>" syntax
+    // so admins can jump directly to a specific step from DeveloperControls.
+    const [devViewName, devStepRaw] = (developerView || '').split(':');
+    const devStep = devStepRaw !== undefined ? parseInt(devStepRaw, 10) : undefined;
+
+    if (devViewName === 'welcome_tunnel') {
+      return (
+        <WelcomeTunnel
+          initialStep={Number.isFinite(devStep) ? devStep : undefined}
+          onComplete={() => setDeveloperView('dashboard')}
+        />
+      );
     }
-    if (developerView === 'employer_welcome_tunnel') {
-      return <EmployerWelcomeTunnel onComplete={() => setDeveloperView('dashboard')} />;
+    if (devViewName === 'employer_welcome_tunnel') {
+      return (
+        <EmployerWelcomeTunnel
+          initialStep={Number.isFinite(devStep) ? devStep : undefined}
+          onComplete={() => setDeveloperView('dashboard')}
+        />
+      );
     }
     if (developerView === 'intro_tutorial') {
       setShowIntroTutorial(true);
