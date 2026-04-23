@@ -343,23 +343,7 @@ const Index = () => {
       return;
     }
 
-    // Show profile selector only for admin
-    if (user && profile &&
-        !location.pathname.startsWith('/profile') && 
-        !location.pathname.startsWith('/search-jobs') && 
-        !location.pathname.startsWith('/dashboard') && 
-        !location.pathname.startsWith('/company-profile') && 
-        !location.pathname.startsWith('/subscription') && 
-        !location.pathname.startsWith('/support') && 
-        !location.pathname.startsWith('/settings') && 
-        !location.pathname.startsWith('/billing') && 
-        !location.pathname.startsWith('/payment') && 
-        !location.pathname.startsWith('/consent')) {
-      if (isAdmin) {
-        setShowProfileSelector(true);
-      }
-    }
-    
+    // Profilväljaren visas inte längre automatiskt — admins växlar roll via Utvecklarvy-knappen i toppnavigationen
     setIsInitializing(false);
   }, [user, loading, navigate, profile, location.pathname]);
 
