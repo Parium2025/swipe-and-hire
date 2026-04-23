@@ -33,6 +33,22 @@ const detectEnv = () => {
 
 const ENV = detectEnv();
 
+// Singleton tracker — only one TruncatedText tooltip can be open at a time.
+// This prevents the "double tooltip" bug where two cards' tooltips overlap
+// when the user moves the mouse from one card to an adjacent one.
+let activeCloseFn: (() => void) | null = null;
+const registerOpenTooltip = (closeFn: () => void) => {
+  if (activeCloseFn && activeCloseFn !== closeFn) {
+    activeCloseFn();
+  }
+  activeCloseFn = closeFn;
+};
+const unregisterOpenTooltip = (closeFn: () => void) => {
+  if (activeCloseFn === closeFn) {
+    activeCloseFn = null;
+  }
+};
+
 /**
  * Component that automatically detects if text is truncated and shows
  * a tooltip with the full text on hover.
@@ -216,15 +232,28 @@ export function TruncatedText({
     setIsOpen(wantsOpen);
   }, [supportsHover, forceClosed, shouldShowTooltip, isDesktopHovering, isDesktopFocused]);
 
+  // Singleton: ensure only one TruncatedText tooltip is open at a time globally.
+  // When this tooltip opens, close any other one. When it closes, unregister.
+  const closeSelf = useCallback(() => {
+    setIsOpen(false);
+    setIsDesktopHovering(false);
+    setIsDesktopFocused(false);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      registerOpenTooltip(closeSelf);
+    } else {
+      unregisterOpenTooltip(closeSelf);
+    }
+    return () => unregisterOpenTooltip(closeSelf);
+  }, [isOpen, closeSelf]);
+
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
     ...style,
   };
-
-  const showNativeTitle = supportsHover
-    ? (tooltipForcedOn || isTruncated || !hasMeasured ? text : undefined)
-    : undefined;
 
   // Stop propagation to prevent parent onClick from firing when interacting with tooltip
   const handleClick = (e: React.MouseEvent) => {
@@ -259,7 +288,8 @@ export function TruncatedText({
             onBlur={handleBlur}
             onTouchStart={isTouch && !supportsHover ? measureTruncation : undefined}
             onMouseDown={(e) => e.stopPropagation()}
-            title={showNativeTitle}
+            // No native `title` attribute — it would render a second (gray) browser
+            // tooltip on top of our custom one.
           >
             {children || text}
           </div>
@@ -274,12 +304,7 @@ export function TruncatedText({
             avoidCollisions={true}
             collisionPadding={12}
             sticky="always"
-            className={`z-[999999] w-fit max-w-[min(calc(100vw-24px),360px)] sm:max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 rounded-lg ${
-              // Desktop: pointer-events:none så tooltipen aldrig blockerar muspekaren
-              // (förhindrar att intilliggande kort triggar en andra tooltip).
-              // Touch: pointer-events:auto så användaren kan scrolla i lång text.
-              supportsHover ? 'pointer-events-none' : 'pointer-events-auto'
-            } ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
+            className={`z-[999999] w-fit max-w-[min(calc(100vw-24px),360px)] sm:max-w-[min(90vw,600px)] max-h-[300px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg ${instantClose ? 'data-[state=closed]:animate-none' : ''}`}
             onPointerDown={stopTooltipPropagation}
             onPointerMove={stopTooltipPropagation}
             onPointerUp={stopTooltipPropagation}
