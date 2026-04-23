@@ -399,6 +399,7 @@ const Index = () => {
       return (
         <WelcomeTunnel
           initialStep={Number.isFinite(devStep) ? devStep : undefined}
+          previewMode
           onComplete={() => setDeveloperView('dashboard')}
         />
       );
@@ -407,6 +408,7 @@ const Index = () => {
       return (
         <EmployerWelcomeTunnel
           initialStep={Number.isFinite(devStep) ? devStep : undefined}
+          previewMode
           onComplete={() => setDeveloperView('dashboard')}
         />
       );
