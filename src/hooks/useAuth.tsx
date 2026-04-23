@@ -859,7 +859,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Parallelize role and organization fetches
+      // Parallelize membership/organization fetches
       const rolePromise = supabase
         .from('user_roles')
         .select('*')
@@ -883,37 +883,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ]);
 
       const { data: roleData, error: roleError } = roleResult;
-      
+      const profileRole = profileData?.role as UserRole | undefined;
+      const membershipOrgId = roleData?.organization_id ?? profileData?.organization_id;
+
       if (roleError) {
         console.error('Error fetching user role:', roleError);
-      } else {
-        setUserRole(roleData as UserRoleData);
+      }
 
-        // If profile didn't have org_id but role does, fetch organization
-        if (!profileData?.organization_id && roleData?.organization_id) {
+      if (profileRole) {
+        setUserRole({
+          id: roleData?.id ?? `profile-role-${userId}`,
+          user_id: userId,
+          role: profileRole,
+          organization_id: membershipOrgId,
+          is_active: roleData?.is_active ?? true,
+        });
+
+        if (membershipOrgId) {
           try {
-            safeSetItem('org_id', roleData.organization_id);
+            safeSetItem('org_id', membershipOrgId);
           } catch (e) {
-            console.warn('Failed to cache org_id from role:', e);
+            console.warn('Failed to cache org_id from membership:', e);
           }
+        }
+      } else {
+        setUserRole(null);
+      }
 
-          const { data: orgData, error: orgError } = await supabase
-            .from('organizations')
-            .select('*')
-            .eq('id', roleData.organization_id)
-            .maybeSingle();
+      if (!profileData?.organization_id && membershipOrgId) {
+        const { data: orgData, error: orgError } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('id', membershipOrgId)
+          .maybeSingle();
 
-          if (orgError) {
-            console.error('Error fetching organization:', orgError);
-          } else if (orgData) {
-            setOrganization(orgData);
-          }
-        } else if (orgResult.data) {
-          if (orgResult.error) {
-            console.error('Error fetching organization:', orgResult.error);
-          } else {
-            setOrganization(orgResult.data);
-          }
+        if (orgError) {
+          console.error('Error fetching organization:', orgError);
+        } else if (orgData) {
+          setOrganization(orgData);
+        }
+      } else if (orgResult.data) {
+        if (orgResult.error) {
+          console.error('Error fetching organization:', orgResult.error);
+        } else {
+          setOrganization(orgResult.data);
         }
       }
     } catch (error) {
@@ -1648,44 +1661,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return { error: 'No user logged in' };
 
     try {
-      // Deactivate current role
-      if (userRole) {
-        await supabase
-          .from('user_roles')
-          .update({ is_active: false })
-          .eq('id', userRole.id);
-      }
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('user_id', user.id);
 
-      // Activate or create new role
-      const { data: existingRole, error: fetchError } = await supabase
-        .from('user_roles')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('role', newRole)
-        .maybeSingle();
-
-      if (fetchError) return { error: fetchError };
-
-      if (existingRole) {
-        // Activate existing role
-        const { error: updateError } = await supabase
-          .from('user_roles')
-          .update({ is_active: true })
-          .eq('id', existingRole.id);
-
-        if (updateError) return { error: updateError };
-      } else {
-        // Create new role
-        const { error: insertError } = await supabase
-          .from('user_roles')
-          .insert([{
-            user_id: user.id,
-            role: newRole,
-            is_active: true
-          }]);
-
-        if (insertError) return { error: insertError };
-      }
+      if (updateError) return { error: updateError };
 
       // Refresh user data
       await fetchUserData(user.id);
