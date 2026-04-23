@@ -426,7 +426,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
               <DropdownMenuSeparator className="bg-white/10 my-1.5" />
               <DropdownMenuItem 
                 onClick={signOut} 
-                className={`${dropdownItemClass} group/logout border border-red-500 bg-red-500 !text-white rounded-full transition-all duration-200 hover:bg-red-600 hover:!text-white hover:border-red-600 hover:shadow-[0_4px_18px_-6px_rgba(239,68,68,0.55)] focus:bg-red-600 focus:!text-white focus:border-red-600`}
+                className="group/logout flex items-center gap-2 cursor-pointer rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 text-white px-3 py-2 text-sm font-medium transition-colors hover:bg-white/10 focus:bg-white/10"
               >
                 <LogOut className="h-4 w-4 transition-transform duration-200 group-hover/logout:-translate-x-0.5" />
                 Logga ut
