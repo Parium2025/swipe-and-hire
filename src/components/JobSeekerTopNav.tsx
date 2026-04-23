@@ -389,7 +389,7 @@ function JobSeekerTopNav() {
               
               <DropdownMenuItem
                 onClick={() => { signOut(); setProfileOpen(false); }}
-                className={`${dropdownItemClass} group/logout border border-red-500/40 bg-red-500/5 text-red-300 rounded-full transition-all duration-200 hover:bg-red-500 hover:!text-white hover:border-red-500 hover:shadow-[0_4px_18px_-6px_rgba(239,68,68,0.55)] focus:bg-red-500 focus:!text-white focus:border-red-500`}
+                className={`${dropdownItemClass} group/logout border border-red-500 bg-red-500 !text-white rounded-full transition-all duration-200 hover:bg-red-600 hover:!text-white hover:border-red-600 hover:shadow-[0_4px_18px_-6px_rgba(239,68,68,0.55)] focus:bg-red-600 focus:!text-white focus:border-red-600`}
               >
                 <LogOut className="h-4 w-4 transition-transform duration-200 group-hover/logout:-translate-x-0.5" />
                 Logga ut
