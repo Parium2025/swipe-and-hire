@@ -108,8 +108,18 @@ const SavedJobs = () => {
     return new Date(expiresAt) < new Date();
   };
 
+  const hasRenderableJobPosting = useCallback((entry: SavedJob) => {
+    const posting = entry.job_postings;
+    return !!(
+      posting &&
+      typeof posting.id === 'string' && posting.id.trim() &&
+      typeof posting.title === 'string' && posting.title.trim() &&
+      typeof posting.created_at === 'string' && posting.created_at.trim()
+    );
+  }, []);
+
   const sortedJobs = useMemo(() => {
-    const withJobs = savedJobs.filter(sj => sj.job_postings !== null);
+    const withJobs = savedJobs.filter(hasRenderableJobPosting);
 
     const isJobExpired = (sj: SavedJob) => !sj.job_postings!.is_active || isExpired(sj.job_postings!.expires_at);
 
@@ -141,12 +151,12 @@ const SavedJobs = () => {
 
   const filteredSkippedJobs = useMemo(() => {
     return skippedJobs.filter(sj => {
-      if (!sj.job_postings) return false;
+      if (!hasRenderableJobPosting(sj)) return false;
       if (!sj.job_postings.is_active) return false;
       if (sj.job_postings.expires_at && new Date(sj.job_postings.expires_at) < new Date()) return false;
       return true;
     });
-  }, [skippedJobs]);
+  }, [skippedJobs, hasRenderableJobPosting]);
 
   const activeJobsForMedia = activeTab === 'saved' ? sortedJobs : filteredSkippedJobs;
 
@@ -228,7 +238,7 @@ const SavedJobs = () => {
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 text-white animate-spin" />
             </div>
-          ) : savedJobs.filter(sj => sj.job_postings !== null).length === 0 ? (
+          ) : savedJobs.filter(hasRenderableJobPosting).length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
                 <Heart className="h-12 w-12 text-white mx-auto mb-4" />
