@@ -36,13 +36,19 @@ interface CachedEntry<T> {
 }
 
 function readCache<T>(prefix: string, userId: string, scope: string, orgId: string | null): T | undefined {
+  const key = prefix + userId;
   try {
-    const raw = localStorage.getItem(prefix + userId);
+    const raw = localStorage.getItem(key);
     if (!raw) return undefined;
     const cached: CachedEntry<T> = JSON.parse(raw);
+    if (!cached || typeof cached !== 'object') {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return undefined;
+    }
     if (cached.scope !== scope || cached.orgId !== orgId) return undefined;
     return cached.data;
   } catch {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
     return undefined;
   }
 }
