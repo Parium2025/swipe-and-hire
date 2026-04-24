@@ -112,7 +112,11 @@ export class StorageOptimizer {
       if (!raw) return null;
 
       const data: StorageData<T> = JSON.parse(raw);
-      
+      if (!data || typeof data !== 'object') {
+        try { storage.removeItem(key); } catch { /* ignore */ }
+        return null;
+      }
+
       // Check expiry
       if (data.expiry) {
         const age = Date.now() - data.timestamp;
