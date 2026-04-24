@@ -196,7 +196,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
   });
 
   const isLoadingSkipped = enableSkipped && queryLoadingSkipped && skippedJobs.length === 0;
-  const savedJobIds = useMemo(() => new Set(savedJobs.map((job) => job.job_id)), [savedJobs]);
+  const savedJobIds = useMemo(() => new Set(Array.isArray(savedJobs) ? savedJobs.map((job) => job.job_id) : []), [savedJobs]);
 
   // ── Realtime: job_postings updates for saved jobs only ──
   useEffect(() => {
