@@ -67,6 +67,76 @@ interface CacheEnvelope<T> {
   timestamp: number;
 }
 
+const asNullableString = (value: unknown): string | null => typeof value === 'string' ? value : null;
+const asRequiredString = (value: unknown): string | null => {
+  const normalized = asNullableString(value)?.trim();
+  return normalized ? normalized : null;
+};
+const asNullableNumber = (value: unknown): number | null => typeof value === 'number' && Number.isFinite(value) ? value : null;
+const asStringArray = (value: unknown): string[] | null => Array.isArray(value)
+  ? value.filter((item): item is string => typeof item === 'string')
+  : null;
+
+function normalizeJobPostingShape(input: unknown): JobPostingShape | null {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+
+  const record = input as Record<string, unknown>;
+  const id = asRequiredString(record.id);
+  const title = asRequiredString(record.title);
+  const createdAt = asRequiredString(record.created_at);
+
+  if (!id || !title || !createdAt) return null;
+
+  return {
+    id,
+    title,
+    image_focus_position: asNullableString(record.image_focus_position),
+    location: asNullableString(record.location),
+    workplace_city: asNullableString(record.workplace_city),
+    workplace_county: asNullableString(record.workplace_county),
+    employment_type: asNullableString(record.employment_type),
+    job_image_url: asNullableString(record.job_image_url),
+    is_active: typeof record.is_active === 'boolean' ? record.is_active : false,
+    created_at: createdAt,
+    expires_at: asNullableString(record.expires_at),
+    applications_count: asNullableNumber(record.applications_count),
+    views_count: asNullableNumber(record.views_count),
+    positions_count: asNullableNumber(record.positions_count),
+    salary_min: asNullableNumber(record.salary_min),
+    salary_max: asNullableNumber(record.salary_max),
+    salary_type: asNullableString(record.salary_type),
+    salary_transparency: asNullableString(record.salary_transparency),
+    benefits: asStringArray(record.benefits),
+    workplace_name: asNullableString(record.workplace_name),
+    company_logo_url: asNullableString(record.company_logo_url),
+  };
+}
+
+function normalizeSavedJobEntry<T extends SavedJob | SkippedJob>(input: unknown): T | null {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+
+  const record = input as Record<string, unknown>;
+  const id = asRequiredString(record.id);
+  const jobId = asRequiredString(record.job_id);
+  const createdAt = asRequiredString(record.created_at);
+
+  if (!id || !jobId || !createdAt) return null;
+
+  return {
+    id,
+    job_id: jobId,
+    created_at: createdAt,
+    job_postings: normalizeJobPostingShape(record.job_postings),
+  } as T;
+}
+
+function sanitizeSavedJobsList<T extends SavedJob | SkippedJob>(input: unknown): T[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((item) => normalizeSavedJobEntry<T>(item))
+    .filter((item): item is T => item !== null);
+}
+
 function readCache<T>(key: string, userId: string): T[] | null {
   try {
     const raw = localStorage.getItem(key);
@@ -78,7 +148,15 @@ function readCache<T>(key: string, userId: string): T[] | null {
       try { localStorage.removeItem(key); } catch { /* ignore */ }
       return null;
     }
-    return env.items;
+    const sanitizedItems = sanitizeSavedJobsList<T>(env.items);
+    if (sanitizedItems.length !== env.items.length) {
+      if (sanitizedItems.length === 0 && env.items.length > 0) {
+        try { localStorage.removeItem(key); } catch { /* ignore */ }
+        return null;
+      }
+      writeCache(key, userId, sanitizedItems);
+    }
+    return sanitizedItems;
   } catch {
     try { localStorage.removeItem(key); } catch { /* ignore */ }
     return null;
