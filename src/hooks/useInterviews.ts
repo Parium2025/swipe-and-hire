@@ -39,8 +39,13 @@ function readEmployerInterviewsCache(userId: string): Interview[] | null {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const cached: CachedInterviews = JSON.parse(raw);
+    if (!cached || !Array.isArray(cached.interviews)) {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
     return cached.interviews;
   } catch {
+    try { localStorage.removeItem(EMPLOYER_INTERVIEWS_CACHE_KEY + userId); } catch { /* ignore */ }
     return null;
   }
 }
