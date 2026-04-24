@@ -200,7 +200,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
 
   // ── Realtime: job_postings updates for saved jobs only ──
   useEffect(() => {
-    if (!user?.id || savedJobs.length === 0) return;
+    if (!user?.id || !Array.isArray(savedJobs) || savedJobs.length === 0) return;
     const ids = new Set(savedJobs.map(sj => sj.job_id));
 
     const channel = supabase
