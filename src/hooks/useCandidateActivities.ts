@@ -23,11 +23,20 @@ export interface CandidateActivity {
 const ACTIVITY_CACHE_KEY = 'parium_candidate_activities_';
 
 function readActivityCache(applicantId: string): CandidateActivity[] | null {
+  const key = ACTIVITY_CACHE_KEY + applicantId;
   try {
-    const raw = localStorage.getItem(ACTIVITY_CACHE_KEY + applicantId);
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
-    return JSON.parse(raw).data;
-  } catch { return null; }
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.data)) {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
+    return parsed.data;
+  } catch {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return null;
+  }
 }
 
 function writeActivityCache(applicantId: string, data: CandidateActivity[]): void {
