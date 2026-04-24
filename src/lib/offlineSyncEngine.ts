@@ -141,8 +141,15 @@ interface SyncTimestamps {
 function getSyncTimestamps(): SyncTimestamps {
   try {
     const raw = localStorage.getItem(SYNC_TIMESTAMPS_KEY);
-    return raw ? JSON.parse(raw) : {};
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      try { localStorage.removeItem(SYNC_TIMESTAMPS_KEY); } catch { /* ignore */ }
+      return {};
+    }
+    return parsed as SyncTimestamps;
   } catch {
+    try { localStorage.removeItem(SYNC_TIMESTAMPS_KEY); } catch { /* ignore */ }
     return {};
   }
 }

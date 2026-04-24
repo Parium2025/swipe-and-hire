@@ -52,8 +52,12 @@ export const readPositions = (): Record<string, ScrollPosition> => {
     const raw = sessionStorage.getItem(SCROLL_STORAGE_KEY);
     if (!raw) return {};
 
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    return Object.entries(parsed).reduce<Record<string, ScrollPosition>>((acc, [pathname, value]) => {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      try { sessionStorage.removeItem(SCROLL_STORAGE_KEY); } catch { /* ignore */ }
+      return {};
+    }
+    return Object.entries(parsed as Record<string, unknown>).reduce<Record<string, ScrollPosition>>((acc, [pathname, value]) => {
       const normalized = normalizePosition(value);
       if (normalized) {
         acc[pathname] = normalized;
@@ -61,6 +65,7 @@ export const readPositions = (): Record<string, ScrollPosition> => {
       return acc;
     }, {});
   } catch {
+    try { sessionStorage.removeItem(SCROLL_STORAGE_KEY); } catch { /* ignore */ }
     return {};
   }
 };

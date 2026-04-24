@@ -167,8 +167,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(() => {
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem(CACHED_PROFILE_KEY) : null;
-      return raw ? JSON.parse(raw) as Profile : null;
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        try { localStorage.removeItem(CACHED_PROFILE_KEY); } catch { /* ignore */ }
+        return null;
+      }
+      return parsed as Profile;
     } catch {
+      try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch { /* ignore */ }
       return null;
     }
   });
@@ -1642,7 +1649,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // The is_org_admin RPC is the source of truth
     try {
       const cached = localStorage.getItem('parium_is_org_admin_' + user.id);
-      if (cached) return JSON.parse(cached).isAdmin === true;
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === 'object') return parsed.isAdmin === true;
+      }
     } catch { /* ignore */ }
     return false;
   };

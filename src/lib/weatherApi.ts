@@ -33,12 +33,17 @@ export const getCachedLocation = (): CachedLocation | null => {
     const cached = localStorage.getItem(LOCATION_CACHE_KEY);
     if (!cached) return null;
     const data = JSON.parse(cached);
+    if (!data || typeof data !== 'object' || typeof data.timestamp !== 'number') {
+      try { localStorage.removeItem(LOCATION_CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
     if (Date.now() - data.timestamp > LOCATION_CACHE_MAX_AGE) {
       console.log('Location cache expired, will refresh');
       return null;
     }
     return data;
   } catch {
+    try { localStorage.removeItem(LOCATION_CACHE_KEY); } catch { /* ignore */ }
     return null;
   }
 };
@@ -55,9 +60,14 @@ export const getCachedWeather = (): CachedWeather | null => {
     const cached = localStorage.getItem(WEATHER_CACHE_KEY);
     if (!cached) return null;
     const data = JSON.parse(cached);
+    if (!data || typeof data !== 'object' || typeof data.timestamp !== 'number') {
+      try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
     if (Date.now() - data.timestamp > WEATHER_CACHE_MAX_AGE) return null;
     return data;
   } catch {
+    try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
     return null;
   }
 };
