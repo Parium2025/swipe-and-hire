@@ -12,14 +12,24 @@ const getCachedSearches = (userId: string): SavedSearch[] | null => {
     const cached = localStorage.getItem(CACHE_KEY);
     if (!cached) return null;
     
-    const { userId: cachedUserId, searches, timestamp } = JSON.parse(cached);
+    const parsed = JSON.parse(cached);
+    if (!parsed || typeof parsed !== 'object') {
+      try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
+    const { userId: cachedUserId, searches, timestamp } = parsed;
     
     // Kontrollera att cache tillhör rätt användare och inte är för gammal (24h)
     if (cachedUserId !== userId) return null;
-    if (Date.now() - timestamp > 24 * 60 * 60 * 1000) return null;
+    if (typeof timestamp !== 'number' || Date.now() - timestamp > 24 * 60 * 60 * 1000) return null;
+    if (!Array.isArray(searches)) {
+      try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
     
     return searches;
   } catch {
+    try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
     return null;
   }
 };
