@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSidebarRoutePrefetch } from "@/hooks/useSidebarRoutePrefetch";
-import { useConversations } from "@/hooks/useConversations";
+import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { preloadImages } from "@/lib/serviceWorkerManager";
 
 import {
@@ -51,8 +51,9 @@ export function AppSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs, preloadedJobSeekerUnreadMessages, preloadedMyApplications } = useAuth();
-  // Realtids-räknare för chattbadgen (åsidosätter cachad siffra från sessionStorage)
-  const { totalUnreadCount: liveJobSeekerUnread } = useConversations();
+  // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt)
+  const conversationsCtx = useConversationsContext();
+  const liveJobSeekerUnread = conversationsCtx?.totalUnreadCount;
   const jobSeekerUnreadMessages = liveJobSeekerUnread ?? preloadedJobSeekerUnreadMessages;
   const navigate = useNavigate();
   const location = useLocation();

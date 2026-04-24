@@ -62,6 +62,7 @@ const MediaMigration = lazyWithRetry(() => import("./pages/MediaMigration"));
 
 
 import { AuthProvider } from "@/hooks/useAuth";
+import { ConversationsProvider } from "@/contexts/ConversationsContext";
 import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
 import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
@@ -222,14 +223,16 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <OnlineStatusProvider>
-          <TooltipProvider delayDuration={0}>
-            <Toaster position="top-center" />
-            <BrowserRouter>
-              <AppShell showHeader={showHeader} />
-            </BrowserRouter>
-          </TooltipProvider>
-        </OnlineStatusProvider>
+        <ConversationsProvider>
+          <OnlineStatusProvider>
+            <TooltipProvider delayDuration={0}>
+              <Toaster position="top-center" />
+              <BrowserRouter>
+                <AppShell showHeader={showHeader} />
+              </BrowserRouter>
+            </TooltipProvider>
+          </OnlineStatusProvider>
+        </ConversationsProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
