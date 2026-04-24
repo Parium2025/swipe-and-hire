@@ -137,7 +137,7 @@ function sanitizeSavedJobsList<T extends SavedJob | SkippedJob>(input: unknown):
     .filter((item): item is T => item !== null);
 }
 
-function readCache<T>(key: string, userId: string): T[] | null {
+function readCache<T extends SavedJob | SkippedJob>(key: string, userId: string): T[] | null {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
@@ -224,7 +224,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      const items = (data as unknown as SavedJob[]) || [];
+      const items = sanitizeSavedJobsList<SavedJob>(data);
       writeCache<SavedJob>(SAVED_CACHE_KEY, user.id, items);
       return items;
     },
@@ -258,7 +258,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
         .eq('action', 'skipped')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      const items = (data as unknown as SkippedJob[]) || [];
+      const items = sanitizeSavedJobsList<SkippedJob>(data);
       writeCache<SkippedJob>(SKIPPED_CACHE_KEY, user.id, items);
       return items;
     },
