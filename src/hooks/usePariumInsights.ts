@@ -16,8 +16,13 @@ function readCache(): HrNewsItem[] | null {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const cached: InsightsCache = JSON.parse(raw);
+    if (!cached || !Array.isArray(cached.items)) {
+      try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
     return cached.items;
   } catch {
+    try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
     return null;
   }
 }
