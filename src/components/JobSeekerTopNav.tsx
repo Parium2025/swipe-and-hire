@@ -5,6 +5,7 @@ import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
+import { useConversations } from "@/hooks/useConversations";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProfileVideo from "@/components/ProfileVideo";
 import {
@@ -80,6 +81,9 @@ function JobSeekerTopNav() {
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const { totalNewMatches } = useSavedSearches();
+  // Realtids-räknare för chattbadgen (åsidosätter cachad siffra från sessionStorage)
+  const { totalUnreadCount: liveJobSeekerUnread } = useConversations();
+  const jobSeekerUnreadMessages = liveJobSeekerUnread ?? preloadedJobSeekerUnreadMessages;
   
   const [jobsOpen, setJobsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -224,9 +228,9 @@ function JobSeekerTopNav() {
             />
             <MessageCircle className="h-4 w-4 relative z-10" />
             <span className="relative z-10">Chattar</span>
-            {preloadedJobSeekerUnreadMessages > 0 && (
+            {jobSeekerUnreadMessages > 0 && (
               <span className="absolute -top-0.5 -right-1 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
-                {preloadedJobSeekerUnreadMessages > 9 ? '9+' : preloadedJobSeekerUnreadMessages}
+                {jobSeekerUnreadMessages > 9 ? '9+' : jobSeekerUnreadMessages}
               </span>
             )}
           </button>
