@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useConversations, type Conversation } from '@/hooks/useConversations';
+import { type Conversation } from '@/hooks/useConversations';
+import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,12 @@ export default function Messages() {
     const timer = setTimeout(() => setShowContentFade(true), 100);
     return () => clearTimeout(timer);
   }, []);
-  const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
+  // Läs från delad context — en enda global subscription körs i ConversationsProvider
+  const conversationsCtx = useConversationsContext();
+  const conversations = conversationsCtx?.conversations ?? [];
+  const isLoading = conversationsCtx?.isLoading ?? false;
+  const totalUnreadCount = conversationsCtx?.totalUnreadCount ?? 0;
+  const refetch = conversationsCtx?.refetch ?? (() => {});
   const { deleteConversation, isDeleting } = useDeleteConversation();
   const { hasTeam } = useTeamMembers();
   const [searchParams, setSearchParams] = useSearchParams();
