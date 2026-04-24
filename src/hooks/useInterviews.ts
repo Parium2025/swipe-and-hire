@@ -209,12 +209,14 @@ export const useCandidateInterviews = () => {
         if (cached) {
           const parsed = JSON.parse(cached);
           // No expiry — realtime subscriptions keep data fresh
-          if (parsed.items?.length >= 0) {
+          if (parsed && Array.isArray(parsed.items)) {
             return parsed.items;
           }
+          // Korrupt cache — rensa
+          try { localStorage.removeItem(cacheKey); } catch { /* ignore */ }
         }
       } catch {
-        // Ignorera cache-fel
+        try { localStorage.removeItem(`job_seeker_interviews_${user.id}`); } catch { /* ignore */ }
       }
       return undefined;
   }, [user?.id]);
