@@ -21,12 +21,21 @@ function loadFromCache(userId: string): Set<string> | null {
     if (!raw) return null;
     
     const data: CacheData = JSON.parse(raw);
+    if (!data || typeof data !== 'object') {
+      try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
     
     // Only check user match - no expiry, background sync keeps fresh
     if (data.userId !== userId) return null;
+    if (!Array.isArray(data.jobIds)) {
+      try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
     
     return new Set(data.jobIds);
   } catch {
+    try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
     return null;
   }
 }
