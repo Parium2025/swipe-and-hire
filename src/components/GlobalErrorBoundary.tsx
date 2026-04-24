@@ -11,6 +11,36 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
   state: State = { hasError: false, isStuck: false };
   private stuckTimer?: ReturnType<typeof setTimeout>;
 
+  private clearCorruptLocalCaches() {
+    if (typeof window === 'undefined') return;
+
+    const resetPrefixes = [
+      'parium_saved_jobs_cache',
+      'parium_saved_jobs_full_cache_v1',
+      'parium_skipped_jobs_full_cache_v1',
+      'job_seeker_saved_jobs_',
+      'job_seeker_applications_',
+      'job_seeker_messages_',
+      'job_seeker_interviews_',
+      'job-details-cache-',
+      'applications_snapshot_',
+    ];
+
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const key = window.localStorage.key(i);
+        if (!key) continue;
+        if (resetPrefixes.some((prefix) => key.startsWith(prefix))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((key) => window.localStorage.removeItem(key));
+    } catch {
+      // ignore
+    }
+  }
+
   componentDidMount() {
     // Detect if app is stuck (e.g., redirect loop in preview)
     this.stuckTimer = setTimeout(() => {
@@ -45,6 +75,7 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
   handleReload = () => {
     // Clear any stuck state and reload
     if (typeof window !== 'undefined') {
+      this.clearCorruptLocalCaches();
       // Clear URL parameters that might cause loops
       const cleanUrl = window.location.origin + window.location.pathname;
       window.location.replace(cleanUrl);
