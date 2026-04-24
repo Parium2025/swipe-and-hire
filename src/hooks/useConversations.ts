@@ -715,9 +715,17 @@ export function useConversationMessages(conversationId: string | null) {
       ['conversations', user.id],
       (prev) => {
         if (!prev) return prev;
-        return prev.map((c) =>
+        const next = prev.map((c) =>
           c.id === conversationId ? { ...c, unread_count: 0 } : c
         );
+        // Synka sessionStorage-cachen som AppSidebar/TopNav faller tillbaka på
+        // vid nästa sidladdning, annars visas gammalt värde innan context hunnit hämta.
+        try {
+          const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+          sessionStorage.setItem('parium_job_seeker_unread_messages', String(total));
+          sessionStorage.setItem('parium_unread_messages', String(total));
+        } catch {}
+        return next;
       }
     );
 
