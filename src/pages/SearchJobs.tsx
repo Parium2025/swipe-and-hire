@@ -845,10 +845,12 @@ const SearchJobs = memo(() => {
       
       {/* Show message when all jobs are loaded */}
       {!hasMoreJobs && !hasNextPage && !isFetchingNextPage && filteredAndSortedJobs.length > 0 && (
-        <div className="text-center pt-2 pb-6">
-          <p className="text-white text-sm">
-            Alla {filteredAndSortedJobs.length} jobb visas
-          </p>
+        <div className="flex justify-center pt-2 pb-6">
+          <div className="inline-flex items-center rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 px-4 py-1.5">
+            <p className="text-white text-sm font-medium">
+              Alla {filteredAndSortedJobs.length} jobb visas
+            </p>
+          </div>
         </div>
       )}
 
