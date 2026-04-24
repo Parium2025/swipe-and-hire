@@ -55,19 +55,28 @@ interface RatingsCacheData {
 
 // Read cached ratings from localStorage for instant display
 const readCachedRatings = (userId: string): Record<string, number> => {
+  const key = RATINGS_CACHE_PREFIX + userId;
   try {
-    const key = RATINGS_CACHE_PREFIX + userId;
     const raw = localStorage.getItem(key);
     if (!raw) return {};
     
     const cache: RatingsCacheData = JSON.parse(raw);
+    if (!cache || typeof cache !== 'object') {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return {};
+    }
     // TTL check
     if (cache.timestamp && Date.now() - cache.timestamp > RATINGS_TTL_MS) {
       localStorage.removeItem(key);
       return {};
     }
+    if (cache.ratings && typeof cache.ratings !== 'object') {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return {};
+    }
     return cache.ratings || {};
   } catch {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
     return {};
   }
 };
