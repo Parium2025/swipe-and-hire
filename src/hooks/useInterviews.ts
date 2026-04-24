@@ -39,8 +39,13 @@ function readEmployerInterviewsCache(userId: string): Interview[] | null {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const cached: CachedInterviews = JSON.parse(raw);
+    if (!cached || !Array.isArray(cached.interviews)) {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
     return cached.interviews;
   } catch {
+    try { localStorage.removeItem(EMPLOYER_INTERVIEWS_CACHE_KEY + userId); } catch { /* ignore */ }
     return null;
   }
 }
@@ -204,12 +209,14 @@ export const useCandidateInterviews = () => {
         if (cached) {
           const parsed = JSON.parse(cached);
           // No expiry — realtime subscriptions keep data fresh
-          if (parsed.items?.length >= 0) {
+          if (parsed && Array.isArray(parsed.items)) {
             return parsed.items;
           }
+          // Korrupt cache — rensa
+          try { localStorage.removeItem(cacheKey); } catch { /* ignore */ }
         }
       } catch {
-        // Ignorera cache-fel
+        try { localStorage.removeItem(`job_seeker_interviews_${user.id}`); } catch { /* ignore */ }
       }
       return undefined;
   }, [user?.id]);
