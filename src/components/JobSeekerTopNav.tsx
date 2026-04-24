@@ -5,7 +5,7 @@ import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
-import { useConversations } from "@/hooks/useConversations";
+import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProfileVideo from "@/components/ProfileVideo";
 import {
@@ -81,8 +81,9 @@ function JobSeekerTopNav() {
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const { totalNewMatches } = useSavedSearches();
-  // Realtids-räknare för chattbadgen (åsidosätter cachad siffra från sessionStorage)
-  const { totalUnreadCount: liveJobSeekerUnread } = useConversations();
+  // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt)
+  const conversationsCtx = useConversationsContext();
+  const liveJobSeekerUnread = conversationsCtx?.totalUnreadCount;
   const jobSeekerUnreadMessages = liveJobSeekerUnread ?? preloadedJobSeekerUnreadMessages;
   
   const [jobsOpen, setJobsOpen] = useState(false);
