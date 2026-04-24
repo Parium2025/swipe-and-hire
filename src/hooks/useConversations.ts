@@ -129,9 +129,13 @@ function readConversationsCache(userId: string): Conversation[] | null {
     const raw = localStorage.getItem(CONVERSATIONS_CACHE_KEY);
     if (!raw) return null;
     const cached: CachedConversations = JSON.parse(raw);
-    if (cached.userId !== userId) return null;
+    if (!cached || cached.userId !== userId) return null;
     if (!cached.version || cached.version < CACHE_VERSION) {
       localStorage.removeItem(CONVERSATIONS_CACHE_KEY);
+      return null;
+    }
+    if (!Array.isArray(cached.conversations)) {
+      try { localStorage.removeItem(CONVERSATIONS_CACHE_KEY); } catch { /* ignore */ }
       return null;
     }
     if (cached.conversations.length === 0) return null;
@@ -140,6 +144,7 @@ function readConversationsCache(userId: string): Conversation[] | null {
     // Unknown identity should be solved by recovery/refetch, not by hiding rows.
     return cached.conversations;
   } catch {
+    try { localStorage.removeItem(CONVERSATIONS_CACHE_KEY); } catch { /* ignore */ }
     return null;
   }
 }
