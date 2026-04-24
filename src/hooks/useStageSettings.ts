@@ -102,10 +102,14 @@ function readCachedSettings(userId: string): DbStageSetting[] | null {
     if (!raw) return null;
 
     const cached: CachedStageSettings = JSON.parse(raw);
-    // No expiry — realtime subscriptions keep data fresh
+    if (!cached || !Array.isArray(cached.settings)) {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
     return cached.settings;
   } catch (parseError) {
     console.warn('Failed to parse cached stage settings:', parseError);
+    try { localStorage.removeItem(STAGE_SETTINGS_CACHE_KEY + userId); } catch { /* ignore */ }
     return null;
   }
 }
