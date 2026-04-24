@@ -25,10 +25,14 @@ function readCache(userId: string): TeamMember[] | null {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const cached: CachedData = JSON.parse(raw);
-    // Only use cache if it's for the same user
-    if (cached.userId !== userId) return null;
+    if (!cached || cached.userId !== userId) return null;
+    if (!Array.isArray(cached.members)) {
+      try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
     return cached.members;
   } catch {
+    try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
     return null;
   }
 }
