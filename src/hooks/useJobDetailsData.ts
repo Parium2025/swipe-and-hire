@@ -205,11 +205,20 @@ const JOB_DETAIL_CACHE_KEY = 'parium_job_detail_';
 const JOB_APPS_CACHE_KEY = 'parium_job_apps_';
 
 function readJobDetailCache(jobId: string): JobPosting | null {
+  const key = JOB_DETAIL_CACHE_KEY + jobId;
   try {
-    const raw = localStorage.getItem(JOB_DETAIL_CACHE_KEY + jobId);
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
-    return JSON.parse(raw).data;
-  } catch { return null; }
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || !parsed.data) {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
+    return parsed.data;
+  } catch {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return null;
+  }
 }
 
 function writeJobDetailCache(jobId: string, data: JobPosting): void {
@@ -219,11 +228,20 @@ function writeJobDetailCache(jobId: string, data: JobPosting): void {
 }
 
 function readJobAppsCache(jobId: string): JobApplication[] | null {
+  const key = JOB_APPS_CACHE_KEY + jobId;
   try {
-    const raw = localStorage.getItem(JOB_APPS_CACHE_KEY + jobId);
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
-    return JSON.parse(raw).data;
-  } catch { return null; }
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.data)) {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
+    return parsed.data;
+  } catch {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return null;
+  }
 }
 
 function writeJobAppsCache(jobId: string, data: JobApplication[]): void {
