@@ -72,9 +72,15 @@ function readCache<T>(key: string, userId: string): T[] | null {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const env: CacheEnvelope<T> = JSON.parse(raw);
-    if (env.userId !== userId) return null;
+    if (!env || env.userId !== userId) return null;
+    if (!Array.isArray(env.items)) {
+      // Korrupt eller gammalt cacheformat — rensa så vi inte kraschar igen
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
     return env.items;
   } catch {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
     return null;
   }
 }
