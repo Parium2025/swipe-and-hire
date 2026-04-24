@@ -92,3 +92,65 @@ export function safeSetItem(key: string, value: string): boolean {
     return false;
   }
 }
+
+/**
+ * Säkert läsa en JSON-cache från localStorage.
+ *
+ * Returnerar `null` (och RENSAR posten) om något är fel:
+ *   - nyckeln saknas
+ *   - innehållet är ogiltig JSON
+ *   - parseat värde är inte ett objekt (null/primitiv)
+ *   - en valfri `validate(parsed)` returnerar false
+ *
+ * Detta är försvaret som gör att korrupta eller gamla cacheformat
+ * ALDRIG kan krascha appen via `.map`/`.filter`/`.length`.
+ */
+export function safeReadJsonCache<T>(
+  key: string,
+  validate?: (parsed: unknown) => parsed is T,
+): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (parsed === null || typeof parsed !== 'object') {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
+    if (validate && !validate(parsed)) {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
+    return parsed as T;
+  } catch {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return null;
+  }
+}
+
+/**
+ * Specialiserad helper för det vanligaste mönstret:
+ * en cache-envelope med ett array-fält. Validerar att fältet är en array.
+ *
+ * Användning:
+ *   const items = safeReadArrayCache<MyItem>(key, 'items');
+ *   // items är garanterat antingen en MyItem[] eller null
+ */
+export function safeReadArrayCache<T>(
+  key: string,
+  arrayField: string = 'items',
+  extraValidate?: (envelope: Record<string, unknown>) => boolean,
+): T[] | null {
+  const env = safeReadJsonCache<Record<string, unknown>>(key);
+  if (!env) return null;
+  const arr = env[arrayField];
+  if (!Array.isArray(arr)) {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return null;
+  }
+  if (extraValidate && !extraValidate(env)) {
+    return null;
+  }
+  return arr as T[];
+}
+
