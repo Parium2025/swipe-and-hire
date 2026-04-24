@@ -26,17 +26,28 @@ const CACHE_KEY = 'parium_company_reviews_cache';
 
 // LocalStorage cache helpers - NO EXPIRY, always syncs in background
 const getLocalCache = (companyId: string): { data: CompanyReviewsData; timestamp: number } | null => {
+  const key = `${CACHE_KEY}_${companyId}`;
   try {
-    const cached = localStorage.getItem(`${CACHE_KEY}_${companyId}`);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      // Always return cached data - background sync will update
-      return parsed;
+    const cached = localStorage.getItem(key);
+    if (!cached) return null;
+    const parsed = JSON.parse(cached);
+    // Validera struktur — annars är cachen korrupt
+    if (
+      !parsed ||
+      typeof parsed !== 'object' ||
+      !parsed.data ||
+      typeof parsed.data !== 'object' ||
+      !Array.isArray(parsed.data.reviews)
+    ) {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
     }
+    return parsed;
   } catch (e) {
     console.warn('Failed to read reviews cache:', e);
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return null;
   }
-  return null;
 };
 
 const setLocalCache = (companyId: string, data: CompanyReviewsData) => {
