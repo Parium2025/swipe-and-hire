@@ -24,11 +24,16 @@ const readCache = <T>(key: string, userId: string): CachedEnvelope<T> | null => 
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as CachedEnvelope<T>;
+    if (!parsed || typeof parsed !== 'object') {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
     if (parsed.version !== OUTREACH_STUDIO_CACHE_VERSION) return null;
     if (parsed.userId !== userId) return null;
 
     return parsed;
   } catch {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
     return null;
   }
 };
