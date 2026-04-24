@@ -1649,7 +1649,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // The is_org_admin RPC is the source of truth
     try {
       const cached = localStorage.getItem('parium_is_org_admin_' + user.id);
-      if (cached) return JSON.parse(cached).isAdmin === true;
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === 'object') return parsed.isAdmin === true;
+      }
     } catch { /* ignore */ }
     return false;
   };
