@@ -240,7 +240,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     },
   });
 
-  const safeSavedJobs = Array.isArray(savedJobs) ? savedJobs : [];
+  const safeSavedJobs = useMemo(() => sanitizeSavedJobsList<SavedJob>(savedJobs), [savedJobs]);
   const isLoadingSaved = queryLoadingSaved && safeSavedJobs.length === 0;
 
   // ── Skipped jobs query (lazy: only when tab opened) ──
@@ -274,14 +274,14 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     },
   });
 
-  const safeSkippedJobs = Array.isArray(skippedJobs) ? skippedJobs : [];
+  const safeSkippedJobs = useMemo(() => sanitizeSavedJobsList<SkippedJob>(skippedJobs), [skippedJobs]);
   const isLoadingSkipped = enableSkipped && queryLoadingSkipped && safeSkippedJobs.length === 0;
   const savedJobIds = useMemo(() => new Set(safeSavedJobs.map((job) => job.job_id)), [safeSavedJobs]);
 
   // ── Realtime: job_postings updates for saved jobs only ──
   useEffect(() => {
-    if (!user?.id || !Array.isArray(savedJobs) || savedJobs.length === 0) return;
-    const ids = new Set(savedJobs.map(sj => sj.job_id));
+    if (!user?.id || safeSavedJobs.length === 0) return;
+    const ids = new Set(safeSavedJobs.map(sj => sj.job_id));
 
     const channel = supabase
       .channel(`saved-jobs-postings-${user.id}`)
@@ -292,8 +292,9 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
           if (!ids.has(payload.new.id)) return;
           queryClient.setQueryData(['saved-jobs', user.id], (oldData: SavedJob[] | undefined) => {
             if (!oldData) return oldData;
+            const current = sanitizeSavedJobsList<SavedJob>(oldData);
             let changed = false;
-            const next = oldData.map(sj => {
+            const next = current.map(sj => {
               if (!sj.job_postings || sj.job_postings.id !== payload.new.id) return sj;
               const jp = sj.job_postings;
               if (
@@ -318,20 +319,21 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
                 },
               };
             });
-            return changed ? next : oldData;
+            return changed ? next : current;
           });
         }
       )
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user?.id, savedJobs, queryClient]);
+  }, [user?.id, safeSavedJobs, queryClient]);
 
   // ── Optimistic remove (used when user confirms unsave) ──
   const removeSavedJobLocally = useCallback((jobId: string) => {
     if (!user?.id) return;
     queryClient.setQueryData(['saved-jobs', user.id], (old: SavedJob[] | undefined) => {
-      const next = old ? old.filter(sj => sj.job_id !== jobId) : old;
+      const current = sanitizeSavedJobsList<SavedJob>(old);
+      const next = current.filter(sj => sj.job_id !== jobId);
       if (next) writeCache<SavedJob>(SAVED_CACHE_KEY, user.id, next);
       return next;
     });
@@ -341,7 +343,8 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
   const removeSkippedJobLocally = useCallback((jobId: string) => {
     if (!user?.id) return;
     queryClient.setQueryData(['skipped-jobs', user.id], (old: SkippedJob[] | undefined) => {
-      const next = old ? old.filter(sj => sj.job_id !== jobId) : old;
+      const current = sanitizeSavedJobsList<SkippedJob>(old);
+      const next = current.filter(sj => sj.job_id !== jobId);
       if (next) writeCache<SkippedJob>(SKIPPED_CACHE_KEY, user.id, next);
       return next;
     });
@@ -353,7 +356,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     const wasSaved = savedJobIds.has(jobId);
 
     queryClient.setQueryData(['saved-jobs', user.id], (old: SavedJob[] | undefined) => {
-      const current = old ?? [];
+      const current = sanitizeSavedJobsList<SavedJob>(old);
 
       if (wasSaved) {
         const next = current.filter((job) => job.job_id !== jobId);
