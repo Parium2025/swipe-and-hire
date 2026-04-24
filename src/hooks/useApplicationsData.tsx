@@ -105,9 +105,17 @@ const readSnapshot = (userId: string): ApplicationData[] => {
     if (!raw) return [];
 
     const snapshot: SnapshotData = JSON.parse(raw);
+    if (!snapshot || typeof snapshot !== 'object') {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return [];
+    }
     // TTL check — invalidate snapshots older than 1 hour as safety net
     if (snapshot.timestamp && Date.now() - snapshot.timestamp > SNAPSHOT_TTL_MS) {
       localStorage.removeItem(key);
+      return [];
+    }
+    if (!Array.isArray(snapshot.items)) {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
       return [];
     }
 
