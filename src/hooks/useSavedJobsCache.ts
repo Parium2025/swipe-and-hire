@@ -72,9 +72,15 @@ function readCache<T>(key: string, userId: string): T[] | null {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const env: CacheEnvelope<T> = JSON.parse(raw);
-    if (env.userId !== userId) return null;
+    if (!env || env.userId !== userId) return null;
+    if (!Array.isArray(env.items)) {
+      // Korrupt eller gammalt cacheformat — rensa så vi inte kraschar igen
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
     return env.items;
   } catch {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
     return null;
   }
 }
@@ -190,11 +196,11 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
   });
 
   const isLoadingSkipped = enableSkipped && queryLoadingSkipped && skippedJobs.length === 0;
-  const savedJobIds = useMemo(() => new Set(savedJobs.map((job) => job.job_id)), [savedJobs]);
+  const savedJobIds = useMemo(() => new Set(Array.isArray(savedJobs) ? savedJobs.map((job) => job.job_id) : []), [savedJobs]);
 
   // ── Realtime: job_postings updates for saved jobs only ──
   useEffect(() => {
-    if (!user?.id || savedJobs.length === 0) return;
+    if (!user?.id || !Array.isArray(savedJobs) || savedJobs.length === 0) return;
     const ids = new Set(savedJobs.map(sj => sj.job_id));
 
     const channel = supabase
