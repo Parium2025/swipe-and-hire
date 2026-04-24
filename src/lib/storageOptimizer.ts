@@ -168,6 +168,10 @@ export class StorageOptimizer {
           if (!raw) continue;
 
           const data = JSON.parse(raw) as StorageData<unknown>;
+          if (!data || typeof data !== 'object') {
+            keysToRemove.push(key);
+            continue;
+          }
           if (data.expiry && now - data.timestamp > data.expiry) {
             keysToRemove.push(key);
           }
