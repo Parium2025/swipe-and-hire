@@ -96,7 +96,11 @@ export default function Messages() {
   };
 
   // Filter conversations based on tab and search
+  // OBS: Tabs visas bara när hasTeam=true (arbetsgivare med team).
+  // För jobbsökare/solo-arbetsgivare visas alltid ALLA konversationer,
+  // annars kan kategorisering filtrera bort giltiga chattar.
   const getConversationsForTab = () => {
+    if (!hasTeam) return conversations;
     switch (activeTab) {
       case 'candidates': return candidateConversations;
       case 'colleagues': return colleagueConversations;
