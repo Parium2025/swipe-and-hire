@@ -24,8 +24,13 @@ function readOrgQuestionsCache(userId: string): OrganizationQuestion[] | null {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const cached: CachedOrgQuestions = JSON.parse(raw);
+    if (!cached || !Array.isArray(cached.questions)) {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
     return cached.questions;
   } catch {
+    try { localStorage.removeItem(ORG_QUESTIONS_CACHE_KEY + userId); } catch { /* ignore */ }
     return null;
   }
 }
