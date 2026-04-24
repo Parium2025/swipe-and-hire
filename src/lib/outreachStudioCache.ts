@@ -50,15 +50,31 @@ const writeCache = <T>(key: string, userId: string, data: T) => {
   );
 };
 
-export const readCachedOutreachStudio = (userId: string) =>
-  readCache<CachedOutreachStudioData>(`${OUTREACH_STUDIO_CACHE_PREFIX}${userId}`, userId)?.data ?? null;
+export const readCachedOutreachStudio = (userId: string): CachedOutreachStudioData | null => {
+  const data = readCache<CachedOutreachStudioData>(`${OUTREACH_STUDIO_CACHE_PREFIX}${userId}`, userId)?.data ?? null;
+  if (!data) return null;
+  // Validera att alla tre fält är arrayer (annars är cachen korrupt)
+  if (!Array.isArray(data.templates) || !Array.isArray(data.automations) || !Array.isArray(data.logs)) {
+    try { localStorage.removeItem(`${OUTREACH_STUDIO_CACHE_PREFIX}${userId}`); } catch { /* ignore */ }
+    return null;
+  }
+  return data;
+};
 
 export const writeCachedOutreachStudio = (userId: string, data: CachedOutreachStudioData) => {
   writeCache(`${OUTREACH_STUDIO_CACHE_PREFIX}${userId}`, userId, data);
 };
 
-export const readCachedOutreachTemplates = (userId: string) =>
-  readCache<OutreachTemplate[]>(`${OUTREACH_TEMPLATES_CACHE_PREFIX}${userId}`, userId)?.data ?? null;
+export const readCachedOutreachTemplates = (userId: string): OutreachTemplate[] | null => {
+  const data = readCache<OutreachTemplate[]>(`${OUTREACH_TEMPLATES_CACHE_PREFIX}${userId}`, userId)?.data ?? null;
+  if (!Array.isArray(data)) {
+    if (data !== null) {
+      try { localStorage.removeItem(`${OUTREACH_TEMPLATES_CACHE_PREFIX}${userId}`); } catch { /* ignore */ }
+    }
+    return null;
+  }
+  return data;
+};
 
 export const writeCachedOutreachTemplates = (userId: string, templates: OutreachTemplate[]) => {
   writeCache(`${OUTREACH_TEMPLATES_CACHE_PREFIX}${userId}`, userId, templates);
