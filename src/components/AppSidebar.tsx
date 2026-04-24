@@ -52,9 +52,12 @@ export function AppSidebar() {
   const collapsed = state === 'collapsed';
   const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs, preloadedJobSeekerUnreadMessages, preloadedMyApplications } = useAuth();
   // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt)
+  // Viktigt: när context är mountad (även med värde 0) ska live alltid vinna över preloaded,
+  // annars visar badgen ett gammalt cachat värde efter att olästa nollställts.
   const conversationsCtx = useConversationsContext();
-  const liveJobSeekerUnread = conversationsCtx?.totalUnreadCount;
-  const jobSeekerUnreadMessages = liveJobSeekerUnread ?? preloadedJobSeekerUnreadMessages;
+  const jobSeekerUnreadMessages = conversationsCtx
+    ? conversationsCtx.totalUnreadCount
+    : preloadedJobSeekerUnreadMessages;
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();

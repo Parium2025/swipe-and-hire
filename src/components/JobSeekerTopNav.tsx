@@ -82,9 +82,12 @@ function JobSeekerTopNav() {
   const { checkBeforeNavigation } = useUnsavedChanges();
   const { totalNewMatches } = useSavedSearches();
   // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt)
+  // Viktigt: när context är mountad (även med värde 0) ska live alltid vinna över preloaded,
+  // annars visar badgen ett gammalt cachat värde efter att olästa nollställts.
   const conversationsCtx = useConversationsContext();
-  const liveJobSeekerUnread = conversationsCtx?.totalUnreadCount;
-  const jobSeekerUnreadMessages = liveJobSeekerUnread ?? preloadedJobSeekerUnreadMessages;
+  const jobSeekerUnreadMessages = conversationsCtx
+    ? conversationsCtx.totalUnreadCount
+    : preloadedJobSeekerUnreadMessages;
   
   const [jobsOpen, setJobsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
