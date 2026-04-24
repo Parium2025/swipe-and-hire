@@ -705,9 +705,22 @@ export function useConversationMessages(conversationId: string | null) {
     };
   }, [conversationId, user, queryClient]);
 
-  // Mark conversation as read
+  // Mark conversation as read (optimistic — badge nollställs direkt)
   const markAsRead = useCallback(async () => {
     if (!conversationId || !user) return;
+
+    // Optimistisk uppdatering: nollställ unread_count för denna konversation
+    // i cache så badgar i sidebar/topnav/Messages uppdateras omedelbart.
+    queryClient.setQueryData<Conversation[]>(
+      ['conversations', user.id],
+      (prev) => {
+        if (!prev) return prev;
+        return prev.map((c) =>
+          c.id === conversationId ? { ...c, unread_count: 0 } : c
+        );
+      }
+    );
+
     if (!getIsOnline()) return; // Silent fail for mark as read - non-critical
 
     try {
