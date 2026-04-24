@@ -97,9 +97,6 @@ export const useJobSeekerBackgroundSync = () => {
         jobIds: Array.from(jobIds),
         timestamp: Date.now(),
       }));
-      
-      // Uppdatera React Query cache för omedelbar användning
-      queryClient.setQueryData(['saved-jobs', userId], jobIds);
     }
   }, [queryClient]);
 

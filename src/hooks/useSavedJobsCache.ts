@@ -162,7 +162,8 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     },
   });
 
-  const isLoadingSaved = queryLoadingSaved && savedJobs.length === 0;
+  const safeSavedJobs = Array.isArray(savedJobs) ? savedJobs : [];
+  const isLoadingSaved = queryLoadingSaved && safeSavedJobs.length === 0;
 
   // ── Skipped jobs query (lazy: only when tab opened) ──
   const {
@@ -195,8 +196,9 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     },
   });
 
-  const isLoadingSkipped = enableSkipped && queryLoadingSkipped && skippedJobs.length === 0;
-  const savedJobIds = useMemo(() => new Set(Array.isArray(savedJobs) ? savedJobs.map((job) => job.job_id) : []), [savedJobs]);
+  const safeSkippedJobs = Array.isArray(skippedJobs) ? skippedJobs : [];
+  const isLoadingSkipped = enableSkipped && queryLoadingSkipped && safeSkippedJobs.length === 0;
+  const savedJobIds = useMemo(() => new Set(safeSavedJobs.map((job) => job.job_id)), [safeSavedJobs]);
 
   // ── Realtime: job_postings updates for saved jobs only ──
   useEffect(() => {
@@ -341,9 +343,9 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
   }, [user?.id, queryClient, removeSkippedJobLocally]);
 
   return {
-    savedJobs,
+    savedJobs: safeSavedJobs,
     savedJobIds,
-    skippedJobs,
+    skippedJobs: safeSkippedJobs,
     isLoadingSaved,
     isLoadingSkipped,
     removeSavedJobLocally,
