@@ -134,6 +134,11 @@ export function clearMediaUrlCache(
     signedUrlMemoryCache.delete(key);
   }
 
+  // Extra safety: evict blob-cache entries by the actual storage path too.
+  // This covers overwritten files where the signed URL may no longer be present
+  // in our signed-url caches but the old blob still uses the same object path.
+  imageCache.evictByPattern(storagePath);
+
   for (const key of Array.from(ongoingLoads.keys())) {
     if (matchesStoragePath(key)) ongoingLoads.delete(key);
   }
@@ -191,13 +196,29 @@ export function useMediaUrl(
       return;
     }
     
+    const refreshSignedUrl = async () => {
+      clearMediaUrlCache(storagePath, mediaType);
+      const freshSignedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform);
+      if (!freshSignedUrl || !mountedRef.current) return;
+      setUrl(freshSignedUrl);
+      if (shouldWarmBlobCache(mediaType)) {
+        imageCache.loadImage(freshSignedUrl)
+          .then(blobUrl => {
+            if (mountedRef.current) setUrl(blobUrl);
+          })
+          .catch(() => {});
+      }
+    };
+
     // Om vi redan har cached URL, använd den direkt
     if (cachedUrl) {
       setUrl(cachedUrl);
       
       // Ladda blob i bakgrunden för ännu snabbare framtida laddning
       if (shouldWarmBlobCache(mediaType) && !cachedUrl.startsWith('blob:')) {
-        imageCache.loadImage(cachedUrl).catch(() => {});
+        imageCache.loadImage(cachedUrl).catch(() => {
+          void refreshSignedUrl().catch(() => {});
+        });
       }
       return;
     }
@@ -213,7 +234,9 @@ export function useMediaUrl(
       } else {
         setUrl(memCached.url);
         if (shouldWarmBlobCache(mediaType)) {
-          imageCache.loadImage(memCached.url).catch(() => {});
+          imageCache.loadImage(memCached.url).catch(() => {
+            void refreshSignedUrl().catch(() => {});
+          });
         }
         return;
       }
@@ -240,7 +263,9 @@ export function useMediaUrl(
                 setUrl(blobUrl);
               }
             })
-            .catch(() => {});
+            .catch(() => {
+              void refreshSignedUrl().catch(() => {});
+            });
         }
 
       } catch (e) {

@@ -1546,6 +1546,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (nextProfileImage) {
+          clearMediaUrlCache(nextProfileImage, 'profile-image');
           const freshAvatarUrl = await getMediaUrl(nextProfileImage, 'profile-image', 86400);
           if (freshAvatarUrl) {
             setPreloadedAvatarUrl(freshAvatarUrl);
