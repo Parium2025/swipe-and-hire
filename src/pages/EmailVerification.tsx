@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import * as QRCodeStylingModule from 'qr-code-styling';
 // CJS/ESM interop: handle both default and namespace exports
 const QRCodeStyling = (QRCodeStylingModule as any).default || QRCodeStylingModule;
+const PUBLIC_APP_URL = 'https://parium.se';
 
 const EmailVerification = () => {
   const [verificationMethod, setVerificationMethod] = useState<'email' | 'pin' | 'qr'>('email');
@@ -31,7 +32,7 @@ const EmailVerification = () => {
     setUserEmail(email);
     
     if (token) {
-      const fullUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/confirm?confirm=${token}`;
+      const fullUrl = `${PUBLIC_APP_URL}/confirm?confirm=${token}`;
       setConfirmationUrl(fullUrl);
       
       // Skapa QR-kod
