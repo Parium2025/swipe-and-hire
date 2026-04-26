@@ -550,10 +550,10 @@ export const JobSlide = memo(function JobSlide({
                   </Badge>
                 </div>
 
-                <h3 className="mt-1 line-clamp-2 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold leading-[1.08] tracking-tight text-white">
+                <h3 className="mt-1 line-clamp-2 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold leading-[1.08] tracking-tight text-white" style={nextOverlayTextStyle}>
                   {nextJob.title}
                 </h3>
-                <p className="mt-2 truncate text-base font-semibold text-white">
+                <p className="mt-2 truncate text-base font-semibold text-white" style={nextOverlayTextStyle}>
                   {[nextJob.employment_type && getEmploymentTypeLabel(nextJob.employment_type), nextJob.location].filter(Boolean).join(' • ')}
                 </p>
                 {/* Badges — salary, date, benefits, applicants */}
@@ -724,7 +724,7 @@ export const JobSlide = memo(function JobSlide({
           </div>
         )}
 
-        <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.4)' }}>
+        <div className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center" style={overlayTextStyle}>
           <div className="mx-auto w-full max-w-[21rem]">
             {/* Company logo or initials fallback */}
             {(logoUrl || !imageUrl) && displayCompanyName && (
@@ -770,10 +770,11 @@ export const JobSlide = memo(function JobSlide({
               ref={titleRef}
               data-title-tap-zone
               className="mt-1 text-[clamp(1.58rem,6.4vw,2.1rem)] font-extrabold text-white leading-[1.08] tracking-tight line-clamp-2"
+              style={overlayTextStyle}
             >
               {job.title}
             </h2>
-            <p className="text-white font-semibold text-base mt-2 truncate">
+            <p className="text-white font-semibold text-base mt-2 truncate" style={overlayTextStyle}>
               {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
             </p>
             {/* Salary + Date badges */}
