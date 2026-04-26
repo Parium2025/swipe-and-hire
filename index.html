@@ -17,24 +17,21 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <script>
-      // 🚨 PUBLIC ROOT HARD-LOAD / CACHE KILL-SWITCH
-      // Runs before React on the public landing root. It does NOT trust old
-      // localStorage "done" markers: if a Service Worker/controller or Cache
-      // Storage bucket still exists, it clears them and reloads with a unique
-      // cache-bust URL. This is intentionally limited to `/` so the app tunnel
-      // (/dashboard, /auth, etc.) is not disturbed.
+      // 🚨 PUBLIC DOMAIN HARD-LOAD / CACHE KILL-SWITCH
+      // Runs before React on every public route. It does NOT trust old
+      // localStorage/sessionStorage markers: if any Service Worker/controller or
+      // Cache Storage bucket exists, it unregisters/deletes everything and
+      // reloads once with a unique cache-bust URL.
       (function() {
         try {
           var host = window.location.hostname;
-          var path = window.location.pathname;
           var isPublicHost = host === 'parium.se' || host === 'www.parium.se' || host === 'parium-ab.lovable.app';
-          var isLandingRoot = path === '/' || path === '/index.html';
-          if (!isPublicHost || !isLandingRoot) return;
+          if (!isPublicHost) return;
 
-          var resetVersion = 'root-hard-load-2026-04-26-v8-no-sw-no-cache';
+          var resetVersion = 'domain-hard-load-2026-04-26-v9-no-sw-no-cache';
           var resetParam = '_hard_reload';
-          var attemptKey = 'parium_root_hard_reload_attempt_' + resetVersion;
-          var maxAttempts = 2;
+          var attemptKey = 'parium_domain_hard_reload_attempt_' + resetVersion;
+          var maxAttempts = 3;
           var url = new URL(window.location.href);
           var attempts = 0;
           try { attempts = parseInt(sessionStorage.getItem(attemptKey) || '0', 10) || 0; } catch (e) {}
