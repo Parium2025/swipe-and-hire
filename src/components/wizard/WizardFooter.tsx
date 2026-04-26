@@ -98,7 +98,7 @@ export const WizardFooter = ({
   const nextButtonClasses = 
     'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
 
-  const submitButtonClasses = 'rounded-full text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600';
+  const submitButtonClasses = 'rounded-full px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-green-600/80 text-white hover:bg-green-600 hover:text-white md:hover:bg-green-600 md:hover:text-white disabled:bg-green-600/60 disabled:text-white disabled:opacity-70 [&_svg]:text-white';
 
   // Always center buttons with a gap between them
   const justifyClass = 'justify-center gap-3';
