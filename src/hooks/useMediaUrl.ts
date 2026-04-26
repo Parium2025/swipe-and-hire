@@ -234,7 +234,9 @@ export function useMediaUrl(
       } else {
         setUrl(memCached.url);
         if (shouldWarmBlobCache(mediaType)) {
-          imageCache.loadImage(memCached.url).catch(() => {});
+          imageCache.loadImage(memCached.url).catch(() => {
+            void refreshSignedUrl().catch(() => {});
+          });
         }
         return;
       }
@@ -261,7 +263,9 @@ export function useMediaUrl(
                 setUrl(blobUrl);
               }
             })
-            .catch(() => {});
+            .catch(() => {
+              void refreshSignedUrl().catch(() => {});
+            });
         }
 
       } catch (e) {
