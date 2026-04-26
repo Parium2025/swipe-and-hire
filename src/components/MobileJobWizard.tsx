@@ -4060,7 +4060,7 @@ const MobileJobWizard = ({
                   <>
                     <button 
                       onClick={() => setShowCompanyProfile(true)}
-                      className={`${textSizes.company} font-medium mb-1 transition-colors cursor-pointer text-left line-clamp-1`}
+                      className={`${textSizes.company} font-medium mb-1 cursor-pointer text-left line-clamp-1`}
                       style={getJobOverlayTextStyle(formData.overlay_text_color)}
                     >
                       {profile?.company_name || 'Företag'}
@@ -4069,7 +4069,6 @@ const MobileJobWizard = ({
                       text={getDisplayTitle()} 
                       className={`${textSizes.title} font-bold leading-tight mb-1 line-clamp-5 w-full max-w-full cursor-pointer`}
                       style={getJobOverlayTextStyle(formData.overlay_text_color)}
-                      alwaysShowTooltip="desktop-only"
                     />
                     <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
@@ -4606,19 +4605,18 @@ const MobileJobWizard = ({
                                     const textSizes = getSmartTextSizes();
                                     return (
                                       <>
-                                        <button 
-                                          onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
- className={`${textSizes.company} font-medium mb-1 transition-colors cursor-pointer text-left line-clamp-1`}
-                                           style={getJobOverlayTextStyle(formData.overlay_text_color)}
-                                        >
+                                         <button 
+                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
+ className={`${textSizes.company} font-medium mb-1 cursor-pointer text-left line-clamp-1`}
+                                            style={getJobOverlayTextStyle(formData.overlay_text_color)}
+                                         >
                                           {profile?.company_name || 'Företag'}
                                         </button>
-                                        <TruncatedText 
-                                          text={formData.title || 'Jobbtitel'} 
-                                          className={`${textSizes.title} font-bold leading-tight mb-1 line-clamp-2 w-full max-w-full cursor-pointer`}
-                                          style={getJobOverlayTextStyle(formData.overlay_text_color)}
-                                          alwaysShowTooltip="desktop-only"
-                                        />
+                                         <TruncatedText 
+                                           text={formData.title || 'Jobbtitel'} 
+                                           className={`${textSizes.title} font-bold leading-tight mb-1 line-clamp-2 w-full max-w-full cursor-pointer`}
+                                           style={getJobOverlayTextStyle(formData.overlay_text_color)}
+                                         />
                                         <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                                           {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                         </div>
