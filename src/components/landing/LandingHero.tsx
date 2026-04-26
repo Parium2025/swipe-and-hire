@@ -2,37 +2,101 @@ import { useEffect, useRef, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import scrollHeroVideo from '@/assets/parium-scroll-hero.mp4';
 
 type LandingHeroProps = {
   scrollContainerRef: RefObject<HTMLDivElement>;
 };
 
+const FRAME_COUNT = 85;
+const frameSrc = (frame: number) => `/landing-frames/frame-${String(frame).padStart(3, '0')}.jpg`;
+
 const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const container = scrollContainerRef.current;
+    const section = sectionRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+    if (!container || !section || !canvas || !context) return;
 
-    video.muted = true;
-    video.playsInline = true;
+    let raf = 0;
+    let activeFrame = 1;
+    let disposed = false;
 
-    const playVideo = () => {
-      void video.play().catch(() => undefined);
+    const loadFrame = (frame: number) => {
+      const clampedFrame = Math.min(FRAME_COUNT, Math.max(1, frame));
+      const cached = imageCacheRef.current.get(clampedFrame);
+      if (cached) return Promise.resolve(cached);
+
+      return new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image();
+        image.decoding = 'async';
+        image.onload = () => {
+          imageCacheRef.current.set(clampedFrame, image);
+          resolve(image);
+        };
+        image.onerror = reject;
+        image.src = frameSrc(clampedFrame);
+      });
     };
 
-    playVideo();
-    video.addEventListener('canplay', playVideo);
-    window.addEventListener('pointerdown', playVideo, { passive: true });
-    document.addEventListener('visibilitychange', playVideo);
+    const drawCover = (image: HTMLImageElement) => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.round(rect.width * dpr));
+      const height = Math.max(1, Math.round(rect.height * dpr));
+
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+      const drawWidth = image.naturalWidth * scale;
+      const drawHeight = image.naturalHeight * scale;
+      const drawX = (width - drawWidth) / 2;
+      const drawY = (height - drawHeight) / 2;
+
+      context.clearRect(0, 0, width, height);
+      context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+    };
+
+    const renderFrame = (frame: number) => {
+      activeFrame = Math.min(FRAME_COUNT, Math.max(1, frame));
+      void loadFrame(activeFrame)
+        .then((image) => {
+          if (!disposed && activeFrame === frame) drawCover(image);
+        })
+        .catch(() => undefined);
+
+      void loadFrame(activeFrame + 1).catch(() => undefined);
+      void loadFrame(activeFrame + 2).catch(() => undefined);
+    };
+
+    const syncToScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const scrollableDistance = Math.max(1, section.offsetHeight - window.innerHeight);
+        const rawProgress = (container.scrollTop - section.offsetTop) / scrollableDistance;
+        const progress = Math.min(1, Math.max(0, rawProgress));
+        renderFrame(Math.round(progress * (FRAME_COUNT - 1)) + 1);
+      });
+    };
+
+    renderFrame(1);
+    syncToScroll();
+    container.addEventListener('scroll', syncToScroll, { passive: true });
+    window.addEventListener('resize', syncToScroll);
 
     return () => {
-      video.removeEventListener('canplay', playVideo);
-      window.removeEventListener('pointerdown', playVideo);
-      document.removeEventListener('visibilitychange', playVideo);
+      disposed = true;
+      cancelAnimationFrame(raf);
+      container.removeEventListener('scroll', syncToScroll);
+      window.removeEventListener('resize', syncToScroll);
     };
   }, [scrollContainerRef]);
 
@@ -42,18 +106,13 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   };
 
   return (
-    <section ref={sectionRef} className="relative min-h-[100svh] overflow-hidden bg-gradient-parium">
-      <div className="relative min-h-[100svh] overflow-hidden">
-        <video
-          ref={videoRef}
-          src={scrollHeroVideo}
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          aria-label="Parium introduktionsvideo"
+    <section ref={sectionRef} className="relative bg-gradient-parium" style={{ height: '520vh' }}>
+      <div className="sticky top-0 h-[100svh] overflow-hidden">
+        <canvas
+          ref={canvasRef}
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          aria-label="Parium scrollstyrd frame-by-frame-introduktion"
+          role="img"
         />
 
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--primary)/0.05)_0%,hsl(var(--primary)/0)_44%,hsl(var(--primary)/0.28)_100%)]" />
