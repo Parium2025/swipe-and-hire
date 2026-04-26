@@ -117,7 +117,7 @@ export function useOfflineProfileQueue(userId: string | undefined) {
 
       const { error } = await supabase
         .from('profiles')
-        .update(item.updates)
+        .update(item.updates as never)
         .eq('user_id', item.userId);
 
       if (error) throw error;
@@ -143,7 +143,7 @@ export function useOfflineProfileQueue(userId: string | undefined) {
         if (Object.keys(jobPostingSyncUpdates).length > 0) {
           const { error: jobSyncError } = await supabase
             .from('job_postings')
-            .update(jobPostingSyncUpdates)
+            .update(jobPostingSyncUpdates as never)
             .eq('employer_id', item.userId)
             .is('deleted_at', null);
 
