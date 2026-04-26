@@ -322,6 +322,7 @@ const MobileJobWizard = ({
           job_image_desktop_url: existingJob.job_image_desktop_url || '',
           image_focus_position: (existingJob as any).image_focus_position || 'center',
           image_focus_position_desktop: (existingJob as any).image_focus_position_desktop || 'center',
+          overlay_text_color: normalizeJobOverlayTextColor(existingJob.overlay_text_color),
           location: existingJob.location || '',
         };
 
@@ -403,6 +404,7 @@ const MobileJobWizard = ({
           job_image_desktop_url: '',
           image_focus_position: 'center',
           image_focus_position_desktop: 'center',
+          overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
           work_start_time: '',
           work_end_time: '',
         };
@@ -459,6 +461,7 @@ const MobileJobWizard = ({
           job_image_desktop_url: '',
           image_focus_position: 'center',
           image_focus_position_desktop: 'center',
+          overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
           work_start_time: '',
           work_end_time: '',
         };
