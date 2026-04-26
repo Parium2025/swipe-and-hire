@@ -503,7 +503,7 @@ const MobileJobWizard = ({
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
   const [isScrolledTop, setIsScrolledTop] = useState(true);
-  const [previewMode, setPreviewMode] = usePersistedPreviewMode('mobile-job-wizard-preview-mode');
+  const [previewMode, setPreviewMode] = usePersistedPreviewMode('mobile-job-wizard-preview-mode', 'mobile');
   const [showDesktopApplicationForm, setShowDesktopApplicationForm] = useState(false);
 
   // Utility function to truncate text for better display
