@@ -210,16 +210,6 @@ export function initConnectivityManager(queryClient: QueryClient) {
   // Start heartbeat
   restartHeartbeat();
 
-  // Listen for SW background sync trigger messages
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data?.type === 'TRIGGER_OFFLINE_SYNC') {
-        console.log('[ConnectivityManager] SW triggered offline sync');
-        // Force a connectivity check and notify listeners
-        void runConnectivityCheck();
-      }
-    });
-  }
 }
 
 /** Subscribe to connectivity changes */

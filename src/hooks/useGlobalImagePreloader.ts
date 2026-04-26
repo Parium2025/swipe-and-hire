@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { waitForServiceWorker } from '@/lib/serviceWorkerManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 // Import logo directly so it's bundled and we get the hashed URL
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
@@ -46,11 +45,6 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
       try {
         // 🔥 PRIORITET 0: Ladda Parium-logotypen OMEDELBART med native Image()
         await preloadImageNative(pariumLogoRings);
-
-        // Vänta på service worker endast i produktion (för övriga assets)
-        if (import.meta.env.PROD) {
-          await waitForServiceWorker();
-        }
 
         // 🔥 PRIORITET 1: Ladda inloggad användares profilmedia
         // (sidebaren visar avatar/video direkt efter login)
