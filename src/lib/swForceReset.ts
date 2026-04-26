@@ -14,7 +14,7 @@
  * Bumpa RESET_VERSION om vi behöver göra det igen i framtiden.
  */
 
-const RESET_VERSION = 'sw-reset-2026-04-26-v7-disable-service-worker-landing-root';
+const RESET_VERSION = 'sw-reset-2026-04-26-v8-hard-root-no-sw-no-cache';
 const RESET_KEY = 'parium_sw_force_reset';
 const RESET_ATTEMPT_KEY = 'parium_sw_force_reset_attempt';
 const RESET_QUERY_PARAM = '_sw_reset';
@@ -46,7 +46,7 @@ export function forceServiceWorkerReset(): void {
       return;
     }
 
-    if (stored === RESET_VERSION) return;
+    if (stored === RESET_VERSION && !navigator.serviceWorker?.controller) return;
 
     const lastAttemptRaw = sessionStorage.getItem(RESET_ATTEMPT_KEY);
     if (lastAttemptRaw) {

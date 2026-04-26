@@ -1,4 +1,4 @@
-const KILL_VERSION = 'sw-kill-2026-04-26-landing-root';
+const KILL_VERSION = 'sw-kill-2026-04-26-v8-hard-root-no-sw';
 
 const clearPariumCaches = async () => {
   try {
