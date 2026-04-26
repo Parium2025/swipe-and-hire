@@ -63,6 +63,7 @@ const EmployerProfile = () => {
   const [originalProfileImageUrl, setOriginalProfileImageUrl] = useState<string>(''); // URL/blob for editor source
   const [originalProfileImageStoragePath, setOriginalProfileImageStoragePath] = useState<string>(''); // Storage path for restore
   const [profileImageIsEdited, setProfileImageIsEdited] = useState(false); // Track if image has been cropped/edited
+  const [isEditingExistingProfileImage, setIsEditingExistingProfileImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const didInitRef = useRef(false);
 
@@ -214,6 +215,7 @@ const EmployerProfile = () => {
       setOriginalProfileImageUrl(imageUrl);
       setOriginalProfileImageStoragePath(''); // New file, no storage path yet
       setPendingImageSrc(imageUrl);
+      setIsEditingExistingProfileImage(false);
       setImageEditorOpen(true);
       setProfileImageIsEdited(false); // Fresh image, not edited yet
     } else {
@@ -238,6 +240,7 @@ const EmployerProfile = () => {
     // Priority 1: Use stored original URL from current session
     if (originalProfileImageUrl) {
       setPendingImageSrc(originalProfileImageUrl);
+      setIsEditingExistingProfileImage(true);
       setImageEditorOpen(true);
       return;
     }
@@ -250,6 +253,7 @@ const EmployerProfile = () => {
           // Cache for future edits in the same session (Job Wizard pattern)
           setOriginalProfileImageUrl(signedUrl);
           setPendingImageSrc(signedUrl);
+          setIsEditingExistingProfileImage(true);
           setImageEditorOpen(true);
           return;
         }
@@ -267,6 +271,7 @@ const EmployerProfile = () => {
           setOriginalProfileImageUrl(signedUrl);
           setOriginalProfileImageStoragePath(formData.profile_image_url);
           setPendingImageSrc(signedUrl);
+          setIsEditingExistingProfileImage(true);
           setImageEditorOpen(true);
         }
       } catch (error) {
