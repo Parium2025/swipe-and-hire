@@ -51,6 +51,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
+import { DEFAULT_JOB_OVERLAY_TEXT_COLOR, getJobOverlayTextStyle, normalizeJobOverlayTextColor } from '@/lib/jobOverlayText';
 
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
@@ -113,6 +114,7 @@ interface ExistingJob {
   pitch?: string | null;
   job_image_url?: string | null;
   job_image_desktop_url?: string | null;
+  overlay_text_color?: string | null;
   is_active?: boolean;
 }
 
