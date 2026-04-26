@@ -47,6 +47,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TruncatedText } from '@/components/TruncatedText';
 import MyCandidates from '@/pages/MyCandidates';
 import Messages from '@/pages/Messages';
+import RealtimeStatusPage from '@/components/RealtimeStatusPage';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
 import { useDevice } from '@/hooks/use-device';
 
@@ -461,7 +462,7 @@ const Index = () => {
   // isAdmin is now from database via useIsOrgAdmin hook
 
   // Render sidebar layout for profile pages and employer routes
-  const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
+  const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/status', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute && role !== 'employer') {
@@ -500,6 +501,13 @@ const Index = () => {
           // Endast Fredrik kan komma åt admin-sidan
           if (isAdmin) {
             return <SupportAdmin />;
+          } else {
+            navigate('/support');
+            return <Support />;
+          }
+        case '/status':
+          if (isAdmin) {
+            return <RealtimeStatusPage />;
           } else {
             navigate('/support');
             return <Support />;
@@ -570,6 +578,13 @@ const Index = () => {
         case '/admin':
           if (isAdmin) {
             return <SupportAdmin />;
+          } else {
+            navigate('/support');
+            return <Support />;
+          }
+        case '/status':
+          if (isAdmin) {
+            return <RealtimeStatusPage />;
           } else {
             navigate('/support');
             return <Support />;

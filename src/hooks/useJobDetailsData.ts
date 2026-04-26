@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCachedProfile, readPersistentCache, writePersistentCache } from '@/lib/performanceGuards';
+import { measurePerformance } from '@/lib/realtimePerformance';
 import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -148,10 +149,10 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
 
   // Fetch profile media in ONE batch call (scales to millions)
   // Note: applicantIds already declared above at line 93
-  const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+  const { data: batchMediaData } = await measurePerformance('matching', () => supabase.rpc('get_applicant_profile_media_batch', {
     p_applicant_ids: applicantIds,
     p_employer_id: userId
-  });
+  }));
   
   const mediaByApplicant = new Map<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; city: string | null }>();
   if (batchMediaData && Array.isArray(batchMediaData)) {
@@ -166,10 +167,10 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
   }
 
   // Fetch last_active_at for all applicants using the activity RPC
-  const activityResult = await supabase.rpc('get_applicant_latest_activity', {
+  const activityResult = await measurePerformance('matching', () => supabase.rpc('get_applicant_latest_activity', {
     p_applicant_ids: applicantIds,
     p_employer_id: userId
-  });
+  }));
   
   const activityByApplicant = new Map<string, { last_active_at: string | null }>();
   (activityResult.data || []).forEach((a: { applicant_id: string; last_active_at: string | null }) => {

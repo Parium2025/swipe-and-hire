@@ -6,6 +6,7 @@ import { expandSearchTerms, detectSalarySearch, allKnownLocationTerms } from '@/
 import { safeSetItem } from '@/lib/safeStorage';
 import { imageCache } from '@/lib/imageCache';
 import { readThroughCache } from '@/lib/performanceGuards';
+import { measurePerformance } from '@/lib/realtimePerformance';
 
 // 🔥 Offline-cache: senaste lyckade sökresultat per query-nyckel.
 // Används som fallback när nätverket är borta så att jobbkort fortfarande
@@ -527,7 +528,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
           searchCacheKey([HOT_SEARCH_CACHE_PREFIX, fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, pageSize, pageParam || '', employerIdsKey, createdAfter || '']),
           HOT_SEARCH_CACHE_TTL,
           async () => {
-            const { data, error } = await supabase.rpc('search_jobs', {
+            const { data, error } = await measurePerformance('search', () => supabase.rpc('search_jobs', {
               p_search_query: fullSearchQuery || null,
               p_city: cityFilter || null,
               p_county: countyFilter || null,
@@ -540,7 +541,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
               p_cursor_created_at: (pageParam as string | null) || null,
               p_employer_ids: employerIdsArray,
               p_created_after: createdAfter || null,
-            } as any);
+            } as any));
 
             if (error) throw error;
             return (data || []) as SearchJob[];
@@ -741,7 +742,7 @@ export function useInfiniteJobSearch(options: UseInfiniteJobSearchOptions) {
       salarySearch?.targetSalary,
     ],
     queryFn: async ({ pageParam }) => {
-      const { data, error } = await supabase.rpc('search_jobs', {
+      const { data, error } = await measurePerformance('search', () => supabase.rpc('search_jobs', {
         p_search_query: fullSearchQuery || null,
         p_city: cityFilter || null,
         p_county: countyFilter || null,
@@ -752,7 +753,7 @@ export function useInfiniteJobSearch(options: UseInfiniteJobSearchOptions) {
         p_limit: pageSize,
         p_offset: 0,
         p_cursor_created_at: pageParam || null,
-      });
+      }));
 
       if (error) throw error;
       return (data || []) as unknown as SearchJob[];
