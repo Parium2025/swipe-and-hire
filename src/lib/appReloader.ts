@@ -74,6 +74,15 @@ const purgeRuntimeCaches = async (): Promise<void> => {
   } catch {
     /* noop */
   }
+
+  try {
+    if (typeof navigator !== 'undefined' && navigator.serviceWorker?.getRegistrations) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister().catch(() => false)));
+    }
+  } catch {
+    /* noop */
+  }
 };
 
 const performReload = (opts: ReloadOptions): void => {
