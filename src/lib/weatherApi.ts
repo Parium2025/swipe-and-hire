@@ -124,6 +124,7 @@ export const getWeatherInfo = (code: number, isNight: boolean): { description: s
 // ─── Fetch current weather (server-side cache → direct fallback) ─
 
 const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+const USE_WEATHER_EDGE_CACHE = false;
 
 const fallbackWeatherResponse = (lat: number, lon: number) => {
   const today = new Date().toISOString().slice(0, 10);
@@ -182,7 +183,7 @@ export const fetchCurrentWeather = async (lat: number, lon: number): Promise<{
   cachedCity?: string;
 }> => {
   // Try server-side cache first
-  if (SUPABASE_PROJECT_ID) {
+  if (USE_WEATHER_EDGE_CACHE && SUPABASE_PROJECT_ID) {
     try {
       const res = await fetch(
         `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/weather-cache`,
