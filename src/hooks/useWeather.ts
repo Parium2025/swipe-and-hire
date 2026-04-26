@@ -176,14 +176,14 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       });
 
       if (gpsResult && mountedRef.current) {
-      console.log(`🛰️ GPS coordinates: ${gpsResult.lat.toFixed(6)}, ${gpsResult.lon.toFixed(6)}`);
-      
-      // Don't call getCityName directly — the edge function (fetchCurrentWeather)
-      // already returns a cached city via server-side reverse geocoding.
-      // Calling Nominatim from each client would hit its 1 req/s rate limit at scale.
-      const cached = locationRef.current || getCachedLocation();
-      const cityHint = cached?.city || '';
-      await updateLocation(gpsResult.lat, gpsResult.lon, cityHint || null, 'gps');
+        console.log(`🛰️ GPS coordinates: ${gpsResult.lat.toFixed(6)}, ${gpsResult.lon.toFixed(6)}`);
+
+        // Don't call getCityName directly — the edge function (fetchCurrentWeather)
+        // already returns a cached city via server-side reverse geocoding.
+        // Calling Nominatim from each client would hit its 1 req/s rate limit at scale.
+        const cached = locationRef.current || getCachedLocation();
+        const cityHint = cached?.city || '';
+        await updateLocation(gpsResult.lat, gpsResult.lon, cityHint || null, 'gps');
         return;
       }
     } catch (error) {
@@ -201,7 +201,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       }
     }
 
-    const ipLocation = await getLocationByIP();
+    const ipLocation = await getLocationByIP().catch((error) => {
+      console.warn('IP location lookup failed, continuing with fallbacks:', error);
+      return null;
+    });
     if (ipLocation && mountedRef.current) {
       if (cached && cached.source === 'gps') {
         console.log('⚠️ Ignoring IP location (might be datacenter), using GPS cache');
@@ -229,13 +232,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     }
 
     if (mountedRef.current) {
-      updateWeather({ 
-        isLoading: false, 
-        error: 'unavailable',
-        emoji: getTimeBasedEmoji(),
-      });
+      updateWeather(safeFallback(fallbackCity || ''));
     }
-  }, [fallbackCity, fetchWeatherOnly, updateLocation, updateWeather]);
+  }, [fallbackCity, fetchWeatherOnly, safeFallback, updateLocation, updateWeather]);
 
   // Main initialization effect
   useEffect(() => {
