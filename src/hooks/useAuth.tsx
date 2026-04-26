@@ -1440,7 +1440,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (Object.keys(jobPostingSyncUpdates).length > 0) {
           const { error: jobSyncError } = await supabase
             .from('job_postings')
-            .update(jobPostingSyncUpdates)
+            .update(jobPostingSyncUpdates as never)
             .eq('employer_id', user.id)
             .is('deleted_at', null);
 
