@@ -70,7 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
       const isEmployer = (profile?.role || '').toLowerCase() === 'employer';
       const companyName = profile?.company_name || 'Ditt företag';
 
-      const appUrl = Deno.env.get("REDIRECT_URL") || "https://parium.se";
+      const appUrl = Deno.env.get("REDIRECT_URL") || "https://www.parium.se";
       const loginUrl = `${appUrl}/auth`;
 
       const subject = isEmployer
@@ -260,7 +260,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 5. Bygg bekräftelse-URL direkt mot frontend-appens email-confirm-sida
     const redirectEnv = Deno.env.get("REDIRECT_URL") || "";
-    const defaultAppUrl = "https://parium.se";
+    const defaultAppUrl = "https://www.parium.se";
 
     let appBase = defaultAppUrl;
     if (redirectEnv && redirectEnv.startsWith("http")) {

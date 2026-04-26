@@ -13,7 +13,7 @@ const handler = async (req: Request): Promise<Response> => {
   console.log('Redirect-confirm accessed with token:', token);
 
   const envRedirect = Deno.env.get('REDIRECT_URL') || '';
-  const defaultRedirect = 'https://parium.se';
+  const defaultRedirect = 'https://www.parium.se';
   const redirectBase = envRedirect.includes('supabase.co') ? defaultRedirect : (envRedirect || defaultRedirect);
 
   // Om ingen token – skicka till en felvy i frontend
@@ -144,7 +144,7 @@ function getSuccessPage(message: string, alreadyConfirmed = false): string {
         </div>
         <p>Du kan nu logga in i Parium och börja swipa dig fram till din nästa jobbmöjlighet.</p>
         <p class="subtitle">Framtiden börjar med ett swipe 🚀</p>
-        <a href="https://parium.se/auth" class="button">
+        <a href="https://www.parium.se/auth" class="button">
           Logga in nu
         </a>
       </div>
@@ -218,7 +218,7 @@ function getErrorPage(message: string): string {
         <h2>Bekräftelsefel</h2>
         <p>${message}</p>
         <p>Du kan försöka registrera dig igen eller kontakta support om problemet kvarstår.</p>
-        <a href="https://parium.se/auth" class="button">
+        <a href="https://www.parium.se/auth" class="button">
           Tillbaka till inloggning
         </a>
       </div>

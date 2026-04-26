@@ -11,7 +11,7 @@ const handler = async (req: Request): Promise<Response> => {
   console.log("auth hook accessed:", url.toString());
 
   const envRedirect = Deno.env.get("REDIRECT_URL") || "";
-  const defaultRedirect = "https://parium.se";
+  const defaultRedirect = "https://www.parium.se";
 
   // Om REDIRECT_URL av misstag pekar mot en Supabase-domän, fall back till app-URL
   const redirectBase = envRedirect.includes("supabase.co")
