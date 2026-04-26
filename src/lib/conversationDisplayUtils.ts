@@ -51,8 +51,7 @@ export function getConversationDisplayName(opts: {
  *
  * Avatar priority:
  * 1. Snapshot identity is preserved for names.
- * 2. Live profile photo wins when available so avatar changes propagate in chats.
- * 3. Snapshot photo is fallback if live profile media is unavailable.
+ * 2. Snapshot photo is preserved when available.
  * 3. Nothing available → undefined
  */
 export function getConversationAvatarProfile(
@@ -65,7 +64,7 @@ export function getConversationAvatarProfile(
       first_name: snapshot.first_name,
       last_name: snapshot.last_name,
       company_name: null,
-      profile_image_url: displayMember?.profile?.profile_image_url || snapshot.profile_image_snapshot_url || null,
+      profile_image_url: snapshot.profile_image_snapshot_url || null,
       company_logo_url: null,
     };
   }
