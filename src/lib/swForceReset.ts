@@ -14,7 +14,7 @@
  * Bumpa RESET_VERSION om vi behöver göra det igen i framtiden.
  */
 
-const RESET_VERSION = 'sw-reset-2026-04-26-landing-frame-sequence-hq-v5-public-landing-visible';
+const RESET_VERSION = 'sw-reset-2026-04-26-v6-auth-provider-landing-cache-reset';
 const RESET_KEY = 'parium_sw_force_reset';
 const RESET_ATTEMPT_KEY = 'parium_sw_force_reset_attempt';
 const RESET_QUERY_PARAM = '_sw_reset';
