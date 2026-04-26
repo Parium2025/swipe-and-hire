@@ -88,7 +88,13 @@ function shouldTrackUrl(input: RequestInfo | URL): boolean {
   return /\/rest\/v1\//.test(value) || /\/functions\/v1\//.test(value) || /supabase\.co/.test(value) || /lovable/.test(value);
 }
 
-function createFailure(partial: Omit<AppFailure, 'id' | 'route' | 'createdAt'>): AppFailure {
+type CreateFailureInput = Omit<AppFailure, 'id' | 'route' | 'createdAt' | 'fingerprint' | 'occurrenceCount' | 'lastSeenAt'> & {
+  fingerprint?: string;
+  occurrenceCount?: number;
+  lastSeenAt?: number;
+};
+
+function createFailure(partial: CreateFailureInput): AppFailure {
   const createdAt = Date.now();
   return {
     ...partial,
