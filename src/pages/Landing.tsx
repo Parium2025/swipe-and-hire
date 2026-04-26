@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
@@ -18,7 +18,6 @@ const Landing = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [showSections, setShowSections] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user && profile) {
@@ -102,14 +101,13 @@ const Landing = () => {
 
   return (
     <div
-      ref={scrollContainerRef}
-      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-gradient-parium text-white"
+      className="min-h-screen overflow-x-hidden bg-gradient-parium text-white"
       style={{ WebkitOverflowScrolling: 'touch' }}
     >
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
         <main>
-          <LandingHero scrollContainerRef={scrollContainerRef} />
+          <LandingHero />
           {showSections && (
             <Suspense fallback={null}>
               <LandingMarquee />

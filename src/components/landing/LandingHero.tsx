@@ -1,21 +1,16 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import scrollHeroVideo from '@/assets/parium-scroll-hero.mp4';
 
-type LandingHeroProps = {
-  scrollContainerRef: RefObject<HTMLDivElement>;
-};
-
-const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
+const LandingHero = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(7.041667);
 
   const { scrollYProgress } = useScroll({
-    container: scrollContainerRef,
     target: sectionRef,
     offset: ['start start', 'end end'],
   });
@@ -25,17 +20,17 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
   useEffect(() => {
-    const container = scrollContainerRef.current;
     const section = sectionRef.current;
     const video = videoRef.current;
-    if (!container || !section || !video) return;
+    if (!section || !video) return;
 
     let raf = 0;
     const syncVideoToScroll = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        const scrollableDistance = Math.max(1, section.offsetHeight - container.clientHeight);
-        const rawProgress = (container.scrollTop - section.offsetTop) / scrollableDistance;
+        const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+        const scrollableDistance = Math.max(1, section.offsetHeight - window.innerHeight);
+        const rawProgress = (window.scrollY - sectionTop) / scrollableDistance;
         const progress = Math.min(1, Math.max(0, rawProgress));
         const targetTime = Math.min(videoDuration - 0.04, Math.max(0.001, progress * videoDuration));
 
@@ -46,17 +41,17 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
     };
 
     syncVideoToScroll();
-    container.addEventListener('scroll', syncVideoToScroll, { passive: true });
+    window.addEventListener('scroll', syncVideoToScroll, { passive: true });
     window.addEventListener('resize', syncVideoToScroll);
     video.addEventListener('loadedmetadata', syncVideoToScroll);
 
     return () => {
       cancelAnimationFrame(raf);
-      container.removeEventListener('scroll', syncVideoToScroll);
+      window.removeEventListener('scroll', syncVideoToScroll);
       window.removeEventListener('resize', syncVideoToScroll);
       video.removeEventListener('loadedmetadata', syncVideoToScroll);
     };
-  }, [scrollContainerRef, videoDuration]);
+  }, [videoDuration]);
 
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
