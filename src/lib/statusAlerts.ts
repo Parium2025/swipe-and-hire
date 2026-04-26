@@ -131,7 +131,7 @@ export async function processStatusAlerts(summaries: PerformanceSummary[], owner
 
 export async function notifyAppFailure(failure: AppFailure, ownerUserId: string): Promise<void> {
   const dedupe = readJson<Record<string, number>>(ALERT_DEDUPE_KEY, {});
-  const fingerprint = `app:${failure.kind}:${failure.status ?? ''}:${failure.message.slice(0, 120)}`;
+  const fingerprint = failure.fingerprint;
   const now = Date.now();
   if (now - (dedupe[fingerprint] ?? 0) < ALERT_COOLDOWN_MS) return;
   dedupe[fingerprint] = now;
@@ -180,4 +180,40 @@ export async function notifyAppFailure(failure: AppFailure, ownerUserId: string)
   } catch (error) {
     console.warn('App failure push alert failed:', error);
   }
+}
+
+export async function reportAppException(failure: AppFailure, ownerUserId: string): Promise<void> {
+  const payload = {
+    owner_user_id: ownerUserId,
+    environment: import.meta.env.MODE || 'production',
+    kind: failure.kind,
+    severity: failure.severity,
+    title: failure.title,
+    message: failure.message.slice(0, 2000),
+    route: failure.route || '/',
+    source: failure.source || null,
+    stacktrace: failure.stacktrace || null,
+    http_status: failure.status || null,
+    fingerprint: failure.fingerprint,
+    last_seen_at: new Date(failure.lastSeenAt || failure.createdAt).toISOString(),
+    metadata: {
+      browser: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+      url: typeof window !== 'undefined' ? window.location.href : '',
+    },
+  };
+
+  await supabase.rpc('record_app_exception' as never, {
+    _owner_user_id: ownerUserId,
+    _environment: payload.environment,
+    _kind: payload.kind,
+    _severity: payload.severity,
+    _title: payload.title,
+    _message: payload.message,
+    _route: payload.route,
+    _source: payload.source,
+    _stacktrace: payload.stacktrace,
+    _http_status: payload.http_status,
+    _fingerprint: payload.fingerprint,
+    _metadata: payload.metadata,
+  } as never);
 }

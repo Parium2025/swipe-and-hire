@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_exceptions: {
+        Row: {
+          created_at: string
+          environment: string
+          fingerprint: string
+          first_seen_at: string
+          http_status: number | null
+          id: string
+          kind: string
+          last_seen_at: string
+          message: string
+          metadata: Json
+          occurrence_count: number
+          owner_user_id: string
+          route: string
+          severity: string
+          source: string | null
+          stacktrace: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          environment?: string
+          fingerprint: string
+          first_seen_at?: string
+          http_status?: number | null
+          id?: string
+          kind: string
+          last_seen_at?: string
+          message: string
+          metadata?: Json
+          occurrence_count?: number
+          owner_user_id: string
+          route?: string
+          severity?: string
+          source?: string | null
+          stacktrace?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          fingerprint?: string
+          first_seen_at?: string
+          http_status?: number | null
+          id?: string
+          kind?: string
+          last_seen_at?: string
+          message?: string
+          metadata?: Json
+          occurrence_count?: number
+          owner_user_id?: string
+          route?: string
+          severity?: string
+          source?: string | null
+          stacktrace?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       candidate_activities: {
         Row: {
           activity_type: string
@@ -2655,6 +2718,10 @@ export type Database = {
         Returns: boolean
       }
       heartbeat_session: { Args: { p_session_token: string }; Returns: boolean }
+      increment_app_exception_count: {
+        Args: { _fingerprint: string; _owner_user_id: string }
+        Returns: undefined
+      }
       is_conversation_admin: {
         Args: { p_conversation_id: string }
         Returns: boolean
@@ -2677,6 +2744,23 @@ export type Database = {
           p_cv_url: string
           p_job_id?: string
           p_priority?: number
+        }
+        Returns: string
+      }
+      record_app_exception: {
+        Args: {
+          _environment: string
+          _fingerprint: string
+          _http_status: number
+          _kind: string
+          _message: string
+          _metadata?: Json
+          _owner_user_id: string
+          _route: string
+          _severity: string
+          _source: string
+          _stacktrace: string
+          _title: string
         }
         Returns: string
       }
