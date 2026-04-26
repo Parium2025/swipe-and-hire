@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
+import { fetchCachedProfile, readPersistentCache, writePersistentCache } from '@/lib/performanceGuards';
 import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -68,11 +69,7 @@ async function fetchJobDetails(jobId: string, userId: string): Promise<JobPostin
   if (!data) return null;
 
   // Fetch employer profile
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('first_name, last_name, profile_image_url')
-    .eq('user_id', data.employer_id)
-    .single();
+  const profileData = await fetchCachedProfile(data.employer_id);
 
   return {
     ...data,
@@ -201,54 +198,29 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
 }
 
 // localStorage cache for job details
-const JOB_DETAIL_CACHE_KEY = 'parium_job_detail_';
-const JOB_APPS_CACHE_KEY = 'parium_job_apps_';
+const JOB_DETAIL_CACHE_KEY = 'parium_job_detail_v2_';
+const JOB_APPS_CACHE_KEY = 'parium_job_apps_v2_';
+const JOB_DETAIL_TTL = 15 * 60 * 1000;
+const JOB_APPS_TTL = 2 * 60 * 1000;
 
 function readJobDetailCache(jobId: string): JobPosting | null {
-  const key = JOB_DETAIL_CACHE_KEY + jobId;
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object' || !parsed.data) {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return null;
-    }
-    return parsed.data;
-  } catch {
-    try { localStorage.removeItem(key); } catch { /* ignore */ }
-    return null;
-  }
+  return readPersistentCache<JobPosting>(
+    JOB_DETAIL_CACHE_KEY + jobId,
+    JOB_DETAIL_TTL,
+    (data): data is JobPosting => Boolean(data && typeof data === 'object' && typeof (data as JobPosting).id === 'string'),
+  );
 }
 
 function writeJobDetailCache(jobId: string, data: JobPosting): void {
-  try {
-    safeSetItem(JOB_DETAIL_CACHE_KEY + jobId, JSON.stringify({ data, timestamp: Date.now() }));
-  } catch { /* storage full */ }
+  writePersistentCache(JOB_DETAIL_CACHE_KEY + jobId, data);
 }
 
 function readJobAppsCache(jobId: string): JobApplication[] | null {
-  const key = JOB_APPS_CACHE_KEY + jobId;
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.data)) {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return null;
-    }
-    return parsed.data;
-  } catch {
-    try { localStorage.removeItem(key); } catch { /* ignore */ }
-    return null;
-  }
+  return readPersistentCache<JobApplication[]>(JOB_APPS_CACHE_KEY + jobId, JOB_APPS_TTL, Array.isArray);
 }
 
 function writeJobAppsCache(jobId: string, data: JobApplication[]): void {
-  try {
-    // Only cache first 50 to save space
-    safeSetItem(JOB_APPS_CACHE_KEY + jobId, JSON.stringify({ data: data.slice(0, 50), timestamp: Date.now() }));
-  } catch { /* storage full */ }
+  writePersistentCache(JOB_APPS_CACHE_KEY + jobId, data.slice(0, 50));
 }
 
 export function useJobDetailsData(jobId: string | undefined) {
