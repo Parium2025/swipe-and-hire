@@ -8,6 +8,7 @@ import { getTimeRemaining } from '@/lib/date';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useCardImage } from '@/hooks/useCardImage';
 import { TruncatedText } from '@/components/TruncatedText';
+import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 
 interface ReadOnlyMobileJobCardProps {
   job: {
@@ -25,6 +26,7 @@ interface ReadOnlyMobileJobCardProps {
     company_name?: string;
     workplace_name?: string;
     company_logo_url?: string;
+    overlay_text_color?: string | null;
     updated_at?: string;
     positions_count?: number;
     salary_min?: number | null;
@@ -107,6 +109,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
+  const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -229,7 +232,8 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         <div>
           <TruncatedText
             text={job.title}
-            className="text-base font-bold text-white leading-snug line-clamp-2 text-center"
+            className="text-base font-bold leading-snug line-clamp-2 text-center"
+            style={overlayTextStyle}
           />
         </div>
 
