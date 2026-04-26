@@ -6,7 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
 import { getMediaUrl } from '@/lib/mediaManager';
-import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { clearMediaUrlCache, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
@@ -1524,6 +1524,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem(CACHED_PROFILE_KEY);
         } catch {
           // ignore cache cleanup failures
+        }
+      }
+
+      if (Object.prototype.hasOwnProperty.call(cleanedUpdates, 'profile_image_url')) {
+        const previousProfileImage = profile?.profile_image_url || null;
+        const nextProfileImage = typeof cleanedUpdates.profile_image_url === 'string'
+          ? cleanedUpdates.profile_image_url.trim() || null
+          : cleanedUpdates.profile_image_url ?? null;
+
+        if (previousProfileImage && previousProfileImage !== nextProfileImage) {
+          clearMediaUrlCache(previousProfileImage, 'profile-image');
+        }
+
+        setPreloadedAvatarUrl(null);
+        try {
+          sessionStorage.removeItem(AVATAR_CACHE_KEY);
+          localStorage.removeItem(CACHED_PROFILE_KEY);
+        } catch {
+          // ignore cache cleanup failures
+        }
+
+        if (nextProfileImage) {
+          const freshAvatarUrl = await getMediaUrl(nextProfileImage, 'profile-image', 86400);
+          if (freshAvatarUrl) {
+            setPreloadedAvatarUrl(freshAvatarUrl);
+            try { sessionStorage.setItem(AVATAR_CACHE_KEY, freshAvatarUrl); } catch {}
+          }
+          void prefetchMediaUrl(nextProfileImage, 'profile-image').catch(() => {});
         }
       }
 
