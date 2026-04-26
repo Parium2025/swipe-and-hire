@@ -85,7 +85,10 @@ async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
 
   try {
     console.log('📚 Loading Swedish postal database...');
-    const response = await fetch('/swedish-postal-codes.csv');
+    const response = await fetch('/swedish-postal-codes.csv', { cache: 'force-cache' });
+    if (!response.ok) {
+      throw new Error(`Postal database unavailable: ${response.status}`);
+    }
     const csvText = await response.text();
     const lines = csvText.trim().split('\n');
     
@@ -108,7 +111,7 @@ async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
     console.log(`✅ Loaded ${Object.keys(swedishPostalDatabase).length} postal codes - ready for instant search!`);
     return swedishPostalDatabase;
   } catch (error) {
-    console.error('❌ Failed to load Swedish postal database:', error);
+    console.warn('Swedish postal database unavailable, using built-in fallback');
     swedishPostalDatabase = {};
     return swedishPostalDatabase;
   }
