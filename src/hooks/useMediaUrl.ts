@@ -118,6 +118,49 @@ function getCachedUrlSync(storagePath: string, mediaType: MediaType, transform?:
   return null;
 }
 
+export function clearMediaUrlCache(
+  storagePath: string | null | undefined,
+  mediaType?: MediaType
+) {
+  if (!storagePath) return;
+
+  const mediaPrefix = mediaType ? `media_url_${mediaType}` : 'media_url_';
+  const matchesStoragePath = (key: string) =>
+    key.startsWith(mediaPrefix) && key.endsWith(`_${storagePath}`);
+
+  for (const [key, cached] of signedUrlMemoryCache.entries()) {
+    if (!matchesStoragePath(key)) continue;
+    imageCache.evict(cached.url);
+    signedUrlMemoryCache.delete(key);
+  }
+
+  for (const key of Array.from(ongoingLoads.keys())) {
+    if (matchesStoragePath(key)) ongoingLoads.delete(key);
+  }
+
+  try {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !matchesStoragePath(key)) continue;
+
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (typeof parsed?.url === 'string') imageCache.evict(parsed.url);
+        } catch {
+          // ignore malformed cache entries
+        }
+      }
+      keysToRemove.push(key);
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+  } catch {
+    // Ignore storage cleanup failures
+  }
+}
+
 export function useMediaUrl(
   storagePath: string | null | undefined,
   mediaType: MediaType,
