@@ -1,6 +1,6 @@
-import { useRef, useState, type RefObject } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import scrollHeroVideo from '@/assets/parium-scroll-hero.mp4';
 
@@ -24,12 +24,39 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const ctaY = useTransform(scrollYProgress, [0, 0.12, 0.82, 0.94], [16, 0, 0, 16]);
   const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
-  useMotionValueEvent(scrollYProgress, 'change', (latest) => {
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    const section = sectionRef.current;
     const video = videoRef.current;
-    if (!video || !Number.isFinite(videoDuration)) return;
-    const targetTime = Math.min(videoDuration - 0.04, Math.max(0, latest * videoDuration));
-    if (Math.abs(video.currentTime - targetTime) > 0.03) video.currentTime = targetTime;
-  });
+    if (!container || !section || !video) return;
+
+    let raf = 0;
+    const syncVideoToScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const scrollableDistance = Math.max(1, section.offsetHeight - container.clientHeight);
+        const rawProgress = (container.scrollTop - section.offsetTop) / scrollableDistance;
+        const progress = Math.min(1, Math.max(0, rawProgress));
+        const targetTime = Math.min(videoDuration - 0.04, Math.max(0.001, progress * videoDuration));
+
+        if (video.readyState >= 1 && Math.abs(video.currentTime - targetTime) > 0.02) {
+          video.currentTime = targetTime;
+        }
+      });
+    };
+
+    syncVideoToScroll();
+    container.addEventListener('scroll', syncVideoToScroll, { passive: true });
+    window.addEventListener('resize', syncVideoToScroll);
+    video.addEventListener('loadedmetadata', syncVideoToScroll);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      container.removeEventListener('scroll', syncVideoToScroll);
+      window.removeEventListener('resize', syncVideoToScroll);
+      video.removeEventListener('loadedmetadata', syncVideoToScroll);
+    };
+  }, [scrollContainerRef, videoDuration]);
 
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
