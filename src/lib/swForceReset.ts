@@ -86,7 +86,9 @@ export function forceServiceWorkerReset(): void {
 
     if (stored === RESET_VERSION && !navigator.serviceWorker?.controller) {
       void verifyClean().then((clean) => {
-        if (!clean) localStorage.removeItem(RESET_KEY);
+        if (clean) return;
+        localStorage.removeItem(RESET_KEY);
+        void runReset();
       });
       return;
     }
