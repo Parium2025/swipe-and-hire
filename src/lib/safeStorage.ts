@@ -20,6 +20,9 @@ const EVICTION_KEYS_PREFIX = [
   'parium_employer_jobs_v3_',
   'parium_employer_counts_v1_',
   'parium_employer_stats_v1_',
+  'parium_profile_lite_v1_',
+  'parium_job_detail_v2_',
+  'parium_job_apps_v2_',
 ];
 
 /**
