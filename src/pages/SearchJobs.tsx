@@ -814,6 +814,7 @@ const SearchJobs = memo(() => {
                       salary_max: job.salary_max,
                       salary_type: job.salary_type,
                       salary_transparency: job.salary_transparency,
+                      overlay_text_color: job.overlay_text_color,
                       benefits: job.benefits,
                     }}
                     hasApplied={appliedJobIds.has(job.id)}
