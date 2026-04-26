@@ -181,3 +181,35 @@ export async function notifyAppFailure(failure: AppFailure, ownerUserId: string)
     console.warn('App failure push alert failed:', error);
   }
 }
+
+export async function reportAppException(failure: AppFailure, ownerUserId: string): Promise<void> {
+  const payload = {
+    owner_user_id: ownerUserId,
+    environment: import.meta.env.MODE || 'production',
+    kind: failure.kind,
+    severity: failure.severity,
+    title: failure.title,
+    message: failure.message.slice(0, 2000),
+    route: failure.route || '/',
+    source: failure.source || null,
+    stacktrace: failure.stacktrace || null,
+    http_status: failure.status || null,
+    fingerprint: failure.fingerprint,
+    last_seen_at: new Date(failure.lastSeenAt || failure.createdAt).toISOString(),
+    metadata: {
+      browser: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+      url: typeof window !== 'undefined' ? window.location.href : '',
+    },
+  };
+
+  await supabase
+    .from('app_exceptions' as never)
+    .upsert(payload as never, { onConflict: 'owner_user_id,fingerprint' })
+    .select('id')
+    .maybeSingle();
+
+  await supabase.rpc('increment_app_exception_count' as never, {
+    _owner_user_id: ownerUserId,
+    _fingerprint: failure.fingerprint,
+  } as never);
+}
