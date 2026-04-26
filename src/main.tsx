@@ -7,7 +7,7 @@ import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import { initSyncEngine } from './lib/offlineSyncEngine'
 import { nukeStaleCaches } from './lib/cacheNuke'
-import { forceServiceWorkerReset } from './lib/swForceReset'
+import { forceServiceWorkerReset, getServiceWorkerResetVersion } from './lib/swForceReset'
 import { installBfcacheGuard, persistBuildSignature } from './lib/appReloader'
 import { installVersionWatcher } from './lib/versionWatcher'
 import pariumLogoRings from './assets/parium-logo-rings.png'
@@ -168,7 +168,15 @@ async function bootstrap() {
   }
 
   // Registrera Service Worker och Sync Engine
-  if (import.meta.env.PROD && !isPreviewHost && !isPublicLandingRoute) {
+  const hasCompletedCurrentReset = (() => {
+    try {
+      return localStorage.getItem('parium_sw_force_reset') === getServiceWorkerResetVersion();
+    } catch {
+      return false;
+    }
+  })();
+
+  if (import.meta.env.PROD && !isPreviewHost && !isPublicLandingRoute && hasCompletedCurrentReset) {
     registerServiceWorker().catch(() => {});
   }
   
