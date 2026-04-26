@@ -154,7 +154,9 @@ async function bootstrap() {
   // 🔥 CRITICAL: ALWAYS preload AND DECODE the auth logo immediately, regardless of current route.
   // This ensures the logo is already in browser memory when user logs out and navigates to /auth.
   // On /auth route we block until decoded; on other routes we still decode but don't block.
-  const isAuthRoute = typeof window !== 'undefined' && window.location.pathname === '/auth';
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const isAuthRoute = currentPath === '/auth';
+  const isPublicLandingRoute = currentPath === '/';
   
   // Start both preloads immediately (parallel)
   const authLogoPromise = preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
@@ -166,7 +168,7 @@ async function bootstrap() {
   }
 
   // Registrera Service Worker och Sync Engine
-  if (import.meta.env.PROD && !isPreviewHost) {
+  if (import.meta.env.PROD && !isPreviewHost && !isPublicLandingRoute) {
     registerServiceWorker().catch(() => {});
   }
   
