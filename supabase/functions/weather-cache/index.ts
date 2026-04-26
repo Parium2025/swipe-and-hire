@@ -9,6 +9,24 @@ const cityCache = new Map<string, { city: string; timestamp: number }>();
 
 const WEATHER_TTL = 15 * 60 * 1000; // 15 minutes
 const CITY_TTL = 60 * 60 * 1000;    // 1 hour (cities don't move)
+const OPEN_METEO_TIMEOUT_MS = 4500;
+
+const fallbackWeather = (lat: number, lon: number) => ({
+  latitude: lat,
+  longitude: lon,
+  current: {
+    time: new Date().toISOString().slice(0, 16),
+    temperature_2m: 0,
+    apparent_temperature: 0,
+    weather_code: 0,
+  },
+  daily: {
+    time: [new Date().toISOString().slice(0, 10)],
+    sunrise: [`${new Date().toISOString().slice(0, 10)}T07:00`],
+    sunset: [`${new Date().toISOString().slice(0, 10)}T17:00`],
+  },
+  fallback: true,
+});
 
 /** Round coordinates to ~1km grid for cache deduplication */
 function roundCoord(val: number): number {
@@ -21,7 +39,8 @@ function cacheKey(lat: number, lon: number): string {
 
 async function fetchWeather(lat: number, lon: number) {
   const res = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code&daily=sunrise,sunset&timezone=auto`
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code&daily=sunrise,sunset&timezone=auto`,
+    { signal: AbortSignal.timeout(OPEN_METEO_TIMEOUT_MS) }
   );
   if (!res.ok) throw new Error(`Open-Meteo error: ${res.status}`);
   return await res.json();
@@ -79,7 +98,12 @@ Deno.serve(async (req) => {
     if (cached && now - cached.timestamp < WEATHER_TTL) {
       weatherData = cached.data;
     } else {
-      weatherData = await fetchWeather(roundCoord(lat), roundCoord(lon));
+      try {
+        weatherData = await fetchWeather(roundCoord(lat), roundCoord(lon));
+      } catch (weatherError) {
+        console.warn('Open-Meteo unavailable, returning safe fallback:', weatherError);
+        weatherData = fallbackWeather(roundCoord(lat), roundCoord(lon));
+      }
       weatherCache.set(key, { data: weatherData, timestamp: now });
     }
 
