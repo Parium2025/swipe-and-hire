@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Activity, AlertTriangle, BellRing, CheckCircle2, Clock, RefreshCw, ServerCrash } from 'lucide-react';
+import { Activity, AlertTriangle, BellRing, CheckCircle2, Clock, RefreshCw, ServerCrash, ShieldAlert } from 'lucide-react';
 import { getPerformanceSummaries, subscribeToPerformance, type PerformanceSummary } from '@/lib/realtimePerformance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { getStatusAlertHistory, processStatusAlerts, type StatusAlert } from '@/lib/statusAlerts';
+import { getAppFailureHistory, subscribeToAppFailures, type AppFailure } from '@/lib/appFailureMonitor';
 
 const formatMs = (value: number | null) => value === null ? '—' : `${value.toLocaleString('sv-SE')} ms`;
 const formatRate = (value: number) => `${(value * 100).toLocaleString('sv-SE', { maximumFractionDigits: 2 })}%`;
@@ -21,6 +22,7 @@ export default function RealtimeStatusPage() {
   const [summaries, setSummaries] = useState(() => getPerformanceSummaries());
   const [now, setNow] = useState(Date.now());
   const [alerts, setAlerts] = useState<StatusAlert[]>(() => getStatusAlertHistory());
+  const [failures, setFailures] = useState<AppFailure[]>(() => getAppFailureHistory());
   const alertingRef = useRef(false);
 
   useEffect(() => {
@@ -43,11 +45,13 @@ export default function RealtimeStatusPage() {
     };
 
     const unsubscribe = subscribeToPerformance(update);
+    const unsubscribeFailures = subscribeToAppFailures(() => setFailures(getAppFailureHistory()));
     const interval = window.setInterval(update, 5000);
     update();
 
     return () => {
       unsubscribe();
+      unsubscribeFailures();
       window.clearInterval(interval);
     };
   }, [user?.id]);
@@ -72,7 +76,7 @@ export default function RealtimeStatusPage() {
             </div>
             <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Realtidsstatus</h1>
             <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
-              Mäter de senaste 15 minuterna av faktiska klientanrop för search, matchning och chatt.
+              Mäter search, matchning, chatt, runtime-fel, misslyckade async-flöden och kritiska backend-anrop.
             </p>
           </div>
           <div className={`inline-flex items-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold ${overall.className}`}>
@@ -172,6 +176,30 @@ export default function RealtimeStatusPage() {
               </div>
             )}
           </div>
+        </section>
+
+        <section className="rounded-lg border border-border bg-card/70 p-4">
+          <div className="mb-3 flex items-center gap-2 font-semibold text-foreground">
+            <ShieldAlert className="h-4 w-4" /> Senaste appfel
+          </div>
+          {failures.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Inga runtime-, async- eller kritiska backendfel fångade ännu.</p>
+          ) : (
+            <div className="grid gap-2 md:grid-cols-2">
+              {failures.slice(0, 6).map((failure) => (
+                <div key={failure.id} className="rounded-lg border border-border bg-background/50 p-3 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-medium text-foreground">{failure.title}</span>
+                    <span className={failure.severity === 'critical' ? 'text-xs text-red-300' : 'text-xs text-amber-300'}>
+                      {new Date(failure.createdAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground break-words">{failure.message}</p>
+                  <p className="mt-2 text-[11px] text-muted-foreground">{failure.route}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </main>
