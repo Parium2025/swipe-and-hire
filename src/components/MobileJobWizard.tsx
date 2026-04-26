@@ -4663,6 +4663,33 @@ const MobileJobWizard = ({
                 )}
                 {/* Image upload section - separate for mobile and desktop */}
                 <div className="space-y-4 max-w-lg mx-auto">
+                  <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <Label className="text-white font-medium text-sm sm:text-base">Textfärg på jobbkort</Label>
+                        <p className="text-white text-xs sm:text-sm mt-1">Välj färgen som visas ovanpå annonsbilden.</p>
+                      </div>
+                      <Input
+                        type="color"
+                        value={normalizeJobOverlayTextColor(formData.overlay_text_color)}
+                        onChange={(e) => handleInputChange('overlay_text_color', normalizeJobOverlayTextColor(e.target.value))}
+                        className="h-11 w-16 shrink-0 cursor-pointer rounded-lg border-white/20 bg-white/10 p-1"
+                        aria-label="Välj textfärg på jobbkort"
+                      />
+                    </div>
+                    <div className="mt-3 flex items-center gap-2">
+                      {['#FFFFFF', '#111827', '#FACC15', '#38BDF8'].map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => handleInputChange('overlay_text_color', color)}
+                          className="h-8 w-8 rounded-full border border-white/30 transition-transform active:scale-95"
+                          style={{ backgroundColor: color }}
+                          aria-label={`Välj färg ${color}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
                   {/* Mobile image section */}
                   <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                     <div className="flex items-center gap-2 mb-2">
