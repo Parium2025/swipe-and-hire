@@ -39,29 +39,32 @@
               if (!data || !data.version) return;
               if (data.version === clientVersion) return; // matchar — allt bra
 
-              // Mismatch → Safari serverar gammal index.html. Tvinga färsk hämtning.
+              // Mismatch → Safari serverar gammal index.html. Töm SW/Cache först,
+              // vänta tills det är klart och navigera sedan. Annars kan iOS Safari
+              // hinna låta den gamla service workern svara på reloaden igen.
               sessionStorage.setItem(loopKey, String(Date.now()));
+              var cleanupTasks = [];
               try {
                 if (window.caches && caches.keys) {
-                  caches.keys().then(function(keys) {
+                  cleanupTasks.push(caches.keys().then(function(keys) {
                     return Promise.all(keys.map(function(k) { return caches.delete(k); }));
-                  }).catch(function() {});
+                  }).catch(function() {}));
                 }
               } catch (e) {}
               try {
                 if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-                  navigator.serviceWorker.getRegistrations().then(function(rs) {
-                    rs.forEach(function(r) { try { r.unregister(); } catch (e) {} });
-                  }).catch(function() {});
+                  cleanupTasks.push(navigator.serviceWorker.getRegistrations().then(function(rs) {
+                    return Promise.all(rs.map(function(r) { try { return r.unregister(); } catch (e) { return false; } }));
+                  }).catch(function() {}));
                 }
               } catch (e) {}
-              try {
+              Promise.all(cleanupTasks).finally(function() { try {
                 var url = new URL(window.location.href);
                 url.searchParams.set('_v', data.version.slice(0, 10));
                 window.location.replace(url.toString());
               } catch (e) {
                 try { window.location.reload(); } catch (e2) {}
-              }
+              }});
             })
             .catch(function() { /* offline — strunta */ });
         } catch (e) { /* noop */ }

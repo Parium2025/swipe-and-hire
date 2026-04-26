@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
 
@@ -16,16 +15,8 @@ const LandingFooter = lazy(() => import('@/components/landing/LandingFooter'));
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
   const [showSections, setShowSections] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (user && profile) {
-      const role = (profile as any)?.role;
-      if (role) navigate('/home', { replace: true });
-    }
-  }, [user, profile, navigate]);
 
   // SEO
   useEffect(() => {
