@@ -24,6 +24,9 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
       'job_seeker_interviews_',
       'job-details-cache-',
       'applications_snapshot_',
+      'parium_is_org_admin_',
+      'parium_browser_cache_reset',
+      'parium_sw_force_reset',
     ];
 
     try {
@@ -76,8 +79,23 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
     // Clear any stuck state and reload
     if (typeof window !== 'undefined') {
       this.clearCorruptLocalCaches();
-      // Clear URL parameters that might cause loops
-      const cleanUrl = window.location.origin + window.location.pathname;
+      try {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+          navigator.serviceWorker.getRegistrations()
+            .then((regs) => Promise.all(regs.map((r) => r.unregister())))
+            .catch(() => {});
+        }
+        if (typeof caches !== 'undefined' && caches.keys) {
+          caches.keys()
+            .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+            .catch(() => {});
+        }
+      } catch {
+        // ignore
+      }
+
+      // Clear URL parameters that might cause loops and force a fresh app shell
+      const cleanUrl = `${window.location.origin}${window.location.pathname}?_recover=${Date.now()}`;
       window.location.replace(cleanUrl);
     }
   };
