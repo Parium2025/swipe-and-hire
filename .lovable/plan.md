@@ -1,35 +1,39 @@
+Ja — det går att göra.
 
-## Problem
-Swipe-kortens innehåll (JobSlide) visar för mycket text utan trunkering, vilket skapar en rörig upplevelse. Målet är att matcha den rena designen i förhandsvisningen (bild 2).
+Jag kan bygga om första vyn på landningssidan så att den känns som videon du skickade: frame-för-frame-känsla, mjuka animationer, ren premiumdesign, lättläst text och med Parium-bakgrunden kvar.
 
-## Design — "Premium TikTok-kort"
-Varje kort ska visa:
-1. **Bakgrundsbild** (eller gradient-fallback) — som idag
-2. **Bottensektion** med gradient-overlay:
-   - Företagsnamn (vit, medium, en rad)
-   - Jobbtitel (vit, bold, max 2 rader med `line-clamp-2`)
-   - Anställningsform • Plats (en rad, truncated)
-3. **Swipe-hints** längst ner ("← Skippa · Dubbeltryck för mer · Gilla →")
-4. **LIKE/NOPE-stämplar** vid drag — som idag
+Plan:
 
-### Vad som tas bort från kortet:
-- All beskrivningstext — den visas bara i detaljvyn (SwipeJobDetail) vid dubbeltryck
+1. Behåll nuvarande grund
+- Landningssidans befintliga bakgrund och brandkänsla behålls.
+- Navigeringen, login-flödet och resten av landningssidan påverkas inte.
+- Ändringen isoleras till landningssidans första hero/intro-del.
 
-### SwipeJobDetail (detaljvyn vid dubbeltryck):
-- Behåller all info (beskrivning, krav, förmåner etc.)
-- **Trunkerar** beskrivningen till max 6 rader med "Visa mer"-knapp
-- Bättre visuell hierarki
+2. Skapa en ny cinematic hero-sekvens
+- Bygg första skärmen som en scroll-/tidsstyrd sekvens med flera tydliga “frames”.
+- Varje frame får ren typografi, mjuk in-/utgång och kontrollerad rörelse.
+- Ingen ful textplatta, skugga eller rektangel bakom texten.
+- Texten ska vara direkt på bakgrunden men fortfarande läsbar med subtila gradients/kontrast, inte boxar.
 
-### Synk med förhandsvisning:
-- Kortets layout matchar exakt vad arbetsgivaren ser i mobilförhandsvisningen (MobileJobWizard)
-- Samma typografi-storlekar och trunkering
+3. Återskapa känslan från videon i webben
+- Använd videon som visuell referens för rytm, placering och övergångar.
+- Bygg animationerna med Framer Motion och scroll-progress, så det känns levande men fortfarande snabbt.
+- Undvik att lägga in videon som en tung bakgrundsfilm om det går; bättre är att återskapa den nativt i React för prestanda och skärpa.
 
-## Filer att ändra
-1. `src/components/swipe/JobSlide.tsx` — Rensa bottensektionen, säkerställ trunkering
-2. `src/components/swipe/SwipeJobDetail.tsx` — Trunkera description med "Visa mer"
-3. `src/components/swipe/SwipeCard.tsx` — Synka samma bottenlayout (om den fortfarande används)
+4. Mobil först
+- Optimera särskilt för mindre skärmar där problemet syntes tydligt.
+- Säkerställ att rubriker inte får “lager”, glow, text-shadow eller smutsig bakgrund.
+- Anpassa storlek, radbrytningar och spacing så texten blir lättläst på mobil.
 
-## Inte ändra
-- Swipe-mekanik (touch, drag, snap)
-- Filter, header, dots
-- Backend/data
+5. Kvalitetssäkra efter implementation
+- Köra typecheck/build.
+- Kontrollera att första vyn inte sabbar scroll, navigation eller resten av landningssidan.
+- Kontrollera att animationerna inte blir hackiga eller för tunga.
+
+Tekniskt upplägg:
+- Främst uppdatera `src/components/landing/LandingHero.tsx`.
+- Eventuellt skapa små isolerade landing-komponenter om sekvensen behöver delas upp.
+- Inte röra globala app-komponenter.
+- Inte ändra backend eller databasen.
+
+Målet: första intrycket ska kännas mer premium, mer “producerat”, men fortfarande snabbt, rent och tydligt.

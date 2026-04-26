@@ -1,41 +1,14 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useRef, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import ProfessionGrid from '@/components/landing/ProfessionGrid';
-import storyMatch from '@/assets/landing-story-match.jpg';
-import storyChat from '@/assets/landing-story-chat.jpg';
-import storyHire from '@/assets/landing-story-hire.jpg';
+import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
-const steps = [
-  {
-    id: 'discover',
-    headline: 'Vi finns här för er.',
-    sub: 'Oavsett om du söker jobb eller rätt kandidat — Parium kopplar samman er.',
-    image: null as string | null,
-    alt: 'Collage av olika yrken',
-  },
-  {
-    id: 'match',
-    headline: 'Rätt person. Rätt tajming.',
-    sub: 'Kandidat och arbetsgivare möts i en exakt, meningsfull matchning.',
-    image: storyMatch as string | null,
-    alt: 'Två professionella skakar hand framför en stadsutsikt',
-  },
-  {
-    id: 'chat',
-    headline: 'Dialog utan fördröjning.',
-    sub: 'Samtalet startar sömlöst, medan intresset fortfarande brinner.',
-    image: storyChat as string | null,
-    alt: 'Kvinna använder smartphone i modernt café',
-  },
-  {
-    id: 'hire',
-    headline: 'Från match till anställning.',
-    sub: 'Hela resan, i en plattform. Resultat du kan mäta.',
-    image: storyHire as string | null,
-    alt: 'Team firar med high-five på modernt kontor',
-  },
+const storyFrames = [
+  { id: 'start', headline: 'Vi finns här för dig.', sub: 'Jobb och kandidater, samlat i ett flöde som rör sig med dig.' },
+  { id: 'swipe', headline: 'Svep när det känns rätt.', sub: 'Snabba beslut, tydliga profiler och bättre tajming.' },
+  { id: 'match', headline: 'Matchen sker direkt.', sub: 'När båda är intresserade öppnas dialogen utan friktion.' },
+  { id: 'brand', headline: 'Parium.', sub: 'Rekrytering som känns enkel från första sekunden.' },
 ];
 
 type LandingHeroProps = {
@@ -52,49 +25,26 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
     offset: ['start start', 'end end'],
   });
 
-  // Wider crossfade overlap for smoother blending between images
-  const fade = 0.12;
-
-  const img0Opacity = useTransform(scrollYProgress, [0, 0.25 - fade, 0.25 + fade / 2], [1, 1, 0]);
-  const img1Opacity = useTransform(scrollYProgress, [0.25 - fade, 0.25 + fade / 2, 0.5 - fade, 0.5 + fade / 2], [0, 1, 1, 0]);
-  const img2Opacity = useTransform(scrollYProgress, [0.5 - fade, 0.5 + fade / 2, 0.75 - fade, 0.75 + fade / 2], [0, 1, 1, 0]);
-  const img3Opacity = useTransform(scrollYProgress, [0.75 - fade, 0.75 + fade / 2, 1], [0, 1, 1]);
-
-  // Ken Burns zoom
-  const img0Scale = useTransform(scrollYProgress, [0, 0.25], [1, 1.12]);
-  const img1Scale = useTransform(scrollYProgress, [0.25, 0.5], [1, 1.12]);
-  const img2Scale = useTransform(scrollYProgress, [0.5, 0.75], [1, 1.12]);
-  const img3Scale = useTransform(scrollYProgress, [0.75, 1], [1, 1.12]);
-
-  // Text opacity — smoother fade with wider windows
-  const text0Opacity = useTransform(scrollYProgress, [0, 0.03, 0.18, 0.25], [1, 1, 1, 0]);
-  const text1Opacity = useTransform(scrollYProgress, [0.22, 0.28, 0.45, 0.5], [0, 1, 1, 0]);
-  const text2Opacity = useTransform(scrollYProgress, [0.47, 0.53, 0.7, 0.75], [0, 1, 1, 0]);
-  const text3Opacity = useTransform(scrollYProgress, [0.72, 0.78, 0.95, 1], [0, 1, 1, 1]);
-
-  // Text Y translation
-  const text0Y = useTransform(scrollYProgress, [0, 0.03, 0.18, 0.25], [0, 0, 0, -30]);
-  const text1Y = useTransform(scrollYProgress, [0.22, 0.28, 0.45, 0.5], [30, 0, 0, -30]);
-  const text2Y = useTransform(scrollYProgress, [0.47, 0.53, 0.7, 0.75], [30, 0, 0, -30]);
-  const text3Y = useTransform(scrollYProgress, [0.72, 0.78, 0.95, 1], [30, 0, 0, 0]);
-
-  // Single continuous progress bar
+  const phoneY = useTransform(scrollYProgress, [0, 0.38, 0.72, 1], ['8%', '0%', '-3%', '0%']);
+  const phoneScale = useTransform(scrollYProgress, [0, 0.46, 0.72, 1], [0.82, 0.94, 1.18, 1.48]);
+  const phoneRotate = useTransform(scrollYProgress, [0, 0.36, 0.72, 1], [-2.5, 0, 0.8, 0]);
+  const streetOpacity = useTransform(scrollYProgress, [0, 0.68, 0.86], [1, 1, 0]);
+  const brandFillOpacity = useTransform(scrollYProgress, [0.72, 0.9, 1], [0, 1, 1]);
+  const logoScale = useTransform(scrollYProgress, [0.74, 0.92, 1], [0.78, 1, 1.03]);
+  const ctaOpacity = useTransform(scrollYProgress, [0, 0.66, 0.78], [1, 1, 0]);
   const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
-
-  const imgOpacities = [img0Opacity, img1Opacity, img2Opacity, img3Opacity];
-  const imgScales = [img0Scale, img1Scale, img2Scale, img3Scale];
-  const textOpacities = [text0Opacity, text1Opacity, text2Opacity, text3Opacity];
-  const textYs = [text0Y, text1Y, text2Y, text3Y];
-
-  // Preload images
-  useEffect(() => {
-    steps.forEach(({ image }) => {
-      if (image) {
-        const img = new Image();
-        img.src = image;
-      }
-    });
-  }, []);
+  const textOpacities = [
+    useTransform(scrollYProgress, [0, 0.04, 0.18, 0.28], [1, 1, 1, 0]),
+    useTransform(scrollYProgress, [0.24, 0.34, 0.46, 0.56], [0, 1, 1, 0]),
+    useTransform(scrollYProgress, [0.52, 0.62, 0.72, 0.82], [0, 1, 1, 0]),
+    useTransform(scrollYProgress, [0.78, 0.9, 1], [0, 1, 1]),
+  ];
+  const textYs = [
+    useTransform(scrollYProgress, [0, 0.2, 0.28], [0, 0, -18]),
+    useTransform(scrollYProgress, [0.24, 0.34, 0.56], [18, 0, -18]),
+    useTransform(scrollYProgress, [0.52, 0.62, 0.82], [18, 0, -18]),
+    useTransform(scrollYProgress, [0.78, 0.9], [18, 0]),
+  ];
 
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
@@ -102,84 +52,78 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   };
 
   return (
-    <section ref={sectionRef} className="relative" style={{ height: '400vh' }}>
-      <div className="sticky top-0 h-[100dvh] overflow-hidden">
-        {/* First slide: profession grid */}
-        <motion.div
-          className="absolute inset-0 will-change-transform"
-          style={{
-            opacity: imgOpacities[0],
-            scale: imgScales[0],
-            zIndex: 0,
-          }}
-        >
-          <ProfessionGrid />
+    <section ref={sectionRef} className="relative" style={{ height: '420vh' }}>
+      <div className="sticky top-0 h-[100dvh] overflow-hidden bg-gradient-parium">
+        <motion.div className="pointer-events-none absolute inset-0" style={{ opacity: streetOpacity }}>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,hsl(var(--secondary)/0.18),transparent_34%),linear-gradient(180deg,hsl(var(--primary)/0),hsl(var(--primary)/0.7))]" />
+          <div className="absolute left-1/2 top-[18%] h-[120vh] w-[1px] origin-top bg-secondary/25" />
+          <div className="absolute left-[22%] top-[22%] h-[105vh] w-[1px] origin-top -rotate-[18deg] bg-secondary/15" />
+          <div className="absolute right-[22%] top-[22%] h-[105vh] w-[1px] origin-top rotate-[18deg] bg-secondary/15" />
+          <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-[repeating-linear-gradient(90deg,hsl(var(--secondary)/0.09)_0_1px,transparent_1px_92px)] opacity-50" />
         </motion.div>
 
-        {/* Remaining slides: regular images */}
-        {steps.slice(1).map((step, idx) => {
-          const i = idx + 1;
-          return (
-            <motion.img
-              key={step.id}
-              src={step.image!}
-              alt={step.alt}
-              width={1920}
-              height={1080}
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover will-change-transform"
-              style={{
-                opacity: imgOpacities[i],
-                scale: imgScales[i],
-                zIndex: i,
-              }}
-            />
-          );
-        })}
+        <motion.div className="absolute inset-0 z-[3] bg-primary" style={{ opacity: brandFillOpacity }} />
 
-        {/* Gradient overlays for text readability */}
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-black/15 to-transparent lg:from-black/20" />
-
-        {/* Content */}
-        <div className="relative z-10 flex h-full flex-col justify-between">
-          {/* Top text area — centered horizontally */}
-          <div className="flex flex-col items-center px-6 pt-16 text-center lg:items-center lg:text-center lg:px-16 lg:flex-1 lg:justify-start">
-            {/* Main heading */}
-            <motion.h1
-              className="text-[clamp(2.8rem,8vw,6.5rem)] font-black uppercase leading-[0.88] tracking-[-0.04em] text-white"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.05 }}
-            >
-              Rekrytering. I rörelse.
-            </motion.h1>
-
-            {/* Scroll-driven text — layered, fading smoothly */}
-            <div className="relative mt-4 min-h-[5rem] w-full">
-              {steps.map((step, i) => (
-                <motion.div
-                  key={step.id}
-                  className="absolute inset-0 flex flex-col items-center lg:items-start"
-                  style={{ opacity: textOpacities[i], y: textYs[i] }}
-                >
-                  <h2 className="text-[clamp(1.3rem,3.2vw,2.2rem)] font-semibold leading-tight tracking-[-0.02em] text-white">
-                    {step.headline}
-                  </h2>
-                  <p className="mt-2 max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
-                    {step.sub}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
+        <div className="relative z-10 flex h-full flex-col items-center justify-between px-5 pb-5 pt-20 sm:px-8 sm:pb-8 lg:px-16">
+          <div className="relative h-[8.75rem] w-full max-w-5xl text-center sm:h-[9.5rem]">
+            {storyFrames.map((frame, i) => (
+              <motion.div
+                key={frame.id}
+                className="absolute inset-x-0 top-0 flex flex-col items-center"
+                style={{ opacity: textOpacities[i], y: textYs[i] }}
+              >
+                <h1 className="max-w-[12ch] text-[clamp(2.25rem,7vw,5.75rem)] font-black uppercase leading-[0.9] text-primary-foreground sm:max-w-none">
+                  {frame.headline}
+                </h1>
+                <p className="mt-3 max-w-[34rem] text-sm font-medium leading-relaxed text-primary-foreground/70 sm:text-base md:text-lg">
+                  {frame.sub}
+                </p>
+              </motion.div>
+            ))}
           </div>
+
+          <motion.div
+            className="relative z-10 flex w-full flex-1 items-center justify-center py-3 will-change-transform"
+            style={{ y: phoneY, scale: phoneScale, rotate: phoneRotate }}
+          >
+            <div className="relative aspect-[9/18.8] h-[min(58vh,34rem)] min-h-[23rem] overflow-hidden rounded-[2.25rem] border-[0.58rem] border-primary bg-primary shadow-[0_30px_90px_hsl(var(--primary)/0.58)] sm:h-[min(62vh,38rem)]">
+              <div className="absolute left-1/2 top-2 z-20 h-5 w-24 -translate-x-1/2 rounded-full bg-primary" />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--primary))_0%,hsl(var(--primary)/0.88)_20%,hsl(var(--primary)/0.34)_100%)]" />
+              <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-5 pb-3 pt-6 text-[0.63rem] font-bold text-primary-foreground/80">
+                <span>13:58</span>
+                <span>1/3</span>
+              </div>
+              <div className="absolute inset-x-4 top-16 z-10 flex justify-center">
+                <div className="rounded-full border border-primary-foreground/15 bg-primary-foreground/8 px-4 py-2 text-[0.68rem] font-bold text-primary-foreground/85">
+                  Visa filter
+                </div>
+              </div>
+              <div className="absolute inset-x-4 top-28 bottom-24 overflow-hidden rounded-[1.35rem] border border-primary-foreground/10 bg-[linear-gradient(145deg,hsl(var(--accent)/0.9),hsl(var(--secondary)/0.14))]">
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_0_36%,hsl(var(--primary)/0.16)_36%_37%,transparent_37%_64%,hsl(var(--primary)/0.14)_64%_65%,transparent_65%)]" />
+                <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[linear-gradient(180deg,transparent,hsl(var(--primary)/0.72))]" />
+                <div className="absolute left-1/2 top-[44%] h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-primary" />
+                <div className="absolute inset-x-0 bottom-8 px-4 text-center">
+                  <p className="text-[0.65rem] font-bold text-primary-foreground/75">Är Parium AB</p>
+                  <p className="mt-1 text-xl font-black leading-none text-primary-foreground">Vi finns här för dig</p>
+                  <p className="mt-2 text-[0.68rem] font-semibold text-primary-foreground/70">Heltid · Parium</p>
+                </div>
+              </div>
+              <div className="absolute inset-x-0 bottom-8 z-20 flex justify-center gap-4">
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-destructive text-sm font-black text-destructive-foreground">×</div>
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-secondary text-sm font-black text-secondary-foreground">▱</div>
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-accent text-sm font-black text-accent-foreground">♥</div>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div className="pointer-events-none absolute inset-0 z-20 grid place-items-center" style={{ opacity: brandFillOpacity }}>
+            <motion.img src={pariumLogo} alt="Parium" className="h-auto w-[min(72vw,34rem)]" style={{ scale: logoScale }} />
+          </motion.div>
 
           {/* CTA — pinned to bottom, centered */}
           <motion.div
-             className="absolute inset-x-0 bottom-20 z-20 flex justify-center px-6 sm:bottom-24 md:bottom-28 lg:relative lg:inset-auto lg:bottom-auto lg:z-auto lg:justify-center lg:px-16 lg:pb-12"
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
+             className="absolute inset-x-0 bottom-20 z-30 flex justify-center px-6 sm:bottom-24 md:bottom-28 lg:relative lg:inset-auto lg:bottom-auto lg:z-30 lg:justify-center lg:px-16 lg:pb-12"
+            style={{ opacity: ctaOpacity }}
           >
             <motion.button
               type="button"
@@ -195,7 +139,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
 
           {/* Minimal progress bar instead of step indicators */}
           <div className="relative z-20 px-6 pb-5 lg:px-16 lg:pb-8">
-            <div className="h-[2px] w-full rounded-full bg-white/10 overflow-hidden">
+            <div className="h-[2px] w-full overflow-hidden rounded-full bg-primary-foreground/10">
               <motion.div
                 className="h-full rounded-full bg-secondary"
                 style={{ width: progressWidth }}
