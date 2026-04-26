@@ -25,17 +25,17 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
   useEffect(() => {
+    const container = scrollContainerRef.current;
     const section = sectionRef.current;
     const video = videoRef.current;
-    if (!section || !video) return;
+    if (!container || !section || !video) return;
 
     let raf = 0;
     const syncVideoToScroll = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        const rect = section.getBoundingClientRect();
         const scrollableDistance = Math.max(1, section.offsetHeight - window.innerHeight);
-        const rawProgress = Math.abs(rect.top) / scrollableDistance;
+        const rawProgress = (container.scrollTop - section.offsetTop) / scrollableDistance;
         const progress = Math.min(1, Math.max(0, rawProgress));
         const targetTime = Math.min(videoDuration - 0.04, Math.max(0.001, progress * videoDuration));
 
@@ -46,19 +46,17 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
     };
 
     syncVideoToScroll();
-    window.addEventListener('scroll', syncVideoToScroll, { passive: true });
-    document.addEventListener('scroll', syncVideoToScroll, { passive: true, capture: true });
+    container.addEventListener('scroll', syncVideoToScroll, { passive: true });
     window.addEventListener('resize', syncVideoToScroll);
     video.addEventListener('loadedmetadata', syncVideoToScroll);
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', syncVideoToScroll);
-      document.removeEventListener('scroll', syncVideoToScroll, { capture: true });
+      container.removeEventListener('scroll', syncVideoToScroll);
       window.removeEventListener('resize', syncVideoToScroll);
       video.removeEventListener('loadedmetadata', syncVideoToScroll);
     };
-  }, [videoDuration]);
+  }, [scrollContainerRef, videoDuration]);
 
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
@@ -71,7 +69,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
         <video
           ref={videoRef}
           src={scrollHeroVideo}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
           muted
           playsInline
           preload="auto"
