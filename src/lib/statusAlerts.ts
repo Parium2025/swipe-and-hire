@@ -151,35 +151,6 @@ export async function notifyAppFailure(failure: AppFailure, ownerUserId: string)
     warnings: [failure.kind],
   };
   storeStatusAlert(alert);
-
-  const metadata = {
-    route: failure.route || '/status',
-    area: failure.kind,
-    status: failure.severity,
-    source: failure.source || '',
-    httpStatus: failure.status || '',
-  };
-
-  await supabase.from('notifications').insert({
-    user_id: ownerUserId,
-    type: 'system_app_failure',
-    title: failure.title,
-    body: alert.body,
-    metadata,
-  });
-
-  try {
-    await supabase.functions.invoke('send-push-notification', {
-      body: {
-        recipient_id: ownerUserId,
-        title: failure.title,
-        body: alert.body,
-        data: Object.fromEntries(Object.entries(metadata).map(([key, value]) => [key, String(value)])),
-      },
-    });
-  } catch (error) {
-    console.warn('App failure push alert failed:', error);
-  }
 }
 
 export async function reportAppException(failure: AppFailure, ownerUserId: string): Promise<void> {
