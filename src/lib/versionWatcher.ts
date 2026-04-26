@@ -13,8 +13,8 @@
 
 import { requestAppReload, shortHash } from './appReloader';
 
-const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000; // 5 minuter
-const MIN_CHECK_GAP_MS = 60 * 1000; // dubbletter-skydd: max 1 fetch/min
+const HEARTBEAT_INTERVAL_MS = 60 * 1000; // tät landing-check efter publish, utan manuell Safari-rensning
+const MIN_CHECK_GAP_MS = 20 * 1000; // dubbletter-skydd
 
 let installed = false;
 let heartbeatId: ReturnType<typeof setInterval> | null = null;
@@ -36,6 +36,14 @@ const getClientVersion = (): string | null => {
     return meta?.getAttribute('content') ?? null;
   } catch {
     return null;
+  }
+};
+
+const isLandingPage = (): boolean => {
+  try {
+    return window.location.pathname === '/' || window.location.pathname === '/index';
+  } catch {
+    return false;
   }
 };
 
@@ -73,7 +81,7 @@ const checkVersion = async (reason: string): Promise<void> => {
     });
 
     requestAppReload('build-version', {
-      defer: true,
+      defer: !isLandingPage(),
       purgeCaches: true,
       cacheBustParam: { key: '_v', value: shortHash(data.version) },
     });
