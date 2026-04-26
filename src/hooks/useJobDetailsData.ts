@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { safeSetItem } from '@/lib/safeStorage';
 import { fetchCachedProfile, readPersistentCache, writePersistentCache } from '@/lib/performanceGuards';
 import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
