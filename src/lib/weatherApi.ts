@@ -125,6 +125,25 @@ export const getWeatherInfo = (code: number, isNight: boolean): { description: s
 
 const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 
+const fallbackWeatherResponse = (lat: number, lon: number) => {
+  const today = new Date().toISOString().slice(0, 10);
+  return {
+    latitude: lat,
+    longitude: lon,
+    current: {
+      time: new Date().toISOString().slice(0, 16),
+      temperature_2m: 0,
+      apparent_temperature: 0,
+      weather_code: 0,
+    },
+    daily: {
+      time: [today],
+      sunrise: [`${today}T07:00`],
+      sunset: [`${today}T17:00`],
+    },
+  };
+};
+
 /** Parse raw Open-Meteo response into our format */
 const parseWeatherResponse = (data: Record<string, unknown>) => {
   const current = (data as { current?: Record<string, unknown> })?.current;
@@ -179,17 +198,25 @@ export const fetchCurrentWeather = async (lat: number, lon: number): Promise<{
         const parsed = parseWeatherResponse(weather as Record<string, unknown>);
         return { ...parsed, cachedCity: city || undefined };
       }
-    } catch {
-      console.warn('Weather cache edge function unavailable, falling back to direct API');
+      console.warn(`Weather cache unavailable (${res.status}), falling back to direct API`);
+    } catch (error) {
+      console.warn('Weather cache unavailable, falling back to direct API', error);
     }
   }
 
   // Direct fallback
-  const res = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code&daily=sunrise,sunset&timezone=auto`
-  );
-  const data = await res.json();
-  return parseWeatherResponse(data);
+  try {
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code&daily=sunrise,sunset&timezone=auto`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (!res.ok) throw new Error(`Open-Meteo error: ${res.status}`);
+    const data = await res.json();
+    return parseWeatherResponse(data);
+  } catch (error) {
+    console.warn('Direct weather API unavailable, using neutral fallback', error);
+    return parseWeatherResponse(fallbackWeatherResponse(lat, lon));
+  }
 };
 
 // ─── Geocoding ───────────────────────────────────────────
