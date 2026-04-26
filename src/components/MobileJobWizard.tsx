@@ -4674,13 +4674,35 @@ const MobileJobWizard = ({
                         <Label className="text-white font-medium text-sm sm:text-base">Textfärg på jobbkort</Label>
                         <p className="text-white text-xs sm:text-sm mt-1">Välj färgen som visas ovanpå annonsbilden.</p>
                       </div>
-                      <Input
-                        type="color"
-                        value={normalizeJobOverlayTextColor(formData.overlay_text_color)}
-                        onChange={(e) => handleInputChange('overlay_text_color', normalizeJobOverlayTextColor(e.target.value))}
-                        className="h-11 w-16 shrink-0 cursor-pointer rounded-lg border-white/20 bg-white/10 p-1"
-                        aria-label="Välj textfärg på jobbkort"
-                      />
+                      <Popover modal={false}>
+                        <PopoverTrigger asChild>
+                          <button
+                            type="button"
+                            className="flex h-11 w-16 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white/10 transition-colors md:hover:bg-white/15"
+                            aria-label="Välj textfärg på jobbkort"
+                          >
+                            <span
+                              className="h-6 w-9 rounded-sm border border-white/30 shadow-inner"
+                              style={{ backgroundColor: normalizeJobOverlayTextColor(formData.overlay_text_color) }}
+                            />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          align={isMobile ? 'center' : 'end'}
+                          side="bottom"
+                          sideOffset={8}
+                          className="z-[9999] w-[min(92vw,260px)] rounded-lg border-white/20 bg-card-parium p-3 shadow-2xl [&_.react-colorful]:!h-[190px] [&_.react-colorful]:!w-full"
+                        >
+                          <div className="mb-2 flex items-center gap-2 text-sm font-medium text-white">
+                            <Palette className="h-4 w-4" />
+                            Välj färg
+                          </div>
+                          <HexColorPicker
+                            color={normalizeJobOverlayTextColor(formData.overlay_text_color)}
+                            onChange={(color) => handleInputChange('overlay_text_color', normalizeJobOverlayTextColor(color))}
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <div className="mt-3 flex items-center gap-2">
                       {['#FFFFFF', '#111827', '#FACC15', '#38BDF8'].map((color) => (
