@@ -8,7 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "load:test": "bun scripts/load-test.ts"
   },
   "dependencies": {
     "@capacitor-community/background-geolocation": "^1.2.26",
