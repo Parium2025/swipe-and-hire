@@ -136,7 +136,7 @@ export function recordPerformanceSample(area: PerformanceArea, latencyMs: number
   subscribers.forEach((callback) => callback());
 }
 
-export async function measurePerformance<T>(area: PerformanceArea, task: () => Promise<T>): Promise<T> {
+export async function measurePerformance<T>(area: PerformanceArea, task: () => PromiseLike<T>): Promise<T> {
   const startedAt = performance.now();
   try {
     const result = await task();
