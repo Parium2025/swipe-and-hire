@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Activity, AlertTriangle, CheckCircle2, Clock, RefreshCw, ServerCrash } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Activity, AlertTriangle, BellRing, CheckCircle2, Clock, RefreshCw, ServerCrash } from 'lucide-react';
 import { getPerformanceSummaries, subscribeToPerformance, type PerformanceSummary } from '@/lib/realtimePerformance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useAuth } from '@/hooks/useAuth';
+import { getStatusAlertHistory, processStatusAlerts, type StatusAlert } from '@/lib/statusAlerts';
 
 const formatMs = (value: number | null) => value === null ? '—' : `${value.toLocaleString('sv-SE')} ms`;
 const formatRate = (value: number) => `${(value * 100).toLocaleString('sv-SE', { maximumFractionDigits: 2 })}%`;
@@ -15,13 +17,29 @@ const statusCopy: Record<PerformanceSummary['status'], { label: string; classNam
 };
 
 export default function RealtimeStatusPage() {
+  const { user } = useAuth();
   const [summaries, setSummaries] = useState(() => getPerformanceSummaries());
   const [now, setNow] = useState(Date.now());
+  const [alerts, setAlerts] = useState<StatusAlert[]>(() => getStatusAlertHistory());
+  const alertingRef = useRef(false);
 
   useEffect(() => {
     const update = () => {
-      setSummaries(getPerformanceSummaries());
+      const nextSummaries = getPerformanceSummaries();
+      setSummaries(nextSummaries);
       setNow(Date.now());
+
+      if (user?.id && !alertingRef.current) {
+        alertingRef.current = true;
+        processStatusAlerts(nextSummaries, user.id)
+          .then((sent) => {
+            if (sent.length > 0) setAlerts(getStatusAlertHistory());
+          })
+          .catch((error) => console.warn('Status alert processing failed:', error))
+          .finally(() => {
+            alertingRef.current = false;
+          });
+      }
     };
 
     const unsubscribe = subscribeToPerformance(update);
@@ -32,7 +50,7 @@ export default function RealtimeStatusPage() {
       unsubscribe();
       window.clearInterval(interval);
     };
-  }, []);
+  }, [user?.id]);
 
   const overallStatus = useMemo(() => {
     if (summaries.some((item) => item.status === 'critical')) return 'critical';
@@ -123,11 +141,37 @@ export default function RealtimeStatusPage() {
           })}
         </section>
 
-        <section className="rounded-lg border border-border bg-card/70 p-4 text-sm text-muted-foreground">
-          <div className="mb-2 flex items-center gap-2 font-semibold text-foreground">
-            <RefreshCw className="h-4 w-4" /> Trösklar
+        <section className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
+          <div className="rounded-lg border border-border bg-card/70 p-4 text-sm text-muted-foreground">
+            <div className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+              <RefreshCw className="h-4 w-4" /> Trösklar
+            </div>
+            <p>Varning: p95 &gt; 1,5s, p99 &gt; 3s eller error rate &gt; 1%. Kritiskt: p95 &gt; 3s, p99 &gt; 5s eller error rate &gt; 2%.</p>
+            <p className="mt-3">Larm skickas som ägarnotis med 15 minuters cooldown per område och varningstyp.</p>
           </div>
-          <p>Varning: p95 &gt; 1,5s, p99 &gt; 3s eller error rate &gt; 1%. Kritiskt: p95 &gt; 3s, p99 &gt; 5s eller error rate &gt; 2%.</p>
+
+          <div className="rounded-lg border border-border bg-card/70 p-4">
+            <div className="mb-3 flex items-center gap-2 font-semibold text-foreground">
+              <BellRing className="h-4 w-4" /> Senaste larm
+            </div>
+            {alerts.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Inga larm har skickats i den här webbläsaren ännu.</p>
+            ) : (
+              <div className="space-y-2">
+                {alerts.slice(0, 5).map((alert) => (
+                  <div key={alert.id} className="rounded-lg border border-border bg-background/50 p-3 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium text-foreground">{alert.title}</span>
+                      <span className={alert.status === 'critical' ? 'text-xs text-red-300' : 'text-xs text-amber-300'}>
+                        {new Date(alert.createdAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">{alert.body}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </main>
