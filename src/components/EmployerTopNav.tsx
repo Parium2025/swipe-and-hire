@@ -1,5 +1,4 @@
 import React, { memo, useEffect, useState } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -35,6 +34,7 @@ import {
 } from "lucide-react";
 import { PariumLogoButton } from "@/components/PariumLogoButton";
 import NotificationCenter from "@/components/NotificationCenter";
+import { TruncatedText } from "@/components/TruncatedText";
 
 // Dashboard dropdown items
 const dashboardItems = [
@@ -391,22 +391,16 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                     <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse" />
                   )}
                   <div className="flex flex-col min-w-0 flex-1">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="text-white font-medium text-sm truncate max-w-[140px] cursor-default">{getUserDisplayName()}</span>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="bg-popover text-white border-border">
-                        {getUserDisplayName()}
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="text-white text-xs truncate max-w-[140px] cursor-default">{user?.email || ''}</span>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="bg-popover text-white border-border">
-                        {user?.email || ''}
-                      </TooltipContent>
-                    </Tooltip>
+                    <TruncatedText
+                      text={getUserDisplayName()}
+                      className="text-white font-medium text-sm truncate max-w-[140px] block cursor-default"
+                      tooltipSide="bottom"
+                    />
+                    <TruncatedText
+                      text={user?.email || ''}
+                      className="text-white text-xs truncate max-w-[140px] block cursor-default"
+                      tooltipSide="bottom"
+                    />
                   </div>
                 </div>
               </div>
