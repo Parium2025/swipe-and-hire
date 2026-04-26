@@ -338,7 +338,8 @@ Deno.serve(async (req) => {
             }
           } catch (err) {
             console.error(`Error sending follow-up reminder for interview ${interview.id}:`, err);
-            errors.push(`Followup ${interview.id}: ${err.message}`);
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            errors.push(`Followup ${interview.id}: ${message}`);
           }
         }
 
@@ -369,8 +370,9 @@ Deno.serve(async (req) => {
     );
   } catch (error) {
     console.error("Interview reminders error:", error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
