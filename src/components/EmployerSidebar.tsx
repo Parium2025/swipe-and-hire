@@ -521,7 +521,6 @@ export function EmployerSidebar() {
                         <Settings className="h-4 w-4" />
                         {!collapsed && <span className="font-medium">Admin Panel</span>}
                       </button>
-...
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
