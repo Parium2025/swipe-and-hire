@@ -124,7 +124,8 @@ export const useJobSeekerBackgroundSync = () => {
           created_at,
           expires_at,
           applications_count,
-          company_logo_url
+          company_logo_url,
+          overlay_text_color
         )
       `)
       .eq('applicant_id', userId)
@@ -224,7 +225,8 @@ export const useJobSeekerBackgroundSync = () => {
         is_active,
         job_image_url,
         workplace_name,
-        company_logo_url
+        company_logo_url,
+        overlay_text_color
       `)
       .eq('is_active', true)
       .is('deleted_at', null)
