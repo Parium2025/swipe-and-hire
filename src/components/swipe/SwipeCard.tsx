@@ -88,6 +88,7 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
   }, [rawImageUrl, cachedBlob]);
 
   const imageUrl = blobFailed ? rawImageUrl : (cachedBlob || loadedBlob || rawImageUrl);
+  const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
 
   const handleImageError = useMemo(() => {
     return (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -223,6 +224,7 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
         <h2
           className="text-xl font-bold text-white leading-snug tracking-tight mt-0.5"
           style={{
+            ...overlayTextStyle,
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
@@ -231,7 +233,7 @@ export function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSw
         >
           {job.title}
         </h2>
-        <p className="text-white/70 text-sm mt-1.5 truncate">
+        <p className="text-white/70 text-sm mt-1.5 truncate" style={overlayTextStyle}>
           {[job.employment_type && getEmploymentTypeLabel(job.employment_type), job.location].filter(Boolean).join(' • ')}
         </p>
 
