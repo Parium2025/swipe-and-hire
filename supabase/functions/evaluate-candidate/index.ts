@@ -47,7 +47,8 @@ async function fetchWithRetry(
       clearTimeout(timeoutId);
       if (attempt < maxRetries) {
         const delay = baseDelayMs * Math.pow(2, attempt) + Math.random() * 500;
-        console.log(`Attempt ${attempt + 1} ${error?.name === 'AbortError' ? 'timeout' : 'network error'}, retrying in ${Math.round(delay)}ms...`);
+        const isAbortError = error instanceof Error && error.name === 'AbortError';
+        console.log(`Attempt ${attempt + 1} ${isAbortError ? 'timeout' : 'network error'}, retrying in ${Math.round(delay)}ms...`);
         await new Promise(r => setTimeout(r, delay));
         continue;
       }
