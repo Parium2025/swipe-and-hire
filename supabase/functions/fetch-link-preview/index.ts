@@ -184,7 +184,6 @@ Deno.serve(async (req) => {
     const { error: upsertError } = await supabase
       .from('link_previews')
       .upsert({
-        url,
         ...preview,
         fetched_at: new Date().toISOString(),
       }, { onConflict: 'url' });

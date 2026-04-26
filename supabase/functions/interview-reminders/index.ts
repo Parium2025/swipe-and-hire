@@ -173,7 +173,7 @@ Deno.serve(async (req) => {
     if (upcomingInterviews && upcomingInterviews.length > 0) {
       console.log(`Found ${upcomingInterviews.length} interviews to send reminders for`);
 
-      for (const interview of upcomingInterviews as Interview[]) {
+      for (const interview of upcomingInterviews as unknown as Interview[]) {
         const jobTitle = interview.job_postings?.title || "intervju";
         const scheduledTime = new Date(interview.scheduled_at);
         const timeString = scheduledTime.toLocaleTimeString("sv-SE", {
@@ -214,7 +214,8 @@ Deno.serve(async (req) => {
           }
         } catch (err) {
           console.error(`Error sending reminder to candidate ${interview.applicant_id}:`, err);
-          errors.push(`Candidate ${interview.applicant_id}: ${err.message}`);
+          const message = err instanceof Error ? err.message : 'Unknown error';
+          errors.push(`Candidate ${interview.applicant_id}: ${message}`);
         }
 
         // Send reminder to employer
@@ -243,7 +244,8 @@ Deno.serve(async (req) => {
           }
         } catch (err) {
           console.error(`Error sending reminder to employer ${interview.employer_id}:`, err);
-          errors.push(`Employer ${interview.employer_id}: ${err.message}`);
+          const message = err instanceof Error ? err.message : 'Unknown error';
+          errors.push(`Employer ${interview.employer_id}: ${message}`);
         }
       }
     } else {
@@ -336,7 +338,8 @@ Deno.serve(async (req) => {
             }
           } catch (err) {
             console.error(`Error sending follow-up reminder for interview ${interview.id}:`, err);
-            errors.push(`Followup ${interview.id}: ${err.message}`);
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            errors.push(`Followup ${interview.id}: ${message}`);
           }
         }
 
@@ -367,8 +370,9 @@ Deno.serve(async (req) => {
     );
   } catch (error) {
     console.error("Interview reminders error:", error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
