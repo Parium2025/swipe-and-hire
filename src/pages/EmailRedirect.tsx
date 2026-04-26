@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, Smartphone, AlertTriangle, Copy, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+const PUBLIC_APP_URL = 'https://parium.se';
+
 const EmailRedirect = () => {
   const [isInAppBrowser, setIsInAppBrowser] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -49,7 +51,7 @@ const EmailRedirect = () => {
 
   const copyUrlToClipboard = async () => {
     const confirmToken = searchParams.get('confirm');
-    const url = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/confirm?confirm=${confirmToken}`;
+    const url = `${PUBLIC_APP_URL}/confirm?confirm=${confirmToken}`;
     
     try {
       await navigator.clipboard.writeText(url);
@@ -71,7 +73,7 @@ const EmailRedirect = () => {
 
   const openInSafari = () => {
     const confirmToken = searchParams.get('confirm');
-    const url = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/confirm?confirm=${confirmToken}`;
+    const url = `${PUBLIC_APP_URL}/confirm?confirm=${confirmToken}`;
     
     // Försök öppna i Safari
     if (isMobile) {
