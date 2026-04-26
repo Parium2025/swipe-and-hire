@@ -51,6 +51,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
+import { DEFAULT_JOB_OVERLAY_TEXT_COLOR, getJobOverlayTextStyle, normalizeJobOverlayTextColor } from '@/lib/jobOverlayText';
 
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
@@ -113,6 +114,7 @@ interface ExistingJob {
   pitch?: string | null;
   job_image_url?: string | null;
   job_image_desktop_url?: string | null;
+  overlay_text_color?: string | null;
   is_active?: boolean;
 }
 
@@ -320,13 +322,17 @@ const MobileJobWizard = ({
           job_image_desktop_url: existingJob.job_image_desktop_url || '',
           image_focus_position: (existingJob as any).image_focus_position || 'center',
           image_focus_position_desktop: (existingJob as any).image_focus_position_desktop || 'center',
+          overlay_text_color: normalizeJobOverlayTextColor(existingJob.overlay_text_color),
           location: existingJob.location || '',
         };
 
         const localDraft = editDraftKey ? parseEditDraftState(localStorage.getItem(editDraftKey), existingJob.id) : null;
         const sessionDraft = parseEditDraftState(sessionStorage.getItem(EDIT_JOB_SESSION_KEY), existingJob.id);
         const isLocalFresh = !!localDraft?.savedAt && Date.now() - localDraft.savedAt < 24 * 60 * 60 * 1000;
-        const restoredFormData = isLocalFresh && localDraft?.formData ? localDraft.formData : loadedFormData;
+        const restoredFormData = {
+          ...(isLocalFresh && localDraft?.formData ? localDraft.formData : loadedFormData),
+          overlay_text_color: normalizeJobOverlayTextColor((isLocalFresh && localDraft?.formData ? localDraft.formData : loadedFormData).overlay_text_color),
+        };
         const bestStepSource = [localDraft, sessionDraft]
           .filter((draft): draft is NonNullable<typeof draft> => !!draft)
           .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))[0];
@@ -401,6 +407,7 @@ const MobileJobWizard = ({
           job_image_desktop_url: '',
           image_focus_position: 'center',
           image_focus_position_desktop: 'center',
+          overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
           work_start_time: '',
           work_end_time: '',
         };
@@ -457,6 +464,7 @@ const MobileJobWizard = ({
           job_image_desktop_url: '',
           image_focus_position: 'center',
           image_focus_position_desktop: 'center',
+          overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
           work_start_time: '',
           work_end_time: '',
         };
@@ -795,7 +803,8 @@ const MobileJobWizard = ({
     job_image_url: '',
     job_image_desktop_url: '',
     image_focus_position: 'center',
-    image_focus_position_desktop: 'center'
+    image_focus_position_desktop: 'center',
+    overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
@@ -2075,7 +2084,8 @@ const MobileJobWizard = ({
       job_image_url: '',
       job_image_desktop_url: '',
       image_focus_position: 'center',
-      image_focus_position_desktop: 'center'
+      image_focus_position_desktop: 'center',
+      overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
     });
     setCustomQuestions([]);
     setInitialCustomQuestions([]);
@@ -2198,6 +2208,7 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
         expires_at: null,
         is_active: false // Save as draft - not published
@@ -2360,6 +2371,7 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         is_active: true
       };
       
@@ -4036,7 +4048,8 @@ const MobileJobWizard = ({
                             ) : null}
                             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                             <div 
-                              className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain"
+                              className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-center cursor-pointer overflow-y-auto overscroll-contain"
+                              style={getJobOverlayTextStyle(formData.overlay_text_color)}
                               onClick={() => setShowApplicationForm(true)}
                             >
               {(() => {
@@ -4045,16 +4058,18 @@ const MobileJobWizard = ({
                   <>
                     <button 
                       onClick={() => setShowCompanyProfile(true)}
-                      className={`${textSizes.company} text-white font-medium mb-1 hover:text-white transition-colors cursor-pointer text-left line-clamp-1`}
+                      className={`${textSizes.company} font-medium mb-1 transition-colors cursor-pointer text-left line-clamp-1`}
+                      style={getJobOverlayTextStyle(formData.overlay_text_color)}
                     >
                       {profile?.company_name || 'Företag'}
                     </button>
                     <TruncatedText 
                       text={getDisplayTitle()} 
-                      className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-5 w-full max-w-full cursor-pointer`}
+                      className={`${textSizes.title} font-bold leading-tight mb-1 line-clamp-5 w-full max-w-full cursor-pointer`}
+                      style={getJobOverlayTextStyle(formData.overlay_text_color)}
                       alwaysShowTooltip="desktop-only"
                     />
-                    <div className={`${textSizes.meta} text-white`}>
+                    <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                     </div>
                   </>
@@ -4581,7 +4596,8 @@ const MobileJobWizard = ({
                                 
                                 {/* Content - clickable to show form */}
                                 <div 
-                                  className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
+                                  className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-center cursor-pointer overflow-y-auto overscroll-contain z-[2]"
+                                  style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                   onClick={() => setShowDesktopApplicationForm(true)}
                                 >
                                   {(() => {
@@ -4590,16 +4606,18 @@ const MobileJobWizard = ({
                                       <>
                                         <button 
                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
+ className={`${textSizes.company} font-medium mb-1 transition-colors cursor-pointer text-left line-clamp-1`}
+                                           style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                         >
                                           {profile?.company_name || 'Företag'}
                                         </button>
                                         <TruncatedText 
                                           text={formData.title || 'Jobbtitel'} 
-                                          className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-2 w-full max-w-full cursor-pointer`}
+                                          className={`${textSizes.title} font-bold leading-tight mb-1 line-clamp-2 w-full max-w-full cursor-pointer`}
+                                          style={getJobOverlayTextStyle(formData.overlay_text_color)}
                                           alwaysShowTooltip="desktop-only"
                                         />
-                                        <div className={`${textSizes.meta} text-white`}>
+                                        <div className={textSizes.meta} style={getJobOverlayTextStyle(formData.overlay_text_color)}>
                                           {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                         </div>
                                       </>
@@ -4648,6 +4666,33 @@ className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary 
                 )}
                 {/* Image upload section - separate for mobile and desktop */}
                 <div className="space-y-4 max-w-lg mx-auto">
+                  <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <Label className="text-white font-medium text-sm sm:text-base">Textfärg på jobbkort</Label>
+                        <p className="text-white text-xs sm:text-sm mt-1">Välj färgen som visas ovanpå annonsbilden.</p>
+                      </div>
+                      <Input
+                        type="color"
+                        value={normalizeJobOverlayTextColor(formData.overlay_text_color)}
+                        onChange={(e) => handleInputChange('overlay_text_color', normalizeJobOverlayTextColor(e.target.value))}
+                        className="h-11 w-16 shrink-0 cursor-pointer rounded-lg border-white/20 bg-white/10 p-1"
+                        aria-label="Välj textfärg på jobbkort"
+                      />
+                    </div>
+                    <div className="mt-3 flex items-center gap-2">
+                      {['#FFFFFF', '#111827', '#FACC15', '#38BDF8'].map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => handleInputChange('overlay_text_color', color)}
+                          className="h-8 w-8 rounded-full border border-white/30 transition-transform active:scale-95"
+                          style={{ backgroundColor: color }}
+                          aria-label={`Välj färg ${color}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
                   {/* Mobile image section */}
                   <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                     <div className="flex items-center gap-2 mb-2">

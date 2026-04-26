@@ -48,6 +48,7 @@ export interface JobFormData extends BaseFormData {
   job_image_desktop_url: string;
   image_focus_position: string;
   image_focus_position_desktop: string;
+  overlay_text_color: string;
 }
 
 export interface TemplateFormData extends BaseFormData {
@@ -245,6 +246,7 @@ export const createEmptyJobFormData = (): JobFormData => ({
   job_image_desktop_url: '',
   image_focus_position: 'center',
   image_focus_position_desktop: 'center',
+  overlay_text_color: '#FFFFFF',
 });
 
 export const createEmptyTemplateFormData = (): TemplateFormData => ({
