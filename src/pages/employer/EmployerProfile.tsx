@@ -963,6 +963,7 @@ const EmployerProfile = () => {
         isOpen={imageEditorOpen}
         onClose={() => {
           setImageEditorOpen(false);
+          setIsEditingExistingProfileImage(false);
           if (pendingImageSrc) {
             URL.revokeObjectURL(pendingImageSrc);
           }
@@ -970,7 +971,7 @@ const EmployerProfile = () => {
         }}
         imageSrc={pendingImageSrc}
         onSave={handleProfileImageSave}
-       onRestoreOriginal={originalProfileImageStoragePath ? handleRestoreOriginal : undefined}
+        onRestoreOriginal={isEditingExistingProfileImage && originalProfileImageStoragePath ? handleRestoreOriginal : undefined}
        aspectRatio={1}
         isCircular={true}
       />
