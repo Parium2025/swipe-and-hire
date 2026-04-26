@@ -85,49 +85,18 @@ export async function executeWithConflictCheck<T>(
   }
 }
 
-// ─── 2. SERVICE WORKER BACKGROUND SYNC ──────────────────────────────
-
-const SYNC_TAG = 'parium-offline-sync';
+// ─── 2. BACKGROUND SYNC (DISABLED) ──────────────────────────────
 
 /**
- * Request a background sync from the Service Worker.
- * If the SW or Background Sync API isn't available, returns false.
+ * Service Worker background sync är avstängd. Offlineköer flushas i appen via
+ * ConnectivityManager så vi inte återintroducerar en SW som kan cacha landing.
  */
 export async function requestBackgroundSync(): Promise<boolean> {
-  try {
-    if (!('serviceWorker' in navigator)) return false;
-
-    const registration = await navigator.serviceWorker.ready;
-    
-    // Check if Background Sync is supported
-    if (!('sync' in registration)) {
-      console.log('[SyncEngine] Background Sync API not available');
-      return false;
-    }
-
-    await (registration as any).sync.register(SYNC_TAG);
-    console.log('[SyncEngine] Background sync registered');
-    return true;
-  } catch (err) {
-    console.warn('[SyncEngine] Failed to register background sync:', err);
-    return false;
-  }
+  return false;
 }
 
-/**
- * Notify the Service Worker that there are queued operations.
- * The SW will attempt to sync even if the tab is closed.
- */
 export function notifySwOfPendingOps(): void {
-  if (!navigator.serviceWorker?.controller) return;
-
-  navigator.serviceWorker.controller.postMessage({
-    type: 'PENDING_OFFLINE_OPS',
-    timestamp: Date.now(),
-  });
-
-  // Also try to register a background sync
-  requestBackgroundSync().catch(() => { /* ignore */ });
+  // no-op by design
 }
 
 // ─── 3. SELECTIVE DATA SYNC ─────────────────────────────────────────
@@ -238,19 +207,6 @@ export function initSyncEngine(): void {
   if (_initialized) return;
   _initialized = true;
 
-  // When coming back online, request a background sync
-  onConnectivityChange((online) => {
-    if (online) {
-      requestBackgroundSync();
-    }
-  });
-
-  // Listen for SW messages about completed syncs
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data?.type === 'SYNC_COMPLETE') {
-        console.log('[SyncEngine] Background sync completed by SW');
-      }
-    });
-  }
+  // Offlineköer hanteras av respektive queue-hook när anslutningen kommer tillbaka.
+  onConnectivityChange(() => {});
 }
