@@ -9,7 +9,9 @@ type LandingHeroProps = {
 
 const FRAME_COUNT = 169;
 const HERO_SCROLL_HEIGHT = '260vh';
-const frameSrc = (frame: number) => `/landing-frames/frame-${String(frame).padStart(3, '0')}.jpg`;
+const FRAME_VERSION = 'hq-v2-169';
+const frameSrc = (frame: number) =>
+  `/landing-frames/frame-${String(frame).padStart(3, '0')}.jpg?v=${FRAME_VERSION}`;
 
 const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
