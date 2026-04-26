@@ -40,6 +40,7 @@ interface JobPostingShape {
   benefits: string[] | null;
   workplace_name: string | null;
   company_logo_url: string | null;
+  overlay_text_color: string | null;
 }
 
 export interface SavedJob {
@@ -109,6 +110,7 @@ function normalizeJobPostingShape(input: unknown): JobPostingShape | null {
     benefits: asStringArray(record.benefits),
     workplace_name: asNullableString(record.workplace_name),
     company_logo_url: asNullableString(record.company_logo_url),
+    overlay_text_color: asNullableString(record.overlay_text_color),
   };
 }
 
@@ -201,7 +203,8 @@ const SAVED_SELECT = `
     salary_transparency,
     benefits,
     workplace_name,
-    company_logo_url
+    company_logo_url,
+    overlay_text_color
   )
 `;
 
