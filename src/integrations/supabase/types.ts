@@ -2718,6 +2718,10 @@ export type Database = {
         Returns: boolean
       }
       heartbeat_session: { Args: { p_session_token: string }; Returns: boolean }
+      increment_app_exception_count: {
+        Args: { _fingerprint: string; _owner_user_id: string }
+        Returns: undefined
+      }
       is_conversation_admin: {
         Args: { p_conversation_id: string }
         Returns: boolean
