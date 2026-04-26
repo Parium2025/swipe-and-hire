@@ -7,7 +7,8 @@ type LandingHeroProps = {
   scrollContainerRef: RefObject<HTMLDivElement>;
 };
 
-const FRAME_COUNT = 85;
+const FRAME_COUNT = 169;
+const HERO_SCROLL_HEIGHT = '260vh';
 const frameSrc = (frame: number) => `/landing-frames/frame-${String(frame).padStart(3, '0')}.jpg`;
 
 const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
@@ -75,6 +76,8 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
 
       void loadFrame(activeFrame + 1).catch(() => undefined);
       void loadFrame(activeFrame + 2).catch(() => undefined);
+      void loadFrame(activeFrame + 3).catch(() => undefined);
+      void loadFrame(activeFrame + 4).catch(() => undefined);
     };
 
     const syncToScroll = () => {
@@ -106,7 +109,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   };
 
   return (
-    <section ref={sectionRef} className="relative bg-gradient-parium" style={{ height: '520vh' }}>
+    <section ref={sectionRef} className="relative bg-gradient-parium" style={{ height: HERO_SCROLL_HEIGHT }}>
       <div className="sticky top-0 h-[100svh] overflow-hidden">
         <canvas
           ref={canvasRef}
