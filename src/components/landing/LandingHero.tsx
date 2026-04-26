@@ -28,9 +28,9 @@ const LandingHero = () => {
     const syncVideoToScroll = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+        const rect = section.getBoundingClientRect();
         const scrollableDistance = Math.max(1, section.offsetHeight - window.innerHeight);
-        const rawProgress = (window.scrollY - sectionTop) / scrollableDistance;
+        const rawProgress = Math.abs(rect.top) / scrollableDistance;
         const progress = Math.min(1, Math.max(0, rawProgress));
         const targetTime = Math.min(videoDuration - 0.04, Math.max(0.001, progress * videoDuration));
 
@@ -42,12 +42,14 @@ const LandingHero = () => {
 
     syncVideoToScroll();
     window.addEventListener('scroll', syncVideoToScroll, { passive: true });
+    document.addEventListener('scroll', syncVideoToScroll, { passive: true, capture: true });
     window.addEventListener('resize', syncVideoToScroll);
     video.addEventListener('loadedmetadata', syncVideoToScroll);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', syncVideoToScroll);
+      document.removeEventListener('scroll', syncVideoToScroll, { capture: true });
       window.removeEventListener('resize', syncVideoToScroll);
       video.removeEventListener('loadedmetadata', syncVideoToScroll);
     };
