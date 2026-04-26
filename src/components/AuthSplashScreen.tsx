@@ -196,18 +196,19 @@ export function AuthSplashScreen() {
             willChange: 'opacity, transform',
           }}
         />
-        <span 
-          style={{
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            background: 'rgba(255,255,255,0.6)',
-            animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            animationDelay: '-0.9s',
-            transform: 'translateZ(0)',
-            willChange: 'opacity, transform',
-          }}
-        />
+          <span 
+            style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.6)',
+              animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              animationDelay: '-0.9s',
+              transform: 'translateZ(0)',
+              willChange: 'opacity, transform',
+            }}
+          />
+        </div>
       </div>
       
       <style>{`
