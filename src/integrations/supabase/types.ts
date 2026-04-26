@@ -1072,6 +1072,7 @@ export type Database = {
           job_image_url: string | null
           location: string | null
           occupation: string | null
+          overlay_text_color: string
           pitch: string | null
           positions_count: number | null
           remote_work_possible: string | null
@@ -1119,6 +1120,7 @@ export type Database = {
           job_image_url?: string | null
           location?: string | null
           occupation?: string | null
+          overlay_text_color?: string
           pitch?: string | null
           positions_count?: number | null
           remote_work_possible?: string | null
@@ -1166,6 +1168,7 @@ export type Database = {
           job_image_url?: string | null
           location?: string | null
           occupation?: string | null
+          overlay_text_color?: string
           pitch?: string | null
           positions_count?: number | null
           remote_work_possible?: string | null
