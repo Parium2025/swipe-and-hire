@@ -119,8 +119,6 @@ async function bootstrap() {
   // 🔄 Spotify-style version watcher: visibility-check + 5min heartbeat → silent deferred reload
   installVersionWatcher();
 
-  // ✅ Preview hygiene: ensure we are never stuck on an old cached bundle/UI.
-  // The preview environment should always reflect the latest code immediately.
   const isPreviewHost = (() => {
     try {
       return typeof window !== 'undefined' && window.location.hostname.includes('id-preview--');
@@ -128,27 +126,6 @@ async function bootstrap() {
       return false;
     }
   })();
-
-  if (isPreviewHost) {
-    // Best-effort cleanup without blocking first paint.
-    setTimeout(() => {
-      try {
-        if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
-          navigator.serviceWorker.getRegistrations()
-            .then((regs) => Promise.all(regs.map((r) => r.unregister())))
-            .catch(() => {});
-        }
-
-        if (typeof caches !== 'undefined' && caches.keys) {
-          caches.keys()
-            .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
-            .catch(() => {});
-        }
-      } catch {
-        // ignore
-      }
-    }, 0);
-  }
 
   // 🔥 CRITICAL: ALWAYS preload AND DECODE the auth logo immediately, regardless of current route.
   // This ensures the logo is already in browser memory when user logs out and navigates to /auth.
