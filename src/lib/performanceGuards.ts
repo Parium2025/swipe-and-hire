@@ -117,7 +117,7 @@ export async function fetchCachedProfiles(userIds: string[]): Promise<Map<string
 
   if (missing.length === 0) return result;
 
-  const { data, error } = await rateLimited('profiles-batch-read', 100, () => supabase
+  const { data, error } = await rateLimited('profiles-batch-read', 100, async () => supabase
     .from('profiles')
     .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
     .in('user_id', missing));
