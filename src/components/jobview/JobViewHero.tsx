@@ -4,6 +4,7 @@ import { Users, Building2, MapPin, Timer, Gift, Briefcase, Banknote } from 'luci
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
+import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 
 interface JobViewHeroProps {
   title: string;
@@ -20,6 +21,7 @@ interface JobViewHeroProps {
   benefits?: string[] | null;
   createdAt?: string;
   expiresAt?: string | null;
+  overlayTextColor?: string | null;
 }
 
 const GRADIENTS = [
@@ -87,6 +89,7 @@ export const JobViewHero = memo(function JobViewHero({
   benefits,
   createdAt,
   expiresAt,
+  overlayTextColor,
 }: JobViewHeroProps) {
   const positionsText = (positionsCount || 1) === 1 ? '1 ledig tjänst' : `${positionsCount} lediga tjänster`;
   const gradient = useMemo(() => getGradientForName(companyName), [companyName]);
@@ -95,6 +98,7 @@ export const JobViewHero = memo(function JobViewHero({
   const hasImage = !!imageUrl;
   const salaryText = useMemo(() => getSalaryText(salaryMin, salaryMax, salaryType, salaryTransparency), [salaryMin, salaryMax, salaryType, salaryTransparency]);
   const timeInfo = useMemo(() => createdAt ? getTimeRemaining(createdAt, expiresAt ?? undefined) : null, [createdAt, expiresAt]);
+  const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(overlayTextColor), [overlayTextColor]);
 
   // Shared overlay content for both image and gradient fallback
   const overlayContent = (
@@ -103,6 +107,7 @@ export const JobViewHero = memo(function JobViewHero({
         text={title}
         className="text-white text-[15px] sm:text-xl md:text-2xl lg:text-3xl font-bold leading-snug sm:leading-tight max-w-4xl w-full text-center line-clamp-2 sm:line-clamp-3"
         tooltipSide="bottom"
+        style={overlayTextStyle}
       />
       
       {/* Mobile metadata — only show company badge when there's an image */}
