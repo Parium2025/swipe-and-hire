@@ -36,7 +36,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
   const handleUpgrade = () => {
     if (!isApp) {
       // Web: Stripe checkout will be integrated here
-      window.open('https://www.www.parium.se', '_blank', 'noopener,noreferrer');
+      window.open('https://www.parium.se', '_blank', 'noopener,noreferrer');
     }
   };
 
