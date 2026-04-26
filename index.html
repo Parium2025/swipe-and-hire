@@ -17,6 +17,59 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <script>
+      // 🚨 PUBLIC SAFARI CACHE KILL-SWITCH
+      // Runs before React. If Safari is controlled by an old Service Worker / Cache Storage,
+      // clear it once per version before loading the app bundle.
+      (function() {
+        try {
+          var host = window.location.hostname;
+          var isPublicHost = host === 'parium.se' || host === 'www.parium.se' || host === 'parium-ab.lovable.app';
+          if (!isPublicHost) return;
+
+          var resetVersion = 'browser-cache-reset-2026-04-26-v6-auth-provider-landing';
+          var resetKey = 'parium_browser_cache_reset';
+          var resetParam = '_cache_reset';
+          var url = new URL(window.location.href);
+
+          if (url.searchParams.get(resetParam) === resetVersion) {
+            try { localStorage.setItem(resetKey, resetVersion); } catch (e) {}
+            url.searchParams.delete(resetParam);
+            window.history.replaceState({}, document.title, url.toString());
+            return;
+          }
+
+          try {
+            if (localStorage.getItem(resetKey) === resetVersion) return;
+          } catch (e) {}
+
+          var cleanupTasks = [];
+          try {
+            if (window.caches && caches.keys) {
+              cleanupTasks.push(caches.keys().then(function(keys) {
+                return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+              }).catch(function() {}));
+            }
+          } catch (e) {}
+          try {
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+              cleanupTasks.push(navigator.serviceWorker.getRegistrations().then(function(rs) {
+                return Promise.all(rs.map(function(r) { try { return r.unregister(); } catch (e) { return false; } }));
+              }).catch(function() {}));
+            }
+          } catch (e) {}
+
+          Promise.all(cleanupTasks).finally(function() {
+            try {
+              var next = new URL(window.location.href);
+              next.searchParams.set(resetParam, resetVersion);
+              window.location.replace(next.toString());
+            } catch (e) {
+              try { window.location.reload(); } catch (e2) {}
+            }
+          });
+        } catch (e) { /* noop */ }
+      })();
+
       // 🚨 FIRST-PAINT VERSION CHECK
       // Körs FÖRE allt annat. Om Safari har cachat en gammal index.html men servern
       // har en ny version → reload omedelbart med cache-bust. Detta är den enda
