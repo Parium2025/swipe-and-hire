@@ -116,7 +116,7 @@ export const useNotificationPreferences = () => {
       if (existing) {
         const { error } = await supabase
           .from('notification_preferences')
-          .update({ [updateField]: enabled, updated_at: new Date().toISOString() })
+          .update({ [updateField]: enabled, updated_at: new Date().toISOString() } as never)
           .eq('user_id', user.id)
           .eq('notification_type', type);
         if (error) throw error;

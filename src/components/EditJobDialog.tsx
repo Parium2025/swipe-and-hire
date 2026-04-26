@@ -1064,7 +1064,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
       const { error } = await supabase
         .from('job_postings')
-        .update(payload)
+        .update(payload as never)
         .eq('id', job.id);
 
       if (error) {
@@ -1688,7 +1688,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
       const { error } = await supabase
         .from('job_postings')
-        .update(payload)
+        .update(payload as never)
         .eq('id', job.id);
 
       if (error) {

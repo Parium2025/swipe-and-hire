@@ -165,7 +165,7 @@ const SupportAdmin = () => {
           message: replyMessage,
           is_admin_reply: true,
           admin_email: 'fredrikandits@hotmail.com'
-        });
+        } as never);
 
       if (error) throw error;
 

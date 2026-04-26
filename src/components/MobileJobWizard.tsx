@@ -2222,7 +2222,7 @@ const MobileJobWizard = ({
       if (existingJob?.id) {
         const { data, error: updateError } = await supabase
           .from('job_postings')
-          .update(jobData)
+          .update(jobData as never)
           .eq('id', existingJob.id)
           .select()
           .single();
@@ -2395,7 +2395,7 @@ const MobileJobWizard = ({
       if (shouldUpdateExisting) {
         const { data, error: updateError } = await supabase
           .from('job_postings')
-          .update(jobData)
+          .update(jobData as never)
           .eq('id', existingJob.id)
           .select()
           .single();
