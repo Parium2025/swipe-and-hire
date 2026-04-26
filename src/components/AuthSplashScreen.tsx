@@ -49,7 +49,8 @@ export function AuthSplashScreen() {
     setImageLoaded(false);
   }, [isTriggered, isVisible]);
   
-  // Trigger fade-in when image is loaded
+  // Trigger content fade-in when image is loaded. The shell background itself is
+  // opaque immediately so protected/outside pages never flash during logout.
   useEffect(() => {
     if (isVisible && imageLoaded && !isFadingOut) {
       // Use requestAnimationFrame for smooth fade-in like index.html
@@ -112,57 +113,65 @@ export function AuthSplashScreen() {
         justifyContent: 'flex-start',
         paddingTop: 'clamp(calc(env(safe-area-inset-top, 0px) + 24px), 5vw, 50px)',
         background: 'hsl(215, 100%, 12%)',
-        opacity: isFadingIn && !isFadingOut ? 1 : 0,
-        transition: 'opacity 0.4s ease-out',
+        opacity: isFadingOut ? 0 : 1,
+        transition: 'opacity 0.5s ease-out',
         transform: 'translateZ(0)',
         willChange: 'opacity',
-        // Never block scroll/click when the splash is transparent.
-        pointerEvents: isFadingIn && !isFadingOut ? 'auto' : 'none',
+        pointerEvents: isFadingOut ? 'none' : 'auto',
       }}
     >
-      {/* Parium Logo - inbäddad data-URI (offline-redo) */}
-      <img
-        src={authLogoDataUri}
-        alt="Parium"
-        onLoad={() => setImageLoaded(true)}
-        onError={() => setImageLoaded(true)}
-        style={{ 
-          height: 'clamp(200px, 30vw, 256px)',
-          width: 'auto',
-          marginBottom: 0,
-          transform: 'translateZ(0)',
-        }}
-        decoding="sync"
-        loading="eager"
-        fetchPriority="high"
-      />
-      
-      {/* Tagline - exakt samma som index.html */}
-      <p 
+      <div
         style={{
-          color: 'white',
-          fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
-          fontWeight: 600,
-          letterSpacing: '-0.01em',
-          marginTop: 'clamp(4px, 1vw, 8px)',
-          marginBottom: '40px',
-          textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-          fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
-        }}
-      >
-        Din karriärresa börjar här
-      </p>
-      
-      {/* Pulserande prickar - exakt samma som index.html */}
-      <div 
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '10px',
-          opacity: dotsFading ? 0 : 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          opacity: isFadingIn && !isFadingOut ? 1 : 0,
           transition: 'opacity 0.4s ease-out',
         }}
       >
+        {/* Parium Logo - inbäddad data-URI (offline-redo) */}
+        <img
+          src={authLogoDataUri}
+          alt="Parium"
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageLoaded(true)}
+          style={{ 
+            height: 'clamp(200px, 30vw, 256px)',
+            width: 'auto',
+            marginBottom: 0,
+            transform: 'translateZ(0)',
+          }}
+          decoding="sync"
+          loading="eager"
+          fetchPriority="high"
+        />
+        
+        {/* Tagline - exakt samma som index.html */}
+        <p 
+          style={{
+            color: 'white',
+            fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
+            fontWeight: 600,
+            letterSpacing: '-0.01em',
+            marginTop: 'clamp(4px, 1vw, 8px)',
+            marginBottom: '40px',
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+          }}
+        >
+          Din karriärresa börjar här
+        </p>
+        
+        {/* Pulserande prickar - exakt samma som index.html */}
+        <div 
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px',
+            opacity: dotsFading ? 0 : 1,
+            transition: 'opacity 0.4s ease-out',
+          }}
+        >
         <span 
           style={{
             width: '10px',
