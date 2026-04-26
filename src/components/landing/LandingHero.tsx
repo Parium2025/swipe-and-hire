@@ -1,41 +1,14 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useRef, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import ProfessionGrid from '@/components/landing/ProfessionGrid';
-import storyMatch from '@/assets/landing-story-match.jpg';
-import storyChat from '@/assets/landing-story-chat.jpg';
-import storyHire from '@/assets/landing-story-hire.jpg';
+import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
-const steps = [
-  {
-    id: 'discover',
-    headline: 'Vi finns här för er.',
-    sub: 'Oavsett om du söker jobb eller rätt kandidat — Parium kopplar samman er.',
-    image: null as string | null,
-    alt: 'Collage av olika yrken',
-  },
-  {
-    id: 'match',
-    headline: 'Rätt person. Rätt tajming.',
-    sub: 'Kandidat och arbetsgivare möts i en exakt, meningsfull matchning.',
-    image: storyMatch as string | null,
-    alt: 'Två professionella skakar hand framför en stadsutsikt',
-  },
-  {
-    id: 'chat',
-    headline: 'Dialog utan fördröjning.',
-    sub: 'Samtalet startar sömlöst, medan intresset fortfarande brinner.',
-    image: storyChat as string | null,
-    alt: 'Kvinna använder smartphone i modernt café',
-  },
-  {
-    id: 'hire',
-    headline: 'Från match till anställning.',
-    sub: 'Hela resan, i en plattform. Resultat du kan mäta.',
-    image: storyHire as string | null,
-    alt: 'Team firar med high-five på modernt kontor',
-  },
+const storyFrames = [
+  { id: 'start', headline: 'Vi finns här för dig.', sub: 'Jobb och kandidater, samlat i ett flöde som rör sig med dig.' },
+  { id: 'swipe', headline: 'Svep när det känns rätt.', sub: 'Snabba beslut, tydliga profiler och bättre tajming.' },
+  { id: 'match', headline: 'Matchen sker direkt.', sub: 'När båda är intresserade öppnas dialogen utan friktion.' },
+  { id: 'brand', headline: 'Parium.', sub: 'Rekrytering som känns enkel från första sekunden.' },
 ];
 
 type LandingHeroProps = {
