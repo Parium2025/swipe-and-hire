@@ -803,22 +803,29 @@ export function useJobSearchCount(options: Omit<UseOptimizedJobSearchOptions, 'e
   const { data: count = 0 } = useQuery({
     queryKey: ['job-search-count', fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('count_search_jobs', {
-        p_search_query: fullSearchQuery || null,
-        p_city: cityFilter || null,
-        p_county: countyFilter || null,
-        p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
-        p_category: categoryFilter || null,
-        p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
-        p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
-      });
+      return readThroughCache<number>(
+        searchCacheKey([COUNT_CACHE_PREFIX, fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch]),
+        COUNT_CACHE_TTL,
+        async () => {
+          const { data, error } = await supabase.rpc('count_search_jobs', {
+            p_search_query: fullSearchQuery || null,
+            p_city: cityFilter || null,
+            p_county: countyFilter || null,
+            p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
+            p_category: categoryFilter || null,
+            p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
+            p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
+          });
 
-      if (error) {
-        console.error('Count search jobs error:', error);
-        return 0;
-      }
+          if (error) {
+            console.error('Count search jobs error:', error);
+            return 0;
+          }
 
-      return data || 0;
+          return data || 0;
+        },
+        (data): data is number => typeof data === 'number',
+      );
     },
     staleTime: 60000,
     gcTime: 5 * 60 * 1000,
