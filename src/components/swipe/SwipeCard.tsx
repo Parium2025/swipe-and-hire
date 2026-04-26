@@ -7,6 +7,7 @@ import { imageCache } from '@/lib/imageCache';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { TruncatedText } from '@/components/TruncatedText';
 import { Badge } from '@/components/ui/badge';
+import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 
 export interface SwipeJob {
   id: string;
@@ -35,6 +36,7 @@ export interface SwipeJob {
   salary_transparency?: string;
   benefits?: string[] | null;
   company_logo_url?: string;
+  overlay_text_color?: string | null;
 }
 
 function resolveImageUrl(url?: string): string | null {
