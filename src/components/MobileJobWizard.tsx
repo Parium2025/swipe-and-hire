@@ -3534,7 +3534,7 @@ const MobileJobWizard = ({
                     {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                       <>
                         {/* Left tooltip (company name) */}
-                        <div className="pointer-events-none absolute z-[999] top-14 -left-[115px] flex items-center gap-1">
+                        <div className="pointer-events-none absolute z-[999] top-14 -left-[98px] md:-left-[104px] flex items-center gap-1">
                           <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                             Obs, tryck här!
                           </div>
@@ -3548,7 +3548,7 @@ const MobileJobWizard = ({
                           </svg>
                         </div>
                         {/* Right tooltip (X button) - outside the phone */}
-                        <div className="pointer-events-none absolute z-[999] top-4 -right-[115px] flex items-center gap-1">
+                        <div className="pointer-events-none absolute z-[999] top-4 -right-[98px] md:-right-[104px] flex items-center gap-1">
                           <svg width="20" height="16" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
                             <defs>
                               <marker id="arrowheadLeft_ext_2" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
