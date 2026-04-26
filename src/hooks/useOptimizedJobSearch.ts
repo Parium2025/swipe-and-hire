@@ -5,6 +5,7 @@ import { getTimeRemaining } from '@/lib/date';
 import { expandSearchTerms, detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
 import { safeSetItem } from '@/lib/safeStorage';
 import { imageCache } from '@/lib/imageCache';
+import { readThroughCache } from '@/lib/performanceGuards';
 
 // 🔥 Offline-cache: senaste lyckade sökresultat per query-nyckel.
 // Används som fallback när nätverket är borta så att jobbkort fortfarande
@@ -12,6 +13,10 @@ import { imageCache } from '@/lib/imageCache';
 // när det finns en cache, query:n hämtar nytt så snart nätet finns.
 const SEARCH_CACHE_PREFIX = 'parium_job_search_cache_v1_';
 const SEARCH_CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 dagar
+const HOT_SEARCH_CACHE_PREFIX = 'parium_hot_job_search_v1_';
+const HOT_SEARCH_CACHE_TTL = 20 * 1000;
+const COUNT_CACHE_PREFIX = 'parium_job_search_count_v1_';
+const COUNT_CACHE_TTL = 30 * 1000;
 
 interface CachedSearch {
   jobs: SearchJob[];
@@ -518,23 +523,30 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       abortControllerRef.current = new AbortController();
 
       try {
-        const { data, error } = await supabase.rpc('search_jobs', {
-          p_search_query: fullSearchQuery || null,
-          p_city: cityFilter || null,
-          p_county: countyFilter || null,
-          p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
-          p_category: categoryFilter || null,
-          p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
-          p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
-          p_limit: pageSize,
-          p_offset: 0,
-          p_cursor_created_at: (pageParam as string | null) || null,
-          p_employer_ids: employerIdsArray,
-          p_created_after: createdAfter || null,
-        } as any);
+        return readThroughCache<SearchJob[]>(
+          searchCacheKey([HOT_SEARCH_CACHE_PREFIX, fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, pageSize, pageParam || '', employerIdsKey, createdAfter || '']),
+          HOT_SEARCH_CACHE_TTL,
+          async () => {
+            const { data, error } = await supabase.rpc('search_jobs', {
+              p_search_query: fullSearchQuery || null,
+              p_city: cityFilter || null,
+              p_county: countyFilter || null,
+              p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
+              p_category: categoryFilter || null,
+              p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
+              p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
+              p_limit: pageSize,
+              p_offset: 0,
+              p_cursor_created_at: (pageParam as string | null) || null,
+              p_employer_ids: employerIdsArray,
+              p_created_after: createdAfter || null,
+            } as any);
 
-        if (error) throw error;
-        return (data || []) as SearchJob[];
+            if (error) throw error;
+            return (data || []) as SearchJob[];
+          },
+          Array.isArray,
+        );
       } catch (err) {
         // Vid första sidan + nätverksfel: använd cachad data om den finns
         if (!pageParam) {
