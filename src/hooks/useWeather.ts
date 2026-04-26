@@ -47,6 +47,17 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const mountedRef = useRef(true);
   const backgroundUpdatePendingRef = useRef(false);
 
+  const safeFallback = useCallback((city = ''): WeatherData => ({
+    temperature: 0,
+    feelsLike: 0,
+    weatherCode: 0,
+    description: '',
+    emoji: getTimeBasedEmoji(),
+    city,
+    isLoading: false,
+    error: 'unavailable',
+  }), []);
+
   const [weather, setWeather] = useState<WeatherData>(() => {
     const cached = getCachedWeather();
     if (cached) {
@@ -114,9 +125,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       });
     } catch (err) {
       console.error('Weather fetch error:', err);
-      updateWeather({ isLoading: false, error: 'unavailable' });
+      updateWeather(safeFallback(city));
     }
-  }, [updateWeather]);
+  }, [safeFallback, updateWeather]);
 
   const updateLocation = useCallback(async (newLat: number, newLon: number, knownCity: string | null, source: 'gps' | 'ip' | 'fallback' | 'background') => {
     // City is resolved server-side by the edge function (fetchCurrentWeather returns cachedCity).
@@ -157,13 +168,14 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   });
 
   const checkForLocationChange = useCallback(async (silent = true) => {
-    const gpsResult = await getCurrentPosition({
-      timeout: 8000,
-      enableHighAccuracy: true,
-      maximumAge: 0,
-    });
+    try {
+      const gpsResult = await getCurrentPosition({
+        timeout: 8000,
+        enableHighAccuracy: true,
+        maximumAge: 0,
+      });
 
-    if (gpsResult && mountedRef.current) {
+      if (gpsResult && mountedRef.current) {
       console.log(`🛰️ GPS coordinates: ${gpsResult.lat.toFixed(6)}, ${gpsResult.lon.toFixed(6)}`);
       
       // Don't call getCityName directly — the edge function (fetchCurrentWeather)
@@ -172,7 +184,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       const cached = locationRef.current || getCachedLocation();
       const cityHint = cached?.city || '';
       await updateLocation(gpsResult.lat, gpsResult.lon, cityHint || null, 'gps');
-      return;
+        return;
+      }
+    } catch (error) {
+      console.warn('GPS lookup failed, continuing with fallbacks:', error);
     }
 
     const cached = locationRef.current || getCachedLocation();
