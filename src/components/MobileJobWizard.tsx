@@ -50,7 +50,6 @@ import { createSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
 import { DEFAULT_JOB_OVERLAY_TEXT_COLOR, getJobOverlayTextStyle, normalizeJobOverlayTextColor } from '@/lib/jobOverlayText';
@@ -503,7 +502,7 @@ const MobileJobWizard = ({
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
   const [isScrolledTop, setIsScrolledTop] = useState(true);
-  const [previewMode, setPreviewMode] = usePersistedPreviewMode('mobile-job-wizard-preview-mode');
+  const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [showDesktopApplicationForm, setShowDesktopApplicationForm] = useState(false);
 
   // Utility function to truncate text for better display
