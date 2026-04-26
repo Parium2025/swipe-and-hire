@@ -116,7 +116,7 @@ const handler = async (req: Request): Promise<Response> => {
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
         <tr>
           <td align="center" style="padding: 0;">
-            <a href="https://parium.se/my-jobs" 
+            <a href="https://www.parium.se/my-jobs" 
                style="background-color: #1a237e; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none;">
               Gå till Mina Annonser
             </a>
