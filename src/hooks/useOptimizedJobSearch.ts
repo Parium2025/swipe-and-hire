@@ -742,7 +742,7 @@ export function useInfiniteJobSearch(options: UseInfiniteJobSearchOptions) {
       });
 
       if (error) throw error;
-      return (data || []) as SearchJob[];
+      return (data || []) as unknown as SearchJob[];
     },
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => {
