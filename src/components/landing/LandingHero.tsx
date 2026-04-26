@@ -1,16 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import scrollHeroVideo from '@/assets/parium-scroll-hero.mp4';
 
-const LandingHero = () => {
+type LandingHeroProps = {
+  scrollContainerRef: RefObject<HTMLDivElement>;
+};
+
+const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoDuration, setVideoDuration] = useState(7.041667);
 
   const { scrollYProgress } = useScroll({
+    container: scrollContainerRef,
     target: sectionRef,
     offset: ['start start', 'end end'],
   });
