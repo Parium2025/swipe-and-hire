@@ -124,9 +124,6 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
           <motion.div
              className="absolute inset-x-0 bottom-20 z-30 flex justify-center px-6 sm:bottom-24 md:bottom-28 lg:relative lg:inset-auto lg:bottom-auto lg:z-30 lg:justify-center lg:px-16 lg:pb-12"
             style={{ opacity: ctaOpacity }}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
           >
             <motion.button
               type="button"
@@ -142,7 +139,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
 
           {/* Minimal progress bar instead of step indicators */}
           <div className="relative z-20 px-6 pb-5 lg:px-16 lg:pb-8">
-            <div className="h-[2px] w-full rounded-full bg-white/10 overflow-hidden">
+            <div className="h-[2px] w-full overflow-hidden rounded-full bg-primary-foreground/10">
               <motion.div
                 className="h-full rounded-full bg-secondary"
                 style={{ width: progressWidth }}
