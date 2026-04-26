@@ -243,7 +243,6 @@ const handler = async (req: Request): Promise<Response> => {
       attachments: [{
         filename: 'intervju.ics',
         content: icsBase64,
-        contentType: 'text/calendar; method=REQUEST',
       }],
     });
 
@@ -276,7 +275,6 @@ const handler = async (req: Request): Promise<Response> => {
           attachments: [{
             filename: 'intervju.ics',
             content: empIcsBase64,
-            contentType: 'text/calendar; method=REQUEST',
           }],
         });
 
