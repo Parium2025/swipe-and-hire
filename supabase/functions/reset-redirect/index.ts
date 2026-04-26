@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Token-användning kontrolleras INTE här - det sker först när användaren faktiskt 
     // försöker uppdatera lösenordet i Auth.tsx handlePasswordReset
     if (token) {
-      let redirectUrl = "https://www.parium.se/auth?reset=true";
+      let redirectUrl = "https://parium.se/auth?reset=true";
       const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
       redirectUrl += `&${paramName}=${token}`;
       if (type) redirectUrl += `&type=${type}`;
@@ -53,7 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Om ingen token, redirect till auth
     console.log(`✅ NO TOKEN - Redirecting to auth page`);
-    let redirectUrl = "https://www.parium.se/auth?reset=true";
+    let redirectUrl = "https://parium.se/auth?reset=true";
     if (issued) redirectUrl += `&issued=${issued}`;
     return new Response(null, {
       status: 302,
@@ -70,7 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, {
       status: 302,
       headers: {
-        "Location": "https://www.parium.se/auth?reset=true&expired=true",
+        "Location": "https://parium.se/auth?reset=true&expired=true",
         ...corsHeaders,
       },
     });
