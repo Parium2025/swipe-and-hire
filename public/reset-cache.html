@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="sv-SE">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Parium – rensar cache</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #001935;
+        color: #ffffff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      main {
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+      }
+      p { opacity: 0.82; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div>
+        <h1>Rensar Parium</h1>
+        <p>Vänta ett ögonblick…</p>
+      </div>
+    </main>
+    <script>
+      (function () {
+        var target = '/?cache-reset=' + Date.now();
+        var clear = [];
+
+        try {
+          if (window.caches && caches.keys) {
+            clear.push(caches.keys().then(function (keys) {
+              return Promise.all(keys.map(function (key) { return caches.delete(key); }));
+            }).catch(function () {}));
+          }
+        } catch (e) {}
+
+        try {
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            clear.push(navigator.serviceWorker.getRegistrations().then(function (regs) {
+              return Promise.all(regs.map(function (reg) { return reg.unregister(); }));
+            }).catch(function () {}));
+          }
+        } catch (e) {}
+
+        Promise.all(clear).finally(function () {
+          try { window.location.replace(target); }
+          catch (e) { window.location.href = target; }
+        });
+      })();
+    </script>
+  </body>
+</html>

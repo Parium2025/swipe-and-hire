@@ -1,14 +1,10 @@
-const KILL_VERSION = 'sw-kill-2026-04-26-v8-hard-root-no-sw';
+const KILL_VERSION = 'sw-kill-2026-04-26-v9-clear-all-and-navigate';
 
 const clearPariumCaches = async () => {
   try {
     if (typeof caches === 'undefined' || !caches.keys) return;
     const keys = await caches.keys();
-    await Promise.all(
-      keys
-        .filter((key) => key.startsWith('parium-') || key.includes('parium'))
-        .map((key) => caches.delete(key).catch(() => false))
-    );
+    await Promise.all(keys.map((key) => caches.delete(key).catch(() => false)));
   } catch {
     // ignore
   }
@@ -20,6 +16,14 @@ const notifyClients = async () => {
     clients.forEach((client) => {
       try {
         client.postMessage({ type: 'PARIUM_SW_REMOVED', version: KILL_VERSION });
+      } catch {
+        // ignore
+      }
+
+      try {
+        const url = new URL(client.url);
+        url.searchParams.set('_sw_killed', `${KILL_VERSION}-${Date.now()}`);
+        client.navigate(url.toString()).catch(() => undefined);
       } catch {
         // ignore
       }

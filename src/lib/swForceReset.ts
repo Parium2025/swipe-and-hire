@@ -14,7 +14,7 @@
  * Bumpa RESET_VERSION om vi behöver göra det igen i framtiden.
  */
 
-const RESET_VERSION = 'sw-reset-2026-04-26-v8-hard-root-no-sw-no-cache';
+const RESET_VERSION = 'sw-reset-2026-04-26-v9-hard-domain-no-sw-no-cache';
 const RESET_KEY = 'parium_sw_force_reset';
 const RESET_ATTEMPT_KEY = 'parium_sw_force_reset_attempt';
 const RESET_QUERY_PARAM = '_sw_reset';
@@ -46,7 +46,52 @@ export function forceServiceWorkerReset(): void {
       return;
     }
 
-    if (stored === RESET_VERSION && !navigator.serviceWorker?.controller) return;
+    const hasServiceWorkerApi = 'serviceWorker' in navigator && !!navigator.serviceWorker.getRegistrations;
+
+    const runReset = async (): Promise<void> => {
+      const tasks: Promise<unknown>[] = [];
+
+      if (hasServiceWorkerApi) {
+        tasks.push(
+          navigator.serviceWorker
+            .getRegistrations()
+            .then((regs) => Promise.all(regs.map((r) => r.unregister().catch(() => false))))
+            .catch(() => undefined)
+        );
+      }
+
+      if (typeof caches !== 'undefined' && caches.keys) {
+        tasks.push(
+          caches
+            .keys()
+            .then((keys) => Promise.all(keys.map((k) => caches.delete(k).catch(() => false))))
+            .catch(() => undefined)
+        );
+      }
+
+      await Promise.all(tasks);
+    };
+
+    const verifyClean = async (): Promise<boolean> => {
+      try {
+        const [regs, keys] = await Promise.all([
+          hasServiceWorkerApi ? navigator.serviceWorker.getRegistrations().catch(() => []) : Promise.resolve([]),
+          typeof caches !== 'undefined' && caches.keys ? caches.keys().catch(() => []) : Promise.resolve([]),
+        ]);
+        return regs.length === 0 && keys.length === 0 && !navigator.serviceWorker?.controller;
+      } catch {
+        return false;
+      }
+    };
+
+    if (stored === RESET_VERSION && !navigator.serviceWorker?.controller) {
+      void verifyClean().then((clean) => {
+        if (clean) return;
+        localStorage.removeItem(RESET_KEY);
+        void runReset();
+      });
+      return;
+    }
 
     const lastAttemptRaw = sessionStorage.getItem(RESET_ATTEMPT_KEY);
     if (lastAttemptRaw) {
@@ -63,29 +108,7 @@ export function forceServiceWorkerReset(): void {
 
     sessionStorage.setItem(RESET_ATTEMPT_KEY, `${RESET_VERSION}:${Date.now()}`);
 
-    const tasks: Promise<unknown>[] = [];
-
-    if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
-      tasks.push(
-        navigator.serviceWorker
-          .getRegistrations()
-          .then((regs) => Promise.all(regs.map((r) => r.unregister().catch(() => false))))
-          .catch(() => undefined)
-      );
-    }
-
-    if (typeof caches !== 'undefined' && caches.keys) {
-      tasks.push(
-        caches
-          .keys()
-          .then((keys) => Promise.all(keys.map((k) => caches.delete(k).catch(() => false))))
-          .catch(() => undefined)
-      );
-    }
-
-    if (tasks.length === 0) return;
-
-    Promise.all(tasks)
+    runReset()
       .then(() => {
         console.log('[swForceReset] Removed service worker + caches, reloading…');
         setTimeout(() => {
