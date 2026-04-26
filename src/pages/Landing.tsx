@@ -39,7 +39,7 @@ const Landing = () => {
     setMeta('og:type', 'website', 'property');
     setMeta('og:locale', 'sv_SE', 'property');
     setMeta('og:site_name', 'Parium', 'property');
-    setMeta('og:url', 'https://parium-ab.lovable.app', 'property');
+    setMeta('og:url', 'https://parium.se', 'property');
     setMeta('twitter:title', 'Parium – Rekrytering. På 60 sekunder.');
     setMeta('twitter:description', desc);
     setMeta('twitter:card', 'summary_large_image');
@@ -52,7 +52,7 @@ const Landing = () => {
       canonical.rel = 'canonical';
       document.head.appendChild(canonical);
     }
-    canonical.href = 'https://parium-ab.lovable.app';
+    canonical.href = 'https://parium.se';
 
     const jsonLd = {
       '@context': 'https://schema.org',
@@ -61,7 +61,7 @@ const Landing = () => {
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web, iOS, Android',
       description: desc,
-      url: 'https://parium-ab.lovable.app',
+      url: 'https://parium.se',
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' },
       author: { '@type': 'Organization', name: 'Parium AB' },
     };
