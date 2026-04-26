@@ -3,6 +3,7 @@ import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getIsOnline } from '@/lib/connectivityManager';
+import { fetchCachedProfile, fetchCachedProfiles, rateLimited } from '@/lib/performanceGuards';
 import { useAuth } from './useAuth';
 import { prefetchMediaUrl } from './useMediaUrl';
 import { toast } from 'sonner';
@@ -315,14 +316,7 @@ export function useConversations() {
 
       // Profiles are CRITICAL for identity — if this fails, React Query will retry (retry: 2).
       // Never silently swallow profile errors — that causes "Okänd användare".
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-        .in('user_id', allUserIds);
-
-      if (profilesError) throw profilesError;
-
-      const profileMap = new Map((profiles || []).map((p) => [p.user_id, p]));
+      const profileMap = await fetchCachedProfiles(allUserIds);
 
       // 🔥 Use efficient DB function instead of fetching ALL messages
       // This scales to millions of messages - only returns latest + unread count per conversation
@@ -541,12 +535,7 @@ export function useConversationMessages(conversationId: string | null) {
       // Fetch sender profiles
       const senderIds = [...new Set(messages.map(m => m.sender_id))];
 
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-        .in('user_id', senderIds);
-
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      const profileMap = await fetchCachedProfiles(senderIds);
 
       return messages.map(msg => ({
         ...msg,
@@ -593,12 +582,7 @@ export function useConversationMessages(conversationId: string | null) {
 
       // Fetch sender profiles for older messages
       const newSenderIds = [...new Set(olderMessages.map(m => m.sender_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-        .in('user_id', newSenderIds);
-
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      const profileMap = await fetchCachedProfiles(newSenderIds);
 
       const enrichedOlder = olderMessages.map(msg => ({
         ...msg,
