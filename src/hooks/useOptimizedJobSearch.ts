@@ -141,6 +141,7 @@ export interface SearchJob {
   image_focus_position: string;
   company_name: string;
   company_logo_url?: string;
+  overlay_text_color?: string | null;
   company_avg_rating?: number;
   company_review_count?: number;
 }
