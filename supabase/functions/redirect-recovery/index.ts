@@ -39,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, {
       status: 302,
       headers: {
-        "Location": "https://www.parium.se/auth",
+        "Location": "https://parium.se/auth",
         ...corsHeaders,
       },
     });
