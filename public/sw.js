@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v9';
+const CACHE_VERSION = 'v10';
 
 const IMAGE_CACHE = `parium-images-${CACHE_VERSION}`;
 const STATIC_CACHE = `parium-static-${CACHE_VERSION}`;
@@ -76,6 +76,14 @@ const isImageRequest = (url) => {
   return IMAGE_PATTERNS.some(pattern => pattern.test(url));
 };
 
+const isLandingFrameRequest = (url) => {
+  try {
+    return new URL(url).pathname.startsWith('/landing-frames/');
+  } catch {
+    return false;
+  }
+};
+
 const isApiRequest = (url) => {
   return API_PATTERNS.some(pattern => pattern.test(url));
 };
@@ -110,7 +118,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== IMAGE_CACHE && cacheName !== STATIC_CACHE && cacheName !== API_CACHE) {
+          if (cacheName.startsWith('parium-') && cacheName !== IMAGE_CACHE && cacheName !== STATIC_CACHE && cacheName !== API_CACHE) {
             console.log('[SW] Removing old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -174,6 +182,13 @@ self.addEventListener('fetch', (event) => {
   const url = request.url;
 
   if (request.method !== 'GET') {
+    return;
+  }
+
+  // Landingens frame-by-frame hero måste alltid hämtas färskt från deployen.
+  // De här filerna versioneras i React-koden och får inte fastna i SW image-cache.
+  if (isLandingFrameRequest(url)) {
+    event.respondWith(fetch(new Request(request, { cache: 'no-store' })));
     return;
   }
 
