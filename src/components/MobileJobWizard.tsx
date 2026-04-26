@@ -329,7 +329,10 @@ const MobileJobWizard = ({
         const localDraft = editDraftKey ? parseEditDraftState(localStorage.getItem(editDraftKey), existingJob.id) : null;
         const sessionDraft = parseEditDraftState(sessionStorage.getItem(EDIT_JOB_SESSION_KEY), existingJob.id);
         const isLocalFresh = !!localDraft?.savedAt && Date.now() - localDraft.savedAt < 24 * 60 * 60 * 1000;
-        const restoredFormData = isLocalFresh && localDraft?.formData ? localDraft.formData : loadedFormData;
+        const restoredFormData = {
+          ...(isLocalFresh && localDraft?.formData ? localDraft.formData : loadedFormData),
+          overlay_text_color: normalizeJobOverlayTextColor((isLocalFresh && localDraft?.formData ? localDraft.formData : loadedFormData).overlay_text_color),
+        };
         const bestStepSource = [localDraft, sessionDraft]
           .filter((draft): draft is NonNullable<typeof draft> => !!draft)
           .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))[0];
