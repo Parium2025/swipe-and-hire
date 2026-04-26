@@ -4,10 +4,9 @@ import * as Sentry from '@sentry/react'
 import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
-import { registerServiceWorker } from './lib/serviceWorkerManager'
 import { initSyncEngine } from './lib/offlineSyncEngine'
 import { nukeStaleCaches } from './lib/cacheNuke'
-import { forceServiceWorkerReset, getServiceWorkerResetVersion } from './lib/swForceReset'
+import { forceServiceWorkerReset } from './lib/swForceReset'
 import { installBfcacheGuard, persistBuildSignature } from './lib/appReloader'
 import { installVersionWatcher } from './lib/versionWatcher'
 import pariumLogoRings from './assets/parium-logo-rings.png'
@@ -167,20 +166,11 @@ async function bootstrap() {
     await authLogoPromise;
   }
 
-  // Registrera Service Worker och Sync Engine
-  const hasCompletedCurrentReset = (() => {
-    try {
-      return localStorage.getItem('parium_sw_force_reset') === getServiceWorkerResetVersion();
-    } catch {
-      return false;
-    }
-  })();
-
-  if (import.meta.env.PROD && !isPreviewHost && !isPublicLandingRoute && hasCompletedCurrentReset) {
-    registerServiceWorker().catch(() => {});
-  }
+  // Service Worker intentionally disabled on published builds.
+  // A stale SW was the only layer that could keep Safari on an old landing page.
+  // Existing SW installs are removed by index.html + swForceReset + public/sw.js kill-switch.
   
-  // Initialize the offline sync engine (works regardless of SW)
+  // Initialize the offline sync engine (works without SW; background sync is best-effort only)
   initSyncEngine();
 
   const root = createRoot(document.getElementById('root')!);

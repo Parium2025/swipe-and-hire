@@ -9,12 +9,12 @@
  * publicerade domäner och:
  *   1. Av-registrerar alla service workers
  *   2. Tömmer alla Cache Storage-buckets
- *   3. Tvingar en silent reload så nya SW + bundle hämtas direkt
+ *   3. Tvingar en silent reload så bundle hämtas direkt utan SW
  *
  * Bumpa RESET_VERSION om vi behöver göra det igen i framtiden.
  */
 
-const RESET_VERSION = 'sw-reset-2026-04-26-v6-auth-provider-landing-cache-reset';
+const RESET_VERSION = 'sw-reset-2026-04-26-v7-disable-service-worker-landing-root';
 const RESET_KEY = 'parium_sw_force_reset';
 const RESET_ATTEMPT_KEY = 'parium_sw_force_reset_attempt';
 const RESET_QUERY_PARAM = '_sw_reset';
@@ -87,7 +87,7 @@ export function forceServiceWorkerReset(): void {
 
     Promise.all(tasks)
       .then(() => {
-        console.log('[swForceReset] Cleared old service worker + caches, reloading…');
+        console.log('[swForceReset] Removed service worker + caches, reloading…');
         setTimeout(() => {
           try {
             const nextUrl = new URL(window.location.href);
