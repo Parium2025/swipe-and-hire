@@ -25,49 +25,25 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
     offset: ['start start', 'end end'],
   });
 
-  // Wider crossfade overlap for smoother blending between images
-  const fade = 0.12;
-
-  const img0Opacity = useTransform(scrollYProgress, [0, 0.25 - fade, 0.25 + fade / 2], [1, 1, 0]);
-  const img1Opacity = useTransform(scrollYProgress, [0.25 - fade, 0.25 + fade / 2, 0.5 - fade, 0.5 + fade / 2], [0, 1, 1, 0]);
-  const img2Opacity = useTransform(scrollYProgress, [0.5 - fade, 0.5 + fade / 2, 0.75 - fade, 0.75 + fade / 2], [0, 1, 1, 0]);
-  const img3Opacity = useTransform(scrollYProgress, [0.75 - fade, 0.75 + fade / 2, 1], [0, 1, 1]);
-
-  // Ken Burns zoom
-  const img0Scale = useTransform(scrollYProgress, [0, 0.25], [1, 1.12]);
-  const img1Scale = useTransform(scrollYProgress, [0.25, 0.5], [1, 1.12]);
-  const img2Scale = useTransform(scrollYProgress, [0.5, 0.75], [1, 1.12]);
-  const img3Scale = useTransform(scrollYProgress, [0.75, 1], [1, 1.12]);
-
-  // Text opacity — smoother fade with wider windows
-  const text0Opacity = useTransform(scrollYProgress, [0, 0.03, 0.18, 0.25], [1, 1, 1, 0]);
-  const text1Opacity = useTransform(scrollYProgress, [0.22, 0.28, 0.45, 0.5], [0, 1, 1, 0]);
-  const text2Opacity = useTransform(scrollYProgress, [0.47, 0.53, 0.7, 0.75], [0, 1, 1, 0]);
-  const text3Opacity = useTransform(scrollYProgress, [0.72, 0.78, 0.95, 1], [0, 1, 1, 1]);
-
-  // Text Y translation
-  const text0Y = useTransform(scrollYProgress, [0, 0.03, 0.18, 0.25], [0, 0, 0, -30]);
-  const text1Y = useTransform(scrollYProgress, [0.22, 0.28, 0.45, 0.5], [30, 0, 0, -30]);
-  const text2Y = useTransform(scrollYProgress, [0.47, 0.53, 0.7, 0.75], [30, 0, 0, -30]);
-  const text3Y = useTransform(scrollYProgress, [0.72, 0.78, 0.95, 1], [30, 0, 0, 0]);
-
-  // Single continuous progress bar
+  const phoneY = useTransform(scrollYProgress, [0, 0.38, 0.72, 1], ['8%', '0%', '-3%', '0%']);
+  const phoneScale = useTransform(scrollYProgress, [0, 0.46, 0.72, 1], [0.82, 0.94, 1.18, 1.48]);
+  const phoneRotate = useTransform(scrollYProgress, [0, 0.36, 0.72, 1], [-2.5, 0, 0.8, 0]);
+  const streetOpacity = useTransform(scrollYProgress, [0, 0.68, 0.86], [1, 1, 0]);
+  const brandFillOpacity = useTransform(scrollYProgress, [0.72, 0.9, 1], [0, 1, 1]);
+  const logoScale = useTransform(scrollYProgress, [0.74, 0.92, 1], [0.78, 1, 1.03]);
   const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
-
-  const imgOpacities = [img0Opacity, img1Opacity, img2Opacity, img3Opacity];
-  const imgScales = [img0Scale, img1Scale, img2Scale, img3Scale];
-  const textOpacities = [text0Opacity, text1Opacity, text2Opacity, text3Opacity];
-  const textYs = [text0Y, text1Y, text2Y, text3Y];
-
-  // Preload images
-  useEffect(() => {
-    steps.forEach(({ image }) => {
-      if (image) {
-        const img = new Image();
-        img.src = image;
-      }
-    });
-  }, []);
+  const textOpacities = [
+    useTransform(scrollYProgress, [0, 0.04, 0.18, 0.28], [1, 1, 1, 0]),
+    useTransform(scrollYProgress, [0.24, 0.34, 0.46, 0.56], [0, 1, 1, 0]),
+    useTransform(scrollYProgress, [0.52, 0.62, 0.72, 0.82], [0, 1, 1, 0]),
+    useTransform(scrollYProgress, [0.78, 0.9, 1], [0, 1, 1]),
+  ];
+  const textYs = [
+    useTransform(scrollYProgress, [0, 0.2, 0.28], [0, 0, -18]),
+    useTransform(scrollYProgress, [0.24, 0.34, 0.56], [18, 0, -18]),
+    useTransform(scrollYProgress, [0.52, 0.62, 0.82], [18, 0, -18]),
+    useTransform(scrollYProgress, [0.78, 0.9], [18, 0]),
+  ];
 
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
