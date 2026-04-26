@@ -31,6 +31,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const streetOpacity = useTransform(scrollYProgress, [0, 0.68, 0.86], [1, 1, 0]);
   const brandFillOpacity = useTransform(scrollYProgress, [0.72, 0.9, 1], [0, 1, 1]);
   const logoScale = useTransform(scrollYProgress, [0.74, 0.92, 1], [0.78, 1, 1.03]);
+  const ctaOpacity = useTransform(scrollYProgress, [0, 0.66, 0.78], [1, 1, 0]);
   const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
   const textOpacities = [
     useTransform(scrollYProgress, [0, 0.04, 0.18, 0.28], [1, 1, 1, 0]),
@@ -110,7 +111,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
               <div className="absolute inset-x-0 bottom-8 z-20 flex justify-center gap-4">
                 <div className="grid h-11 w-11 place-items-center rounded-full bg-destructive text-sm font-black text-destructive-foreground">×</div>
                 <div className="grid h-11 w-11 place-items-center rounded-full bg-secondary text-sm font-black text-secondary-foreground">▱</div>
-                <div className="grid h-11 w-11 place-items-center rounded-full bg-[hsl(135_75%_55%)] text-sm font-black text-primary-foreground">♥</div>
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-accent text-sm font-black text-accent-foreground">♥</div>
               </div>
             </div>
           </motion.div>
@@ -121,7 +122,8 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
 
           {/* CTA — pinned to bottom, centered */}
           <motion.div
-             className="absolute inset-x-0 bottom-20 z-20 flex justify-center px-6 sm:bottom-24 md:bottom-28 lg:relative lg:inset-auto lg:bottom-auto lg:z-auto lg:justify-center lg:px-16 lg:pb-12"
+             className="absolute inset-x-0 bottom-20 z-30 flex justify-center px-6 sm:bottom-24 md:bottom-28 lg:relative lg:inset-auto lg:bottom-auto lg:z-30 lg:justify-center lg:px-16 lg:pb-12"
+            style={{ opacity: ctaOpacity }}
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
