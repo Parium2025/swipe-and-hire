@@ -2205,6 +2205,7 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
         expires_at: null,
         is_active: false // Save as draft - not published
@@ -2367,6 +2368,7 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         is_active: true
       };
       
