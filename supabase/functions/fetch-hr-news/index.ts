@@ -914,6 +914,7 @@ serve(async (req) => {
     );
   } catch (e) {
     console.error('Fatal error:', e);
-    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const message = e instanceof Error ? e.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
