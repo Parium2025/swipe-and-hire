@@ -26,6 +26,7 @@ interface Application {
     positions_count: number | null;
     workplace_name: string | null;
     company_logo_url: string | null;
+      overlay_text_color: string | null;
   } | null;
 }
 
@@ -122,7 +123,8 @@ export function useMyApplicationsCache() {
             job_image_url,
             positions_count,
             workplace_name,
-            company_logo_url
+            company_logo_url,
+            overlay_text_color
           )
         `)
         .eq('applicant_id', user.id)
