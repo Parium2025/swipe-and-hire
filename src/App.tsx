@@ -76,6 +76,7 @@ import { ScrollRestoration } from "@/components/ScrollRestoration";
 import { CriticalAssetPreloads } from "@/components/CriticalAssetPreloads";
 import { AuthSplashScreen } from "@/components/AuthSplashScreen";
 import { RealtimeKeepAlive } from "@/components/RealtimeKeepAlive";
+import { AppFailureMonitor } from "@/components/AppFailureMonitor";
 
 // Run draft cleanup once on app load (removes drafts older than 1 day)
 // Defer to idle time to avoid blocking first paint
@@ -228,6 +229,7 @@ const App = () => {
           <OnlineStatusProvider>
             <TooltipProvider delayDuration={0}>
               <Toaster position="top-center" />
+              <AppFailureMonitor />
               <BrowserRouter>
                 <AppShell showHeader={showHeader} />
               </BrowserRouter>
