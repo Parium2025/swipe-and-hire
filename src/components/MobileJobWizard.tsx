@@ -800,7 +800,8 @@ const MobileJobWizard = ({
     job_image_url: '',
     job_image_desktop_url: '',
     image_focus_position: 'center',
-    image_focus_position_desktop: 'center'
+    image_focus_position_desktop: 'center',
+    overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
@@ -2080,7 +2081,8 @@ const MobileJobWizard = ({
       job_image_url: '',
       job_image_desktop_url: '',
       image_focus_position: 'center',
-      image_focus_position_desktop: 'center'
+      image_focus_position_desktop: 'center',
+      overlay_text_color: DEFAULT_JOB_OVERLAY_TEXT_COLOR,
     });
     setCustomQuestions([]);
     setInitialCustomQuestions([]);
