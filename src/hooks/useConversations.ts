@@ -637,12 +637,8 @@ export function useConversationMessages(conversationId: string | null) {
             if (alreadyExists) return;
           }
 
-          // Fetch sender profile for the new message
-          const { data: senderProfile } = await supabase
-            .from('profiles')
-            .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-            .eq('user_id', newMessage.sender_id)
-            .single();
+          // Fetch sender profile through shared cache to avoid one profile read per realtime event burst
+          const senderProfile = await fetchCachedProfile(newMessage.sender_id);
 
           // Add message directly to cache - instant update!
           queryClient.setQueryData<ConversationMessage[]>(
@@ -799,7 +795,7 @@ export function useConversationMessages(conversationId: string | null) {
     );
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await rateLimited(`send-message-${conversationId}-${user.id}`, 350, async () => supabase
         .from('conversation_messages')
         .insert({
           conversation_id: conversationId,
@@ -812,7 +808,7 @@ export function useConversationMessages(conversationId: string | null) {
           } : {}),
         })
         .select()
-        .single();
+        .single());
 
       if (error) throw error;
 
