@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_exceptions: {
+        Row: {
+          created_at: string
+          environment: string
+          fingerprint: string
+          first_seen_at: string
+          http_status: number | null
+          id: string
+          kind: string
+          last_seen_at: string
+          message: string
+          metadata: Json
+          occurrence_count: number
+          owner_user_id: string
+          route: string
+          severity: string
+          source: string | null
+          stacktrace: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          environment?: string
+          fingerprint: string
+          first_seen_at?: string
+          http_status?: number | null
+          id?: string
+          kind: string
+          last_seen_at?: string
+          message: string
+          metadata?: Json
+          occurrence_count?: number
+          owner_user_id: string
+          route?: string
+          severity?: string
+          source?: string | null
+          stacktrace?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          fingerprint?: string
+          first_seen_at?: string
+          http_status?: number | null
+          id?: string
+          kind?: string
+          last_seen_at?: string
+          message?: string
+          metadata?: Json
+          occurrence_count?: number
+          owner_user_id?: string
+          route?: string
+          severity?: string
+          source?: string | null
+          stacktrace?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       candidate_activities: {
         Row: {
           activity_type: string
