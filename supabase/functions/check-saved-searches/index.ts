@@ -177,8 +177,9 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('[check-saved-searches] Error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
