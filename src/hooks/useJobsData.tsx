@@ -37,6 +37,7 @@ export interface JobPosting {
   employer_id: string;
   job_image_url?: string;
   company_logo_url?: string;
+  overlay_text_color?: string | null;
   image_focus_position?: string;
   job_image_card_url?: string;
   job_image_desktop_url?: string;

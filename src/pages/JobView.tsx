@@ -54,6 +54,7 @@ interface JobPosting {
   job_image_url?: string;
   job_image_desktop_url?: string;
   company_logo_url?: string | null;
+  overlay_text_color?: string | null;
   // Legacy: callers may still pass profiles; we no longer query it.
   profiles?: {
     first_name?: string;
@@ -117,6 +118,7 @@ const JobView = () => {
     location: prefetched.location || '',
     workplace_name: prefetched.workplace_name || prefetched.company_name,
     company_logo_url: prefetched.company_logo_url,
+    overlay_text_color: prefetched.overlay_text_color,
   } as JobPosting : null);
 
   const [job, setJob] = useState<JobPosting | null>(initialJob);
@@ -591,6 +593,7 @@ const JobView = () => {
               benefits={job.benefits}
               createdAt={job.created_at}
               expiresAt={job.expires_at}
+              overlayTextColor={job.overlay_text_color}
             />
 
             {/* Description */}

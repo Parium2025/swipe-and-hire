@@ -2817,6 +2817,7 @@ export type Database = {
               job_image_url: string
               location: string
               occupation: string
+              overlay_text_color: string
               pitch: string
               positions_count: number
               remote_work_possible: string
