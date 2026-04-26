@@ -2747,6 +2747,23 @@ export type Database = {
         }
         Returns: string
       }
+      record_app_exception: {
+        Args: {
+          _environment: string
+          _fingerprint: string
+          _http_status: number
+          _kind: string
+          _message: string
+          _metadata?: Json
+          _owner_user_id: string
+          _route: string
+          _severity: string
+          _source: string
+          _stacktrace: string
+          _title: string
+        }
+        Returns: string
+      }
       record_job_view:
         | {
             Args: {
