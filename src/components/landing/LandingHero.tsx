@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import scrollHeroVideo from '@/assets/parium-scroll-hero.mp4';
 
@@ -12,51 +12,29 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoDuration, setVideoDuration] = useState(7.041667);
-
-  const { scrollYProgress } = useScroll({
-    container: scrollContainerRef,
-    target: sectionRef,
-    offset: ['start start', 'end end'],
-  });
-
-  const ctaOpacity = useTransform(scrollYProgress, [0, 0.12, 0.82, 0.94], [0, 1, 1, 0]);
-  const ctaY = useTransform(scrollYProgress, [0, 0.12, 0.82, 0.94], [16, 0, 0, 16]);
-  const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    const section = sectionRef.current;
     const video = videoRef.current;
-    if (!container || !section || !video) return;
+    if (!video) return;
 
-    let raf = 0;
-    const syncVideoToScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const scrollableDistance = Math.max(1, section.offsetHeight - window.innerHeight);
-        const rawProgress = (container.scrollTop - section.offsetTop) / scrollableDistance;
-        const progress = Math.min(1, Math.max(0, rawProgress));
-        const targetTime = Math.min(videoDuration - 0.04, Math.max(0.001, progress * videoDuration));
+    video.muted = true;
+    video.playsInline = true;
 
-        if (video.readyState >= 1 && Math.abs(video.currentTime - targetTime) > 0.02) {
-          video.currentTime = targetTime;
-        }
-      });
+    const playVideo = () => {
+      void video.play().catch(() => undefined);
     };
 
-    syncVideoToScroll();
-    container.addEventListener('scroll', syncVideoToScroll, { passive: true });
-    window.addEventListener('resize', syncVideoToScroll);
-    video.addEventListener('loadedmetadata', syncVideoToScroll);
+    playVideo();
+    video.addEventListener('canplay', playVideo);
+    window.addEventListener('pointerdown', playVideo, { passive: true });
+    document.addEventListener('visibilitychange', playVideo);
 
     return () => {
-      cancelAnimationFrame(raf);
-      container.removeEventListener('scroll', syncVideoToScroll);
-      window.removeEventListener('resize', syncVideoToScroll);
-      video.removeEventListener('loadedmetadata', syncVideoToScroll);
+      video.removeEventListener('canplay', playVideo);
+      window.removeEventListener('pointerdown', playVideo);
+      document.removeEventListener('visibilitychange', playVideo);
     };
-  }, [scrollContainerRef, videoDuration]);
+  }, [scrollContainerRef]);
 
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
@@ -64,28 +42,27 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   };
 
   return (
-    <section ref={sectionRef} className="relative" style={{ height: '520vh' }}>
-      <div className="sticky top-0 h-[100dvh] overflow-hidden bg-gradient-parium">
+    <section ref={sectionRef} className="relative min-h-[100svh] overflow-hidden bg-gradient-parium">
+      <div className="relative min-h-[100svh] overflow-hidden">
         <video
           ref={videoRef}
           src={scrollHeroVideo}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+          autoPlay
+          loop
           muted
           playsInline
           preload="auto"
-          aria-label="Parium scroll-baserad introduktionsvideo"
-          onLoadedMetadata={(event) => {
-            const duration = event.currentTarget.duration;
-            if (Number.isFinite(duration) && duration > 0) setVideoDuration(duration);
-            event.currentTarget.currentTime = 0.001;
-          }}
+          aria-label="Parium introduktionsvideo"
         />
 
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--primary)/0.05)_0%,hsl(var(--primary)/0)_44%,hsl(var(--primary)/0.28)_100%)]" />
 
         <motion.div
           className="absolute inset-x-0 bottom-20 z-20 flex justify-center px-6 sm:bottom-24 md:bottom-28"
-          style={{ opacity: ctaOpacity, y: ctaY }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.3 }}
         >
           <motion.button
             type="button"
@@ -99,11 +76,7 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
           </motion.button>
         </motion.div>
 
-        <div className="absolute inset-x-0 bottom-0 z-20 px-6 pb-5 lg:px-16 lg:pb-8">
-          <div className="h-[2px] w-full overflow-hidden rounded-full bg-primary-foreground/10">
-            <motion.div className="h-full rounded-full bg-secondary" style={{ width: progressWidth }} />
-          </div>
-        </div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-primary/55 to-transparent" />
       </div>
     </section>
   );
