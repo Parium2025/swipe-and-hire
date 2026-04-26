@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { fetchCachedProfile, fetchCachedProfiles, rateLimited } from '@/lib/performanceGuards';
+import { measurePerformance } from '@/lib/realtimePerformance';
 import { useAuth } from './useAuth';
 import { prefetchMediaUrl } from './useMediaUrl';
 import { toast } from 'sonner';
@@ -795,7 +796,7 @@ export function useConversationMessages(conversationId: string | null) {
     );
 
     try {
-      const { data, error } = await rateLimited(`send-message-${conversationId}-${user.id}`, 350, async () => supabase
+      const { data, error } = await rateLimited(`send-message-${conversationId}-${user.id}`, 350, async () => measurePerformance('chat', () => supabase
         .from('conversation_messages')
         .insert({
           conversation_id: conversationId,
@@ -808,7 +809,7 @@ export function useConversationMessages(conversationId: string | null) {
           } : {}),
         })
         .select()
-        .single());
+        .single()));
 
       if (error) throw error;
 
