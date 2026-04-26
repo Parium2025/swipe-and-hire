@@ -55,6 +55,7 @@ interface Application {
     views_count: number | null;
     job_image_url: string | null;
     positions_count: number | null;
+      overlay_text_color: string | null;
     profiles: {
       company_name: string | null;
       company_logo_url: string | null;
@@ -269,6 +270,7 @@ const MyApplications = () => {
                     company_name: companyName,
                     workplace_name: job.workplace_name || undefined,
                     company_logo_url: job.company_logo_url || undefined,
+                    overlay_text_color: job.overlay_text_color,
                     positions_count: job.positions_count || undefined,
                   }}
                   onDeleteClick={handleDeleteClick}
