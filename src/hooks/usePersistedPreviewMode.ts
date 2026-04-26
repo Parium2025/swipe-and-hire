@@ -7,21 +7,21 @@ function isPreviewMode(value: string | null): value is PersistedPreviewMode {
   return value === 'mobile' || value === 'desktop';
 }
 
-function getDefaultPreviewMode(): PersistedPreviewMode {
-  return getDevice() === 'mobile' ? 'mobile' : 'desktop';
+function getDefaultPreviewMode(defaultMode?: PersistedPreviewMode): PersistedPreviewMode {
+  return defaultMode ?? (getDevice() === 'mobile' ? 'mobile' : 'desktop');
 }
 
-export function usePersistedPreviewMode(storageKey: string) {
+export function usePersistedPreviewMode(storageKey: string, defaultMode?: PersistedPreviewMode) {
   const [previewMode, setPreviewMode] = useState<PersistedPreviewMode>(() => {
     if (typeof window === 'undefined') {
-      return getDefaultPreviewMode();
+      return getDefaultPreviewMode(defaultMode);
     }
 
     try {
       const storedMode = window.sessionStorage.getItem(storageKey);
-      return isPreviewMode(storedMode) ? storedMode : getDefaultPreviewMode();
+      return isPreviewMode(storedMode) ? storedMode : getDefaultPreviewMode(defaultMode);
     } catch {
-      return getDefaultPreviewMode();
+      return getDefaultPreviewMode(defaultMode);
     }
   });
 
