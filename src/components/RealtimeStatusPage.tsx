@@ -6,6 +6,20 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { getStatusAlertHistory, processStatusAlerts, type StatusAlert } from '@/lib/statusAlerts';
 import { getAppFailureHistory, subscribeToAppFailures, type AppFailure } from '@/lib/appFailureMonitor';
+import { supabase } from '@/integrations/supabase/client';
+
+type StoredException = {
+  id: string;
+  kind: string;
+  severity: 'warning' | 'critical';
+  title: string;
+  message: string;
+  route: string;
+  source: string | null;
+  stacktrace: string | null;
+  occurrence_count: number;
+  last_seen_at: string;
+};
 
 const formatMs = (value: number | null) => value === null ? '—' : `${value.toLocaleString('sv-SE')} ms`;
 const formatRate = (value: number) => `${(value * 100).toLocaleString('sv-SE', { maximumFractionDigits: 2 })}%`;
@@ -23,6 +37,7 @@ export default function RealtimeStatusPage() {
   const [now, setNow] = useState(Date.now());
   const [alerts, setAlerts] = useState<StatusAlert[]>(() => getStatusAlertHistory());
   const [failures, setFailures] = useState<AppFailure[]>(() => getAppFailureHistory());
+  const [exceptions, setExceptions] = useState<StoredException[]>([]);
   const alertingRef = useRef(false);
 
   useEffect(() => {
@@ -30,6 +45,15 @@ export default function RealtimeStatusPage() {
       const nextSummaries = getPerformanceSummaries();
       setSummaries(nextSummaries);
       setNow(Date.now());
+
+      if (user?.id) {
+        supabase
+          .from('app_exceptions' as never)
+          .select('id, kind, severity, title, message, route, source, stacktrace, occurrence_count, last_seen_at')
+          .order('last_seen_at' as never, { ascending: false })
+          .limit(12)
+          .then(({ data }) => setExceptions((data as unknown as StoredException[]) || []));
+      }
 
       if (user?.id && !alertingRef.current) {
         alertingRef.current = true;
@@ -180,22 +204,38 @@ export default function RealtimeStatusPage() {
 
         <section className="rounded-lg border border-border bg-card/70 p-4">
           <div className="mb-3 flex items-center gap-2 font-semibold text-foreground">
-            <ShieldAlert className="h-4 w-4" /> Senaste appfel
+            <ShieldAlert className="h-4 w-4" /> Exceptions med stacktrace och frekvens
           </div>
-          {failures.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Inga runtime-, async- eller kritiska backendfel fångade ännu.</p>
+          {exceptions.length === 0 && failures.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Inga frontend- eller backend-exceptions fångade ännu.</p>
           ) : (
-            <div className="grid gap-2 md:grid-cols-2">
-              {failures.slice(0, 6).map((failure) => (
+            <div className="grid gap-2">
+              {(exceptions.length > 0 ? exceptions : failures.slice(0, 6).map((failure) => ({
+                id: failure.id,
+                kind: failure.kind,
+                severity: failure.severity,
+                title: failure.title,
+                message: failure.message,
+                route: failure.route,
+                source: failure.source ?? null,
+                stacktrace: failure.stacktrace ?? null,
+                occurrence_count: failure.occurrenceCount,
+                last_seen_at: new Date(failure.lastSeenAt).toISOString(),
+              }))).map((failure) => (
                 <div key={failure.id} className="rounded-lg border border-border bg-background/50 p-3 text-sm">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-medium text-foreground">{failure.title}</span>
                     <span className={failure.severity === 'critical' ? 'text-xs text-red-300' : 'text-xs text-amber-300'}>
-                      {new Date(failure.createdAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}
+                      {failure.occurrence_count}× · {new Date(failure.last_seen_at).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground break-words">{failure.message}</p>
-                  <p className="mt-2 text-[11px] text-muted-foreground">{failure.route}</p>
+                  <p className="mt-2 text-[11px] text-muted-foreground break-words">{failure.kind} · {failure.route}{failure.source ? ` · ${failure.source}` : ''}</p>
+                  {failure.stacktrace && (
+                    <pre className="mt-3 max-h-36 overflow-auto rounded-md border border-border bg-muted/20 p-3 text-[11px] leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                      {failure.stacktrace}
+                    </pre>
+                  )}
                 </div>
               ))}
             </div>
