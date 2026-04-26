@@ -131,7 +131,7 @@ export async function processStatusAlerts(summaries: PerformanceSummary[], owner
 
 export async function notifyAppFailure(failure: AppFailure, ownerUserId: string): Promise<void> {
   const dedupe = readJson<Record<string, number>>(ALERT_DEDUPE_KEY, {});
-  const fingerprint = `app:${failure.kind}:${failure.status ?? ''}:${failure.message.slice(0, 120)}`;
+  const fingerprint = failure.fingerprint;
   const now = Date.now();
   if (now - (dedupe[fingerprint] ?? 0) < ALERT_COOLDOWN_MS) return;
   dedupe[fingerprint] = now;
@@ -202,14 +202,18 @@ export async function reportAppException(failure: AppFailure, ownerUserId: strin
     },
   };
 
-  await supabase
-    .from('app_exceptions' as never)
-    .upsert(payload as never, { onConflict: 'owner_user_id,fingerprint' })
-    .select('id')
-    .maybeSingle();
-
-  await supabase.rpc('increment_app_exception_count' as never, {
+  await supabase.rpc('record_app_exception' as never, {
     _owner_user_id: ownerUserId,
-    _fingerprint: failure.fingerprint,
+    _environment: payload.environment,
+    _kind: payload.kind,
+    _severity: payload.severity,
+    _title: payload.title,
+    _message: payload.message,
+    _route: payload.route,
+    _source: payload.source,
+    _stacktrace: payload.stacktrace,
+    _http_status: payload.http_status,
+    _fingerprint: payload.fingerprint,
+    _metadata: payload.metadata,
   } as never);
 }
