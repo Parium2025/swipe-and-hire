@@ -12,6 +12,7 @@ import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
 import type { SwipeJob } from './SwipeCard';
 import { TruncatedText } from '@/components/TruncatedText';
 import { Badge } from '@/components/ui/badge';
+import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 
 function resolveImageUrl(url?: string, bucket = 'job-images'): string | null {
   if (!url) return null;
@@ -136,6 +137,8 @@ export const JobSlide = memo(function JobSlide({
   // 🚀 Logo i swipe-card är liten (~64px) → be om optimerad version
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', job.updated_at, { width: 64, height: 64, quality: 80, resize: 'contain' });
   const { displayUrl: nextLogoUrl } = useCardImage(nextJob?.company_logo_url ?? null, 'company-logos', nextJob?.updated_at, { width: 64, height: 64, quality: 80, resize: 'contain' });
+  const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
+  const nextOverlayTextStyle = useMemo(() => getJobOverlayTextStyle(nextJob?.overlay_text_color), [nextJob?.overlay_text_color]);
 
   const isTitleTruncated = useCallback(() => {
     const el = titleRef.current;
@@ -505,7 +508,7 @@ export const JobSlide = memo(function JobSlide({
             {/* Full content — identical to active card so nothing flashes on transition */}
             <div
               className="absolute inset-x-0 top-[20%] bottom-28 z-10 flex items-center justify-center px-6 text-center"
-              style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.4)' }}
+              style={nextOverlayTextStyle}
             >
               <div className="mx-auto w-full max-w-[21rem]">
                 {/* Company logo or initials — same logic as active card */}
