@@ -10,6 +10,7 @@ import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
 import { isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
 import type { JobPosting } from '@/hooks/useJobsData';
+import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 
 interface MobileJobCardProps {
   job: JobPosting;
@@ -65,6 +66,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', undefined, { width: 64, height: 64, quality: 80, resize: 'contain' });
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
+  const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
 
   const handleCardClick = () => {
     if (isDraft && onEditDraft) {
@@ -159,6 +161,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           <TruncatedText
             text={job.title}
             className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] text-white line-clamp-2"
+            style={overlayTextStyle}
           />
         </div>
 
