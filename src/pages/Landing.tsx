@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 
 const LandingMarquee = lazy(() => import('@/components/landing/LandingMarquee'));
 const LandingStatement = lazy(() => import('@/components/landing/LandingStatement'));
@@ -97,6 +98,7 @@ const Landing = () => {
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain bg-gradient-parium text-primary-foreground"
       style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
     >
+      <AnimatedBackground />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
         <main>
