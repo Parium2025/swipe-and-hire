@@ -9,17 +9,6 @@ type LandingHeroProps = {
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-const FloatingBubbles = () => (
-  <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-    <motion.span className="absolute left-[7%] top-[18%] h-3 w-3 rounded-full bg-secondary/35 blur-[0.5px]" animate={{ y: [0, -18, 0], opacity: [0.35, 0.75, 0.35] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} />
-    <motion.span className="absolute left-[13%] top-[29%] h-2 w-2 rounded-full bg-white/35" animate={{ y: [0, 14, 0], opacity: [0.25, 0.55, 0.25] }} transition={{ duration: 7.5, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }} />
-    <motion.span className="absolute right-[8%] top-[20%] h-2.5 w-2.5 rounded-full bg-secondary/25" animate={{ y: [0, -12, 0], opacity: [0.25, 0.6, 0.25] }} transition={{ duration: 6.8, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }} />
-    <motion.span className="absolute right-[12%] bottom-[14%] h-4 w-4 rounded-full bg-white/25" animate={{ y: [0, 18, 0], opacity: [0.2, 0.45, 0.2] }} transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }} />
-    <motion.span className="absolute right-[6%] bottom-[10%] h-2.5 w-2.5 rounded-full bg-secondary/35" animate={{ y: [0, -14, 0], opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 5.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }} />
-    <div className="absolute left-1/2 top-[18%] h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-secondary/10 blur-[150px]" />
-  </div>
-);
-
 const MatchPreview = () => (
   <motion.div
     className="relative mx-auto w-full max-w-[21rem] sm:max-w-[24rem]"
@@ -89,8 +78,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
   };
 
   return (
-    <section className="relative min-h-[100svh] overflow-hidden bg-gradient-parium px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24" aria-labelledby="landing-hero-heading">
-      <FloatingBubbles />
+    <section className="relative min-h-[100svh] overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24" aria-labelledby="landing-hero-heading">
       <div className="relative z-10 mx-auto grid min-h-[calc(100svh-11rem)] max-w-[1400px] items-center gap-12 lg:grid-cols-[1.08fr_0.92fr]">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -126,7 +114,6 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         </motion.div>
         <MatchPreview />
       </div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-primary/70 to-transparent" />
     </section>
   );
 };
