@@ -1,7 +1,7 @@
 import { type PointerEvent, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { ArrowRight, BriefcaseBusiness, CheckCircle2, MapPin, Sparkles, Users } from 'lucide-react';
+import { ArrowRight, BriefcaseBusiness, CheckCircle2, MapPin, Users } from 'lucide-react';
 import iphoneFrame from '@/assets/parium-iphone-frame.png';
 
 type LandingHeroProps = {
