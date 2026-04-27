@@ -1,4 +1,4 @@
-const KILL_VERSION = 'sw-kill-2026-04-26-v9-clear-all-and-navigate';
+const KILL_VERSION = 'sw-kill-2026-04-27-v10-clear-all-and-navigate';
 
 const clearPariumCaches = async () => {
   try {
