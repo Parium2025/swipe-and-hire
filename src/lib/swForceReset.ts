@@ -14,7 +14,7 @@
  * Bumpa RESET_VERSION om vi behöver göra det igen i framtiden.
  */
 
-const RESET_VERSION = 'sw-reset-2026-04-26-v9-hard-domain-no-sw-no-cache';
+const RESET_VERSION = 'sw-reset-2026-04-27-v10-hard-domain-no-sw-no-cache';
 const RESET_KEY = 'parium_sw_force_reset';
 const RESET_ATTEMPT_KEY = 'parium_sw_force_reset_attempt';
 const RESET_QUERY_PARAM = '_sw_reset';
