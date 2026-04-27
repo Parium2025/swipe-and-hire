@@ -1,7 +1,8 @@
-import { type RefObject } from 'react';
+import { type PointerEvent, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight, BriefcaseBusiness, CheckCircle2, MapPin, Sparkles, Users } from 'lucide-react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { ArrowRight, BriefcaseBusiness, CheckCircle2, MapPin, Users } from 'lucide-react';
+import iphoneFrame from '@/assets/parium-iphone-frame.png';
 
 type LandingHeroProps = {
   scrollContainerRef: RefObject<HTMLDivElement>;
@@ -9,64 +10,93 @@ type LandingHeroProps = {
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-const MatchPreview = () => (
-  <motion.div
-    className="relative mx-auto w-full max-w-[21rem] sm:max-w-[24rem]"
-    initial={{ opacity: 0, y: 28, scale: 0.96 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ duration: 0.85, ease, delay: 0.15 }}
-  >
-    <div className="relative rounded-[2rem] border border-white/10 bg-primary/80 p-3 shadow-[0_30px_100px_hsl(var(--primary)/0.65)] backdrop-blur-2xl">
-      <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.035] p-4">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary/70">Matchning</p>
-            <h2 className="mt-1 text-xl font-black text-white">Produktdesigner</h2>
-          </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-secondary/20 bg-secondary/10">
-            <Sparkles className="h-5 w-5 text-secondary" />
-          </div>
-        </div>
+const PhoneShowcase = () => {
+  const pointerX = useMotionValue(0);
+  const pointerY = useMotionValue(0);
+  const smoothX = useSpring(pointerX, { stiffness: 110, damping: 18, mass: 0.35 });
+  const smoothY = useSpring(pointerY, { stiffness: 110, damping: 18, mass: 0.35 });
+  const rotateY = useTransform(smoothX, [-1, 1], [-13, 13]);
+  const rotateX = useTransform(smoothY, [-1, 1], [10, -10]);
 
-        <div className="space-y-3">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-secondary/15 text-sm font-black text-white">A</div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-white">Astra Studio</p>
-                <p className="mt-1 flex items-center gap-1.5 text-xs text-white/45"><MapPin className="h-3.5 w-3.5" /> Stockholm · Hybrid</p>
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    pointerX.set(((event.clientX - rect.left) / rect.width - 0.5) * 2);
+    pointerY.set(((event.clientY - rect.top) / rect.height - 0.5) * 2);
+  };
+
+  const resetPointer = () => {
+    pointerX.set(0);
+    pointerY.set(0);
+  };
+
+  return (
+    <motion.div
+      className="relative mx-auto flex w-full max-w-[25rem] justify-center sm:max-w-[29rem] lg:max-w-[32rem]"
+      initial={{ opacity: 0, y: 34 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.9, ease, delay: 0.08 }}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={resetPointer}
+      style={{ perspective: 1400 }}
+    >
+      <div className="absolute inset-x-6 top-8 h-72 rounded-full bg-secondary/20 blur-[95px]" />
+      <div className="absolute bottom-4 left-1/2 h-24 w-56 -translate-x-1/2 rounded-full bg-primary/70 blur-[38px]" />
+
+      <motion.div
+        className="relative w-[18.5rem] max-w-[76vw] transform-gpu sm:w-[22rem]"
+        style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+        animate={{ y: [0, -12, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className="absolute left-[9%] top-[3.6%] h-[91.5%] w-[82%] overflow-hidden rounded-[2.15rem] bg-gradient-parium sm:rounded-[2.7rem]">
+          <div className="absolute inset-0 opacity-80">
+            <div className="absolute left-6 top-14 h-24 w-24 rounded-full bg-secondary/20 blur-3xl" />
+            <div className="absolute bottom-12 right-4 h-28 w-28 rounded-full bg-primary-glow/25 blur-3xl" />
+          </div>
+          <div className="relative flex h-full flex-col px-5 pb-6 pt-16 text-white sm:px-6 sm:pt-20">
+            <div className="mb-5 flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-secondary/75">Parium</span>
+              <span className="rounded-full bg-secondary/15 px-3 py-1 text-[10px] font-bold text-secondary">Live match</span>
+            </div>
+            <h2 className="text-3xl font-black leading-[0.96] tracking-[-0.02em] sm:text-4xl">Rätt match. Mindre brus.</h2>
+            <p className="mt-3 text-sm leading-6 text-white/58">En upplevelse byggd för både kandidater och arbetsgivare.</p>
+
+            <div className="mt-7 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-3 backdrop-blur-xl">
+                <Users className="mb-3 h-4 w-4 text-secondary" />
+                <p className="text-lg font-black">Jobbsökare</p>
+                <p className="mt-1 text-[11px] leading-4 text-white/45">Hitta roller som faktiskt passar.</p>
               </div>
-              <span className="rounded-full bg-secondary/15 px-2.5 py-1 text-xs font-bold text-secondary">94%</span>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-3 backdrop-blur-xl">
+                <BriefcaseBusiness className="mb-3 h-4 w-4 text-secondary" />
+                <p className="text-lg font-black">Arbetsgivare</p>
+                <p className="mt-1 text-[11px] leading-4 text-white/45">Se kandidater med hög relevans.</p>
+              </div>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {['UI/UX', 'Fast roll', '52–62k'].map((item) => (
-                <span key={item} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60">{item}</span>
-              ))}
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-              <Users className="mb-3 h-4 w-4 text-secondary" />
-              <p className="text-lg font-black text-white">12</p>
-              <p className="text-xs text-white/40">nya kandidater</p>
+            <div className="mt-auto space-y-3">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-4 backdrop-blur-xl">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-secondary/15 text-sm font-black">P</div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold">Produktdesigner</p>
+                    <p className="mt-1 flex items-center gap-1.5 text-xs text-white/45"><MapPin className="h-3.5 w-3.5" /> Stockholm · Hybrid</p>
+                  </div>
+                  <span className="rounded-full bg-secondary/15 px-2.5 py-1 text-xs font-bold text-secondary">96%</span>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-secondary/20 bg-secondary/10 p-4 backdrop-blur-xl">
+                <p className="flex items-center gap-2 text-sm font-bold"><CheckCircle2 className="h-4 w-4 text-secondary" /> Matchning redo</p>
+              </div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-              <BriefcaseBusiness className="mb-3 h-4 w-4 text-secondary" />
-              <p className="text-lg font-black text-white">8</p>
-              <p className="text-xs text-white/40">jobb som passar</p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-secondary/20 bg-secondary/10 p-4">
-            <p className="flex items-center gap-2 text-sm font-bold text-white"><CheckCircle2 className="h-4 w-4 text-secondary" /> Ni matchar</p>
-            <p className="mt-1 text-xs leading-relaxed text-white/45">Starta konversationen direkt och boka nästa steg när det passar.</p>
           </div>
         </div>
-      </div>
-    </div>
-  </motion.div>
-);
+        <img src={iphoneFrame} alt="Parium iPhone-förhandsvisning" className="relative z-10 block h-auto w-full select-none drop-shadow-[0_34px_90px_hsl(var(--primary)/0.75)]" draggable={false} />
+        <div className="pointer-events-none absolute inset-[3%] z-20 rounded-[2.5rem] bg-gradient-to-br from-white/18 via-transparent to-white/5 opacity-60" />
+      </motion.div>
+    </motion.div>
+  );
+};
 
 const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
@@ -111,7 +141,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             </a>
           </div>
         </motion.div>
-        <MatchPreview />
+        <PhoneShowcase />
       </div>
     </section>
   );
