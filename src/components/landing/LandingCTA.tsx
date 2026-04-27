@@ -19,7 +19,6 @@ const LandingCTA = () => {
 
   return (
     <section ref={sectionRef} className="relative overflow-hidden px-5 py-28 sm:px-6 sm:py-36 md:px-12 lg:px-24" aria-label="Kom igång">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/10 blur-[150px]" />
       <motion.div style={{ y, opacity }} className="relative z-10 mx-auto max-w-[1100px] text-center">
         <h2 className="text-[2.8rem] font-black leading-[0.98] tracking-[-0.03em] text-white sm:text-[4.5rem] md:text-[6.2rem]">
           Börja med en bättre matchning.
