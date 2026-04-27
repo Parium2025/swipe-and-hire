@@ -20,8 +20,8 @@ const PhoneShowcase = ({ scrollContainerRef }: { scrollContainerRef: RefObject<H
   const pointerRotateX = useTransform(smoothY, [-1, 1], [9, -9]);
   const scrollRotateY = useTransform(scrollYProgress, [0, 0.22], [-8, 5]);
   const scrollRotateX = useTransform(scrollYProgress, [0, 0.22], [7, -3]);
-  const rotateY = useTransform([pointerRotateY, scrollRotateY], ([pointer, scroll]) => pointer + scroll);
-  const rotateX = useTransform([pointerRotateX, scrollRotateX], ([pointer, scroll]) => pointer + scroll);
+  const rotateY = useTransform([pointerRotateY, scrollRotateY], ([pointer, scroll]) => Number(pointer) + Number(scroll));
+  const rotateX = useTransform([pointerRotateX, scrollRotateX], ([pointer, scroll]) => Number(pointer) + Number(scroll));
   const phoneY = useTransform(scrollYProgress, [0, 0.24], [0, -54]);
   const glassY = useTransform(scrollYProgress, [0, 0.24], [0, 36]);
 
@@ -54,8 +54,6 @@ const PhoneShowcase = ({ scrollContainerRef }: { scrollContainerRef: RefObject<H
       <motion.div
         className="relative w-[18rem] max-w-[72vw] transform-gpu sm:w-[21.5rem] lg:w-[23rem]"
         style={{ rotateX, rotateY, y: phoneY, transformStyle: 'preserve-3d' }}
-        animate={{ y: [0, -12, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
       >
         <div className="absolute left-[8.7%] top-[2.3%] h-[94.4%] w-[82.4%] overflow-hidden rounded-[2.25rem] bg-gradient-parium sm:rounded-[2.9rem]">
           <div className="absolute inset-0 opacity-80">
