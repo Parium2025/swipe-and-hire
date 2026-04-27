@@ -1,19 +1,16 @@
-const items = ['SWIPE', 'MATCHA', 'ANSTÄLL', 'AI-DRIVEN', 'MOBILE-FIRST', 'GDPR-SÄKER', '60 SEK'];
+const items = ['MATCHNING', 'JOBB', 'KANDIDATER', 'INTERVJUER', 'TEAM', 'MOBILT', 'SVERIGE'];
 
 const LandingMarquee = () => (
-  <section className="relative py-6 sm:py-10 overflow-hidden border-y border-white/[0.04]" aria-hidden="true">
+  <section className="relative overflow-hidden border-y border-white/[0.04] py-5 sm:py-7" aria-hidden="true">
     <div className="flex whitespace-nowrap animate-landing-marquee">
       {[0, 1].map((loop) => (
-        <div
-          key={loop}
-          className="flex items-center gap-8 sm:gap-14 shrink-0 pr-8 sm:pr-14"
-        >
-          {items.map((item, i) => (
-            <span key={`${loop}-${i}`} className="flex items-center gap-8 sm:gap-14">
-              <span className="text-[2rem] sm:text-[3rem] md:text-[4rem] font-black tracking-[-0.04em] text-white/[0.06] uppercase select-none">
+        <div key={loop} className="flex shrink-0 items-center gap-8 pr-8 sm:gap-12 sm:pr-12">
+          {items.map((item) => (
+            <span key={`${loop}-${item}`} className="flex items-center gap-8 sm:gap-12">
+              <span className="select-none text-2xl font-black uppercase tracking-[0.08em] text-white/[0.08] sm:text-4xl">
                 {item}
               </span>
-              <span className="w-2.5 h-2.5 rounded-full bg-secondary/25 flex-shrink-0" />
+              <span className="h-2 w-2 shrink-0 rounded-full bg-secondary/35" />
             </span>
           ))}
         </div>
