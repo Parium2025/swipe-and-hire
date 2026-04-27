@@ -1,109 +1,87 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BriefcaseBusiness, CheckCircle2, MapPin, Sparkles, Users } from 'lucide-react';
 
 type LandingHeroProps = {
   scrollContainerRef: RefObject<HTMLDivElement>;
 };
 
-const FRAME_COUNT = 169;
-const HERO_SCROLL_HEIGHT = '260vh';
-const FRAME_VERSION = 'hq-v3-169-no-sw-cache';
-const frameSrc = (frame: number) =>
-  `/landing-frames/frame-${String(frame).padStart(3, '0')}.jpg?v=${FRAME_VERSION}`;
+const ease = [0.22, 1, 0.36, 1] as const;
 
-const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
+const FloatingBubbles = () => (
+  <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <motion.span className="absolute left-[7%] top-[18%] h-3 w-3 rounded-full bg-secondary/35 blur-[0.5px]" animate={{ y: [0, -18, 0], opacity: [0.35, 0.75, 0.35] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} />
+    <motion.span className="absolute left-[13%] top-[29%] h-2 w-2 rounded-full bg-white/35" animate={{ y: [0, 14, 0], opacity: [0.25, 0.55, 0.25] }} transition={{ duration: 7.5, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }} />
+    <motion.span className="absolute right-[8%] top-[20%] h-2.5 w-2.5 rounded-full bg-secondary/25" animate={{ y: [0, -12, 0], opacity: [0.25, 0.6, 0.25] }} transition={{ duration: 6.8, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }} />
+    <motion.span className="absolute right-[12%] bottom-[14%] h-4 w-4 rounded-full bg-white/25" animate={{ y: [0, 18, 0], opacity: [0.2, 0.45, 0.2] }} transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }} />
+    <motion.span className="absolute right-[6%] bottom-[10%] h-2.5 w-2.5 rounded-full bg-secondary/35" animate={{ y: [0, -14, 0], opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 5.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }} />
+    <div className="absolute left-1/2 top-[18%] h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-secondary/10 blur-[150px]" />
+  </div>
+);
+
+const MatchPreview = () => (
+  <motion.div
+    className="relative mx-auto w-full max-w-[21rem] sm:max-w-[24rem]"
+    initial={{ opacity: 0, y: 28, scale: 0.96 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    transition={{ duration: 0.85, ease, delay: 0.15 }}
+  >
+    <div className="absolute -inset-8 rounded-full bg-secondary/10 blur-[90px]" />
+    <div className="relative rounded-[2rem] border border-white/10 bg-primary/80 p-3 shadow-[0_30px_100px_hsl(var(--primary)/0.65)] backdrop-blur-2xl">
+      <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.035] p-4">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary/70">Matchning</p>
+            <h2 className="mt-1 text-xl font-black text-white">Produktdesigner</h2>
+          </div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-secondary/20 bg-secondary/10">
+            <Sparkles className="h-5 w-5 text-secondary" />
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-secondary/15 text-sm font-black text-white">A</div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-white">Astra Studio</p>
+                <p className="mt-1 flex items-center gap-1.5 text-xs text-white/45"><MapPin className="h-3.5 w-3.5" /> Stockholm · Hybrid</p>
+              </div>
+              <span className="rounded-full bg-secondary/15 px-2.5 py-1 text-xs font-bold text-secondary">94%</span>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {['UI/UX', 'Fast roll', '52–62k'].map((item) => (
+                <span key={item} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60">{item}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+              <Users className="mb-3 h-4 w-4 text-secondary" />
+              <p className="text-lg font-black text-white">12</p>
+              <p className="text-xs text-white/40">nya kandidater</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+              <BriefcaseBusiness className="mb-3 h-4 w-4 text-secondary" />
+              <p className="text-lg font-black text-white">8</p>
+              <p className="text-xs text-white/40">jobb som passar</p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-secondary/20 bg-secondary/10 p-4">
+            <p className="flex items-center gap-2 text-sm font-bold text-white"><CheckCircle2 className="h-4 w-4 text-secondary" /> Ni matchar</p>
+            <p className="mt-1 text-xs leading-relaxed text-white/45">Starta konversationen direkt och boka nästa steg när det passar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
+
+const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
-  const sectionRef = useRef<HTMLElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
-
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    const section = sectionRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d');
-    if (!container || !section || !canvas || !context) return;
-
-    let raf = 0;
-    let activeFrame = 1;
-    let disposed = false;
-
-    const loadFrame = (frame: number) => {
-      const clampedFrame = Math.min(FRAME_COUNT, Math.max(1, frame));
-      const cached = imageCacheRef.current.get(clampedFrame);
-      if (cached) return Promise.resolve(cached);
-
-      return new Promise<HTMLImageElement>((resolve, reject) => {
-        const image = new Image();
-        image.decoding = 'async';
-        image.onload = () => {
-          imageCacheRef.current.set(clampedFrame, image);
-          resolve(image);
-        };
-        image.onerror = reject;
-        image.src = frameSrc(clampedFrame);
-      });
-    };
-
-    const drawCover = (image: HTMLImageElement) => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const width = Math.max(1, Math.round(rect.width * dpr));
-      const height = Math.max(1, Math.round(rect.height * dpr));
-
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
-      }
-
-      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
-      const drawWidth = image.naturalWidth * scale;
-      const drawHeight = image.naturalHeight * scale;
-      const drawX = (width - drawWidth) / 2;
-      const drawY = (height - drawHeight) / 2;
-
-      context.clearRect(0, 0, width, height);
-      context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
-    };
-
-    const renderFrame = (frame: number) => {
-      activeFrame = Math.min(FRAME_COUNT, Math.max(1, frame));
-      void loadFrame(activeFrame)
-        .then((image) => {
-          if (!disposed && activeFrame === frame) drawCover(image);
-        })
-        .catch(() => undefined);
-
-      void loadFrame(activeFrame + 1).catch(() => undefined);
-      void loadFrame(activeFrame + 2).catch(() => undefined);
-      void loadFrame(activeFrame + 3).catch(() => undefined);
-      void loadFrame(activeFrame + 4).catch(() => undefined);
-    };
-
-    const syncToScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const scrollableDistance = Math.max(1, section.offsetHeight - window.innerHeight);
-        const rawProgress = (container.scrollTop - section.offsetTop) / scrollableDistance;
-        const progress = Math.min(1, Math.max(0, rawProgress));
-        renderFrame(Math.round(progress * (FRAME_COUNT - 1)) + 1);
-      });
-    };
-
-    renderFrame(1);
-    syncToScroll();
-    container.addEventListener('scroll', syncToScroll, { passive: true });
-    window.addEventListener('resize', syncToScroll);
-
-    return () => {
-      disposed = true;
-      cancelAnimationFrame(raf);
-      container.removeEventListener('scroll', syncToScroll);
-      window.removeEventListener('resize', syncToScroll);
-    };
-  }, [scrollContainerRef]);
 
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
@@ -111,37 +89,44 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   };
 
   return (
-    <section ref={sectionRef} className="relative bg-gradient-parium" style={{ height: HERO_SCROLL_HEIGHT }}>
-      <div className="sticky top-0 h-[100svh] overflow-hidden">
-        <canvas
-          ref={canvasRef}
-          className="pointer-events-none absolute inset-0 h-full w-full"
-          aria-label="Parium scrollstyrd frame-by-frame-introduktion"
-          role="img"
-        />
-
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--primary)/0.05)_0%,hsl(var(--primary)/0)_44%,hsl(var(--primary)/0.28)_100%)]" />
-
+    <section className="relative min-h-[100svh] overflow-hidden bg-gradient-parium px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24" aria-labelledby="landing-hero-heading">
+      <FloatingBubbles />
+      <div className="relative z-10 mx-auto grid min-h-[calc(100svh-11rem)] max-w-[1400px] items-center gap-12 lg:grid-cols-[1.08fr_0.92fr]">
         <motion.div
-          className="absolute inset-x-0 bottom-20 z-20 flex justify-center px-6 sm:bottom-24 md:bottom-28"
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.3 }}
+          transition={{ duration: 0.75, ease }}
+          className="max-w-4xl"
         >
-          <motion.button
-            type="button"
-            onPointerDown={handleStart}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="group inline-flex min-h-touch items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-secondary-foreground shadow-[0_16px_48px_hsl(var(--secondary)/0.35)] transition-shadow hover:shadow-[0_20px_60px_hsl(var(--secondary)/0.45)]"
-          >
-            Kom igång gratis
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </motion.button>
+          <span className="inline-flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-secondary/70">
+            <span className="h-px w-10 bg-gradient-to-r from-secondary to-transparent" />
+            Rekrytering som känns enkel
+          </span>
+          <h1 id="landing-hero-heading" className="mt-6 text-[3.25rem] font-black leading-[0.95] tracking-[-0.03em] text-white sm:text-[4.8rem] md:text-[6.4rem] lg:text-[7.2rem]">
+            Hitta rätt jobb. Rätt kandidat.
+          </h1>
+          <p className="mt-7 max-w-2xl text-base leading-8 text-white/60 sm:text-lg">
+            Parium samlar jobbsökare och arbetsgivare i ett modernt flöde där matchningar, dialog och nästa steg sker utan krångel.
+          </p>
+          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <motion.button
+              type="button"
+              onPointerDown={handleStart}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-secondary-foreground shadow-[0_18px_55px_hsl(var(--secondary)/0.28)] transition-shadow hover:shadow-[0_22px_70px_hsl(var(--secondary)/0.36)]"
+            >
+              Kom igång gratis
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </motion.button>
+            <a href="#hur-det-fungerar" className="inline-flex min-h-touch items-center justify-center rounded-full border border-white/10 bg-white/[0.035] px-7 py-3.5 text-sm font-bold text-white/80 transition-colors hover:bg-white/[0.065]">
+              Se hur det fungerar
+            </a>
+          </div>
         </motion.div>
-
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-primary/55 to-transparent" />
+        <MatchPreview />
       </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-primary/70 to-transparent" />
     </section>
   );
 };

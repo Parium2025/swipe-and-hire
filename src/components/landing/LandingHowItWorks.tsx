@@ -1,80 +1,53 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Hand, Sparkles, MessageCircle } from 'lucide-react';
+import { MessageCircle, Search, Sparkles } from 'lucide-react';
 import { useRef } from 'react';
 import { StaggerReveal, StaggerItem } from './ScrollReveal';
 
 const steps = [
-  { icon: Hand, num: '01', title: 'Swipe', description: 'Bläddra igenom relevanta jobb eller kandidater. Swipea höger på det som matchar.' },
-  { icon: Sparkles, num: '02', title: 'Matcha', description: 'AI:n hittar de bästa matchningarna automatiskt. Inga fler timmar av manuell screening.' },
-  { icon: MessageCircle, num: '03', title: 'Anställ', description: 'Starta en konversation direkt. Boka intervju och anställ — allt i appen.' },
+  { icon: Search, num: '01', title: 'Skapa din profil', description: 'Lägg upp det viktigaste: erfarenhet, önskemål, roll och vad som gör matchningen relevant.' },
+  { icon: Sparkles, num: '02', title: 'Få relevanta förslag', description: 'Parium sorterar fram jobb och kandidater som passar — utan att upplevelsen känns tung.' },
+  { icon: MessageCircle, num: '03', title: 'Ta nästa steg', description: 'När båda sidor är intresserade kan ni prata direkt, boka intervju och komma vidare.' },
 ];
 
 const LandingHowItWorks = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  });
-
-  const headerY = useTransform(scrollYProgress, [0, 0.3], [80, 0]);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] });
+  const headerY = useTransform(scrollYProgress, [0, 0.3], [56, 0]);
   const headerOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
-  const lineHeight = useTransform(scrollYProgress, [0.1, 0.7], ['0%', '100%']);
 
   return (
-    <section
-      ref={sectionRef}
-      id="hur-det-fungerar"
-      className="relative py-28 sm:py-36 lg:py-48 px-5 sm:px-6 md:px-12 lg:px-24"
-      aria-labelledby="how-heading"
-    >
-      <div className="max-w-[1400px] mx-auto relative z-10">
-        <motion.div className="mb-20 sm:mb-28" style={{ y: headerY, opacity: headerOpacity }}>
-          <span className="inline-flex items-center gap-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.3em] uppercase text-secondary/50">
-            <span className="w-10 sm:w-14 h-px bg-gradient-to-r from-secondary to-transparent" />
+    <section ref={sectionRef} id="hur-det-fungerar" className="relative px-5 py-24 sm:px-6 sm:py-32 md:px-12 lg:px-24" aria-labelledby="how-heading">
+      <div className="relative z-10 mx-auto max-w-[1400px]">
+        <motion.div className="mb-14 sm:mb-20" style={{ y: headerY, opacity: headerOpacity }}>
+          <span className="inline-flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-secondary/65">
+            <span className="h-px w-12 bg-gradient-to-r from-secondary to-transparent" />
             Så fungerar det
           </span>
-          <h2 id="how-heading" className="mt-5 text-4xl sm:text-5xl md:text-7xl font-black tracking-[-0.04em] text-white uppercase">
-            Tre steg.<span className="text-white/10"> Det är allt.</span>
+          <h2 id="how-heading" className="mt-5 max-w-4xl text-4xl font-black tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
+            Från profil till dialog i tre enkla steg.
           </h2>
         </motion.div>
 
-        <div className="relative">
-          {/* Vertical progress line */}
-          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-white/[0.03]">
-            <motion.div
-              className="w-full bg-gradient-to-b from-secondary via-secondary to-transparent"
-              style={{ height: lineHeight }}
-            />
-          </div>
-
-          <StaggerReveal className="grid md:grid-cols-3 gap-5 sm:gap-8">
-            {steps.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <StaggerItem key={step.num}>
-                  <article
-                    className="group relative p-7 sm:p-10 rounded-2xl sm:rounded-3xl border border-white/[0.04] bg-white/[0.015] hover:bg-white/[0.04] hover:border-secondary/20 transition-all duration-700 overflow-hidden"
-                    style={{ marginTop: i === 1 ? '2.5rem' : i === 2 ? '5rem' : 0 }}
-                  >
-                    {/* Big background number */}
-                    <div className="text-[7rem] sm:text-[9rem] font-black leading-none tracking-[-0.06em] text-white/[0.015] select-none absolute top-0 right-3">
-                      {step.num}
+        <StaggerReveal className="grid gap-4 md:grid-cols-3 sm:gap-5">
+          {steps.map((step) => {
+            const Icon = step.icon;
+            return (
+              <StaggerItem key={step.num}>
+                <article className="group relative h-full overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-colors duration-500 hover:bg-white/[0.055] sm:p-8">
+                  <div className="mb-8 flex items-center justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/20 bg-secondary/10">
+                      <Icon className="h-5 w-5 text-secondary" strokeWidth={1.7} />
                     </div>
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-7 border bg-secondary/[0.08] border-secondary/15">
-                      <Icon className="w-6 h-6 text-secondary" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-3 uppercase">{step.title}</h3>
-                    <p className="text-white/35 text-sm leading-relaxed">{step.description}</p>
-                    {/* Bottom glow line */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-r from-transparent via-secondary to-transparent" />
-                    {/* Corner glow */}
-                    <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-secondary/[0.06]" />
-                  </article>
-                </StaggerItem>
-              );
-            })}
-          </StaggerReveal>
-        </div>
+                    <span className="text-4xl font-black tracking-[-0.04em] text-white/[0.08]">{step.num}</span>
+                  </div>
+                  <h3 className="text-2xl font-black text-white">{step.title}</h3>
+                  <p className="mt-4 text-sm leading-7 text-white/48">{step.description}</p>
+                  <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-secondary/45 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                </article>
+              </StaggerItem>
+            );
+          })}
+        </StaggerReveal>
       </div>
     </section>
   );

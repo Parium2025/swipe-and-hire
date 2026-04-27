@@ -29,10 +29,10 @@ const LandingFooter = () => (
           transition={{ duration: 0.8, ease }}
         >
           <p className="text-[1.5rem] sm:text-[2.5rem] md:text-[4rem] lg:text-[5rem] font-black tracking-[-0.04em] text-white/[0.06] uppercase leading-[0.95] select-none">
-            Alltid redo.
+            Enklare väg.
             <br />
             <span className="bg-gradient-to-r from-secondary/20 to-[hsl(190_100%_55%/0.20)] bg-clip-text text-transparent">
-              Alltid matchande.
+              Bättre matchning.
             </span>
           </p>
         </motion.div>
@@ -53,7 +53,7 @@ const LandingFooter = () => (
               width={128}
               height={128}
             />
-            <p className="text-white/20 text-xs tracking-wide">Framtidens rekrytering, idag.</p>
+            <p className="text-white/20 text-xs tracking-wide">Jobb och kandidater, samlat i ett smartare flöde.</p>
           </div>
 
           {/* Navigation */}
