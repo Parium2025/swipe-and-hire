@@ -59,7 +59,6 @@ const LandingForUsers = () => {
                 transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
                 className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl sm:p-9 lg:p-10"
               >
-                <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-secondary/8 blur-[90px]" />
                 <div className="relative z-10">
                   <div className="mb-8 flex items-center justify-between gap-4">
                     <span className="inline-flex items-center gap-2 rounded-full border border-secondary/20 bg-secondary/10 px-3 py-1.5 text-xs font-bold text-secondary">
