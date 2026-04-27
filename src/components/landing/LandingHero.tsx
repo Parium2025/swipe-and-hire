@@ -1,108 +1,132 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useState, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowRight, BriefcaseBusiness, Check, MapPin, MessageCircle, Sparkles } from 'lucide-react';
 
 type LandingHeroProps = {
   scrollContainerRef: RefObject<HTMLDivElement>;
 };
 
-const FRAME_COUNT = 169;
-const HERO_SCROLL_HEIGHT = '260vh';
-const FRAME_VERSION = 'hq-v3-169-no-sw-cache';
-const frameSrc = (frame: number) =>
-  `/landing-frames/frame-${String(frame).padStart(3, '0')}.jpg?v=${FRAME_VERSION}`;
+const messages = ['Är du tillgänglig?', 'Ja, absolut.', 'Perfekt matchning.'];
+
+const TypingMessages = () => {
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [displayText, setDisplayText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentMessage = messages[messageIndex];
+    const isComplete = displayText === currentMessage;
+    const isEmpty = displayText.length === 0;
+
+    const timeout = window.setTimeout(
+      () => {
+        if (!isDeleting && isComplete) {
+          setIsDeleting(true);
+          return;
+        }
+
+        if (isDeleting && isEmpty) {
+          setIsDeleting(false);
+          setMessageIndex((index) => (index + 1) % messages.length);
+          return;
+        }
+
+        setDisplayText((text) =>
+          isDeleting ? currentMessage.slice(0, text.length - 1) : currentMessage.slice(0, text.length + 1),
+        );
+      },
+      !isDeleting && isComplete ? 1700 : isDeleting ? 46 : 92,
+    );
+
+    return () => window.clearTimeout(timeout);
+  }, [displayText, isDeleting, messageIndex]);
+
+  return (
+    <div className="min-h-[44px] max-w-[168px] text-left font-mono text-[12px] font-semibold leading-snug text-primary">
+      <span>{displayText}</span>
+      <motion.span
+        className="ml-1 inline-block h-3 w-1 translate-y-0.5 bg-secondary"
+        animate={{ opacity: [0, 1, 0] }}
+        transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+      />
+    </div>
+  );
+};
+
+const PhoneMockup = () => (
+  <motion.div
+    className="relative mx-auto h-[520px] w-[258px] sm:h-[590px] sm:w-[292px] md:h-[650px] md:w-[322px]"
+    initial={{ opacity: 0, y: 42, rotate: -2 }}
+    animate={{ opacity: 1, y: 0, rotate: 0 }}
+    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.18 }}
+  >
+    <div className="absolute -inset-12 rounded-full bg-primary-glow/20 blur-[80px]" />
+    <div className="relative h-full rounded-[2.7rem] border border-white/20 bg-white/12 p-3 shadow-[0_34px_110px_hsl(var(--primary)/0.45)] backdrop-blur-xl">
+      <div className="h-full overflow-hidden rounded-[2.15rem] border border-white/10 bg-[linear-gradient(180deg,hsl(var(--primary))_0%,hsl(var(--primary)/0.96)_55%,hsl(var(--primary-glow)/0.32)_100%)]">
+        <div className="mx-auto mt-3 h-5 w-24 rounded-full bg-white/12" />
+        <div className="px-5 pt-6 text-primary-foreground">
+          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50">
+            <span>Parium</span>
+            <span>Live</span>
+          </div>
+          <div className="mt-6 rounded-[1.4rem] border border-white/10 bg-white/10 p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground">
+                <BriefcaseBusiness className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold">Produktdesigner</p>
+                <p className="text-xs text-white/55">Stockholm · Hybrid</p>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-2 text-xs text-white/60">
+              <MapPin className="h-3.5 w-3.5" />
+              <span>Matchar din profil till 94%</span>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-[1.4rem] border border-secondary/20 bg-secondary/15 p-4">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold text-secondary">
+              <MessageCircle className="h-4 w-4" />
+              <span>Ny kontakt</span>
+            </div>
+            <TypingMessages />
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {['Snabb ansökan', 'Verifierad roll'].map((label) => (
+              <div key={label} className="rounded-2xl border border-white/10 bg-white/8 p-3">
+                <Check className="mb-2 h-4 w-4 text-secondary" />
+                <p className="text-[11px] font-semibold leading-tight text-white/70">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="absolute inset-x-6 bottom-8 rounded-[1.6rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-primary">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">Redo att matcha</p>
+              <p className="text-xs text-white/55">3 nya möjligheter idag</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
 
 const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
-  const sectionRef = useRef<HTMLElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
 
   useEffect(() => {
     const container = scrollContainerRef.current;
-    const section = sectionRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d');
-    if (!container || !section || !canvas || !context) return;
-
-    let raf = 0;
-    let activeFrame = 1;
-    let disposed = false;
-
-    const loadFrame = (frame: number) => {
-      const clampedFrame = Math.min(FRAME_COUNT, Math.max(1, frame));
-      const cached = imageCacheRef.current.get(clampedFrame);
-      if (cached) return Promise.resolve(cached);
-
-      return new Promise<HTMLImageElement>((resolve, reject) => {
-        const image = new Image();
-        image.decoding = 'async';
-        image.onload = () => {
-          imageCacheRef.current.set(clampedFrame, image);
-          resolve(image);
-        };
-        image.onerror = reject;
-        image.src = frameSrc(clampedFrame);
-      });
-    };
-
-    const drawCover = (image: HTMLImageElement) => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const width = Math.max(1, Math.round(rect.width * dpr));
-      const height = Math.max(1, Math.round(rect.height * dpr));
-
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
-      }
-
-      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
-      const drawWidth = image.naturalWidth * scale;
-      const drawHeight = image.naturalHeight * scale;
-      const drawX = (width - drawWidth) / 2;
-      const drawY = (height - drawHeight) / 2;
-
-      context.clearRect(0, 0, width, height);
-      context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
-    };
-
-    const renderFrame = (frame: number) => {
-      activeFrame = Math.min(FRAME_COUNT, Math.max(1, frame));
-      void loadFrame(activeFrame)
-        .then((image) => {
-          if (!disposed && activeFrame === frame) drawCover(image);
-        })
-        .catch(() => undefined);
-
-      void loadFrame(activeFrame + 1).catch(() => undefined);
-      void loadFrame(activeFrame + 2).catch(() => undefined);
-      void loadFrame(activeFrame + 3).catch(() => undefined);
-      void loadFrame(activeFrame + 4).catch(() => undefined);
-    };
-
-    const syncToScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const scrollableDistance = Math.max(1, section.offsetHeight - window.innerHeight);
-        const rawProgress = (container.scrollTop - section.offsetTop) / scrollableDistance;
-        const progress = Math.min(1, Math.max(0, rawProgress));
-        renderFrame(Math.round(progress * (FRAME_COUNT - 1)) + 1);
-      });
-    };
-
-    renderFrame(1);
-    syncToScroll();
-    container.addEventListener('scroll', syncToScroll, { passive: true });
-    window.addEventListener('resize', syncToScroll);
-
-    return () => {
-      disposed = true;
-      cancelAnimationFrame(raf);
-      container.removeEventListener('scroll', syncToScroll);
-      window.removeEventListener('resize', syncToScroll);
-    };
+    if (!container) return;
+    container.scrollTo({ top: 0, behavior: 'auto' });
   }, [scrollContainerRef]);
 
   const handleStart = () => {
@@ -111,36 +135,68 @@ const LandingHero = ({ scrollContainerRef }: LandingHeroProps) => {
   };
 
   return (
-    <section ref={sectionRef} className="relative bg-gradient-parium" style={{ height: HERO_SCROLL_HEIGHT }}>
-      <div className="sticky top-0 h-[100svh] overflow-hidden">
-        <canvas
-          ref={canvasRef}
-          className="pointer-events-none absolute inset-0 h-full w-full"
-          aria-label="Parium scrollstyrd frame-by-frame-introduktion"
-          role="img"
-        />
+    <section className="relative min-h-[100svh] overflow-hidden bg-gradient-parium px-5 pb-14 pt-24 sm:px-8 md:pt-28">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-6 top-28 h-2 w-2 rounded-full bg-secondary/60" />
+        <div className="absolute left-[12%] top-[32%] h-3 w-3 rounded-full bg-white/20" />
+        <div className="absolute right-[10%] top-24 h-2.5 w-2.5 rounded-full bg-secondary/45" />
+        <div className="absolute bottom-[18%] right-8 h-4 w-4 rounded-full bg-accent/35" />
+        <div className="absolute -bottom-28 -right-28 h-80 w-80 rounded-full bg-primary-glow/25 blur-[95px]" />
+      </div>
 
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--primary)/0.05)_0%,hsl(var(--primary)/0)_44%,hsl(var(--primary)/0.28)_100%)]" />
-
-        <motion.div
-          className="absolute inset-x-0 bottom-20 z-20 flex justify-center px-6 sm:bottom-24 md:bottom-28"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.3 }}
-        >
-          <motion.button
-            type="button"
-            onPointerDown={handleStart}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="group inline-flex min-h-touch items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-secondary-foreground shadow-[0_16px_48px_hsl(var(--secondary)/0.35)] transition-shadow hover:shadow-[0_20px_60px_hsl(var(--secondary)/0.45)]"
+      <div className="relative z-10 mx-auto grid min-h-[calc(100svh-9rem)] w-full max-w-[1180px] items-center gap-10 md:grid-cols-[1.05fr_0.95fr]">
+        <div className="mx-auto max-w-2xl text-center md:mx-0 md:text-left">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white/60 backdrop-blur-xl"
           >
-            Kom igång gratis
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </motion.button>
-        </motion.div>
+            <span className="h-2 w-2 rounded-full bg-secondary" />
+            Jobbmatchning i realtid
+          </motion.div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-primary/55 to-transparent" />
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+            className="text-balance text-5xl font-black leading-[0.92] tracking-normal text-white sm:text-6xl lg:text-7xl"
+          >
+            Hitta rätt jobb. Matcha på sekunder.
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.22 }}
+            className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-white/65 sm:text-lg md:mx-0"
+          >
+            Parium kopplar ihop kandidater och arbetsgivare med smarta matchningar, snabb kontakt och ett flöde som känns naturligt från första swipen.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.36 }}
+            className="mt-8 flex flex-col items-center gap-3 sm:flex-row md:justify-start"
+          >
+            <motion.button
+              type="button"
+              onPointerDown={handleStart}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="group inline-flex min-h-touch items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-secondary-foreground shadow-[0_18px_56px_hsl(var(--secondary)/0.35)] transition-shadow hover:shadow-[0_22px_70px_hsl(var(--secondary)/0.45)]"
+            >
+              Kom igång gratis
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </motion.button>
+            <span className="text-sm font-medium text-white/45">För kandidater och arbetsgivare</span>
+          </motion.div>
+        </div>
+
+        <AnimatePresence>
+          <PhoneMockup />
+        </AnimatePresence>
       </div>
     </section>
   );
