@@ -16,7 +16,6 @@ const MatchPreview = () => (
     animate={{ opacity: 1, y: 0, scale: 1 }}
     transition={{ duration: 0.85, ease, delay: 0.15 }}
   >
-    <div className="absolute -inset-8 rounded-full bg-secondary/10 blur-[90px]" />
     <div className="relative rounded-[2rem] border border-white/10 bg-primary/80 p-3 shadow-[0_30px_100px_hsl(var(--primary)/0.65)] backdrop-blur-2xl">
       <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.035] p-4">
         <div className="mb-4 flex items-center justify-between">
