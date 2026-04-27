@@ -141,7 +141,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             </a>
           </div>
         </motion.div>
-        <MatchPreview />
+        <PhoneShowcase />
       </div>
     </section>
   );
