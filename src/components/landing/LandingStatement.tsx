@@ -9,8 +9,6 @@ const LandingStatement = () => {
 
   return (
     <section ref={ref} className="relative overflow-hidden px-5 py-24 sm:px-6 sm:py-32 md:px-12 lg:px-24">
-      <div className="pointer-events-none absolute left-[12%] top-12 h-2.5 w-2.5 rounded-full bg-secondary/35" />
-      <div className="pointer-events-none absolute right-[16%] bottom-20 h-3.5 w-3.5 rounded-full bg-white/20" />
       <motion.div style={{ y, opacity }} className="relative z-10 mx-auto max-w-[1150px] text-center">
         <p className="text-[2.4rem] font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-[4rem] md:text-[5.6rem] lg:text-[6.6rem]">
           En tydlig väg från första intryck till rätt matchning.
