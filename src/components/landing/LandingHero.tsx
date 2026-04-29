@@ -1,6 +1,6 @@
 import { type PointerEvent, type RefObject, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 
 type LandingHeroProps = {
@@ -39,10 +39,12 @@ const AudienceCard = ({
 }) => {
   const pointerX = useMotionValue(0.5);
   const pointerY = useMotionValue(0.5);
-  const rotateX = useTransform(pointerY, [0, 1], [4, -4]);
-  const rotateY = useTransform(pointerX, [0, 1], [-5, 5]);
-  const innerX = useTransform(pointerX, [0, 1], [-4, 4]);
-  const innerY = useTransform(pointerY, [0, 1], [-3, 3]);
+  const smoothX = useSpring(pointerX, { stiffness: 115, damping: 24, mass: 0.72 });
+  const smoothY = useSpring(pointerY, { stiffness: 115, damping: 24, mass: 0.72 });
+  const rotateX = useTransform(smoothY, [0, 1], [3.2, -3.2]);
+  const rotateY = useTransform(smoothX, [0, 1], [-3.8, 3.8]);
+  const innerX = useTransform(smoothX, [0, 1], [-3, 3]);
+  const innerY = useTransform(smoothY, [0, 1], [-2, 2]);
   const isSelected = selectedRole === role;
   const isOtherSelected = selectedRole && selectedRole !== role;
 
@@ -70,15 +72,18 @@ const AudienceCard = ({
       }}
       animate={isSelected ? { scale: 1.035, y: -3 } : isOtherSelected ? { opacity: 0.2, scale: 0.94 } : undefined}
       whileTap={!selectedRole ? { scale: 0.985 } : undefined}
-      transition={{ duration: 0.55, ease }}
+      transition={{ duration: 0.68, ease }}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-      className="group relative min-h-touch overflow-hidden rounded-full border border-secondary/18 bg-white/[0.045] px-5 py-3.5 text-left shadow-[0_18px_58px_hsl(var(--secondary)/0.12)] outline-none backdrop-blur-2xl transition-colors hover:border-secondary/34 hover:bg-secondary/[0.075] hover:shadow-[0_22px_72px_hsl(var(--secondary)/0.20)] focus-visible:ring-2 focus-visible:ring-secondary sm:px-6 sm:py-4"
+      className="group relative min-h-touch rounded-full bg-transparent p-0 text-left outline-none"
     >
-      <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_150%_at_12%_0%,hsl(var(--secondary)/0.26),transparent_48%),linear-gradient(135deg,hsl(var(--secondary)/0.16),hsl(var(--primary)/0.10)_48%,hsl(var(--background)/0.08))] opacity-90 transition-opacity group-hover:opacity-100" />
-      <span className="pointer-events-none absolute inset-[1px] rounded-full bg-white/[0.025]" />
-      <motion.span className="relative z-10 flex items-center gap-3.5" style={{ x: innerX, y: innerY }}>
-        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary shadow-[0_0_34px_hsl(var(--secondary)/0.18)]">
-          <Icon className="h-4.5 w-4.5" />
+      <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100" />
+      <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-45 transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100" />
+      <motion.span
+        className="relative z-10 flex items-center gap-3.5 overflow-hidden rounded-full border border-white/12 bg-white/[0.045] px-5 py-3.5 shadow-[0_16px_48px_hsl(var(--background)/0.18)] backdrop-blur-xl transition-colors duration-500 ease-out group-hover:border-secondary/34 group-hover:bg-white/[0.06] group-focus-visible:border-secondary/45 sm:px-6 sm:py-4"
+        style={{ x: innerX, y: innerY }}
+      >
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary transition-shadow duration-500 ease-out group-hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] group-focus-visible:shadow-[0_0_30px_hsl(var(--secondary)/0.28)]">
+          <Icon className="h-[18px] w-[18px]" />
         </span>
         <span className="whitespace-nowrap text-base font-black leading-none text-white sm:text-lg">
           {label}
