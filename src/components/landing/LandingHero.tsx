@@ -9,20 +9,20 @@ type LandingHeroProps = {
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
-const splineScene = 'https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode';
+const splineScene = 'https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode';
 
 const MatchPreview = () => (
   <motion.div
-    className="relative mx-auto w-full max-w-[21rem] sm:max-w-[24rem]"
+    className="relative mx-auto h-[31rem] w-full max-w-[34rem] sm:h-[34rem]"
     initial={{ opacity: 0, y: 28, scale: 0.96 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
     transition={{ duration: 0.85, ease, delay: 0.15 }}
   >
-    <div className="pointer-events-auto absolute -inset-x-20 -inset-y-24 z-0 opacity-70 blur-[0.2px] sm:-inset-x-28 sm:-inset-y-28 lg:-inset-x-40 lg:-inset-y-36">
+    <div className="pointer-events-auto absolute -inset-x-16 -inset-y-10 z-0 opacity-100 sm:-inset-x-24 sm:-inset-y-12 lg:-inset-x-32 lg:-inset-y-16">
       <SplineScene scene={splineScene} className="h-full w-full" />
     </div>
-    <div className="pointer-events-none absolute -inset-10 z-[1] bg-[radial-gradient(circle_at_center,transparent_0%,transparent_44%,hsl(var(--primary)/0.72)_78%)]" />
-    <div className="relative rounded-[2rem] border border-white/10 bg-primary/80 p-3 shadow-[0_30px_100px_hsl(var(--primary)/0.65)] backdrop-blur-2xl">
+    <div className="pointer-events-none absolute -inset-10 z-[1] bg-[radial-gradient(circle_at_70%_45%,transparent_0%,transparent_42%,hsl(var(--primary)/0.68)_82%)]" />
+    <div className="absolute bottom-0 left-0 z-10 w-[min(22rem,88vw)] rounded-[2rem] border border-white/10 bg-primary/75 p-3 shadow-[0_30px_100px_hsl(var(--primary)/0.65)] backdrop-blur-2xl sm:w-[23rem]">
       <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.035] p-4">
         <div className="mb-4 flex items-center justify-between">
           <div>
