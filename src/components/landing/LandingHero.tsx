@@ -2,12 +2,14 @@ import { type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, CheckCircle2, MapPin, Sparkles, Users } from 'lucide-react';
+import { SplineScene } from '@/components/ui/spline-scene';
 
 type LandingHeroProps = {
   scrollContainerRef: RefObject<HTMLDivElement>;
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
+const splineScene = 'https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode';
 
 const MatchPreview = () => (
   <motion.div
@@ -16,6 +18,10 @@ const MatchPreview = () => (
     animate={{ opacity: 1, y: 0, scale: 1 }}
     transition={{ duration: 0.85, ease, delay: 0.15 }}
   >
+    <div className="pointer-events-auto absolute -inset-x-20 -inset-y-24 z-0 opacity-70 blur-[0.2px] sm:-inset-x-28 sm:-inset-y-28 lg:-inset-x-40 lg:-inset-y-36">
+      <SplineScene scene={splineScene} className="h-full w-full" />
+    </div>
+    <div className="pointer-events-none absolute -inset-10 z-[1] bg-[radial-gradient(circle_at_center,transparent_0%,transparent_44%,hsl(var(--primary)/0.72)_78%)]" />
     <div className="relative rounded-[2rem] border border-white/10 bg-primary/80 p-3 shadow-[0_30px_100px_hsl(var(--primary)/0.65)] backdrop-blur-2xl">
       <div className="rounded-[1.45rem] border border-white/10 bg-white/[0.035] p-4">
         <div className="mb-4 flex items-center justify-between">
