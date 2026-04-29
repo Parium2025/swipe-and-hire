@@ -1,22 +1,11 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 
-const LandingMarquee = lazy(() => import('@/components/landing/LandingMarquee'));
-const LandingStatement = lazy(() => import('@/components/landing/LandingStatement'));
-const LandingHowItWorks = lazy(() => import('@/components/landing/LandingHowItWorks'));
-const LandingFeatures = lazy(() => import('@/components/landing/LandingFeatures'));
-const LandingForUsers = lazy(() => import('@/components/landing/LandingForUsers'));
-const LandingStats = lazy(() => import('@/components/landing/LandingStats'));
-const LandingTestimonials = lazy(() => import('@/components/landing/LandingTestimonials'));
-const LandingCTA = lazy(() => import('@/components/landing/LandingCTA'));
-const LandingFooter = lazy(() => import('@/components/landing/LandingFooter'));
-
 const Landing = () => {
   const navigate = useNavigate();
-  const [showSections, setShowSections] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // SEO
@@ -82,11 +71,6 @@ const Landing = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setShowSections(true), 300);
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleLogin = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth');
@@ -103,24 +87,7 @@ const Landing = () => {
         <LandingNav onLoginClick={handleLogin} />
         <main>
           <LandingHero scrollContainerRef={scrollContainerRef} />
-          {showSections && (
-            <Suspense fallback={null}>
-              <LandingMarquee />
-              <LandingStatement />
-              <LandingHowItWorks />
-              <LandingFeatures />
-              <LandingForUsers />
-              <LandingStats />
-              <LandingTestimonials />
-              <LandingCTA />
-            </Suspense>
-          )}
         </main>
-        {showSections && (
-          <Suspense fallback={null}>
-            <LandingFooter />
-          </Suspense>
-        )}
       </div>
     </div>
   );
