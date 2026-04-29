@@ -13,15 +13,21 @@ const splineScene = 'https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecod
 
 const MatchPreview = () => (
   <motion.div
-    className="relative mx-auto h-[31rem] w-full max-w-[34rem] sm:h-[34rem]"
+    className="relative mx-auto h-[34rem] w-full max-w-[40rem] overflow-visible sm:h-[38rem] lg:h-[42rem]"
     initial={{ opacity: 0, y: 28, scale: 0.96 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
     transition={{ duration: 0.85, ease, delay: 0.15 }}
   >
-    <div className="pointer-events-auto absolute -inset-x-16 -inset-y-10 z-0 opacity-100 sm:-inset-x-24 sm:-inset-y-12 lg:-inset-x-32 lg:-inset-y-16">
+    <div
+      className="pointer-events-auto absolute -inset-x-28 -inset-y-20 z-0 opacity-100 sm:-inset-x-36 sm:-inset-y-24 lg:-inset-x-48 lg:-inset-y-28"
+      style={{
+        WebkitMaskImage: 'radial-gradient(ellipse at 55% 50%, black 0%, black 46%, transparent 74%)',
+        maskImage: 'radial-gradient(ellipse at 55% 50%, black 0%, black 46%, transparent 74%)',
+      }}
+    >
       <SplineScene scene={splineScene} className="h-full w-full" />
     </div>
-    <div className="pointer-events-none absolute -inset-10 z-[1] bg-[radial-gradient(circle_at_70%_45%,transparent_0%,transparent_58%,hsl(var(--primary)/0.58)_88%)]" />
+    <div className="pointer-events-none absolute -inset-24 z-[1] bg-[radial-gradient(ellipse_at_56%_50%,transparent_0%,transparent_54%,hsl(var(--primary)/0.45)_84%,hsl(var(--primary)/0.78)_100%)]" />
   </motion.div>
 );
 
