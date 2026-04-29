@@ -1,4 +1,4 @@
-import { type RefObject, useState } from 'react';
+import { type PointerEvent, type RefObject, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
@@ -46,7 +46,7 @@ const AudienceCard = ({
   const isSelected = selectedRole === role;
   const isOtherSelected = selectedRole && selectedRole !== role;
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const handlePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
     if (selectedRole) return;
     const bounds = event.currentTarget.getBoundingClientRect();
     pointerX.set((event.clientX - bounds.left) / bounds.width);
@@ -78,7 +78,7 @@ const AudienceCard = ({
       <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:34px_34px] opacity-35" />
       <motion.span className="relative z-10 flex h-full flex-col justify-between gap-8" style={{ x: innerX, y: innerY }}>
         <span className="flex items-center justify-between gap-4">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-secondary/20 bg-secondary/10 text-secondary shadow-[0_0_42px_hsl(var(--secondary)/0.24)]">
+          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary shadow-[0_0_42px_hsl(var(--secondary)/0.24)]">
             <Icon className="h-5 w-5" />
           </span>
           <ArrowRight className="h-5 w-5 text-white/40 transition-transform group-hover:translate-x-1 group-hover:text-secondary" />
