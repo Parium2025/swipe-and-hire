@@ -39,10 +39,10 @@ const AudienceCard = ({
 }) => {
   const pointerX = useMotionValue(0.5);
   const pointerY = useMotionValue(0.5);
-  const rotateX = useTransform(pointerY, [0, 1], [13, -13]);
-  const rotateY = useTransform(pointerX, [0, 1], [-13, 13]);
-  const innerX = useTransform(pointerX, [0, 1], [-18, 18]);
-  const innerY = useTransform(pointerY, [0, 1], [-18, 18]);
+  const rotateX = useTransform(pointerY, [0, 1], [4, -4]);
+  const rotateY = useTransform(pointerX, [0, 1], [-5, 5]);
+  const innerX = useTransform(pointerX, [0, 1], [-4, 4]);
+  const innerY = useTransform(pointerY, [0, 1], [-3, 3]);
   const isSelected = selectedRole === role;
   const isOtherSelected = selectedRole && selectedRole !== role;
 
@@ -68,24 +68,22 @@ const AudienceCard = ({
         hidden: { opacity: 0, y: 34, scale: 0.96, filter: 'blur(12px)' },
         show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
       }}
-      animate={isSelected ? { scale: 1.055, y: -8 } : isOtherSelected ? { opacity: 0.22, scale: 0.92 } : undefined}
+      animate={isSelected ? { scale: 1.035, y: -3 } : isOtherSelected ? { opacity: 0.2, scale: 0.94 } : undefined}
       whileTap={!selectedRole ? { scale: 0.985 } : undefined}
       transition={{ duration: 0.55, ease }}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-      className="group relative min-h-[16rem] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.045] p-7 text-left shadow-[0_32px_100px_hsl(var(--background)/0.38)] outline-none backdrop-blur-2xl transition-colors hover:bg-white/[0.065] focus-visible:ring-2 focus-visible:ring-secondary sm:min-h-[18rem] sm:p-8"
+      className="group relative min-h-touch overflow-hidden rounded-full border border-secondary/18 bg-white/[0.045] px-5 py-3.5 text-left shadow-[0_18px_58px_hsl(var(--secondary)/0.12)] outline-none backdrop-blur-2xl transition-colors hover:border-secondary/34 hover:bg-secondary/[0.075] hover:shadow-[0_22px_72px_hsl(var(--secondary)/0.20)] focus-visible:ring-2 focus-visible:ring-secondary sm:px-6 sm:py-4"
     >
-      <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(89%_85%_at_17%_79%,hsl(var(--secondary)/0.42)_0%,hsl(var(--secondary)/0.24)_38%,hsl(var(--primary)/0.34)_72%,hsl(var(--background)/0.18)_100%)] opacity-80 transition-opacity group-hover:opacity-100" />
-      <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:34px_34px] opacity-35" />
-      <motion.span className="relative z-10 flex h-full flex-col justify-between gap-8" style={{ x: innerX, y: innerY }}>
-        <span className="flex items-center justify-between gap-4">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary shadow-[0_0_42px_hsl(var(--secondary)/0.24)]">
-            <Icon className="h-5 w-5" />
-          </span>
-          <ArrowRight className="h-5 w-5 text-white/40 transition-transform group-hover:translate-x-1 group-hover:text-secondary" />
+      <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_150%_at_12%_0%,hsl(var(--secondary)/0.26),transparent_48%),linear-gradient(135deg,hsl(var(--secondary)/0.16),hsl(var(--primary)/0.10)_48%,hsl(var(--background)/0.08))] opacity-90 transition-opacity group-hover:opacity-100" />
+      <span className="pointer-events-none absolute inset-[1px] rounded-full bg-white/[0.025]" />
+      <motion.span className="relative z-10 flex items-center gap-3.5" style={{ x: innerX, y: innerY }}>
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary shadow-[0_0_34px_hsl(var(--secondary)/0.18)]">
+          <Icon className="h-4.5 w-4.5" />
         </span>
-        <span className="block text-4xl font-black leading-[0.95] tracking-[-0.02em] text-white sm:text-5xl">
+        <span className="whitespace-nowrap text-base font-black leading-none text-white sm:text-lg">
           {label}
         </span>
+        <ArrowRight className="ml-1 h-4 w-4 text-white/38 transition-transform group-hover:translate-x-0.5 group-hover:text-secondary" />
       </motion.span>
     </motion.button>
   );
@@ -140,7 +138,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         </motion.div>
 
         <motion.div
-          className="mt-10 grid w-full max-w-3xl gap-4 sm:grid-cols-2 lg:mt-12"
+          className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 lg:mt-12"
           initial="hidden"
           animate="show"
           variants={{
