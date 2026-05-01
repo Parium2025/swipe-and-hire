@@ -35,24 +35,31 @@ const Landing = () => {
     body.style.height = '100%';
     body.style.overscrollBehavior = 'none';
 
+    const isAllowedTarget = (target: EventTarget | null) => {
+      const el = target as HTMLElement | null;
+      return !!(el && el.closest && el.closest('[data-allow-touch="true"]'));
+    };
     const preventScroll = (event: TouchEvent) => {
-      const target = event.target as HTMLElement | null;
-      // Allow touch interaction inside the 3D phone (Spline iframe / canvas)
-      if (target && target.closest('[data-allow-touch="true"]')) return;
+      if (isAllowedTarget(event.target)) return;
+      if (event.cancelable) event.preventDefault();
+    };
+    const preventWheel = (event: WheelEvent) => {
+      if (isAllowedTarget(event.target)) return;
+      if (event.cancelable) event.preventDefault();
+    };
+    const preventGesture = (event: Event) => {
       if (event.cancelable) event.preventDefault();
     };
     window.addEventListener('touchmove', preventScroll, { passive: false });
     document.addEventListener('touchmove', preventScroll, { passive: false });
-    document.addEventListener('gesturestart', (e) => e.preventDefault());
-    document.addEventListener('wheel', (e) => {
-      const target = e.target as HTMLElement | null;
-      if (target && target.closest('[data-allow-touch="true"]')) return;
-      if (e.cancelable) e.preventDefault();
-    }, { passive: false });
+    document.addEventListener('wheel', preventWheel, { passive: false });
+    document.addEventListener('gesturestart', preventGesture);
 
     return () => {
       window.removeEventListener('touchmove', preventScroll);
       document.removeEventListener('touchmove', preventScroll);
+      document.removeEventListener('wheel', preventWheel);
+      document.removeEventListener('gesturestart', preventGesture);
       documentElement.style.overflow = previousHtml.overflow;
       documentElement.style.height = previousHtml.height;
       documentElement.style.overscrollBehavior = previousHtml.overscrollBehavior;
