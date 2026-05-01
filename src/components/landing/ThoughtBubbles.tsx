@@ -208,7 +208,7 @@ const ThoughtBubble = ({ bubble, index }: { bubble: Bubble; index: number }) => 
 
 export const ThoughtBubbles = () => {
   return (
-    <div className="pointer-events-none absolute inset-0 z-[6]" aria-hidden>
+    <div className="pointer-events-none absolute inset-0 z-[15]" aria-hidden>
       {bubbles.map((bubble, i) => (
         <ThoughtBubble key={i} bubble={bubble} index={i} />
       ))}
