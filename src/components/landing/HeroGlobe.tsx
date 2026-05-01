@@ -77,7 +77,7 @@ export const HeroGlobe = () => {
   return (
     <motion.div
       ref={containerRef}
-      className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
       initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{
@@ -86,18 +86,7 @@ export const HeroGlobe = () => {
         delay: 0.1,
       }}
     >
-      {/*
-        Mobile-first responsive sizing:
-        - The container fills the available area (the brain stays large
-          on screen, fills the corners — like on tablet/desktop).
-        - Inside, the iframe is scaled UP so the brain renders at a
-          smaller relative size within the Spline scene. The scene's
-          ambient particles continue to fill the visible area.
-        - On tablet/desktop the scale returns to 1 (normal size) where
-          the brain already looks right.
-        - We hide the bottom 12% to clip the "Built with Spline" badge.
-      */}
-      <div className="parium-brain-stage relative aspect-square w-full max-w-full overflow-hidden sm:w-auto sm:h-full sm:max-h-[640px] lg:max-h-[760px]">
+      <div className="parium-brain-stage absolute -inset-x-10 -top-16 -bottom-24 overflow-hidden sm:inset-0">
         <iframe
           ref={iframeRef}
           src={SPLINE_EMBED_URL}
@@ -108,24 +97,22 @@ export const HeroGlobe = () => {
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
-          className={`parium-brain-iframe absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
+          className={`parium-brain-iframe absolute left-1/2 top-1/2 border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            // Render the iframe LARGER than its container. The Spline scene
-            // composes the brain to fit its own viewport, so a larger iframe
-            // means the brain (which sits centered in the scene) appears
-            // proportionally SMALLER inside our visible square. Overflow is
-            // clipped by the container.
-            width: 'var(--brain-iframe-size, 180%)',
-            height: 'calc(var(--brain-iframe-size, 180%) * 1.12)',
+            width: 'var(--brain-scene-size, 156%)',
+            height: 'calc(var(--brain-scene-size, 156%) * 1.12)',
+            transform: 'translate(-50%, -50%) translateY(var(--brain-y, 4%)) scale(var(--brain-render-scale, 0.66))',
           }}
         />
         <style>{`
-          /* Mobile: render iframe larger so the brain inside it shrinks
-             relative to the visible stage. Tablet & up: 100% (natural). */
           @media (min-width: 640px) {
-            .parium-brain-stage .parium-brain-iframe { --brain-iframe-size: 100%; }
+            .parium-brain-stage .parium-brain-iframe {
+              --brain-scene-size: 100%;
+              --brain-render-scale: 1;
+              --brain-y: 0%;
+            }
           }
         `}</style>
       </div>
