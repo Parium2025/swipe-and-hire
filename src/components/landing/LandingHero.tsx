@@ -117,6 +117,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       <ThoughtBubbles />
       {/* Ambient glow */}
       <div className="pointer-events-none absolute inset-x-0 top-24 mx-auto h-[30rem] max-w-5xl rounded-full bg-secondary/10 blur-3xl z-[1]" />
+      <HeroGlobe />
 
       {selectedRole && (
         <motion.div
@@ -139,10 +140,8 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           Parium — från en tanke till verklighet
         </h1>
 
-        {/* The 3D brain — fills the hero, with thought bubbles framing it */}
-        <div className="relative w-full flex-1">
-          <HeroGlobe />
-        </div>
+        {/* Spacer keeps the CTAs anchored while the 3D phone uses the full hero height. */}
+        <div className="relative w-full flex-1" aria-hidden="true" />
 
         {/* 3. Audience CTAs at the bottom — clearly under the brain */}
         <motion.div
