@@ -77,7 +77,7 @@ export const HeroGlobe = () => {
   return (
     <motion.div
       ref={containerRef}
-      className="pointer-events-none absolute inset-x-0 top-[2%] z-0 flex justify-center sm:top-0 lg:-top-[3%]"
+      className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
       initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{
@@ -87,15 +87,11 @@ export const HeroGlobe = () => {
       }}
     >
       {/*
-        Wrapper is sized to fill the hero generously. We clip ~9% off the
-        bottom by making the wrapper shorter than the iframe inside it, so
-        the "Built with Spline" badge in the bottom-right is hidden — while
-        the brain itself stays perfectly centered horizontally.
+        Wrapper fills the available flex slot square-ish. We clip ~12% off
+        the bottom of the iframe so the "Built with Spline" badge in the
+        bottom-right is hidden — while the brain stays horizontally centered.
       */}
-      <div className="relative h-[72vh] w-[72vh] max-h-[700px] max-w-[700px] overflow-hidden sm:h-[78vh] sm:w-[78vh] lg:h-[84vh] lg:w-[84vh] lg:max-h-[860px] lg:max-w-[860px]">
-        {/* No skeleton — we let the hero background show through until the
-            Spline scene has finished its first paint. */}
-
+      <div className="relative aspect-square h-full max-h-[560px] w-auto max-w-full overflow-hidden sm:max-h-[640px] lg:max-h-[760px]">
         <iframe
           ref={iframeRef}
           src={SPLINE_EMBED_URL}
@@ -109,9 +105,6 @@ export const HeroGlobe = () => {
           className={`absolute left-0 top-0 w-full border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
-          // Iframe is 12% taller than its wrapper. Wrapper's overflow-hidden
-          // crops the bottom strip where the Spline badge lives, but the
-          // brain stays horizontally centered because width is exactly 100%.
           style={{ height: '112%' }}
         />
       </div>

@@ -111,10 +111,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
   const exitX = selectedRole === 'job_seeker' ? '-105vw' : selectedRole === 'employer' ? '105vw' : 0;
 
   return (
-    <section className="relative min-h-[100svh] overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24" aria-labelledby="landing-hero-heading">
-      {/* Spline 3D Earth Globe — lazy, performance-aware */}
-      <HeroGlobe />
-
+    <section className="relative min-h-[100svh] overflow-hidden px-5 pb-10 pt-24 sm:px-6 sm:pb-14 sm:pt-28 md:px-12 lg:px-24" aria-labelledby="landing-hero-heading">
       {/* Ambient glow */}
       <div className="pointer-events-none absolute inset-x-0 top-24 mx-auto h-[30rem] max-w-5xl rounded-full bg-secondary/10 blur-3xl z-[1]" />
 
@@ -127,26 +124,22 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         />
       )}
 
+      {/* Vertically stacked hero: heading → brain → CTAs */}
       <motion.div
-        className="relative z-10 mx-auto flex min-h-[calc(100svh-11rem)] max-w-[1180px] flex-col items-center justify-start pt-6 text-center sm:pt-10 lg:pt-14"
+        className="relative z-10 mx-auto flex min-h-[calc(100svh-9rem)] max-w-[1180px] flex-col items-center text-center"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        {/* Main heading — Marvellco-style letter reveal: each glyph rises out
-            of a clip mask with blur + scale on a long, slow ease. */}
-        <motion.div className="mx-auto pb-4">
+        {/* 1. Heading at the very top */}
+        <motion.div className="mx-auto w-full">
           <h1
             id="landing-hero-heading"
-            className="text-[2rem] font-black leading-[1.05] tracking-[-0.035em] text-white sm:text-[3.2rem] md:text-[4.2rem] lg:text-[5.4rem]"
+            className="text-[1.95rem] font-black leading-[1.05] tracking-[-0.035em] text-white sm:text-[3rem] md:text-[3.8rem] lg:text-[4.8rem]"
           >
             {(() => {
               const lines = ['Från en tanke till verklighet,', 'vi gör det möjligt'];
               let globalIndex = 0;
-              // Total chars used to compute audience-button delay so they
-              // appear *after* the headline finishes.
-              const totalChars = lines.reduce((acc, l) => acc + l.replace(/\s/g, '').length, 0);
-              (window as any).__pariumHeroCharCount = totalChars;
               return lines.map((line, li) => (
                 <span
                   key={li}
@@ -167,7 +160,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
                             transition={{
                               duration: 1.15,
                               ease: [0.85, 0.09, 0.15, 0.91],
-                              delay: 1.45 + i * 0.038,
+                              delay: 0.6 + i * 0.035,
                             }}
                           >
                             {char}
@@ -185,14 +178,19 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           </h1>
         </motion.div>
 
-        {/* Audience buttons */}
+        {/* 2. The 3D brain — flexes to fill remaining space between heading and CTAs */}
+        <div className="relative my-2 w-full flex-1 sm:my-4">
+          <HeroGlobe />
+        </div>
+
+        {/* 3. Audience CTAs at the bottom — clearly under the brain */}
         <motion.div
-          className="mt-8 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 lg:mt-10"
+          className="mt-2 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
           initial="hidden"
           animate="show"
           variants={{
             hidden: {},
-            show: { transition: { staggerChildren: 0.22, delayChildren: 2.95 } },
+            show: { transition: { staggerChildren: 0.22, delayChildren: 2.6 } },
           }}
         >
           {audienceOptions.map((option) => (
