@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -7,7 +7,6 @@ import BentoScrollGallery from '@/components/landing/BentoScrollGallery';
 
 const Landing = () => {
   const navigate = useNavigate();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // SEO
   useEffect(() => {
@@ -35,7 +34,6 @@ const Landing = () => {
     setMeta('twitter:description', desc);
     setMeta('twitter:card', 'summary_large_image');
     setMeta('robots', 'index, follow, max-image-preview:large');
-    setMeta('keywords', 'rekrytering, jobb, swipe, matchning, AI, hitta jobb, Sverige, kandidater');
 
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
     if (!canonical) {
@@ -56,22 +54,25 @@ const Landing = () => {
   };
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain bg-gradient-parium text-primary-foreground"
-      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
-    >
+    // Window-scroll (NOT a custom scroll container) — required for
+    // GSAP ScrollTrigger pin + Flip to work reliably across browsers/iOS.
+    <div className="relative min-h-screen bg-gradient-parium text-primary-foreground">
       <AnimatedBackground />
       <div className="relative z-10">
         <LandingNav onLoginClick={handleLogin} />
         <main className="relative">
-          {/* Floating Parium thought bubbles — kept as decorative overlay */}
+          {/* Floating Parium thought bubbles — pinned to first viewport */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-screen z-[15]">
             <ThoughtBubbles />
           </div>
 
-          {/* Bento scroll gallery — replaces previous hero content */}
-          <BentoScrollGallery scrollContainerRef={scrollContainerRef} />
+          {/* Bento scroll gallery (uses window scroll) */}
+          <BentoScrollGallery />
+
+          {/* Spacer so the user has room to scroll past the pinned gallery
+              and trigger the Flip animation. The pinned section adds its
+              own end-distance via `end: '+=100%'`. */}
+          <div className="h-[60vh]" aria-hidden="true" />
         </main>
       </div>
     </div>
