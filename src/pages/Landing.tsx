@@ -1,21 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
+import LandingHero from '@/components/landing/LandingHero';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import ThoughtBubbles from '@/components/landing/ThoughtBubbles';
-import HeroSection from '@/components/landing/v2/HeroSection';
-import MarqueeStrip from '@/components/landing/v2/MarqueeStrip';
-import TestimonialQuote from '@/components/landing/v2/TestimonialQuote';
-import PricingSection from '@/components/landing/v2/PricingSection';
-import TestimonialCarousel from '@/components/landing/v2/TestimonialCarousel';
-import ProjectsSection from '@/components/landing/v2/ProjectsSection';
-import PartnerSection from '@/components/landing/v2/PartnerSection';
-import LandingV2Footer from '@/components/landing/v2/LandingV2Footer';
-import CopyrightBar from '@/components/landing/v2/CopyrightBar';
-import BottomNav from '@/components/landing/v2/BottomNav';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // SEO
   useEffect(() => {
@@ -31,8 +22,7 @@ const Landing = () => {
       el.setAttribute('content', content);
     };
 
-    const desc =
-      'Parium matchar kandidater och arbetsgivare på sekunder. Swipea, matcha och anställ – Tinder för jobb.';
+    const desc = 'Parium matchar kandidater och arbetsgivare på sekunder. Swipea, matcha och anställ – Tinder för jobb.';
     setMeta('description', desc);
     setMeta('og:title', 'Parium – Rekrytering. På 60 sekunder.', 'property');
     setMeta('og:description', desc, 'property');
@@ -44,8 +34,9 @@ const Landing = () => {
     setMeta('twitter:description', desc);
     setMeta('twitter:card', 'summary_large_image');
     setMeta('robots', 'index, follow, max-image-preview:large');
+    setMeta('keywords', 'rekrytering, jobb, swipe, matchning, AI, hitta jobb, Sverige, kandidater');
 
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.rel = 'canonical';
@@ -53,7 +44,29 @@ const Landing = () => {
     }
     canonical.href = 'https://parium.se';
 
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Parium',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web, iOS, Android',
+      description: desc,
+      url: 'https://parium.se',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' },
+      author: { '@type': 'Organization', name: 'Parium AB' },
+    };
+
+    let script = document.querySelector('#landing-jsonld') as HTMLScriptElement;
+    if (!script) {
+      script = document.createElement('script');
+      script.id = 'landing-jsonld';
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(jsonLd);
+
     return () => {
+      script?.remove();
       canonical?.remove();
     };
   }, []);
@@ -64,28 +77,18 @@ const Landing = () => {
   };
 
   return (
-    <div className="landing-v2-scroll bg-gradient-parium text-primary-foreground font-pp-neue">
+    <div
+      ref={scrollContainerRef}
+      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain bg-gradient-parium text-primary-foreground"
+      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
+    >
       <AnimatedBackground />
-      <ThoughtBubbles />
-
-      <div className="relative z-10">
+      <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
-
         <main>
-          <HeroSection />
-          <MarqueeStrip />
-          <TestimonialQuote />
-          <PricingSection />
-          <TestimonialCarousel />
-          <ProjectsSection />
-          <PartnerSection />
-          <LandingV2Footer />
-          <CopyrightBar />
-          <div className="h-24" aria-hidden />
+          <LandingHero scrollContainerRef={scrollContainerRef} />
         </main>
       </div>
-
-      <BottomNav />
     </div>
   );
 };
