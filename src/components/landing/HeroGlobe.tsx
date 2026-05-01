@@ -116,14 +116,15 @@ export const HeroGlobe = () => {
         />
 
         {/* Hide the "Built with Spline" badge by feathering the bottom-right
-            corner into the page background. We use a soft radial gradient
-            instead of a solid block so there is no visible rectangle. */}
+            corner into the page background. Sized generously to fully cover
+            the pill on all viewports, with a soft radial falloff so it
+            blends seamlessly into the hero background. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-2 -right-2 h-[110px] w-[260px]"
+          className="pointer-events-none absolute bottom-0 right-0 h-[150px] w-[340px]"
           style={{
             background:
-              'radial-gradient(ellipse 75% 75% at 100% 100%, hsl(var(--background)) 38%, hsl(var(--background) / 0.92) 55%, hsl(var(--background) / 0.6) 72%, transparent 100%)',
+              'radial-gradient(ellipse 80% 80% at 100% 100%, hsl(var(--background)) 55%, hsl(var(--background) / 0.9) 70%, transparent 100%)',
           }}
         />
       </div>
