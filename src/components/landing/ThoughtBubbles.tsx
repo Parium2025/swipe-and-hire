@@ -155,7 +155,7 @@ const ThoughtBubble = ({ bubble, index }: { bubble: Bubble; index: number }) => 
 
   return (
     <motion.div
-      className={`pointer-events-none absolute z-[5] ${bubble.position}`}
+      className={`pointer-events-none absolute z-[15] ${bubble.position}`}
       initial={{ opacity: 0, scale: 0.4, y: -20, filter: 'blur(12px)' }}
       animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
       transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: bubble.delay }}
