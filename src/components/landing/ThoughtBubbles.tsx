@@ -184,8 +184,8 @@ const ThoughtBubble = ({ bubble, index }: { bubble: Bubble; index: number }) => 
           <div className="pointer-events-none absolute -inset-px rounded-[2rem] bg-[linear-gradient(135deg,hsl(var(--secondary)/0.7),hsl(var(--primary)/0.4)_60%,hsl(var(--secondary)/0.6))] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
           {/* Bubble body */}
-          <div className="relative max-w-[170px] sm:max-w-[210px] lg:max-w-[240px] rounded-[2rem] border border-white/30 bg-white/85 px-4 py-3 sm:px-5 sm:py-3.5 shadow-[0_10px_40px_hsl(var(--background)/0.4)] backdrop-blur-md transition-all duration-500 group-hover:border-white/60 group-hover:bg-white group-hover:shadow-[0_18px_60px_hsl(var(--secondary)/0.35)]">
-            <p className="text-[11px] sm:text-[13px] lg:text-[14px] font-bold leading-tight text-[hsl(220_50%_20%)] text-center">
+          <div className="relative max-w-[120px] sm:max-w-[180px] lg:max-w-[230px] rounded-[1.5rem] sm:rounded-[2rem] border border-white/30 bg-white/85 px-2.5 py-1.5 sm:px-4 sm:py-3 lg:px-5 lg:py-3.5 shadow-[0_10px_40px_hsl(var(--background)/0.4)] backdrop-blur-md transition-all duration-500 group-hover:border-white/60 group-hover:bg-white group-hover:shadow-[0_18px_60px_hsl(var(--secondary)/0.35)]">
+            <p className="text-[9px] sm:text-[12px] lg:text-[14px] font-bold leading-tight text-[hsl(220_50%_20%)] text-center">
               – {bubble.text}
             </p>
           </div>
