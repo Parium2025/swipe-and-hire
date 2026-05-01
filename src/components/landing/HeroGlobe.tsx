@@ -87,11 +87,19 @@ export const HeroGlobe = () => {
       }}
     >
       {/*
-        Wrapper fills the available flex slot square-ish. We clip ~12% off
-        the bottom of the iframe so the "Built with Spline" badge in the
-        bottom-right is hidden — while the brain stays horizontally centered.
+        Wrapper is square and capped by BOTH width and height so the brain
+        never gets clipped on narrow screens. On mobile we cap it small
+        (~70vw) so it sits compactly between the bubbles. On larger screens
+        we let it grow up to a fixed pixel ceiling.
+        We still clip ~12% off the bottom to hide the "Built with Spline" badge.
       */}
-      <div className="relative aspect-square h-full max-h-[560px] w-auto max-w-full overflow-hidden sm:max-h-[640px] lg:max-h-[760px]">
+      <div
+        className="relative aspect-square overflow-hidden"
+        style={{
+          width: 'min(70vw, 70vh, 720px)',
+          maxWidth: '100%',
+        }}
+      >
         <iframe
           ref={iframeRef}
           src={SPLINE_EMBED_URL}
