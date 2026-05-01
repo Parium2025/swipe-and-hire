@@ -52,35 +52,20 @@ export const HeroGlobe = () => {
     };
   }, []);
 
+  // Pause/resume the embedded scene when the tab visibility changes.
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const app = new Application(canvas, { renderMode: prefersReducedMotion ? 'auto' : 'continuous' });
-    appRef.current = app;
-
-    app.load(SPLINE_SCENE_URL).then(() => {
-      app.setBackgroundColor('transparent');
-      app.setSize(canvas.clientWidth, canvas.clientHeight);
-      app.setZoom(window.innerWidth < 640 ? 1.35 : 1);
-      requestAnimationFrame(() => setReady(true));
-    });
-
-    const onResize = () => {
-      app.setSize(canvas.clientWidth, canvas.clientHeight);
-      app.setZoom(window.innerWidth < 640 ? 1.35 : 1);
+    const onVis = () => {
+      const win = iframeRef.current?.contentWindow;
+      if (!win) return;
+      try {
+        win.postMessage({ type: document.hidden ? 'spline:pause' : 'spline:play' }, '*');
+      } catch {
+        /* cross-origin iframe — ignore */
+      }
     };
-
-    const onVis = () => (document.hidden ? app.stop() : app.play());
-    window.addEventListener('resize', onResize);
     document.addEventListener('visibilitychange', onVis);
-    return () => {
-      window.removeEventListener('resize', onResize);
-      document.removeEventListener('visibilitychange', onVis);
-      app.stop();
-      appRef.current = null;
-    };
-  }, [prefersReducedMotion]);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, []);
 
   // Safety net: if onLoad never fires (rare CDN hiccups) we still reveal
   // the iframe after a generous timeout so the experience never gets stuck.
@@ -102,10 +87,17 @@ export const HeroGlobe = () => {
       }}
     >
       <div className="parium-brain-stage absolute -inset-x-10 -top-16 -bottom-24 overflow-hidden sm:inset-0">
-        <canvas
-          ref={canvasRef}
-          aria-label="Particle AI Brain"
-          className={`absolute left-1/2 top-1/2 h-[58svh] w-[170vw] -translate-x-1/2 -translate-y-1/2 translate-x-[4%] -translate-y-[2%] transition-opacity duration-[1200ms] ease-out sm:h-full sm:w-full sm:translate-x-0 sm:translate-y-0 ${
+        <iframe
+          ref={iframeRef}
+          src={SPLINE_EMBED_URL}
+          title="Particle AI Brain"
+          loading="eager"
+          // @ts-expect-error — fetchpriority is valid HTML
+          fetchpriority="high"
+          onLoad={() => {
+            requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
+          }}
+          className={`absolute left-1/2 top-1/2 h-[720px] w-[1180px] -translate-x-1/2 -translate-y-1/2 translate-x-[6%] -translate-y-[3%] scale-[0.46] border-0 transition-opacity duration-[1200ms] ease-out sm:h-[112%] sm:w-full sm:translate-x-0 sm:translate-y-0 sm:scale-100 ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
         />
