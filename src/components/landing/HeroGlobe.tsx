@@ -169,11 +169,11 @@ export const HeroGlobe = () => {
             splineReady ? 'opacity-0' : 'opacity-100'
           }`}
         >
-          <div className="absolute inset-[3%] rounded-full bg-[radial-gradient(circle_at_50%_42%,hsl(var(--secondary)/0.38),hsl(var(--secondary)/0.12)_36%,hsl(var(--background)/0.64)_66%,transparent_74%)] blur-2xl" />
-          <div className="absolute inset-[10%] rounded-full bg-[radial-gradient(circle_at_46%_40%,hsl(var(--secondary)/0.24),hsl(var(--background)/0.72)_52%,hsl(var(--background)/0.92)_70%,transparent_73%)]" />
-          <div className="absolute inset-[14%] rounded-full border border-secondary/20 opacity-70 [mask-image:radial-gradient(circle,black_58%,transparent_72%)]" />
-          <div className="absolute inset-[20%] rounded-full border border-secondary/15 opacity-60 animate-[spin_44s_linear_infinite] [mask-image:linear-gradient(120deg,transparent,black_35%,black_64%,transparent)]" />
-          <div className="absolute inset-[32%] rounded-full border border-secondary/10 opacity-50 animate-[spin_62s_linear_infinite_reverse] [mask-image:linear-gradient(35deg,black,transparent_70%)]" />
+          <div className="absolute inset-[4%] rounded-full bg-[radial-gradient(circle_at_50%_44%,hsl(var(--secondary)/0.22),hsl(var(--secondary)/0.08)_34%,transparent_68%)] blur-2xl" />
+          <div className="absolute inset-[13%] rounded-full bg-[radial-gradient(circle_at_48%_42%,hsl(var(--secondary)/0.14),hsl(var(--background)/0.18)_48%,transparent_72%)]" />
+          <div className="absolute inset-[15%] rounded-full border border-secondary/18 opacity-70 [mask-image:radial-gradient(circle,black_48%,transparent_72%)]" />
+          <div className="absolute inset-[21%] rounded-full border border-secondary/14 opacity-60 animate-[spin_44s_linear_infinite] [mask-image:linear-gradient(120deg,transparent,black_35%,black_64%,transparent)]" />
+          <div className="absolute inset-[33%] rounded-full border border-secondary/10 opacity-50 animate-[spin_62s_linear_infinite_reverse] [mask-image:linear-gradient(35deg,black,transparent_70%)]" />
         </div>
 
         <canvas
