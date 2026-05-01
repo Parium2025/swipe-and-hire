@@ -86,8 +86,7 @@ export const HeroGlobe = () => {
         delay: 0.1,
       }}
     >
-      <div className="parium-brain-stage absolute inset-0 overflow-hidden">
-        <div className="parium-brain-particles parium-brain-particles-back" />
+      <div className="parium-brain-stage absolute -inset-x-10 -top-16 -bottom-24 overflow-hidden sm:inset-0">
         <iframe
           ref={iframeRef}
           src={SPLINE_EMBED_URL}
@@ -107,56 +106,12 @@ export const HeroGlobe = () => {
             transform: 'translate(-50%, -50%) translateY(var(--brain-y, 4%))',
           }}
         />
-        <div className="parium-brain-particles parium-brain-particles-front" />
         <style>{`
-          .parium-brain-stage {
-            background:
-              radial-gradient(circle at 50% 44%, hsl(var(--secondary) / 0.22), transparent 42%),
-              linear-gradient(180deg, hsl(var(--background) / 0.2), hsl(var(--background) / 0.78));
-          }
-
-          .parium-brain-particles {
-            position: absolute;
-            inset: -14%;
-            background-image:
-              radial-gradient(circle, hsl(var(--secondary) / 0.78) 0 1px, transparent 1.8px),
-              radial-gradient(circle, hsl(var(--primary) / 0.5) 0 1.5px, transparent 2.4px),
-              radial-gradient(circle, hsl(var(--foreground) / 0.34) 0 1px, transparent 2px);
-            background-size: 27px 27px, 49px 49px, 81px 81px;
-            background-position: 0 0, 17px 23px, 34px 12px;
-            opacity: 0.52;
-            animation: parium-particles-rise 20s linear infinite;
-          }
-
-          .parium-brain-particles-back {
-            filter: blur(0.2px);
-          }
-
-          .parium-brain-particles-front {
-            opacity: 0.28;
-            animation-duration: 15s;
-            -webkit-mask-image: radial-gradient(ellipse at 50% 54%, transparent 0 31%, black 50% 100%);
-            mask-image: radial-gradient(ellipse at 50% 54%, transparent 0 31%, black 50% 100%);
-          }
-
-          @keyframes parium-particles-rise {
-            from { transform: translate3d(0, 5%, 0); }
-            to { transform: translate3d(0, -5%, 0); }
-          }
-
           @media (min-width: 640px) {
             .parium-brain-stage .parium-brain-iframe {
               --brain-scene-size: 100%;
               --brain-y: 0%;
             }
-
-            .parium-brain-particles {
-              display: none;
-            }
-          }
-
-          @media (prefers-reduced-motion: reduce) {
-            .parium-brain-particles { animation: none; }
           }
         `}</style>
       </div>
