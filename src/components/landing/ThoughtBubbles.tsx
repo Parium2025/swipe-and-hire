@@ -43,7 +43,7 @@ const bubbles: Bubble[] = [
   // ── UPPER AREA (clear of navbar) ──────────────────────────────────────
   {
     text: 'Ska vi rekrytera en ny kollega?',
-    position: 'left-[4%] top-[16%] sm:left-[8%] sm:top-[15%] lg:left-[16%] lg:top-[17%]',
+    position: 'left-[3%] top-[14%] sm:left-[8%] sm:top-[15%] lg:left-[16%] lg:top-[17%]',
     delay: 3.0,
     floatDuration: 7.5,
     tailAnchor: 'r',
@@ -52,7 +52,7 @@ const bubbles: Bubble[] = [
   },
   {
     text: 'Hur går vi tillväga för att rekrytera?',
-    position: 'right-[4%] top-[22%] sm:right-[8%] sm:top-[21%] lg:right-[16%] lg:top-[24%]',
+    position: 'right-[3%] top-[20%] sm:right-[8%] sm:top-[21%] lg:right-[16%] lg:top-[24%]',
     delay: 3.3,
     floatDuration: 8.5,
     tailAnchor: 'l',
@@ -60,30 +60,32 @@ const bubbles: Bubble[] = [
     tailLength: 4,
   },
 
-  // ── SIDE AREA (mid-height) ────────────────────────────────────────────
+  // ── SIDE AREA (mid-height) — hidden on mobile to avoid covering the phone ─
   {
     text: 'Ska jag söka nytt jobb?',
-    position: 'left-[3%] top-[42%] sm:left-[6%] sm:top-[41%] lg:left-[12%] lg:top-[43%]',
+    position: 'left-[6%] top-[41%] lg:left-[12%] lg:top-[43%]',
     delay: 3.45,
     floatDuration: 8.2,
     tailAnchor: 'r',
     tailDirection: 'down',
     tailLength: 3,
+    hideOnMobile: true,
   },
   {
     text: 'Är det värt att anställa en till?',
-    position: 'right-[3%] top-[48%] sm:right-[6%] sm:top-[47%] lg:right-[12%] lg:top-[49%]',
+    position: 'right-[6%] top-[47%] lg:right-[12%] lg:top-[49%]',
     delay: 3.75,
     floatDuration: 8.7,
     tailAnchor: 'l',
     tailDirection: 'down',
     tailLength: 3,
+    hideOnMobile: true,
   },
 
   // ── LOWER AREA (clear of CTAs) ────────────────────────────────────────
   {
     text: 'Jag trivs inte där jag jobbar i dag.',
-    position: 'left-[4%] bottom-[26%] sm:left-[8%] sm:bottom-[24%] lg:left-[16%] lg:bottom-[26%]',
+    position: 'left-[3%] bottom-[24%] sm:left-[8%] sm:bottom-[24%] lg:left-[16%] lg:bottom-[26%]',
     delay: 3.6,
     floatDuration: 8,
     tailAnchor: 'r',
@@ -92,7 +94,7 @@ const bubbles: Bubble[] = [
   },
   {
     text: 'Det är jobbigt att söka jobb.',
-    position: 'right-[4%] bottom-[20%] sm:right-[8%] sm:bottom-[18%] lg:right-[16%] lg:bottom-[20%]',
+    position: 'right-[3%] bottom-[18%] sm:right-[8%] sm:bottom-[18%] lg:right-[16%] lg:bottom-[20%]',
     delay: 3.9,
     floatDuration: 9,
     tailAnchor: 'l',
