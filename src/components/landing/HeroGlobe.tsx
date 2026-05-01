@@ -77,7 +77,7 @@ export const HeroGlobe = () => {
   return (
     <motion.div
       ref={containerRef}
-      className="pointer-events-none absolute inset-x-0 top-[6%] z-0 flex justify-center sm:top-[4%] lg:top-[2%]"
+      className="pointer-events-none absolute inset-x-0 top-[2%] z-0 flex justify-center sm:top-0 lg:-top-[3%]"
       initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{
