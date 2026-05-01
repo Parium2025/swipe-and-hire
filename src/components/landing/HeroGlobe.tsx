@@ -67,23 +67,17 @@ export const HeroGlobe = () => {
       setLoadPhase('loading');
 
       try {
-        const [{ Application }, sceneResponse] = await Promise.all([
-          import('@splinetool/runtime'),
-          fetch(getSceneUrl(), {
-            cache: 'force-cache',
-            credentials: 'omit',
-            mode: 'cors',
-            signal: abortController.signal,
-          }),
-        ]);
-
-        if (!sceneResponse.ok) throw new Error('Spline scene request failed');
-
-        const sceneBuffer = await sceneResponse.arrayBuffer();
+        const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
 
         splineApp = new Application(canvas, { renderMode: 'continuous' });
-        splineApp.start(sceneBuffer, { interactive: false });
+        splineApp.setGlobalEvents(false);
+        await splineApp.load(getSceneUrl(), {}, {
+          cache: 'force-cache',
+          credentials: 'omit',
+          mode: 'cors',
+          signal: abortController.signal,
+        });
         splineApp.setBackgroundColor('rgba(0, 3, 26, 0)');
 
         rafHandle = window.requestAnimationFrame(() => {
