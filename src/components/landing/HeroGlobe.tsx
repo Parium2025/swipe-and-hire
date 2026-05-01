@@ -97,7 +97,7 @@ export const HeroGlobe = () => {
           the brain already looks right.
         - We hide the bottom 12% to clip the "Built with Spline" badge.
       */}
-      <div className="relative aspect-square w-full max-w-full overflow-hidden sm:w-auto sm:h-full sm:max-h-[640px] lg:max-h-[760px]">
+      <div className="parium-brain-stage relative aspect-square w-full max-w-full overflow-hidden sm:w-auto sm:h-full sm:max-h-[640px] lg:max-h-[760px]">
         <iframe
           ref={iframeRef}
           src={SPLINE_EMBED_URL}
@@ -108,25 +108,22 @@ export const HeroGlobe = () => {
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
-          className={`absolute left-1/2 top-1/2 border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
+          className={`parium-brain-iframe absolute left-1/2 top-1/2 border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            // Width/height are 100% of the container; we translate to recenter
-            // and scale up so the brain shrinks relative to the visible area.
-            // Mobile-first: heavy zoom-out → scales back to 1 on tablet+.
             width: '100%',
             height: '112%',
-            transform: 'translate(-50%, -50%) scale(var(--brain-scale, 1.6))',
+            transform: 'translate(-50%, -50%) scale(var(--brain-scale, 1.7))',
             transformOrigin: 'center center',
           }}
         />
         <style>{`
-          /* Zoom out heavily on mobile so the brain looks proportionally
-             smaller inside the same large scene area. Snap back to 1 from
-             the tablet breakpoint upward. */
+          /* Mobile (default): zoom OUT inside the scene so the brain looks
+             proportionally smaller while the scene still fills the area.
+             Tablet & up: brain renders at its natural size. */
           @media (min-width: 640px) {
-            div > iframe { --brain-scale: 1; }
+            .parium-brain-stage .parium-brain-iframe { --brain-scale: 1; }
           }
         `}</style>
       </div>
