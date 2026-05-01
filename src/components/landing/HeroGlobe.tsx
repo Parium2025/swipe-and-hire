@@ -18,7 +18,7 @@ import { motion, useReducedMotion } from 'framer-motion';
  */
 
 const SPLINE_EMBED_URL =
-  'https://my.spline.design/particleaibrain-qOZru01HpsaDi218BLYF1WXA/';
+  'https://my.spline.design/untitled-R9AE3iFR515l7EKvHCNavLb7/';
 
 export const HeroGlobe = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -104,10 +104,8 @@ export const HeroGlobe = () => {
           }`}
           style={{
             position: 'absolute',
-            top: 0,
-            right: 0,
-            left: 'auto',
-            width: 'max(100%, 700px)',
+            inset: 0,
+            width: '100%',
             height: 'calc(100% + 52px)',
             border: 'none',
             background: 'transparent',
