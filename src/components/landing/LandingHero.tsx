@@ -94,7 +94,7 @@ const PariumGlobe = ({ selectedRole }: { selectedRole: AudienceRole | null }) =>
             <circle cx="320" cy="320" r="244" fill="url(#parium-globe-core)" />
             <circle cx="320" cy="320" r="244" fill="none" stroke="hsl(var(--secondary))" strokeOpacity="0.18" strokeWidth="1.2" />
             {orbitPaths.map((path, index) => (
-              <motion.path
+              <path
                 key={path}
                 d={path}
                 fill="none"
@@ -103,20 +103,16 @@ const PariumGlobe = ({ selectedRole }: { selectedRole: AudienceRole | null }) =>
                 strokeDasharray={index % 2 ? '7 13' : '2 10'}
                 strokeLinecap="round"
                 filter="url(#parium-glow)"
-                animate={{ strokeDashoffset: index % 2 ? [0, -120] : [0, 96] }}
-                transition={{ duration: 16 + index * 4, repeat: Infinity, ease: 'linear' }}
               />
             ))}
             {particles.map((particle, index) => (
-              <motion.circle
+              <circle
                 key={`${particle.x}-${particle.y}`}
                 cx={particle.x}
                 cy={particle.y}
                 r={particle.r}
                 fill="hsl(var(--secondary))"
-                opacity={particle.opacity}
-                animate={{ opacity: [particle.opacity * 0.45, particle.opacity, particle.opacity * 0.55] }}
-                transition={{ duration: 2.8 + (index % 6) * 0.42, repeat: Infinity, ease: 'easeInOut' }}
+                opacity={particle.opacity * (index % 3 === 0 ? 1 : 0.68)}
               />
             ))}
           </motion.g>
