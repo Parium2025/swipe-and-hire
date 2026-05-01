@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import type { Application } from '@splinetool/runtime';
+import splineSceneUrl from '@/assets/holographic-earth.scene.splinecode?url';
 
 /**
  * HeroGlobe — Spline globe with a premium loading experience.
@@ -7,39 +9,93 @@ import { motion, useReducedMotion } from 'framer-motion';
  * Strategy (no permanent fallback — Spline always loads):
  * 1. Render a lightweight animated CSS "skeleton" orb instantly so the hero
  *    feels alive from the first paint and the layout never jumps.
- * 2. Lazy-mount the Spline iframe only when:
- *    - The hero is in (or near) the viewport (IntersectionObserver)
- *    - The browser is idle (requestIdleCallback) so it never blocks the
- *      entrance text animation
- *    - A short delay has elapsed so the heading finishes animating first
- * 3. When the iframe finishes loading, cross-fade smoothly from the skeleton
- *    to the real 3D globe.
+ * 2. Load the Spline scene through @splinetool/runtime instead of an iframe.
+ *    The public iframe document is ~5MB by itself and also loads the scene;
+ *    direct runtime avoids that duplicate document and gives us lifecycle
+ *    control, which prevents the animation from freezing after refresh.
+ * 3. Cross-fade only after the runtime has started the real scene.
  *
  * We honor prefers-reduced-motion by softening the entrance only — the
  * Spline asset still loads.
  */
 
-const SPLINE_SRC =
+const SPLINE_EMBED_URL =
   'https://my.spline.design/holographicearthwithdynamiclines-Pg5EiAtNq3hkwAdNMvB5pQAD/';
+const SPLINE_SCENE_URL = splineSceneUrl;
+
+type LoadPhase = 'waiting' | 'loading' | 'ready' | 'fallback';
 
 export const HeroGlobe = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [shouldLoadSpline, setShouldLoadSpline] = useState(false);
-  const [splineReady, setSplineReady] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [loadPhase, setLoadPhase] = useState<LoadPhase>('waiting');
   const prefersReducedMotion = useReducedMotion();
+  const splineReady = loadPhase === 'ready';
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el || typeof window === 'undefined') return;
 
     let cancelled = false;
+    let splineApp: Application | null = null;
     let idleHandle: number | null = null;
     let timeoutHandle: number | null = null;
+    let rafHandle: number | null = null;
+    const abortController = new AbortController();
 
-    // Mobile/low-end devices get a slightly longer warm-up so the text
-    // animation finishes before the heavy iframe boots.
+    const warmConnection = () => {
+      if (document.querySelector('link[data-parium-spline-preconnect="true"]')) return;
+      const link = document.createElement('link');
+      link.rel = 'preconnect';
+      link.href = 'https://my.spline.design';
+      link.crossOrigin = 'anonymous';
+      link.dataset.pariumSplinePreconnect = 'true';
+      document.head.appendChild(link);
+    };
+
+    const getSceneUrl = () => {
+      const url = new URL(SPLINE_SCENE_URL, window.location.href);
+      const previewToken = new URLSearchParams(window.location.search).get('__lovable_token');
+      if (previewToken && url.origin === window.location.origin) url.searchParams.set('__lovable_token', previewToken);
+      return url.toString();
+    };
+
+    const bootSpline = async () => {
+      const canvas = canvasRef.current;
+      if (!canvas || cancelled) return;
+
+      setLoadPhase('loading');
+
+      try {
+        const { Application } = await import('@splinetool/runtime');
+        if (cancelled) return;
+
+        splineApp = new Application(canvas, { renderMode: 'continuous' });
+        splineApp.setGlobalEvents(false);
+        await splineApp.load(getSceneUrl(), {}, {
+          cache: 'force-cache',
+          credentials: 'omit',
+          mode: 'cors',
+          signal: abortController.signal,
+        });
+        splineApp.setBackgroundColor('rgba(0, 3, 26, 0)');
+
+        rafHandle = window.requestAnimationFrame(() => {
+          rafHandle = window.requestAnimationFrame(() => {
+            if (!cancelled) setLoadPhase('ready');
+          });
+        });
+      } catch (error) {
+        if (!cancelled && !abortController.signal.aborted) setLoadPhase('fallback');
+      }
+    };
+
+    warmConnection();
+
+    // Runtime loading is much lighter than the public iframe, so the warm-up
+    // can be short while still keeping the first hero animation smooth.
     const isSmall = window.innerWidth < 640;
-    const warmup = isSmall ? 1400 : 800;
+    const warmup = isSmall ? 650 : 350;
 
     const triggerLoad = () => {
       if (cancelled) return;
@@ -48,14 +104,22 @@ export const HeroGlobe = () => {
         const w = window as any;
         if (typeof w.requestIdleCallback === 'function') {
           idleHandle = w.requestIdleCallback(
-            () => !cancelled && setShouldLoadSpline(true),
-            { timeout: 2500 },
+            () => void bootSpline(),
+            { timeout: isSmall ? 1200 : 800 },
           );
         } else {
-          setShouldLoadSpline(true);
+          void bootSpline();
         }
       }, warmup);
     };
+
+    const handleVisibility = () => {
+      if (!splineApp) return;
+      if (document.hidden) splineApp.stop();
+      else splineApp.play();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -73,11 +137,15 @@ export const HeroGlobe = () => {
 
     return () => {
       cancelled = true;
+      abortController.abort();
       observer.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibility);
       if (timeoutHandle) clearTimeout(timeoutHandle);
+      if (rafHandle) cancelAnimationFrame(rafHandle);
       if (idleHandle && (window as any).cancelIdleCallback) {
         (window as any).cancelIdleCallback(idleHandle);
       }
+      splineApp?.dispose();
     };
   }, []);
 
@@ -93,34 +161,39 @@ export const HeroGlobe = () => {
         delay: 0.15,
       }}
     >
-      <div className="relative h-[70vh] w-[70vh] max-h-[720px] max-w-[720px] sm:h-[75vh] sm:w-[75vh] lg:h-[80vh] lg:w-[80vh] lg:max-h-[860px] lg:max-w-[860px] overflow-hidden">
+      <div className="relative h-[70vh] w-[70vh] max-h-[720px] max-w-[720px] overflow-hidden sm:h-[75vh] sm:w-[75vh] lg:h-[80vh] lg:w-[80vh] lg:max-h-[860px] lg:max-w-[860px]">
         {/* Lightweight CSS skeleton — always rendered first, cross-fades out when Spline is ready */}
         <div
           aria-hidden
-          className={`absolute inset-0 transition-opacity duration-[1600ms] ease-out ${
+          className={`absolute inset-0 transition-opacity duration-[1400ms] ease-out ${
             splineReady ? 'opacity-0' : 'opacity-100'
           }`}
         >
-          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_50%,hsl(var(--secondary)/0.32),hsl(var(--secondary)/0.10)_38%,transparent_70%)] blur-2xl" />
-          <div className="absolute inset-[12%] rounded-full bg-[radial-gradient(circle_at_50%_50%,hsl(var(--secondary)/0.18),transparent_60%)]" />
-          <div className="absolute inset-[22%] rounded-full border border-secondary/20 [mask-image:radial-gradient(circle,black_60%,transparent)]" />
-          <div className="absolute inset-[32%] rounded-full border border-secondary/15 animate-[spin_38s_linear_infinite] [mask-image:linear-gradient(135deg,black,transparent)]" />
-          <div className="absolute inset-[42%] rounded-full border border-secondary/10 animate-[spin_52s_linear_infinite_reverse] [mask-image:linear-gradient(45deg,black,transparent)]" />
+          <div className="absolute inset-[4%] rounded-full bg-[radial-gradient(circle_at_50%_44%,hsl(var(--secondary)/0.22),hsl(var(--secondary)/0.08)_34%,transparent_68%)] blur-2xl" />
+          <div className="absolute inset-[13%] rounded-full bg-[radial-gradient(circle_at_48%_42%,hsl(var(--secondary)/0.14),hsl(var(--background)/0.18)_48%,transparent_72%)]" />
+          <div className="absolute inset-[15%] rounded-full border border-secondary/18 opacity-70 [mask-image:radial-gradient(circle,black_48%,transparent_72%)]" />
+          <div className="absolute inset-[21%] rounded-full border border-secondary/14 opacity-60 animate-[spin_44s_linear_infinite] [mask-image:linear-gradient(120deg,transparent,black_35%,black_64%,transparent)]" />
+          <div className="absolute inset-[33%] rounded-full border border-secondary/10 opacity-50 animate-[spin_62s_linear_infinite_reverse] [mask-image:linear-gradient(35deg,black,transparent_70%)]" />
         </div>
 
-        {/* Spline iframe — lazy mounted, always loads (no permanent fallback) */}
-        {shouldLoadSpline && (
+        <canvas
+          ref={canvasRef}
+          aria-hidden
+          className={`absolute left-1/2 top-1/2 h-[86%] w-[86%] -translate-x-1/2 -translate-y-1/2 scale-[1.165] transition-opacity duration-[900ms] ease-out [contain:layout_paint_size] sm:h-[88%] sm:w-[88%] sm:scale-[1.14] ${
+            splineReady ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+
+        {/* Emergency fallback only if direct runtime fails; normal path never uses iframe. */}
+        {loadPhase === 'fallback' && (
           <iframe
-            src={SPLINE_SRC}
-            className={`absolute inset-0 w-full border-0 transition-opacity duration-[1200ms] ease-out ${
-              splineReady ? 'opacity-100' : 'opacity-0'
-            }`}
+            src={SPLINE_EMBED_URL}
+            className="absolute inset-0 w-full border-0 opacity-100 transition-opacity duration-[1200ms] ease-out"
             style={{ height: 'calc(100% + 60px)' }}
             title="3D Earth"
             loading="lazy"
             // @ts-expect-error — fetchpriority is valid HTML
             fetchpriority="low"
-            onLoad={() => setSplineReady(true)}
           />
         )}
       </div>
