@@ -130,7 +130,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
 
       {/* Vertically stacked hero: heading → brain → CTAs */}
       <motion.div
-        className="relative z-10 mx-auto flex min-h-[calc(100svh-9rem)] max-w-[1180px] flex-col items-center text-center"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-[calc(100svh-9rem)] max-w-[1180px] flex-col items-center text-center"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
@@ -141,11 +141,11 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         </h1>
 
         {/* Spacer keeps the CTAs anchored while the 3D phone uses the full hero height. */}
-        <div className="relative w-full flex-1" aria-hidden="true" />
+        <div className="pointer-events-none relative w-full flex-1" aria-hidden="true" />
 
         {/* 3. Audience CTAs at the bottom — clearly under the brain */}
         <motion.div
-          className="mt-2 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
+          className="pointer-events-auto mt-2 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
           initial="hidden"
           animate="show"
           variants={{
