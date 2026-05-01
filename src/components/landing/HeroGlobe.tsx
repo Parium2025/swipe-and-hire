@@ -92,6 +92,7 @@ export const HeroGlobe = () => {
 
       {/* Phone wrapper — animates in with a premium float + scale */}
       <motion.div
+        data-allow-touch="true"
         className="relative w-full h-full pointer-events-auto"
         initial={{
           opacity: 0,
