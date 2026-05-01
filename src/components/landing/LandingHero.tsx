@@ -121,9 +121,11 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         <div className="relative h-[70vh] w-[70vh] max-h-[720px] max-w-[720px] sm:h-[75vh] sm:w-[75vh] lg:h-[80vh] lg:w-[80vh] lg:max-h-[860px] lg:max-w-[860px]">
           {/* Soft radial fade so globe blends into dark background */}
           <div className="absolute inset-[-15%] rounded-full bg-[radial-gradient(circle,transparent_30%,hsl(var(--background))_72%)] z-10 pointer-events-none" />
-          <SplineScene
-            scene="https://prod.spline.design/holographicearthwithdynamiclines-Pg5EiAtNq3hkwAdNMvB5pQAD/scene.splinecode"
-            className="h-full w-full"
+          <iframe
+            src="https://my.spline.design/holographicearthwithdynamiclines-Pg5EiAtNq3hkwAdNMvB5pQAD/"
+            className="h-full w-full border-0"
+            title="3D Earth"
+            loading="eager"
           />
         </div>
       </motion.div>
