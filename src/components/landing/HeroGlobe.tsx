@@ -119,6 +119,7 @@ export const HeroGlobe = () => {
       >
         <iframe
           ref={iframeRef}
+          data-allow-touch="true"
           src={SPLINE_EMBED_URL}
           title="3D Phone"
           frameBorder={0}
