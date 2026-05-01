@@ -1,77 +1,21 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
-import LandingHero from '@/components/landing/LandingHero';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import ThoughtBubbles from '@/components/landing/ThoughtBubbles';
+import HeroSection from '@/components/landing/v2/HeroSection';
+import MarqueeStrip from '@/components/landing/v2/MarqueeStrip';
+import TestimonialQuote from '@/components/landing/v2/TestimonialQuote';
+import PricingSection from '@/components/landing/v2/PricingSection';
+import TestimonialCarousel from '@/components/landing/v2/TestimonialCarousel';
+import ProjectsSection from '@/components/landing/v2/ProjectsSection';
+import PartnerSection from '@/components/landing/v2/PartnerSection';
+import LandingV2Footer from '@/components/landing/v2/LandingV2Footer';
+import CopyrightBar from '@/components/landing/v2/CopyrightBar';
+import BottomNav from '@/components/landing/v2/BottomNav';
 
 const Landing = () => {
   const navigate = useNavigate();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const { documentElement, body } = document;
-    const scrollY = window.scrollY;
-    const previousHtml = {
-      overflow: documentElement.style.overflow,
-      height: documentElement.style.height,
-      overscrollBehavior: documentElement.style.overscrollBehavior,
-    };
-    const previousBody = {
-      overflow: body.style.overflow,
-      position: body.style.position,
-      top: body.style.top,
-      width: body.style.width,
-      height: body.style.height,
-      overscrollBehavior: body.style.overscrollBehavior,
-    };
-
-    documentElement.style.overflow = 'hidden';
-    documentElement.style.height = '100%';
-    documentElement.style.overscrollBehavior = 'none';
-    body.style.overflow = 'hidden';
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
-    body.style.width = '100%';
-    body.style.height = '100%';
-    body.style.overscrollBehavior = 'none';
-
-    const isAllowedTarget = (target: EventTarget | null) => {
-      const el = target as HTMLElement | null;
-      return !!(el && el.closest && el.closest('[data-allow-touch="true"]'));
-    };
-    const preventScroll = (event: TouchEvent) => {
-      if (isAllowedTarget(event.target)) return;
-      if (event.cancelable) event.preventDefault();
-    };
-    const preventWheel = (event: WheelEvent) => {
-      if (isAllowedTarget(event.target)) return;
-      if (event.cancelable) event.preventDefault();
-    };
-    const preventGesture = (event: Event) => {
-      if (event.cancelable) event.preventDefault();
-    };
-    window.addEventListener('touchmove', preventScroll, { passive: false });
-    document.addEventListener('touchmove', preventScroll, { passive: false });
-    document.addEventListener('wheel', preventWheel, { passive: false });
-    document.addEventListener('gesturestart', preventGesture);
-
-    return () => {
-      window.removeEventListener('touchmove', preventScroll);
-      document.removeEventListener('touchmove', preventScroll);
-      document.removeEventListener('wheel', preventWheel);
-      document.removeEventListener('gesturestart', preventGesture);
-      documentElement.style.overflow = previousHtml.overflow;
-      documentElement.style.height = previousHtml.height;
-      documentElement.style.overscrollBehavior = previousHtml.overscrollBehavior;
-      body.style.overflow = previousBody.overflow;
-      body.style.position = previousBody.position;
-      body.style.top = previousBody.top;
-      body.style.width = previousBody.width;
-      body.style.height = previousBody.height;
-      body.style.overscrollBehavior = previousBody.overscrollBehavior;
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
 
   // SEO
   useEffect(() => {
@@ -87,7 +31,8 @@ const Landing = () => {
       el.setAttribute('content', content);
     };
 
-    const desc = 'Parium matchar kandidater och arbetsgivare på sekunder. Swipea, matcha och anställ – Tinder för jobb.';
+    const desc =
+      'Parium matchar kandidater och arbetsgivare på sekunder. Swipea, matcha och anställ – Tinder för jobb.';
     setMeta('description', desc);
     setMeta('og:title', 'Parium – Rekrytering. På 60 sekunder.', 'property');
     setMeta('og:description', desc, 'property');
@@ -99,9 +44,8 @@ const Landing = () => {
     setMeta('twitter:description', desc);
     setMeta('twitter:card', 'summary_large_image');
     setMeta('robots', 'index, follow, max-image-preview:large');
-    setMeta('keywords', 'rekrytering, jobb, swipe, matchning, AI, hitta jobb, Sverige, kandidater');
 
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.rel = 'canonical';
@@ -109,29 +53,7 @@ const Landing = () => {
     }
     canonical.href = 'https://parium.se';
 
-    const jsonLd = {
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: 'Parium',
-      applicationCategory: 'BusinessApplication',
-      operatingSystem: 'Web, iOS, Android',
-      description: desc,
-      url: 'https://parium.se',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' },
-      author: { '@type': 'Organization', name: 'Parium AB' },
-    };
-
-    let script = document.querySelector('#landing-jsonld') as HTMLScriptElement;
-    if (!script) {
-      script = document.createElement('script');
-      script.id = 'landing-jsonld';
-      script.type = 'application/ld+json';
-      document.head.appendChild(script);
-    }
-    script.textContent = JSON.stringify(jsonLd);
-
     return () => {
-      script?.remove();
       canonical?.remove();
     };
   }, []);
@@ -142,18 +64,28 @@ const Landing = () => {
   };
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className="fixed inset-0 z-0 overflow-hidden overscroll-none bg-gradient-parium text-primary-foreground"
-      style={{ touchAction: 'none' }}
-    >
+    <div className="landing-v2-scroll bg-gradient-parium text-primary-foreground font-pp-neue">
       <AnimatedBackground />
-      <div className="relative z-10 h-full">
+      <ThoughtBubbles />
+
+      <div className="relative z-10">
         <LandingNav onLoginClick={handleLogin} />
-        <main className="h-full">
-          <LandingHero scrollContainerRef={scrollContainerRef} />
+
+        <main>
+          <HeroSection />
+          <MarqueeStrip />
+          <TestimonialQuote />
+          <PricingSection />
+          <TestimonialCarousel />
+          <ProjectsSection />
+          <PartnerSection />
+          <LandingV2Footer />
+          <CopyrightBar />
+          <div className="h-24" aria-hidden />
         </main>
       </div>
+
+      <BottomNav />
     </div>
   );
 };
