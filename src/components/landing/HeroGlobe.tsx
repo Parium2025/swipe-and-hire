@@ -101,35 +101,12 @@ export const HeroGlobe = () => {
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            width: 'var(--brain-scene-size, 170%)',
-            height: 'calc(var(--brain-scene-size, 170%) * 1.12)',
-            transform: 'translate(-50%, -50%) translate(var(--brain-x, 4%), var(--brain-y, 0%)) scale(var(--brain-render-scale, 0.62))',
+            width: 'var(--brain-scene-size, 156%)',
+            height: 'calc(var(--brain-scene-size, 156%) * 1.12)',
+            transform: 'translate(-50%, -50%) translate(var(--brain-x, 2%), var(--brain-y, -2%)) scale(var(--brain-render-scale, 0.66))',
           }}
         />
-        <div className="parium-mobile-sparkles" aria-hidden />
         <style>{`
-          .parium-mobile-sparkles {
-            pointer-events: none;
-            position: absolute;
-            inset: 10% -8% 8%;
-            background-image:
-              radial-gradient(circle, hsl(var(--secondary) / 0.72) 0 1px, transparent 1.8px),
-              radial-gradient(circle, hsl(var(--foreground) / 0.32) 0 1px, transparent 2.1px),
-              radial-gradient(circle, hsl(var(--primary) / 0.48) 0 1.4px, transparent 2.5px);
-            background-size: 18px 26px, 31px 39px, 47px 58px;
-            background-position: 2px 0, 11px 14px, 24px 7px;
-            opacity: 0.34;
-            mix-blend-mode: screen;
-            -webkit-mask-image:
-              linear-gradient(90deg, black 0 20%, transparent 42% 58%, black 80% 100%),
-              linear-gradient(180deg, transparent, black 16% 84%, transparent);
-            -webkit-mask-composite: source-in;
-            mask-image:
-              linear-gradient(90deg, black 0 20%, transparent 42% 58%, black 80% 100%),
-              linear-gradient(180deg, transparent, black 16% 84%, transparent);
-            mask-composite: intersect;
-          }
-
           @media (min-width: 640px) {
             .parium-brain-stage .parium-brain-iframe {
               --brain-scene-size: 100%;
@@ -137,8 +114,6 @@ export const HeroGlobe = () => {
               --brain-x: 0%;
               --brain-y: 0%;
             }
-
-            .parium-mobile-sparkles { display: none; }
           }
         `}</style>
       </div>
