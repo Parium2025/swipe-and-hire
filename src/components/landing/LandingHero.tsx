@@ -133,31 +133,61 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        {/* Main heading — word-by-word stagger */}
+        {/* Main heading — Marvellco-style letter reveal: each glyph rises out
+            of a clip mask with blur + scale on a long, slow ease. */}
         <motion.div className="mx-auto pb-4">
           <h1
             id="landing-hero-heading"
-            className="text-[2.6rem] font-black leading-[1.1] tracking-[-0.03em] text-white sm:text-[4rem] md:text-[5.2rem] lg:text-[6.4rem]"
+            className="text-[2.6rem] font-black leading-[1.05] tracking-[-0.035em] text-white sm:text-[4rem] md:text-[5.2rem] lg:text-[6.4rem]"
           >
-            {'Vi gör drömmar\ntill verklighet'.split('\n').map((line, li) => (
-              <span key={li} className="block overflow-hidden py-[0.08em]">
-                {line.split(' ').map((word, wi) => (
-                  <motion.span
-                    key={wi}
-                    className="inline-block mr-[0.28em] last:mr-0"
-                    initial={{ y: '120%', opacity: 0, filter: 'blur(10px)' }}
-                    animate={{ y: '0%', opacity: 1, filter: 'blur(0px)' }}
-                    transition={{
-                      duration: 1.1,
-                      ease: [0.22, 1, 0.36, 1],
-                      delay: 0.5 + (li * 3 + wi) * 0.14,
-                    }}
-                  >
-                    {word}
-                  </motion.span>
-                ))}
-              </span>
-            ))}
+            {(() => {
+              const lines = ['Vi gör drömmar', 'till verklighet'];
+              let globalIndex = 0;
+              return lines.map((line, li) => (
+                <span
+                  key={li}
+                  className="block overflow-hidden py-[0.1em]"
+                  aria-label={line}
+                >
+                  {line.split(' ').map((word, wi, words) => (
+                    <span key={wi} className="inline-block whitespace-nowrap">
+                      {Array.from(word).map((char) => {
+                        const i = globalIndex++;
+                        return (
+                          <motion.span
+                            key={i}
+                            aria-hidden
+                            className="inline-block will-change-transform"
+                            initial={{
+                              y: '110%',
+                              opacity: 0,
+                              filter: 'blur(14px)',
+                              scale: 0.92,
+                            }}
+                            animate={{
+                              y: '0%',
+                              opacity: 1,
+                              filter: 'blur(0px)',
+                              scale: 1,
+                            }}
+                            transition={{
+                              duration: 1.4,
+                              ease: [0.16, 1, 0.3, 1],
+                              delay: 0.55 + i * 0.045,
+                            }}
+                          >
+                            {char}
+                          </motion.span>
+                        );
+                      })}
+                      {wi < words.length - 1 && (
+                        <span className="inline-block">&nbsp;</span>
+                      )}
+                    </span>
+                  ))}
+                </span>
+              ));
+            })()}
           </h1>
         </motion.div>
 
