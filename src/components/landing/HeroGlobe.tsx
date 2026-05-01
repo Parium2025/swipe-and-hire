@@ -62,19 +62,14 @@ export const HeroGlobe = () => {
 
     app.load(SPLINE_SCENE_URL).then(() => {
       app.setBackgroundColor('transparent');
-      app.setZoom(window.innerWidth < 640 ? 0.58 : 1);
-      app.setSize(window.innerWidth < 640 ? 1180 : canvas.clientWidth, window.innerWidth < 640 ? 720 : canvas.clientHeight);
+      app.setSize(canvas.clientWidth, canvas.clientHeight);
+      app.setZoom(window.innerWidth < 640 ? 1.35 : 1);
       requestAnimationFrame(() => setReady(true));
     });
 
     const onResize = () => {
-      if (window.innerWidth < 640) {
-        app.setSize(1180, 720);
-        app.setZoom(0.58);
-      } else {
-        app.setSize(canvas.clientWidth, canvas.clientHeight);
-        app.setZoom(1);
-      }
+      app.setSize(canvas.clientWidth, canvas.clientHeight);
+      app.setZoom(window.innerWidth < 640 ? 1.35 : 1);
     };
 
     const onVis = () => (document.hidden ? app.stop() : app.play());
@@ -111,7 +106,7 @@ export const HeroGlobe = () => {
         <canvas
           ref={canvasRef}
           aria-label="Particle AI Brain"
-          className={`absolute left-1/2 top-1/2 h-[720px] w-[1180px] -translate-x-1/2 -translate-y-1/2 translate-x-[6%] -translate-y-[3%] scale-[0.46] transition-opacity duration-[1200ms] ease-out sm:h-full sm:w-full sm:translate-x-0 sm:translate-y-0 sm:scale-100 ${
+          className={`absolute left-1/2 top-1/2 h-[58svh] w-[170vw] -translate-x-1/2 -translate-y-1/2 translate-x-[4%] -translate-y-[2%] transition-opacity duration-[1200ms] ease-out sm:h-full sm:w-full sm:translate-x-0 sm:translate-y-0 ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
         />
