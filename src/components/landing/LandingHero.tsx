@@ -118,14 +118,11 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
       >
-        <div className="relative h-[70vh] w-[70vh] max-h-[720px] max-w-[720px] sm:h-[75vh] sm:w-[75vh] lg:h-[80vh] lg:w-[80vh] lg:max-h-[860px] lg:max-w-[860px] overflow-hidden rounded-full">
-          {/* Soft radial fade so globe blends into dark background */}
-          <div className="absolute inset-[-15%] rounded-full bg-[radial-gradient(circle,transparent_30%,hsl(var(--background))_72%)] z-10 pointer-events-none" />
-          {/* Bottom fade to hide Spline watermark */}
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[hsl(var(--background))] to-transparent z-10 pointer-events-none" />
+        <div className="relative h-[70vh] w-[70vh] max-h-[720px] max-w-[720px] sm:h-[75vh] sm:w-[75vh] lg:h-[80vh] lg:w-[80vh] lg:max-h-[860px] lg:max-w-[860px] overflow-hidden">
           <iframe
             src="https://my.spline.design/holographicearthwithdynamiclines-Pg5EiAtNq3hkwAdNMvB5pQAD/"
-            className="h-full w-full border-0"
+            className="absolute inset-0 w-full border-0"
+            style={{ height: 'calc(100% + 60px)' }}
             title="3D Earth"
             loading="eager"
           />
@@ -151,13 +148,13 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         style={{ perspective: 650 }}
       >
         {/* Main heading — word-by-word stagger */}
-        <motion.div className="mx-auto overflow-hidden pb-2">
+        <motion.div className="mx-auto pb-4">
           <h1
             id="landing-hero-heading"
-            className="text-[2.6rem] font-black leading-[1.05] tracking-[-0.03em] text-white sm:text-[4rem] md:text-[5.2rem] lg:text-[6.4rem]"
+            className="text-[2.6rem] font-black leading-[1.1] tracking-[-0.03em] text-white sm:text-[4rem] md:text-[5.2rem] lg:text-[6.4rem]"
           >
             {'Vi gör drömmar\ntill verklighet'.split('\n').map((line, li) => (
-              <span key={li} className="block overflow-hidden">
+              <span key={li} className="block overflow-hidden py-[0.08em]">
                 {line.split(' ').map((word, wi) => (
                   <motion.span
                     key={wi}
@@ -165,9 +162,9 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
                     initial={{ y: '120%', opacity: 0, filter: 'blur(10px)' }}
                     animate={{ y: '0%', opacity: 1, filter: 'blur(0px)' }}
                     transition={{
-                      duration: 0.95,
+                      duration: 1.1,
                       ease: [0.22, 1, 0.36, 1],
-                      delay: 0.5 + (li * 3 + wi) * 0.12,
+                      delay: 0.5 + (li * 3 + wi) * 0.14,
                     }}
                   >
                     {word}
@@ -178,24 +175,14 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           </h1>
         </motion.div>
 
-        {/* Subtitle */}
-        <motion.p
-          className="mt-4 max-w-lg text-base text-white/50 sm:text-lg md:mt-6 lg:text-xl"
-          initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ duration: 1, ease, delay: 1.4 }}
-        >
-          Rekrytering. På 60 sekunder.
-        </motion.p>
-
         {/* Audience buttons */}
         <motion.div
-          className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 lg:mt-12"
+          className="mt-8 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 lg:mt-10"
           initial="hidden"
           animate="show"
           variants={{
             hidden: {},
-            show: { transition: { staggerChildren: 0.16, delayChildren: 1.7 } },
+            show: { transition: { staggerChildren: 0.18, delayChildren: 1.6 } },
           }}
         >
           {audienceOptions.map((option) => (
