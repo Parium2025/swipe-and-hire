@@ -53,6 +53,13 @@ export const HeroGlobe = () => {
       document.head.appendChild(link);
     };
 
+    const getSceneUrl = () => {
+      const url = new URL(SPLINE_SCENE_URL, window.location.href);
+      const previewToken = new URLSearchParams(window.location.search).get('__lovable_token');
+      if (previewToken && url.origin === window.location.origin) url.searchParams.set('__lovable_token', previewToken);
+      return url.toString();
+    };
+
     const bootSpline = async () => {
       const canvas = canvasRef.current;
       if (!canvas || cancelled) return;
@@ -62,7 +69,7 @@ export const HeroGlobe = () => {
       try {
         const [{ Application }, sceneResponse] = await Promise.all([
           import('@splinetool/runtime'),
-          fetch(SPLINE_SCENE_URL, {
+          fetch(getSceneUrl(), {
             cache: 'force-cache',
             credentials: 'omit',
             mode: 'cors',
