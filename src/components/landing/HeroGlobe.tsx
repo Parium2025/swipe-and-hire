@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Application } from '@splinetool/runtime';
 
 /**
  * HeroGlobe — Spline "Particle AI Brain" with a premium loading experience.
@@ -22,12 +21,12 @@ import { Application } from '@splinetool/runtime';
  *     battery and CPU on mobile.
  */
 
-const SPLINE_SCENE_URL = '/spline/particleaibrain.splinecode';
+const SPLINE_EMBED_URL =
+  'https://my.spline.design/particleaibrain-qOZru01HpsaDi218BLYF1WXA/';
 
 export const HeroGlobe = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const appRef = useRef<Application | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [ready, setReady] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
