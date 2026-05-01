@@ -134,55 +134,13 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        {/* 1. Heading at the very top */}
-        <motion.div className="mx-auto w-full">
-          <h1
-            id="landing-hero-heading"
-            className="text-[1.95rem] font-black leading-[1.05] tracking-[-0.035em] text-white sm:text-[3rem] md:text-[3.8rem] lg:text-[4.8rem]"
-          >
-            {(() => {
-              const lines = ['Från en tanke till verklighet,', 'vi gör det möjligt'];
-              let globalIndex = 0;
-              return lines.map((line, li) => (
-                <span
-                  key={li}
-                  className="block overflow-hidden py-[0.1em]"
-                  aria-label={line}
-                >
-                  {line.split(' ').map((word, wi, words) => (
-                    <span key={wi} className="inline-block whitespace-nowrap">
-                      {Array.from(word).map((char) => {
-                        const i = globalIndex++;
-                        return (
-                          <motion.span
-                            key={i}
-                            aria-hidden
-                            className="inline-block will-change-transform"
-                            initial={{ y: '-110%', opacity: 0 }}
-                            animate={{ y: '0%', opacity: 1 }}
-                            transition={{
-                              duration: 1.15,
-                              ease: [0.85, 0.09, 0.15, 0.91],
-                              delay: 0.6 + i * 0.035,
-                            }}
-                          >
-                            {char}
-                          </motion.span>
-                        );
-                      })}
-                      {wi < words.length - 1 && (
-                        <span className="inline-block">&nbsp;</span>
-                      )}
-                    </span>
-                  ))}
-                </span>
-              ));
-            })()}
-          </h1>
-        </motion.div>
+        {/* Hidden heading for SEO/a11y only */}
+        <h1 id="landing-hero-heading" className="sr-only">
+          Parium — från en tanke till verklighet
+        </h1>
 
-        {/* 2. The 3D brain — flexes to fill remaining space between heading and CTAs */}
-        <div className="relative my-2 w-full flex-1 sm:my-4">
+        {/* The 3D brain — fills the hero, with thought bubbles framing it */}
+        <div className="relative w-full flex-1">
           <HeroGlobe />
         </div>
 
