@@ -95,7 +95,7 @@ export const HeroGlobe = () => {
           loading="eager"
           // @ts-expect-error — fetchpriority is valid HTML
           fetchpriority="high"
-          allowTransparent
+          allowTransparency={true}
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
@@ -105,8 +105,9 @@ export const HeroGlobe = () => {
           style={{
             position: 'absolute',
             top: 0,
-            left: 0,
-            width: '100%',
+            right: 0,
+            left: 'auto',
+            width: 'max(100%, 700px)',
             height: 'calc(100% + 52px)',
             border: 'none',
             background: 'transparent',
