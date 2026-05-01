@@ -101,9 +101,9 @@ export const HeroGlobe = () => {
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            width: 'var(--brain-scene-size, 176%)',
-            height: 'calc(var(--brain-scene-size, 176%) * 1.12)',
-            transform: 'translate(-50%, -50%) translateY(var(--brain-y, 5%)) scale(var(--brain-render-scale, 0.58))',
+            width: 'var(--brain-scene-size, 156%)',
+            height: 'calc(var(--brain-scene-size, 156%) * 1.12)',
+            transform: 'translate(-50%, -50%) translateY(var(--brain-y, 4%)) scale(var(--brain-render-scale, 0.66))',
           }}
         />
         <style>{`
