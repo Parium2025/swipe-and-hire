@@ -182,7 +182,7 @@ const AnimatedRoutes = () => {
 
 const AppShell = ({ showHeader }: { showHeader: boolean }) => {
   const location = useLocation();
-  const isLightweightRoute = ['/', '/auth'].includes(location.pathname);
+  const isLightweightRoute = ['/', '/auth', '/jobbsokare', '/arbetsgivare'].includes(location.pathname);
 
   return (
     <>
@@ -213,7 +213,7 @@ const App = () => {
   // Förladdda alla kritiska bilder globalt vid app-start.
   // Viktigt: på /auth vill vi INTE starta tunga preloads som kan konkurrera med loggans first paint.
   const preloadEnabled = typeof window !== 'undefined'
-    ? !['/', '/auth'].includes(window.location.pathname)
+    ? !['/', '/auth', '/jobbsokare', '/arbetsgivare'].includes(window.location.pathname)
     : true;
   useGlobalImagePreloader(preloadEnabled);
 

@@ -1,4 +1,4 @@
-import { type PointerEvent, type RefObject, useState } from 'react';
+import { type PointerEvent, type RefObject, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
@@ -24,6 +24,113 @@ const audienceOptions = [
 ];
 
 type AudienceRole = (typeof audienceOptions)[number]['role'];
+
+const PariumGlobe = ({ selectedRole }: { selectedRole: AudienceRole | null }) => {
+  const orbitPaths = useMemo(
+    () => [
+      'M91 238c60-98 220-126 349-68 92 42 151 111 141 162-12 63-126 82-254 44C174 331 60 290 91 238Z',
+      'M146 126c84-46 226-25 318 48 88 69 96 155 17 193-84 41-225 12-314-64-83-70-92-139-21-177Z',
+      'M276 65c77 74 113 201 80 283-29 74-112 76-186 5-76-73-111-199-80-281 28-74 111-78 186-7Z',
+      'M455 85c-38 94-142 218-233 278-81 54-126 31-101-51 28-91 132-216 232-278 86-53 131-30 102 51Z',
+    ],
+    []
+  );
+
+  const particles = useMemo(
+    () => Array.from({ length: 34 }, (_, i) => ({
+      x: 82 + ((i * 47) % 438),
+      y: 68 + ((i * 83) % 354),
+      r: 1.25 + (i % 4) * 0.42,
+      opacity: 0.28 + (i % 5) * 0.08,
+    })),
+    []
+  );
+
+  return (
+    <motion.div
+      className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
+      initial={{ opacity: 0, scale: 0.72, filter: 'blur(18px)' }}
+      animate={
+        selectedRole
+          ? { opacity: 1, scale: 2.28, filter: 'blur(0px)' }
+          : { opacity: 1, scale: 1, filter: 'blur(0px)' }
+      }
+      transition={{ duration: selectedRole ? 1.08 : 2.05, ease: [0.16, 1, 0.3, 1] }}
+      aria-hidden="true"
+    >
+      <motion.div
+        className="relative h-[68vh] w-[68vh] max-h-[710px] max-w-[710px] sm:h-[74vh] sm:w-[74vh] lg:h-[80vh] lg:w-[80vh] lg:max-h-[850px] lg:max-w-[850px]"
+        animate={selectedRole ? { y: 0 } : { y: [0, -10, 0] }}
+        transition={selectedRole ? { duration: 0.9, ease } : { duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className="absolute inset-[5%] rounded-full bg-secondary/10 blur-3xl" />
+        <div className="absolute inset-[13%] rounded-full bg-primary/12 blur-2xl" />
+        <svg className="relative h-full w-full" viewBox="0 0 640 640" role="img" aria-label="Parium globe">
+          <defs>
+            <radialGradient id="parium-globe-core" cx="50%" cy="45%" r="54%">
+              <stop offset="0%" stopColor="hsl(var(--secondary))" stopOpacity="0.34" />
+              <stop offset="42%" stopColor="hsl(var(--primary))" stopOpacity="0.14" />
+              <stop offset="76%" stopColor="hsl(var(--background))" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="hsl(var(--background))" stopOpacity="0" />
+            </radialGradient>
+            <linearGradient id="parium-globe-line" x1="82" y1="83" x2="560" y2="514" gradientUnits="userSpaceOnUse">
+              <stop stopColor="hsl(var(--secondary))" stopOpacity="0.12" />
+              <stop offset="0.48" stopColor="hsl(var(--secondary))" stopOpacity="0.72" />
+              <stop offset="1" stopColor="hsl(var(--primary))" stopOpacity="0.18" />
+            </linearGradient>
+            <filter id="parium-glow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <motion.g
+            animate={selectedRole ? { rotate: 14 } : { rotate: [0, 360] }}
+            transition={selectedRole ? { duration: 1.08, ease } : { duration: 58, repeat: Infinity, ease: 'linear' }}
+            style={{ transformOrigin: '320px 320px' }}
+          >
+            <circle cx="320" cy="320" r="244" fill="url(#parium-globe-core)" />
+            <circle cx="320" cy="320" r="244" fill="none" stroke="hsl(var(--secondary))" strokeOpacity="0.18" strokeWidth="1.2" />
+            {orbitPaths.map((path, index) => (
+              <path
+                key={path}
+                d={path}
+                fill="none"
+                stroke="url(#parium-globe-line)"
+                strokeWidth={index === 0 ? 1.7 : 1.15}
+                strokeDasharray={index % 2 ? '7 13' : '2 10'}
+                strokeLinecap="round"
+                filter="url(#parium-glow)"
+              />
+            ))}
+            {particles.map((particle, index) => (
+              <circle
+                key={`${particle.x}-${particle.y}`}
+                cx={particle.x}
+                cy={particle.y}
+                r={particle.r}
+                fill="hsl(var(--secondary))"
+                opacity={particle.opacity * (index % 3 === 0 ? 1 : 0.68)}
+              />
+            ))}
+          </motion.g>
+          <motion.path
+            d="M504 169c21 17 37 34 50 54"
+            fill="none"
+            stroke="hsl(var(--accent))"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeDasharray="4 10"
+            animate={{ pathLength: [0.25, 1, 0.25], opacity: [0.35, 0.95, 0.35] }}
+            transition={{ duration: 5.8, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </svg>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 const AudienceCard = ({
   label,
@@ -104,47 +211,33 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
     setSelectedRole(role);
     sessionStorage.setItem('parium-skip-splash', '1');
     window.setTimeout(() => {
-      navigate(role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare');
-    }, 860);
+      navigate(role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare', {
+        state: { entry: 'globe-zoom', audience: role },
+      });
+    }, 1060);
   };
   const exitX = selectedRole === 'job_seeker' ? '-105vw' : selectedRole === 'employer' ? '105vw' : 0;
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24" aria-labelledby="landing-hero-heading">
-      {/* Spline 3D Earth Globe — behind everything */}
-      <motion.div
-        className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
-        initial={{ opacity: 0, scale: 0.7 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-      >
-        <div className="relative h-[70vh] w-[70vh] max-h-[720px] max-w-[720px] sm:h-[75vh] sm:w-[75vh] lg:h-[80vh] lg:w-[80vh] lg:max-h-[860px] lg:max-w-[860px] overflow-hidden">
-          <iframe
-            src="https://my.spline.design/holographicearthwithdynamiclines-Pg5EiAtNq3hkwAdNMvB5pQAD/"
-            className="absolute inset-0 w-full border-0"
-            style={{ height: 'calc(100% + 60px)' }}
-            title="3D Earth"
-            loading="eager"
-          />
-        </div>
-      </motion.div>
+      <PariumGlobe selectedRole={selectedRole} />
 
       {/* Ambient glow */}
       <div className="pointer-events-none absolute inset-x-0 top-24 mx-auto h-[30rem] max-w-5xl rounded-full bg-secondary/10 blur-3xl z-[1]" />
 
       {selectedRole && (
         <motion.div
-          className="pointer-events-none absolute inset-0 z-20 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--secondary)/0.28),hsl(var(--background)/0.98)_68%)]"
+          className="pointer-events-none absolute inset-0 z-20 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--secondary)/0.22),hsl(var(--background)/0.12)_34%,hsl(var(--background)/0.98)_78%)]"
           initial={{ x: selectedRole === 'job_seeker' ? '100%' : '-100%', opacity: 0.88 }}
           animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.86, ease }}
+          transition={{ duration: 1.06, ease }}
         />
       )}
 
       <motion.div
         className="relative z-10 mx-auto flex min-h-[calc(100svh-11rem)] max-w-[1180px] flex-col items-center justify-center text-center"
-        animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
-        transition={{ duration: 0.86, ease }}
+        animate={selectedRole ? { x: exitX, opacity: 0, scale: 0.74, filter: 'blur(16px)' } : { x: 0, opacity: 1, scale: 1, filter: 'blur(0px)' }}
+        transition={{ duration: 1.06, ease }}
         style={{ perspective: 650 }}
       >
         {/* Main heading — word-by-word stagger */}

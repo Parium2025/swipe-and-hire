@@ -141,10 +141,7 @@
     <!-- Preload Parium logos for instant rendering -->
     <link rel="preload" as="image" href="/src/assets/parium-logo-rings.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/parium-auth-logo.png" fetchpriority="high" />
-    <!-- Preload hero image used on Landing -->
-    <link rel="preload" as="image" href="/assets/hero-woman-left-hand-verified.jpg" type="image/jpeg" fetchpriority="high" />
-    <!-- Preload NASA Earth day image for Globe component -->
-    <link rel="preload" as="image" href="/images/earth-day.jpg" type="image/jpeg" fetchpriority="low" />
+    <!-- Heavy app imagery is route-loaded to keep the landing experience responsive. -->
  
       
     
@@ -417,8 +414,6 @@
     </div>
     
     <div id="app-bg" aria-hidden="true"></div>
-    <!-- Hidden hero preloader for Safari/iOS -->
-    <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
     <div id="root"></div>
     <script>
       (function() {
