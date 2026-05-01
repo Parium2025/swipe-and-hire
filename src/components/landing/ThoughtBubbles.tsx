@@ -1,13 +1,16 @@
 import { motion, useReducedMotion } from 'framer-motion';
 
 /**
- * ThoughtBubbles — six floating thought clouds positioned around the
- * 3D brain. Bubbles are spread evenly so they never overlap each other
- * or the brain in the center. Each bubble has:
- *  - a staggered fade/scale entrance
- *  - a slow infinite float loop
- *  - a hover effect (lift, glow, brighten)
- *  - a "tail" of descending dots that point toward the brain's center
+ * ThoughtBubbles — floating thought clouds that appear to rise FROM the
+ * brain. All bubbles are placed in the upper half of the hero (above the
+ * brain's visual center) and arranged asymmetrically so they never feel
+ * like a grid. Each bubble has a trail of dots that descend toward the
+ * brain — making them look connected to / pulled out of the brain.
+ *
+ * Constraints:
+ *  - Nothing sits behind the brain (everything in upper region only).
+ *  - Asymmetric placement (different heights, no straight rows).
+ *  - Tail dots always descend toward the brain center.
  */
 
 type Bubble = {
@@ -19,127 +22,133 @@ type Bubble = {
   /** Float duration (s) for the idle loop */
   floatDuration: number;
   /**
-   * Where the bubble sits relative to the brain — controls which corner
-   * the tail dots descend from so they always point INWARD toward the brain.
+   * Horizontal anchor on the bubble where the tail starts.
+   * 'l' = bottom-left, 'c' = bottom-center, 'r' = bottom-right.
+   * Choose based on which side of the brain the bubble sits on, so the
+   * tail visually slants toward the brain center.
    */
-  quadrant: 'tl' | 'tr' | 'bl' | 'br' | 'l' | 'r';
+  tailAnchor: 'l' | 'c' | 'r';
+  /** Tail length (number of dots, 3-5). Longer for bubbles farther up. */
+  tailLength?: number;
   /** Hidden on small screens to avoid clutter */
   hideOnMobile?: boolean;
 };
 
+/**
+ * All bubbles live in the TOP half of the hero, asymmetrically arranged.
+ * Heights are intentionally varied (no two on the same row).
+ */
 const bubbles: Bubble[] = [
-  // Top-left
+  // Far top-left, high up
   {
     text: 'Ska vi rekrytera en ny kollega?',
-    position: 'left-[2%] top-[14%] sm:left-[4%] sm:top-[16%] lg:left-[6%] lg:top-[18%]',
+    position: 'left-[3%] top-[6%] sm:left-[5%] sm:top-[5%] lg:left-[7%] lg:top-[6%]',
     delay: 3.0,
     floatDuration: 7.5,
-    quadrant: 'tl',
+    tailAnchor: 'r',
+    tailLength: 5,
   },
-  // Top-right
-  {
-    text: 'Hur går vi tillväga för att rekrytera?',
-    position: 'right-[2%] top-[14%] sm:right-[4%] sm:top-[16%] lg:right-[6%] lg:top-[18%]',
-    delay: 3.2,
-    floatDuration: 9,
-    quadrant: 'tr',
-  },
-  // Middle-left (desktop only — keeps mobile breathing)
+  // Upper-mid-left, slightly lower than first
   {
     text: 'Ska jag söka nytt jobb?',
-    position: 'left-[1%] top-[44%] sm:left-[3%] lg:left-[4%]',
+    position: 'left-[6%] top-[26%] sm:left-[14%] sm:top-[22%] lg:left-[18%] lg:top-[24%]',
     delay: 3.4,
     floatDuration: 8.5,
-    quadrant: 'l',
-    hideOnMobile: true,
+    tailAnchor: 'r',
+    tailLength: 4,
+    hideOnMobile: false,
   },
-  // Middle-right (desktop only)
+  // Top-center, highest
   {
     text: 'Är det värt att anställa en till?',
-    position: 'right-[1%] top-[44%] sm:right-[3%] lg:right-[4%]',
+    position: 'left-1/2 -translate-x-1/2 top-[2%] sm:top-[3%]',
     delay: 3.6,
-    floatDuration: 7.8,
-    quadrant: 'r',
+    floatDuration: 9,
+    tailAnchor: 'c',
+    tailLength: 5,
     hideOnMobile: true,
   },
-  // Bottom-left
+  // Upper-mid-right, lower than top-center
   {
-    text: 'Jag trivs inte där jag jobbar i dag.',
-    position: 'left-[2%] bottom-[8%] sm:left-[5%] sm:bottom-[10%] lg:left-[8%] lg:bottom-[12%]',
-    delay: 3.8,
+    text: 'Hur går vi tillväga för att rekrytera?',
+    position: 'right-[6%] top-[20%] sm:right-[14%] sm:top-[18%] lg:right-[18%] lg:top-[20%]',
+    delay: 3.2,
     floatDuration: 8,
-    quadrant: 'bl',
+    tailAnchor: 'l',
+    tailLength: 4,
   },
-  // Bottom-right
+  // Far top-right, high
   {
     text: 'Det är jobbigt att söka jobb.',
-    position: 'right-[2%] bottom-[8%] sm:right-[5%] sm:bottom-[10%] lg:right-[8%] lg:bottom-[12%]',
-    delay: 4.0,
+    position: 'right-[3%] top-[8%] sm:right-[5%] sm:top-[7%] lg:right-[7%] lg:top-[8%]',
+    delay: 3.8,
     floatDuration: 9.5,
-    quadrant: 'br',
+    tailAnchor: 'l',
+    tailLength: 5,
+  },
+  // Slight off-center bubble between mid-left and top-center
+  {
+    text: 'Jag trivs inte där jag jobbar i dag.',
+    position: 'left-[32%] top-[12%] sm:left-[34%] sm:top-[10%] lg:left-[36%] lg:top-[12%]',
+    delay: 4.0,
+    floatDuration: 7.8,
+    tailAnchor: 'c',
+    tailLength: 4,
+    hideOnMobile: true,
   },
 ];
 
-/**
- * Compute tail position + direction. Tails always point INWARD
- * toward the brain in the center of the hero.
- */
-const tailPlacement = (q: Bubble['quadrant']) => {
-  switch (q) {
-    case 'tl':
-      // bubble top-left of brain → tail descends from bottom-right of bubble, pointing down-right
-      return { side: 'right-5 -bottom-6', dir: 'down-right' };
-    case 'tr':
-      return { side: 'left-5 -bottom-6', dir: 'down-left' };
-    case 'l':
-      return { side: '-right-6 top-1/2 -translate-y-1/2', dir: 'right' };
-    case 'r':
-      return { side: '-left-6 top-1/2 -translate-y-1/2', dir: 'left' };
-    case 'bl':
-      // bubble below-left of brain → tail rises from top-right, pointing up-right
-      return { side: 'right-5 -top-6', dir: 'up-right' };
-    case 'br':
-      return { side: 'left-5 -top-6', dir: 'up-left' };
-  }
-};
-
-const TailDots = ({ direction, delay }: { direction: string; delay: number }) => {
+const TailDots = ({ length, delay }: { length: number; delay: number }) => {
   const prefersReducedMotion = useReducedMotion();
-  const isHorizontal = direction === 'left' || direction === 'right';
-  const flexClass = isHorizontal ? 'flex-row' : 'flex-col';
+  // Build dots: largest near the bubble, shrinking down toward the brain
+  const sizes = ['h-2 w-2', 'h-1.5 w-1.5', 'h-1.5 w-1.5', 'h-1 w-1', 'h-1 w-1'];
+  const dots = Array.from({ length }, (_, i) => sizes[i] ?? 'h-1 w-1');
 
-  // Order dots so the largest is closest to the bubble and they shrink toward the brain
   return (
-    <div className={`flex ${flexClass} items-center gap-1`}>
-      <motion.span
-        className="h-2 w-2 rounded-full border border-white/40 bg-white/85 shadow-[0_2px_8px_hsl(var(--secondary)/0.4)]"
-        animate={prefersReducedMotion ? undefined : { scale: [1, 1.18, 1], opacity: [0.85, 1, 0.85] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay }}
-      />
-      <motion.span
-        className="h-1.5 w-1.5 rounded-full border border-white/35 bg-white/75"
-        animate={prefersReducedMotion ? undefined : { scale: [1, 1.22, 1], opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay: delay + 0.18 }}
-      />
-      <motion.span
-        className="h-1 w-1 rounded-full bg-white/60"
-        animate={prefersReducedMotion ? undefined : { scale: [1, 1.28, 1], opacity: [0.55, 0.95, 0.55] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay: delay + 0.36 }}
-      />
+    <div className="flex flex-col items-center gap-1.5">
+      {dots.map((size, i) => (
+        <motion.span
+          key={i}
+          className={`${size} rounded-full bg-white/80 shadow-[0_0_8px_hsl(var(--secondary)/0.5)]`}
+          style={{ opacity: 0.9 - i * 0.12 }}
+          animate={
+            prefersReducedMotion
+              ? undefined
+              : {
+                  scale: [1, 1.25, 1],
+                  opacity: [0.9 - i * 0.12, 1 - i * 0.1, 0.9 - i * 0.12],
+                }
+          }
+          transition={{
+            duration: 2.4,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            // Stagger from bubble downward so the trail looks like it's
+            // continuously emanating from the brain.
+            delay: delay + i * 0.18,
+          }}
+        />
+      ))}
     </div>
   );
 };
 
 const ThoughtBubble = ({ bubble, index }: { bubble: Bubble; index: number }) => {
   const prefersReducedMotion = useReducedMotion();
-  const tail = tailPlacement(bubble.quadrant);
+
+  const tailPositionClass =
+    bubble.tailAnchor === 'l'
+      ? 'left-5 -bottom-2 translate-y-full'
+      : bubble.tailAnchor === 'r'
+        ? 'right-5 -bottom-2 translate-y-full'
+        : 'left-1/2 -translate-x-1/2 -bottom-2 translate-y-full';
 
   return (
     <motion.div
       className={`pointer-events-none absolute z-[5] ${bubble.position} ${
         bubble.hideOnMobile ? 'hidden sm:block' : ''
       }`}
-      initial={{ opacity: 0, scale: 0.4, y: 20, filter: 'blur(12px)' }}
+      initial={{ opacity: 0, scale: 0.4, y: -20, filter: 'blur(12px)' }}
       animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
       transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: bubble.delay }}
     >
@@ -148,8 +157,8 @@ const ThoughtBubble = ({ bubble, index }: { bubble: Bubble; index: number }) => 
           prefersReducedMotion
             ? undefined
             : {
-                y: [0, -8, 0],
-                rotate: index % 2 === 0 ? [0, 1.2, 0] : [0, -1.2, 0],
+                y: [0, -6, 0],
+                rotate: index % 2 === 0 ? [0, 1, 0] : [0, -1, 0],
               }
         }
         transition={{
@@ -160,7 +169,7 @@ const ThoughtBubble = ({ bubble, index }: { bubble: Bubble; index: number }) => 
         }}
         className="relative"
       >
-        {/* Hover-enabled wrapper (re-enable pointer events just here) */}
+        {/* Hover wrapper */}
         <motion.div
           className="group pointer-events-auto relative cursor-default"
           whileHover={{ scale: 1.06, y: -4 }}
@@ -172,7 +181,7 @@ const ThoughtBubble = ({ bubble, index }: { bubble: Bubble; index: number }) => 
           {/* Animated gradient ring on hover */}
           <div className="pointer-events-none absolute -inset-px rounded-[2rem] bg-[linear-gradient(135deg,hsl(var(--secondary)/0.7),hsl(var(--primary)/0.4)_60%,hsl(var(--secondary)/0.6))] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-          {/* Bubble body — glassmorphic cloud */}
+          {/* Bubble body */}
           <div className="relative max-w-[170px] sm:max-w-[210px] lg:max-w-[240px] rounded-[2rem] border border-white/30 bg-white/85 px-4 py-3 sm:px-5 sm:py-3.5 shadow-[0_10px_40px_hsl(var(--background)/0.4)] backdrop-blur-md transition-all duration-500 group-hover:border-white/60 group-hover:bg-white group-hover:shadow-[0_18px_60px_hsl(var(--secondary)/0.35)]">
             <p className="text-[11px] sm:text-[13px] lg:text-[14px] font-bold leading-tight text-[hsl(220_50%_20%)] text-center">
               – {bubble.text}
@@ -180,9 +189,9 @@ const ThoughtBubble = ({ bubble, index }: { bubble: Bubble; index: number }) => 
           </div>
         </motion.div>
 
-        {/* Tail dots — point toward the brain */}
-        <div className={`absolute ${tail.side}`}>
-          <TailDots direction={tail.dir} delay={bubble.delay} />
+        {/* Tail dots — descend toward the brain (looks like the thought is being pulled up from the brain) */}
+        <div className={`absolute ${tailPositionClass}`}>
+          <TailDots length={bubble.tailLength ?? 4} delay={bubble.delay} />
         </div>
       </motion.div>
     </motion.div>
@@ -191,7 +200,7 @@ const ThoughtBubble = ({ bubble, index }: { bubble: Bubble; index: number }) => 
 
 export const ThoughtBubbles = () => {
   return (
-    <div className="pointer-events-none absolute inset-0 z-[4]" aria-hidden>
+    <div className="pointer-events-none absolute inset-0 z-[6]" aria-hidden>
       {bubbles.map((bubble, i) => (
         <ThoughtBubble key={i} bubble={bubble} index={i} />
       ))}
