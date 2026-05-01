@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { Application } from '@splinetool/runtime';
 
 /**
  * HeroGlobe — Spline "Particle AI Brain" with a premium loading experience.
@@ -21,12 +22,12 @@ import { motion, useReducedMotion } from 'framer-motion';
  *     battery and CPU on mobile.
  */
 
-const SPLINE_EMBED_URL =
-  'https://my.spline.design/particleaibrain-qOZru01HpsaDi218BLYF1WXA/';
+const SPLINE_SCENE_URL = '/spline/particleaibrain.splinecode';
 
 export const HeroGlobe = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const appRef = useRef<Application | null>(null);
   const [ready, setReady] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
@@ -52,20 +53,40 @@ export const HeroGlobe = () => {
     };
   }, []);
 
-  // Pause/resume the embedded scene when the tab visibility changes.
   useEffect(() => {
-    const onVis = () => {
-      const win = iframeRef.current?.contentWindow;
-      if (!win) return;
-      try {
-        win.postMessage({ type: document.hidden ? 'spline:pause' : 'spline:play' }, '*');
-      } catch {
-        /* cross-origin iframe — ignore */
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const app = new Application(canvas, { renderMode: prefersReducedMotion ? 'auto' : 'continuous' });
+    appRef.current = app;
+
+    app.load(SPLINE_SCENE_URL).then(() => {
+      app.setBackgroundColor('transparent');
+      app.setZoom(window.innerWidth < 640 ? 0.58 : 1);
+      app.setSize(window.innerWidth < 640 ? 1180 : canvas.clientWidth, window.innerWidth < 640 ? 720 : canvas.clientHeight);
+      requestAnimationFrame(() => setReady(true));
+    });
+
+    const onResize = () => {
+      if (window.innerWidth < 640) {
+        app.setSize(1180, 720);
+        app.setZoom(0.58);
+      } else {
+        app.setSize(canvas.clientWidth, canvas.clientHeight);
+        app.setZoom(1);
       }
     };
+
+    const onVis = () => (document.hidden ? app.stop() : app.play());
+    window.addEventListener('resize', onResize);
     document.addEventListener('visibilitychange', onVis);
-    return () => document.removeEventListener('visibilitychange', onVis);
-  }, []);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      document.removeEventListener('visibilitychange', onVis);
+      app.stop();
+      appRef.current = null;
+    };
+  }, [prefersReducedMotion]);
 
   // Safety net: if onLoad never fires (rare CDN hiccups) we still reveal
   // the iframe after a generous timeout so the experience never gets stuck.
