@@ -69,29 +69,59 @@ export const HeroGlobe = () => {
 
   return (
     <motion.div
-      className="pointer-events-auto absolute inset-0 z-0 overflow-hidden"
-      initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        duration: prefersReducedMotion ? 0.6 : 2.4,
-        ease: [0.16, 1, 0.3, 1],
-        delay: 0.1,
-      }}
+      className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: ready ? 1 : 0 }}
+      transition={{ duration: prefersReducedMotion ? 0.4 : 1.6, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div
+      {/* Premium ambient glow that fades in behind the phone */}
+      <motion.div
+        aria-hidden
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        initial={{ opacity: 0, scale: 0.6 }}
+        animate={{ opacity: ready ? 1 : 0, scale: ready ? 1 : 0.6 }}
+        transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
         style={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
+          width: 'min(720px, 90%)',
+          height: 'min(720px, 90%)',
+          background:
+            'radial-gradient(circle at center, hsl(var(--primary) / 0.35) 0%, hsl(var(--primary) / 0.12) 35%, transparent 70%)',
+          filter: 'blur(40px)',
+        }}
+      />
+
+      {/* Phone wrapper — animates in with a premium float + scale */}
+      <motion.div
+        className="relative w-full h-full pointer-events-auto"
+        initial={{
+          opacity: 0,
+          y: prefersReducedMotion ? 0 : 60,
+          scale: prefersReducedMotion ? 1 : 0.85,
+          rotateX: prefersReducedMotion ? 0 : 12,
+        }}
+        animate={{
+          opacity: ready ? 1 : 0,
+          y: ready ? 0 : 60,
+          scale: ready ? 1 : 0.85,
+          rotateX: ready ? 0 : 12,
+        }}
+        transition={{
+          duration: prefersReducedMotion ? 0.6 : 2.4,
+          ease: [0.16, 1, 0.3, 1],
+          delay: 0.3,
+        }}
+        style={{
+          perspective: 1200,
+          transformStyle: 'preserve-3d',
           overflow: 'hidden',
         }}
       >
         <iframe
           ref={iframeRef}
           src={SPLINE_EMBED_URL}
-          title="Particle AI Brain"
+          title="3D Phone"
           frameBorder={0}
-          allow="autoplay"
+          allow="autoplay; xr-spatial-tracking"
           loading="eager"
           // @ts-expect-error — fetchpriority is valid HTML
           fetchpriority="high"
@@ -99,9 +129,7 @@ export const HeroGlobe = () => {
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
-          className={`[--phone-scale:0.82] [--phone-y:49%] max-[360px]:[--phone-scale:0.6] max-[360px]:[--phone-y:54%] transition-opacity duration-[1200ms] ease-out sm:[--phone-scale:0.9] sm:[--phone-y:50%] md:[--phone-scale:1] ${
-            ready ? 'opacity-100' : 'opacity-0'
-          }`}
+          className="[--phone-scale:0.82] [--phone-y:49%] max-[360px]:[--phone-scale:0.6] max-[360px]:[--phone-y:54%] sm:[--phone-scale:0.9] sm:[--phone-y:50%] md:[--phone-scale:1]"
           style={{
             position: 'absolute',
             top: 'var(--phone-y)',
@@ -113,9 +141,12 @@ export const HeroGlobe = () => {
             border: 'none',
             background: 'transparent',
             display: 'block',
+            // Ensure touch gestures rotate the phone instead of scrolling the page
+            touchAction: 'none',
+            pointerEvents: 'auto',
           }}
         />
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
