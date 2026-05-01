@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroGlobe from './HeroGlobe';
-import ThoughtBubbles from './ThoughtBubbles';
 
 
 type LandingHeroProps = {
