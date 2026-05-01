@@ -97,7 +97,7 @@ export const HeroGlobe = () => {
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
-          className={`parium-brain-iframe absolute left-1/2 top-1/2 border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
+          className={`absolute left-1/2 top-1/2 border-0 transition-opacity duration-[1200ms] ease-out ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
@@ -108,7 +108,7 @@ export const HeroGlobe = () => {
         />
         <style>{`
           @media (min-width: 640px) {
-            .parium-brain-stage .parium-brain-iframe {
+            .parium-brain-stage iframe {
               --brain-scene-width: 100%;
               --brain-scene-height: 112%;
               --brain-render-scale: 1;
