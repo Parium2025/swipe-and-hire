@@ -96,7 +96,10 @@ export const HeroGlobe = () => {
             Spline scene has finished its first paint. This avoids the
             "fake globe appears then swaps" effect the user reported. */}
 
-        {/* Spline iframe — mounted immediately, hidden until first paint */}
+        {/* Spline iframe — mounted immediately, hidden until first paint.
+            We oversize it (~112%) and shift it up-and-left so the
+            "Built with Spline" badge in the bottom-right corner is pushed
+            outside the wrapper's overflow-hidden area. No mask needed. */}
         <iframe
           ref={iframeRef}
           src={SPLINE_EMBED_URL}
@@ -109,22 +112,17 @@ export const HeroGlobe = () => {
             // cross-fade — eliminates the visible "snap" some users reported.
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
-          className={`absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
+          className={`absolute border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{ height: 'calc(100% + 70px)' }}
-        />
-
-        {/* Hide the "Built with Spline" badge by feathering the bottom-right
-            corner into the page background. Sized generously to fully cover
-            the pill on all viewports, with a soft radial falloff so it
-            blends seamlessly into the hero background. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute bottom-0 right-0 h-[150px] w-[340px]"
           style={{
-            background:
-              'radial-gradient(ellipse 80% 80% at 100% 100%, hsl(var(--background)) 55%, hsl(var(--background) / 0.9) 70%, transparent 100%)',
+            // Oversize to push the bottom-right Spline badge outside the
+            // wrapper's clipped area. Top/left negative offsets keep the
+            // brain visually centered.
+            width: '118%',
+            height: '118%',
+            top: '-9%',
+            left: '-15%',
           }}
         />
       </div>
