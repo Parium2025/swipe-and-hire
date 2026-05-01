@@ -2,6 +2,7 @@ import { type PointerEvent, type RefObject, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
+import { SplineScene } from '@/components/ui/spline-scene';
 
 type LandingHeroProps = {
   scrollContainerRef: RefObject<HTMLDivElement>;
@@ -110,7 +111,26 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24" aria-labelledby="landing-hero-heading">
-      <div className="pointer-events-none absolute inset-x-0 top-24 mx-auto h-[30rem] max-w-5xl rounded-full bg-secondary/10 blur-3xl" />
+      {/* Spline 3D Earth Globe — behind everything */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
+        initial={{ opacity: 0, scale: 0.7 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+      >
+        <div className="relative h-[70vh] w-[70vh] max-h-[720px] max-w-[720px] sm:h-[75vh] sm:w-[75vh] lg:h-[80vh] lg:w-[80vh] lg:max-h-[860px] lg:max-w-[860px]">
+          {/* Soft radial fade so globe blends into dark background */}
+          <div className="absolute inset-[-15%] rounded-full bg-[radial-gradient(circle,transparent_30%,hsl(var(--background))_72%)] z-10 pointer-events-none" />
+          <SplineScene
+            scene="https://prod.spline.design/holographicearthwithdynamiclines-Pg5EiAtNq3hkwAdNMvB5pQAD/scene.splinecode"
+            className="h-full w-full"
+          />
+        </div>
+      </motion.div>
+
+      {/* Ambient glow */}
+      <div className="pointer-events-none absolute inset-x-0 top-24 mx-auto h-[30rem] max-w-5xl rounded-full bg-secondary/10 blur-3xl z-[1]" />
+
       {selectedRole && (
         <motion.div
           className="pointer-events-none absolute inset-0 z-20 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--secondary)/0.28),hsl(var(--background)/0.98)_68%)]"
@@ -119,50 +139,71 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           transition={{ duration: 0.86, ease }}
         />
       )}
+
       <motion.div
         className="relative z-10 mx-auto flex min-h-[calc(100svh-11rem)] max-w-[1180px] flex-col items-center justify-center text-center"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        <motion.div
-          className="mx-auto overflow-hidden pb-2"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-        >
-          <h1 id="landing-hero-heading" className="text-[4.7rem] font-black leading-[0.82] tracking-[-0.03em] text-white sm:text-[7.5rem] md:text-[10rem] lg:text-[12rem]">
-            <motion.span
-              className="block"
-              initial={{ y: '-115%', opacity: 0, filter: 'blur(18px)' }}
-              animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-              transition={{ duration: 1.05, ease, delay: 0.08 }}
-            >
-              Parium
-            </motion.span>
+        {/* Main heading — word-by-word stagger */}
+        <motion.div className="mx-auto overflow-hidden pb-2">
+          <h1
+            id="landing-hero-heading"
+            className="text-[2.6rem] font-black leading-[1.05] tracking-[-0.03em] text-white sm:text-[4rem] md:text-[5.2rem] lg:text-[6.4rem]"
+          >
+            {'Vi gör drömmar\ntill verklighet'.split('\n').map((line, li) => (
+              <span key={li} className="block overflow-hidden">
+                {line.split(' ').map((word, wi) => (
+                  <motion.span
+                    key={wi}
+                    className="inline-block mr-[0.28em] last:mr-0"
+                    initial={{ y: '120%', opacity: 0, filter: 'blur(10px)' }}
+                    animate={{ y: '0%', opacity: 1, filter: 'blur(0px)' }}
+                    transition={{
+                      duration: 0.95,
+                      ease: [0.22, 1, 0.36, 1],
+                      delay: 0.5 + (li * 3 + wi) * 0.12,
+                    }}
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+              </span>
+            ))}
           </h1>
         </motion.div>
 
+        {/* Subtitle */}
+        <motion.p
+          className="mt-4 max-w-lg text-base text-white/50 sm:text-lg md:mt-6 lg:text-xl"
+          initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 1, ease, delay: 1.4 }}
+        >
+          Rekrytering. På 60 sekunder.
+        </motion.p>
+
+        {/* Audience buttons */}
         <motion.div
           className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 lg:mt-12"
           initial="hidden"
           animate="show"
           variants={{
             hidden: {},
-            show: { transition: { staggerChildren: 0.16, delayChildren: 0.95 } },
+            show: { transition: { staggerChildren: 0.16, delayChildren: 1.7 } },
           }}
         >
-          {audienceOptions.map((option) => {
-            return (
-              <AudienceCard
-                key={option.role}
-                label={option.label}
-                role={option.role}
-                icon={option.icon}
-                selectedRole={selectedRole}
-                onChoose={handleChoice}
-              />
-            );
-          })}
+          {audienceOptions.map((option) => (
+            <AudienceCard
+              key={option.role}
+              label={option.label}
+              role={option.role}
+              icon={option.icon}
+              selectedRole={selectedRole}
+              onChoose={handleChoice}
+            />
+          ))}
         </motion.div>
       </motion.div>
     </section>
