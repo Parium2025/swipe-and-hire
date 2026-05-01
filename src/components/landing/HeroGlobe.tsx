@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import type { Application } from '@splinetool/runtime';
+import splineSceneUrl from '@/assets/holographic-earth.scene.splinecode?url';
 
 /**
  * HeroGlobe — Spline globe with a premium loading experience.
@@ -20,7 +21,7 @@ import type { Application } from '@splinetool/runtime';
 
 const SPLINE_EMBED_URL =
   'https://my.spline.design/holographicearthwithdynamiclines-Pg5EiAtNq3hkwAdNMvB5pQAD/';
-const SPLINE_SCENE_URL = '/spline/holographic-earth.scene.splinecode';
+const SPLINE_SCENE_URL = splineSceneUrl;
 
 type LoadPhase = 'waiting' | 'loading' | 'ready' | 'fallback';
 
