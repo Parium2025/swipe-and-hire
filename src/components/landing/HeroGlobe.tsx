@@ -106,7 +106,6 @@ export const HeroGlobe = () => {
             transform: 'translate(-50%, -50%) translate(var(--brain-x, 10%), var(--brain-y, -4%)) scale(var(--brain-render-scale, 0.56))',
           }}
         />
-        <div className="pointer-events-none absolute left-1/2 top-[64%] h-10 w-36 -translate-x-1/2 rounded-full bg-background/95 blur-sm sm:hidden" />
         <style>{`
           @media (min-width: 640px) {
             .parium-brain-stage .parium-brain-iframe {
