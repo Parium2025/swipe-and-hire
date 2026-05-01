@@ -112,8 +112,6 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden px-5 pb-10 pt-24 sm:px-6 sm:pb-14 sm:pt-28 md:px-12 lg:px-24" aria-labelledby="landing-hero-heading">
-      {/* Floating thought bubbles around the brain */}
-      <ThoughtBubbles />
       {/* Ambient glow */}
       <div className="pointer-events-none absolute inset-x-0 top-24 mx-auto h-[30rem] max-w-5xl rounded-full bg-secondary/10 blur-3xl z-[1]" />
       <HeroGlobe />
