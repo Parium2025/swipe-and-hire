@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 /**
- * HeroGlobe — Spline "Particle AI Brain".
+ * HeroGlobe — Spline 3D phone scene.
  *
- * Minimal wrapper around the Spline iframe, matching the reference
- * ParticleBrain implementation exactly (full width/height with a +52px
- * height bleed to hide Spline's bottom watermark). No transforms or
- * scaling — the scene fills its container natively on every screen size.
+ * The phone scene needs a larger internal render viewport on narrow screens;
+ * otherwise Spline crops the model at the top. We render the iframe larger and
+ * scale it back down so the visible phone fits while the background still bleeds
+ * to every edge.
  *
  * We keep:
  *  - preconnect/dns-prefetch warmup so the iframe handshake is hot before
@@ -69,7 +69,7 @@ export const HeroGlobe = () => {
 
   return (
     <motion.div
-      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+      className="pointer-events-auto absolute inset-0 z-0 overflow-hidden"
       initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{
@@ -99,14 +99,17 @@ export const HeroGlobe = () => {
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
-          className={`transition-opacity duration-[1200ms] ease-out ${
+          className={`[--phone-scale:0.82] [--phone-y:49%] max-[360px]:[--phone-scale:0.6] max-[360px]:[--phone-y:54%] transition-opacity duration-[1200ms] ease-out sm:[--phone-scale:0.9] sm:[--phone-y:50%] md:[--phone-scale:1] ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
             position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: 'calc(100% + 52px)',
+            top: 'var(--phone-y)',
+            left: '50%',
+            width: 'max(calc(100% / var(--phone-scale)), 560px)',
+            height: 'max(calc((100% + 52px) / var(--phone-scale)), 760px)',
+            transform: 'translate3d(-50%, -50%, 0) scale(var(--phone-scale))',
+            transformOrigin: 'center center',
             border: 'none',
             background: 'transparent',
             display: 'block',
