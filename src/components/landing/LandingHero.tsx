@@ -2,6 +2,7 @@ import { type PointerEvent, type RefObject, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
+import HeroGlobe from './HeroGlobe';
 
 
 type LandingHeroProps = {
@@ -111,23 +112,8 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24" aria-labelledby="landing-hero-heading">
-      {/* Spline 3D Earth Globe — behind everything */}
-      <motion.div
-        className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
-        initial={{ opacity: 0, scale: 0.7 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-      >
-        <div className="relative h-[70vh] w-[70vh] max-h-[720px] max-w-[720px] sm:h-[75vh] sm:w-[75vh] lg:h-[80vh] lg:w-[80vh] lg:max-h-[860px] lg:max-w-[860px] overflow-hidden">
-          <iframe
-            src="https://my.spline.design/holographicearthwithdynamiclines-Pg5EiAtNq3hkwAdNMvB5pQAD/"
-            className="absolute inset-0 w-full border-0"
-            style={{ height: 'calc(100% + 60px)' }}
-            title="3D Earth"
-            loading="eager"
-          />
-        </div>
-      </motion.div>
+      {/* Spline 3D Earth Globe — lazy, performance-aware */}
+      <HeroGlobe />
 
       {/* Ambient glow */}
       <div className="pointer-events-none absolute inset-x-0 top-24 mx-auto h-[30rem] max-w-5xl rounded-full bg-secondary/10 blur-3xl z-[1]" />
