@@ -116,13 +116,13 @@ export const HeroGlobe = () => {
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            // Oversize to push the bottom-right Spline badge outside the
-            // wrapper's clipped area. Top/left negative offsets keep the
-            // brain visually centered.
-            width: '118%',
+            // Oversize symmetrically in width so the brain stays centered,
+            // and shift up just enough that the bottom-right Spline badge
+            // is pushed below the wrapper's clipped edge.
+            width: '122%',
             height: '118%',
-            top: '-9%',
-            left: '-15%',
+            top: '-12%',
+            left: '-11%',
           }}
         />
       </div>
