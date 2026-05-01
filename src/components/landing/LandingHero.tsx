@@ -141,7 +141,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             className="text-[2.6rem] font-black leading-[1.05] tracking-[-0.035em] text-white sm:text-[4rem] md:text-[5.2rem] lg:text-[6.4rem]"
           >
             {(() => {
-              const lines = ['Från tanke', 'till verklighet'];
+              const lines = ['Från en tanke', 'till verklighet'];
               let globalIndex = 0;
               // Total chars used to compute audience-button delay so they
               // appear *after* the headline finishes.
