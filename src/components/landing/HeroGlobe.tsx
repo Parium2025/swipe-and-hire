@@ -92,19 +92,9 @@ export const HeroGlobe = () => {
         watermark by extending the iframe slightly past the bottom edge.
       */}
       <div className="relative h-[78vh] w-[78vh] max-h-[760px] max-w-[760px] overflow-hidden sm:h-[82vh] sm:w-[82vh] lg:h-[88vh] lg:w-[88vh] lg:max-h-[920px] lg:max-w-[920px]">
-        {/* Skeleton — instantly visible, fades out when the real scene is ready */}
-        <div
-          aria-hidden
-          className={`absolute inset-0 transition-opacity duration-[1400ms] ease-out ${
-            ready ? 'opacity-0' : 'opacity-100'
-          }`}
-        >
-          <div className="absolute inset-[6%] rounded-full bg-[radial-gradient(circle_at_50%_44%,hsl(var(--secondary)/0.22),hsl(var(--secondary)/0.08)_34%,transparent_68%)] blur-2xl" />
-          <div className="absolute inset-[16%] rounded-full bg-[radial-gradient(circle_at_48%_42%,hsl(var(--secondary)/0.14),hsl(var(--background)/0.18)_48%,transparent_72%)]" />
-          <div className="absolute inset-[18%] rounded-full border border-secondary/15 opacity-70 [mask-image:radial-gradient(circle,black_48%,transparent_72%)]" />
-          <div className="absolute inset-[24%] rounded-full border border-secondary/12 opacity-60 animate-[spin_44s_linear_infinite] [mask-image:linear-gradient(120deg,transparent,black_35%,black_64%,transparent)]" />
-          <div className="absolute inset-[34%] rounded-full border border-secondary/10 opacity-50 animate-[spin_62s_linear_infinite_reverse] [mask-image:linear-gradient(35deg,black,transparent_70%)]" />
-        </div>
+        {/* No skeleton — we let the hero background show through until the
+            Spline scene has finished its first paint. This avoids the
+            "fake globe appears then swaps" effect the user reported. */}
 
         {/* Spline iframe — mounted immediately, hidden until first paint */}
         <iframe
@@ -125,15 +115,15 @@ export const HeroGlobe = () => {
           style={{ height: 'calc(100% + 70px)' }}
         />
 
-        {/* Mask the "Built with Spline" badge in the bottom-right corner. */}
+        {/* Hide the "Built with Spline" badge by feathering the bottom-right
+            corner into the page background. We use a soft radial gradient
+            instead of a solid block so there is no visible rectangle. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute bottom-0 right-0 h-[58px] w-[180px] bg-background"
+          className="pointer-events-none absolute -bottom-2 -right-2 h-[110px] w-[260px]"
           style={{
-            WebkitMaskImage:
-              'radial-gradient(ellipse at bottom right, black 60%, transparent 100%)',
-            maskImage:
-              'radial-gradient(ellipse at bottom right, black 60%, transparent 100%)',
+            background:
+              'radial-gradient(ellipse 75% 75% at 100% 100%, hsl(var(--background)) 38%, hsl(var(--background) / 0.92) 55%, hsl(var(--background) / 0.6) 72%, transparent 100%)',
           }}
         />
       </div>
