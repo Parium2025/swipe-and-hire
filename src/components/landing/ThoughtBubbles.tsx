@@ -30,6 +30,8 @@ type Bubble = {
   tailDirection: 'down' | 'up';
   /** Tail length (number of dots, 3-5) */
   tailLength?: number;
+  /** Hide on small screens to keep mobile uncluttered */
+  hideOnMobile?: boolean;
 };
 
 /**
