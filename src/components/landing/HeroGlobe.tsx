@@ -102,8 +102,8 @@ export const HeroGlobe = () => {
           }`}
           style={{
             width: 'var(--brain-scene-width, 960px)',
-            height: 'var(--brain-scene-height, 540px)',
-            transform: 'translate(-50%, -50%) translate(var(--brain-x, 0%), var(--brain-y, -1%)) scale(var(--brain-render-scale, 0.72))',
+            height: 'var(--brain-scene-height, 640px)',
+            transform: 'translate(-50%, -50%) translate(var(--brain-x, 10%), var(--brain-y, -4%)) scale(var(--brain-render-scale, 0.56))',
           }}
         />
         <style>{`
