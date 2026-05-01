@@ -128,7 +128,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       )}
 
       <motion.div
-        className="relative z-10 mx-auto flex min-h-[calc(100svh-11rem)] max-w-[1180px] flex-col items-center justify-center text-center"
+        className="relative z-10 mx-auto flex min-h-[calc(100svh-11rem)] max-w-[1180px] flex-col items-center justify-start pt-6 text-center sm:pt-10 lg:pt-14"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
@@ -138,10 +138,10 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         <motion.div className="mx-auto pb-4">
           <h1
             id="landing-hero-heading"
-            className="text-[2.6rem] font-black leading-[1.05] tracking-[-0.035em] text-white sm:text-[4rem] md:text-[5.2rem] lg:text-[6.4rem]"
+            className="text-[2rem] font-black leading-[1.05] tracking-[-0.035em] text-white sm:text-[3.2rem] md:text-[4.2rem] lg:text-[5.4rem]"
           >
             {(() => {
-              const lines = ['Från en tanke', 'till verklighet'];
+              const lines = ['Från en tanke till verklighet,', 'vi gör det möjligt'];
               let globalIndex = 0;
               // Total chars used to compute audience-button delay so they
               // appear *after* the headline finishes.
