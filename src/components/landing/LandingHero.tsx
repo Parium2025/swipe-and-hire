@@ -119,11 +119,10 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
       >
         <div className="relative h-[70vh] w-[70vh] max-h-[720px] max-w-[720px] sm:h-[75vh] sm:w-[75vh] lg:h-[80vh] lg:w-[80vh] lg:max-h-[860px] lg:max-w-[860px] overflow-hidden">
-          {/* Bottom fade to hide Spline watermark */}
-          <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[hsl(var(--background))] to-transparent z-10 pointer-events-none" />
           <iframe
             src="https://my.spline.design/holographicearthwithdynamiclines-Pg5EiAtNq3hkwAdNMvB5pQAD/"
-            className="h-full w-full border-0"
+            className="absolute inset-0 w-full border-0"
+            style={{ height: 'calc(100% + 60px)' }}
             title="3D Earth"
             loading="eager"
           />
