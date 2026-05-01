@@ -20,7 +20,7 @@ import type { Application } from '@splinetool/runtime';
 
 const SPLINE_EMBED_URL =
   'https://my.spline.design/holographicearthwithdynamiclines-Pg5EiAtNq3hkwAdNMvB5pQAD/';
-const SPLINE_SCENE_URL = `${SPLINE_EMBED_URL}scene.splinecode`;
+const SPLINE_SCENE_URL = '/spline/holographic-earth.scene.splinecode';
 
 type LoadPhase = 'waiting' | 'loading' | 'ready' | 'fallback';
 
