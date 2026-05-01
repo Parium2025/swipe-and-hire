@@ -18,7 +18,7 @@ import { motion, useReducedMotion } from 'framer-motion';
  */
 
 const SPLINE_EMBED_URL =
-  'https://my.spline.design/particleaibrain-qOZru01HpsaDi218BLYF1WXA/';
+  'https://my.spline.design/untitled-R9AE3iFR515l7EKvHCNavLb7/';
 
 export const HeroGlobe = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
