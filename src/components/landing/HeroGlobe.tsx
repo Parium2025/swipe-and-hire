@@ -77,7 +77,7 @@ export const HeroGlobe = () => {
   return (
     <motion.div
       ref={containerRef}
-      className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
       initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{
@@ -86,18 +86,8 @@ export const HeroGlobe = () => {
         delay: 0.1,
       }}
     >
-      {/*
-        Mobile-first responsive sizing:
-        - The container fills the available area (the brain stays large
-          on screen, fills the corners — like on tablet/desktop).
-        - Inside, the iframe is scaled UP so the brain renders at a
-          smaller relative size within the Spline scene. The scene's
-          ambient particles continue to fill the visible area.
-        - On tablet/desktop the scale returns to 1 (normal size) where
-          the brain already looks right.
-        - We hide the bottom 12% to clip the "Built with Spline" badge.
-      */}
-      <div className="parium-brain-stage relative aspect-square w-full max-w-full overflow-hidden sm:w-auto sm:h-full sm:max-h-[640px] lg:max-h-[760px]">
+      <div className="parium-brain-stage absolute inset-0 overflow-hidden">
+        <div className="parium-brain-particles parium-brain-particles-back" />
         <iframe
           ref={iframeRef}
           src={SPLINE_EMBED_URL}
@@ -108,24 +98,72 @@ export const HeroGlobe = () => {
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
-          className={`parium-brain-iframe absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
+          className={`parium-brain-iframe absolute left-1/2 top-1/2 border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            // Render the iframe LARGER than its container. The Spline scene
-            // composes the brain to fit its own viewport, so a larger iframe
-            // means the brain (which sits centered in the scene) appears
-            // proportionally SMALLER inside our visible square. Overflow is
-            // clipped by the container.
-            width: 'var(--brain-iframe-size, 180%)',
-            height: 'calc(var(--brain-iframe-size, 180%) * 1.12)',
+            width: '100%',
+            height: '112%',
+            transform: 'translate(-50%, -50%) translateY(var(--brain-y, 2%)) scale(var(--brain-scale, 0.72))',
           }}
         />
+        <div className="parium-brain-particles parium-brain-particles-front" />
         <style>{`
-          /* Mobile: render iframe larger so the brain inside it shrinks
-             relative to the visible stage. Tablet & up: 100% (natural). */
+          .parium-brain-stage {
+            background:
+              radial-gradient(circle at 50% 44%, hsl(var(--secondary) / 0.22), transparent 42%),
+              linear-gradient(180deg, hsl(var(--background) / 0.2), hsl(var(--background) / 0.78));
+          }
+
+          .parium-brain-iframe {
+            -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 0 58%, transparent 78%);
+            mask-image: radial-gradient(ellipse at 50% 50%, black 0 58%, transparent 78%);
+          }
+
+          .parium-brain-particles {
+            position: absolute;
+            inset: -14%;
+            background-image:
+              radial-gradient(circle, hsl(var(--secondary) / 0.78) 0 1px, transparent 1.8px),
+              radial-gradient(circle, hsl(var(--primary) / 0.5) 0 1.5px, transparent 2.4px),
+              radial-gradient(circle, hsl(var(--foreground) / 0.34) 0 1px, transparent 2px);
+            background-size: 27px 27px, 49px 49px, 81px 81px;
+            background-position: 0 0, 17px 23px, 34px 12px;
+            opacity: 0.52;
+            animation: parium-particles-rise 20s linear infinite;
+          }
+
+          .parium-brain-particles-back {
+            filter: blur(0.2px);
+          }
+
+          .parium-brain-particles-front {
+            opacity: 0.28;
+            animation-duration: 15s;
+            -webkit-mask-image: radial-gradient(ellipse at 50% 54%, transparent 0 31%, black 50% 100%);
+            mask-image: radial-gradient(ellipse at 50% 54%, transparent 0 31%, black 50% 100%);
+          }
+
+          @keyframes parium-particles-rise {
+            from { transform: translate3d(0, 5%, 0); }
+            to { transform: translate3d(0, -5%, 0); }
+          }
+
           @media (min-width: 640px) {
-            .parium-brain-stage .parium-brain-iframe { --brain-iframe-size: 100%; }
+            .parium-brain-stage .parium-brain-iframe {
+              --brain-scale: 1;
+              --brain-y: 0%;
+              -webkit-mask-image: none;
+              mask-image: none;
+            }
+
+            .parium-brain-particles {
+              display: none;
+            }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .parium-brain-particles { animation: none; }
           }
         `}</style>
       </div>
