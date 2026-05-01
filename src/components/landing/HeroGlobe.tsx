@@ -87,19 +87,17 @@ export const HeroGlobe = () => {
       }}
     >
       {/*
-        Wrapper is square and capped by BOTH width and height so the brain
-        never gets clipped on narrow screens. On mobile we cap it small
-        (~70vw) so it sits compactly between the bubbles. On larger screens
-        we let it grow up to a fixed pixel ceiling.
-        We still clip ~12% off the bottom to hide the "Built with Spline" badge.
+        Mobile-first responsive sizing:
+        - The container fills the available area (the brain stays large
+          on screen, fills the corners — like on tablet/desktop).
+        - Inside, the iframe is scaled UP so the brain renders at a
+          smaller relative size within the Spline scene. The scene's
+          ambient particles continue to fill the visible area.
+        - On tablet/desktop the scale returns to 1 (normal size) where
+          the brain already looks right.
+        - We hide the bottom 12% to clip the "Built with Spline" badge.
       */}
-      <div
-        className="relative aspect-square overflow-hidden"
-        style={{
-          width: 'min(70vw, 70vh, 720px)',
-          maxWidth: '100%',
-        }}
-      >
+      <div className="relative aspect-square w-full max-w-full overflow-hidden sm:w-auto sm:h-full sm:max-h-[640px] lg:max-h-[760px]">
         <iframe
           ref={iframeRef}
           src={SPLINE_EMBED_URL}
@@ -110,11 +108,27 @@ export const HeroGlobe = () => {
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
-          className={`absolute left-0 top-0 w-full border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
+          className={`absolute left-1/2 top-1/2 border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{ height: '112%' }}
+          style={{
+            // Width/height are 100% of the container; we translate to recenter
+            // and scale up so the brain shrinks relative to the visible area.
+            // Mobile-first: heavy zoom-out → scales back to 1 on tablet+.
+            width: '100%',
+            height: '112%',
+            transform: 'translate(-50%, -50%) scale(var(--brain-scale, 1.6))',
+            transformOrigin: 'center center',
+          }}
         />
+        <style>{`
+          /* Zoom out heavily on mobile so the brain looks proportionally
+             smaller inside the same large scene area. Snap back to 1 from
+             the tablet breakpoint upward. */
+          @media (min-width: 640px) {
+            div > iframe { --brain-scale: 1; }
+          }
+        `}</style>
       </div>
     </motion.div>
   );
