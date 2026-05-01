@@ -1856,3 +1856,20 @@ All colors MUST be HSL.
 .gallery--bento .gallery__item:nth-child(6) { grid-area: 3 / 3 / 5 / 4; }
 .gallery--bento .gallery__item:nth-child(7) { grid-area: 4 / 1 / 5 / 2; }
 .gallery--bento .gallery__item:nth-child(8) { grid-area: 4 / 2 / 5 / 3; }
+
+/* iOS Safari hardening for the bento scroll system */
+.gallery-wrap {
+  /* Promote to its own layer so pinType:'transform' renders stably */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+  /* Prevent rubber-banding from leaking horizontal jitter */
+  overscroll-behavior: contain;
+}
+
+.gallery__item {
+  -webkit-transform: translateZ(0);
+  /* Hint Safari to keep these on the GPU during Flip */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
