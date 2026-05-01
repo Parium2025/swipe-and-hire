@@ -124,6 +124,18 @@ export const HeroGlobe = () => {
           }`}
           style={{ height: 'calc(100% + 70px)' }}
         />
+
+        {/* Mask the "Built with Spline" badge in the bottom-right corner. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-0 right-0 h-[58px] w-[180px] bg-background"
+          style={{
+            WebkitMaskImage:
+              'radial-gradient(ellipse at bottom right, black 60%, transparent 100%)',
+            maskImage:
+              'radial-gradient(ellipse at bottom right, black 60%, transparent 100%)',
+          }}
+        />
       </div>
     </motion.div>
   );

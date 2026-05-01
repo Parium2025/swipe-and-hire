@@ -141,8 +141,12 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             className="text-[2.6rem] font-black leading-[1.05] tracking-[-0.035em] text-white sm:text-[4rem] md:text-[5.2rem] lg:text-[6.4rem]"
           >
             {(() => {
-              const lines = ['Vi gör drömmar', 'till verklighet'];
+              const lines = ['Från tanke', 'till verklighet'];
               let globalIndex = 0;
+              // Total chars used to compute audience-button delay so they
+              // appear *after* the headline finishes.
+              const totalChars = lines.reduce((acc, l) => acc + l.replace(/\s/g, '').length, 0);
+              (window as any).__pariumHeroCharCount = totalChars;
               return lines.map((line, li) => (
                 <span
                   key={li}
@@ -158,22 +162,12 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
                             key={i}
                             aria-hidden
                             className="inline-block will-change-transform"
-                            initial={{
-                              y: '110%',
-                              opacity: 0,
-                              filter: 'blur(14px)',
-                              scale: 0.92,
-                            }}
-                            animate={{
-                              y: '0%',
-                              opacity: 1,
-                              filter: 'blur(0px)',
-                              scale: 1,
-                            }}
+                            initial={{ y: '-110%', opacity: 0 }}
+                            animate={{ y: '0%', opacity: 1 }}
                             transition={{
-                              duration: 1.4,
-                              ease: [0.16, 1, 0.3, 1],
-                              delay: 0.55 + i * 0.045,
+                              duration: 1.15,
+                              ease: [0.85, 0.09, 0.15, 0.91],
+                              delay: 1.45 + i * 0.038,
                             }}
                           >
                             {char}
@@ -198,7 +192,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           animate="show"
           variants={{
             hidden: {},
-            show: { transition: { staggerChildren: 0.18, delayChildren: 1.6 } },
+            show: { transition: { staggerChildren: 0.22, delayChildren: 2.95 } },
           }}
         >
           {audienceOptions.map((option) => (
