@@ -108,36 +108,13 @@ export const HeroGlobe = () => {
       }}
     >
       <div className="parium-brain-stage absolute -inset-x-10 -top-16 -bottom-24 overflow-hidden sm:inset-0">
-        <iframe
-          ref={iframeRef}
-          src={SPLINE_EMBED_URL}
-          title="Particle AI Brain"
-          loading="eager"
-          // @ts-expect-error — fetchpriority is valid HTML
-          fetchpriority="high"
-          onLoad={() => {
-            requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
-          }}
-          className={`parium-brain-iframe absolute left-1/2 top-1/2 border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
+        <canvas
+          ref={canvasRef}
+          aria-label="Particle AI Brain"
+          className={`absolute left-1/2 top-1/2 h-[720px] w-[1180px] -translate-x-1/2 -translate-y-1/2 translate-x-[6%] -translate-y-[3%] scale-[0.46] transition-opacity duration-[1200ms] ease-out sm:h-full sm:w-full sm:translate-x-0 sm:translate-y-0 sm:scale-100 ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{
-            width: 'var(--brain-scene-width, 1180px)',
-            height: 'var(--brain-scene-height, 720px)',
-            transform: 'translate(-50%, -50%) translate(var(--brain-x, 6%), var(--brain-y, -3%)) scale(var(--brain-render-scale, 0.46))',
-          }}
         />
-        <style>{`
-          @media (min-width: 640px) {
-            .parium-brain-stage .parium-brain-iframe {
-              --brain-scene-width: 100%;
-              --brain-scene-height: 112%;
-              --brain-render-scale: 1;
-              --brain-x: 0%;
-              --brain-y: 0%;
-            }
-          }
-        `}</style>
       </div>
     </motion.div>
   );
