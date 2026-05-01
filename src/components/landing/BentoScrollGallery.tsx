@@ -6,26 +6,17 @@ import { Flip } from 'gsap/Flip';
 gsap.registerPlugin(ScrollTrigger, Flip);
 
 /**
- * BentoScrollGallery
+ * BentoScrollGallery — bento grid that expands via GSAP Flip on scroll.
  *
- * GSAP Flip-driven bento grid that expands to a full-screen layout as the user
- * scrolls. Mirrors the CodePen reference but uses Parium tokens.
- *
- * iOS Safari hardening:
- *  - scrollerProxy bridges the custom scroll container to ScrollTrigger so
- *    momentum scroll & rubber-banding don't desync the pinned element.
- *  - pinType: 'transform' avoids the broken `position: fixed` behavior inside
- *    nested scrollers (which iOS handles incorrectly).
- *  - scrub: 0.5 smooths fast finger flings without feeling laggy.
- *  - touchmove on the scroller forces ScrollTrigger.update() so animation
- *    keeps up with iOS's throttled scroll events during momentum.
- *  - Resize is debounced and ignores tiny height changes from the URL bar
- *    showing/hiding, which would otherwise re-pin mid-scroll.
- *  - will-change + translateZ promotes tiles to their own GPU layer.
+ * IMPORTANT: this app's <html> and <body> have `overflow:hidden`, so all
+ * scrolling on Landing happens inside a custom container (passed as
+ * `scrollerRef`). We register that element with ScrollTrigger via
+ * `scrollerProxy` and use `pinType: 'transform'` so pin works correctly
+ * inside the non-window scroller (and on iOS Safari).
  */
 
 type Props = {
-  scrollContainerRef?: RefObject<HTMLDivElement>;
+  scrollerRef: RefObject<HTMLDivElement>;
 };
 
 const placeholders = Array.from({ length: 8 }, (_, i) => ({
@@ -42,40 +33,34 @@ const placeholders = Array.from({ length: 8 }, (_, i) => ({
   ][i],
 }));
 
-export const BentoScrollGallery = ({ scrollContainerRef }: Props) => {
+export const BentoScrollGallery = ({ scrollerRef }: Props) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const galleryElement = galleryRef.current;
     const wrapElement = wrapRef.current;
-    if (!galleryElement || !wrapElement) return;
+    const scroller = scrollerRef.current;
+    if (!galleryElement || !wrapElement || !scroller) return;
 
-    const customScroller = scrollContainerRef?.current ?? null;
-    const scrollerTarget: Element | Window = customScroller ?? window;
+    // Bridge the custom scroller to ScrollTrigger
+    ScrollTrigger.scrollerProxy(scroller, {
+      scrollTop(value) {
+        if (arguments.length && value !== undefined) {
+          scroller.scrollTop = value;
+        }
+        return scroller.scrollTop;
+      },
+      getBoundingClientRect() {
+        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
+      },
+      pinType: 'transform',
+    });
 
-    // Register scrollerProxy ONCE per scroller so ScrollTrigger reads
-    // scroll position from the right element on iOS.
-    if (customScroller) {
-      ScrollTrigger.scrollerProxy(customScroller, {
-        scrollTop(value) {
-          if (arguments.length && value !== undefined) {
-            customScroller.scrollTop = value;
-          }
-          return customScroller.scrollTop;
-        },
-        getBoundingClientRect() {
-          return {
-            top: 0,
-            left: 0,
-            width: window.innerWidth,
-            height: window.innerHeight,
-          };
-        },
-        // pinType 'transform' is required for ANY non-window scroller on iOS.
-        pinType: 'transform',
-      });
-    }
+    // Forward scroller's scroll events to ScrollTrigger
+    const onScroll = () => ScrollTrigger.update();
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    scroller.addEventListener('touchmove', onScroll, { passive: true });
 
     let flipCtx: gsap.Context | null = null;
 
@@ -86,14 +71,7 @@ export const BentoScrollGallery = ({ scrollContainerRef }: Props) => {
       galleryElement.classList.remove('gallery--final');
 
       flipCtx = gsap.context(() => {
-        // Promote tiles to their own GPU layer for smoother iOS rendering.
-        gsap.set(galleryItems, {
-          willChange: 'transform',
-          force3D: true,
-          backfaceVisibility: 'hidden',
-        });
-
-        // Capture target (final) state
+        // Capture target (final-grid) state via temporary class swap
         galleryElement.classList.add('gallery--final');
         const flipState = Flip.getState(galleryItems);
         galleryElement.classList.remove('gallery--final');
@@ -103,103 +81,55 @@ export const BentoScrollGallery = ({ scrollContainerRef }: Props) => {
           ease: 'expoScale(1, 5)',
         });
 
-        const tl = gsap.timeline({
+        gsap.timeline({
           scrollTrigger: {
             trigger: galleryElement,
-            scroller: scrollerTarget,
+            scroller,
             start: 'center center',
             end: '+=100%',
-            // Smoothing scrub: catches up over 0.5s after fast finger flings
-            // so iOS momentum doesn't cause animation snap.
             scrub: 0.5,
             pin: wrapElement,
-            pinType: customScroller ? 'transform' : 'fixed',
+            pinType: 'transform',
             anticipatePin: 1,
             invalidateOnRefresh: true,
           },
-        });
+        }).add(flip);
 
-        tl.add(flip);
+        ScrollTrigger.refresh();
       });
-
-      ScrollTrigger.refresh();
     };
 
-    // Wait for fonts + layout settle before first measurement to avoid
-    // mis-pinned positions on iOS.
-    const startWhenReady = () => {
-      if (document.readyState === 'complete') {
-        // Two RAFs ensures any final layout pass (Safari URL bar, fonts) is in.
-        requestAnimationFrame(() => requestAnimationFrame(createTween));
-      } else {
-        window.addEventListener('load', startWhenReady, { once: true });
-      }
-    };
-    startWhenReady();
+    // Wait for layout to settle
+    requestAnimationFrame(() => requestAnimationFrame(createTween));
 
-    // ── iOS touchmove sync ───────────────────────────────────────────────
-    // iOS throttles `scroll` events during momentum; pulling ScrollTrigger
-    // forward on every touchmove keeps the pinned animation in lock-step.
-    const handleTouch = () => ScrollTrigger.update();
-    if (customScroller) {
-      customScroller.addEventListener('touchmove', handleTouch, { passive: true });
-      customScroller.addEventListener('touchstart', handleTouch, { passive: true });
-    }
-
-    // ── Debounced resize that ignores iOS URL-bar jitter ─────────────────
-    let lastWidth = window.innerWidth;
-    let lastHeight = window.innerHeight;
-    let resizeTimer: number | null = null;
-
+    // Debounced resize
+    let lastW = window.innerWidth;
+    let lastH = window.innerHeight;
+    let timer: number | null = null;
     const handleResize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const widthChanged = w !== lastWidth;
-      // Ignore height-only changes <= 120px (URL bar show/hide is ~80-100px).
-      const significantHeightChange = Math.abs(h - lastHeight) > 120;
-
-      if (!widthChanged && !significantHeightChange) return;
-
-      lastWidth = w;
-      lastHeight = h;
-
-      if (resizeTimer) window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(() => {
-        createTween();
-      }, 180);
+      if (w === lastW && Math.abs(h - lastH) <= 120) return;
+      lastW = w;
+      lastH = h;
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(createTween, 180);
     };
-
     window.addEventListener('resize', handleResize);
-    // visualViewport gives more accurate iOS resize signals (keyboard, zoom)
-    window.visualViewport?.addEventListener('resize', handleResize);
-
-    // Orientation change requires a hard refresh AFTER the new layout settles.
-    const handleOrientation = () => {
-      window.setTimeout(createTween, 350);
-    };
-    window.addEventListener('orientationchange', handleOrientation);
 
     return () => {
-      if (resizeTimer) window.clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
-      window.visualViewport?.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleOrientation);
-      if (customScroller) {
-        customScroller.removeEventListener('touchmove', handleTouch);
-        customScroller.removeEventListener('touchstart', handleTouch);
-      }
+      scroller.removeEventListener('scroll', onScroll);
+      scroller.removeEventListener('touchmove', onScroll);
+      if (timer) window.clearTimeout(timer);
       flipCtx?.revert();
     };
-  }, [scrollContainerRef]);
+  }, [scrollerRef]);
 
   return (
     <section className="bento-scroll-section relative" aria-label="Parium showcase">
       <div ref={wrapRef} className="gallery-wrap">
-        <div
-          ref={galleryRef}
-          id="bento-gallery"
-          className="gallery gallery--bento"
-        >
+        <div ref={galleryRef} className="gallery gallery--bento">
           {placeholders.map((p) => (
             <div
               key={p.id}
