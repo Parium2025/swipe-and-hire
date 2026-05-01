@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
-import LandingHero from '@/components/landing/LandingHero';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import ThoughtBubbles from '@/components/landing/ThoughtBubbles';
+import BentoScrollGallery from '@/components/landing/BentoScrollGallery';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -44,29 +45,7 @@ const Landing = () => {
     }
     canonical.href = 'https://parium.se';
 
-    const jsonLd = {
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: 'Parium',
-      applicationCategory: 'BusinessApplication',
-      operatingSystem: 'Web, iOS, Android',
-      description: desc,
-      url: 'https://parium.se',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' },
-      author: { '@type': 'Organization', name: 'Parium AB' },
-    };
-
-    let script = document.querySelector('#landing-jsonld') as HTMLScriptElement;
-    if (!script) {
-      script = document.createElement('script');
-      script.id = 'landing-jsonld';
-      script.type = 'application/ld+json';
-      document.head.appendChild(script);
-    }
-    script.textContent = JSON.stringify(jsonLd);
-
     return () => {
-      script?.remove();
       canonical?.remove();
     };
   }, []);
@@ -83,10 +62,16 @@ const Landing = () => {
       style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
     >
       <AnimatedBackground />
-      <div className="relative z-10 min-h-full">
+      <div className="relative z-10">
         <LandingNav onLoginClick={handleLogin} />
-        <main>
-          <LandingHero scrollContainerRef={scrollContainerRef} />
+        <main className="relative">
+          {/* Floating Parium thought bubbles — kept as decorative overlay */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-screen z-[15]">
+            <ThoughtBubbles />
+          </div>
+
+          {/* Bento scroll gallery — replaces previous hero content */}
+          <BentoScrollGallery scrollContainerRef={scrollContainerRef} />
         </main>
       </div>
     </div>
