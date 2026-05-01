@@ -8,6 +8,53 @@ const Landing = () => {
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const { documentElement, body } = document;
+    const scrollY = window.scrollY;
+    const previousHtml = {
+      overflow: documentElement.style.overflow,
+      height: documentElement.style.height,
+      overscrollBehavior: documentElement.style.overscrollBehavior,
+    };
+    const previousBody = {
+      overflow: body.style.overflow,
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+      height: body.style.height,
+      overscrollBehavior: body.style.overscrollBehavior,
+    };
+
+    documentElement.style.overflow = 'hidden';
+    documentElement.style.height = '100%';
+    documentElement.style.overscrollBehavior = 'none';
+    body.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+    body.style.height = '100%';
+    body.style.overscrollBehavior = 'none';
+
+    const preventScroll = (event: TouchEvent) => {
+      event.preventDefault();
+    };
+    window.addEventListener('touchmove', preventScroll, { passive: false });
+
+    return () => {
+      window.removeEventListener('touchmove', preventScroll);
+      documentElement.style.overflow = previousHtml.overflow;
+      documentElement.style.height = previousHtml.height;
+      documentElement.style.overscrollBehavior = previousHtml.overscrollBehavior;
+      body.style.overflow = previousBody.overflow;
+      body.style.position = previousBody.position;
+      body.style.top = previousBody.top;
+      body.style.width = previousBody.width;
+      body.style.height = previousBody.height;
+      body.style.overscrollBehavior = previousBody.overscrollBehavior;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
   // SEO
   useEffect(() => {
     document.title = 'Parium – Rekrytering. På 60 sekunder.';
