@@ -104,10 +104,8 @@ export const HeroGlobe = () => {
           }`}
           style={{
             position: 'absolute',
-            top: 0,
-            right: 0,
-            left: 'auto',
-            width: 'max(100%, 700px)',
+            inset: 0,
+            width: '100%',
             height: 'calc(100% + 52px)',
             border: 'none',
             background: 'transparent',
