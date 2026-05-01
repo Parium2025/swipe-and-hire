@@ -77,7 +77,7 @@ export const HeroGlobe = () => {
   return (
     <motion.div
       ref={containerRef}
-      className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
+      className="pointer-events-none absolute inset-x-0 top-[6%] z-0 flex justify-center sm:top-[4%] lg:top-[2%]"
       initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{
@@ -87,19 +87,15 @@ export const HeroGlobe = () => {
       }}
     >
       {/*
-        The wrapper is sized to fill the hero generously on desktop and stay
-        comfortably contained on mobile. The overflow trick hides the Spline
-        watermark by extending the iframe slightly past the bottom edge.
+        Wrapper is sized to fill the hero generously. We clip ~9% off the
+        bottom by making the wrapper shorter than the iframe inside it, so
+        the "Built with Spline" badge in the bottom-right is hidden — while
+        the brain itself stays perfectly centered horizontally.
       */}
-      <div className="relative h-[78vh] w-[78vh] max-h-[760px] max-w-[760px] overflow-hidden sm:h-[82vh] sm:w-[82vh] lg:h-[88vh] lg:w-[88vh] lg:max-h-[920px] lg:max-w-[920px]">
+      <div className="relative h-[72vh] w-[72vh] max-h-[700px] max-w-[700px] overflow-hidden sm:h-[78vh] sm:w-[78vh] lg:h-[84vh] lg:w-[84vh] lg:max-h-[860px] lg:max-w-[860px]">
         {/* No skeleton — we let the hero background show through until the
-            Spline scene has finished its first paint. This avoids the
-            "fake globe appears then swaps" effect the user reported. */}
+            Spline scene has finished its first paint. */}
 
-        {/* Spline iframe — mounted immediately, hidden until first paint.
-            We oversize it (~112%) and shift it up-and-left so the
-            "Built with Spline" badge in the bottom-right corner is pushed
-            outside the wrapper's overflow-hidden area. No mask needed. */}
         <iframe
           ref={iframeRef}
           src={SPLINE_EMBED_URL}
@@ -108,22 +104,15 @@ export const HeroGlobe = () => {
           // @ts-expect-error — fetchpriority is valid HTML
           fetchpriority="high"
           onLoad={() => {
-            // Give Spline ~2 frames to flush its first WebGL paint before we
-            // cross-fade — eliminates the visible "snap" some users reported.
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
-          className={`absolute border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
+          className={`absolute left-0 top-0 w-full border-0 transition-opacity duration-[1200ms] ease-out [contain:layout_paint_size] ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{
-            // Oversize symmetrically in width so the brain stays centered,
-            // and shift up just enough that the bottom-right Spline badge
-            // is pushed below the wrapper's clipped edge.
-            width: '122%',
-            height: '118%',
-            top: '-12%',
-            left: '-11%',
-          }}
+          // Iframe is 12% taller than its wrapper. Wrapper's overflow-hidden
+          // crops the bottom strip where the Spline badge lives, but the
+          // brain stays horizontally centered because width is exactly 100%.
+          style={{ height: '112%' }}
         />
       </div>
     </motion.div>
