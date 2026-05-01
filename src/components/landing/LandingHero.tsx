@@ -192,7 +192,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           animate="show"
           variants={{
             hidden: {},
-            show: { transition: { staggerChildren: 0.18, delayChildren: 1.6 } },
+            show: { transition: { staggerChildren: 0.22, delayChildren: 2.95 } },
           }}
         >
           {audienceOptions.map((option) => (
