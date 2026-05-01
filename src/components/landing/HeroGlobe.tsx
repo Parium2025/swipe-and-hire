@@ -92,6 +92,7 @@ export const HeroGlobe = () => {
 
       {/* Phone wrapper — animates in with a premium float + scale */}
       <motion.div
+        data-allow-touch="true"
         className="relative w-full h-full pointer-events-auto"
         initial={{
           opacity: 0,
@@ -118,6 +119,7 @@ export const HeroGlobe = () => {
       >
         <iframe
           ref={iframeRef}
+          data-allow-touch="true"
           src={SPLINE_EMBED_URL}
           title="3D Phone"
           frameBorder={0}
