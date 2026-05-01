@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Flip } from 'gsap/Flip';
@@ -6,15 +6,18 @@ import { Flip } from 'gsap/Flip';
 gsap.registerPlugin(ScrollTrigger, Flip);
 
 /**
- * BentoScrollGallery — exact port of the CodePen reference.
+ * BentoScrollGallery — bento grid that expands via GSAP Flip on scroll.
  *
- * 8 bento tiles that expand from a 3-column compact grid into a 3-column
- * full-bleed grid as the user scrolls. The whole wrap is pinned for one
- * viewport-height of scroll while the Flip animation plays.
- *
- * Uses window scroll (no custom scroller). Replace the placeholder
- * `<div>` inside each `.gallery__item` with `<img src=... />` later.
+ * IMPORTANT: this app's <html> and <body> have `overflow:hidden`, so all
+ * scrolling on Landing happens inside a custom container (passed as
+ * `scrollerRef`). We register that element with ScrollTrigger via
+ * `scrollerProxy` and use `pinType: 'transform'` so pin works correctly
+ * inside the non-window scroller (and on iOS Safari).
  */
+
+type Props = {
+  scrollerRef: RefObject<HTMLDivElement>;
+};
 
 const placeholders = Array.from({ length: 8 }, (_, i) => ({
   id: i + 1,
@@ -30,14 +33,34 @@ const placeholders = Array.from({ length: 8 }, (_, i) => ({
   ][i],
 }));
 
-export const BentoScrollGallery = () => {
+export const BentoScrollGallery = ({ scrollerRef }: Props) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const galleryElement = galleryRef.current;
     const wrapElement = wrapRef.current;
-    if (!galleryElement || !wrapElement) return;
+    const scroller = scrollerRef.current;
+    if (!galleryElement || !wrapElement || !scroller) return;
+
+    // Bridge the custom scroller to ScrollTrigger
+    ScrollTrigger.scrollerProxy(scroller, {
+      scrollTop(value) {
+        if (arguments.length && value !== undefined) {
+          scroller.scrollTop = value;
+        }
+        return scroller.scrollTop;
+      },
+      getBoundingClientRect() {
+        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
+      },
+      pinType: 'transform',
+    });
+
+    // Forward scroller's scroll events to ScrollTrigger
+    const onScroll = () => ScrollTrigger.update();
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    scroller.addEventListener('touchmove', onScroll, { passive: true });
 
     let flipCtx: gsap.Context | null = null;
 
@@ -61,23 +84,25 @@ export const BentoScrollGallery = () => {
         gsap.timeline({
           scrollTrigger: {
             trigger: galleryElement,
+            scroller,
             start: 'center center',
             end: '+=100%',
             scrub: 0.5,
             pin: wrapElement,
+            pinType: 'transform',
             anticipatePin: 1,
             invalidateOnRefresh: true,
           },
         }).add(flip);
+
+        ScrollTrigger.refresh();
       });
     };
 
-    // Wait until layout is fully settled
-    const start = () => requestAnimationFrame(() => requestAnimationFrame(createTween));
-    if (document.readyState === 'complete') start();
-    else window.addEventListener('load', start, { once: true });
+    // Wait for layout to settle
+    requestAnimationFrame(() => requestAnimationFrame(createTween));
 
-    // Debounced resize that ignores tiny iOS URL-bar height changes
+    // Debounced resize
     let lastW = window.innerWidth;
     let lastH = window.innerHeight;
     let timer: number | null = null;
@@ -94,11 +119,12 @@ export const BentoScrollGallery = () => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('load', start);
+      scroller.removeEventListener('scroll', onScroll);
+      scroller.removeEventListener('touchmove', onScroll);
       if (timer) window.clearTimeout(timer);
       flipCtx?.revert();
     };
-  }, []);
+  }, [scrollerRef]);
 
   return (
     <section className="bento-scroll-section relative" aria-label="Parium showcase">
