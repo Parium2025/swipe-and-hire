@@ -60,6 +60,28 @@ const bubbles: Bubble[] = [
     tailLength: 4,
   },
 
+  // ── SIDE AREA (mid-height, framing the brain) ─────────────────────────
+  // Mid-left, slightly higher
+  {
+    text: 'Ska jag söka nytt jobb?',
+    position: 'left-[2%] top-[44%] sm:left-[4%] sm:top-[42%] lg:left-[6%] lg:top-[44%]',
+    delay: 3.45,
+    floatDuration: 8.2,
+    tailAnchor: 'r',
+    tailDirection: 'down',
+    tailLength: 3,
+  },
+  // Mid-right, slightly lower than mid-left
+  {
+    text: 'Är det värt att anställa en till?',
+    position: 'right-[2%] top-[50%] sm:right-[4%] sm:top-[48%] lg:right-[6%] lg:top-[50%]',
+    delay: 3.75,
+    floatDuration: 8.7,
+    tailAnchor: 'l',
+    tailDirection: 'down',
+    tailLength: 3,
+  },
+
   // ── LOWER AREA (clear of CTAs) ────────────────────────────────────────
   // Lower-left, higher than lower-right for asymmetry
   {
