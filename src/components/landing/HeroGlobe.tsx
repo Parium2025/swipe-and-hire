@@ -99,7 +99,7 @@ export const HeroGlobe = () => {
           onLoad={() => {
             requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
           }}
-          className={`[--phone-scale:0.82] [--phone-y:54%] transition-opacity duration-[1200ms] ease-out sm:[--phone-scale:0.9] sm:[--phone-y:52%] md:[--phone-scale:1] md:[--phone-y:50%] ${
+          className={`[--phone-scale:0.78] [--phone-y:52%] max-[360px]:[--phone-scale:0.68] max-[360px]:[--phone-y:50%] transition-opacity duration-[1200ms] ease-out sm:[--phone-scale:0.9] sm:[--phone-y:52%] md:[--phone-scale:1] md:[--phone-y:50%] ${
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
