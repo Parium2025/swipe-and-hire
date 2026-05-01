@@ -102,9 +102,9 @@ export const HeroGlobe = () => {
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            width: '100%',
-            height: '112%',
-            transform: 'translate(-50%, -50%) translateY(var(--brain-y, 2%)) scale(var(--brain-scale, 0.72))',
+            width: 'var(--brain-scene-size, 260%)',
+            height: 'calc(var(--brain-scene-size, 260%) * 1.12)',
+            transform: 'translate(-50%, -50%) translateY(var(--brain-y, 4%))',
           }}
         />
         <div className="parium-brain-particles parium-brain-particles-front" />
@@ -113,11 +113,6 @@ export const HeroGlobe = () => {
             background:
               radial-gradient(circle at 50% 44%, hsl(var(--secondary) / 0.22), transparent 42%),
               linear-gradient(180deg, hsl(var(--background) / 0.2), hsl(var(--background) / 0.78));
-          }
-
-          .parium-brain-iframe {
-            -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 0 58%, transparent 78%);
-            mask-image: radial-gradient(ellipse at 50% 50%, black 0 58%, transparent 78%);
           }
 
           .parium-brain-particles {
@@ -151,10 +146,8 @@ export const HeroGlobe = () => {
 
           @media (min-width: 640px) {
             .parium-brain-stage .parium-brain-iframe {
-              --brain-scale: 1;
+              --brain-scene-size: 100%;
               --brain-y: 0%;
-              -webkit-mask-image: none;
-              mask-image: none;
             }
 
             .parium-brain-particles {
