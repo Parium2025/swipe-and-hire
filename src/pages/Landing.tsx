@@ -36,12 +36,23 @@ const Landing = () => {
     body.style.overscrollBehavior = 'none';
 
     const preventScroll = (event: TouchEvent) => {
-      event.preventDefault();
+      const target = event.target as HTMLElement | null;
+      // Allow touch interaction inside the 3D phone (Spline iframe / canvas)
+      if (target && target.closest('[data-allow-touch="true"]')) return;
+      if (event.cancelable) event.preventDefault();
     };
     window.addEventListener('touchmove', preventScroll, { passive: false });
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    document.addEventListener('gesturestart', (e) => e.preventDefault());
+    document.addEventListener('wheel', (e) => {
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest('[data-allow-touch="true"]')) return;
+      if (e.cancelable) e.preventDefault();
+    }, { passive: false });
 
     return () => {
       window.removeEventListener('touchmove', preventScroll);
+      document.removeEventListener('touchmove', preventScroll);
       documentElement.style.overflow = previousHtml.overflow;
       documentElement.style.height = previousHtml.height;
       documentElement.style.overscrollBehavior = previousHtml.overscrollBehavior;
