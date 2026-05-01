@@ -101,15 +101,16 @@ export const HeroGlobe = () => {
             ready ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            width: 'var(--brain-scene-size, 260%)',
-            height: 'calc(var(--brain-scene-size, 260%) * 1.12)',
-            transform: 'translate(-50%, -50%) translateY(var(--brain-y, 4%))',
+            width: 'var(--brain-scene-size, 176%)',
+            height: 'calc(var(--brain-scene-size, 176%) * 1.12)',
+            transform: 'translate(-50%, -50%) translateY(var(--brain-y, 5%)) scale(var(--brain-render-scale, 0.58))',
           }}
         />
         <style>{`
           @media (min-width: 640px) {
             .parium-brain-stage .parium-brain-iframe {
               --brain-scene-size: 100%;
+              --brain-render-scale: 1;
               --brain-y: 0%;
             }
           }
