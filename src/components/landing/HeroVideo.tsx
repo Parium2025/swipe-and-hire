@@ -15,9 +15,9 @@ const HeroVideo = () => {
         preload="auto"
         className="absolute inset-0 h-full w-full object-cover"
       />
-      {/* Dark overlay for text legibility */}
-      <div className="absolute inset-0 bg-background/55 sm:bg-background/50" />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/40 to-background/85" />
+      {/* Strong dark overlay */}
+      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/55 to-background/90" />
     </div>
   );
 };
