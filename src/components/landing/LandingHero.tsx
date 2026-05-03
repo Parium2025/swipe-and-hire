@@ -153,7 +153,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         {/* CTAs */}
 
         <motion.div
-          className="pointer-events-auto mt-2 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
+          className="pointer-events-auto mt-10 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
           initial="hidden"
           animate="show"
           variants={{
