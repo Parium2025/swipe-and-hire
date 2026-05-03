@@ -15,8 +15,9 @@ const HeroVideo = () => {
         preload="auto"
         className="absolute inset-0 h-full w-full object-cover"
       />
-      {/* Subtle bottom gradient for button legibility (Job&Talent style) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
+      {/* Darkening overlay */}
+      <div className="absolute inset-0 bg-black/45" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60" />
     </div>
   );
 };
