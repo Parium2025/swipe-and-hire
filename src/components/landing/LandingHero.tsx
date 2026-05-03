@@ -111,12 +111,9 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
   const exitX = selectedRole === 'job_seeker' ? '-105vw' : selectedRole === 'employer' ? '105vw' : 0;
 
   return (
-    <section className="relative min-h-[100svh] overflow-hidden px-5 pb-10 pt-24 sm:px-6 sm:pb-14 sm:pt-28 md:px-12 lg:px-24" aria-labelledby="landing-hero-heading">
-      {/* Floating thought bubbles around the brain */}
-      <ThoughtBubbles />
-      {/* Ambient glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-24 mx-auto h-[30rem] max-w-5xl rounded-full bg-secondary/10 blur-3xl z-[1]" />
-      <HeroGlobe />
+    <section className="relative min-h-[100svh] overflow-hidden" aria-labelledby="landing-hero-heading">
+      {/* Background video */}
+      <HeroVideo />
 
       {selectedRole && (
         <motion.div
@@ -127,22 +124,34 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         />
       )}
 
-      {/* Vertically stacked hero: heading → brain → CTAs */}
+      {/* Stacked hero: heading → CTAs */}
       <motion.div
-        className="pointer-events-none relative z-10 mx-auto flex min-h-[calc(100svh-9rem)] max-w-[1180px] flex-col items-center text-center"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center px-5 pb-16 pt-24 text-center sm:px-6 sm:pt-28 md:px-12 lg:px-24"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        {/* Hidden heading for SEO/a11y only */}
-        <h1 id="landing-hero-heading" className="sr-only">
-          Parium — från en tanke till verklighet
-        </h1>
+        <motion.h1
+          id="landing-hero-heading"
+          initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 1.4, ease, delay: 0.4 }}
+          className="max-w-4xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-6xl md:text-7xl lg:text-[5.5rem]"
+        >
+          Välkommen till Parium
+        </motion.h1>
 
-        {/* Spacer keeps the CTAs anchored while the 3D phone uses the full hero height. */}
-        <div className="pointer-events-none relative w-full flex-1" aria-hidden="true" />
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease, delay: 0.9 }}
+          className="mt-6 max-w-xl text-base text-white/80 sm:text-lg"
+        >
+          Rekrytering på 60 sekunder. Swipea, matcha och anställ.
+        </motion.p>
 
-        {/* 3. Audience CTAs at the bottom — clearly under the brain */}
+        {/* CTAs */}
+
         <motion.div
           className="pointer-events-auto mt-2 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
           initial="hidden"
