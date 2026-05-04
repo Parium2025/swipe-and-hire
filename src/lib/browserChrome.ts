@@ -1,22 +1,27 @@
 const LANDING_CHROME_COLOR = '#626262';
 const PARIUM_CHROME_COLOR = '#001935';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
+const CHROME_SYNC_DELAYS = [0, 16, 80, 180, 360, 720, 1200];
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 
 const setThemeColor = (color: string) => {
-  const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
+  const existing = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
+  const metas: HTMLMetaElement[] = [];
 
   THEME_COLOR_MEDIA.forEach((media) => {
-    if (metas.some((meta) => (meta.getAttribute('media') || '') === media)) return;
-    const meta = document.createElement('meta');
+    const meta = existing.find((item) => (item.getAttribute('media') || '') === media) ?? document.createElement('meta');
     meta.name = 'theme-color';
     if (media) meta.media = media;
-    document.head.appendChild(meta);
+    else meta.removeAttribute('media');
+    meta.setAttribute('content', color);
+    document.head.insertBefore(meta, document.head.firstChild);
     metas.push(meta);
   });
 
-  metas.forEach((meta) => meta.setAttribute('content', color));
+  existing.forEach((meta) => {
+    if (!metas.includes(meta)) meta.remove();
+  });
 
   requestAnimationFrame(() => {
     metas.forEach((meta) => {
@@ -27,17 +32,29 @@ const setThemeColor = (color: string) => {
   });
 };
 
-export const syncBrowserChrome = (pathname = window.location.pathname) => {
-  const isLandingVideo = isLandingVideoPath(pathname);
-  const color = isLandingVideo ? LANDING_CHROME_COLOR : PARIUM_CHROME_COLOR;
-
+const paintChromeBase = (color: string, isLandingVideo: boolean) => {
   document.documentElement.classList.toggle('landing-video-chrome', isLandingVideo);
   document.body.classList.toggle('landing-video-chrome', isLandingVideo);
   document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideo);
   document.body.classList.toggle('parium-app-chrome', !isLandingVideo);
 
+  document.documentElement.style.setProperty('--active-browser-chrome-color', color);
+  document.body.style.setProperty('--active-browser-chrome-color', color);
+  document.documentElement.style.background = color;
   document.documentElement.style.backgroundColor = color;
+  document.body.style.background = color;
   document.body.style.backgroundColor = color;
 
   setThemeColor(color);
+};
+
+export const syncBrowserChrome = (pathname = window.location.pathname) => {
+  const isLandingVideo = isLandingVideoPath(pathname);
+  const color = isLandingVideo ? LANDING_CHROME_COLOR : PARIUM_CHROME_COLOR;
+
+  CHROME_SYNC_DELAYS.forEach((delay) => {
+    window.setTimeout(() => {
+      paintChromeBase(color, isLandingVideo);
+    }, delay);
+  });
 };
