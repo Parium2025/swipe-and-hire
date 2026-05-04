@@ -2,9 +2,36 @@ const LANDING_CHROME_COLOR = '#626262';
 const PARIUM_CHROME_COLOR = '#001935';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 const CHROME_SYNC_DELAYS = [0, 16, 80, 180, 360, 720, 1200];
+const CHROME_SENTINELS = [
+  { id: 'parium-browser-chrome-top', edge: 'top' },
+  { id: 'parium-browser-chrome-bottom', edge: 'bottom' },
+] as const;
 let chromeSyncVersion = 0;
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
+
+const ensureChromeSentinel = ({ id, edge }: (typeof CHROME_SENTINELS)[number]) => {
+  let sentinel = document.getElementById(id) as HTMLDivElement | null;
+
+  if (!sentinel) {
+    sentinel = document.createElement('div');
+    sentinel.id = id;
+    sentinel.className = 'parium-browser-chrome-sentinel';
+    sentinel.setAttribute('aria-hidden', 'true');
+    sentinel.dataset.chromeEdge = edge;
+    document.body.appendChild(sentinel);
+  }
+
+  return sentinel;
+};
+
+const paintChromeSentinels = (color: string) => {
+  CHROME_SENTINELS.forEach((sentinelConfig) => {
+    const sentinel = ensureChromeSentinel(sentinelConfig);
+    sentinel.style.backgroundColor = color;
+    sentinel.style.setProperty('--active-browser-chrome-color', color);
+  });
+};
 
 const setThemeColor = (color: string) => {
   const existing = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
@@ -46,6 +73,7 @@ const paintChromeBase = (color: string, isLandingVideo: boolean) => {
   document.body.style.background = color;
   document.body.style.backgroundColor = color;
 
+  paintChromeSentinels(color);
   setThemeColor(color);
 };
 
