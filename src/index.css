@@ -647,6 +647,21 @@ All colors MUST be HSL.
     background-image: none !important;
   }
 
+  /* Audience-sidor (jobbsökare/arbetsgivare): solid Parium-blå topp + botten */
+  html.parium-app-chrome,
+  body.parium-app-chrome,
+  body.parium-app-chrome #root {
+    background: #001935 !important;
+    background-color: #001935 !important;
+    background-image: none !important;
+  }
+
+  body.parium-app-chrome::before,
+  body.parium-app-chrome::after {
+    background: #001935 !important;
+    background-image: none !important;
+  }
+
   /* Desktop: render the gradient on a fixed layer so it never shifts with content height */
   @media (min-width: 1024px) {
     body::before {
@@ -680,6 +695,14 @@ All colors MUST be HSL.
       background-color: #626262 !important;
       background-image: none !important;
     }
+
+    html.parium-app-chrome,
+    body.parium-app-chrome,
+    body.parium-app-chrome #root {
+      background: #001935 !important;
+      background-color: #001935 !important;
+      background-image: none !important;
+    }
   }
 
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
@@ -700,6 +723,14 @@ All colors MUST be HSL.
       background-image: none !important;
     }
 
+    html.parium-app-chrome,
+    body.parium-app-chrome,
+    body.parium-app-chrome #root {
+      background: #001935 !important;
+      background-color: #001935 !important;
+      background-image: none !important;
+    }
+
     /* Standalone mode (hemskärm) får full höjd */
     @media (display-mode: standalone) {
       html, body {
@@ -711,6 +742,12 @@ All colors MUST be HSL.
       html.landing-video-chrome,
       html.landing-video-chrome body {
         background: #626262 !important;
+        background-image: none !important;
+      }
+
+      html.parium-app-chrome,
+      html.parium-app-chrome body {
+        background: #001935 !important;
         background-image: none !important;
       }
         /* Paint gradient under the home indicator too */
