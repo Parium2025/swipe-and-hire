@@ -82,10 +82,17 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
   const color = isLandingVideo ? LANDING_CHROME_COLOR : PARIUM_CHROME_COLOR;
 
-  CHROME_SYNC_DELAYS.forEach((delay) => {
+  paintChromeBase(color, isLandingVideo);
+
+  CHROME_SYNC_DELAYS.slice(1).forEach((delay) => {
     window.setTimeout(() => {
       if (syncVersion !== chromeSyncVersion) return;
       paintChromeBase(color, isLandingVideo);
     }, delay);
+  });
+
+  requestAnimationFrame(() => {
+    if (syncVersion !== chromeSyncVersion) return;
+    paintChromeBase(color, isLandingVideo);
   });
 };
