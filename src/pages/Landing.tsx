@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
-import { AnimatedBackground } from '@/components/AnimatedBackground';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -71,19 +70,24 @@ const Landing = () => {
     };
   }, []);
 
-  // Set iOS Safari chrome (status bar + bottom URL bar) to sandy while Landing is mounted.
-  // Safari reads theme-color at navigation/page-load time, so we set it once on mount.
+  // Keep browser chrome/background sandy only while the video landing route is mounted.
   useEffect(() => {
     const SAND = '#877C72';
+    const BLUE = '#001935';
     const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
-    const originals = metas.map((m) => m.getAttribute('content'));
+
+    document.documentElement.classList.add('landing-video-chrome');
+    document.body.classList.add('landing-video-chrome');
+    document.documentElement.classList.remove('parium-app-chrome');
+    document.body.classList.remove('parium-app-chrome');
     metas.forEach((m) => m.setAttribute('content', SAND));
 
     return () => {
-      metas.forEach((m, i) => {
-        const o = originals[i];
-        if (o !== null) m.setAttribute('content', o);
-      });
+      document.documentElement.classList.remove('landing-video-chrome');
+      document.body.classList.remove('landing-video-chrome');
+      document.documentElement.classList.add('parium-app-chrome');
+      document.body.classList.add('parium-app-chrome');
+      metas.forEach((m) => m.setAttribute('content', BLUE));
     };
   }, []);
 
