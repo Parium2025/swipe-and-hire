@@ -89,11 +89,16 @@ const Landing = () => {
       document.head.appendChild(createdMeta);
     }
 
-    // html/body bg — Safari samples this for the bottom URL bar
+    // html/body bg — Safari samples this for the bottom URL bar.
+    // Måste rensa background-image också, eftersom global CSS sätter en gradient via shorthand.
     const html = document.documentElement;
     const body = document.body;
     const originalHtmlBg = html.style.backgroundColor;
     const originalBodyBg = body.style.backgroundColor;
+    const originalHtmlBgImg = html.style.backgroundImage;
+    const originalBodyBgImg = body.style.backgroundImage;
+    html.style.backgroundImage = 'none';
+    body.style.backgroundImage = 'none';
     html.style.backgroundColor = SAND;
     body.style.backgroundColor = SAND;
 
@@ -104,6 +109,8 @@ const Landing = () => {
       createdMeta?.remove();
       html.style.backgroundColor = originalHtmlBg;
       body.style.backgroundColor = originalBodyBg;
+      html.style.backgroundImage = originalHtmlBgImg;
+      body.style.backgroundImage = originalBodyBgImg;
     };
   }, []);
 
