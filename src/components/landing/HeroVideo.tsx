@@ -71,17 +71,13 @@ const HeroVideo = () => {
     };
 
     const recover = () => {
-      if (cancelled || failed) return;
-      if (recoveryAttempts >= MAX_RECOVERY) {
-        // Give up gracefully — keep last visible frame
-        setFailed(true);
-        if (watchdog) {
-          window.clearInterval(watchdog);
-          watchdog = undefined;
-        }
-        return;
-      }
+      if (cancelled) return;
       recoveryAttempts += 1;
+      // After MAX_RECOVERY hard reloads, switch to poster fallback (hides <video>)
+      // but KEEP retrying softly in the background so it self-heals.
+      if (recoveryAttempts >= MAX_RECOVERY && !failed) {
+        setFailed(true);
+      }
       try {
         const t = video.currentTime;
         video.load();
@@ -90,6 +86,8 @@ const HeroVideo = () => {
         /* noop */
       }
       safePlay();
+      // If recovery succeeds, handleCanPlay will reset recoveryAttempts and
+      // we re-enable the live video below.
     };
 
     watchdog = window.setInterval(() => {
