@@ -723,6 +723,14 @@ All colors MUST be HSL.
       background-image: none !important;
     }
 
+    html.parium-app-chrome,
+    body.parium-app-chrome,
+    body.parium-app-chrome #root {
+      background: #001935 !important;
+      background-color: #001935 !important;
+      background-image: none !important;
+    }
+
     /* Standalone mode (hemskärm) får full höjd */
     @media (display-mode: standalone) {
       html, body {
