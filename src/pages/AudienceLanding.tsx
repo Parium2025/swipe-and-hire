@@ -49,7 +49,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-gradient-parium text-primary-foreground">
+    <div className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-parium-navy text-primary-foreground">
       <AnimatedBackground />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
