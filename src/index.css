@@ -707,6 +707,12 @@ All colors MUST be HSL.
         background: var(--gradient-parium) !important;
         background-size: cover;
       }
+
+      html.landing-video-chrome,
+      html.landing-video-chrome body {
+        background: #877C72 !important;
+        background-image: none !important;
+      }
         /* Paint gradient under the home indicator too */
         body::after {
           content: "";
