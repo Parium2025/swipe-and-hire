@@ -166,6 +166,14 @@ const HeroVideo = () => {
         preload="auto"
         className="absolute inset-0 h-full w-full object-cover"
       />
+      {/* Plan B: static poster fallback if video fails completely */}
+      {failed && (
+        <div
+          className="absolute inset-0 h-full w-full bg-cover bg-center"
+          style={{ backgroundImage: 'url(/hero-poster.jpg)' }}
+          aria-hidden="true"
+        />
+      )}
       {/* Darkening overlays */}
       <div className="absolute inset-0 bg-black/45" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60" />
