@@ -89,11 +89,16 @@ const Landing = () => {
       document.head.appendChild(createdMeta);
     }
 
-    // html/body bg — Safari samples this for the bottom URL bar
+    // html/body bg — Safari samples this for the bottom URL bar.
+    // Måste rensa background-image också, eftersom global CSS sätter en gradient via shorthand.
     const html = document.documentElement;
     const body = document.body;
     const originalHtmlBg = html.style.backgroundColor;
     const originalBodyBg = body.style.backgroundColor;
+    const originalHtmlBgImg = html.style.backgroundImage;
+    const originalBodyBgImg = body.style.backgroundImage;
+    html.style.backgroundImage = 'none';
+    body.style.backgroundImage = 'none';
     html.style.backgroundColor = SAND;
     body.style.backgroundColor = SAND;
 
@@ -104,6 +109,8 @@ const Landing = () => {
       createdMeta?.remove();
       html.style.backgroundColor = originalHtmlBg;
       body.style.backgroundColor = originalBodyBg;
+      html.style.backgroundImage = originalHtmlBgImg;
+      body.style.backgroundImage = originalBodyBgImg;
     };
   }, []);
 
@@ -115,8 +122,8 @@ const Landing = () => {
   return (
     <div
       ref={scrollContainerRef}
-      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain bg-background text-primary-foreground"
-      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
+      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain text-primary-foreground"
+      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom', backgroundColor: '#877C72' }}
     >
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
