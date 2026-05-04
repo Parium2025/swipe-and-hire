@@ -70,9 +70,9 @@ const Landing = () => {
     };
   }, []);
 
-  // Keep browser chrome/background sandy only while the video landing route is mounted.
+  // Keep browser chrome/background gray only while the video landing route is mounted.
   useEffect(() => {
-    const SAND = '#8A8A8A';
+    const LANDING_GRAY = '#626262';
     const BLUE = '#001935';
     const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
 
@@ -80,7 +80,7 @@ const Landing = () => {
     document.body.classList.add('landing-video-chrome');
     document.documentElement.classList.remove('parium-app-chrome');
     document.body.classList.remove('parium-app-chrome');
-    metas.forEach((m) => m.setAttribute('content', SAND));
+    metas.forEach((m) => m.setAttribute('content', LANDING_GRAY));
 
     return () => {
       document.documentElement.classList.remove('landing-video-chrome');
