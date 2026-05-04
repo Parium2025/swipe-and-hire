@@ -111,8 +111,19 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
   const exitX = selectedRole === 'job_seeker' ? '-105vw' : selectedRole === 'employer' ? '105vw' : 0;
 
   return (
-    <section className="relative min-h-[100svh] overflow-hidden" aria-labelledby="landing-hero-heading">
-      {/* Background video */}
+    <section
+      className="relative min-h-[100svh] min-h-[100dvh] w-screen overflow-hidden"
+      style={{
+        marginLeft: 'calc(50% - 50vw)',
+        marginRight: 'calc(50% - 50vw)',
+        marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))',
+        marginBottom: 'calc(-1 * env(safe-area-inset-bottom, 0px))',
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
+      aria-labelledby="landing-hero-heading"
+    >
+      {/* Background video — fills entire viewport including safe areas */}
       <HeroVideo />
 
       {selectedRole && (
