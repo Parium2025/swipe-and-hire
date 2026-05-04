@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroVideo from './HeroVideo';
+import { syncBrowserChrome } from '@/lib/browserChrome';
 
 
 type LandingHeroProps = {
@@ -103,13 +104,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
   const handleChoice = (role: AudienceRole) => {
     if (selectedRole) return;
     setSelectedRole(role);
-    document.documentElement.classList.remove('landing-video-chrome');
-    document.body.classList.remove('landing-video-chrome');
-    document.documentElement.classList.add('parium-app-chrome');
-    document.body.classList.add('parium-app-chrome');
-    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
-      meta.setAttribute('content', '#001935');
-    });
+    syncBrowserChrome(role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare');
     sessionStorage.setItem('parium-skip-splash', '1');
     window.setTimeout(() => {
       navigate(role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare');
