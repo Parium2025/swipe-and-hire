@@ -636,14 +636,14 @@ All colors MUST be HSL.
   html.landing-video-chrome,
   body.landing-video-chrome,
   body.landing-video-chrome #root {
-    background: #877C72 !important;
-    background-color: #877C72 !important;
+    background: #8A8A8A !important;
+    background-color: #8A8A8A !important;
     background-image: none !important;
   }
 
   body.landing-video-chrome::before,
   body.landing-video-chrome::after {
-    background: #877C72 !important;
+    background: #8A8A8A !important;
     background-image: none !important;
   }
 
@@ -676,8 +676,8 @@ All colors MUST be HSL.
     html.landing-video-chrome,
     body.landing-video-chrome,
     body.landing-video-chrome #root {
-      background: #877C72 !important;
-      background-color: #877C72 !important;
+      background: #8A8A8A !important;
+      background-color: #8A8A8A !important;
       background-image: none !important;
     }
   }
@@ -695,8 +695,8 @@ All colors MUST be HSL.
     html.landing-video-chrome,
     body.landing-video-chrome,
     body.landing-video-chrome #root {
-      background: #877C72 !important;
-      background-color: #877C72 !important;
+      background: #8A8A8A !important;
+      background-color: #8A8A8A !important;
       background-image: none !important;
     }
 
@@ -710,7 +710,7 @@ All colors MUST be HSL.
 
       html.landing-video-chrome,
       html.landing-video-chrome body {
-        background: #877C72 !important;
+        background: #8A8A8A !important;
         background-image: none !important;
       }
         /* Paint gradient under the home indicator too */

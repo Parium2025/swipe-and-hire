@@ -11,7 +11,7 @@
       (function() {
         try {
           var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
-          var chromeColor = isLandingVideoRoute ? '#877C72' : '#001935';
+          var chromeColor = isLandingVideoRoute ? '#8A8A8A' : '#001935';
           document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: light)">');
@@ -36,7 +36,7 @@
       (function() {
         try {
           var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
-          var chromeColor = isLandingVideoRoute ? '#877C72' : '#001935';
+          var chromeColor = isLandingVideoRoute ? '#8A8A8A' : '#001935';
           document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
           var metas = document.querySelectorAll('meta[name="theme-color"]');
