@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import LandingNav from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { syncBrowserChrome } from '@/lib/browserChrome';
 
 type AudienceLandingProps = {
   audience: 'job_seeker' | 'employer';
@@ -29,13 +30,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const page = content[audience];
 
   useEffect(() => {
-    document.documentElement.classList.remove('landing-video-chrome');
-    document.body.classList.remove('landing-video-chrome');
-    document.documentElement.classList.add('parium-app-chrome');
-    document.body.classList.add('parium-app-chrome');
-    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
-      meta.setAttribute('content', '#001935');
-    });
+    syncBrowserChrome(window.location.pathname);
   }, []);
 
   const handleLogin = () => {

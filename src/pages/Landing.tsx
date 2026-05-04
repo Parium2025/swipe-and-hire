@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
+import { syncBrowserChrome } from '@/lib/browserChrome';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -72,22 +73,10 @@ const Landing = () => {
 
   // Keep browser chrome/background gray only while the video landing route is mounted.
   useEffect(() => {
-    const LANDING_GRAY = '#626262';
-    const BLUE = '#001935';
-    const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
-
-    document.documentElement.classList.add('landing-video-chrome');
-    document.body.classList.add('landing-video-chrome');
-    document.documentElement.classList.remove('parium-app-chrome');
-    document.body.classList.remove('parium-app-chrome');
-    metas.forEach((m) => m.setAttribute('content', LANDING_GRAY));
+    syncBrowserChrome('/');
 
     return () => {
-      document.documentElement.classList.remove('landing-video-chrome');
-      document.body.classList.remove('landing-video-chrome');
-      document.documentElement.classList.add('parium-app-chrome');
-      document.body.classList.add('parium-app-chrome');
-      metas.forEach((m) => m.setAttribute('content', BLUE));
+      syncBrowserChrome(window.location.pathname);
     };
   }, []);
 
