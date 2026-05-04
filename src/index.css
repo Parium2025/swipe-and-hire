@@ -692,7 +692,7 @@ All colors MUST be HSL.
     bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
     height: calc(env(safe-area-inset-bottom, 0px) + 140px);
     pointer-events: none;
-    z-index: 2147483646;
+    z-index: 0;
   }
 
   /* Desktop: render the gradient on a fixed layer so it never shifts with content height */
