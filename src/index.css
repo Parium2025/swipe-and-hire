@@ -693,6 +693,22 @@ All colors MUST be HSL.
       }
   }
 
+  /* Landing hero video: iOS Safari samples html/body/root and the scroll surface for browser chrome. */
+  html.landing-video-chrome,
+  body.landing-video-chrome,
+  body.landing-video-chrome #root,
+  body.landing-video-chrome .landing-video-surface {
+    background: hsl(26 8% 49%) !important;
+    background-image: none !important;
+    background-color: hsl(26 8% 49%) !important;
+  }
+
+  body.landing-video-chrome::before,
+  body.landing-video-chrome::after {
+    display: none !important;
+    background: hsl(26 8% 49%) !important;
+  }
+
   /* Custom date input styling */
   .custom-date-input::placeholder {
     color: rgba(255, 255, 255, 0.6) !important;
