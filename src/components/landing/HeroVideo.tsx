@@ -2,69 +2,120 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 /**
- * Premium hero background video.
- * - Autoplays muted/inline (iOS/Android safe)
+ * Premium hero background video — bulletproof edition.
+ * - Autoplays muted/inline on iOS, Android, desktop
  * - Recovers from freezes (visibility, stalled, suspend, pause)
- * - Watchdog: detects stuck currentTime and restarts playback
- * - Fades in only when first frame is actually painted
+ * - Capped retries to avoid infinite reload loops on broken streams
+ * - Respects prefers-reduced-motion and Save-Data
+ * - Falls back to static poster frame if all recovery fails
  */
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    // Respect user/network preferences — show first frame, no looping playback
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const saveData =
+      typeof navigator !== 'undefined' &&
+      'connection' in navigator &&
+      Boolean((navigator as any).connection?.saveData);
+
+    if (prefersReducedMotion || saveData) {
+      video.removeAttribute('autoplay');
+      video.loop = false;
+      video.preload = 'metadata';
+      const showFrame = () => {
+        try {
+          video.currentTime = 0.1;
+        } catch {
+          /* noop */
+        }
+        setReady(true);
+      };
+      video.addEventListener('loadedmetadata', showFrame, { once: true });
+      return () => video.removeEventListener('loadedmetadata', showFrame);
+    }
+
     let cancelled = false;
     let watchdog: number | undefined;
     let lastTime = 0;
-    let stuckCount = 0;
+    let stuckTicks = 0;
+    let recoveryAttempts = 0;
+    const MAX_RECOVERY = 4;
+
+    const gestureCleanups: Array<() => void> = [];
+    const cleanupGestures = () => {
+      while (gestureCleanups.length) gestureCleanups.pop()?.();
+    };
+
+    const armGestureRetry = () => {
+      if (cancelled) return;
+      const retry = () => {
+        cleanupGestures();
+        if (cancelled) return;
+        video.play().catch(() => {});
+      };
+      const opts: AddEventListenerOptions = { once: true, passive: true };
+      window.addEventListener('pointerdown', retry, opts);
+      window.addEventListener('touchstart', retry, opts);
+      window.addEventListener('keydown', retry, opts);
+      gestureCleanups.push(
+        () => window.removeEventListener('pointerdown', retry),
+        () => window.removeEventListener('touchstart', retry),
+        () => window.removeEventListener('keydown', retry)
+      );
+    };
 
     const safePlay = () => {
       if (cancelled || !video) return;
       const p = video.play();
       if (p && typeof p.catch === 'function') {
-        p.catch(() => {
-          // Autoplay blocked — retry on first user gesture
-          const retry = () => {
-            video.play().catch(() => {});
-            window.removeEventListener('pointerdown', retry);
-            window.removeEventListener('touchstart', retry);
-            window.removeEventListener('keydown', retry);
-          };
-          window.addEventListener('pointerdown', retry, { once: true });
-          window.addEventListener('touchstart', retry, { once: true });
-          window.addEventListener('keydown', retry, { once: true });
-        });
+        p.catch(() => armGestureRetry());
       }
     };
 
     const handleCanPlay = () => {
       setReady(true);
+      recoveryAttempts = 0;
       safePlay();
     };
 
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && video.paused) {
+      if (cancelled) return;
+      if (document.visibilityState === 'visible' && video.paused && !failed) {
         safePlay();
       }
     };
 
-    const handleStall = () => {
-      // Force reload of the current playback
+    const recover = () => {
+      if (cancelled || failed) return;
+      if (recoveryAttempts >= MAX_RECOVERY) {
+        // Give up gracefully — keep last visible frame
+        setFailed(true);
+        if (watchdog) {
+          window.clearInterval(watchdog);
+          watchdog = undefined;
+        }
+        return;
+      }
+      recoveryAttempts += 1;
       try {
         const t = video.currentTime;
         video.load();
-        video.currentTime = t || 0;
-        safePlay();
+        if (Number.isFinite(t)) video.currentTime = t;
       } catch {
-        safePlay();
+        /* noop */
       }
+      safePlay();
     };
 
-    // Watchdog — if currentTime doesn't advance while page is visible, recover
     watchdog = window.setInterval(() => {
+      if (cancelled || failed) return;
       if (document.visibilityState !== 'visible') return;
       if (video.paused || video.ended) {
         safePlay();
@@ -72,42 +123,50 @@ const HeroVideo = () => {
       }
       if (video.readyState < 2) return;
       if (video.currentTime === lastTime) {
-        stuckCount += 1;
-        if (stuckCount >= 3) {
-          stuckCount = 0;
-          handleStall();
+        stuckTicks += 1;
+        if (stuckTicks >= 3) {
+          stuckTicks = 0;
+          recover();
         }
       } else {
-        stuckCount = 0;
+        stuckTicks = 0;
+        recoveryAttempts = 0;
         lastTime = video.currentTime;
       }
     }, 1000);
 
+    const handleStall = () => recover();
+    const handleError = () => recover();
+    const handlePause = () => {
+      if (document.visibilityState === 'visible' && !failed) safePlay();
+    };
+
     video.addEventListener('canplay', handleCanPlay);
     video.addEventListener('loadeddata', handleCanPlay);
     video.addEventListener('stalled', handleStall);
+    video.addEventListener('error', handleError);
     video.addEventListener('suspend', () => safePlay());
-    video.addEventListener('pause', () => {
-      if (document.visibilityState === 'visible') safePlay();
-    });
+    video.addEventListener('pause', handlePause);
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('focus', handleVisibility);
     window.addEventListener('pageshow', handleVisibility);
 
-    // Kick playback immediately
     safePlay();
 
     return () => {
       cancelled = true;
       if (watchdog) window.clearInterval(watchdog);
+      cleanupGestures();
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('loadeddata', handleCanPlay);
       video.removeEventListener('stalled', handleStall);
+      video.removeEventListener('error', handleError);
+      video.removeEventListener('pause', handlePause);
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('focus', handleVisibility);
       window.removeEventListener('pageshow', handleVisibility);
     };
-  }, []);
+  }, [failed]);
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden bg-background">
@@ -126,7 +185,6 @@ const HeroVideo = () => {
         disableRemotePlayback
         controls={false}
         preload="auto"
-        poster=""
         className="absolute inset-0 h-full w-full object-cover"
       />
       {/* Darkening overlays */}
