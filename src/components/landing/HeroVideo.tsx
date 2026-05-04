@@ -121,8 +121,7 @@ const HeroVideo = () => {
         muted
         loop
         playsInline
-        // @ts-expect-error - non-standard but needed for iOS Safari background autoplay
-        webkit-playsinline="true"
+        {...({ 'webkit-playsinline': 'true', 'x5-playsinline': 'true' } as Record<string, string>)}
         disablePictureInPicture
         disableRemotePlayback
         controls={false}
