@@ -91,13 +91,17 @@ const HeroVideo = () => {
     };
 
     watchdog = window.setInterval(() => {
-      if (cancelled || failed) return;
+      if (cancelled) return;
       if (document.visibilityState !== 'visible') return;
       if (video.paused || video.ended) {
         safePlay();
         return;
       }
-      if (video.readyState < 2) return;
+      if (video.readyState < 2) {
+        // Stuck buffering — try a soft recover so we eventually come back
+        safePlay();
+        return;
+      }
       if (video.currentTime === lastTime) {
         stuckTicks += 1;
         if (stuckTicks >= 3) {
@@ -108,13 +112,15 @@ const HeroVideo = () => {
         stuckTicks = 0;
         recoveryAttempts = 0;
         lastTime = video.currentTime;
+        // If we previously fell back to poster, video is alive again — restore it
+        if (failed) setFailed(false);
       }
     }, 1000);
 
     const handleStall = () => recover();
     const handleError = () => recover();
     const handlePause = () => {
-      if (document.visibilityState === 'visible' && !failed) safePlay();
+      if (document.visibilityState === 'visible') safePlay();
     };
 
     video.addEventListener('canplay', handleCanPlay);
