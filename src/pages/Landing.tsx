@@ -95,7 +95,7 @@ const Landing = () => {
   return (
     <div
       ref={scrollContainerRef}
-      className="landing-video-surface fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain text-primary-foreground"
+      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain text-foreground"
       style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
     >
       <div className="relative z-10 min-h-full">
