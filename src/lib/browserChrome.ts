@@ -2,6 +2,7 @@ const LANDING_CHROME_COLOR = '#626262';
 const PARIUM_CHROME_COLOR = '#001935';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 const CHROME_SYNC_DELAYS = [0, 16, 80, 180, 360, 720, 1200];
+let chromeSyncVersion = 0;
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 
@@ -49,11 +50,13 @@ const paintChromeBase = (color: string, isLandingVideo: boolean) => {
 };
 
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
+  const syncVersion = ++chromeSyncVersion;
   const isLandingVideo = isLandingVideoPath(pathname);
   const color = isLandingVideo ? LANDING_CHROME_COLOR : PARIUM_CHROME_COLOR;
 
   CHROME_SYNC_DELAYS.forEach((delay) => {
     window.setTimeout(() => {
+      if (syncVersion !== chromeSyncVersion) return;
       paintChromeBase(color, isLandingVideo);
     }, delay);
   });
