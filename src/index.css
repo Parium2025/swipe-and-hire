@@ -660,10 +660,26 @@ All colors MUST be HSL.
   body.landing-video-chrome::before,
   body.landing-video-chrome::after,
   body.parium-app-chrome:not(.landing-video-chrome)::before,
-  body.parium-app-chrome:not(.landing-video-chrome)::after {
+  body.parium-app-chrome:not(.landing-video-chrome)::after,
+  .parium-browser-chrome-sentinel {
     background: var(--active-browser-chrome-color) !important;
+    background-color: var(--active-browser-chrome-color) !important;
     background-image: none !important;
   }
+
+  .parium-browser-chrome-sentinel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    display: block;
+    min-height: 16px;
+    width: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #parium-browser-chrome-top { top: 0; }
+  #parium-browser-chrome-bottom { bottom: -8px; }
 
   /* Same live-updated chrome layer as the top: paints behind Safari bottom UI during SPA route changes. */
   body.landing-video-chrome::after,
