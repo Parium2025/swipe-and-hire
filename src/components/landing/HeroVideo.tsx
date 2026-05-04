@@ -155,7 +155,7 @@ const HeroVideo = () => {
       <motion.video
         ref={videoRef}
         initial={{ opacity: 0, scale: 1.06 }}
-        animate={{ opacity: ready ? 1 : 0, scale: ready ? 1 : 1.06 }}
+        animate={{ opacity: ready && !failed ? 1 : 0, scale: ready && !failed ? 1 : 1.06 }}
         transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
         src="/hero-video.mp4"
         poster="/hero-poster.jpg"
@@ -169,6 +169,7 @@ const HeroVideo = () => {
         controls={false}
         preload="auto"
         className="absolute inset-0 h-full w-full object-cover"
+        style={{ visibility: failed ? 'hidden' : 'visible', pointerEvents: 'none' }}
       />
       {/* Plan B: static poster fallback if video fails completely */}
       {failed && (
