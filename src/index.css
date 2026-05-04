@@ -175,6 +175,7 @@ All colors MUST be HSL.
     --primary-glow: 200 100% 35%;
     --parium-chrome-blue: 212 100% 10%;
     --landing-chrome-gray: 0 0% 38.4%;
+    --active-browser-chrome-color: hsl(var(--parium-chrome-blue));
 
     /* Parium Light Blue (från loggans ringar) */
     --secondary: 200 100% 60%;
@@ -637,34 +638,25 @@ All colors MUST be HSL.
 
   html.landing-video-chrome,
   body.landing-video-chrome,
-  body.landing-video-chrome #root {
-    background: hsl(var(--landing-chrome-gray)) !important;
-    background-color: hsl(var(--landing-chrome-gray)) !important;
+  body.landing-video-chrome #root,
+  html.parium-app-chrome:not(.landing-video-chrome),
+  body.parium-app-chrome:not(.landing-video-chrome),
+  body.parium-app-chrome:not(.landing-video-chrome) #root {
+    background: var(--active-browser-chrome-color) !important;
+    background-color: var(--active-browser-chrome-color) !important;
     background-image: none !important;
   }
 
   body.landing-video-chrome::before,
-  body.landing-video-chrome::after {
-    background: hsl(var(--landing-chrome-gray)) !important;
-    background-image: none !important;
-  }
-
-  /* Audience-sidor (jobbsökare/arbetsgivare): solid Parium-blå topp + botten.
-     Guarded so video landing always stays gray until CTA switches classes. */
-  html.parium-app-chrome:not(.landing-video-chrome),
-  body.parium-app-chrome:not(.landing-video-chrome),
-  body.parium-app-chrome:not(.landing-video-chrome) #root {
-    background: hsl(var(--parium-chrome-blue)) !important;
-    background-color: hsl(var(--parium-chrome-blue)) !important;
-    background-image: none !important;
-  }
-
+  body.landing-video-chrome::after,
   body.parium-app-chrome:not(.landing-video-chrome)::before,
   body.parium-app-chrome:not(.landing-video-chrome)::after {
-    background: hsl(var(--parium-chrome-blue)) !important;
+    background: var(--active-browser-chrome-color) !important;
     background-image: none !important;
   }
 
+  /* Same live-updated chrome layer as the top: paints behind Safari bottom UI during SPA route changes. */
+  body.landing-video-chrome::after,
   body.parium-app-chrome:not(.landing-video-chrome)::after {
     content: "";
     position: fixed;
