@@ -71,6 +71,27 @@ const Landing = () => {
     };
   }, []);
 
+  // Override browser chrome theme color to match the sandy hero video while on Landing.
+  // Restore the original dark color when leaving so resten av appen behåller den blå bakgrunden.
+  useEffect(() => {
+    const SAND = '#877C72';
+    const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
+    const originals = metas.map((m) => m.getAttribute('content'));
+    metas.forEach((m) => m.setAttribute('content', SAND));
+    if (metas.length === 0) {
+      const m = document.createElement('meta');
+      m.name = 'theme-color';
+      m.content = SAND;
+      document.head.appendChild(m);
+      return () => { m.remove(); };
+    }
+    return () => {
+      metas.forEach((m, i) => {
+        if (originals[i] !== null) m.setAttribute('content', originals[i] as string);
+      });
+    };
+  }, []);
+
   const handleLogin = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth');
