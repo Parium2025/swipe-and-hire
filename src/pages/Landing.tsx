@@ -71,51 +71,18 @@ const Landing = () => {
     };
   }, []);
 
-  // Match iOS Safari chrome only while the hero video is the active viewport.
+  // Set iOS Safari chrome (status bar + bottom URL bar) to sandy while Landing is mounted.
+  // Safari reads theme-color at navigation/page-load time, so we set it once on mount.
   useEffect(() => {
     const SAND = '#877C72';
-    const CHROME_CLASS = 'landing-video-chrome';
-    const scrollEl = scrollContainerRef.current;
-    const html = document.documentElement;
-    const body = document.body;
     const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
-    const originalMetas = metas.map((meta) => meta.getAttribute('content'));
-
-    let raf = 0;
-    const applyChrome = (active: boolean) => {
-      html.classList.toggle(CHROME_CLASS, active);
-      body.classList.toggle(CHROME_CLASS, active);
-      metas.forEach((meta, index) => {
-        const original = originalMetas[index];
-        if (active) meta.setAttribute('content', SAND);
-        else if (original) meta.setAttribute('content', original);
-      });
-    };
-
-    const updateChrome = () => {
-      raf = 0;
-      const scrollTop = scrollEl?.scrollTop ?? 0;
-      const heroIsActive = scrollTop < window.innerHeight * 0.72;
-      applyChrome(heroIsActive);
-    };
-
-    const scheduleUpdate = () => {
-      if (!raf) raf = window.requestAnimationFrame(updateChrome);
-    };
-
-    updateChrome();
-    scrollEl?.addEventListener('scroll', scheduleUpdate, { passive: true });
-    window.addEventListener('resize', scheduleUpdate, { passive: true });
+    const originals = metas.map((m) => m.getAttribute('content'));
+    metas.forEach((m) => m.setAttribute('content', SAND));
 
     return () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      scrollEl?.removeEventListener('scroll', scheduleUpdate);
-      window.removeEventListener('resize', scheduleUpdate);
-      html.classList.remove(CHROME_CLASS);
-      body.classList.remove(CHROME_CLASS);
-      metas.forEach((meta, index) => {
-        const original = originalMetas[index];
-        if (original) meta.setAttribute('content', original);
+      metas.forEach((m, i) => {
+        const o = originals[i];
+        if (o !== null) m.setAttribute('content', o);
       });
     };
   }, []);
@@ -128,7 +95,7 @@ const Landing = () => {
   return (
     <div
       ref={scrollContainerRef}
-      className="landing-video-surface fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain text-primary-foreground"
+      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain text-foreground"
       style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
     >
       <div className="relative z-10 min-h-full">
