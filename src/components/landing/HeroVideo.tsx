@@ -154,6 +154,7 @@ const HeroVideo = () => {
         animate={{ opacity: ready ? 1 : 0, scale: ready ? 1 : 1.06 }}
         transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
         src="/hero-video.mp4"
+        poster="/hero-poster.jpg"
         autoPlay
         muted
         loop
