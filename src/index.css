@@ -647,6 +647,21 @@ All colors MUST be HSL.
     background-image: none !important;
   }
 
+  /* Audience-sidor (jobbsökare/arbetsgivare): solid Parium-blå topp + botten */
+  html.parium-app-chrome,
+  body.parium-app-chrome,
+  body.parium-app-chrome #root {
+    background: #001935 !important;
+    background-color: #001935 !important;
+    background-image: none !important;
+  }
+
+  body.parium-app-chrome::before,
+  body.parium-app-chrome::after {
+    background: #001935 !important;
+    background-image: none !important;
+  }
+
   /* Desktop: render the gradient on a fixed layer so it never shifts with content height */
   @media (min-width: 1024px) {
     body::before {
