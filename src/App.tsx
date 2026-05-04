@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useLayoutEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -131,7 +131,7 @@ const LazyFallback = () => (
 const AnimatedRoutes = () => {
   const location = useLocation();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     syncBrowserChrome(location.pathname);
   }, [location.pathname]);
 
