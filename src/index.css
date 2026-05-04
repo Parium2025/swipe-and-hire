@@ -633,6 +633,20 @@ All colors MUST be HSL.
     background-size: cover;
   }
 
+  html.landing-video-chrome,
+  body.landing-video-chrome,
+  body.landing-video-chrome #root {
+    background: hsl(26 8% 49%) !important;
+    background-color: hsl(26 8% 49%) !important;
+    background-image: none !important;
+  }
+
+  body.landing-video-chrome::before,
+  body.landing-video-chrome::after {
+    background: hsl(26 8% 49%) !important;
+    background-image: none !important;
+  }
+
   /* Desktop: render the gradient on a fixed layer so it never shifts with content height */
   @media (min-width: 1024px) {
     body::before {
@@ -658,6 +672,14 @@ All colors MUST be HSL.
     html, body {
       background: var(--gradient-parium-desktop);
     }
+
+    html.landing-video-chrome,
+    body.landing-video-chrome,
+    body.landing-video-chrome #root {
+      background: hsl(26 8% 49%) !important;
+      background-color: hsl(26 8% 49%) !important;
+      background-image: none !important;
+    }
   }
 
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
@@ -668,6 +690,14 @@ All colors MUST be HSL.
       min-height: 100svh; /* Safari browser mode */
       padding-top: env(safe-area-inset-top);
       margin-top: calc(-1 * env(safe-area-inset-top));
+    }
+
+    html.landing-video-chrome,
+    body.landing-video-chrome,
+    body.landing-video-chrome #root {
+      background: hsl(26 8% 49%) !important;
+      background-color: hsl(26 8% 49%) !important;
+      background-image: none !important;
     }
 
     /* Standalone mode (hemskärm) får full höjd */
