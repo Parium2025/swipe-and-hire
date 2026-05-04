@@ -637,6 +637,16 @@ All colors MUST be HSL.
   }
 
   html.landing-video-chrome,
+  body.landing-video-chrome {
+    --active-browser-chrome-color: hsl(var(--landing-chrome-gray));
+  }
+
+  html.parium-app-chrome:not(.landing-video-chrome),
+  body.parium-app-chrome:not(.landing-video-chrome) {
+    --active-browser-chrome-color: hsl(var(--parium-chrome-blue));
+  }
+
+  html.landing-video-chrome,
   body.landing-video-chrome,
   body.landing-video-chrome #root,
   html.parium-app-chrome:not(.landing-video-chrome),
