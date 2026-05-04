@@ -72,7 +72,7 @@ const Landing = () => {
 
   // Keep browser chrome/background sandy only while the video landing route is mounted.
   useEffect(() => {
-    const SAND = '#877C72';
+    const SAND = '#8A8A8A';
     const BLUE = '#001935';
     const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
 
