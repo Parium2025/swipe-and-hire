@@ -6,9 +6,21 @@
     <!-- PWA / iOS status bar full-bleed -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <!-- Theme-color sätts före React så iOS/Android browser-chrome får rätt färg direkt -->
-    <meta name="theme-color" content="#877C72" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#877C72" media="(prefers-color-scheme: dark)" />
+    <script>
+      // Theme-color måste skrivas medan <head> parsas, innan Safari låser browser-chrome.
+      (function() {
+        try {
+          var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
+          var chromeColor = isLandingVideoRoute ? '#877C72' : '#001935';
+          document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
+          document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
+          document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: light)">');
+          document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: dark)">');
+        } catch (e) {
+          document.write('<meta name="theme-color" content="#001935">');
+        }
+      })();
+    </script>
     <title>Parium – Rekrytering. På 60 sekunder.</title>
     <meta name="description" content="Parium matchar kandidater och arbetsgivare på sekunder. Swipea, matcha och anställ – Tinder för jobb.">
     <meta name="author" content="Parium" />
