@@ -173,6 +173,8 @@ All colors MUST be HSL.
     --primary: 215 100% 12%;
     --primary-foreground: 210 40% 98%;
     --primary-glow: 200 100% 35%;
+    --parium-chrome-blue: 212 100% 10%;
+    --landing-chrome-gray: 0 0% 38.4%;
 
     /* Parium Light Blue (från loggans ringar) */
     --secondary: 200 100% 60%;
@@ -636,14 +638,14 @@ All colors MUST be HSL.
   html.landing-video-chrome,
   body.landing-video-chrome,
   body.landing-video-chrome #root {
-    background: #626262 !important;
-    background-color: #626262 !important;
+    background: hsl(var(--landing-chrome-gray)) !important;
+    background-color: hsl(var(--landing-chrome-gray)) !important;
     background-image: none !important;
   }
 
   body.landing-video-chrome::before,
   body.landing-video-chrome::after {
-    background: #626262 !important;
+    background: hsl(var(--landing-chrome-gray)) !important;
     background-image: none !important;
   }
 
@@ -652,15 +654,26 @@ All colors MUST be HSL.
   html.parium-app-chrome:not(.landing-video-chrome),
   body.parium-app-chrome:not(.landing-video-chrome),
   body.parium-app-chrome:not(.landing-video-chrome) #root {
-    background: #001935 !important;
-    background-color: #001935 !important;
+    background: hsl(var(--parium-chrome-blue)) !important;
+    background-color: hsl(var(--parium-chrome-blue)) !important;
     background-image: none !important;
   }
 
   body.parium-app-chrome:not(.landing-video-chrome)::before,
   body.parium-app-chrome:not(.landing-video-chrome)::after {
-    background: #001935 !important;
+    background: hsl(var(--parium-chrome-blue)) !important;
     background-image: none !important;
+  }
+
+  body.parium-app-chrome:not(.landing-video-chrome)::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
+    height: calc(env(safe-area-inset-bottom, 0px) + 140px);
+    pointer-events: none;
+    z-index: 0;
   }
 
   /* Desktop: render the gradient on a fixed layer so it never shifts with content height */
