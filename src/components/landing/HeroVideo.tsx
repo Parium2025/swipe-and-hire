@@ -71,17 +71,13 @@ const HeroVideo = () => {
     };
 
     const recover = () => {
-      if (cancelled || failed) return;
-      if (recoveryAttempts >= MAX_RECOVERY) {
-        // Give up gracefully — keep last visible frame
-        setFailed(true);
-        if (watchdog) {
-          window.clearInterval(watchdog);
-          watchdog = undefined;
-        }
-        return;
-      }
+      if (cancelled) return;
       recoveryAttempts += 1;
+      // After MAX_RECOVERY hard reloads, switch to poster fallback (hides <video>)
+      // but KEEP retrying softly in the background so it self-heals.
+      if (recoveryAttempts >= MAX_RECOVERY && !failed) {
+        setFailed(true);
+      }
       try {
         const t = video.currentTime;
         video.load();
@@ -90,16 +86,22 @@ const HeroVideo = () => {
         /* noop */
       }
       safePlay();
+      // If recovery succeeds, handleCanPlay will reset recoveryAttempts and
+      // we re-enable the live video below.
     };
 
     watchdog = window.setInterval(() => {
-      if (cancelled || failed) return;
+      if (cancelled) return;
       if (document.visibilityState !== 'visible') return;
       if (video.paused || video.ended) {
         safePlay();
         return;
       }
-      if (video.readyState < 2) return;
+      if (video.readyState < 2) {
+        // Stuck buffering — try a soft recover so we eventually come back
+        safePlay();
+        return;
+      }
       if (video.currentTime === lastTime) {
         stuckTicks += 1;
         if (stuckTicks >= 3) {
@@ -110,13 +112,15 @@ const HeroVideo = () => {
         stuckTicks = 0;
         recoveryAttempts = 0;
         lastTime = video.currentTime;
+        // If we previously fell back to poster, video is alive again — restore it
+        if (failed) setFailed(false);
       }
     }, 1000);
 
     const handleStall = () => recover();
     const handleError = () => recover();
     const handlePause = () => {
-      if (document.visibilityState === 'visible' && !failed) safePlay();
+      if (document.visibilityState === 'visible') safePlay();
     };
 
     video.addEventListener('canplay', handleCanPlay);
@@ -151,7 +155,7 @@ const HeroVideo = () => {
       <motion.video
         ref={videoRef}
         initial={{ opacity: 0, scale: 1.06 }}
-        animate={{ opacity: ready ? 1 : 0, scale: ready ? 1 : 1.06 }}
+        animate={{ opacity: ready && !failed ? 1 : 0, scale: ready && !failed ? 1 : 1.06 }}
         transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
         src="/hero-video.mp4"
         poster="/hero-poster.jpg"
@@ -165,6 +169,7 @@ const HeroVideo = () => {
         controls={false}
         preload="auto"
         className="absolute inset-0 h-full w-full object-cover"
+        style={{ visibility: failed ? 'hidden' : 'visible', pointerEvents: 'none' }}
       />
       {/* Plan B: static poster fallback if video fails completely */}
       {failed && (
