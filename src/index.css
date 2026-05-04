@@ -647,17 +647,18 @@ All colors MUST be HSL.
     background-image: none !important;
   }
 
-  /* Audience-sidor (jobbsökare/arbetsgivare): solid Parium-blå topp + botten */
-  html.parium-app-chrome,
-  body.parium-app-chrome,
-  body.parium-app-chrome #root {
+  /* Audience-sidor (jobbsökare/arbetsgivare): solid Parium-blå topp + botten.
+     Guarded so video landing always stays gray until CTA switches classes. */
+  html.parium-app-chrome:not(.landing-video-chrome),
+  body.parium-app-chrome:not(.landing-video-chrome),
+  body.parium-app-chrome:not(.landing-video-chrome) #root {
     background: #001935 !important;
     background-color: #001935 !important;
     background-image: none !important;
   }
 
-  body.parium-app-chrome::before,
-  body.parium-app-chrome::after {
+  body.parium-app-chrome:not(.landing-video-chrome)::before,
+  body.parium-app-chrome:not(.landing-video-chrome)::after {
     background: #001935 !important;
     background-image: none !important;
   }
@@ -696,9 +697,9 @@ All colors MUST be HSL.
       background-image: none !important;
     }
 
-    html.parium-app-chrome,
-    body.parium-app-chrome,
-    body.parium-app-chrome #root {
+    html.parium-app-chrome:not(.landing-video-chrome),
+    body.parium-app-chrome:not(.landing-video-chrome),
+    body.parium-app-chrome:not(.landing-video-chrome) #root {
       background: #001935 !important;
       background-color: #001935 !important;
       background-image: none !important;
@@ -723,9 +724,9 @@ All colors MUST be HSL.
       background-image: none !important;
     }
 
-    html.parium-app-chrome,
-    body.parium-app-chrome,
-    body.parium-app-chrome #root {
+    html.parium-app-chrome:not(.landing-video-chrome),
+    body.parium-app-chrome:not(.landing-video-chrome),
+    body.parium-app-chrome:not(.landing-video-chrome) #root {
       background: #001935 !important;
       background-color: #001935 !important;
       background-image: none !important;
@@ -745,8 +746,8 @@ All colors MUST be HSL.
         background-image: none !important;
       }
 
-      html.parium-app-chrome,
-      html.parium-app-chrome body {
+      html.parium-app-chrome:not(.landing-video-chrome),
+      html.parium-app-chrome:not(.landing-video-chrome) body {
         background: #001935 !important;
         background-image: none !important;
       }
