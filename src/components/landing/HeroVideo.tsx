@@ -18,28 +18,6 @@ const HeroVideo = () => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Respect user/network preferences — show first frame, no looping playback
-    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const saveData =
-      typeof navigator !== 'undefined' &&
-      'connection' in navigator &&
-      Boolean((navigator as any).connection?.saveData);
-
-    if (prefersReducedMotion || saveData) {
-      video.removeAttribute('autoplay');
-      video.loop = false;
-      video.preload = 'metadata';
-      const showFrame = () => {
-        try {
-          video.currentTime = 0.1;
-        } catch {
-          /* noop */
-        }
-        setReady(true);
-      };
-      video.addEventListener('loadedmetadata', showFrame, { once: true });
-      return () => video.removeEventListener('loadedmetadata', showFrame);
-    }
 
     let cancelled = false;
     let watchdog: number | undefined;
