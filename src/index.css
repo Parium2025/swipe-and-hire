@@ -636,14 +636,14 @@ All colors MUST be HSL.
   html.landing-video-chrome,
   body.landing-video-chrome,
   body.landing-video-chrome #root {
-    background: hsl(26 8% 49%) !important;
-    background-color: hsl(26 8% 49%) !important;
+    background: #877C72 !important;
+    background-color: #877C72 !important;
     background-image: none !important;
   }
 
   body.landing-video-chrome::before,
   body.landing-video-chrome::after {
-    background: hsl(26 8% 49%) !important;
+    background: #877C72 !important;
     background-image: none !important;
   }
 
@@ -676,8 +676,8 @@ All colors MUST be HSL.
     html.landing-video-chrome,
     body.landing-video-chrome,
     body.landing-video-chrome #root {
-      background: hsl(26 8% 49%) !important;
-      background-color: hsl(26 8% 49%) !important;
+      background: #877C72 !important;
+      background-color: #877C72 !important;
       background-image: none !important;
     }
   }
@@ -695,8 +695,8 @@ All colors MUST be HSL.
     html.landing-video-chrome,
     body.landing-video-chrome,
     body.landing-video-chrome #root {
-      background: hsl(26 8% 49%) !important;
-      background-color: hsl(26 8% 49%) !important;
+      background: #877C72 !important;
+      background-color: #877C72 !important;
       background-image: none !important;
     }
 
