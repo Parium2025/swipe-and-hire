@@ -6,9 +6,21 @@
     <!-- PWA / iOS status bar full-bleed -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <!-- Theme-color = svart så iOS/Android browser-chrome smälter in i den mörka videon -->
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <script>
+      // Theme-color måste skrivas medan <head> parsas, innan Safari låser browser-chrome.
+      (function() {
+        try {
+          var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
+          var chromeColor = isLandingVideoRoute ? '#877C72' : '#001935';
+          document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
+          document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
+          document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: light)">');
+          document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: dark)">');
+        } catch (e) {
+          document.write('<meta name="theme-color" content="#001935">');
+        }
+      })();
+    </script>
     <title>Parium – Rekrytering. På 60 sekunder.</title>
     <meta name="description" content="Parium matchar kandidater och arbetsgivare på sekunder. Swipea, matcha och anställ – Tinder för jobb.">
     <meta name="author" content="Parium" />
@@ -19,6 +31,23 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <script>
+      // First-paint browser chrome/background: sand only on the video landing route.
+      // All other routes keep the Parium blue before React has mounted.
+      (function() {
+        try {
+          var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
+          var chromeColor = isLandingVideoRoute ? '#877C72' : '#001935';
+          document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
+          document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
+          var metas = document.querySelectorAll('meta[name="theme-color"]');
+          for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', chromeColor);
+          document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.toggle('landing-video-chrome', isLandingVideoRoute);
+            document.body.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
+          }, { once: true });
+        } catch (e) { /* noop */ }
+      })();
+
       // 🚨 PUBLIC DOMAIN HARD-LOAD / CACHE KILL-SWITCH
       // Runs before React on every public route. It does NOT trust old
       // localStorage/sessionStorage markers: if any Service Worker/controller or
@@ -178,9 +207,15 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/parium-touch-icon-v3.png">
   <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/parium-touch-icon-v3.png">
   <style>
-    /* CRITICAL: Prevent white flash on refresh - dark background ALWAYS */
+    /* CRITICAL: Prevent white flash on refresh - dark background by default */
     html, body {
       background: hsl(215 100% 12%) !important;
+    }
+    html.landing-video-chrome,
+    html.landing-video-chrome body,
+    html.landing-video-chrome #root {
+      background: hsl(26 8% 49%) !important;
+      background-color: hsl(26 8% 49%) !important;
     }
     
     /* Dedicated full-screen background layer to eliminate iOS PWA banding/stripes */
