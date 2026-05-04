@@ -71,46 +71,52 @@ const Landing = () => {
     };
   }, []);
 
-  // Match the iOS Safari top/bottom chrome to the sandy hero video while Landing is mounted.
-  // Sets both <meta name="theme-color"> AND html/body background (Safari uses page bg for the
-  // bottom URL bar tint). Restored on unmount so övriga sidor behåller den blå bakgrunden.
+  // Match iOS Safari chrome only while the hero video is the active viewport.
   useEffect(() => {
     const SAND = '#877C72';
-
-    // theme-color (top status bar on iOS PWAs / Chrome Android)
-    const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
-    const originalMetas = metas.map((m) => m.getAttribute('content'));
-    metas.forEach((m) => m.setAttribute('content', SAND));
-    let createdMeta: HTMLMetaElement | null = null;
-    if (metas.length === 0) {
-      createdMeta = document.createElement('meta');
-      createdMeta.name = 'theme-color';
-      createdMeta.content = SAND;
-      document.head.appendChild(createdMeta);
-    }
-
-    // html/body bg — Safari samples this for the bottom URL bar.
-    // Måste rensa background-image också, eftersom global CSS sätter en gradient via shorthand.
+    const CHROME_CLASS = 'landing-video-chrome';
+    const scrollEl = scrollContainerRef.current;
     const html = document.documentElement;
     const body = document.body;
-    const originalHtmlBg = html.style.backgroundColor;
-    const originalBodyBg = body.style.backgroundColor;
-    const originalHtmlBgImg = html.style.backgroundImage;
-    const originalBodyBgImg = body.style.backgroundImage;
-    html.style.backgroundImage = 'none';
-    body.style.backgroundImage = 'none';
-    html.style.backgroundColor = SAND;
-    body.style.backgroundColor = SAND;
+    const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
+    const originalMetas = metas.map((meta) => meta.getAttribute('content'));
+
+    let raf = 0;
+    const applyChrome = (active: boolean) => {
+      html.classList.toggle(CHROME_CLASS, active);
+      body.classList.toggle(CHROME_CLASS, active);
+      metas.forEach((meta, index) => {
+        const original = originalMetas[index];
+        if (active) meta.setAttribute('content', SAND);
+        else if (original) meta.setAttribute('content', original);
+      });
+    };
+
+    const updateChrome = () => {
+      raf = 0;
+      const scrollTop = scrollEl?.scrollTop ?? 0;
+      const heroIsActive = scrollTop < window.innerHeight * 0.72;
+      applyChrome(heroIsActive);
+    };
+
+    const scheduleUpdate = () => {
+      if (!raf) raf = window.requestAnimationFrame(updateChrome);
+    };
+
+    updateChrome();
+    scrollEl?.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate, { passive: true });
 
     return () => {
-      metas.forEach((m, i) => {
-        if (originalMetas[i] !== null) m.setAttribute('content', originalMetas[i] as string);
+      if (raf) window.cancelAnimationFrame(raf);
+      scrollEl?.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+      html.classList.remove(CHROME_CLASS);
+      body.classList.remove(CHROME_CLASS);
+      metas.forEach((meta, index) => {
+        const original = originalMetas[index];
+        if (original) meta.setAttribute('content', original);
       });
-      createdMeta?.remove();
-      html.style.backgroundColor = originalHtmlBg;
-      body.style.backgroundColor = originalBodyBg;
-      html.style.backgroundImage = originalHtmlBgImg;
-      body.style.backgroundImage = originalBodyBgImg;
     };
   }, []);
 
@@ -122,8 +128,8 @@ const Landing = () => {
   return (
     <div
       ref={scrollContainerRef}
-      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain text-primary-foreground"
-      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom', backgroundColor: '#877C72' }}
+      className="landing-video-surface fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain text-primary-foreground"
+      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
     >
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
