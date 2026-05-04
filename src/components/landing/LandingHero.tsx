@@ -123,6 +123,8 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       }}
       aria-labelledby="landing-hero-heading"
     >
+      {/* Background video — fills entire viewport including safe areas */}
+      <HeroVideo />
 
       {selectedRole && (
         <motion.div
