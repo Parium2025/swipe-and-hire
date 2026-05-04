@@ -744,6 +744,12 @@ All colors MUST be HSL.
         background: #626262 !important;
         background-image: none !important;
       }
+
+      html.parium-app-chrome,
+      html.parium-app-chrome body {
+        background: #001935 !important;
+        background-image: none !important;
+      }
         /* Paint gradient under the home indicator too */
         body::after {
           content: "";
