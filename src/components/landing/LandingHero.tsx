@@ -103,6 +103,13 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
   const handleChoice = (role: AudienceRole) => {
     if (selectedRole) return;
     setSelectedRole(role);
+    document.documentElement.classList.remove('landing-video-chrome');
+    document.body.classList.remove('landing-video-chrome');
+    document.documentElement.classList.add('parium-app-chrome');
+    document.body.classList.add('parium-app-chrome');
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+      meta.setAttribute('content', '#001935');
+    });
     sessionStorage.setItem('parium-skip-splash', '1');
     window.setTimeout(() => {
       navigate(role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare');
