@@ -71,24 +71,39 @@ const Landing = () => {
     };
   }, []);
 
-  // Override browser chrome theme color to match the sandy hero video while on Landing.
-  // Restore the original dark color when leaving so resten av appen behåller den blå bakgrunden.
+  // Match the iOS Safari top/bottom chrome to the sandy hero video while Landing is mounted.
+  // Sets both <meta name="theme-color"> AND html/body background (Safari uses page bg for the
+  // bottom URL bar tint). Restored on unmount so övriga sidor behåller den blå bakgrunden.
   useEffect(() => {
     const SAND = '#877C72';
+
+    // theme-color (top status bar on iOS PWAs / Chrome Android)
     const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
-    const originals = metas.map((m) => m.getAttribute('content'));
+    const originalMetas = metas.map((m) => m.getAttribute('content'));
     metas.forEach((m) => m.setAttribute('content', SAND));
+    let createdMeta: HTMLMetaElement | null = null;
     if (metas.length === 0) {
-      const m = document.createElement('meta');
-      m.name = 'theme-color';
-      m.content = SAND;
-      document.head.appendChild(m);
-      return () => { m.remove(); };
+      createdMeta = document.createElement('meta');
+      createdMeta.name = 'theme-color';
+      createdMeta.content = SAND;
+      document.head.appendChild(createdMeta);
     }
+
+    // html/body bg — Safari samples this for the bottom URL bar
+    const html = document.documentElement;
+    const body = document.body;
+    const originalHtmlBg = html.style.backgroundColor;
+    const originalBodyBg = body.style.backgroundColor;
+    html.style.backgroundColor = SAND;
+    body.style.backgroundColor = SAND;
+
     return () => {
       metas.forEach((m, i) => {
-        if (originals[i] !== null) m.setAttribute('content', originals[i] as string);
+        if (originalMetas[i] !== null) m.setAttribute('content', originalMetas[i] as string);
       });
+      createdMeta?.remove();
+      html.style.backgroundColor = originalHtmlBg;
+      body.style.backgroundColor = originalBodyBg;
     };
   }, []);
 
