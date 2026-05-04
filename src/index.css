@@ -672,14 +672,15 @@ All colors MUST be HSL.
     left: 0;
     right: 0;
     display: block;
-    min-height: 16px;
+    height: calc(env(safe-area-inset-bottom, 0px) + 48px);
+    min-height: 48px;
     width: 100%;
     pointer-events: none;
-    z-index: 0;
+    z-index: 2147483647;
   }
 
-  #parium-browser-chrome-top { top: 0; }
-  #parium-browser-chrome-bottom { bottom: -8px; }
+  #parium-browser-chrome-top { top: -40px; }
+  #parium-browser-chrome-bottom { bottom: calc(-1 * env(safe-area-inset-bottom, 0px) - 40px); }
 
   /* Same live-updated chrome layer as the top: paints behind Safari bottom UI during SPA route changes. */
   body.landing-video-chrome::after,
@@ -691,7 +692,7 @@ All colors MUST be HSL.
     bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
     height: calc(env(safe-area-inset-bottom, 0px) + 140px);
     pointer-events: none;
-    z-index: 0;
+    z-index: 2147483646;
   }
 
   /* Desktop: render the gradient on a fixed layer so it never shifts with content height */
