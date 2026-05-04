@@ -696,17 +696,12 @@ All colors MUST be HSL.
 
     html.landing-video-chrome,
     body.landing-video-chrome,
-    body.landing-video-chrome #root {
-      background: hsl(var(--landing-chrome-gray)) !important;
-      background-color: hsl(var(--landing-chrome-gray)) !important;
-      background-image: none !important;
-    }
-
+    body.landing-video-chrome #root,
     html.parium-app-chrome:not(.landing-video-chrome),
     body.parium-app-chrome:not(.landing-video-chrome),
     body.parium-app-chrome:not(.landing-video-chrome) #root {
-      background: hsl(var(--parium-chrome-blue)) !important;
-      background-color: hsl(var(--parium-chrome-blue)) !important;
+      background: var(--active-browser-chrome-color) !important;
+      background-color: var(--active-browser-chrome-color) !important;
       background-image: none !important;
     }
   }
@@ -723,17 +718,12 @@ All colors MUST be HSL.
 
     html.landing-video-chrome,
     body.landing-video-chrome,
-    body.landing-video-chrome #root {
-      background: hsl(var(--landing-chrome-gray)) !important;
-      background-color: hsl(var(--landing-chrome-gray)) !important;
-      background-image: none !important;
-    }
-
+    body.landing-video-chrome #root,
     html.parium-app-chrome:not(.landing-video-chrome),
     body.parium-app-chrome:not(.landing-video-chrome),
     body.parium-app-chrome:not(.landing-video-chrome) #root {
-      background: hsl(var(--parium-chrome-blue)) !important;
-      background-color: hsl(var(--parium-chrome-blue)) !important;
+      background: var(--active-browser-chrome-color) !important;
+      background-color: var(--active-browser-chrome-color) !important;
       background-image: none !important;
     }
 
@@ -746,14 +736,10 @@ All colors MUST be HSL.
       }
 
       html.landing-video-chrome,
-      html.landing-video-chrome body {
-        background: hsl(var(--landing-chrome-gray)) !important;
-        background-image: none !important;
-      }
-
+      html.landing-video-chrome body,
       html.parium-app-chrome:not(.landing-video-chrome),
       html.parium-app-chrome:not(.landing-video-chrome) body {
-        background: hsl(var(--parium-chrome-blue)) !important;
+        background: var(--active-browser-chrome-color) !important;
         background-image: none !important;
       }
         /* Paint gradient under the home indicator too */
