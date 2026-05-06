@@ -77,7 +77,7 @@ const AudienceCard = ({
       whileTap={!selectedRole ? { scale: 0.985 } : undefined}
       transition={{ duration: 0.68, ease }}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-      className="group relative min-h-touch rounded-full bg-transparent p-0 text-left outline-none"
+      className="group relative min-h-touch w-full max-w-[300px] rounded-full bg-transparent p-0 text-left outline-none sm:w-[300px]"
     >
       <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100" />
       <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-45 transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100" />
@@ -88,10 +88,10 @@ const AudienceCard = ({
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary transition-shadow duration-500 ease-out group-hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] group-focus-visible:shadow-[0_0_30px_hsl(var(--secondary)/0.28)]">
           <Icon className="h-[18px] w-[18px]" />
         </span>
-        <span className="whitespace-nowrap text-base font-black leading-none text-white sm:text-lg">
+        <span className="flex-1 whitespace-nowrap text-base font-black leading-none text-white sm:text-lg">
           {label}
         </span>
-        <ArrowRight className="ml-1 h-4 w-4 text-white/38 transition-transform group-hover:translate-x-0.5 group-hover:text-secondary" />
+        <ArrowRight className="ml-1 h-4 w-4 shrink-0 text-white transition-transform group-hover:translate-x-0.5" />
       </motion.span>
     </motion.button>
   );
