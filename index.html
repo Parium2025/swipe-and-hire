@@ -15,11 +15,15 @@
           var chromeColor = isLandingVideoRoute ? '#626262' : '#001935';
           document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
+          // Inline body/html-färg så iOS Safari samplar rätt färg vid first paint.
+          // Inline-style har högre specificity än <style>-block → överrider safe default.
+          document.documentElement.style.backgroundColor = chromeColor;
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: light)">');
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: dark)">');
           document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.toggle('landing-video-chrome', isLandingVideoRoute);
             document.body.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
+            document.body.style.backgroundColor = chromeColor;
           }, { once: true });
         } catch (e) {
           document.write('<meta name="theme-color" content="#001935">');
