@@ -58,16 +58,6 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="fixed inset-0 bg-[hsl(220_20%_4%/0.98)] backdrop-blur-2xl pt-24 px-6">
             <div className="flex flex-col gap-1">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-white/50 hover:text-white text-lg font-semibold py-4 border-b border-white/[0.03] transition-colors uppercase tracking-wide"
-                >
-                  {item.label}
-                </a>
-              ))}
               <div className="pt-8">
                 <Button
                   onClick={() => {
