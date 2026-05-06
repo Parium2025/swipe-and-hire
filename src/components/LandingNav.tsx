@@ -17,11 +17,6 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const navItems = [
-    { label: 'Funktioner', href: '#funktioner' },
-    { label: 'Hur det fungerar', href: '#hur-det-fungerar' },
-  ];
-
   return (
     <>
       <nav
@@ -40,22 +35,11 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
               height={224}
               className="h-auto w-24 md:w-28"
             />
-            <div className="hidden md:flex items-center gap-8">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="text-white/30 hover:text-white/60 transition-colors text-[13px] font-medium tracking-wide uppercase"
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
-            <div className="hidden md:block">
+            <div className="hidden md:block ml-auto">
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-6 bg-white/[0.04] border border-white/[0.08] text-white text-[13px] font-medium hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300"
+                className="rounded-full px-6 bg-white/[0.04] border border-white/[0.08] text-white text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
               >
                 Logga in
               </Button>
@@ -74,16 +58,6 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="fixed inset-0 bg-[hsl(220_20%_4%/0.98)] backdrop-blur-2xl pt-24 px-6">
             <div className="flex flex-col gap-1">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-white/50 hover:text-white text-lg font-semibold py-4 border-b border-white/[0.03] transition-colors uppercase tracking-wide"
-                >
-                  {item.label}
-                </a>
-              ))}
               <div className="pt-8">
                 <Button
                   onClick={() => {
