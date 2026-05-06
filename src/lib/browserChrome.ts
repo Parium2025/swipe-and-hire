@@ -43,13 +43,24 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideo);
   document.body.classList.toggle('parium-app-chrome', !isLandingVideo);
 
-  // IMPORTANT: Do NOT touch body/html background — that would override the
-  // app's own gradient. theme-color alone tells Safari/Chrome which color
-  // to paint their browser UI (URL bar / toolbar) with.
-  document.body.style.removeProperty('background-color');
-  document.body.style.removeProperty('background');
-  document.documentElement.style.removeProperty('background-color');
-  document.documentElement.style.removeProperty('background');
+  // Sätt body/html bakgrundsfärg INLINE så iOS Safari ser ändringen direkt
+  // vid SPA-navigering. Endast klasser räcker inte — Safari samplar bottnen
+  // baserat på computed background-color och behöver en faktisk style-mutation.
+  document.body.style.backgroundColor = color;
+  document.documentElement.style.backgroundColor = color;
 
   setThemeColor(color);
+
+  // Tvinga iOS Safari att re-sampla bottenverktygsfältet med en micro-scroll.
+  // Utan detta behåller Safari färgen från first paint tills användaren själv
+  // scrollar. Detta är ett känt iOS-beteende vid SPA-navigering.
+  if (typeof window !== 'undefined') {
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      window.scrollTo(0, y + 1);
+      requestAnimationFrame(() => {
+        window.scrollTo(0, y);
+      });
+    });
+  }
 };
