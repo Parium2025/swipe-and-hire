@@ -685,7 +685,8 @@ All colors MUST be HSL.
     
     /* Apply desktop gradient to html/body as well */
     html, body {
-      background: var(--gradient-parium-desktop);
+      background-color: hsl(215 100% 12%);
+      background-image: var(--gradient-parium-desktop);
     }
   }
 
