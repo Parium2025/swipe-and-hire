@@ -212,9 +212,7 @@
        The grey landing video background is provided by the video element
        itself, layered above the body gradient. */
     
-    /* Dedicated full-screen background layer to eliminate iOS PWA banding/stripes */
-    #app-bg { display: none !important; }
-    /* Ensure app content sits above background layer */
+    /* App content sits above any background layer */
     #root { position: relative; z-index: 1; }
 
     /* Global CSS var to offset decorations in PWA */
