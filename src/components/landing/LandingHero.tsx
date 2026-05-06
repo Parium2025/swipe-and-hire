@@ -187,6 +187,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             <AudienceCard
               key={option.role}
               label={option.label}
+              sublabel={option.sublabel}
               role={option.role}
               icon={option.icon}
               selectedRole={selectedRole}
