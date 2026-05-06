@@ -636,6 +636,15 @@ All colors MUST be HSL.
     background-size: cover;
   }
 
+  /* Landing video route (/) — färga body grå så iOS Safari samplar
+     grått för bottenverktygsfältet (matchar topp + video). Detta är
+     den ENDA platsen där body-färgen avviker från Parium-blå.
+     Klassen sätts av syncBrowserChrome() + index.html init-script. */
+  html.landing-video-chrome,
+  body.landing-video-chrome {
+    background: #626262 !important;
+  }
+
   /* Browser chrome (Safari/Chrome URL-bar) sköts uteslutande av
      <meta name="theme-color"> som sätts en gång i index.html och
      uppdateras vid SPA-navigering via syncBrowserChrome().
