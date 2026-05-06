@@ -692,8 +692,6 @@ All colors MUST be HSL.
         background-size: cover;
       }
 
-      /* Chrome color via theme-color meta only — body keeps its gradient. */
-
         /* Paint gradient under the home indicator too */
         body::after {
           content: "";
