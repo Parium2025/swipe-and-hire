@@ -115,8 +115,16 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
     setSelectedRole(role);
     syncBrowserChrome(role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare');
     sessionStorage.setItem('parium-skip-splash', '1');
+    const target = role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare';
     window.setTimeout(() => {
-      navigate(role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare');
+      // Hard navigation (location.assign) istället för SPA-push.
+      // Anledning: iOS Safaris bottenverktygsfält samplar body-färgen
+      // vid first paint och uppdaterar INTE vid SPA-navigering, även
+      // om body-färg/theme-color ändras dynamiskt. En riktig page load
+      // tvingar Safari att räkna om både topp- och bottenfältet baserat
+      // på nya sidans theme-color + body background. Detta är samma
+      // mekanism som en hard refresh, vilket användaren bekräftar funkar.
+      window.location.assign(target);
     }, 860);
   };
   const exitX = selectedRole === 'job_seeker' ? '-105vw' : selectedRole === 'employer' ? '105vw' : 0;
