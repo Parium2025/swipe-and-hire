@@ -7,7 +7,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script>
-      // Theme-color måste skrivas medan <head> parsas, innan Safari låser browser-chrome.
+      // Theme-color + chrome-klasser sätts EN gång medan <head> parsas,
+      // innan Safari låser browser-UI:t. Ingen dubblering senare.
       (function() {
         try {
           var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
@@ -16,6 +17,10 @@
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: light)">');
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: dark)">');
+          document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.toggle('landing-video-chrome', isLandingVideoRoute);
+            document.body.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
+          }, { once: true });
         } catch (e) {
           document.write('<meta name="theme-color" content="#001935">');
         }
