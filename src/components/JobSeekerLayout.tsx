@@ -162,10 +162,17 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   // Mobile/Tablet layout with sidebar
   return (
     <SidebarProvider defaultOpen={true} className="bg-gradient-parium">
-      {/* Fixed gradient background - covers viewport */}
-      <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
+      {/* Fixed gradient background - covers full viewport including safe areas */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          background: 'var(--gradient-parium)',
+          backgroundSize: 'cover',
+          backgroundAttachment: 'fixed',
+        }}
+      />
       
-      <div className="h-[100dvh] flex w-full overflow-hidden relative bg-gradient-parium" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="h-[100dvh] flex w-full overflow-hidden relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">
