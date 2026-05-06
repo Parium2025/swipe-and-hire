@@ -79,6 +79,7 @@ import { AuthSplashScreen } from "@/components/AuthSplashScreen";
 import { RealtimeKeepAlive } from "@/components/RealtimeKeepAlive";
 import { AppFailureMonitor } from "@/components/AppFailureMonitor";
 import { syncBrowserChrome, mountChromePopstateGuard, noteChromePath } from "@/lib/browserChrome";
+import BottomChromeStrip from "@/components/BottomChromeStrip";
 
 // Run draft cleanup once on app load (removes drafts older than 1 day)
 // Defer to idle time to avoid blocking first paint
@@ -195,6 +196,7 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
 
   return (
     <>
+      <BottomChromeStrip />
       <OfflineIndicator />
       {!isLightweightRoute && <SystemHealthPanel />}
       <UnsavedChangesProvider>
