@@ -214,12 +214,11 @@
       background: linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 18%) 50%, hsl(215 100% 12%) 100%) !important;
       background-attachment: fixed !important;
     }
-    html.landing-video-chrome,
-    html.landing-video-chrome body,
-    html.landing-video-chrome #root {
-      background: #626262 !important;
-      background-color: #626262 !important;
-    }
+    /* NOTE: Do NOT paint body grey on the landing video route.
+       The Parium blue gradient must stay on body so iOS Safari's
+       bottom toolbar samples the blue color (matching the URL bar).
+       The grey landing video background is provided by the video element
+       itself, layered above the body gradient. */
     
     /* Dedicated full-screen background layer to eliminate iOS PWA banding/stripes */
     #app-bg { display: none !important; }
