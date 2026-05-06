@@ -36,22 +36,9 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <script>
-      // First-paint browser chrome/background: sand only on the video landing route.
-      // All other routes keep the Parium blue before React has mounted.
-      (function() {
-        try {
-          var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
-          var chromeColor = isLandingVideoRoute ? '#626262' : '#001935';
-          document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
-          document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
-          var metas = document.querySelectorAll('meta[name="theme-color"]');
-          for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', chromeColor);
-          document.addEventListener('DOMContentLoaded', function() {
-            document.body.classList.toggle('landing-video-chrome', isLandingVideoRoute);
-            document.body.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
-          }, { once: true });
-        } catch (e) { /* noop */ }
-      })();
+      // (Theme-color + chrome-klasser sätts redan i första <script>-blocket ovan.
+      // Ingen dubblering här — det orsakade kapplöpningar mot Safari.)
+
 
       // 🚨 PUBLIC DOMAIN HARD-LOAD / CACHE KILL-SWITCH
       // Runs before React on every public route. It does NOT trust old
