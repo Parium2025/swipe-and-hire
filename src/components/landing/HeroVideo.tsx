@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 
 /**
  * Premium hero background video — bulletproof edition.
@@ -161,13 +160,22 @@ const HeroVideo = () => {
     };
   }, [failed]);
 
+  // Sätt muted/playsInline direkt på DOM-noden. iOS Safari kräver att muted
+  // finns som property vid första load, annars blockas autoplay och en
+  // play-overlay ritas över videon.
+  const setRef = (node: HTMLVideoElement | null) => {
+    videoRef.current = node;
+    if (node) {
+      node.muted = true;
+      node.defaultMuted = true;
+      (node as any).playsInline = true;
+    }
+  };
+
   return (
     <div className="absolute inset-0 z-0 overflow-hidden bg-background">
-      <motion.video
-        ref={videoRef}
-        initial={{ opacity: 0, scale: 1.06 }}
-        animate={{ opacity: ready && !failed ? 1 : 0, scale: ready && !failed ? 1 : 1.06 }}
-        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+      <video
+        ref={setRef}
         poster="/hero-poster.jpg"
         autoPlay
         muted
@@ -176,17 +184,19 @@ const HeroVideo = () => {
         {...({ 'webkit-playsinline': 'true', 'x5-playsinline': 'true' } as Record<string, string>)}
         disablePictureInPicture
         disableRemotePlayback
-        controls={false}
         preload="auto"
         className="absolute inset-0 h-full w-full object-cover"
-        style={{ visibility: failed ? 'hidden' : 'visible', pointerEvents: 'none' }}
+        style={{
+          visibility: failed ? 'hidden' : 'visible',
+          opacity: ready && !failed ? 1 : 0,
+          transform: ready && !failed ? 'scale(1)' : 'scale(1.06)',
+          transition: 'opacity 1.4s cubic-bezier(0.16,1,0.3,1), transform 1.4s cubic-bezier(0.16,1,0.3,1)',
+          pointerEvents: 'none',
+        }}
       >
-        {/* Mobile: 720p / 3 MB — instant load on cellular */}
         <source src="/hero-video-720.mp4" type="video/mp4" media="(max-width: 768px)" />
-        {/* Desktop: 1080p / 11 MB — full quality */}
         <source src="/hero-video.mp4" type="video/mp4" />
-      </motion.video>
-      {/* Plan B: static poster fallback if video fails completely */}
+      </video>
       {failed && (
         <div
           className="absolute inset-0 h-full w-full bg-cover bg-center"
@@ -194,7 +204,6 @@ const HeroVideo = () => {
           aria-hidden="true"
         />
       )}
-      {/* Darkening overlays */}
       <div className="absolute inset-0 bg-black/45" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60" />
     </div>
