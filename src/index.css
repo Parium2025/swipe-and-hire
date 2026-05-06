@@ -646,26 +646,11 @@ All colors MUST be HSL.
     --active-browser-chrome-color: hsl(var(--parium-chrome-blue));
   }
 
-  html.landing-video-chrome,
-  body.landing-video-chrome,
-  body.landing-video-chrome #root,
-  html.parium-app-chrome:not(.landing-video-chrome),
-  body.parium-app-chrome:not(.landing-video-chrome),
-  body.parium-app-chrome:not(.landing-video-chrome) #root {
-    background: var(--active-browser-chrome-color) !important;
-    background-color: var(--active-browser-chrome-color) !important;
-    background-image: none !important;
-  }
+  /* NOTE: We intentionally do NOT paint body/html/#root with the
+     chrome color. The browser chrome color is communicated to the OS
+     via <meta name="theme-color"> only. Painting the body would hide
+     the app's gradient. */
 
-  body.landing-video-chrome::before,
-  body.landing-video-chrome::after,
-  body.parium-app-chrome:not(.landing-video-chrome)::before,
-  body.parium-app-chrome:not(.landing-video-chrome)::after,
-  .parium-browser-chrome-sentinel {
-    background: var(--active-browser-chrome-color) !important;
-    background-color: var(--active-browser-chrome-color) !important;
-    background-image: none !important;
-  }
 
   /* Legacy chrome sentinels removed — Safari/iOS handles browser chrome
      coloring automatically via the <meta name="theme-color"> tag.
@@ -702,16 +687,8 @@ All colors MUST be HSL.
       background: var(--gradient-parium-desktop);
     }
 
-    html.landing-video-chrome,
-    body.landing-video-chrome,
-    body.landing-video-chrome #root,
-    html.parium-app-chrome:not(.landing-video-chrome),
-    body.parium-app-chrome:not(.landing-video-chrome),
-    body.parium-app-chrome:not(.landing-video-chrome) #root {
-      background: var(--active-browser-chrome-color) !important;
-      background-color: var(--active-browser-chrome-color) !important;
-      background-image: none !important;
-    }
+    /* Chrome color is set via theme-color meta only — do not paint body. */
+
   }
 
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
