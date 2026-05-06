@@ -29,9 +29,7 @@ const EmployerDesktopShell = ({
       <div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: 'var(--gradient-parium)',
-          backgroundSize: 'cover',
-          backgroundAttachment: 'fixed',
+          background: 'linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 25%) 50%, hsl(215 100% 12%) 100%)',
         }}
       />
 
