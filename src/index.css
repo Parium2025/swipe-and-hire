@@ -630,9 +630,15 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
-  /* Global background gradient */
+  /* Global background gradient.
+     IMPORTANT: background-color (solid mörkblå) sätts som fallback under
+     gradienten. iOS Safari samplar färgen från sidans nedersta pixel för
+     att färga sitt bottenverktygsfält. Radial-gradienten kan ha ljusa
+     kanter — solid background-color säkerställer att Safari ALLTID
+     samplar Parium-mörkblå för bottenfältet. */
   html, body {
-    background: var(--gradient-parium);
+    background-color: hsl(215 100% 12%);
+    background-image: var(--gradient-parium);
     background-size: cover;
   }
 
@@ -642,7 +648,8 @@ All colors MUST be HSL.
      Klassen sätts av syncBrowserChrome() + index.html init-script. */
   html.landing-video-chrome,
   body.landing-video-chrome {
-    background: #626262 !important;
+    background-color: #626262 !important;
+    background-image: none !important;
   }
 
   /* Browser chrome (Safari/Chrome URL-bar) sköts uteslutande av
@@ -678,14 +685,16 @@ All colors MUST be HSL.
     
     /* Apply desktop gradient to html/body as well */
     html, body {
-      background: var(--gradient-parium-desktop);
+      background-color: hsl(215 100% 12%);
+      background-image: var(--gradient-parium-desktop);
     }
   }
 
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
   @supports (padding: env(safe-area-inset-top)) {
     html, body {
-      background: var(--gradient-parium);
+      background-color: hsl(215 100% 12%);
+      background-image: var(--gradient-parium);
       background-size: cover;
       min-height: 100svh; /* Safari browser mode */
       padding-top: env(safe-area-inset-top);
