@@ -114,18 +114,15 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
     if (selectedRole) return;
     setSelectedRole(role);
     const target = role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare';
-    syncBrowserChrome(target);
     sessionStorage.setItem('parium-skip-splash', '1');
+    // Sätt målets färg INNAN navigation så Safaris topp-bar samplar blått direkt.
+    syncBrowserChrome(target);
     window.setTimeout(() => {
-      // Hard navigation eftersom vi byter mellan grå (/) och blå (target)
-      // browser-chrome. iOS Safaris bottenfält uppdateras endast vid en
-      // riktig sidladdning. SPA-nav skulle behålla grå botten på blå sida.
-      // Faller tillbaka till SPA om hard reload misslyckas (osannolikt).
-      try {
-        window.location.assign(target);
-      } catch {
-        navigate(target);
-      }
+      // SPA-nav (ingen hard reload) — back-knappen ska fungera och videon ska
+      // inte tvångsladdas om. iOS Safaris bottenfält kan behålla grå sampling
+      // tills nästa hard refresh; det är ett acceptabelt visuellt trade-off
+      // jämfört med vit/trasig sida som hard reloads orsakade.
+      navigate(target);
     }, 860);
   };
   const exitX = selectedRole === 'job_seeker' ? '-105vw' : selectedRole === 'employer' ? '105vw' : 0;

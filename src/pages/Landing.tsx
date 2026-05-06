@@ -71,13 +71,10 @@ const Landing = () => {
     };
   }, []);
 
-  // Keep browser chrome/background gray only while the video landing route is mounted.
+  // Browser chrome synkas centralt i App.tsx via route-effekten.
+  // Ingen lokal cleanup här — den racear annars med App.tsx vid navigation.
   useEffect(() => {
     syncBrowserChrome('/');
-
-    return () => {
-      syncBrowserChrome(window.location.pathname);
-    };
   }, []);
 
   const handleLogin = () => {
