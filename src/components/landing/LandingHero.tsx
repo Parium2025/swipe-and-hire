@@ -114,12 +114,18 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
     if (selectedRole) return;
     setSelectedRole(role);
     const target = role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare';
-    // Sätt body-färg + theme-color INNAN navigering så Safari ser den nya
-    // färgen direkt vid layout-bytet (inte efter route-render).
     syncBrowserChrome(target);
     sessionStorage.setItem('parium-skip-splash', '1');
     window.setTimeout(() => {
-      navigate(target);
+      // Hard navigation eftersom vi byter mellan grå (/) och blå (target)
+      // browser-chrome. iOS Safaris bottenfält uppdateras endast vid en
+      // riktig sidladdning. SPA-nav skulle behålla grå botten på blå sida.
+      // Faller tillbaka till SPA om hard reload misslyckas (osannolikt).
+      try {
+        window.location.assign(target);
+      } catch {
+        navigate(target);
+      }
     }, 860);
   };
   const exitX = selectedRole === 'job_seeker' ? '-105vw' : selectedRole === 'employer' ? '105vw' : 0;

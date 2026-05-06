@@ -1,8 +1,10 @@
+const LANDING_CHROME_COLOR = '#626262';
 const PARIUM_CHROME_COLOR = '#001935';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 const BOTTOM_BAR_ID = 'parium-bottom-chrome';
 
-// Remove any legacy sentinel elements that previous versions injected.
+const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
+
 const removeLegacySentinels = () => {
   ['parium-browser-chrome-top', 'parium-browser-chrome-bottom', BOTTOM_BAR_ID].forEach((id) => {
     const el = document.getElementById(id);
@@ -30,33 +32,80 @@ const setThemeColor = (color: string) => {
 };
 
 /**
- * Synkroniserar browserns chrome (URL-bar topp + verktygsfält botten).
+ * Synkroniserar browser-chrome (URL-bar topp + bottenverktygsfält).
  *
- * BESLUT (2026-05-06): Hela appen — inklusive landningssidan — använder
- * Parium-blå (#001935) för browser-chrome. Tidigare hade landningssidan
- * grått chrome (matchande videons fade), men iOS Safari behöll grå
- * sampling vid SPA-navigering vilket gav vit/fel botten på övriga sidor.
+ * KÄND iOS SAFARI-BUGG:
+ * Safari samplar body's bakgrundsfärg för bottenverktygsfältet vid
+ * SIDLADDNING. Vid SPA-navigering uppdateras topp-URL-baren via
+ * <meta name="theme-color">, men bottenfältet behåller sin första
+ * sampling tills sidan laddas om.
  *
- * Genom att alltid använda samma färg får vi:
- *   - Konsekvent topp-URL-bar i hela appen (Parium-blå).
- *   - Konsekvent bottenverktygsfält (Parium-blå).
- *   - Inga Safari-samplings-buggar vid SPA-navigering.
- *   - Videon på landningssidan fyller fortfarande hela viewporten.
+ * LÖSNING: Om vi byter mellan en grå route (/) och en blå route
+ * (resten av appen) tvingar vi en hard reload via location.assign,
+ * så Safari samplar den nya färgen från scratch.
  */
-export const syncBrowserChrome = (_pathname = window.location.pathname) => {
+export const syncBrowserChrome = (pathname = window.location.pathname) => {
+  const isLandingVideo = isLandingVideoPath(pathname);
+  const color = isLandingVideo ? LANDING_CHROME_COLOR : PARIUM_CHROME_COLOR;
+
   removeLegacySentinels();
 
-  // Behåll klasser för bakåtkompatibilitet med befintlig CSS, men båda
-  // pekar nu på samma färg.
-  document.documentElement.classList.remove('landing-video-chrome');
-  document.body.classList.remove('landing-video-chrome');
-  document.documentElement.classList.add('parium-app-chrome');
-  document.body.classList.add('parium-app-chrome');
+  document.documentElement.classList.toggle('landing-video-chrome', isLandingVideo);
+  document.body.classList.toggle('landing-video-chrome', isLandingVideo);
+  document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideo);
+  document.body.classList.toggle('parium-app-chrome', !isLandingVideo);
 
-  // Inline body/html-färg → Safari samplar bottnen baserat på denna.
-  document.documentElement.style.backgroundColor = PARIUM_CHROME_COLOR;
-  document.body.style.backgroundColor = PARIUM_CHROME_COLOR;
+  // Inline body/html-färg vinner över CSS (utom !important).
+  document.documentElement.style.setProperty('background-color', color, 'important');
+  document.body.style.setProperty('background-color', color, 'important');
 
-  // Top URL-bar.
-  setThemeColor(PARIUM_CHROME_COLOR);
+  setThemeColor(color);
+};
+
+/**
+ * Navigerar till en route med hard reload om bottenfältets färg behöver
+ * byta. Användning: window-nivå navigation från landing → app eller back.
+ */
+export const navigateWithChromeSync = (target: string) => {
+  const currentIsLanding = isLandingVideoPath(window.location.pathname);
+  const targetIsLanding = isLandingVideoPath(target);
+
+  if (currentIsLanding !== targetIsLanding) {
+    // Färgbyte krävs → hard reload så iOS Safari samplar om bottenfältet.
+    window.location.assign(target);
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Lyssnar på popstate (back/forward-knapp). Om vi byter mellan grå/blå
+ * routes via back-knappen tvingar vi en reload så bottenfältet uppdateras.
+ *
+ * Detta är säkert att alltid montera — det körs bara en gång per popstate
+ * och gör bara reload när färgbyte faktiskt sker.
+ */
+let popstateMounted = false;
+let lastSeenPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+
+export const mountChromePopstateGuard = () => {
+  if (popstateMounted || typeof window === 'undefined') return;
+  popstateMounted = true;
+
+  window.addEventListener('popstate', () => {
+    const newPath = window.location.pathname;
+    const wasLanding = isLandingVideoPath(lastSeenPath);
+    const isLanding = isLandingVideoPath(newPath);
+    lastSeenPath = newPath;
+
+    if (wasLanding !== isLanding) {
+      // Färgbyte via back/forward → hard reload för korrekt iOS-rendering.
+      window.location.reload();
+    }
+  });
+};
+
+// Track path changes from SPA navigation too.
+export const noteChromePath = (pathname: string) => {
+  lastSeenPath = pathname;
 };
