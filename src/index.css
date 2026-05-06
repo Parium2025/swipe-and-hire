@@ -692,7 +692,8 @@ All colors MUST be HSL.
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
   @supports (padding: env(safe-area-inset-top)) {
     html, body {
-      background: var(--gradient-parium);
+      background-color: hsl(215 100% 12%);
+      background-image: var(--gradient-parium);
       background-size: cover;
       min-height: 100svh; /* Safari browser mode */
       padding-top: env(safe-area-inset-top);
