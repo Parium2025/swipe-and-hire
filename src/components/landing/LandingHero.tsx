@@ -16,11 +16,13 @@ const audienceOptions = [
   {
     role: 'job_seeker' as const,
     label: 'För jobbsökare',
+    sublabel: 'Hitta jobb direkt',
     icon: Search,
   },
   {
     role: 'employer' as const,
     label: 'För arbetsgivare',
+    sublabel: 'Hitta rätt kandidat nu',
     icon: BriefcaseBusiness,
   },
 ];
@@ -29,12 +31,14 @@ type AudienceRole = (typeof audienceOptions)[number]['role'];
 
 const AudienceCard = ({
   label,
+  sublabel,
   role,
   icon: Icon,
   selectedRole,
   onChoose,
 }: {
   label: string;
+  sublabel: string;
   role: AudienceRole;
   icon: typeof Search;
   selectedRole: AudienceRole | null;
@@ -88,8 +92,13 @@ const AudienceCard = ({
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary transition-shadow duration-500 ease-out group-hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] group-focus-visible:shadow-[0_0_30px_hsl(var(--secondary)/0.28)]">
           <Icon className="h-[18px] w-[18px]" />
         </span>
-        <span className="flex-1 whitespace-nowrap text-base font-black leading-none text-white sm:text-lg">
-          {label}
+        <span className="flex-1 flex flex-col gap-0.5 leading-none">
+          <span className="whitespace-nowrap text-base font-black leading-none text-white sm:text-lg">
+            {label}
+          </span>
+          <span className="whitespace-nowrap text-[11px] font-medium leading-none text-white/60 sm:text-xs">
+            {sublabel}
+          </span>
         </span>
         <ArrowRight className="ml-1 h-4 w-4 shrink-0 text-white transition-transform group-hover:translate-x-0.5" />
       </motion.span>
@@ -178,6 +187,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             <AudienceCard
               key={option.role}
               label={option.label}
+              sublabel={option.sublabel}
               role={option.role}
               icon={option.icon}
               selectedRole={selectedRole}
