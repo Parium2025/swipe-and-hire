@@ -17,6 +17,10 @@ const HeroVideo = () => {
     const video = videoRef.current;
     if (!video) return;
 
+    // iOS Safari: säkerställ muted/playsInline som DOM-property innan play().
+    video.muted = true;
+    video.defaultMuted = true;
+    (video as any).playsInline = true;
 
     let cancelled = false;
     let watchdog: number | undefined;
