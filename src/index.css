@@ -667,32 +667,13 @@ All colors MUST be HSL.
     background-image: none !important;
   }
 
-  .parium-browser-chrome-sentinel {
-    position: fixed;
-    left: 0;
-    right: 0;
-    display: block;
-    height: calc(env(safe-area-inset-bottom, 0px) + 48px);
-    min-height: 48px;
-    width: 100%;
-    pointer-events: none;
-    z-index: 2147483647;
-  }
-
-  #parium-browser-chrome-top { top: -40px; }
-  #parium-browser-chrome-bottom { bottom: calc(-1 * env(safe-area-inset-bottom, 0px) - 40px); }
-
-  /* Same live-updated chrome layer as the top: paints behind Safari bottom UI during SPA route changes. */
-  body.landing-video-chrome::after,
-  body.parium-app-chrome:not(.landing-video-chrome)::after {
-    content: "";
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
-    height: calc(env(safe-area-inset-bottom, 0px) + 140px);
-    pointer-events: none;
-    z-index: 0;
+  /* Legacy chrome sentinels removed — Safari/iOS handles browser chrome
+     coloring automatically via the <meta name="theme-color"> tag.
+     No in-app overlays needed. */
+  .parium-browser-chrome-sentinel,
+  #parium-browser-chrome-top,
+  #parium-browser-chrome-bottom {
+    display: none !important;
   }
 
   /* Desktop: render the gradient on a fixed layer so it never shifts with content height */
