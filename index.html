@@ -7,7 +7,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script>
-      // Theme-color måste skrivas medan <head> parsas, innan Safari låser browser-chrome.
+      // Theme-color + chrome-klasser sätts EN gång medan <head> parsas,
+      // innan Safari låser browser-UI:t. Ingen dubblering senare.
       (function() {
         try {
           var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
@@ -16,6 +17,10 @@
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: light)">');
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: dark)">');
+          document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.toggle('landing-video-chrome', isLandingVideoRoute);
+            document.body.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
+          }, { once: true });
         } catch (e) {
           document.write('<meta name="theme-color" content="#001935">');
         }
@@ -31,22 +36,9 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <script>
-      // First-paint browser chrome/background: sand only on the video landing route.
-      // All other routes keep the Parium blue before React has mounted.
-      (function() {
-        try {
-          var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
-          var chromeColor = isLandingVideoRoute ? '#626262' : '#001935';
-          document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
-          document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
-          var metas = document.querySelectorAll('meta[name="theme-color"]');
-          for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', chromeColor);
-          document.addEventListener('DOMContentLoaded', function() {
-            document.body.classList.toggle('landing-video-chrome', isLandingVideoRoute);
-            document.body.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
-          }, { once: true });
-        } catch (e) { /* noop */ }
-      })();
+      // (Theme-color + chrome-klasser sätts redan i första <script>-blocket ovan.
+      // Ingen dubblering här — det orsakade kapplöpningar mot Safari.)
+
 
       // 🚨 PUBLIC DOMAIN HARD-LOAD / CACHE KILL-SWITCH
       // Runs before React on every public route. It does NOT trust old
@@ -220,9 +212,7 @@
        The grey landing video background is provided by the video element
        itself, layered above the body gradient. */
     
-    /* Dedicated full-screen background layer to eliminate iOS PWA banding/stripes */
-    #app-bg { display: none !important; }
-    /* Ensure app content sits above background layer */
+    /* App content sits above any background layer */
     #root { position: relative; z-index: 1; }
 
     /* Global CSS var to offset decorations in PWA */
@@ -455,7 +445,7 @@
       </p>
     </div>
     
-    <div id="app-bg" aria-hidden="true"></div>
+    
     <!-- Hidden hero preloader for Safari/iOS -->
     <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
     <div id="root"></div>
