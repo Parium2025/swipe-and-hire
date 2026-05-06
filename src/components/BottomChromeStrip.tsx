@@ -31,6 +31,10 @@ const BottomChromeStrip = () => {
 
   const color = isLandingVideoPath(location.pathname) ? LANDING_COLOR : PARIUM_COLOR;
 
+  useEffect(() => {
+    console.log('[BottomChromeStrip]', { path: location.pathname, color });
+  }, [location.pathname, color]);
+
   return (
     <div
       aria-hidden="true"
@@ -39,7 +43,7 @@ const BottomChromeStrip = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        height: 'calc(env(safe-area-inset-bottom, 0px) + 10px)',
+        height: 'calc(env(safe-area-inset-bottom, 0px) + 28px)',
         backgroundColor: color,
         zIndex: 2147483647,
         pointerEvents: 'none',
