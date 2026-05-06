@@ -27,13 +27,13 @@ const BottomChromeStrip = () => {
     return () => mq.removeEventListener?.('change', apply);
   }, []);
 
-  if (!isTouch) return null;
-
   const color = isLandingVideoPath(location.pathname) ? LANDING_COLOR : PARIUM_COLOR;
 
   useEffect(() => {
     console.log('[BottomChromeStrip]', { path: location.pathname, color });
   }, [location.pathname, color]);
+
+  if (!isTouch) return null;
 
   return (
     <div
