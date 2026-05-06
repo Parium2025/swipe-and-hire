@@ -636,25 +636,10 @@ All colors MUST be HSL.
     background-size: cover;
   }
 
-  html.landing-video-chrome,
-  body.landing-video-chrome {
-    --active-browser-chrome-color: hsl(var(--landing-chrome-gray));
-  }
-
-  html.parium-app-chrome:not(.landing-video-chrome),
-  body.parium-app-chrome:not(.landing-video-chrome) {
-    --active-browser-chrome-color: hsl(var(--parium-chrome-blue));
-  }
-
-  /* NOTE: We intentionally do NOT paint body/html/#root with the
-     chrome color. The browser chrome color is communicated to the OS
-     via <meta name="theme-color"> only. Painting the body would hide
-     the app's gradient. */
-
-
-  /* Legacy chrome sentinels removed — Safari/iOS handles browser chrome
-     coloring automatically via the <meta name="theme-color"> tag.
-     No in-app overlays needed. */
+  /* Browser chrome (Safari/Chrome URL-bar) sköts uteslutande av
+     <meta name="theme-color"> som sätts en gång i index.html och
+     uppdateras vid SPA-navigering via syncBrowserChrome().
+     Inga overlays, sentinels eller body-painting behövs. */
   .parium-browser-chrome-sentinel,
   #parium-browser-chrome-top,
   #parium-browser-chrome-bottom {
