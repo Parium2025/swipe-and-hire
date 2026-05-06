@@ -701,16 +701,8 @@ All colors MUST be HSL.
       margin-top: calc(-1 * env(safe-area-inset-top));
     }
 
-    html.landing-video-chrome,
-    body.landing-video-chrome,
-    body.landing-video-chrome #root,
-    html.parium-app-chrome:not(.landing-video-chrome),
-    body.parium-app-chrome:not(.landing-video-chrome),
-    body.parium-app-chrome:not(.landing-video-chrome) #root {
-      background: var(--active-browser-chrome-color) !important;
-      background-color: var(--active-browser-chrome-color) !important;
-      background-image: none !important;
-    }
+    /* Chrome color is set via theme-color meta only — do not paint body. */
+
 
     /* Standalone mode (hemskärm) får full höjd */
     @media (display-mode: standalone) {
