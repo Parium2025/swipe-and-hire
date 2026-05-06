@@ -17,11 +17,6 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const navItems = [
-    { label: 'Funktioner', href: '#funktioner' },
-    { label: 'Hur det fungerar', href: '#hur-det-fungerar' },
-  ];
-
   return (
     <>
       <nav
@@ -40,22 +35,11 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
               height={224}
               className="h-auto w-24 md:w-28"
             />
-            <div className="hidden md:flex items-center gap-8">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="text-white/30 hover:text-white/60 transition-colors text-[13px] font-medium tracking-wide uppercase"
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
-            <div className="hidden md:block">
+            <div className="hidden md:block ml-auto">
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-6 bg-white/[0.04] border border-white/[0.08] text-white text-[13px] font-medium hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300"
+                className="rounded-full px-6 bg-white/[0.04] border border-white/[0.08] text-white text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
               >
                 Logga in
               </Button>
