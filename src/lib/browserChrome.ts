@@ -42,8 +42,18 @@ const setThemeColor = (color: string) => {
  * implementerat manuellt för bottnen.
  */
 const ensureBottomChrome = (color: string) => {
-  if (typeof document === 'undefined') return;
-  let bar = document.getElementById(BOTTOM_BAR_ID);
+  if (typeof document === 'undefined' || typeof window === 'undefined') return;
+
+  // Endast iOS/touch — på desktop finns inget bottenverktygsfält att matcha,
+  // så remsan skulle bara synas som en onödig linje.
+  const isTouch = window.matchMedia('(pointer: coarse)').matches;
+  const existing = document.getElementById(BOTTOM_BAR_ID);
+  if (!isTouch) {
+    if (existing) existing.remove();
+    return;
+  }
+
+  let bar = existing;
   if (!bar) {
     bar = document.createElement('div');
     bar.id = BOTTOM_BAR_ID;
@@ -53,11 +63,8 @@ const ensureBottomChrome = (color: string) => {
       'left:0',
       'right:0',
       'bottom:0',
-      // Täck hela safe-area + några extra pixlar så Safari garanterat
-      // samplar vår färg, inte gradienten ovanför.
       'height:1px',
       'pointer-events:none',
-      // Ovanpå app-content men UNDER modaler/toasts (z-index < 9999).
       'z-index:2147483646',
       'transform:translateZ(0)',
       'will-change:background-color',
