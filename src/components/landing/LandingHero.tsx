@@ -92,11 +92,11 @@ const AudienceCard = ({
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary transition-shadow duration-500 ease-out group-hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] group-focus-visible:shadow-[0_0_30px_hsl(var(--secondary)/0.28)]">
           <Icon className="h-[18px] w-[18px]" />
         </span>
-        <span className="flex-1 flex flex-col gap-0.5 leading-none">
+        <span className="flex-1 flex flex-col items-center gap-0.5 leading-none text-center">
           <span className="whitespace-nowrap text-base font-black leading-none text-white sm:text-lg">
             {label}
           </span>
-          <span className="whitespace-nowrap text-[11px] font-medium leading-none text-white/60 sm:text-xs">
+          <span className="whitespace-nowrap text-[11px] font-medium leading-none text-white sm:text-xs">
             {sublabel}
           </span>
         </span>
