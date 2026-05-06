@@ -137,14 +137,6 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       {/* Background video — fills entire viewport including safe areas */}
       <HeroVideo />
 
-      {selectedRole && (
-        <motion.div
-          className="pointer-events-none absolute inset-0 z-20 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--secondary)/0.28),hsl(var(--background)/0.98)_68%)]"
-          initial={{ x: selectedRole === 'job_seeker' ? '100%' : '-100%', opacity: 0.88 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.86, ease }}
-        />
-      )}
 
       {/* Stacked hero: heading → CTAs */}
       <motion.div
