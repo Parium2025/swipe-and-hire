@@ -31,10 +31,10 @@ const HeroVideo = () => {
         controls={false}
         disablePictureInPicture
         disableRemotePlayback
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ pointerEvents: 'none' }}
+        className="absolute inset-0 h-full w-full object-cover pointer-events-none"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
+      <div className="absolute inset-0 bg-black/45 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 pointer-events-none" />
     </div>
   );
 };
