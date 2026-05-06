@@ -78,7 +78,7 @@ import { CriticalAssetPreloads } from "@/components/CriticalAssetPreloads";
 import { AuthSplashScreen } from "@/components/AuthSplashScreen";
 import { RealtimeKeepAlive } from "@/components/RealtimeKeepAlive";
 import { AppFailureMonitor } from "@/components/AppFailureMonitor";
-import { syncBrowserChrome } from "@/lib/browserChrome";
+import { syncBrowserChrome, mountChromePopstateGuard, noteChromePath } from "@/lib/browserChrome";
 
 // Run draft cleanup once on app load (removes drafts older than 1 day)
 // Defer to idle time to avoid blocking first paint
@@ -132,7 +132,9 @@ const AnimatedRoutes = () => {
   const location = useLocation();
 
   useLayoutEffect(() => {
+    mountChromePopstateGuard();
     syncBrowserChrome(location.pathname);
+    noteChromePath(location.pathname);
   }, [location.pathname]);
 
   return (
