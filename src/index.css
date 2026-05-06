@@ -712,13 +712,8 @@ All colors MUST be HSL.
         background-size: cover;
       }
 
-      html.landing-video-chrome,
-      html.landing-video-chrome body,
-      html.parium-app-chrome:not(.landing-video-chrome),
-      html.parium-app-chrome:not(.landing-video-chrome) body {
-        background: var(--active-browser-chrome-color) !important;
-        background-image: none !important;
-      }
+      /* Chrome color via theme-color meta only — body keeps its gradient. */
+
         /* Paint gradient under the home indicator too */
         body::after {
           content: "";
