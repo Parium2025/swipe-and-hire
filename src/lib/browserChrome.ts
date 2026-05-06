@@ -43,11 +43,13 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideo);
   document.body.classList.toggle('parium-app-chrome', !isLandingVideo);
 
-  // Only set the body background color so Safari's chrome (URL bar / toolbar)
-  // blends into the page edges. We do NOT inject any in-app overlay divs —
-  // those produced a visible extra strip the user complained about.
-  document.body.style.backgroundColor = color;
-  document.documentElement.style.backgroundColor = color;
+  // IMPORTANT: Do NOT touch body/html background — that would override the
+  // app's own gradient. theme-color alone tells Safari/Chrome which color
+  // to paint their browser UI (URL bar / toolbar) with.
+  document.body.style.removeProperty('background-color');
+  document.body.style.removeProperty('background');
+  document.documentElement.style.removeProperty('background-color');
+  document.documentElement.style.removeProperty('background');
 
   setThemeColor(color);
 };
