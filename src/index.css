@@ -671,9 +671,6 @@ All colors MUST be HSL.
     html, body {
       background: var(--gradient-parium-desktop);
     }
-
-    /* Chrome color is set via theme-color meta only — do not paint body. */
-
   }
 
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
@@ -685,8 +682,6 @@ All colors MUST be HSL.
       padding-top: env(safe-area-inset-top);
       margin-top: calc(-1 * env(safe-area-inset-top));
     }
-
-    /* Chrome color is set via theme-color meta only — do not paint body. */
 
 
     /* Standalone mode (hemskärm) får full höjd */
