@@ -31,12 +31,14 @@ type AudienceRole = (typeof audienceOptions)[number]['role'];
 
 const AudienceCard = ({
   label,
+  sublabel,
   role,
   icon: Icon,
   selectedRole,
   onChoose,
 }: {
   label: string;
+  sublabel: string;
   role: AudienceRole;
   icon: typeof Search;
   selectedRole: AudienceRole | null;
