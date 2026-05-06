@@ -107,7 +107,7 @@ const AudienceCard = ({
 };
 
 const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroProps) => {
-  const navigate = useNavigate();
+  // navigate ej längre nödvändig — vi använder hard navigation (se handleChoice).
   const [selectedRole, setSelectedRole] = useState<AudienceRole | null>(null);
 
   const handleChoice = (role: AudienceRole) => {
