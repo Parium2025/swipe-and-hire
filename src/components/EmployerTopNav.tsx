@@ -185,7 +185,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   };
 
   return (
-    <nav className="h-14 flex items-center bg-transparent">
+    <nav className="h-16 flex items-center border-b border-white/20 bg-transparent">
       <div className="w-full responsive-container-wide flex items-center justify-between">
       {/* Left side: Logo + Main Nav */}
       <div className="flex items-center gap-1">

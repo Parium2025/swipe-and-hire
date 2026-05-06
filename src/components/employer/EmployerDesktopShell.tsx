@@ -52,7 +52,7 @@ const EmployerDesktopShell = ({
           />
         </header>
 
-        <div className="fixed left-0 right-0 top-14 pointer-events-none z-20" style={{ height: 'calc(100vh - 3.5rem)' }}>
+        <div className="fixed left-0 right-0 top-16 pointer-events-none z-20" style={{ height: 'calc(100vh - 4rem)' }}>
           <FloatingBubbles />
         </div>
 
