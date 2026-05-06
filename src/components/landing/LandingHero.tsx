@@ -137,6 +137,23 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       {/* Background video — fills entire viewport including safe areas */}
       <HeroVideo />
 
+      {/*
+        iOS Safari samplar färgen från sidans nedersta pixel för att färga sitt
+        bottenverktygsfält. Utan detta lager hamnar videon (grå himmel) längst
+        ner → grått toolbar. Med detta lager samplar Safari den blå
+        Parium-gradienten → samma blåa botten som på /home.
+        Höjden = safe-area + några extra pixlar; lagret ligger UNDER videon
+        så det inte syns visuellt på sidan, bara för Safaris sampling.
+      */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]"
+        style={{
+          height: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
+          background: 'hsl(215 100% 12%)',
+        }}
+      />
+
 
       {/* Stacked hero: heading → CTAs */}
       <motion.div
