@@ -16,11 +16,13 @@ const audienceOptions = [
   {
     role: 'job_seeker' as const,
     label: 'För jobbsökare',
+    sublabel: 'Hitta jobb direkt',
     icon: Search,
   },
   {
     role: 'employer' as const,
     label: 'För arbetsgivare',
+    sublabel: 'Hitta rätt kandidat nu',
     icon: BriefcaseBusiness,
   },
 ];
