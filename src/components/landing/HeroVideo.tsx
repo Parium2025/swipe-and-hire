@@ -167,8 +167,11 @@ const HeroVideo = () => {
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden bg-background">
-      <video
+      <motion.video
         ref={videoRef}
+        initial={{ opacity: 0, scale: 1.06 }}
+        animate={{ opacity: ready && !failed ? 1 : 0, scale: ready && !failed ? 1 : 1.06 }}
+        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
         poster="/hero-poster.jpg"
         autoPlay
         muted
@@ -177,19 +180,14 @@ const HeroVideo = () => {
         {...({ 'webkit-playsinline': 'true', 'x5-playsinline': 'true' } as Record<string, string>)}
         disablePictureInPicture
         disableRemotePlayback
+        controls={false}
         preload="auto"
         className="absolute inset-0 h-full w-full object-cover"
-        style={{
-          visibility: failed ? 'hidden' : 'visible',
-          opacity: ready && !failed ? 1 : 0,
-          transform: ready && !failed ? 'scale(1)' : 'scale(1.06)',
-          transition: 'opacity 1.4s cubic-bezier(0.16,1,0.3,1), transform 1.4s cubic-bezier(0.16,1,0.3,1)',
-          pointerEvents: 'none',
-        }}
+        style={{ visibility: failed ? 'hidden' : 'visible', pointerEvents: 'none' }}
       >
         <source src="/hero-video-720.mp4" type="video/mp4" media="(max-width: 768px)" />
         <source src="/hero-video.mp4" type="video/mp4" />
-      </video>
+      </motion.video>
       {failed && (
         <div
           className="absolute inset-0 h-full w-full bg-cover bg-center"
