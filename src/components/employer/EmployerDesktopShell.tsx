@@ -26,6 +26,8 @@ const EmployerDesktopShell = ({
 }: EmployerDesktopShellProps) => {
   return (
     <>
+      <div className="fixed -inset-20 bg-parium-gradient pointer-events-none z-0" />
+
       <div className="h-dvh flex flex-col w-full overflow-hidden relative">
         <AnimatedBackground showBubbles={false} />
 
