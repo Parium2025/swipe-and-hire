@@ -199,19 +199,17 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/parium-touch-icon-v3.png">
   <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/parium-touch-icon-v3.png">
   <style>
-    /* CRITICAL: Solid Parium dark blue as base color on html/body.
-       iOS Safari samplar bottenpixeln för sitt verktygsfält — en solid
-       färg garanterar att bottenfältet ALLTID matchar topp-URL-baren
-       (#001935). Gradienten renderas ovanpå via index.css. */
+    /* Body-färgen sätts INLINE av syncBrowserChrome() vid varje route-byte:
+       - På "/" → #626262 (matchar landningssidans video + topp-URL-bar)
+       - Överallt annat → #001935 (matchar Parium-blå topp-URL-bar)
+       iOS Safaris bottenverktygsfält samplar body's computed background-color,
+       så inline-style på body ändrar bottenfältet automatiskt vid SPA-nav.
+       Vi sätter en safe default här (blå) för first paint innan JS hinner köra,
+       UTAN !important så syncBrowserChrome's inline-style vinner. */
     html, body {
-      background-color: #001935 !important;
+      background-color: #001935;
     }
-    /* NOTE: Do NOT paint body grey on the landing video route.
-       The Parium blue gradient must stay on body so iOS Safari's
-       bottom toolbar samples the blue color (matching the URL bar).
-       The grey landing video background is provided by the video element
-       itself, layered above the body gradient. */
-    
+
     /* App content sits above any background layer */
     #root { position: relative; z-index: 1; }
 
