@@ -27,8 +27,12 @@ const EmployerDesktopShell = ({
   return (
     <>
       <div
-        className="fixed bg-parium-gradient pointer-events-none z-0"
-        style={{ top: '-2px', left: '-2px', right: '-2px', bottom: '-2px' }}
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          background: 'var(--gradient-parium)',
+          backgroundSize: 'cover',
+          backgroundAttachment: 'fixed',
+        }}
       />
 
       <div className="h-screen flex flex-col w-full overflow-hidden relative">
