@@ -122,6 +122,15 @@ const HeroVideo = () => {
     const handlePause = () => {
       if (document.visibilityState === 'visible') safePlay();
     };
+    // When network comes back online, force a fresh load + play.
+    // Otherwise the <video> element stays stuck in its previous error state
+    // until the user manually refreshes the page.
+    const handleOnline = () => {
+      if (cancelled) return;
+      recoveryAttempts = 0;
+      stuckTicks = 0;
+      recover();
+    };
 
     video.addEventListener('canplay', handleCanPlay);
     video.addEventListener('loadeddata', handleCanPlay);
@@ -132,6 +141,7 @@ const HeroVideo = () => {
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('focus', handleVisibility);
     window.addEventListener('pageshow', handleVisibility);
+    window.addEventListener('online', handleOnline);
 
     safePlay();
 
@@ -147,6 +157,7 @@ const HeroVideo = () => {
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('focus', handleVisibility);
       window.removeEventListener('pageshow', handleVisibility);
+      window.removeEventListener('online', handleOnline);
     };
   }, [failed]);
 
