@@ -17,6 +17,10 @@ const HeroVideo = () => {
     const video = videoRef.current;
     if (!video) return;
 
+    // iOS Safari: säkerställ muted/playsInline som DOM-property innan play().
+    video.muted = true;
+    video.defaultMuted = true;
+    (video as any).playsInline = true;
 
     let cancelled = false;
     let watchdog: number | undefined;
@@ -160,22 +164,10 @@ const HeroVideo = () => {
     };
   }, [failed]);
 
-  // Sätt muted/playsInline direkt på DOM-noden. iOS Safari kräver att muted
-  // finns som property vid första load, annars blockas autoplay och en
-  // play-overlay ritas över videon.
-  const setRef = (node: HTMLVideoElement | null) => {
-    videoRef.current = node;
-    if (node) {
-      node.muted = true;
-      node.defaultMuted = true;
-      (node as any).playsInline = true;
-    }
-  };
-
   return (
     <div className="absolute inset-0 z-0 overflow-hidden bg-background">
       <video
-        ref={setRef}
+        ref={videoRef}
         poster="/hero-poster.jpg"
         autoPlay
         muted
