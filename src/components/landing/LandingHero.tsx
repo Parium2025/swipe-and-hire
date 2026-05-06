@@ -83,8 +83,6 @@ const AudienceCard = ({
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
       className="group relative min-h-touch w-full max-w-[300px] rounded-full bg-transparent p-0 text-left outline-none sm:w-[300px]"
     >
-      <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100" />
-      <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-45 transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100" />
       <motion.span
         className="relative z-10 flex items-center gap-3.5 overflow-hidden rounded-full border border-white/12 bg-white/[0.045] px-5 py-3.5 shadow-[0_16px_48px_hsl(var(--background)/0.18)] backdrop-blur-xl transition-colors duration-500 ease-out group-hover:border-secondary/34 group-hover:bg-white/[0.06] group-focus-visible:border-secondary/45 sm:px-6 sm:py-4"
         style={{ x: innerX, y: innerY }}
