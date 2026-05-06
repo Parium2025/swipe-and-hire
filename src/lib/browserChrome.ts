@@ -55,7 +55,7 @@ const ensureBottomChrome = (color: string) => {
       'bottom:0',
       // Täck hela safe-area + några extra pixlar så Safari garanterat
       // samplar vår färg, inte gradienten ovanför.
-      'height:calc(env(safe-area-inset-bottom, 0px) + 24px)',
+      'height:1px',
       'pointer-events:none',
       // Ovanpå app-content men UNDER modaler/toasts (z-index < 9999).
       'z-index:2147483646',
