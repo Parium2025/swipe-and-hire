@@ -2,7 +2,7 @@ import { DataSharingConsent } from '@/components/DataSharingConsent';
 
 const Consent = () => {
   return (
-     <div className="responsive-container-wide py-6 animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+     <div className="responsive-container-wide py-6 animate-fade-in">
       <div className="mb-6 text-center">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mitt samtycke</h1>
         <p className="text-sm text-white">

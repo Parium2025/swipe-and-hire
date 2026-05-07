@@ -169,7 +169,7 @@ const MyApplications = () => {
 
   if (!showContent || isLoading) {
     return (
-       <div className="responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-hidden="true">
+       <div className="responsive-container-wide opacity-0" aria-hidden="true">
         <div className="text-center mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
           <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
@@ -183,7 +183,7 @@ const MyApplications = () => {
 
   if (error) {
     return (
-       <div className="responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+       <div className="responsive-container-wide animate-fade-in">
         <div className="text-center py-12 text-red-400">
           Något gick fel vid hämtning av ansökningar
         </div>
@@ -192,7 +192,7 @@ const MyApplications = () => {
   }
 
   return (
-     <div className="responsive-container-wide animate-fade-in space-y-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+     <div className="responsive-container-wide animate-fade-in space-y-8">
       {/* Interviews Section */}
       {interviews && interviews.length > 0 && (
         <section>
