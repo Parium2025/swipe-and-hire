@@ -895,7 +895,7 @@ All colors MUST be HSL.
   }
   @media (pointer: coarse) {
     :root {
-      --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 40px);
+      --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 68px);
     }
     body,
     #root {
