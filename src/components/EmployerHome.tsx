@@ -234,7 +234,7 @@ const EmployerHome = memo(() => {
 
   if (isLoading || !showContent) {
     return (
-      <div className="space-y-6 responsive-container-wide py-8 opacity-0">
+      <div className="space-y-6 responsive-container-wide py-8 opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         {/* Invisible placeholder */}
       </div>
     );
@@ -245,7 +245,7 @@ const EmployerHome = memo(() => {
       <GpsPrompt />
       {/* Visa vädereffekter endast efter kort mount-delay (ger cache-rensning tid) */}
       {showWeatherEffects && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
-      <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 animate-fade-in relative z-10">
+      <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 animate-fade-in relative z-10 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         {/* System Health badge removed - use nav bar icon instead */}
 
         {/* Personal greeting */}
