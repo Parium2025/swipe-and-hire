@@ -4,6 +4,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroVideo from './HeroVideo';
 import { syncBrowserChrome } from '@/lib/browserChrome';
+import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
 
 type LandingHeroProps = {
