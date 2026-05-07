@@ -30,6 +30,7 @@ const HeroVideo = () => {
           ref={videoRef}
           src="/hero-video.mp4"
           muted
+          autoPlay
           loop
           playsInline
           preload="auto"
