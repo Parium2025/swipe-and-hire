@@ -1,4 +1,4 @@
-const LANDING_CHROME_COLOR = '#626262';
+const LANDING_CHROME_COLOR = '#0a0a0a';
 const PARIUM_CHROME_COLOR = '#001935';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 
