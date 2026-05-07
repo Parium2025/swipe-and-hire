@@ -886,15 +886,25 @@ All colors MUST be HSL.
 
   /* === Touch-only: extra scroll-utrymme för BottomChromeStrip ===
      På telefoner/surfplattor täcker den fasta färgremsan (BottomChromeStrip,
-     14px + safe-area) botten av viewporten. Alla interna scrollytor får
-     därför extra padding-bottom så sista elementet alltid kan scrollas
-     förbi remsan. Påverkar inte desktop. */
+     14px + safe-area) botten av viewporten. Alla scrollytor (interna OCH
+     hela body) får därför extra utrymme så sista elementet alltid kan
+     scrollas förbi remsan. Påverkar inte desktop.
+     Opt-out på en specifik container: lägg till klassen `no-chrome-pad`. */
+  :root {
+    --chrome-strip-pad: 0px;
+  }
   @media (pointer: coarse) {
-    .overflow-y-auto,
-    .overflow-y-scroll,
-    .overflow-auto {
-      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
-      scroll-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
+    :root {
+      --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 68px);
+    }
+    body {
+      padding-bottom: var(--chrome-strip-pad);
+    }
+    .overflow-y-auto:not(.no-chrome-pad),
+    .overflow-y-scroll:not(.no-chrome-pad),
+    .overflow-auto:not(.no-chrome-pad) {
+      padding-bottom: var(--chrome-strip-pad);
+      scroll-padding-bottom: var(--chrome-strip-pad);
     }
   }
 
