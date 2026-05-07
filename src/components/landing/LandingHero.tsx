@@ -156,23 +156,27 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        <motion.h1
-          id="landing-hero-heading"
+        <motion.div
           initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 1.4, ease, delay: 0.4 }}
-          className="max-w-4xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-6xl md:text-7xl lg:text-[5.5rem]"
+          className="flex justify-center"
         >
-          Välkommen till Parium
-        </motion.h1>
+          <img
+            id="landing-hero-heading"
+            src={pariumLogoRings}
+            alt="Parium"
+            className="h-20 w-auto drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:h-28 md:h-36 lg:h-44"
+          />
+        </motion.div>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease, delay: 0.9 }}
-          className="mt-6 max-w-xl text-base text-white/80 sm:text-lg"
+          className="mt-6 max-w-xl text-base text-white sm:text-lg"
         >
-          Rekrytering på 60 sekunder. Swipea, matcha och anställ.
+          Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
         </motion.p>
 
         {/* CTAs */}
