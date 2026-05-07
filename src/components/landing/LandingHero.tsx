@@ -4,7 +4,6 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroVideo from './HeroVideo';
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
 
 type LandingHeroProps = {
@@ -156,27 +155,23 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        <motion.div
+        <motion.h1
+          id="landing-hero-heading"
           initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 1.4, ease, delay: 0.4 }}
-          className="flex justify-center"
+          className="max-w-4xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-6xl md:text-7xl lg:text-[5.5rem]"
         >
-          <img
-            id="landing-hero-heading"
-            src={pariumLogoRings}
-            alt="Parium"
-            className="h-20 w-auto drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:h-28 md:h-36 lg:h-44"
-          />
-        </motion.div>
+          Välkommen till Parium
+        </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease, delay: 0.9 }}
-          className="mt-6 max-w-xl text-base text-white sm:text-lg"
+          className="mt-6 max-w-xl text-base text-white/80 sm:text-lg"
         >
-          Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
+          Rekrytering på 60 sekunder. Swipea, matcha och anställ.
         </motion.p>
 
         {/* CTAs */}

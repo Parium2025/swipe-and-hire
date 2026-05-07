@@ -1,18 +1,39 @@
-## Plan: Uppdatera hero-rubrik och subtitle på landningssidan
+Ja — det går att göra.
 
-### Vad som ska göras
-1. **Ersätt h1-texten** `"Välkommen till Parium"` i `LandingHero.tsx` med samma logga som används i headern (`parium-logo-rings.png`). Loggan visas centrerat ovanför subtitle med samma Framer Motion-entrè-animation.
-2. **Uppdatera subtitle-texten** från `"Rekrytering på 60 sekunder. Swipea, matcha och anställ."` till `"Oavsett om du söker jobb eller rekryterar så finns vi här för dig!"`.
-3. **Gör subtitle kritvit** — byt från `text-white/80` till `text-white`.
+Jag kan bygga om första vyn på landningssidan så att den känns som videon du skickade: frame-för-frame-känsla, mjuka animationer, ren premiumdesign, lättläst text och med Parium-bakgrunden kvar.
 
-### Tekniska detaljer
-- Importera `pariumLogoRings` från `"@/assets/parium-logo-rings.png"` i `LandingHero.tsx`.
-- Byt ut `<motion.h1>` mot en `<motion.div>` som renderar `<img src={pariumLogoRings}>`.
-- Bibehåll befintliga `initial`/`animate`/`transition`-värden för motion.
-- Loggstorlek: responsiv skalning (~h-14 till h-24 beroende på breakpoint) för att matcha hero-proportionerna.
-- Subtitle-p-taggen behåller sina motion-props, endast text och klass ändras.
+Plan:
 
-### Berörda filer
-- `src/components/landing/LandingHero.tsx`
+1. Behåll nuvarande grund
+- Landningssidans befintliga bakgrund och brandkänsla behålls.
+- Navigeringen, login-flödet och resten av landningssidan påverkas inte.
+- Ändringen isoleras till landningssidans första hero/intro-del.
 
-Inga databasändringar, inga nya dependencies.
+2. Skapa en ny cinematic hero-sekvens
+- Bygg första skärmen som en scroll-/tidsstyrd sekvens med flera tydliga “frames”.
+- Varje frame får ren typografi, mjuk in-/utgång och kontrollerad rörelse.
+- Ingen ful textplatta, skugga eller rektangel bakom texten.
+- Texten ska vara direkt på bakgrunden men fortfarande läsbar med subtila gradients/kontrast, inte boxar.
+
+3. Återskapa känslan från videon i webben
+- Använd videon som visuell referens för rytm, placering och övergångar.
+- Bygg animationerna med Framer Motion och scroll-progress, så det känns levande men fortfarande snabbt.
+- Undvik att lägga in videon som en tung bakgrundsfilm om det går; bättre är att återskapa den nativt i React för prestanda och skärpa.
+
+4. Mobil först
+- Optimera särskilt för mindre skärmar där problemet syntes tydligt.
+- Säkerställ att rubriker inte får “lager”, glow, text-shadow eller smutsig bakgrund.
+- Anpassa storlek, radbrytningar och spacing så texten blir lättläst på mobil.
+
+5. Kvalitetssäkra efter implementation
+- Köra typecheck/build.
+- Kontrollera att första vyn inte sabbar scroll, navigation eller resten av landningssidan.
+- Kontrollera att animationerna inte blir hackiga eller för tunga.
+
+Tekniskt upplägg:
+- Främst uppdatera `src/components/landing/LandingHero.tsx`.
+- Eventuellt skapa små isolerade landing-komponenter om sekvensen behöver delas upp.
+- Inte röra globala app-komponenter.
+- Inte ändra backend eller databasen.
+
+Målet: första intrycket ska kännas mer premium, mer “producerat”, men fortfarande snabbt, rent och tydligt.
