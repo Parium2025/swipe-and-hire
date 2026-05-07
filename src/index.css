@@ -893,8 +893,8 @@ All colors MUST be HSL.
     .overflow-y-auto,
     .overflow-y-scroll,
     .overflow-auto {
-      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px);
-      scroll-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
+      scroll-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
     }
   }
 
