@@ -12,21 +12,18 @@ const removeLegacySentinels = () => {
 };
 
 const setThemeColor = (color: string) => {
-  const existing = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
-  const metas: HTMLMetaElement[] = [];
+  // Ta bort ALLA befintliga theme-color-meta-tags. Safari cache:ar värdet
+  // aggressivt och uppdaterar inte URL-baren när man bara ändrar `content`
+  // (särskilt vid back-navigation via bfcache). Att fysiskt remova + återskapa
+  // noden tvingar Safari att re-sampla färgen.
+  Array.from(document.querySelectorAll('meta[name="theme-color"]')).forEach((el) => el.remove());
 
   THEME_COLOR_MEDIA.forEach((media) => {
-    const meta = existing.find((item) => (item.getAttribute('media') || '') === media) ?? document.createElement('meta');
-    meta.name = 'theme-color';
-    if (media) meta.media = media;
-    else meta.removeAttribute('media');
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'theme-color');
+    if (media) meta.setAttribute('media', media);
     meta.setAttribute('content', color);
     document.head.insertBefore(meta, document.head.firstChild);
-    metas.push(meta);
-  });
-
-  existing.forEach((meta) => {
-    if (!metas.includes(meta)) meta.remove();
   });
 };
 
