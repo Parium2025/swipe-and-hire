@@ -64,7 +64,7 @@ const HeroVideo = () => {
       >
         <video
           ref={videoRef}
-          src="/hero-video.mp4"
+          poster="/hero-poster.jpg"
           muted
           autoPlay
           loop
@@ -73,7 +73,11 @@ const HeroVideo = () => {
           disablePictureInPicture
           disableRemotePlayback
           className="absolute inset-0 h-full w-full object-cover"
-        />
+        >
+          {/* Mobil & surfplatta får lättare 720p (~2.4 MB) — desktop får 1080p (~11 MB) */}
+          <source src="/hero-video-720.mp4" type="video/mp4" media="(max-width: 1023px)" />
+          <source src="/hero-video.mp4" type="video/mp4" />
+        </video>
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 md:from-black/25 md:via-transparent md:to-black/55 pointer-events-none" />

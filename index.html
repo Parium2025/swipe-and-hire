@@ -172,6 +172,11 @@
     <link rel="preload" as="image" href="/assets/hero-woman-left-hand-verified.jpg" type="image/jpeg" fetchpriority="high" />
     <!-- Preload NASA Earth day image for Globe component -->
     <link rel="preload" as="image" href="/images/earth-day.jpg" type="image/jpeg" fetchpriority="low" />
+    <!-- Preload hero video poster + första bytes av rätt videoupplösning (mobil 720p, desktop 1080p)
+         så Safari/Chrome börjar hämta videon parallellt med JS-bundlen → instant playback. -->
+    <link rel="preload" as="image" href="/hero-poster.jpg" type="image/jpeg" fetchpriority="high" />
+    <link rel="preload" as="video" href="/hero-video-720.mp4" type="video/mp4" media="(max-width: 1023px)" fetchpriority="high" />
+    <link rel="preload" as="video" href="/hero-video.mp4" type="video/mp4" media="(min-width: 1024px)" fetchpriority="high" />
  
       
     
