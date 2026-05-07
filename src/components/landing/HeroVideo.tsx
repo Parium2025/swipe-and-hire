@@ -24,8 +24,33 @@ const HeroVideo = () => {
       video.addEventListener('canplay', tryPlay, { once: true });
     }
 
+    // Starta om videon när användaren kommer tillbaka till fliken/appen
+    // (iOS Safari pausar och "fryser" ofta videon vid app-switch)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          video.currentTime = 0;
+        } catch {}
+        tryPlay();
+      } else {
+        video.pause();
+      }
+    };
+    const handlePageShow = () => {
+      try {
+        video.currentTime = 0;
+      } catch {}
+      tryPlay();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('pageshow', handlePageShow);
+    window.addEventListener('focus', handlePageShow);
+
     return () => {
       video.removeEventListener('canplay', tryPlay);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('pageshow', handlePageShow);
+      window.removeEventListener('focus', handlePageShow);
     };
   }, []);
 
