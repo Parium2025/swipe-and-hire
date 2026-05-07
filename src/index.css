@@ -903,11 +903,14 @@ All colors MUST be HSL.
     #root {
       padding-bottom: var(--chrome-strip-pad) !important;
     }
+    /* !important needed because Tailwind utilities (p-3, p-4, pb-*) live in
+       a later @layer and would otherwise override this padding-bottom. */
     .overflow-y-auto:not(.no-chrome-pad),
     .overflow-y-scroll:not(.no-chrome-pad),
-    .overflow-auto:not(.no-chrome-pad) {
-      padding-bottom: var(--chrome-strip-pad);
-      scroll-padding-bottom: var(--chrome-strip-pad);
+    .overflow-auto:not(.no-chrome-pad),
+    main[data-main-scroll-container="true"]:not(.no-chrome-pad) {
+      padding-bottom: var(--chrome-strip-pad) !important;
+      scroll-padding-bottom: var(--chrome-strip-pad) !important;
     }
   }
 
