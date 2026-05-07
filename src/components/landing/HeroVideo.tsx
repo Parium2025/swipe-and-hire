@@ -11,11 +11,22 @@ const HeroVideo = () => {
     video.muted = true;
     video.defaultMuted = true;
     video.playsInline = true;
-    video.autoplay = true;
-    if (video.paused) {
+
+    const tryPlay = () => {
+      if (!video.paused) return;
       const p = video.play();
       if (p && typeof p.catch === 'function') p.catch(() => {});
+    };
+
+    if (video.readyState >= 2) {
+      tryPlay();
+    } else {
+      video.addEventListener('canplay', tryPlay, { once: true });
     }
+
+    return () => {
+      video.removeEventListener('canplay', tryPlay);
+    };
   }, []);
 
   return (
