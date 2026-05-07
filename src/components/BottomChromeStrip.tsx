@@ -33,6 +33,24 @@ const BottomChromeStrip = () => {
     console.log('[BottomChromeStrip]', { path: location.pathname, color });
   }, [location.pathname, color]);
 
+  // Sync CSS variable so scroll containers always reserve space
+  // matching the strip — independent of @media (pointer: coarse).
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    if (isTouch) {
+      root.style.setProperty(
+        '--chrome-strip-pad',
+        'calc(env(safe-area-inset-bottom, 0px) + 68px)'
+      );
+    } else {
+      root.style.removeProperty('--chrome-strip-pad');
+    }
+    return () => {
+      root.style.removeProperty('--chrome-strip-pad');
+    };
+  }, [isTouch]);
+
   if (!isTouch) return null;
 
   return (
