@@ -83,13 +83,13 @@ const AudienceCard = ({
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
       className="group relative min-h-touch w-full max-w-[300px] rounded-full bg-transparent p-0 text-left outline-none sm:w-[300px]"
     >
-      <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100" />
-      <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-45 transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100" />
+      <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100" />
+      <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-45 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100" />
       <motion.span
-        className="relative z-10 flex items-center gap-3.5 overflow-hidden rounded-full border border-white/12 bg-white/[0.045] px-5 py-3.5 shadow-[0_16px_48px_hsl(var(--background)/0.18)] backdrop-blur-xl transition-colors duration-500 ease-out group-hover:border-secondary/34 group-hover:bg-white/[0.06] group-focus-visible:border-secondary/45 sm:px-6 sm:py-4"
+        className="relative z-10 flex items-center gap-3.5 overflow-hidden rounded-full border border-white/12 bg-white/[0.045] px-5 py-3.5 shadow-[0_16px_48px_hsl(var(--background)/0.18)] backdrop-blur-xl transition-colors duration-500 ease-out [@media(hover:hover)]:group-hover:border-secondary/34 [@media(hover:hover)]:group-hover:bg-white/[0.06] group-focus-visible:border-secondary/45 sm:px-6 sm:py-4"
         style={{ x: innerX, y: innerY }}
       >
-        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary transition-shadow duration-500 ease-out group-hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] group-focus-visible:shadow-[0_0_30px_hsl(var(--secondary)/0.28)]">
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary transition-shadow duration-500 ease-out [@media(hover:hover)]:group-hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] group-focus-visible:shadow-[0_0_30px_hsl(var(--secondary)/0.28)]">
           <Icon className="h-[18px] w-[18px]" />
         </span>
         <span className="flex-1 flex flex-col items-center gap-0.5 leading-none text-center">
@@ -100,7 +100,8 @@ const AudienceCard = ({
             {sublabel}
           </span>
         </span>
-        <ArrowRight className="ml-1 h-4 w-4 shrink-0 text-white transition-transform group-hover:translate-x-0.5" />
+        <ArrowRight className="ml-1 h-4 w-4 shrink-0 text-white transition-transform [@media(hover:hover)]:group-hover:translate-x-0.5" />
+
       </motion.span>
     </motion.button>
   );
