@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const LANDING_COLOR = '#626262';
+const LANDING_COLOR = '#2a2a2a';
 const PARIUM_COLOR = '#001935';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
