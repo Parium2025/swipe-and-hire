@@ -897,8 +897,11 @@ All colors MUST be HSL.
     :root {
       --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 68px);
     }
-    body {
-      padding-bottom: var(--chrome-strip-pad);
+    /* Override the global `html, body, #root { padding: 0 !important }` rule
+       so the bottom padding actually applies on touch devices. */
+    body,
+    #root {
+      padding-bottom: var(--chrome-strip-pad) !important;
     }
     .overflow-y-auto:not(.no-chrome-pad),
     .overflow-y-scroll:not(.no-chrome-pad),
