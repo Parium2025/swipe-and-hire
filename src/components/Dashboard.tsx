@@ -212,7 +212,7 @@ const Dashboard = memo(() => {
 
   if (isLoading || !showContent) {
     return (
-      <div className="dashboard-page-stack responsive-container-wide opacity-0">
+    <div className="dashboard-page-stack responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
@@ -221,7 +221,7 @@ const Dashboard = memo(() => {
   
 
   return (
-    <div className="dashboard-page-stack responsive-container-wide animate-fade-in">
+    <div className="dashboard-page-stack responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       <div className="text-center mb-6">
         <h1 className="text-page-title font-semibold tracking-tight">Dashboard</h1>
       </div>
