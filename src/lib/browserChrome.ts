@@ -12,21 +12,18 @@ const removeLegacySentinels = () => {
 };
 
 const setThemeColor = (color: string) => {
-  const existing = Array.from(document.querySelectorAll('meta[name="theme-color"]')) as HTMLMetaElement[];
-  const metas: HTMLMetaElement[] = [];
+  // Ta bort ALLA befintliga theme-color-meta-tags. Safari cache:ar värdet
+  // aggressivt och uppdaterar inte URL-baren när man bara ändrar `content`
+  // (särskilt vid back-navigation via bfcache). Att fysiskt remova + återskapa
+  // noden tvingar Safari att re-sampla färgen.
+  Array.from(document.querySelectorAll('meta[name="theme-color"]')).forEach((el) => el.remove());
 
   THEME_COLOR_MEDIA.forEach((media) => {
-    const meta = existing.find((item) => (item.getAttribute('media') || '') === media) ?? document.createElement('meta');
-    meta.name = 'theme-color';
-    if (media) meta.media = media;
-    else meta.removeAttribute('media');
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'theme-color');
+    if (media) meta.setAttribute('media', media);
     meta.setAttribute('content', color);
     document.head.insertBefore(meta, document.head.firstChild);
-    metas.push(meta);
-  });
-
-  existing.forEach((meta) => {
-    if (!metas.includes(meta)) meta.remove();
   });
 };
 
@@ -55,9 +52,16 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   setThemeColor(color);
 };
 
-// Behållna no-ops för bakåtkompatibilitet med App.tsx-importer.
+// Mountar en pageshow/popstate-listener som re-syncar chrome när Safari
+// restorar sidan från bfcache (back/forward). Annars sitter den gamla
+// theme-color-färgen kvar i URL-baren även efter SPA-back.
+let pageshowMounted = false;
 export const mountChromePopstateGuard = () => {
-  /* intentionally noop — hard reloads togs bort, de orsakade vit sida vid back. */
+  if (pageshowMounted || typeof window === 'undefined') return;
+  pageshowMounted = true;
+  const resync = () => syncBrowserChrome(window.location.pathname);
+  window.addEventListener('pageshow', resync);
+  window.addEventListener('popstate', resync);
 };
 
 export const noteChromePath = (_pathname: string) => {
