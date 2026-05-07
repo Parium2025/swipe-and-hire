@@ -68,6 +68,7 @@ const EmployerDesktopShell = ({
           style={{ willChange: 'scroll-position', WebkitOverflowScrolling: 'touch' } as CSSProperties}
         >
           {children}
+          <div aria-hidden="true" style={{ flexShrink: 0, height: 'var(--chrome-strip-pad)' }} />
         </main>
       </div>
     </>
