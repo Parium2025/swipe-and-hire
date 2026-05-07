@@ -1507,12 +1507,6 @@ All colors MUST be HSL.
 
 /* Fallback utility for 2-line ellipsis without Tailwind line-clamp plugin */
 @layer utilities {
-  /* Standard bottom padding för sidor: 50px + iOS safe-area
-     så att sista innehållet aldrig klipps av bottenremsan. */
-  .pb-page-bottom {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 50px);
-  }
-
   .two-line-ellipsis {
     display: -webkit-box;
     -webkit-line-clamp: 2;

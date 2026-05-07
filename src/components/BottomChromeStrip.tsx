@@ -41,7 +41,7 @@ const BottomChromeStrip = () => {
     if (isTouch) {
       root.style.setProperty(
         '--chrome-strip-pad',
-        'calc(env(safe-area-inset-bottom, 0px) + 50px)'
+        'calc(env(safe-area-inset-bottom, 0px) + 68px)'
       );
     } else {
       root.style.removeProperty('--chrome-strip-pad');
