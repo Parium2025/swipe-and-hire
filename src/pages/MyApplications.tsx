@@ -192,7 +192,7 @@ const MyApplications = () => {
   }
 
   return (
-     <div className="responsive-container-wide animate-fade-in space-y-8">
+     <div className="responsive-container-wide animate-fade-in space-y-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       {/* Interviews Section */}
       {interviews && interviews.length > 0 && (
         <section>
