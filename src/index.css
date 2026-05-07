@@ -897,19 +897,28 @@ All colors MUST be HSL.
     :root {
       --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 68px);
     }
-    /* Override the global `html, body, #root { padding: 0 !important }` rule
-       so the bottom padding actually applies on touch devices. */
     body,
     #root {
       padding-bottom: var(--chrome-strip-pad) !important;
     }
-    /* !important needed because Tailwind utilities (p-3, p-4, pb-*) live in
-       a later @layer and would otherwise override this padding-bottom. */
+    /* For internal scroll containers, browsers collapse padding-bottom when
+       content overflows (especially on flex containers). Use a sentinel
+       ::after spacer that participates in the scrollable content instead. */
+    .overflow-y-auto:not(.no-chrome-pad)::after,
+    .overflow-y-scroll:not(.no-chrome-pad)::after,
+    .overflow-auto:not(.no-chrome-pad)::after,
+    main[data-main-scroll-container="true"]:not(.no-chrome-pad)::after {
+      content: '';
+      display: block;
+      flex-shrink: 0;
+      width: 100%;
+      height: var(--chrome-strip-pad);
+      pointer-events: none;
+    }
     .overflow-y-auto:not(.no-chrome-pad),
     .overflow-y-scroll:not(.no-chrome-pad),
     .overflow-auto:not(.no-chrome-pad),
     main[data-main-scroll-container="true"]:not(.no-chrome-pad) {
-      padding-bottom: var(--chrome-strip-pad) !important;
       scroll-padding-bottom: var(--chrome-strip-pad) !important;
     }
   }
