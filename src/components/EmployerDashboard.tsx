@@ -536,7 +536,7 @@ const EmployerDashboard = memo(() => {
                 { key: 'expired', jobs: pagedBuckets.expired },
                 { key: 'draft', jobs: pagedBuckets.draft },
               ]}
-              className="pb-24"
+              className=""
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => {
                 const isExpired = isEmployerJobExpired(job);
