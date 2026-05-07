@@ -12,7 +12,7 @@
       (function() {
         try {
           var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
-          var chromeColor = isLandingVideoRoute ? '#626262' : '#001935';
+          var chromeColor = isLandingVideoRoute ? '#0a0a0a' : '#001935';
           document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
           // Inline body/html-färg så iOS Safari samplar rätt färg vid first paint.
@@ -204,7 +204,7 @@
   <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/parium-touch-icon-v3.png">
   <style>
     /* Body-färgen sätts INLINE av syncBrowserChrome() vid varje route-byte:
-       - På "/" → #626262 (matchar landningssidans video + topp-URL-bar)
+       - På "/" → #0a0a0a (matchar landningssidans mörka video-överlagring)
        - Överallt annat → #001935 (matchar Parium-blå topp-URL-bar)
        iOS Safaris bottenverktygsfält samplar body's computed background-color,
        så inline-style på body ändrar bottenfältet automatiskt vid SPA-nav.
