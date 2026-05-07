@@ -85,8 +85,8 @@ const Landing = () => {
   return (
     <div
       ref={scrollContainerRef}
-      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden overscroll-y-contain text-foreground"
-      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
+      className="fixed inset-0 z-0 overflow-hidden text-foreground"
+      style={{ touchAction: 'none', overscrollBehavior: 'none' }}
     >
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
