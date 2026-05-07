@@ -891,11 +891,11 @@ All colors MUST be HSL.
      scrollas förbi remsan. Påverkar inte desktop.
      Opt-out på en specifik container: lägg till klassen `no-chrome-pad`. */
   :root {
-    --chrome-strip-pad: 0px;
+    --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 40px);
   }
   @media (pointer: coarse) {
     :root {
-      --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 68px);
+      --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 40px);
     }
     body,
     #root {
