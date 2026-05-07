@@ -74,6 +74,7 @@ const HeroVideo = () => {
         <video
           ref={videoRef}
           src={src}
+          poster="/hero-video-poster.jpg"
           muted
           autoPlay
           loop
