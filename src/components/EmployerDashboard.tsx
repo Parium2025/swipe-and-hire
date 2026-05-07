@@ -405,7 +405,7 @@ const EmployerDashboard = memo(() => {
   // Wait for data AND minimum delay before showing content with fade
   if (loading || !showContent) {
     return (
-       <div className="space-y-4 responsive-container-wide opacity-0" aria-hidden="true">
+       <div className="space-y-4 responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-hidden="true">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
@@ -415,7 +415,7 @@ const EmployerDashboard = memo(() => {
   const fadeClass = 'animate-fade-in';
 
   return (
-     <div className={`space-y-4 responsive-container-wide ${fadeClass}`}>
+     <div className={`space-y-4 responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)] ${fadeClass}`}>
       <div className="flex justify-center items-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Mina jobbannonser</h1>
       </div>
