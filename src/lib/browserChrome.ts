@@ -52,9 +52,16 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   setThemeColor(color);
 };
 
-// Behållna no-ops för bakåtkompatibilitet med App.tsx-importer.
+// Mountar en pageshow/popstate-listener som re-syncar chrome när Safari
+// restorar sidan från bfcache (back/forward). Annars sitter den gamla
+// theme-color-färgen kvar i URL-baren även efter SPA-back.
+let pageshowMounted = false;
 export const mountChromePopstateGuard = () => {
-  /* intentionally noop — hard reloads togs bort, de orsakade vit sida vid back. */
+  if (pageshowMounted || typeof window === 'undefined') return;
+  pageshowMounted = true;
+  const resync = () => syncBrowserChrome(window.location.pathname);
+  window.addEventListener('pageshow', resync);
+  window.addEventListener('popstate', resync);
 };
 
 export const noteChromePath = (_pathname: string) => {
