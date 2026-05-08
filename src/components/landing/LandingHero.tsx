@@ -170,6 +170,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             className="h-[1em] w-auto inline-block"
             style={{ filter: 'drop-shadow(0 2px 8px hsl(var(--background)/0.5))' }}
           />
+          <span className="md:hidden">Parium</span>
         </motion.h1>
 
         <motion.p
