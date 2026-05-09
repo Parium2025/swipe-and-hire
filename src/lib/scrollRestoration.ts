@@ -21,55 +21,6 @@ export interface ScrollPosition {
 export const getManagedScrollContainer = (): HTMLElement | null =>
   document.querySelector('[data-main-scroll-container="true"]');
 
-/**
- * Smoothly scrolls to top, then runs the callback once the scroll fully
- * settles. Uses the native `scrollend` event when available (Chrome/Safari/
- * Firefox) and falls back to a timeout. This guarantees identical premium
- * feel for both "next" and "previous" pagination clicks.
- */
-export const scrollToTopThenRun = (callback: () => void, fallbackMs = 700) => {
-  if (typeof window === 'undefined') {
-    callback();
-    return;
-  }
-
-  const container = getManagedScrollContainer();
-  const target: HTMLElement | Window = container ?? window;
-  const getTop = () =>
-    container ? container.scrollTop : window.scrollY || window.pageYOffset || 0;
-
-  if (getTop() <= 2) {
-    callback();
-    return;
-  }
-
-  let done = false;
-  const finish = () => {
-    if (done) return;
-    done = true;
-    target.removeEventListener('scrollend', finish as EventListener);
-    clearTimeout(timeoutId);
-    callback();
-  };
-
-  // `scrollend` is supported in modern Chromium/Firefox/Safari.
-  target.addEventListener('scrollend', finish as EventListener, { once: true });
-  // Fallback in case scrollend never fires (older Safari, interrupted scroll).
-  const timeoutId = window.setTimeout(finish, fallbackMs);
-
-  try {
-    if (container) {
-      container.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  } catch {
-    if (container) container.scrollTop = 0;
-    else window.scrollTo(0, 0);
-    finish();
-  }
-};
-
 // ---------------------------------------------------------------------------
 // Session-storage read / write with defensive parsing
 // ---------------------------------------------------------------------------
