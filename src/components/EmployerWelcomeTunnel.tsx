@@ -136,7 +136,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
       const fileExt = optimizedBlob.type === 'image/webp' ? 'webp' : 'png';
       const fileName = `${user.data.user.id}/${Date.now()}-company-logo.${fileExt}`;
 
-      // 🚀 Resilient upload med retry + exponential backoff
+      // 🚀 Resilient upload med retry + exponential backoff + progress
       await uploadWithRetry({
         bucket: 'company-logos',
         path: fileName,
@@ -144,7 +144,9 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
         contentType: optimizedBlob.type,
         cacheControl: '31536000',
         upsert: true,
+        onProgress: (p) => setLogoProgress(p.percent),
       });
+      setLogoProgress(100);
 
       // Use public URL for company logos (no expiration)
       const { data: { publicUrl } } = supabase.storage
