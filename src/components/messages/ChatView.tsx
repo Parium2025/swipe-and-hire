@@ -346,11 +346,17 @@ export function ChatView({
     const ext = file.name.split('.').pop() || 'bin';
     const path = `${currentUserId}/${conversation.id}/${Date.now()}.${ext}`;
 
-    const { error } = await supabase.storage
-      .from('message-attachments')
-      .upload(path, file, { contentType: file.type });
-
-    if (error) {
+    try {
+      // 🚀 Resilient upload med retry + exponential backoff
+      const { uploadWithRetry } = await import('@/lib/uploadWithProgress');
+      await uploadWithRetry({
+        bucket: 'message-attachments',
+        path,
+        file,
+        contentType: file.type,
+        upsert: true,
+      });
+    } catch (error) {
       console.error('Upload error:', error);
       toast.error('Kunde inte ladda upp filen');
       return null;
