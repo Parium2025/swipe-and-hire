@@ -7,6 +7,8 @@ import {
   PaginationItem,
   PaginationLink,
 } from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface DashboardPaginationProps {
   page: number;
@@ -15,9 +17,6 @@ interface DashboardPaginationProps {
   /** Compact mode shows only current page (used on mobile) */
   compact?: boolean;
 }
-
-const navBtnBase =
-  "inline-flex items-center gap-1 h-9 px-2.5 rounded-md text-sm text-white hover:bg-white/10 transition-colors";
 
 export const DashboardPagination = memo(({ page, totalPages, onPageChange, compact = false }: DashboardPaginationProps) => {
   if (totalPages <= 1) return null;
@@ -38,29 +37,33 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
   };
 
   const PrevBtn = (
-    <button
+    <Button
       type="button"
+      variant="glass"
+      size="sm"
       onClick={handlePrev}
       disabled={page === 1}
       aria-label="Föregående sida"
-      className={`${navBtnBase} ${page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+      className={cn("gap-1 px-3", page === 1 && "pointer-events-none opacity-50")}
     >
       <ChevronLeft className="h-4 w-4" />
       <span>Föregående</span>
-    </button>
+    </Button>
   );
 
   const NextBtn = (
-    <button
+    <Button
       type="button"
+      variant="glass"
+      size="sm"
       onClick={handleNext}
       disabled={page === totalPages}
       aria-label="Nästa sida"
-      className={`${navBtnBase} ${page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+      className={cn("gap-1 px-3", page === totalPages && "pointer-events-none opacity-50")}
     >
       <span>Nästa</span>
       <ChevronRight className="h-4 w-4" />
-    </button>
+    </Button>
   );
 
   if (compact) {
