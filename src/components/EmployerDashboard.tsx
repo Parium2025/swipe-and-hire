@@ -34,7 +34,7 @@ import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
-import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
+import { readPositions, writePositions, scrollToTopThenRun } from '@/lib/scrollRestoration';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -242,22 +242,20 @@ const EmployerDashboard = memo(() => {
     draft: sliceToPage(tabBuckets.draft),
   }), [sliceToPage, tabBuckets]);
 
-  
-  // Scroll to top when page changes (but not on initial mount)
-  useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-    if (typeof window !== 'undefined') {
-      const scrollContainer = getManagedScrollContainer();
-      scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      const positions = readPositions();
-      positions[window.location.pathname] = { top: 0 };
-      writePositions(positions);
-    }
+  // Premium pagination: scroll to top first, then swap the page so the
+  // animation feels identical for both "next" and "previous" regardless of
+  // how short the new page's content is.
+  const handlePageChange = useCallback((nextPage: number) => {
+    if (nextPage === page) return;
+    didMountRef.current = true;
+    scrollToTopThenRun(() => {
+      setPage(nextPage);
+      if (typeof window !== 'undefined') {
+        const positions = readPositions();
+        positions[window.location.pathname] = { top: 0 };
+        writePositions(positions);
+      }
+    });
   }, [page]);
 
   const handleDeleteClick = (job: JobPosting) => {
@@ -481,7 +479,7 @@ const EmployerDashboard = memo(() => {
                 </CardErrorBoundary>
               )}
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
           </>
         )}
       </div>
@@ -575,7 +573,7 @@ const EmployerDashboard = memo(() => {
                 );
               }}
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} compact />
           </>
         )}
       </div>

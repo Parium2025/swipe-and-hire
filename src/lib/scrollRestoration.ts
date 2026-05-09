@@ -21,6 +21,65 @@ export interface ScrollPosition {
 export const getManagedScrollContainer = (): HTMLElement | null =>
   document.querySelector('[data-main-scroll-container="true"]');
 
+/**
+ * Smoothly scrolls to top, then runs the callback once scroll settles.
+ * Guarantees identical premium feel for both "next" and "previous" actions
+ * regardless of how short the next page's content is.
+ */
+export const scrollToTopThenRun = (callback: () => void, maxWaitMs = 600) => {
+  if (typeof window === 'undefined') {
+    callback();
+    return;
+  }
+
+  const container = getManagedScrollContainer();
+  const getTop = () =>
+    container ? container.scrollTop : window.scrollY || window.pageYOffset || 0;
+
+  const startTop = getTop();
+  if (startTop <= 2) {
+    callback();
+    return;
+  }
+
+  try {
+    if (container) {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  } catch {
+    if (container) container.scrollTop = 0;
+    else window.scrollTo(0, 0);
+  }
+
+  const start = performance.now();
+  let lastTop = startTop;
+  let stableFrames = 0;
+
+  const tick = () => {
+    const now = performance.now();
+    const top = getTop();
+    if (top <= 2 || now - start >= maxWaitMs) {
+      callback();
+      return;
+    }
+    if (Math.abs(top - lastTop) < 0.5) {
+      stableFrames += 1;
+      if (stableFrames >= 4) {
+        callback();
+        return;
+      }
+    } else {
+      stableFrames = 0;
+    }
+    lastTop = top;
+    requestAnimationFrame(tick);
+  };
+
+  requestAnimationFrame(tick);
+};
+
 // ---------------------------------------------------------------------------
 // Session-storage read / write with defensive parsing
 // ---------------------------------------------------------------------------
