@@ -86,11 +86,16 @@ export const CompanyLogoSection = ({
           </label>
 
           {isUploadingLogo ? (
-            <div className="flex flex-col items-center space-y-2">
-              <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2"></div>
-                Laddar upp...
-              </Badge>
+            <div className="w-full max-w-xs mx-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 space-y-2">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-sm font-medium text-white tabular-nums">
+                  {uploadProgress > 0 ? `${uploadProgress}%` : 'Förbereder…'}
+                </span>
+                <span className="text-[11px] text-white/60">Laddar upp logga</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                <div className="h-full bg-white transition-all duration-200" style={{ width: `${uploadProgress}%` }} />
+              </div>
             </div>
           ) : companyLogoUrl ? (
             <div className="flex flex-col items-center space-y-2">
