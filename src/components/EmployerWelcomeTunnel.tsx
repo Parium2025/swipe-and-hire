@@ -130,16 +130,21 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
-      const { compressImageBlob, LONG_CACHE_UPLOAD_OPTIONS } = await import('@/lib/imageUploadOptimization');
+      const { compressImageBlob } = await import('@/lib/imageUploadOptimization');
+      const { uploadWithRetry } = await import('@/lib/uploadWithProgress');
       const optimizedBlob = await compressImageBlob(editedBlob, { maxDimension: 1024, quality: 0.9 });
       const fileExt = optimizedBlob.type === 'image/webp' ? 'webp' : 'png';
       const fileName = `${user.data.user.id}/${Date.now()}-company-logo.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('company-logos')
-        .upload(fileName, optimizedBlob, LONG_CACHE_UPLOAD_OPTIONS);
-
-      if (uploadError) throw uploadError;
+      // 🚀 Resilient upload med retry + exponential backoff
+      await uploadWithRetry({
+        bucket: 'company-logos',
+        path: fileName,
+        file: optimizedBlob,
+        contentType: optimizedBlob.type,
+        cacheControl: '31536000',
+        upsert: true,
+      });
 
       // Use public URL for company logos (no expiration)
       const { data: { publicUrl } } = supabase.storage
