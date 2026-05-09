@@ -22,25 +22,40 @@ export const getManagedScrollContainer = (): HTMLElement | null =>
   document.querySelector('[data-main-scroll-container="true"]');
 
 /**
- * Smoothly scrolls to top, then runs the callback once scroll settles.
- * Guarantees identical premium feel for both "next" and "previous" actions
- * regardless of how short the next page's content is.
+ * Smoothly scrolls to top, then runs the callback once the scroll fully
+ * settles. Uses the native `scrollend` event when available (Chrome/Safari/
+ * Firefox) and falls back to a timeout. This guarantees identical premium
+ * feel for both "next" and "previous" pagination clicks.
  */
-export const scrollToTopThenRun = (callback: () => void, maxWaitMs = 600) => {
+export const scrollToTopThenRun = (callback: () => void, fallbackMs = 700) => {
   if (typeof window === 'undefined') {
     callback();
     return;
   }
 
   const container = getManagedScrollContainer();
+  const target: HTMLElement | Window = container ?? window;
   const getTop = () =>
     container ? container.scrollTop : window.scrollY || window.pageYOffset || 0;
 
-  const startTop = getTop();
-  if (startTop <= 2) {
+  if (getTop() <= 2) {
     callback();
     return;
   }
+
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    target.removeEventListener('scrollend', finish as EventListener);
+    clearTimeout(timeoutId);
+    callback();
+  };
+
+  // `scrollend` is supported in modern Chromium/Firefox/Safari.
+  target.addEventListener('scrollend', finish as EventListener, { once: true });
+  // Fallback in case scrollend never fires (older Safari, interrupted scroll).
+  const timeoutId = window.setTimeout(finish, fallbackMs);
 
   try {
     if (container) {
@@ -51,33 +66,8 @@ export const scrollToTopThenRun = (callback: () => void, maxWaitMs = 600) => {
   } catch {
     if (container) container.scrollTop = 0;
     else window.scrollTo(0, 0);
+    finish();
   }
-
-  const start = performance.now();
-  let lastTop = startTop;
-  let stableFrames = 0;
-
-  const tick = () => {
-    const now = performance.now();
-    const top = getTop();
-    if (top <= 2 || now - start >= maxWaitMs) {
-      callback();
-      return;
-    }
-    if (Math.abs(top - lastTop) < 0.5) {
-      stableFrames += 1;
-      if (stableFrames >= 4) {
-        callback();
-        return;
-      }
-    } else {
-      stableFrames = 0;
-    }
-    lastTop = top;
-    requestAnimationFrame(tick);
-  };
-
-  requestAnimationFrame(tick);
 };
 
 // ---------------------------------------------------------------------------
