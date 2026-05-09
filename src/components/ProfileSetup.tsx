@@ -44,17 +44,22 @@ const ProfileSetup = () => {
 
   const uploadProfileImage = async (file: File) => {
     try {
-      const { compressImageBlob, LONG_CACHE_UPLOAD_OPTIONS } = await import('@/lib/imageUploadOptimization');
+      const { compressImageBlob } = await import('@/lib/imageUploadOptimization');
+      const { uploadWithRetry } = await import('@/lib/uploadWithProgress');
       const optimized = await compressImageBlob(file, { maxDimension: 1024, quality: 0.9 });
       const isOptimized = optimized !== file;
       const fileExt = isOptimized ? 'webp' : (file.name.split('.').pop() || 'jpg');
       const fileName = `${user?.id}/${Date.now()}-profile-image.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('profile-media')
-        .upload(fileName, optimized, LONG_CACHE_UPLOAD_OPTIONS);
-
-      if (uploadError) throw uploadError;
+      // 🚀 Resilient upload med retry + exponential backoff
+      await uploadWithRetry({
+        bucket: 'profile-media',
+        path: fileName,
+        file: optimized,
+        contentType: optimized.type || file.type,
+        cacheControl: '31536000',
+        upsert: true,
+      });
 
       // Use public URL for profile media (no expiration)
       const { data: { publicUrl } } = supabase.storage

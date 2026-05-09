@@ -77,6 +77,7 @@ import { ScrollRestoration } from "@/components/ScrollRestoration";
 import { CriticalAssetPreloads } from "@/components/CriticalAssetPreloads";
 import { AuthSplashScreen } from "@/components/AuthSplashScreen";
 import { RealtimeKeepAlive } from "@/components/RealtimeKeepAlive";
+import { OfflineQueueRunner } from "@/components/OfflineQueueRunner";
 import { AppFailureMonitor } from "@/components/AppFailureMonitor";
 import { syncBrowserChrome, mountChromePopstateGuard, noteChromePath } from "@/lib/browserChrome";
 import BottomChromeStrip from "@/components/BottomChromeStrip";
@@ -202,6 +203,7 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
       <UnsavedChangesProvider>
         {!isLightweightRoute && <PushNotificationProvider />}
         {!isLightweightRoute && <RealtimeKeepAlive />}
+        {!isLightweightRoute && <OfflineQueueRunner />}
         {location.pathname === '/auth' && <AuthSplashScreen />}
         <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
           {!isLightweightRoute && <CriticalAssetPreloads />}

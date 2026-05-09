@@ -242,13 +242,19 @@ const CompanyProfile = () => {
       const fileExt = 'webp';
       
       const croppedFileName = `${user.data.user.id}/${timestamp}-company-logo.${fileExt}`;
-      const { compressImageBlob, LONG_CACHE_UPLOAD_OPTIONS } = await import('@/lib/imageUploadOptimization');
+      const { compressImageBlob } = await import('@/lib/imageUploadOptimization');
+      const { uploadWithRetry } = await import('@/lib/uploadWithProgress');
       const optimizedBlob = await compressImageBlob(editedBlob, { maxDimension: 1024, quality: 0.9 });
-      const { error: uploadError } = await supabase.storage
-        .from('company-logos')
-        .upload(croppedFileName, optimizedBlob, LONG_CACHE_UPLOAD_OPTIONS);
 
-      if (uploadError) throw uploadError;
+      // 🚀 Resilient upload med retry + exponential backoff
+      await uploadWithRetry({
+        bucket: 'company-logos',
+        path: croppedFileName,
+        file: optimizedBlob,
+        contentType: optimizedBlob.type,
+        cacheControl: '31536000',
+        upsert: true,
+      });
 
       let originalUrl = formData.company_logo_original_url;
       let newOriginalStoragePath = originalLogoStoragePath;
@@ -256,17 +262,23 @@ const CompanyProfile = () => {
       if (originalLogoFile && !originalLogoStoragePath) {
         const origExt = originalLogoFile.name.split('.').pop() || 'jpg';
         const originalFileName = `${user.data.user.id}/${timestamp}-company-logo-original.${origExt}`;
-        const { error: originalUploadError } = await supabase.storage
-          .from('company-logos')
-          .upload(originalFileName, originalLogoFile, LONG_CACHE_UPLOAD_OPTIONS);
-
-        if (!originalUploadError) {
+        try {
+          await uploadWithRetry({
+            bucket: 'company-logos',
+            path: originalFileName,
+            file: originalLogoFile,
+            contentType: originalLogoFile.type,
+            cacheControl: '31536000',
+            upsert: true,
+          });
           const { data: { publicUrl: originalPublicUrl } } = supabase.storage
             .from('company-logos')
             .getPublicUrl(originalFileName);
           originalUrl = `${originalPublicUrl}?t=${timestamp}`;
           newOriginalStoragePath = originalFileName;
           setOriginalLogoStoragePath(originalFileName);
+        } catch (origErr) {
+          console.warn('Original logo upload failed (cropped saved):', origErr);
         }
       }
 

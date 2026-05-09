@@ -659,27 +659,18 @@ const Profile = () => {
     try {
       if (!user?.id) throw new Error('User not found');
       
-      // Simulate progress for videos
-      let progressInterval: number | null = null;
-      if (isVideo) {
-        progressInterval = window.setInterval(() => {
-          setUploadProgress(prev => {
-            if (prev >= 90) return prev;
-            return prev + 10;
-          });
-        }, 200);
-      }
-      
-      // Använd mediaManager för konsistent bucket-hantering
+      // 🚀 Riktig progress från XHR — ersätter den gamla "fake" timern
       const { storagePath, error: uploadError } = await uploadMedia(
         file,
         isVideo ? 'profile-video' : 'profile-image',
-        user.id
+        user.id,
+        {
+          onProgress: (p) => setUploadProgress(p.percent),
+        }
       );
-      
-      if (progressInterval) clearInterval(progressInterval);
+
       setUploadProgress(100);
-      
+
       if (uploadError) throw uploadError;
       
       // Update local state

@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { uploadWithRetry, type UploadProgress, UploadAbortedError } from '@/lib/uploadWithProgress';
 
 /**
  * 🔒 KRITISKT: DETTA ÄR DEN ENDA KÄLLAN TILL SANNING FÖR MEDIA-HANTERING
@@ -114,10 +115,20 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
  * VIKTIGT: Returnerar ENDAST storage path (t.ex. "user-id/timestamp.jpg")
  * Spara detta värde direkt i databasen. Använd useMediaUrl för att visa media.
  */
+export interface UploadMediaOptions {
+  /** Optional progress callback (procent, bytes/s, ETA) */
+  onProgress?: (progress: UploadProgress) => void;
+  /** Avbryt mid-upload */
+  signal?: AbortSignal;
+  /** Notifiera UI om vilket retry-försök vi är på (1 = första försöket) */
+  onAttempt?: (attempt: number) => void;
+}
+
 export async function uploadMedia(
   file: File,
   mediaType: MediaType,
-  userId: string
+  userId: string,
+  options?: UploadMediaOptions
 ): Promise<{ storagePath: string; error?: Error }> {
   const config = MEDIA_CONFIG[mediaType];
   
@@ -142,14 +153,28 @@ export async function uploadMedia(
   const fileExt = file.name.split('.').pop();
   const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
   
-  // Ladda upp till rätt bucket — long cacheControl since we version-bust URLs via updated_at
-  const { error: uploadError } = await supabase.storage
-    .from(config.bucket)
-    .upload(fileName, file, { cacheControl: '31536000', upsert: true });
-  
-  if (uploadError) {
+  // 🚀 Resilient upload: XHR + retry med exponential backoff + progress
+  try {
+    await uploadWithRetry({
+      bucket: config.bucket,
+      path: fileName,
+      file,
+      contentType: file.type,
+      cacheControl: '31536000',
+      upsert: true,
+      signal: options?.signal,
+      onProgress: options?.onProgress,
+      onAttempt: options?.onAttempt,
+    });
+  } catch (uploadError) {
+    if (uploadError instanceof UploadAbortedError) {
+      return { storagePath: '', error: uploadError };
+    }
     console.error(`Upload error for ${mediaType}:`, uploadError);
-    return { storagePath: '', error: uploadError };
+    return {
+      storagePath: '',
+      error: uploadError instanceof Error ? uploadError : new Error('Uppladdning misslyckades'),
+    };
   }
   
   // Returnera ENDAST storage path (aldrig URL)
