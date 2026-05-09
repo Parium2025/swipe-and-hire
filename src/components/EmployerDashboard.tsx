@@ -34,6 +34,7 @@ import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
+import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -249,7 +250,13 @@ const EmployerDashboard = memo(() => {
       return;
     }
     if (typeof window !== 'undefined') {
+      const scrollContainer = getManagedScrollContainer();
+      scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' });
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      const positions = readPositions();
+      positions[window.location.pathname] = { top: 0 };
+      writePositions(positions);
     }
   }, [page]);
 
