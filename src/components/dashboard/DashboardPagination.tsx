@@ -5,7 +5,6 @@ import {
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,
-  PaginationLink,
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -16,6 +15,11 @@ const backButtonClasses =
 
 const nextButtonClasses =
   'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0';
+
+// Sifferknappar – ren text i vitt, ingen ruta, ingen hover-bakgrund.
+// Aktiv sida markeras med en mjuk underline.
+const pageNumberBaseClasses =
+  'inline-flex h-9 min-w-9 items-center justify-center px-2 text-sm text-white bg-transparent border-0 rounded-none cursor-pointer transition-opacity duration-150 hover:!bg-transparent hover:!text-white focus:outline-none focus:ring-0 focus-visible:ring-0';
 
 interface DashboardPaginationProps {
   page: number;
@@ -41,6 +45,25 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
   const goTo = (p: number) => (e: React.MouseEvent) => {
     e.preventDefault();
     onPageChange(p);
+  };
+
+  const PageNumber = ({ p }: { p: number }) => {
+    const isActive = p === page;
+    return (
+      <button
+        type="button"
+        onClick={goTo(p)}
+        aria-current={isActive ? 'page' : undefined}
+        className={cn(
+          pageNumberBaseClasses,
+          isActive
+            ? 'font-semibold relative after:content-[""] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-0 after:h-[2px] after:w-4 after:rounded-full after:bg-white'
+            : 'opacity-70 hover:opacity-100'
+        )}
+      >
+        {p}
+      </button>
+    );
   };
 
   const PrevBtn = (
@@ -83,12 +106,9 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
       <Pagination className="mt-3">
         <PaginationContent>
           <PaginationItem>{PrevBtn}</PaginationItem>
-          <PaginationItem>
-            <PaginationLink isActive className="text-white font-semibold !bg-transparent !border-transparent hover:!bg-transparent">{page}</PaginationLink>
-          </PaginationItem>
+          <PaginationItem><PageNumber p={page} /></PaginationItem>
           <PaginationItem>{NextBtn}</PaginationItem>
         </PaginationContent>
-        <span className="ml-4 text-sm text-white">Sida {page} av {totalPages}</span>
       </Pagination>
     );
   }
@@ -100,41 +120,30 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
 
         {page > 2 && (
           <>
-            <PaginationItem>
-              <PaginationLink onClick={goTo(1)} className="cursor-pointer text-white">1</PaginationLink>
-            </PaginationItem>
+            <PaginationItem><PageNumber p={1} /></PaginationItem>
             {page > 3 && <PaginationEllipsis className="text-white" />}
           </>
         )}
 
         {page > 1 && (
-          <PaginationItem>
-            <PaginationLink onClick={goTo(page - 1)} className="cursor-pointer text-white">{page - 1}</PaginationLink>
-          </PaginationItem>
+          <PaginationItem><PageNumber p={page - 1} /></PaginationItem>
         )}
 
-        <PaginationItem>
-          <PaginationLink isActive className="text-white font-semibold !bg-transparent !border-transparent hover:!bg-transparent">{page}</PaginationLink>
-        </PaginationItem>
+        <PaginationItem><PageNumber p={page} /></PaginationItem>
 
         {page < totalPages && (
-          <PaginationItem>
-            <PaginationLink onClick={goTo(page + 1)} className="cursor-pointer text-white">{page + 1}</PaginationLink>
-          </PaginationItem>
+          <PaginationItem><PageNumber p={page + 1} /></PaginationItem>
         )}
 
         {page < totalPages - 1 && (
           <>
             {page < totalPages - 2 && <PaginationEllipsis className="text-white" />}
-            <PaginationItem>
-              <PaginationLink onClick={goTo(totalPages)} className="cursor-pointer text-white">{totalPages}</PaginationLink>
-            </PaginationItem>
+            <PaginationItem><PageNumber p={totalPages} /></PaginationItem>
           </>
         )}
 
         <PaginationItem>{NextBtn}</PaginationItem>
       </PaginationContent>
-      <span className="ml-4 text-sm text-white">Sida {page} av {totalPages}</span>
     </Pagination>
   );
 });
