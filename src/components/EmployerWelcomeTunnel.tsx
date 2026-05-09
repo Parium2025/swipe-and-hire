@@ -42,6 +42,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoProgress, setLogoProgress] = useState(0);
   const [draftRestored, setDraftRestored] = useState(false);
   
   // Image editor states
