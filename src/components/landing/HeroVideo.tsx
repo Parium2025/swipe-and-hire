@@ -16,78 +16,127 @@ const HeroVideo = () => {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
     // Säkerställ autoplay-krav direkt på DOM-nivå (iOS-kritisk)
     video.muted = true;
     video.defaultMuted = true;
     video.playsInline = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('autoplay', '');
+    // disableRemotePlayback as DOM attribute (not a standard React prop)
+    try { (video as any).disableRemotePlayback = true; } catch {}
+
+    let cancelled = false;
+    let retryTimer: number | null = null;
 
     const tryPlay = () => {
+      if (cancelled || !video) return;
       if (!video.paused && !video.ended) return;
       const p = video.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => {
+          // Autoplay blocked — retry shortly. När användaren rör skärmen
+          // kommer nästa play()-anrop att lyckas.
+          if (retryTimer) window.clearTimeout(retryTimer);
+          retryTimer = window.setTimeout(tryPlay, 400);
+        });
+      }
     };
 
+    // Försök spela direkt — väntar inte på canplay om vi redan har data
     if (video.readyState >= 2) {
       tryPlay();
-    } else {
-      video.addEventListener('canplay', tryPlay, { once: true });
     }
+    // Lyssna alltid på loadeddata/canplay för säker första frame
+    const onCanPlay = () => tryPlay();
+    video.addEventListener('loadeddata', onCanPlay);
+    video.addEventListener('canplay', onCanPlay);
 
-    // Watchdog: om videon stallar/wait:ar, försök återuppta automatiskt
-    let lastTime = 0;
+    // Watchdog: starta först när videon faktiskt börjat spela för att
+    // undvika false positives vid initial buffering.
+    let watchdog: number | null = null;
+    let lastTime = -1;
     let stuckCount = 0;
-    const watchdog = window.setInterval(() => {
-      if (document.visibilityState !== 'visible') return;
-      if (video.paused || video.ended) {
-        tryPlay();
-        return;
-      }
-      if (video.currentTime === lastTime) {
-        stuckCount++;
-        if (stuckCount >= 2) {
-          // Frusen i ~1s — knuffa igång igen utan att nollställa
-          stuckCount = 0;
-          try {
-            video.play().catch(() => {});
-          } catch {}
+
+    const startWatchdog = () => {
+      if (watchdog !== null) return;
+      lastTime = video.currentTime;
+      stuckCount = 0;
+      watchdog = window.setInterval(() => {
+        if (!video) return;
+        if (video.paused || video.ended) {
+          tryPlay();
+          return;
         }
-      } else {
-        stuckCount = 0;
-        lastTime = video.currentTime;
-      }
-    }, 500);
-
-    const handleStalled = () => tryPlay();
-
-    // Starta om videon när användaren kommer tillbaka till fliken/appen.
-    // Viktigt: nollställ ALDRIG currentTime om videon redan spelar — det
-    // orsakar frys på iOS Safari. Bara starta uppspelning om den är pausad.
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        tryPlay();
-      } else {
-        video.pause();
-      }
+        if (video.currentTime === lastTime) {
+          stuckCount++;
+          if (stuckCount >= 2) {
+            stuckCount = 0;
+            try { video.play().catch(() => {}); } catch {}
+          }
+        } else {
+          stuckCount = 0;
+          lastTime = video.currentTime;
+        }
+      }, 500);
     };
-    const handlePageShow = () => {
+
+    const handlePlaying = () => startWatchdog();
+    const handleStalled = () => tryPlay();
+    const handleError = () => {
+      // Försök ladda om källan vid fel
+      try {
+        video.load();
+        tryPlay();
+      } catch {}
+    };
+
+    // Aldrig pausa på visibility — användaren vill att videon alltid rullar.
+    // När fliken kommer tillbaka kan vissa browsers ha pausat ändå, så vi
+    // återupptar. Vi nollställer ALDRIG currentTime.
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') tryPlay();
+    };
+    const handleResume = () => tryPlay();
+
+    // Första user-interaction → garantera att autoplay-block släpper
+    const handleFirstInteraction = () => {
       tryPlay();
     };
-    document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener('pageshow', handlePageShow);
-    window.addEventListener('focus', handlePageShow);
+
+    video.addEventListener('playing', handlePlaying);
     video.addEventListener('stalled', handleStalled);
     video.addEventListener('waiting', handleStalled);
     video.addEventListener('suspend', handleStalled);
+    video.addEventListener('pause', handleStalled); // återstarta om något pausar oss
+    video.addEventListener('error', handleError);
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('pageshow', handleResume);
+    window.addEventListener('focus', handleResume);
+    window.addEventListener('touchstart', handleFirstInteraction, { passive: true, once: true });
+    window.addEventListener('pointerdown', handleFirstInteraction, { once: true });
+    window.addEventListener('click', handleFirstInteraction, { once: true });
 
     return () => {
-      window.clearInterval(watchdog);
-      video.removeEventListener('canplay', tryPlay);
+      cancelled = true;
+      if (retryTimer) window.clearTimeout(retryTimer);
+      if (watchdog !== null) window.clearInterval(watchdog);
+      video.removeEventListener('loadeddata', onCanPlay);
+      video.removeEventListener('canplay', onCanPlay);
+      video.removeEventListener('playing', handlePlaying);
       video.removeEventListener('stalled', handleStalled);
       video.removeEventListener('waiting', handleStalled);
       video.removeEventListener('suspend', handleStalled);
+      video.removeEventListener('pause', handleStalled);
+      video.removeEventListener('error', handleError);
       document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener('pageshow', handlePageShow);
-      window.removeEventListener('focus', handlePageShow);
+      window.removeEventListener('pageshow', handleResume);
+      window.removeEventListener('focus', handleResume);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+      window.removeEventListener('pointerdown', handleFirstInteraction);
+      window.removeEventListener('click', handleFirstInteraction);
     };
   }, []);
 
@@ -109,7 +158,6 @@ const HeroVideo = () => {
           playsInline
           preload="auto"
           disablePictureInPicture
-          disableRemotePlayback
           className="absolute inset-0 h-full w-full object-cover"
         />
       </motion.div>
