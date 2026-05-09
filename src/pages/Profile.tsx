@@ -203,11 +203,15 @@ const Profile = () => {
   const location = useLocation();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const { enqueueProfileUpdate } = useOfflineProfileQueue(user?.id);
+  const { enqueue: enqueueMediaForLater } = useOfflineMediaQueue(user?.id);
   const [loading, setLoading] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgressInfo, setUploadProgressInfo] = useState<UploadProgressInfo | null>(null);
+  const [uploadAttempt, setUploadAttempt] = useState(1);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [coverProgressInfo, setCoverProgressInfo] = useState<UploadProgressInfo | null>(null);
   const [originalValues, setOriginalValues] = useState<any>({});
   const [cvSummaryRefreshKey, setCvSummaryRefreshKey] = useState(0);
   
