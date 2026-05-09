@@ -1040,7 +1040,8 @@ const Profile = () => {
       const { storagePath, error: uploadError } = await uploadMedia(
         editedFile,
         'cover-image',
-        user.data.user.id
+        user.data.user.id,
+        { onProgress: (p) => setCoverProgressInfo(p) }
       );
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
