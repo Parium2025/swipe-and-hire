@@ -43,16 +43,19 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
           <div className="flex items-center justify-between h-16 sm:h-[72px]">
             <a
               href="/"
-              onClick={goHome}
+              onPointerDown={goHome}
+              onClick={(e) => e.preventDefault()}
               aria-label="Tillbaka till start"
-              className="cursor-pointer transition-opacity hover:opacity-80"
+              className="cursor-pointer touch-manipulation select-none transition-opacity active:opacity-70 hover:opacity-80"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <img
                 src={pariumLogo}
                 alt="Parium"
                 width={224}
                 height={224}
-                className="h-auto w-24 md:w-28"
+                draggable={false}
+                className="h-auto w-24 md:w-28 pointer-events-none"
               />
             </a>
             <div className="hidden md:block ml-auto">
