@@ -14,8 +14,8 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const goHome = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const goHome = (e?: React.SyntheticEvent) => {
+    e?.preventDefault();
     if (location.pathname === '/') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
