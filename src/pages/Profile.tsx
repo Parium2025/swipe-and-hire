@@ -28,6 +28,9 @@ import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelecto
 import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
+import { formatBytes, formatTimeRemaining, type UploadProgress as UploadProgressInfo } from '@/lib/uploadWithProgress';
+import { useOfflineMediaQueue } from '@/hooks/useOfflineMediaQueue';
+import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -200,11 +203,15 @@ const Profile = () => {
   const location = useLocation();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const { enqueueProfileUpdate } = useOfflineProfileQueue(user?.id);
+  const { enqueue: enqueueMediaForLater } = useOfflineMediaQueue(user?.id);
   const [loading, setLoading] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgressInfo, setUploadProgressInfo] = useState<UploadProgressInfo | null>(null);
+  const [uploadAttempt, setUploadAttempt] = useState(1);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [coverProgressInfo, setCoverProgressInfo] = useState<UploadProgressInfo | null>(null);
   const [originalValues, setOriginalValues] = useState<any>({});
   const [cvSummaryRefreshKey, setCvSummaryRefreshKey] = useState(0);
   
@@ -655,6 +662,8 @@ const Profile = () => {
     setIsUploadingMedia(true);
     setUploadingMediaType(isVideo ? 'video' : 'image');
     setUploadProgress(0);
+    setUploadProgressInfo(null);
+    setUploadAttempt(1);
     
     try {
       if (!user?.id) throw new Error('User not found');
@@ -665,7 +674,11 @@ const Profile = () => {
         isVideo ? 'profile-video' : 'profile-image',
         user.id,
         {
-          onProgress: (p) => setUploadProgress(p.percent),
+          onProgress: (p) => {
+            setUploadProgress(p.percent);
+            setUploadProgressInfo(p);
+          },
+          onAttempt: (attempt) => setUploadAttempt(attempt),
         }
       );
 
@@ -713,20 +726,34 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Upload error:', error);
-      toast({
-        title: "Fel vid uppladdning",
-        description: error instanceof Error ? error.message : "Kunde inte ladda upp filen.",
-        variant: "destructive"
+      // 🛟 Offline-fallback: lägg i kö och flush:a när nätet är tillbaka
+      const enqueued = await enqueueMediaForLater({
+        blob: file,
+        fileName: `${user!.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${file.name.split('.').pop() || 'bin'}`,
+        mediaType: isVideo ? 'profile-video' : 'profile-image',
+        targetTable: 'profiles',
+        targetField: isVideo ? 'video_url' : 'profile_image_url',
+        targetId: user!.id,
       });
+      if (!enqueued) {
+        toast({
+          title: "Fel vid uppladdning",
+          description: error instanceof Error ? error.message : "Kunde inte ladda upp filen.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUploadingMedia(false);
       setUploadingMediaType(null);
       setUploadProgress(0);
+      setUploadProgressInfo(null);
+      setUploadAttempt(1);
     }
   };
 
   const uploadCoverImage = async (file: File) => {
     setIsUploadingCover(true);
+    setCoverProgressInfo(null);
     
     try {
       if (!user?.id) throw new Error('User not found');
@@ -735,7 +762,8 @@ const Profile = () => {
       const { storagePath, error: uploadError } = await uploadMedia(
         file,
         'cover-image',
-        user.id
+        user.id,
+        { onProgress: (p) => setCoverProgressInfo(p) }
       );
 
       if (uploadError) throw uploadError;
@@ -765,13 +793,24 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Cover upload error:', error);
-      toast({
-        title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp cover-bilden.",
-        variant: "destructive"
+      const enqueued = await enqueueMediaForLater({
+        blob: file,
+        fileName: `${user!.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${file.name.split('.').pop() || 'bin'}`,
+        mediaType: 'cover-image',
+        targetTable: 'profiles',
+        targetField: 'cover_image_url',
+        targetId: user!.id,
       });
+      if (!enqueued) {
+        toast({
+          title: "Fel vid uppladdning",
+          description: "Kunde inte ladda upp cover-bilden.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUploadingCover(false);
+      setCoverProgressInfo(null);
     }
   };
 
@@ -904,7 +943,14 @@ const Profile = () => {
       const { storagePath, error: uploadError } = await uploadMedia(
         editedFile,
         'profile-image',
-        user.data.user.id
+        user.data.user.id,
+        {
+          onProgress: (p) => {
+            setUploadProgress(p.percent);
+            setUploadProgressInfo(p);
+          },
+          onAttempt: (attempt) => setUploadAttempt(attempt),
+        }
       );
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
@@ -952,14 +998,28 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Profile image upload error:', error);
-      toast({
-        title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp profilbilden.",
-        variant: "destructive"
-      });
+      const u = (await supabase.auth.getUser()).data.user;
+      const enqueued = u ? await enqueueMediaForLater({
+        blob: editedBlob,
+        fileName: `${u.id}/${Date.now()}-profile.jpg`,
+        mediaType: 'profile-image',
+        targetTable: 'profiles',
+        targetField: 'profile_image_url',
+        targetId: u.id,
+      }) : null;
+      if (!enqueued) {
+        toast({
+          title: "Fel vid uppladdning",
+          description: "Kunde inte ladda upp profilbilden.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUploadingMedia(false);
       setUploadingMediaType(null);
+      setUploadProgress(0);
+      setUploadProgressInfo(null);
+      setUploadAttempt(1);
     }
   };
 
@@ -980,7 +1040,8 @@ const Profile = () => {
       const { storagePath, error: uploadError } = await uploadMedia(
         editedFile,
         'cover-image',
-        user.data.user.id
+        user.data.user.id,
+        { onProgress: (p) => setCoverProgressInfo(p) }
       );
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
@@ -1026,13 +1087,25 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Cover upload error:', error);
-      toast({
-        title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp cover-bilden.",
-        variant: "destructive"
-      });
+      const u = (await supabase.auth.getUser()).data.user;
+      const enqueued = u ? await enqueueMediaForLater({
+        blob: editedBlob,
+        fileName: `${u.id}/${Date.now()}-cover.jpg`,
+        mediaType: 'cover-image',
+        targetTable: 'profiles',
+        targetField: 'cover_image_url',
+        targetId: u.id,
+      }) : null;
+      if (!enqueued) {
+        toast({
+          title: "Fel vid uppladdning",
+          description: "Kunde inte ladda upp cover-bilden.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUploadingCover(false);
+      setCoverProgressInfo(null);
     }
   };
 
@@ -1706,9 +1779,26 @@ const Profile = () => {
               </Label>
               
               {isUploadingMedia && (
-                <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
-                  {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
-                </Badge>
+                <div className="mx-auto w-full max-w-xs rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 space-y-2 text-left">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-sm font-medium text-white tabular-nums">
+                      {uploadAttempt > 1
+                        ? `Försöker igen (försök ${uploadAttempt})…`
+                        : `${uploadProgress}%`}
+                    </span>
+                    {uploadProgressInfo && (
+                      <span className="text-[11px] text-white/60 tabular-nums">
+                        {formatBytes(uploadProgressInfo.loaded)} / {formatBytes(uploadProgressInfo.total)}
+                      </span>
+                    )}
+                  </div>
+                  <Progress value={uploadProgress} className="h-1.5 bg-white/10" />
+                  {uploadProgressInfo && uploadProgressInfo.secondsRemaining > 0 && (
+                    <div className="text-[11px] text-white/60 tabular-nums">
+                      {formatTimeRemaining(uploadProgressInfo.secondsRemaining)}
+                    </div>
+                  )}
+                </div>
               )}
               
               {(isProfileVideo && !!videoUrl) && !isUploadingMedia && (
@@ -1794,11 +1884,23 @@ const Profile = () => {
                 />
                 
                 {isUploadingCover && (
-                  <div className="flex flex-col items-center w-full">
-                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-sm animate-pulse">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                      Laddar upp cover-bild...
-                    </Badge>
+                  <div className="w-full max-w-xs mx-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 space-y-2">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-sm font-medium text-white tabular-nums">
+                        {coverProgressInfo ? `${coverProgressInfo.percent}%` : 'Förbereder…'}
+                      </span>
+                      {coverProgressInfo && (
+                        <span className="text-[11px] text-white/60 tabular-nums">
+                          {formatBytes(coverProgressInfo.loaded)} / {formatBytes(coverProgressInfo.total)}
+                        </span>
+                      )}
+                    </div>
+                    <Progress value={coverProgressInfo?.percent ?? 0} className="h-1.5 bg-white/10" />
+                    {coverProgressInfo && coverProgressInfo.secondsRemaining > 0 && (
+                      <div className="text-[11px] text-white/60 tabular-nums">
+                        {formatTimeRemaining(coverProgressInfo.secondsRemaining)}
+                      </div>
+                    )}
                   </div>
                 )}
                 

@@ -42,6 +42,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoProgress, setLogoProgress] = useState(0);
   const [draftRestored, setDraftRestored] = useState(false);
   
   // Image editor states
@@ -136,7 +137,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
       const fileExt = optimizedBlob.type === 'image/webp' ? 'webp' : 'png';
       const fileName = `${user.data.user.id}/${Date.now()}-company-logo.${fileExt}`;
 
-      // 🚀 Resilient upload med retry + exponential backoff
+      // 🚀 Resilient upload med retry + exponential backoff + progress
       await uploadWithRetry({
         bucket: 'company-logos',
         path: fileName,
@@ -144,7 +145,9 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
         contentType: optimizedBlob.type,
         cacheControl: '31536000',
         upsert: true,
+        onProgress: (p) => setLogoProgress(p.percent),
       });
+      setLogoProgress(100);
 
       // Use public URL for company logos (no expiration)
       const { data: { publicUrl } } = supabase.storage
@@ -173,6 +176,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
       });
     } finally {
       setIsUploadingLogo(false);
+      setLogoProgress(0);
     }
   };
 
@@ -320,9 +324,12 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
                     onClick={() => document.getElementById('logo-upload')?.click()}
                   >
                     {isUploadingLogo ? (
-                      <div className="text-center">
+                      <div className="text-center w-full px-6">
                         <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
-                        <p className="text-sm text-white">Laddar upp...</p>
+                        <p className="text-sm text-white tabular-nums">{logoProgress}% — laddar upp logga</p>
+                        <div className="mt-2 h-1 w-full max-w-[200px] mx-auto rounded-full bg-white/10 overflow-hidden">
+                          <div className="h-full bg-white transition-all duration-200" style={{ width: `${logoProgress}%` }} />
+                        </div>
                       </div>
                     ) : (
                       <>

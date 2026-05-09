@@ -30,6 +30,7 @@ const CompanyProfile = () => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoProgress, setLogoProgress] = useState(0);
   const [originalValues, setOriginalValues] = useState<any>({});
   const [linkToDelete, setLinkToDelete] = useState<{ link: SocialMediaLink; index: number } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -246,7 +247,7 @@ const CompanyProfile = () => {
       const { uploadWithRetry } = await import('@/lib/uploadWithProgress');
       const optimizedBlob = await compressImageBlob(editedBlob, { maxDimension: 1024, quality: 0.9 });
 
-      // 🚀 Resilient upload med retry + exponential backoff
+      // 🚀 Resilient upload med retry + exponential backoff + progress
       await uploadWithRetry({
         bucket: 'company-logos',
         path: croppedFileName,
@@ -254,7 +255,9 @@ const CompanyProfile = () => {
         contentType: optimizedBlob.type,
         cacheControl: '31536000',
         upsert: true,
+        onProgress: (p) => setLogoProgress(p.percent),
       });
+      setLogoProgress(100);
 
       let originalUrl = formData.company_logo_original_url;
       let newOriginalStoragePath = originalLogoStoragePath;
@@ -315,6 +318,7 @@ const CompanyProfile = () => {
       });
     } finally {
       setIsUploadingLogo(false);
+      setLogoProgress(0);
     }
   };
 
@@ -533,6 +537,7 @@ const CompanyProfile = () => {
         companyLogoUrl={formData.company_logo_url}
         companyName={formData.company_name}
         isUploadingLogo={isUploadingLogo}
+        uploadProgress={logoProgress}
         onUploadClick={() => document.getElementById('logo-upload')?.click()}
         onEditExistingLogo={handleEditExistingLogo}
         onLogoDelete={handleLogoDelete}
