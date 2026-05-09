@@ -202,6 +202,7 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
       <UnsavedChangesProvider>
         {!isLightweightRoute && <PushNotificationProvider />}
         {!isLightweightRoute && <RealtimeKeepAlive />}
+        {!isLightweightRoute && <OfflineQueueRunner />}
         {location.pathname === '/auth' && <AuthSplashScreen />}
         <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
           {!isLightweightRoute && <CriticalAssetPreloads />}
