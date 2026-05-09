@@ -7,6 +7,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useCardImage } from '@/hooks/useCardImage';
+import { ResilientImage } from '@/components/ui/ResilientImage';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 
@@ -132,7 +133,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       <div className="job-card-mobile-media relative w-full overflow-hidden">
         {displayUrl ? (
           <>
-            <img
+            <ResilientImage
               src={displayUrl}
               alt={`${job.title} hos ${companyName}`}
               className="w-full h-full object-cover"
@@ -145,6 +146,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
               })()}` }}
               loading={cardIndex < 6 ? 'eager' : 'lazy'}
               onError={handleImageError}
+              fallbackClassName="w-full h-full"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>
@@ -154,7 +156,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             {logoUrl ? (
               <>
                 <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                  <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} />
+                  <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
                 </div>
                 <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] min-w-0 overflow-hidden">
                   <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0 text-white" />

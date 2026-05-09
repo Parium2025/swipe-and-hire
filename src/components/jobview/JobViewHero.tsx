@@ -5,6 +5,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
+import { ResilientImage } from '@/components/ui/ResilientImage';
 
 interface JobViewHeroProps {
   title: string;
@@ -206,7 +207,7 @@ export const JobViewHero = memo(function JobViewHero({
           {hasLogo ? (
             <>
               <div className="w-20 h-20 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                <img src={companyLogoUrl!} alt={companyName} className="w-full h-full object-cover" draggable={false} />
+                <ResilientImage src={companyLogoUrl!} alt={companyName} className="w-full h-full object-cover" draggable={false} fallbackClassName="w-full h-full" />
               </div>
               <Badge variant="glass" className="text-xs px-2.5 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] overflow-hidden text-white [text-shadow:0_0_1px_rgba(255,255,255,0.6)]">
                 <Building2 className="h-3.5 w-3.5 mr-1 flex-shrink-0 text-white drop-shadow-[0_0_1px_rgba(255,255,255,0.5)]" />
@@ -227,12 +228,13 @@ export const JobViewHero = memo(function JobViewHero({
 
   return (
     <div className="relative w-full h-80 md:h-96 overflow-hidden rounded-lg">
-      <img
+      <ResilientImage
         src={imageUrl}
         alt={`${title} hos ${companyName}`}
         className="w-full h-full object-cover"
         loading="eager"
         fetchPriority="high"
+        fallbackClassName="w-full h-full"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
       {overlayContent}
