@@ -6,6 +6,7 @@ interface CompanyLogoSectionProps {
   companyLogoUrl: string;
   companyName: string;
   isUploadingLogo: boolean;
+  uploadProgress?: number;
   onUploadClick: () => void;
   onEditExistingLogo: () => void;
   onLogoDelete: () => void;
