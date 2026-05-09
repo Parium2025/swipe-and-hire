@@ -1,0 +1,1 @@
+UPDATE public.job_postings SET job_image_url = NULL WHERE id IN ('bbd6e4fc-22ff-4ce2-a9ca-b2af16c811fc', '28c1f9e4-b193-4637-95c1-80ed99d6b438');
