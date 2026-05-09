@@ -211,8 +211,8 @@ const CandidatesContent = () => {
                   onClick={() => setSelectionMode(prev => !prev)}
                   onMouseDown={(e) => e.preventDefault()}
                   className={`
-                    flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-sm font-medium transition-all
-                    border whitespace-nowrap active:scale-[0.97] touch-manipulation outline-none focus:outline-none
+                    flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all
+                    border whitespace-nowrap min-w-0 flex-shrink-0 active:scale-[0.97] touch-manipulation outline-none focus:outline-none
                     ${selectionMode 
                       ? 'bg-white/20 border-white/30 text-white' 
                       : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
