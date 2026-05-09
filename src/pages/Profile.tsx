@@ -662,6 +662,8 @@ const Profile = () => {
     setIsUploadingMedia(true);
     setUploadingMediaType(isVideo ? 'video' : 'image');
     setUploadProgress(0);
+    setUploadProgressInfo(null);
+    setUploadAttempt(1);
     
     try {
       if (!user?.id) throw new Error('User not found');
@@ -672,7 +674,11 @@ const Profile = () => {
         isVideo ? 'profile-video' : 'profile-image',
         user.id,
         {
-          onProgress: (p) => setUploadProgress(p.percent),
+          onProgress: (p) => {
+            setUploadProgress(p.percent);
+            setUploadProgressInfo(p);
+          },
+          onAttempt: (attempt) => setUploadAttempt(attempt),
         }
       );
 
@@ -720,15 +726,28 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Upload error:', error);
-      toast({
-        title: "Fel vid uppladdning",
-        description: error instanceof Error ? error.message : "Kunde inte ladda upp filen.",
-        variant: "destructive"
+      // 🛟 Offline-fallback: lägg i kö och flush:a när nätet är tillbaka
+      const enqueued = await enqueueMediaForLater({
+        blob: file,
+        fileName: `${user!.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${file.name.split('.').pop() || 'bin'}`,
+        mediaType: isVideo ? 'profile-video' : 'profile-image',
+        targetTable: 'profiles',
+        targetField: isVideo ? 'video_url' : 'profile_image_url',
+        targetId: user!.id,
       });
+      if (!enqueued) {
+        toast({
+          title: "Fel vid uppladdning",
+          description: error instanceof Error ? error.message : "Kunde inte ladda upp filen.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUploadingMedia(false);
       setUploadingMediaType(null);
       setUploadProgress(0);
+      setUploadProgressInfo(null);
+      setUploadAttempt(1);
     }
   };
 
