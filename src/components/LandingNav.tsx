@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
@@ -19,6 +20,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   const goHome = (e?: React.SyntheticEvent) => {
     e?.preventDefault();
@@ -36,16 +38,73 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     const id = href.slice(1);
     const el = document.getElementById(id);
     if (el) {
+      setActiveId(id);
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setMobileMenuOpen(false);
     }
   };
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    // Hitta faktisk scroll-container (fixed inset-0 overflow-y-auto används på audience-sidor)
+    const findScroller = (): HTMLElement | Window => {
+      const candidates = Array.from(document.querySelectorAll<HTMLElement>('div'));
+      for (const el of candidates) {
+        const cs = getComputedStyle(el);
+        if (
+          (cs.overflowY === 'auto' || cs.overflowY === 'scroll') &&
+          cs.position === 'fixed' &&
+          el.scrollHeight > el.clientHeight
+        ) {
+          return el;
+        }
+      }
+      return window;
+    };
+    const scroller = findScroller();
+    const getY = () =>
+      scroller === window ? window.scrollY : (scroller as HTMLElement).scrollTop;
+    const onScroll = () => setScrolled(getY() > 40);
+    onScroll();
+    scroller.addEventListener('scroll', onScroll, { passive: true } as any);
+    return () => scroller.removeEventListener('scroll', onScroll as any);
+  }, [location.pathname]);
+
+  // Tracka aktiv sektion baserat på vilken som är synligast
+  useEffect(() => {
+    if (!links.length) return;
+    const ids = links.map((l) => l.href.replace('#', '')).filter(Boolean);
+    const elements = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (!elements.length) return;
+
+    const visibility = new Map<string, number>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          visibility.set(e.target.id, e.intersectionRatio);
+        }
+        let bestId: string | null = null;
+        let bestRatio = 0;
+        visibility.forEach((ratio, id) => {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestId = id;
+          }
+        });
+        if (bestRatio > 0.15) setActiveId(bestId);
+        else setActiveId(null);
+      },
+      {
+        // Lite offset från toppen så aktiv sektion byts när rubriken är under naven
+        rootMargin: '-20% 0px -55% 0px',
+        threshold: [0, 0.15, 0.3, 0.5, 0.75, 1],
+      }
+    );
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [links]);
+
 
   return (
     <>
@@ -79,16 +138,30 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
             {links.length > 0 && (
               <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
-                {links.map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
-                    onClick={(e) => handleAnchor(e, l.href)}
-                    className="rounded-full px-4 py-2 text-[13px] font-medium text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
-                  >
-                    {l.label}
-                  </a>
-                ))}
+                {links.map((l) => {
+                  const id = l.href.replace('#', '');
+                  const isActive = activeId === id;
+                  return (
+                    <a
+                      key={l.href}
+                      href={l.href}
+                      onClick={(e) => handleAnchor(e, l.href)}
+                      aria-current={isActive ? 'true' : undefined}
+                      className={`relative rounded-full px-4 py-2 text-[13px] font-medium transition-colors ${
+                        isActive ? 'text-white' : 'text-white/65 hover:text-white'
+                      }`}
+                    >
+                      {isActive && (
+                        <motion.span
+                          layoutId="nav-bubble"
+                          className="absolute inset-0 -z-0 rounded-full bg-white/[0.10] border border-white/[0.10] shadow-[0_4px_20px_rgba(0,0,0,0.25)]"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
+                        />
+                      )}
+                      <span className="relative z-10">{l.label}</span>
+                    </a>
+                  );
+                })}
               </div>
             )}
 
