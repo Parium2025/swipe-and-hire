@@ -248,8 +248,8 @@ const EmployerDashboard = memo(() => {
       didMountRef.current = true;
       return;
     }
-    if (listTopRef.current) {
-      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [page]);
 
@@ -421,7 +421,7 @@ const EmployerDashboard = memo(() => {
           showDrafts
         />
         {totalPages > 1 && (
-          <span className="hidden md:inline absolute right-0 text-sm text-white/70">
+          <span className="hidden md:inline absolute right-0 text-sm text-white">
             Sida {page} av {totalPages}
           </span>
         )}
