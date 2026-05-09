@@ -57,11 +57,20 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     },
   ];
 
+  const navLinks: LandingNavLink[] = [
+    { label: 'Så funkar det', href: '#sa-funkar-det' },
+    { label: 'Funktioner', href: '#funktioner' },
+    { label: 'Priser', href: '#priser' },
+    { label: 'Vanliga frågor', href: '#faq' },
+    { label: 'Kontakt', href: '#kontakt' },
+  ];
+
   return (
     <div className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-parium-navy text-primary-foreground">
       <AnimatedBackground />
       <div className="relative z-10 min-h-full">
-        <LandingNav onLoginClick={handleLogin} />
+        <LandingNav onLoginClick={handleLogin} links={navLinks} />
+
 
         <motion.main
           initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
