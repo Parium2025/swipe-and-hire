@@ -247,7 +247,7 @@ const CompanyProfile = () => {
       const { uploadWithRetry } = await import('@/lib/uploadWithProgress');
       const optimizedBlob = await compressImageBlob(editedBlob, { maxDimension: 1024, quality: 0.9 });
 
-      // 🚀 Resilient upload med retry + exponential backoff
+      // 🚀 Resilient upload med retry + exponential backoff + progress
       await uploadWithRetry({
         bucket: 'company-logos',
         path: croppedFileName,
@@ -255,7 +255,9 @@ const CompanyProfile = () => {
         contentType: optimizedBlob.type,
         cacheControl: '31536000',
         upsert: true,
+        onProgress: (p) => setLogoProgress(p.percent),
       });
+      setLogoProgress(100);
 
       let originalUrl = formData.company_logo_original_url;
       let newOriginalStoragePath = originalLogoStoragePath;
