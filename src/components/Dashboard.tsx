@@ -16,6 +16,7 @@ import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
+import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -184,8 +185,14 @@ const Dashboard = memo(() => {
       didMountRef.current = true;
       return;
     }
-    if (listTopRef.current) {
-      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (typeof window !== 'undefined') {
+      const scrollContainer = getManagedScrollContainer();
+      scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      const positions = readPositions();
+      positions[window.location.pathname] = { top: 0 };
+      writePositions(positions);
     }
   }, [page]);
 
@@ -247,14 +254,19 @@ const Dashboard = memo(() => {
         </div>
       )}
 
-      {/* Status tabs */}
-      <div className="flex justify-center">
+      {/* Status tabs: Aktiva / Utgångna + sidindikator */}
+      <div className="relative flex justify-center items-center">
         <JobStatusTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
           activeCount={serverCounts?.active ?? activeJobs.length}
           expiredCount={serverCounts?.expired ?? expiredJobs.length}
         />
+        {totalPages > 1 && (
+          <span className="hidden md:inline absolute right-0 text-sm text-white">
+            Sida {page} av {totalPages}
+          </span>
+        )}
       </div>
 
       {/* Desktop: Card grid */}
