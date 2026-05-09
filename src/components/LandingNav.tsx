@@ -20,6 +20,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   const goHome = (e?: React.SyntheticEvent) => {
     e?.preventDefault();
@@ -37,16 +38,73 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     const id = href.slice(1);
     const el = document.getElementById(id);
     if (el) {
+      setActiveId(id);
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setMobileMenuOpen(false);
     }
   };
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    // Hitta faktisk scroll-container (fixed inset-0 overflow-y-auto används på audience-sidor)
+    const findScroller = (): HTMLElement | Window => {
+      const candidates = Array.from(document.querySelectorAll<HTMLElement>('div'));
+      for (const el of candidates) {
+        const cs = getComputedStyle(el);
+        if (
+          (cs.overflowY === 'auto' || cs.overflowY === 'scroll') &&
+          cs.position === 'fixed' &&
+          el.scrollHeight > el.clientHeight
+        ) {
+          return el;
+        }
+      }
+      return window;
+    };
+    const scroller = findScroller();
+    const getY = () =>
+      scroller === window ? window.scrollY : (scroller as HTMLElement).scrollTop;
+    const onScroll = () => setScrolled(getY() > 40);
+    onScroll();
+    scroller.addEventListener('scroll', onScroll, { passive: true } as any);
+    return () => scroller.removeEventListener('scroll', onScroll as any);
+  }, [location.pathname]);
+
+  // Tracka aktiv sektion baserat på vilken som är synligast
+  useEffect(() => {
+    if (!links.length) return;
+    const ids = links.map((l) => l.href.replace('#', '')).filter(Boolean);
+    const elements = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (!elements.length) return;
+
+    const visibility = new Map<string, number>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          visibility.set(e.target.id, e.intersectionRatio);
+        }
+        let bestId: string | null = null;
+        let bestRatio = 0;
+        visibility.forEach((ratio, id) => {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestId = id;
+          }
+        });
+        if (bestRatio > 0.15) setActiveId(bestId);
+        else setActiveId(null);
+      },
+      {
+        // Lite offset från toppen så aktiv sektion byts när rubriken är under naven
+        rootMargin: '-20% 0px -55% 0px',
+        threshold: [0, 0.15, 0.3, 0.5, 0.75, 1],
+      }
+    );
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [links]);
+
 
   return (
     <>
