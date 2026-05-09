@@ -248,8 +248,8 @@ const EmployerDashboard = memo(() => {
       didMountRef.current = true;
       return;
     }
-    if (listTopRef.current) {
-      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [page]);
 
