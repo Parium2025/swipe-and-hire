@@ -84,7 +84,7 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
         <PaginationContent>
           <PaginationItem>{PrevBtn}</PaginationItem>
           <PaginationItem>
-            <PaginationLink isActive className="text-white">{page}</PaginationLink>
+            <PaginationLink isActive className="text-white font-semibold !bg-transparent !border-transparent hover:!bg-transparent">{page}</PaginationLink>
           </PaginationItem>
           <PaginationItem>{NextBtn}</PaginationItem>
         </PaginationContent>
@@ -114,7 +114,7 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
         )}
 
         <PaginationItem>
-          <PaginationLink isActive className="text-white">{page}</PaginationLink>
+          <PaginationLink isActive className="text-white font-semibold !bg-transparent !border-transparent hover:!bg-transparent">{page}</PaginationLink>
         </PaginationItem>
 
         {page < totalPages && (
