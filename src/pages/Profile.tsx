@@ -998,14 +998,28 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Profile image upload error:', error);
-      toast({
-        title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp profilbilden.",
-        variant: "destructive"
-      });
+      const u = (await supabase.auth.getUser()).data.user;
+      const enqueued = u ? await enqueueMediaForLater({
+        blob: editedBlob,
+        fileName: `${u.id}/${Date.now()}-profile.jpg`,
+        mediaType: 'profile-image',
+        targetTable: 'profiles',
+        targetField: 'profile_image_url',
+        targetId: u.id,
+      }) : null;
+      if (!enqueued) {
+        toast({
+          title: "Fel vid uppladdning",
+          description: "Kunde inte ladda upp profilbilden.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUploadingMedia(false);
       setUploadingMediaType(null);
+      setUploadProgress(0);
+      setUploadProgressInfo(null);
+      setUploadAttempt(1);
     }
   };
 
