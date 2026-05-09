@@ -709,7 +709,7 @@ export function CandidatesTable({
                               </Tooltip>
                             )}
                           </div>
-                          {application.phone && <div className="text-sm text-muted-foreground">{application.phone}</div>}
+                          {application.phone && <div className="text-sm text-white">{application.phone}</div>}
                         </div>
                       </div>
                     </TableCell>
