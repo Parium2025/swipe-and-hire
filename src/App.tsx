@@ -77,6 +77,7 @@ import { ScrollRestoration } from "@/components/ScrollRestoration";
 import { CriticalAssetPreloads } from "@/components/CriticalAssetPreloads";
 import { AuthSplashScreen } from "@/components/AuthSplashScreen";
 import { RealtimeKeepAlive } from "@/components/RealtimeKeepAlive";
+import { OfflineQueueRunner } from "@/components/OfflineQueueRunner";
 import { AppFailureMonitor } from "@/components/AppFailureMonitor";
 import { syncBrowserChrome, mountChromePopstateGuard, noteChromePath } from "@/lib/browserChrome";
 import BottomChromeStrip from "@/components/BottomChromeStrip";
