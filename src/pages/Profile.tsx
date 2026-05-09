@@ -1884,11 +1884,23 @@ const Profile = () => {
                 />
                 
                 {isUploadingCover && (
-                  <div className="flex flex-col items-center w-full">
-                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-sm animate-pulse">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                      Laddar upp cover-bild...
-                    </Badge>
+                  <div className="w-full max-w-xs mx-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 space-y-2">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-sm font-medium text-white tabular-nums">
+                        {coverProgressInfo ? `${coverProgressInfo.percent}%` : 'Förbereder…'}
+                      </span>
+                      {coverProgressInfo && (
+                        <span className="text-[11px] text-white/60 tabular-nums">
+                          {formatBytes(coverProgressInfo.loaded)} / {formatBytes(coverProgressInfo.total)}
+                        </span>
+                      )}
+                    </div>
+                    <Progress value={coverProgressInfo?.percent ?? 0} className="h-1.5 bg-white/10" />
+                    {coverProgressInfo && coverProgressInfo.secondsRemaining > 0 && (
+                      <div className="text-[11px] text-white/60 tabular-nums">
+                        {formatTimeRemaining(coverProgressInfo.secondsRemaining)}
+                      </div>
+                    )}
                   </div>
                 )}
                 
