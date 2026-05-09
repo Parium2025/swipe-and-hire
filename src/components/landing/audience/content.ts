@@ -1,4 +1,4 @@
-import { Brain, Compass, MessageCircle, Search, ShieldCheck, Sparkles, Users, Zap, BriefcaseBusiness, Filter, Target, Clock } from 'lucide-react';
+import { Brain, MessageCircle, ShieldCheck, Sparkles, Zap, BriefcaseBusiness, Filter, Target } from 'lucide-react';
 
 export type AudienceRole = 'job_seeker' | 'employer';
 
