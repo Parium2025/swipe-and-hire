@@ -458,9 +458,7 @@ const EmployerDashboard = memo(() => {
                 </CardErrorBoundary>
               )}
             />
-            {totalPages > 1 && (
-              <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-4" />
-            )}
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </>
         )}
       </div>
@@ -554,9 +552,7 @@ const EmployerDashboard = memo(() => {
                 );
               }}
             />
-            {totalPages > 1 && (
-              <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-3" />
-            )}
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
           </>
         )}
       </div>
