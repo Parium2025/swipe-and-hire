@@ -178,6 +178,14 @@ const EmployerDashboard = memo(() => {
       ? tabBuckets.draft
       : tabBuckets.active;
 
+  const activeTabTotalCount = searchTerm.trim()
+    ? tabFilteredJobs.length
+    : activeTab === 'expired'
+      ? (serverCounts?.expired ?? tabBuckets.expired.length)
+      : activeTab === 'draft'
+        ? (serverCounts?.draft ?? tabBuckets.draft.length)
+        : (serverCounts?.active ?? tabBuckets.active.length);
+
   // Ordered tabs for swipe navigation
   const tabOrder: JobStatusTab[] = useMemo(() => hasDrafts ? ['active', 'expired', 'draft'] : ['active', 'expired'], [hasDrafts]);
 
@@ -196,7 +204,7 @@ const EmployerDashboard = memo(() => {
   // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
 
-  const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(activeTabTotalCount / pageSize));
 
   // 🔥 HÅL #2: Pre-warma BARA aktuell tab × current+next page (~40 bilder).
   // Tidigare prewarm av tusentals bilder mättade nätet och evictade cachen.
