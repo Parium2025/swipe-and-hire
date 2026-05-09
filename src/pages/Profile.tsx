@@ -1779,9 +1779,26 @@ const Profile = () => {
               </Label>
               
               {isUploadingMedia && (
-                <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
-                  {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
-                </Badge>
+                <div className="mx-auto w-full max-w-xs rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 space-y-2 text-left">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-sm font-medium text-white tabular-nums">
+                      {uploadAttempt > 1
+                        ? `Försöker igen (försök ${uploadAttempt})…`
+                        : `${uploadProgress}%`}
+                    </span>
+                    {uploadProgressInfo && (
+                      <span className="text-[11px] text-white/60 tabular-nums">
+                        {formatBytes(uploadProgressInfo.loaded)} / {formatBytes(uploadProgressInfo.total)}
+                      </span>
+                    )}
+                  </div>
+                  <Progress value={uploadProgress} className="h-1.5 bg-white/10" />
+                  {uploadProgressInfo && uploadProgressInfo.secondsRemaining > 0 && (
+                    <div className="text-[11px] text-white/60 tabular-nums">
+                      {formatTimeRemaining(uploadProgressInfo.secondsRemaining)}
+                    </div>
+                  )}
+                </div>
               )}
               
               {(isProfileVideo && !!videoUrl) && !isUploadingMedia && (
