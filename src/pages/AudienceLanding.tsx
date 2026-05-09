@@ -20,8 +20,44 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
-    document.title =
-      audience === 'job_seeker' ? 'Parium – För jobbsökare' : 'Parium – För arbetsgivare';
+
+    const isSeeker = audience === 'job_seeker';
+    const title = isSeeker
+      ? 'Hitta jobb som passar dig | Parium – för jobbsökare'
+      : 'Hitta rätt kandidater snabbt | Parium – för arbetsgivare';
+    const description = isSeeker
+      ? 'Slipp långa formulär. Bygg en profil som visar mer än ett CV och få relevanta jobb först. Gratis för jobbsökare i Sverige.'
+      : 'Hitta rätt kandidater på sekunder. Publicera jobb, matcha smart och anställ snabbare med Parium – rekrytering i en ny generation.';
+    const url = isSeeker ? 'https://parium.se/jobbsokare' : 'https://parium.se/arbetsgivare';
+
+    document.title = title;
+
+    const setMeta = (name: string, content: string, attr = 'name') => {
+      let el = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    setMeta('description', description);
+    setMeta('og:title', title, 'property');
+    setMeta('og:description', description, 'property');
+    setMeta('og:url', url, 'property');
+    setMeta('og:type', 'website', 'property');
+    setMeta('twitter:card', 'summary_large_image');
+    setMeta('twitter:title', title);
+    setMeta('twitter:description', description);
+
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = url;
   }, [audience]);
 
   const handleLogin = () => {
