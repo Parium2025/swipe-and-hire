@@ -26,6 +26,7 @@ export const CompanyLogoSection = ({
   companyLogoUrl,
   companyName,
   isUploadingLogo,
+  uploadProgress = 0,
   onUploadClick,
   onEditExistingLogo,
   onLogoDelete,
