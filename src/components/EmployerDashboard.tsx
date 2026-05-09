@@ -31,42 +31,11 @@ import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
+import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
-
-/** Lightweight inline pagination — no external dependency, identical visual to previous inline version */
-const SimplePagination = memo(({ page, totalPages, onPageChange, className = '' }: { page: number; totalPages: number; onPageChange: (p: number) => void; className?: string }) => (
-  <div className={`flex items-center justify-center gap-6 text-xs ${className}`}>
-    <button
-      onClick={() => onPageChange(Math.max(1, page - 1))}
-      disabled={page === 1}
-      className={`flex items-center gap-1.5 text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
-    >
-      <span className="text-lg leading-none">‹</span>
-      <span>Föreg</span>
-    </button>
-    {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(n => (
-      <button
-        key={n}
-        onClick={() => onPageChange(n)}
-        className={`px-1 text-white transition-colors ${page === n ? 'font-medium' : 'opacity-60 hover:opacity-100 cursor-pointer'}`}
-      >
-        {n}
-      </button>
-    ))}
-    <button
-      onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-      disabled={page === totalPages}
-      className={`flex items-center gap-1.5 text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
-    >
-      <span>Nästa</span>
-      <span className="text-lg leading-none">›</span>
-    </button>
-  </div>
-));
-SimplePagination.displayName = 'SimplePagination';
 
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
