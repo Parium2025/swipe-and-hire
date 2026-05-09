@@ -479,7 +479,7 @@ const EmployerDashboard = memo(() => {
                 </CardErrorBoundary>
               )}
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
           </>
         )}
       </div>
@@ -573,7 +573,7 @@ const EmployerDashboard = memo(() => {
                 );
               }}
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} compact />
           </>
         )}
       </div>
