@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { uploadWithRetry, type UploadProgress, UploadAbortedError } from '@/lib/uploadWithProgress';
 
 /**
  * 🔒 KRITISKT: DETTA ÄR DEN ENDA KÄLLAN TILL SANNING FÖR MEDIA-HANTERING
