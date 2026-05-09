@@ -13,6 +13,7 @@ import {
   Plus,
   CheckSquare,
 } from 'lucide-react';
+import { ResilientImage } from '@/components/ui/ResilientImage';
 import { TruncatedText } from '@/components/TruncatedText';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import JobQrCodeButton from '@/components/JobQrCode';
