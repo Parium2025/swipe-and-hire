@@ -410,8 +410,8 @@ const EmployerDashboard = memo(() => {
         hasDrafts={hasDrafts}
       />
 
-      {/* Status tabs: Aktiva / Utgångna / Utkast */}
-      <div className="flex justify-center">
+      {/* Status tabs: Aktiva / Utgångna / Utkast + sidindikator */}
+      <div className="relative flex justify-center items-center">
         <JobStatusTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -420,6 +420,11 @@ const EmployerDashboard = memo(() => {
           draftCount={serverCounts?.draft ?? draftJobsCount}
           showDrafts
         />
+        {totalPages > 1 && (
+          <span className="hidden md:inline absolute right-0 text-sm text-white/70">
+            Sida {page} av {totalPages}
+          </span>
+        )}
       </div>
 
       {/* Result indicator */}
