@@ -43,10 +43,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
           <div className="flex items-center justify-between h-16 sm:h-[72px]">
             <a
               href="/"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.href = '/';
-              }}
+              onClick={goHome}
               aria-label="Tillbaka till start"
               className="cursor-pointer transition-opacity hover:opacity-80"
             >
