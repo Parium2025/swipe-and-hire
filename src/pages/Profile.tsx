@@ -943,7 +943,14 @@ const Profile = () => {
       const { storagePath, error: uploadError } = await uploadMedia(
         editedFile,
         'profile-image',
-        user.data.user.id
+        user.data.user.id,
+        {
+          onProgress: (p) => {
+            setUploadProgress(p.percent);
+            setUploadProgressInfo(p);
+          },
+          onAttempt: (attempt) => setUploadAttempt(attempt),
+        }
       );
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
