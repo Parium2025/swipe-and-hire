@@ -290,7 +290,7 @@ const Dashboard = memo(() => {
                 />
               )}
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
           </>
         )}
       </div>
@@ -335,7 +335,7 @@ const Dashboard = memo(() => {
                 />
               )}
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} compact />
           </>
         )}
       </div>
