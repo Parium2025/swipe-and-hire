@@ -427,6 +427,7 @@ const EmployerDashboard = memo(() => {
 
       {/* Desktop: Card grid — virtualiserad + DOM-persistent över tabbar */}
       <div className="hidden md:block">
+        <div ref={listTopRef} />
         {tabFilteredJobs.length === 0 ? (
           <div className="text-center text-white py-12 font-medium text-sm">
             {searchTerm.trim() 
@@ -437,6 +438,7 @@ const EmployerDashboard = memo(() => {
           </div>
         ) : (
           <>
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
             <VirtualJobGrid
               activeTab={listActiveTab}
               tabs={[
@@ -458,7 +460,6 @@ const EmployerDashboard = memo(() => {
                 </CardErrorBoundary>
               )}
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </>
         )}
       </div>
@@ -496,6 +497,7 @@ const EmployerDashboard = memo(() => {
         ) : (
           <>
             <div ref={listTopRef} />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
             <VirtualJobGrid
               activeTab={listActiveTab}
               tabs={[
@@ -552,7 +554,6 @@ const EmployerDashboard = memo(() => {
                 );
               }}
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
           </>
         )}
       </div>
