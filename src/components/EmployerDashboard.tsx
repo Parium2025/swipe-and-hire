@@ -204,7 +204,9 @@ const EmployerDashboard = memo(() => {
   // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
 
-  const totalPages = Math.max(1, Math.ceil(activeTabTotalCount / pageSize));
+  // Använd lokal data-längd så vi inte visar tomma sidor när server-count är högre
+  // än vad som faktiskt laddats in i klienten.
+  const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
 
   // 🔥 HÅL #2: Pre-warma BARA aktuell tab × current+next page (~40 bilder).
   // Tidigare prewarm av tusentals bilder mättade nätet och evictade cachen.
