@@ -30,6 +30,7 @@ const CompanyProfile = () => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoProgress, setLogoProgress] = useState(0);
   const [originalValues, setOriginalValues] = useState<any>({});
   const [linkToDelete, setLinkToDelete] = useState<{ link: SocialMediaLink; index: number } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
