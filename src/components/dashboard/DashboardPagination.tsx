@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import {
   Pagination,
   PaginationContent,
@@ -9,6 +9,13 @@ import {
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+// Match wizard footer button styling (Tillbaka / Nästa in "Skapa annons")
+const backButtonClasses =
+  'rounded-full bg-white/5 backdrop-blur-sm border border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 [&_svg]:text-white focus:outline-none focus:ring-0 focus-visible:ring-0';
+
+const nextButtonClasses =
+  'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0';
 
 interface DashboardPaginationProps {
   page: number;
@@ -39,16 +46,17 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
   const PrevBtn = (
     <Button
       type="button"
-      variant="glass"
+      variant="outline"
       onClick={handlePrev}
       disabled={page === 1}
       aria-label="Föregående sida"
       className={cn(
-        "gap-1.5 px-4 shrink-0 whitespace-nowrap",
+        backButtonClasses,
+        "shrink-0 whitespace-nowrap",
         page === 1 && "pointer-events-none opacity-50"
       )}
     >
-      <ChevronLeft className="h-4 w-4" />
+      <ArrowLeft className="h-4 w-4 mr-2" />
       <span>Föregående</span>
     </Button>
   );
@@ -56,17 +64,17 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
   const NextBtn = (
     <Button
       type="button"
-      variant="glass"
       onClick={handleNext}
       disabled={page === totalPages}
       aria-label="Nästa sida"
       className={cn(
-        "gap-1.5 px-4 shrink-0 whitespace-nowrap",
+        nextButtonClasses,
+        "shrink-0 whitespace-nowrap",
         page === totalPages && "pointer-events-none opacity-50"
       )}
     >
       <span>Nästa</span>
-      <ChevronRight className="h-4 w-4" />
+      <ArrowRight className="h-4 w-4 ml-2" />
     </Button>
   );
 

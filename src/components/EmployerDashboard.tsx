@@ -446,7 +446,6 @@ const EmployerDashboard = memo(() => {
           </div>
         ) : (
           <>
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
             <VirtualJobGrid
               activeTab={listActiveTab}
               tabs={[
@@ -468,6 +467,7 @@ const EmployerDashboard = memo(() => {
                 </CardErrorBoundary>
               )}
             />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </>
         )}
       </div>
@@ -505,7 +505,6 @@ const EmployerDashboard = memo(() => {
         ) : (
           <>
             <div ref={listTopRef} />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
             <VirtualJobGrid
               activeTab={listActiveTab}
               tabs={[
@@ -562,6 +561,7 @@ const EmployerDashboard = memo(() => {
                 );
               }}
             />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
           </>
         )}
       </div>
