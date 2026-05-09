@@ -57,7 +57,7 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
       )}
     >
       <ArrowLeft className="h-4 w-4 mr-2" />
-      <span>Tillbaka</span>
+      <span>Föregående</span>
     </Button>
   );
 
