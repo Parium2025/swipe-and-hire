@@ -1087,13 +1087,25 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Cover upload error:', error);
-      toast({
-        title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp cover-bilden.",
-        variant: "destructive"
-      });
+      const u = (await supabase.auth.getUser()).data.user;
+      const enqueued = u ? await enqueueMediaForLater({
+        blob: editedBlob,
+        fileName: `${u.id}/${Date.now()}-cover.jpg`,
+        mediaType: 'cover-image',
+        targetTable: 'profiles',
+        targetField: 'cover_image_url',
+        targetId: u.id,
+      }) : null;
+      if (!enqueued) {
+        toast({
+          title: "Fel vid uppladdning",
+          description: "Kunde inte ladda upp cover-bilden.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUploadingCover(false);
+      setCoverProgressInfo(null);
     }
   };
 
