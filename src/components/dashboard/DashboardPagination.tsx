@@ -46,34 +46,35 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
   const PrevBtn = (
     <Button
       type="button"
-      variant="glass"
+      variant="outline"
       onClick={handlePrev}
       disabled={page === 1}
       aria-label="Föregående sida"
       className={cn(
-        "gap-1.5 px-4 shrink-0 whitespace-nowrap",
+        backButtonClasses,
+        "shrink-0 whitespace-nowrap",
         page === 1 && "pointer-events-none opacity-50"
       )}
     >
-      <ChevronLeft className="h-4 w-4" />
-      <span>Föregående</span>
+      <ArrowLeft className="h-4 w-4 mr-2" />
+      <span>Tillbaka</span>
     </Button>
   );
 
   const NextBtn = (
     <Button
       type="button"
-      variant="glass"
       onClick={handleNext}
       disabled={page === totalPages}
       aria-label="Nästa sida"
       className={cn(
-        "gap-1.5 px-4 shrink-0 whitespace-nowrap",
+        nextButtonClasses,
+        "shrink-0 whitespace-nowrap",
         page === totalPages && "pointer-events-none opacity-50"
       )}
     >
       <span>Nästa</span>
-      <ChevronRight className="h-4 w-4" />
+      <ArrowRight className="h-4 w-4 ml-2" />
     </Button>
   );
 
