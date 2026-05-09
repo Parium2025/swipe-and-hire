@@ -9,8 +9,20 @@ interface LandingNavProps {
 }
 
 const LandingNav = ({ onLoginClick }: LandingNavProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const goHome = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      sessionStorage.setItem('parium-skip-splash', '1');
+      navigate('/');
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
