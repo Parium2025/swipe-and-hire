@@ -16,7 +16,7 @@ import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
-import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
+import { readPositions, writePositions, scrollToTopThenRun } from '@/lib/scrollRestoration';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -179,21 +179,19 @@ const Dashboard = memo(() => {
   useEffect(() => { setPage(1); }, [activeTab]);
   useEffect(() => { setPage(1); }, [searchTerm, sortBy, selectedRecruiterId]);
 
-  // Scroll to top when page changes (but not on initial mount)
-  useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-    if (typeof window !== 'undefined') {
-      const scrollContainer = getManagedScrollContainer();
-      scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      const positions = readPositions();
-      positions[window.location.pathname] = { top: 0 };
-      writePositions(positions);
-    }
+  // Premium pagination: scroll to top first, then swap the page so
+  // "Föregående" and "Nästa" feel identical.
+  const handlePageChange = useCallback((nextPage: number) => {
+    if (nextPage === page) return;
+    didMountRef.current = true;
+    scrollToTopThenRun(() => {
+      setPage(nextPage);
+      if (typeof window !== 'undefined') {
+        const positions = readPositions();
+        positions[window.location.pathname] = { top: 0 };
+        writePositions(positions);
+      }
+    });
   }, [page]);
 
   const statsCards = useMemo(() => {
