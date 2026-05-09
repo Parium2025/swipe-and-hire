@@ -709,7 +709,7 @@ export function CandidatesTable({
                               </Tooltip>
                             )}
                           </div>
-                          {application.phone && <div className="text-sm text-muted-foreground">{application.phone}</div>}
+                          {application.phone && <div className="text-sm text-white">{application.phone}</div>}
                         </div>
                       </div>
                     </TableCell>
@@ -723,9 +723,9 @@ export function CandidatesTable({
                         })}
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{application.job_title || 'Okänd tjänst'}</TableCell>
-                    <TableCell className="text-muted-foreground whitespace-nowrap">{formatTimeAgo(application.applied_at)}</TableCell>
-                    <TableCell className="text-muted-foreground whitespace-nowrap">
+                    <TableCell className="text-white">{application.job_title || 'Okänd tjänst'}</TableCell>
+                    <TableCell className="text-white whitespace-nowrap">{formatTimeAgo(application.applied_at)}</TableCell>
+                    <TableCell className="text-white whitespace-nowrap">
                       {application.last_active_at ? (
                         <span className="flex items-center gap-1.5">
                           <Clock className="h-3.5 w-3.5 flex-shrink-0" />
