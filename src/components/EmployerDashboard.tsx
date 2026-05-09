@@ -31,42 +31,11 @@ import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
+import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
-
-/** Lightweight inline pagination — no external dependency, identical visual to previous inline version */
-const SimplePagination = memo(({ page, totalPages, onPageChange, className = '' }: { page: number; totalPages: number; onPageChange: (p: number) => void; className?: string }) => (
-  <div className={`flex items-center justify-center gap-6 text-xs ${className}`}>
-    <button
-      onClick={() => onPageChange(Math.max(1, page - 1))}
-      disabled={page === 1}
-      className={`flex items-center gap-1.5 text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
-    >
-      <span className="text-lg leading-none">‹</span>
-      <span>Föreg</span>
-    </button>
-    {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(n => (
-      <button
-        key={n}
-        onClick={() => onPageChange(n)}
-        className={`px-1 text-white transition-colors ${page === n ? 'font-medium' : 'opacity-60 hover:opacity-100 cursor-pointer'}`}
-      >
-        {n}
-      </button>
-    ))}
-    <button
-      onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-      disabled={page === totalPages}
-      className={`flex items-center gap-1.5 text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
-    >
-      <span>Nästa</span>
-      <span className="text-lg leading-none">›</span>
-    </button>
-  </div>
-));
-SimplePagination.displayName = 'SimplePagination';
 
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
@@ -209,6 +178,14 @@ const EmployerDashboard = memo(() => {
       ? tabBuckets.draft
       : tabBuckets.active;
 
+  const activeTabTotalCount = searchTerm.trim()
+    ? tabFilteredJobs.length
+    : activeTab === 'expired'
+      ? (serverCounts?.expired ?? tabBuckets.expired.length)
+      : activeTab === 'draft'
+        ? (serverCounts?.draft ?? tabBuckets.draft.length)
+        : (serverCounts?.active ?? tabBuckets.active.length);
+
   // Ordered tabs for swipe navigation
   const tabOrder: JobStatusTab[] = useMemo(() => hasDrafts ? ['active', 'expired', 'draft'] : ['active', 'expired'], [hasDrafts]);
 
@@ -227,7 +204,7 @@ const EmployerDashboard = memo(() => {
   // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
 
-  const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(activeTabTotalCount / pageSize));
 
   // 🔥 HÅL #2: Pre-warma BARA aktuell tab × current+next page (~40 bilder).
   // Tidigare prewarm av tusentals bilder mättade nätet och evictade cachen.
@@ -458,6 +435,7 @@ const EmployerDashboard = memo(() => {
 
       {/* Desktop: Card grid — virtualiserad + DOM-persistent över tabbar */}
       <div className="hidden md:block">
+        <div ref={listTopRef} />
         {tabFilteredJobs.length === 0 ? (
           <div className="text-center text-white py-12 font-medium text-sm">
             {searchTerm.trim() 
@@ -468,6 +446,7 @@ const EmployerDashboard = memo(() => {
           </div>
         ) : (
           <>
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
             <VirtualJobGrid
               activeTab={listActiveTab}
               tabs={[
@@ -489,9 +468,6 @@ const EmployerDashboard = memo(() => {
                 </CardErrorBoundary>
               )}
             />
-            {totalPages > 1 && (
-              <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-4" />
-            )}
           </>
         )}
       </div>
@@ -529,6 +505,7 @@ const EmployerDashboard = memo(() => {
         ) : (
           <>
             <div ref={listTopRef} />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
             <VirtualJobGrid
               activeTab={listActiveTab}
               tabs={[
@@ -585,9 +562,6 @@ const EmployerDashboard = memo(() => {
                 );
               }}
             />
-            {totalPages > 1 && (
-              <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-3" />
-            )}
           </>
         )}
       </div>

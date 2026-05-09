@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { safeSetItem } from '@/lib/safeStorage';
+import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo, useEffect } from 'react';
@@ -69,17 +69,17 @@ interface CachedJobs {
 }
 
 function readJobsCache(userId: string, scope: string, orgId: string | null): JobPosting[] | null {
-  try {
-    const key = EMPLOYER_JOBS_CACHE_KEY + userId;
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const cached: CachedJobs = JSON.parse(raw);
-    // Only use if same scope and org
-    if (cached.scope !== scope || cached.orgId !== orgId) return null;
-    return cached.jobs;
-  } catch {
-    return null;
-  }
+  const key = EMPLOYER_JOBS_CACHE_KEY + userId;
+  const cached = safeReadJsonCache<CachedJobs>(key, (value): value is CachedJobs => {
+    const candidate = value as Partial<CachedJobs> | null;
+    return !!candidate
+      && Array.isArray(candidate.jobs)
+      && typeof candidate.scope === 'string'
+      && (candidate.orgId === null || typeof candidate.orgId === 'string')
+      && typeof candidate.timestamp === 'number';
+  });
+  if (!cached || cached.scope !== scope || cached.orgId !== orgId) return null;
+  return cached.jobs;
 }
 
 function writeJobsCache(userId: string, scope: string, orgId: string | null, jobs: JobPosting[]): void {
@@ -166,7 +166,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     enabled: !!user,
     staleTime: 10 * 60 * 1000, // 10 min fallback if realtime drops
     gcTime: Infinity, // Keep in cache permanently during session
-    refetchOnMount: true,
+    refetchOnMount: 'always',
     refetchOnWindowFocus: false,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
@@ -177,7 +177,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     initialDataUpdatedAt: () => {
       if (!user) return undefined;
       const cached = readJobsCache(user.id, scope || 'personal', profile?.organization_id || null);
-      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+      return cached ? 0 : undefined; // Cache ska visas direkt men alltid valideras i bakgrunden
     },
   });
 
