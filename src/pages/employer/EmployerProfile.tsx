@@ -308,16 +308,19 @@ const EmployerProfile = () => {
           const fileExt = originalProfileImageFile.name.split('.').pop() || 'jpg';
           const timestamp = Date.now();
           const originalFileName = `${user.id}/original-${timestamp}.${fileExt}`;
-          
-          const { LONG_CACHE_UPLOAD_OPTIONS } = await import('@/lib/imageUploadOptimization');
-          const { error: origError } = await supabase.storage
-            .from('job-applications')
-            .upload(originalFileName, originalProfileImageFile, LONG_CACHE_UPLOAD_OPTIONS);
-          
-          if (!origError) {
-            setOriginalProfileImageStoragePath(originalFileName);
-            // Keep originalProfileImageUrl (blob) for session-based edits
-          }
+
+          // 🚀 Resilient upload med retry + exponential backoff
+          const { uploadWithRetry } = await import('@/lib/uploadWithProgress');
+          await uploadWithRetry({
+            bucket: 'job-applications',
+            path: originalFileName,
+            file: originalProfileImageFile,
+            contentType: originalProfileImageFile.type,
+            cacheControl: '31536000',
+            upsert: true,
+          });
+          setOriginalProfileImageStoragePath(originalFileName);
+          // Keep originalProfileImageUrl (blob) for session-based edits
         } catch (origErr) {
           console.error('Failed to save original image:', origErr);
         }
