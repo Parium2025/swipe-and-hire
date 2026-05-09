@@ -611,6 +611,15 @@ const Auth = () => {
   if (device === 'mobile') {
     return (
       <div className="h-screen w-full overflow-hidden relative">
+        <div
+          aria-hidden
+          className="fixed inset-0 -z-10 pointer-events-none"
+          style={{
+            backgroundColor: 'hsl(215 100% 12%)',
+            backgroundImage:
+              'radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 22%) 50%, hsl(215 100% 12%) 100%)',
+          }}
+        />
         {/* Bottom safe-area blend to eliminate iOS seam */}
         <div
           className="fixed inset-x-0 bottom-0 pointer-events-none z-40"
