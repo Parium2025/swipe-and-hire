@@ -22,7 +22,7 @@ const HeroVideo = () => {
     video.playsInline = true;
 
     const tryPlay = () => {
-      if (!video.paused) return;
+      if (!video.paused && !video.ended) return;
       const p = video.play();
       if (p && typeof p.catch === 'function') p.catch(() => {});
     };
@@ -33,30 +33,58 @@ const HeroVideo = () => {
       video.addEventListener('canplay', tryPlay, { once: true });
     }
 
-    // Starta om videon när användaren kommer tillbaka till fliken/appen
-    // (iOS Safari pausar och "fryser" ofta videon vid app-switch)
+    // Watchdog: om videon stallar/wait:ar, försök återuppta automatiskt
+    let lastTime = 0;
+    let stuckCount = 0;
+    const watchdog = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      if (video.paused || video.ended) {
+        tryPlay();
+        return;
+      }
+      if (video.currentTime === lastTime) {
+        stuckCount++;
+        if (stuckCount >= 2) {
+          // Frusen i ~1s — knuffa igång igen utan att nollställa
+          stuckCount = 0;
+          try {
+            video.play().catch(() => {});
+          } catch {}
+        }
+      } else {
+        stuckCount = 0;
+        lastTime = video.currentTime;
+      }
+    }, 500);
+
+    const handleStalled = () => tryPlay();
+
+    // Starta om videon när användaren kommer tillbaka till fliken/appen.
+    // Viktigt: nollställ ALDRIG currentTime om videon redan spelar — det
+    // orsakar frys på iOS Safari. Bara starta uppspelning om den är pausad.
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
-        try {
-          video.currentTime = 0;
-        } catch {}
         tryPlay();
       } else {
         video.pause();
       }
     };
     const handlePageShow = () => {
-      try {
-        video.currentTime = 0;
-      } catch {}
       tryPlay();
     };
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('pageshow', handlePageShow);
     window.addEventListener('focus', handlePageShow);
+    video.addEventListener('stalled', handleStalled);
+    video.addEventListener('waiting', handleStalled);
+    video.addEventListener('suspend', handleStalled);
 
     return () => {
+      window.clearInterval(watchdog);
       video.removeEventListener('canplay', tryPlay);
+      video.removeEventListener('stalled', handleStalled);
+      video.removeEventListener('waiting', handleStalled);
+      video.removeEventListener('suspend', handleStalled);
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('pageshow', handlePageShow);
       window.removeEventListener('focus', handlePageShow);
