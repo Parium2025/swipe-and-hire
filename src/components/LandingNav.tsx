@@ -28,13 +28,23 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
       >
         <div className="max-w-[1400px] mx-auto px-5 sm:px-6 md:px-12 lg:px-24">
           <div className="flex items-center justify-between h-16 sm:h-[72px]">
-            <img
-              src={pariumLogo}
-              alt="Parium"
-              width={224}
-              height={224}
-              className="h-auto w-24 md:w-28"
-            />
+            <a
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = '/';
+              }}
+              aria-label="Tillbaka till start"
+              className="cursor-pointer transition-opacity hover:opacity-80"
+            >
+              <img
+                src={pariumLogo}
+                alt="Parium"
+                width={224}
+                height={224}
+                className="h-auto w-24 md:w-28"
+              />
+            </a>
             <div className="hidden md:block ml-auto">
               <Button
                 onClick={onLoginClick}
