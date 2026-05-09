@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
@@ -8,8 +9,20 @@ interface LandingNavProps {
 }
 
 const LandingNav = ({ onLoginClick }: LandingNavProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const goHome = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      sessionStorage.setItem('parium-skip-splash', '1');
+      navigate('/');
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -30,10 +43,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
           <div className="flex items-center justify-between h-16 sm:h-[72px]">
             <a
               href="/"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.href = '/';
-              }}
+              onClick={goHome}
               aria-label="Tillbaka till start"
               className="cursor-pointer transition-opacity hover:opacity-80"
             >
