@@ -176,6 +176,7 @@ const EmployerWelcomeTunnel = ({ onComplete, initialStep, previewMode = false }:
       });
     } finally {
       setIsUploadingLogo(false);
+      setLogoProgress(0);
     }
   };
 
