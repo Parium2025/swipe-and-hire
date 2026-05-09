@@ -204,7 +204,9 @@ const EmployerDashboard = memo(() => {
   // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
 
-  const totalPages = Math.max(1, Math.ceil(activeTabTotalCount / pageSize));
+  // Använd lokal data-längd så vi inte visar tomma sidor när server-count är högre
+  // än vad som faktiskt laddats in i klienten.
+  const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
 
   // 🔥 HÅL #2: Pre-warma BARA aktuell tab × current+next page (~40 bilder).
   // Tidigare prewarm av tusentals bilder mättade nätet och evictade cachen.
@@ -408,8 +410,8 @@ const EmployerDashboard = memo(() => {
         hasDrafts={hasDrafts}
       />
 
-      {/* Status tabs: Aktiva / Utgångna / Utkast */}
-      <div className="flex justify-center">
+      {/* Status tabs: Aktiva / Utgångna / Utkast + sidindikator */}
+      <div className="relative flex justify-center items-center">
         <JobStatusTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -418,6 +420,11 @@ const EmployerDashboard = memo(() => {
           draftCount={serverCounts?.draft ?? draftJobsCount}
           showDrafts
         />
+        {totalPages > 1 && (
+          <span className="hidden md:inline absolute right-0 text-sm text-white/70">
+            Sida {page} av {totalPages}
+          </span>
+        )}
       </div>
 
       {/* Result indicator */}
