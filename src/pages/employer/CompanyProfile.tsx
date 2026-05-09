@@ -537,6 +537,7 @@ const CompanyProfile = () => {
         companyLogoUrl={formData.company_logo_url}
         companyName={formData.company_name}
         isUploadingLogo={isUploadingLogo}
+        uploadProgress={logoProgress}
         onUploadClick={() => document.getElementById('logo-upload')?.click()}
         onEditExistingLogo={handleEditExistingLogo}
         onLogoDelete={handleLogoDelete}
