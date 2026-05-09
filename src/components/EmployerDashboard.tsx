@@ -421,7 +421,7 @@ const EmployerDashboard = memo(() => {
           showDrafts
         />
         {totalPages > 1 && (
-          <span className="hidden md:inline absolute right-0 text-sm text-white/70">
+          <span className="hidden md:inline absolute right-0 text-sm text-white">
             Sida {page} av {totalPages}
           </span>
         )}
