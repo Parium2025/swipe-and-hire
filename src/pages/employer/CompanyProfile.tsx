@@ -318,6 +318,7 @@ const CompanyProfile = () => {
       });
     } finally {
       setIsUploadingLogo(false);
+      setLogoProgress(0);
     }
   };
 
