@@ -64,23 +64,17 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <LandingNav onLoginClick={handleLogin} />
 
         <motion.main
-          initial={{ x: audience === 'job_seeker' ? '100vw' : '-100vw', opacity: 0, filter: 'blur(12px)' }}
-          animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* ──────────────── 1. HERO (vertikal) ──────────────── */}
           <section className="relative flex min-h-[100svh] items-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
             <motion.div
               aria-hidden
-              className="pointer-events-none absolute -top-32 right-[-10%] h-[520px] w-[520px] rounded-full bg-secondary/15 blur-[140px]"
-              animate={{ y: [0, -24, 0], opacity: [0.45, 0.7, 0.45] }}
-              transition={{ duration: 8, ease: 'easeInOut', repeat: Infinity }}
-            />
-            <motion.div
-              aria-hidden
-              className="pointer-events-none absolute bottom-[-15%] left-[-10%] h-[420px] w-[420px] rounded-full bg-primary-glow/20 blur-[120px]"
-              animate={{ y: [0, 18, 0], opacity: [0.4, 0.6, 0.4] }}
-              transition={{ duration: 10, ease: 'easeInOut', repeat: Infinity, delay: 1 }}
+              className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
+              animate={{ opacity: [0.5, 0.75, 0.5] }}
+              transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
             />
 
             <motion.div
