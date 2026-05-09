@@ -753,6 +753,7 @@ const Profile = () => {
 
   const uploadCoverImage = async (file: File) => {
     setIsUploadingCover(true);
+    setCoverProgressInfo(null);
     
     try {
       if (!user?.id) throw new Error('User not found');
@@ -761,7 +762,8 @@ const Profile = () => {
       const { storagePath, error: uploadError } = await uploadMedia(
         file,
         'cover-image',
-        user.id
+        user.id,
+        { onProgress: (p) => setCoverProgressInfo(p) }
       );
 
       if (uploadError) throw uploadError;
@@ -791,13 +793,24 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Cover upload error:', error);
-      toast({
-        title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp cover-bilden.",
-        variant: "destructive"
+      const enqueued = await enqueueMediaForLater({
+        blob: file,
+        fileName: `${user!.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${file.name.split('.').pop() || 'bin'}`,
+        mediaType: 'cover-image',
+        targetTable: 'profiles',
+        targetField: 'cover_image_url',
+        targetId: user!.id,
       });
+      if (!enqueued) {
+        toast({
+          title: "Fel vid uppladdning",
+          description: "Kunde inte ladda upp cover-bilden.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUploadingCover(false);
+      setCoverProgressInfo(null);
     }
   };
 
