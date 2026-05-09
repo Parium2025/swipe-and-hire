@@ -149,8 +149,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </motion.div>
           </section>
 
-          {/* ──────────────── 2. HORISONTELL SCROLL-JACKED SEKTION ──────────────── */}
-          <HorizontalScrollSection panels={panels} panelScrollVh={1} />
+          {/* ──────────────── 2. SÅ FUNKAR DET (horisontell scroll-jacked) ──────────────── */}
+          <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
+            <h2 id="sa-funkar-det-heading" className="sr-only">Så funkar det</h2>
+            <HorizontalScrollSection panels={panels} panelScrollVh={1} />
+          </section>
 
           {/* ──────────────── 3. STATEMENT (vertikal, lugn paus) ──────────────── */}
           <section className="relative overflow-hidden px-5 py-32 sm:px-6 md:px-12 lg:px-24">
@@ -175,6 +178,106 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </motion.p>
             </div>
           </section>
+
+          {/* ──────────────── FUNKTIONER ──────────────── */}
+          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+            <div className="mx-auto max-w-[1180px]">
+              <span className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80">Funktioner</span>
+              <h2 id="funktioner-heading" className="mt-4 max-w-3xl text-4xl font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
+                Allt du behöver för att {audience === 'job_seeker' ? 'hitta rätt jobb' : 'hitta rätt person'}.
+              </h2>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-white/55 sm:text-lg">
+                Platshållartext för funktionsöversikten — fyll med de viktigaste fördelarna.
+              </p>
+              <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div
+                    key={i}
+                    className="rounded-3xl border border-white/[0.06] bg-white/[0.03] p-7 backdrop-blur-xl transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
+                  >
+                    <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
+                      <span className="text-sm font-bold">0{i}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white">Funktion {i}</h3>
+                    <p className="mt-2 text-sm leading-7 text-white/55">
+                      Platshållartext som beskriver funktionen kort och tydligt.
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ──────────────── PRISER ──────────────── */}
+          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+            <div className="mx-auto max-w-[1180px] text-center">
+              <span className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80">Priser</span>
+              <h2 id="priser-heading" className="mt-4 text-4xl font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
+                {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
+              </h2>
+              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/55 sm:text-lg">
+                Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
+              </p>
+              <div className="mx-auto mt-12 grid max-w-3xl gap-5 sm:grid-cols-2">
+                {['Start', 'Premium'].map((plan) => (
+                  <div
+                    key={plan}
+                    className="rounded-3xl border border-white/[0.08] bg-white/[0.04] p-8 text-left backdrop-blur-xl"
+                  >
+                    <h3 className="text-xl font-bold text-white">{plan}</h3>
+                    <p className="mt-2 text-3xl font-black text-white">— kr<span className="text-sm font-medium text-white/50">/mån</span></p>
+                    <p className="mt-4 text-sm leading-7 text-white/55">Platshållare för planbeskrivning.</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ──────────────── FAQ ──────────────── */}
+          <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+            <div className="mx-auto max-w-[880px]">
+              <span className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80">Vanliga frågor</span>
+              <h2 id="faq-heading" className="mt-4 text-4xl font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-5xl">
+                Frågor & svar
+              </h2>
+              <div className="mt-10 space-y-3">
+                {['Hur fungerar Parium?', 'Vad kostar det?', 'Är mina uppgifter säkra?', 'Vilka företag finns här?'].map((q) => (
+                  <details
+                    key={q}
+                    className="group rounded-2xl border border-white/[0.06] bg-white/[0.03] px-6 py-5 backdrop-blur-xl transition-colors hover:border-white/[0.12]"
+                  >
+                    <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-white">
+                      {q}
+                      <span className="ml-4 text-secondary transition-transform group-open:rotate-45">+</span>
+                    </summary>
+                    <p className="mt-4 text-sm leading-7 text-white/60">
+                      Platshållarsvar — fyll på med den faktiska informationen.
+                    </p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ──────────────── KONTAKT ──────────────── */}
+          <section id="kontakt" aria-labelledby="kontakt-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+            <div className="mx-auto max-w-[920px] text-center">
+              <span className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80">Kontakt</span>
+              <h2 id="kontakt-heading" className="mt-4 text-4xl font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-5xl">
+                Vi finns här för dig.
+              </h2>
+              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/55 sm:text-lg">
+                Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.
+              </p>
+              <a
+                href="mailto:hej@parium.se"
+                className="mt-8 inline-block text-lg font-semibold text-secondary underline-offset-4 hover:underline"
+              >
+                hej@parium.se
+              </a>
+            </div>
+          </section>
+
 
           {/* ──────────────── 4. FINAL CTA ──────────────── */}
           <section className="relative overflow-hidden px-5 pb-32 pt-16 sm:px-6 md:px-12 lg:px-24">
