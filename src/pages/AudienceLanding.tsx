@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import HorizontalScrollSection from '@/components/landing/audience/HorizontalScrollSection';
+import BentoZoomGallery from '@/components/landing/audience/BentoZoomGallery';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
 import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
