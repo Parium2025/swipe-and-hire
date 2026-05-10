@@ -8,13 +8,14 @@ import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
 import real3 from '@/assets/landing/jobseeker-real-3.jpg';
 import real4 from '@/assets/landing/jobseeker-real-4.jpg';
+import real5 from '@/assets/landing/jobseeker-real-5.jpg';
 
-// 8 images for the bento grid. Real photos in slots 0, 3, 4 and 5,
+// 8 images for the bento grid. Real photos in slots 0, 1, 3, 4, 5,
 // rest are placeholders until final shoot is in.
 type MediaItem = { type: 'image' | 'video'; src: string; poster?: string };
 const images: MediaItem[] = [
   { type: 'image', src: real1 },
-  { type: 'image', src: img2 },
+  { type: 'image', src: real5 },
   { type: 'image', src: img3 },
   { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real2 },
   { type: 'image', src: real3 },
@@ -28,7 +29,7 @@ const images: MediaItem[] = [
 // so we anchor toward the top.
 const imagePositions: string[] = [
   '50% 25%', // real1 — fitness coach, head upper-center
-  '50% 50%',
+  '50% 30%', // real5 — rörmokare/byggare, head upper-center
   '50% 50%',
   '50% 30%', // real2 — broker, head upper-center
   '50% 22%', // real3 — chef, head upper-center
