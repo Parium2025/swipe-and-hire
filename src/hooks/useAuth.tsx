@@ -1802,28 +1802,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setPreloadedSavedJobs(newSavedJobs);
         try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
 
-        // Hämta antal olästa meddelanden för jobbsökare (via konversationssystemet)
-        const { data: jsMemberData } = await supabase
-          .from('conversation_members')
-          .select('conversation_id, last_read_at')
-          .eq('user_id', user.id);
-
+        // Hämta antal olästa meddelanden för jobbsökare via aggregerad RPC.
+        // 🔥 SCALED: Ett enda anrop istället för N+1 (en count-query per konversation).
+        // Vid 50+ chattar går detta från 50+ round-trips till 1.
         let jsUnread = 0;
-        if (jsMemberData && jsMemberData.length > 0) {
-          for (const member of jsMemberData) {
-            let query = supabase
-              .from('conversation_messages')
-              .select('id', { count: 'exact', head: true })
-              .eq('conversation_id', member.conversation_id)
-              .neq('sender_id', user.id);
-
-            if (member.last_read_at) {
-              query = query.gt('created_at', member.last_read_at);
-            }
-
-            const { count } = await query;
-            jsUnread += count || 0;
+        try {
+          const { data: jsSummaries } = await supabase
+            .rpc('get_conversation_summaries', { p_user_id: user.id });
+          if (Array.isArray(jsSummaries)) {
+            jsUnread = jsSummaries.reduce(
+              (sum: number, s: { unread_count?: number }) => sum + (Number(s?.unread_count) || 0),
+              0
+            );
           }
+        } catch {
+          // Tyst fel — behåller tidigare värde
         }
         setPreloadedJobSeekerUnreadMessages(jsUnread);
         try { sessionStorage.setItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY, String(jsUnread)); } catch {}
