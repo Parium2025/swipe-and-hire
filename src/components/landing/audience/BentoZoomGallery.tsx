@@ -47,6 +47,9 @@ const BentoZoomGallery = () => {
       galleryEl.classList.remove('gallery--final');
 
       flipCtx = gsap.context(() => {
+        // GPU hint för smidig scrub
+        gsap.set(items, { willChange: 'transform', force3D: true });
+
         // Capture final state by briefly applying the final layout class.
         galleryEl.classList.add('gallery--final');
         const flipState = Flip.getState(items);
@@ -54,7 +57,7 @@ const BentoZoomGallery = () => {
 
         const flip = Flip.to(flipState, {
           simple: true,
-          ease: 'expoScale(1, 5)',
+          ease: 'none',
         });
 
         const tl = gsap.timeline({
@@ -62,10 +65,13 @@ const BentoZoomGallery = () => {
             trigger: galleryEl,
             scroller,
             start: 'center center',
-            end: '+=100%',
-            scrub: true,
+            end: '+=120%',
+            scrub: 0.6,
             pin: wrapEl,
+            pinType: scroller ? 'transform' : 'fixed',
             anticipatePin: 1,
+            invalidateOnRefresh: true,
+            fastScrollEnd: true,
           },
         });
 
