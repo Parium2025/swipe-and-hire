@@ -36,7 +36,7 @@ const imagePositions: string[] = [
   '50% 30%', // real2 — broker, head upper-center
   '50% 22%', // real3 — chef, head upper-center
   '50% 28%', // real4 — electrician, head upper-center
-  '50% 50%',
+  '50% 35%', // real7 — lantbrukare i ladugård
   '50% 25%', // real6 — undersköterska, head upper-center
 ];
 
