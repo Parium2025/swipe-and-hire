@@ -130,6 +130,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   return (
     <div
+      data-landing-scroll-root
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
