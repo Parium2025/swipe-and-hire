@@ -98,21 +98,25 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       eyebrow: c.eyebrow,
       title: <>Något som <span className="text-secondary">fångar</span> direkt.</>,
       body: 'Platshållartext. Här ska första budskapet ligga — det som hookar besökaren.',
+      visual: <PanelImage src={panelImages[0]} alt="Person som arbetar fokuserat vid laptop" />,
     },
     {
       eyebrow: 'Steg 01',
       title: <>Berätta vad du <span className="text-secondary">söker</span>.</>,
       body: 'Platshållartext. Förklarar steg 1 i flödet.',
+      visual: <PanelImage src={panelImages[1]} alt="Person som ler och tittar på sin telefon" />,
     },
     {
       eyebrow: 'Steg 02',
       title: <>Vi matchar <span className="text-secondary">automatiskt</span>.</>,
       body: 'Platshållartext. Förklarar matchnings­logiken på ett enkelt sätt.',
+      visual: <PanelImage src={panelImages[2]} alt="Två kollegor i samtal på ett modernt kontor" />,
     },
     {
       eyebrow: 'Steg 03',
       title: <>Ta kontakt på <span className="text-secondary">sekunder</span>.</>,
       body: 'Platshållartext. Sista steget — handling, dialog, nästa steg.',
+      visual: <PanelImage src={panelImages[3]} alt="Hantverkare som arbetar i en ljus verkstad" />,
     },
   ];
 
