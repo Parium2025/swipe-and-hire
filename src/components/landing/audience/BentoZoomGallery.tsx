@@ -16,9 +16,9 @@ const images: MediaItem[] = [
   { type: 'image', src: real1 },
   { type: 'image', src: img2 },
   { type: 'image', src: img3 },
-  { type: 'image', src: real2 },
+  { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real2 },
   { type: 'image', src: real3 },
-  { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real4 },
+  { type: 'image', src: real4 },
   { type: 'image', src: img2 },
   { type: 'image', src: img4 },
 ];
