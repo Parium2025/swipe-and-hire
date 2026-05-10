@@ -244,7 +244,14 @@ const BentoZoomGallery = () => {
           <div className="bz-gallery">
             {images.map((src, i) => (
               <div className="gallery__item" key={i}>
-                <img src={src} alt="" loading={i < 4 ? 'eager' : 'lazy'} decoding="async" draggable={false} />
+                <img
+                  src={src}
+                  alt=""
+                  loading={i < 4 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  draggable={false}
+                  style={{ objectPosition: imagePositions[i] ?? '50% 50%' }}
+                />
               </div>
             ))}
           </div>
