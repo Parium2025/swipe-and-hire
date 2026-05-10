@@ -29,7 +29,7 @@ const images: MediaItem[] = [
 // so we anchor toward the top.
 const imagePositions: string[] = [
   '50% 25%', // real1 — fitness coach, head upper-center
-  '50% 50%',
+  '50% 30%', // real5 — rörmokare/byggare, head upper-center
   '50% 50%',
   '50% 30%', // real2 — broker, head upper-center
   '50% 22%', // real3 — chef, head upper-center
