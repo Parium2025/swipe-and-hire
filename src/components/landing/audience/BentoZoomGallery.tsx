@@ -197,7 +197,7 @@ const BentoZoomGallery = () => {
         .bz-section {
           position: relative;
           width: 100%;
-          height: 260svh;
+          height: 380svh;
         }
         .bz-stage {
           position: sticky;
