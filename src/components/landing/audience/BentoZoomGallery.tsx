@@ -17,7 +17,7 @@ type MediaItem = { type: 'image' | 'video'; src: string; poster?: string };
 const images: MediaItem[] = [
   { type: 'image', src: real1 },
   { type: 'image', src: real5 },
-  { type: 'image', src: img3 },
+  { type: 'video', src: '/landing/jobseeker-real-center.mp4', poster: img3 },
   { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real2 },
   { type: 'video', src: '/landing/jobseeker-real-3.mp4', poster: real3 },
   { type: 'image', src: real4 },
