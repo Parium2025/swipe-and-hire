@@ -226,10 +226,13 @@ export const useEmployerBackgroundSync = () => {
         conversations,
         timestamp: Date.now(),
       }));
-      
-      queryClient.setQueryData(['conversations', userId], conversations);
+
+      // ⚠️ Skriv INTE direkt till queryClient här — denna data saknar `unread_count`
+      // som useConversations räknar fram via separat query. Att klobba cachen får
+      // chatt-badgen att flimra till 0 vid tab-refocus innan riktig data hinner ifatt.
+      // useConversations refetchar själv när den behöver (refetchOnWindowFocus + realtime).
     }
-  }, [queryClient]);
+  }, []);
 
   // 🚀 HUVUDFUNKTION: Förladda ALL arbetsgivardata parallellt
   const preloadAllData = useCallback(async (force = false) => {
