@@ -62,11 +62,11 @@ const BentoZoomGallery = () => {
 
         const tl = gsap.timeline({
           scrollTrigger: {
-            trigger: galleryEl,
+            trigger: wrapEl,
             scroller,
-            start: 'center center',
-            end: '+=120%',
-            scrub: 0.6,
+            start: 'top top',
+            end: '+=150%',
+            scrub: 1,
             pin: wrapEl,
             pinType: scroller ? 'transform' : 'fixed',
             anticipatePin: 1,
@@ -76,6 +76,9 @@ const BentoZoomGallery = () => {
         });
 
         tl.add(flip);
+
+        // Säkerställ att ScrollTrigger mäter rätt efter att layouten satt sig
+        requestAnimationFrame(() => ScrollTrigger.refresh());
 
         return () => {
           gsap.set(items, { clearProps: 'all' });
