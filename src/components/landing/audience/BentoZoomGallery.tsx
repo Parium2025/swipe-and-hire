@@ -10,6 +10,7 @@ import real3 from '@/assets/landing/jobseeker-real-3.jpg';
 import real4 from '@/assets/landing/jobseeker-real-4.jpg';
 import real5 from '@/assets/landing/jobseeker-real-5.jpg';
 import real6 from '@/assets/landing/jobseeker-real-6.jpg';
+import real7 from '@/assets/landing/jobseeker-real-7.jpg';
 
 // 8 images for the bento grid. Real photos in slots 0, 1, 3, 4, 5,
 // rest are placeholders until final shoot is in.
