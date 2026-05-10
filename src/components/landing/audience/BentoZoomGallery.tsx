@@ -258,16 +258,29 @@ const BentoZoomGallery = () => {
       <div ref={sectionRef} className="bz-section">
         <div ref={stageRef} className="bz-stage">
           <div className="bz-gallery">
-            {images.map((src, i) => (
+            {images.map((media, i) => (
               <div className="gallery__item" key={i}>
-                <img
-                  src={src}
-                  alt=""
-                  loading={i < 4 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  draggable={false}
-                  style={{ objectPosition: imagePositions[i] ?? '50% 50%' }}
-                />
+                {media.type === 'video' ? (
+                  <video
+                    src={media.src}
+                    poster={media.poster}
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    preload="auto"
+                    style={{ objectPosition: imagePositions[i] ?? '50% 50%', objectFit: 'cover', width: '100%', height: '100%', display: 'block' }}
+                  />
+                ) : (
+                  <img
+                    src={media.src}
+                    alt=""
+                    loading={i < 4 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    draggable={false}
+                    style={{ objectPosition: imagePositions[i] ?? '50% 50%' }}
+                  />
+                )}
               </div>
             ))}
           </div>
