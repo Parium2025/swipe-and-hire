@@ -3,8 +3,11 @@ import { useLocation } from 'react-router-dom';
 
 const LANDING_COLOR = '#2a2a2a';
 const PARIUM_COLOR = '#001935';
+const AUDIENCE_LANDING_COLOR = '#0B3D84';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
+const isAudienceLandingPath = (pathname: string) =>
+  pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 
 /**
  * Tunn färgremsa längst ner — endast på mobil/touch.
