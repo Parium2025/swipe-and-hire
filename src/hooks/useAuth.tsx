@@ -565,6 +565,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
 
+        // 🧹 Reset transient flags on a fresh successful sign-in so future
+        // unexpected sign-outs (network blips etc.) trigger recovery as expected.
+        if (newUserId !== null && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+          isSessionKickRef.current = false;
+          isManualSignOutRef.current = false;
+          isRecoveringSessionRef.current = false;
+        }
+
         if (event !== 'INITIAL_SESSION') {
           finishInitialization();
         }
