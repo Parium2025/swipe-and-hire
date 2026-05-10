@@ -117,9 +117,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
         <motion.main
-          initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* ──────────────── 1. HERO (vertikal) ──────────────── */}
           <section className="relative flex min-h-[100svh] items-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
