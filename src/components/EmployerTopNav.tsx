@@ -76,6 +76,14 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   const { checkBeforeNavigation } = useUnsavedChanges();
   const prefetchApplications = usePrefetchApplications();
   const queryClient = useQueryClient();
+
+  // Live oläst-räknare från delad ConversationsProvider (en enda subscription globalt).
+  // Faller tillbaka på preloaded värde när context inte är mountad (t.ex. innan
+  // första conversations-fetchen). Samma mönster som JobSeekerTopNav använder.
+  const conversationsCtx = useConversationsContext();
+  const unreadMessages = conversationsCtx
+    ? conversationsCtx.totalUnreadCount
+    : preloadedUnreadMessages;
   
   // Read live job count from react-query cache (updated optimistically on delete)
   const liveJobCount = (() => {
