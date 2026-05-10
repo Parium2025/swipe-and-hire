@@ -2275,7 +2275,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.removeChannel(savedChannel);
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(employerApplicationsChannel);
-      supabase.removeChannel(messagesChannel);
+      // (messagesChannel borttagen — se kommentar ovan om skalningsoptimering)
       supabase.removeChannel(reviewsChannel);
       supabase.removeChannel(myCandidatesChannel);
     };
