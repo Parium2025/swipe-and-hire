@@ -120,10 +120,8 @@ const BentoZoomGallery = () => {
 
       const fromColumn = vw * 0.325;
       const fromRow = vh * 0.23;
-      // Slutmått matchar viewportens aspect så varje ruta i fullzoom = 1 viewport.
-      // Tidigare 100vw × 49.5vh gav ~3:1 letterbox och beskar stående motiv hårt.
       const toColumn = vw;
-      const toRow = vh;
+      const toRow = vh * 0.495;
 
       const fromX = (vw - (fromColumn * 3 + gap * 2)) / 2;
       const fromY = (vh - (fromRow * 4 + gap * 3)) / 2;
