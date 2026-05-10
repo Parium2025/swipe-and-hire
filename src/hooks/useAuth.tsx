@@ -2216,18 +2216,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
       .subscribe((status) => handleChannelStatus('employerApps', status));
 
-    // Real-time för meddelanden (uppdaterar oläst-badge för både employer och jobbsökare)
-    const messagesChannel = supabase
-      .channel(`auth-conv-messages-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'conversation_messages' },
-        () => {
-          refreshEmployerStats();
-          refreshSidebarCounts();
-        }
-      )
-      .subscribe((status) => handleChannelStatus('messages', status));
+    // 🔥 SCALED: Den globala message-realtimen är BORTTAGEN.
+    // Tidigare lyssnade varje inloggad användare på ALLA conversation_messages-INSERTs
+    // i hela databasen och triggade refreshEmployerStats + refreshSidebarCounts.
+    // Vid 1000 användare = kvadratisk last (1000 användare × varje meddelande globalt).
+    //
+    // useConversations har redan en egen filtrerad realtime per användare som uppdaterar
+    // totalUnreadCount korrekt. EmployerTopNav/JobSeekerTopNav läser primärt från
+    // useConversationsContext och faller bara tillbaka på preloadedUnreadMessages
+    // när context inte är mountad (initial state från sessionStorage).
+    //
+    // refreshEmployerStats/refreshSidebarCounts körs fortfarande vid:
+    //  • Initial laddning (efter login)
+    //  • Tab-refocus efter lång frånvaro (via useEmployerBackgroundSync)
+    //  • Realtime-events på job_postings, job_applications, company_reviews, my_candidates
+    //  Det räcker för att hålla badge-fallback-värdet i sessionStorage färskt.
 
     // Real-time för company reviews (uppdaterar recensionsräknare för arbetsgivare)
     const reviewsChannel = supabase
