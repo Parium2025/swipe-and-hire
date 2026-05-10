@@ -554,11 +554,12 @@ export const useEagerRatingsPreload = () => {
         items: conversations,
         timestamp: Date.now(),
       }));
-      
-      // Uppdatera React Query cache
-      queryClient.setQueryData(['conversations', userId], conversations);
+
+      // ⚠️ Skriv INTE till queryClient här — datan saknar `unread_count` som
+      // useConversations beräknar separat. Att klobba cachen får chatt-badgen
+      // att flimra till 0. useConversations refetchar själv vid behov.
     }
-  }, [queryClient]);
+  }, []);
 
   // 📅 Preload intervjuer (kommande bokade intervjuer)
   const preloadInterviews = useCallback(async (userId: string) => {

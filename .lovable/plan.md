@@ -1,119 +1,84 @@
+## Status efter förra ändringen
 
-## Mål
+Jag har gått igenom hela kedjan. Den förra fixen löste flimret **för arbetsgivarens chatt-badge**, men jag hittade två platser till med exakt samma bugg som påverkar **jobbsökarsidan** — så strukturen är inte helt likvärdig än. Här är vad jag vill åtgärda + hela bilden av hur det hänger ihop.
 
-Behåll startsidan (`/`) exakt som den är idag: hero med video, "Välkommen till Parium", knapparna **För jobbsökare** / **För arbetsgivare** och login-knappen i nav. Inget rörs där.
+---
 
-När användaren trycker på en av de två knapparna och tas in på `/jobbsokare` eller `/arbetsgivare` ska sidan kännas som en premium, mörk, cinematic Origin-Executive-upplevelse — sektion för sektion, med mjuka scroll-animationer, sticky text, parallax och staggered reveals. Login-knappen i nav följer alltid med.
+## 1. Det jag verifierade fungerar redan
 
-## Vad som behålls (rörs inte)
+### Chatt-badge på arbetsgivarsidan ✅
+Badgen i `EmployerTopNav` läser `preloadedUnreadMessages` från `useAuth`. Värdet sätts bara till slutligt resultat (aldrig nollställt mid-fetch). Förra fixen tog bort den falska "0"-skrivningen från `useEmployerBackgroundSync`. **Stabilt.**
 
-- `src/pages/Landing.tsx` — startsidan
-- `src/components/landing/LandingHero.tsx` — hero, video, CTA-kort, exit-animation
-- `src/components/landing/HeroVideo.tsx` — video-uppspelning
-- `LandingNav` — login-knappen alltid synlig
-- All routing och `syncBrowserChrome`-logik
+### Notisklockan 🔔 (den med "9+") ✅
+`useNotifications` är redan välbyggd:
+- Hydrerar från `localStorage` direkt på mount (inget tomt mellanläge)
+- På flikbyte: refetchar och sätter state till **slutligt värde** — aldrig till 0 först
+- Realtime ökar räknaren inkrementellt på nya notiser
+- Cache delas mellan flikar via `localStorage` (per user)
 
-## Vad som byggs
+Ingen fix behövs här.
 
-### 1. Ny premium-scroll-sida för audience-flödet
+### Flera flikar samma dator ✅
+- En sessionstoken per webbläsare (`localStorage`) → räknas som **en enhet** i 3-enheter-gränsen
+- Varje flik har egen React-state, egna React Query-cacher i minnet, egen scroll-position
+- Ingen `BroadcastChannel`/storage-lyssnare som tvingar omladdning
+- Heartbeats från valfri flik håller sessionen vid liv för alla
 
-`src/pages/AudienceLanding.tsx` skrivs om från en kort statisk vy till en full scroll-upplevelse byggd av sektioner i `src/components/landing/audience/`. Den behåller:
+Du kan ha 3 flikar med olika kandidater öppna utan att de stör varandra.
 
-- Den befintliga slide-in-entry-animationen (höger/vänster beroende på roll)
-- `LandingNav` med login
-- `AnimatedBackground`
-- `syncBrowserChrome`
+---
 
-Men byter ut den korta hero-blocken mot en lodrät resa med ~6 sektioner, anpassade per roll (jobbsökare vs arbetsgivare).
+## 2. Det jag vill fixa nu (jobbsökarsidan)
 
-### 2. Sektionsstruktur (per roll)
+`JobSeekerTopNav` använder `conversationsCtx.totalUnreadCount` (live) — alltså **direkt** beroende av React Query-cachen `['conversations', userId]`. Två preloaders klobbar fortfarande den cachen med konversationer **utan** `unread_count`-fält:
+
+| Fil | Rad | Problem |
+|---|---|---|
+| `src/hooks/useJobSeekerBackgroundSync.ts` | 191 | `queryClient.setQueryData(['conversations', userId], conversations)` — saknar `unread_count` |
+| `src/hooks/useEagerRatingsPreload.ts` | 559 | Samma sak |
+
+**Effekt:** På jobbsökarsidan flimrar chatt-badgen vid flikbyte (>30s) precis som det gjorde på arbetsgivarsidan innan fixen.
+
+**Åtgärd:** Ta bort `setQueryData`-anropen i båda filerna. Behåll `safeSetItem`-skrivningen till `localStorage`/`sessionStorage` (det är en separat fallback-cache och påverkar inte React Query). `useConversations` refetchar själv vid behov via `refetchOnWindowFocus` + realtime.
+
+---
+
+## 3. Symmetrin mellan sidorna efter fixen
+
+| Yta | Mekanism | Status efter fix |
+|---|---|---|
+| Arbetsgivare · chatt-badge | `preloadedUnreadMessages` (useAuth state) | Stabil |
+| Jobbsökare · chatt-badge | `totalUnreadCount` (useConversations live) | Stabil |
+| Båda · notisklocka | `useNotifications` localStorage + realtime | Stabil |
+| Båda · multi-flik | Egen React-state per flik, delad session | Isolerade |
+
+Strukturen blir alltså likvärdig — bara olika datakällor under huven (vilket är OK eftersom de täcker samma användarbehov).
+
+---
+
+## 4. Stabilitetsbedömning
+
+**Innan denna fix: 7/10**
+- Arbetsgivar-badgen fixad, men jobbsökar-badgen flimrar fortfarande
+- Övriga delar (notisklocka, sessionshantering, multi-flik) är solida
+
+**Efter denna fix: 9/10**
+- Alla badges håller sina värden stabilt vid flikbyten på båda sidor
+- Inga onödiga omladdningar mellan flikar
+- En kvarvarande risk på 1 poäng: den globala `messagesChannel`-realtimen i `useAuth` triggar `refreshEmployerStats` på **alla** nya meddelanden i hela databasen (utan filter), vilket vid hög trafik kan orsaka onödiga RPC-anrop. Inte ett buggproblem — en framtida skalningsoptimering. Lämnar utanför denna fix för att inte ändra något oombett.
+
+---
+
+## 5. Tekniska detaljer (för utvecklare)
 
 ```text
-┌───────────────────────────────────────────────────────────────┐
-│ Section 1 – Audience Hero                                     │
-│   eyebrow → headline rad-för-rad → subtitle → CTA + floating   │
-│   mockup/illustration (subtil floating-animation)              │
-├───────────────────────────────────────────────────────────────┤
-│ Section 2 – Statement (slideLeft headline + slideRight body)   │
-├───────────────────────────────────────────────────────────────┤
-│ Section 3 – Sticky "Så fungerar det" (sticky text vänster,     │
-│   3–4 steg-cards scrollar fram till höger, staggered)          │
-├───────────────────────────────────────────────────────────────┤
-│ Section 4 – Features grid (4 cards, fadeUp + stagger 0.1s)     │
-├───────────────────────────────────────────────────────────────┤
-│ Section 5 – Social proof / siffror (parallax glow bakom)       │
-├───────────────────────────────────────────────────────────────┤
-│ Section 6 – Final CTA (stor knapp → /auth med rätt role)       │
-└───────────────────────────────────────────────────────────────┘
+Innan: preloader → setQueryData(['conversations', uid], rawRows)
+       useConversations subscribers → totalUnread = sum(c.unread_count) = NaN || 0
+       → badge flimrar → useConversations refetchar → korrekt värde
+
+Efter: preloader → bara localStorage + sessionStorage
+       useConversations egen queryFn → setQueryData med berikade rows
+       (inkl. unread_count) → badge stabil hela tiden
 ```
 
-Innehåll per roll:
-
-- **Jobbsökare**: "Hitta jobb som faktiskt passar dig", fokus på matchning, snabb dialog, profil > CV.
-- **Arbetsgivare**: "Hitta rätt människor snabbare", fokus på kvalificerade kandidater, smidigare urval, tydliga nästa steg.
-
-### 3. Animationsbibliotek (delat)
-
-Ny fil `src/components/landing/audience/motionPresets.ts` exporterar variants som följer briefen exakt:
-
-```ts
-const ease = [0.16, 1, 0.3, 1] as const;
-export const fadeUp     = { hidden:{opacity:0,y:40},  visible:{opacity:1,y:0,  transition:{duration:0.8, ease}} };
-export const slideLeft  = { hidden:{opacity:0,x:-80}, visible:{opacity:1,x:0,  transition:{duration:0.9, ease}} };
-export const slideRight = { hidden:{opacity:0,x:80},  visible:{opacity:1,x:0,  transition:{duration:0.9, ease}} };
-export const stagger    = { hidden:{}, visible:{ transition:{ staggerChildren:0.12, delayChildren:0.05 }}};
-```
-
-Alla sektioner använder `motion.* whileInView="visible" viewport={{ once:true, amount:0.25 }}` så animationen triggas när ~25 % av elementet syns. Befintliga `ScrollReveal`/`StaggerReveal` återanvänds där det passar.
-
-### 4. Parallax & sticky
-
-- `useScroll({ target: sectionRef, offset:['start end','end start'] })` per sektion (enligt befintlig konvention och landing-isolation-policyn — aldrig mot window).
-- Subtila `useTransform` på dekorativa glow-blobs (±60–120 px y-translate, opacity 0.4→0.7).
-- Sticky-sektion: `sticky top-24` på vänster kolumn, höger kolumn scrollar normalt med staggered cards.
-
-### 5. Hero rad-för-rad
-
-Audience-hero animerar i ordning via `staggerChildren: 0.18`:
-eyebrow → headline → subtitle → CTA-rad → floating mockup (`animate={{ y:[0,-8,0] }}` loop, 6s, ease-in-out).
-
-### 6. Tillgänglighet & mobil
-
-- Alla `motion.*`-element wrappas så att `prefers-reduced-motion: reduce` ⇒ animationer ersätts av direkt `opacity:1`. Lägger en helper `useReducedMotionSafe()` eller använder framer-motions inbyggda `useReducedMotion()`.
-- Sticky-sektioner stängs av < `md` (blir vanlig vertikal stack).
-- Touch-targets ≥ 44 px, CTA-knappar oförändrade i storlek.
-- Inga horisontella overflow — varje `section` får `overflow-hidden` på x-led.
-
-### 7. Färg & känsla
-
-Behåller befintliga semantiska tokens i `index.css` (mörk `--background`, vit text, `--secondary` som accent). Ingen hårdkodad palett läggs in — om accentnyansen ska skiftas mot champagne/guld så justeras `--secondary` i `index.css` separat efter ditt godkännande (inte i denna plan).
-
-## Filer som skapas
-
-- `src/components/landing/audience/motionPresets.ts`
-- `src/components/landing/audience/AudienceHero.tsx`
-- `src/components/landing/audience/AudienceStatement.tsx`
-- `src/components/landing/audience/AudienceHowItWorks.tsx` (sticky)
-- `src/components/landing/audience/AudienceFeatures.tsx`
-- `src/components/landing/audience/AudienceProof.tsx`
-- `src/components/landing/audience/AudienceFinalCTA.tsx`
-- `src/components/landing/audience/content.ts` (texter per roll)
-
-## Filer som ändras
-
-- `src/pages/AudienceLanding.tsx` — komponerar sektionerna ovan, behåller nav, bakgrund och slide-in-entry.
-
-## Filer som inte rörs
-
-- `src/pages/Landing.tsx`
-- `src/components/landing/LandingHero.tsx`
-- `src/components/landing/HeroVideo.tsx`
-- `LandingNav`, `AnimatedBackground`, `browserChrome.ts`
-- Alla "skyddade" filer i memory (EditJobDialog, MobileJobWizard, ProfilePreview, ProfileVideo)
-
-## Out of scope (gör vi inte nu)
-
-- Inga ändringar på `/` (startsidan)
-- Inga nya färgtokens / temaskift
-- Inga bilder/videoassets genereras — placeholder-mockup blir en CSS-glass-card tills du ger en riktig asset
-- Ingen ny copywriting utöver utkast — du får finslipa texten efteråt
+Inga andra konsumenter använder `['conversations', userId]`-cachen, så borttagningen av `setQueryData` är säker.

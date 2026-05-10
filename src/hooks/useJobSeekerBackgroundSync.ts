@@ -186,11 +186,11 @@ export const useJobSeekerBackgroundSync = () => {
         items: conversations,
         timestamp: Date.now(),
       }));
-      
-      // Uppdatera React Query cache
-      queryClient.setQueryData(['conversations', userId], conversations);
-      
-      // Uppdatera även den nya konversationscachen för useConversations hooken
+
+      // ⚠️ Skriv INTE till queryClient här — denna data saknar `unread_count`
+      // som useConversations beräknar via separat query. Att klobba cachen
+      // får chatt-badgen i JobSeekerTopNav att flimra till 0 vid tab-refocus.
+      // useConversations refetchar själv (refetchOnWindowFocus + realtime).
       try {
         safeSetItem('parium_conversations_cache', JSON.stringify({
           userId,
@@ -201,7 +201,7 @@ export const useJobSeekerBackgroundSync = () => {
         // Ignorera storage-fel
       }
     }
-  }, [queryClient]);
+  }, []);
 
   // 🏢 Preload lediga jobb (alltid hämta färsk data - realtime synkar)
   const preloadAvailableJobs = useCallback(async () => {
