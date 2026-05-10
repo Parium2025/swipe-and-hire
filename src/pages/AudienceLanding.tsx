@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import HorizontalScrollSection from '@/components/landing/audience/HorizontalScrollSection';
+import BentoZoomGallery from '@/components/landing/audience/BentoZoomGallery';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
 import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
@@ -224,7 +224,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {/* ──────────────── 2. SÅ FUNKAR DET (horisontell scroll-jacked) ──────────────── */}
           <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
             <h2 id="sa-funkar-det-heading" className="sr-only">Så funkar det</h2>
-            <HorizontalScrollSection panels={panels} panelScrollVh={1} />
+            <BentoZoomGallery />
           </section>
 
           {/* ──────────────── 3. STATEMENT (vertikal, lugn paus) ──────────────── */}
