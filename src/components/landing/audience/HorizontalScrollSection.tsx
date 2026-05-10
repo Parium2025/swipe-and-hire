@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 type Panel = {
