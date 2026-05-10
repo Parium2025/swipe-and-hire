@@ -124,17 +124,22 @@ const BentoZoomGallery = () => {
       });
     };
 
+    // easeInOutCubic — gentle in the middle, no abrupt scaling jump
+    const ease = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
     const render = (progress: number) => {
+      const eased = ease(progress);
       items.forEach((item, index) => {
         const from = fromRects[index];
         const to = toRects[index];
         if (!from || !to) return;
 
-        const x = from.x + (to.x - from.x) * progress;
-        const y = from.y + (to.y - from.y) * progress;
-        const scaleX = (from.width + (to.width - from.width) * progress) / from.width;
-        const scaleY = (from.height + (to.height - from.height) * progress) / from.height;
-        const radius = 20 * (1 - progress);
+        const x = from.x + (to.x - from.x) * eased;
+        const y = from.y + (to.y - from.y) * eased;
+        const scaleX = (from.width + (to.width - from.width) * eased) / from.width;
+        const scaleY = (from.height + (to.height - from.height) * eased) / from.height;
+        const radius = 20 * (1 - eased);
 
         item.style.transform = `translate3d(${x}px, ${y}px, 0) scale3d(${scaleX}, ${scaleY}, 1)`;
         item.style.borderRadius = `${radius}px`;
@@ -192,7 +197,7 @@ const BentoZoomGallery = () => {
         .bz-section {
           position: relative;
           width: 100%;
-          height: 260svh;
+          height: 380svh;
         }
         .bz-stage {
           position: sticky;
@@ -235,7 +240,7 @@ const BentoZoomGallery = () => {
           user-select: none;
         }
         @media (max-width: 767px) {
-          .bz-section { height: 230svh; }
+          .bz-section { height: 320svh; }
         }
       `}</style>
 
