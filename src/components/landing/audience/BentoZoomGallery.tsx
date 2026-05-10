@@ -7,10 +7,11 @@ import img4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
 import real3 from '@/assets/landing/jobseeker-real-3.jpg';
+import real4 from '@/assets/landing/jobseeker-real-4.jpg';
 
-// 8 images for the bento grid. Real photos in slots 0, 3 and 4,
+// 8 images for the bento grid. Real photos in slots 0, 3, 4 and 5,
 // rest are placeholders until final shoot is in.
-const images = [real1, img2, img3, real2, real3, img3, img2, img4];
+const images = [real1, img2, img3, real2, real3, real4, img2, img4];
 
 // Per-image object-position so faces/heads aren't cropped out by `object-fit: cover`.
 // Real photos have subjects centered horizontally with head in the upper portion,
@@ -21,7 +22,7 @@ const imagePositions: string[] = [
   '50% 50%',
   '50% 30%', // real2 — broker, head upper-center
   '50% 22%', // real3 — chef, head upper-center
-  '50% 50%',
+  '50% 28%', // real4 — electrician, head upper-center
   '50% 50%',
   '50% 50%',
 ];
