@@ -11,7 +11,17 @@ import real4 from '@/assets/landing/jobseeker-real-4.jpg';
 
 // 8 images for the bento grid. Real photos in slots 0, 3, 4 and 5,
 // rest are placeholders until final shoot is in.
-const images = [real1, img2, img3, real2, real3, real4, img2, img4];
+type MediaItem = { type: 'image' | 'video'; src: string; poster?: string };
+const images: MediaItem[] = [
+  { type: 'image', src: real1 },
+  { type: 'image', src: img2 },
+  { type: 'image', src: img3 },
+  { type: 'image', src: real2 },
+  { type: 'image', src: real3 },
+  { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real4 },
+  { type: 'image', src: img2 },
+  { type: 'image', src: img4 },
+];
 
 // Per-image object-position so faces/heads aren't cropped out by `object-fit: cover`.
 // Real photos have subjects centered horizontally with head in the upper portion,
@@ -248,16 +258,29 @@ const BentoZoomGallery = () => {
       <div ref={sectionRef} className="bz-section">
         <div ref={stageRef} className="bz-stage">
           <div className="bz-gallery">
-            {images.map((src, i) => (
+            {images.map((media, i) => (
               <div className="gallery__item" key={i}>
-                <img
-                  src={src}
-                  alt=""
-                  loading={i < 4 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  draggable={false}
-                  style={{ objectPosition: imagePositions[i] ?? '50% 50%' }}
-                />
+                {media.type === 'video' ? (
+                  <video
+                    src={media.src}
+                    poster={media.poster}
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    preload="auto"
+                    style={{ objectPosition: imagePositions[i] ?? '50% 50%', objectFit: 'cover', width: '100%', height: '100%', display: 'block' }}
+                  />
+                ) : (
+                  <img
+                    src={media.src}
+                    alt=""
+                    loading={i < 4 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    draggable={false}
+                    style={{ objectPosition: imagePositions[i] ?? '50% 50%' }}
+                  />
+                )}
               </div>
             ))}
           </div>
