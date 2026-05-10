@@ -8,6 +8,7 @@ import type { JobPosting } from '@/hooks/useJobsData';
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { SystemHealthButton, SystemHealthPanelContent } from "@/components/SystemHealthPanel";
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useConversationsContext } from "@/contexts/ConversationsContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +76,14 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   const { checkBeforeNavigation } = useUnsavedChanges();
   const prefetchApplications = usePrefetchApplications();
   const queryClient = useQueryClient();
+
+  // Live oläst-räknare från delad ConversationsProvider (en enda subscription globalt).
+  // Faller tillbaka på preloaded värde när context inte är mountad (t.ex. innan
+  // första conversations-fetchen). Samma mönster som JobSeekerTopNav använder.
+  const conversationsCtx = useConversationsContext();
+  const unreadMessages = conversationsCtx
+    ? conversationsCtx.totalUnreadCount
+    : preloadedUnreadMessages;
   
   // Read live job count from react-query cache (updated optimistically on delete)
   const liveJobCount = (() => {
@@ -269,9 +278,9 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                     <item.icon className="h-4 w-4" />
                     <span className="flex-1">{item.title}</span>
                     {count && <span className="text-white text-xs">({count})</span>}
-                    {isMessages && preloadedUnreadMessages > 0 && (
+                    {isMessages && unreadMessages > 0 && (
                       <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                        {preloadedUnreadMessages}
+                        {unreadMessages}
                       </span>
                     )}
                   </DropdownMenuItem>
@@ -281,9 +290,9 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
           </DropdownMenu>
 
           <div className="flex items-center gap-2">
-            {preloadedUnreadMessages > 0 && (
+            {unreadMessages > 0 && (
               <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center shrink-0">
-                {preloadedUnreadMessages}
+                {unreadMessages}
               </span>
             )}
             {/* Chattar Button */}
