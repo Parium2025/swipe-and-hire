@@ -22,7 +22,7 @@ const images: MediaItem[] = [
   { type: 'video', src: '/landing/jobseeker-real-3.mp4', poster: real3 },
   { type: 'image', src: real4 },
   { type: 'image', src: img2 },
-  { type: 'image', src: img4 },
+  { type: 'image', src: real6 },
 ];
 
 // Per-image object-position so faces/heads aren't cropped out by `object-fit: cover`.
