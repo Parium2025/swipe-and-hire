@@ -484,6 +484,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (isInitializingRef.current || currentUserIdRef.current === null) return;
       if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       if (!getIsOnline()) return;
+      // Skip if already on /auth — nothing to recover from there
+      if (typeof window !== 'undefined' && window.location?.pathname === '/auth') return;
 
       isRecoveringSessionRef.current = true;
       setTimeout(() => {
