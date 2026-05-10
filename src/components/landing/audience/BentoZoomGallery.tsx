@@ -9,6 +9,7 @@ import real2 from '@/assets/landing/jobseeker-real-2.jpg';
 import real3 from '@/assets/landing/jobseeker-real-3.jpg';
 import real4 from '@/assets/landing/jobseeker-real-4.jpg';
 import real5 from '@/assets/landing/jobseeker-real-5.jpg';
+import real6 from '@/assets/landing/jobseeker-real-6.jpg';
 
 // 8 images for the bento grid. Real photos in slots 0, 1, 3, 4, 5,
 // rest are placeholders until final shoot is in.
@@ -21,7 +22,7 @@ const images: MediaItem[] = [
   { type: 'video', src: '/landing/jobseeker-real-3.mp4', poster: real3 },
   { type: 'image', src: real4 },
   { type: 'image', src: img2 },
-  { type: 'image', src: img4 },
+  { type: 'image', src: real6 },
 ];
 
 // Per-image object-position so faces/heads aren't cropped out by `object-fit: cover`.
@@ -35,7 +36,7 @@ const imagePositions: string[] = [
   '50% 22%', // real3 — chef, head upper-center
   '50% 28%', // real4 — electrician, head upper-center
   '50% 50%',
-  '50% 50%',
+  '50% 25%', // real6 — undersköterska, head upper-center
 ];
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
