@@ -1,8 +1,11 @@
 const LANDING_CHROME_COLOR = '#626262';
 const PARIUM_CHROME_COLOR = '#001935';
+const AUDIENCE_LANDING_CHROME_COLOR = '#0B3D84';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
+const isAudienceLandingPath = (pathname: string) =>
+  pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 
 const removeLegacySentinels = () => {
   ['parium-browser-chrome-top', 'parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
