@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 type Panel = {
@@ -67,11 +67,18 @@ const StaircasePanel = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
+  const [container, setContainer] = useState<RefObject<HTMLElement> | undefined>(undefined);
 
-  // Track the panel from the moment it enters the viewport bottom
-  // until it leaves the top. 0 = entering, 0.5 = centered, 1 = leaving.
+  // The landing page uses an inner scrollable container (fixed inset-0 overflow-y-auto),
+  // not the window. Find it once mounted and feed it to useScroll.
+  useEffect(() => {
+    const root = ref.current?.closest<HTMLElement>('[data-landing-scroll-root]');
+    if (root) setContainer({ current: root });
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: ref,
+    container,
     offset: ['start end', 'end start'],
   });
 
