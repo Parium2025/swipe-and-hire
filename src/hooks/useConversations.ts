@@ -477,13 +477,20 @@ export function useConversations() {
 
   // Synka sessionStorage så att fallback i AppSidebar/TopNav är korrekt
   // vid nästa sidladdning innan context hunnit hämta data.
+  // ⚠️ Skriv ENDAST när vi har en färdig query (inte mid-refetch) OCH datan
+  // faktiskt har unread_count-fältet beräknat. Annars riskerar vi att skriva
+  // 0 vid tab-refocus → badgen flimrar.
   useEffect(() => {
-    if (!conversationsQuery.data) return;
+    if (!conversationsQuery.data || conversationsQuery.isFetching) return;
+    const hasComputedUnread = conversationsQuery.data.some(
+      (c) => typeof c.unread_count === 'number'
+    );
+    if (!hasComputedUnread && conversationsQuery.data.length > 0) return;
     try {
       sessionStorage.setItem('parium_job_seeker_unread_messages', String(totalUnreadCount));
       sessionStorage.setItem('parium_unread_messages', String(totalUnreadCount));
     } catch {}
-  }, [totalUnreadCount, conversationsQuery.data]);
+  }, [totalUnreadCount, conversationsQuery.data, conversationsQuery.isFetching]);
 
   return {
     conversations: conversationsQuery.data || [],
