@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useRef, type ReactNode } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -11,161 +11,197 @@ type Panel = {
 
 type HorizontalScrollSectionProps = {
   panels: Panel[];
-  /** Section pin-height multiplier per panel (1 = 100vh of scroll per panel). */
+  /** Kept for backwards-compat; not used by the staircase layout. */
   panelScrollVh?: number;
 };
 
 /**
- * Premium scroll-jacking section.
- * Desktop/tablet: pins for `panels.length * panelScrollVh` of vertical scroll
- * and translates a horizontal track from 0 → -((n-1)*100%) as the user scrolls.
- * Mobile: stacks panels vertically (smoother, no horizontal jank).
+ * Premium "staircase" scroll section (inspired by originexec.com).
+ * Each panel pins for ~100svh of vertical scroll. As you scroll:
+ *   - the image glides in from the alternating side (right / left / right / left)
+ *   - the text drifts in from the opposite side with a slight delay
+ *   - both fade and parallax slightly to feel layered & cinematic
+ *
+ * Mobile: simpler stacked layout, image always on top, no horizontal motion.
  */
-const HorizontalScrollSection = ({ panels, panelScrollVh = 1 }: HorizontalScrollSectionProps) => {
+const HorizontalScrollSection = ({ panels }: HorizontalScrollSectionProps) => {
   const isMobile = useIsMobile();
-  const sectionRef = useRef<HTMLElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start start', 'end end'],
-  });
-
-  // Smooth out the scroll for that buttery premium feel
-  const smooth = useSpring(scrollYProgress, { stiffness: 90, damping: 30, mass: 0.4 });
-  const translateX = useTransform(smooth, [0, 1], ['0%', `-${(panels.length - 1) * 100}%`]);
-  const progressBar = useTransform(smooth, [0, 1], ['0%', '100%']);
 
   if (isMobile) {
     return (
       <section className="relative">
         {panels.map((p, i) => (
-          <div
-            key={i}
-            className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-5 py-20 sm:px-6"
-          >
-            <PanelInner panel={p} index={i} total={panels.length} />
-          </div>
+          <MobilePanel key={i} panel={p} index={i} total={panels.length} />
         ))}
       </section>
     );
   }
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative"
-      style={{ height: `${panels.length * panelScrollVh * 100}svh` }}
-    >
-      <div className="sticky top-0 flex h-svh w-full items-center overflow-hidden">
-        {/* Top-edge progress bar */}
-        <motion.div
-          aria-hidden
-          style={{ width: progressBar }}
-          className="absolute left-0 top-0 z-30 h-[2px] bg-gradient-to-r from-secondary/0 via-secondary to-secondary/0"
+    <section className="relative">
+      {panels.map((p, i) => (
+        <StaircasePanel
+          key={i}
+          panel={p}
+          index={i}
+          total={panels.length}
+          imageOnRight={i % 2 === 0}
         />
-
-        {/* Panel counter */}
-        <div className="absolute right-6 top-6 z-30 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/45 md:right-12 lg:right-24">
-          <PanelCounter progress={smooth} total={panels.length} />
-        </div>
-
-        <motion.div style={{ x: translateX }} className="flex h-full w-max">
-          {panels.map((p, i) => (
-            <div
-              key={i}
-              className="relative flex h-svh w-screen shrink-0 items-center px-5 sm:px-6 md:px-12 lg:px-24"
-            >
-              <PanelInner panel={p} index={i} total={panels.length} horizontal />
-            </div>
-          ))}
-        </motion.div>
-      </div>
+      ))}
     </section>
   );
 };
 
-const PanelCounter = ({
-  progress,
-  total,
-}: {
-  progress: ReturnType<typeof useSpring>;
-  total: number;
-}) => {
-  const idx = useTransform(progress, (v) => {
-    const i = Math.round(v * (total - 1)) + 1;
-    return `${String(i).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
-  });
-  return <motion.span>{idx}</motion.span>;
-};
+/* ───────────────────────── Desktop staircase panel ───────────────────────── */
 
-const PanelInner = ({
+const StaircasePanel = ({
   panel,
   index,
   total,
-  horizontal = false,
+  imageOnRight,
 }: {
   panel: Panel;
   index: number;
   total: number;
-  horizontal?: boolean;
-}) => (
-  <div
-    className={
-      horizontal
-        ? 'mx-auto grid w-full max-w-[1280px] grid-cols-1 items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]'
-        : 'mx-auto grid w-full max-w-[1280px] grid-cols-1 items-center gap-10'
-    }
-  >
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-    >
-      {panel.eyebrow && (
-        <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-secondary/75">
-          {panel.eyebrow}
-        </span>
-      )}
-      <h2 className="mt-5 max-w-2xl text-4xl font-black leading-[0.96] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl lg:text-[5rem]">
-        {panel.title}
-      </h2>
-      {panel.body && (
-        <div className="mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
-          {panel.body}
-        </div>
-      )}
-      <div className="mt-10 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">
-        <span>{String(index + 1).padStart(2, '0')}</span>
-        <span className="h-px w-10 bg-white/25" />
-        <span>{String(total).padStart(2, '0')}</span>
-      </div>
-    </motion.div>
+  imageOnRight: boolean;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
 
-    <motion.div
-      initial={{ opacity: 0, scale: 0.94, y: 30 }}
-      whileInView={{ opacity: 1, scale: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-      className="relative"
+  // Track the panel from the moment it enters the viewport bottom
+  // until it leaves the top. 0 = entering, 0.5 = centered, 1 = leaving.
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  });
+
+  // Image slides in from its side, parks in the middle, then drifts out.
+  const imgFromX = imageOnRight ? 180 : -180;
+  const imageX = useTransform(
+    scrollYProgress,
+    [0, 0.35, 0.65, 1],
+    reduce ? [0, 0, 0, 0] : [imgFromX, 0, 0, -imgFromX * 0.35],
+  );
+  const imageY = useTransform(scrollYProgress, [0, 0.5, 1], reduce ? [0, 0, 0] : [80, 0, -80]);
+  const imageOpacity = useTransform(scrollYProgress, [0, 0.25, 0.75, 1], [0, 1, 1, 0.4]);
+  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], reduce ? [1, 1, 1] : [0.92, 1, 1.04]);
+
+  // Text comes from the opposite side, with a slightly later in-point.
+  const textFromX = imageOnRight ? -120 : 120;
+  const textX = useTransform(
+    scrollYProgress,
+    [0, 0.4, 0.7, 1],
+    reduce ? [0, 0, 0, 0] : [textFromX, 0, 0, -textFromX * 0.25],
+  );
+  const textOpacity = useTransform(scrollYProgress, [0.05, 0.35, 0.8, 1], [0, 1, 1, 0.3]);
+
+  return (
+    <div
+      ref={ref}
+      className="relative flex min-h-[100svh] items-center overflow-hidden px-6 py-24 md:px-12 lg:px-24"
     >
-      {panel.visual ?? <PanelPlaceholder />}
-    </motion.div>
+      <div
+        className={
+          'mx-auto grid w-full max-w-[1280px] grid-cols-1 items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]'
+        }
+      >
+        {/* Text column */}
+        <motion.div
+          style={{ x: textX, opacity: textOpacity }}
+          className={imageOnRight ? 'lg:order-1' : 'lg:order-2'}
+        >
+          {panel.eyebrow && (
+            <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-secondary/75">
+              {panel.eyebrow}
+            </span>
+          )}
+          <h2 className="mt-5 max-w-2xl text-4xl font-black leading-[0.96] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl lg:text-[5rem]">
+            {panel.title}
+          </h2>
+          {panel.body && (
+            <div className="mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
+              {panel.body}
+            </div>
+          )}
+          <div className="mt-10 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <span className="h-px w-10 bg-white/25" />
+            <span>{String(total).padStart(2, '0')}</span>
+          </div>
+        </motion.div>
+
+        {/* Image column */}
+        <motion.div
+          style={{
+            x: imageX,
+            y: imageY,
+            opacity: imageOpacity,
+            scale: imageScale,
+          }}
+          className={`relative ${imageOnRight ? 'lg:order-2' : 'lg:order-1'}`}
+        >
+          {panel.visual ?? <PanelPlaceholder />}
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+/* ───────────────────────── Mobile stacked panel ───────────────────────── */
+
+const MobilePanel = ({
+  panel,
+  index,
+  total,
+}: {
+  panel: Panel;
+  index: number;
+  total: number;
+}) => (
+  <div className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-5 py-20 sm:px-6">
+    <div className="mx-auto grid w-full max-w-[1280px] grid-cols-1 items-center gap-10">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 30 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        className="relative"
+      >
+        {panel.visual ?? <PanelPlaceholder />}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.4 }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+      >
+        {panel.eyebrow && (
+          <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-secondary/75">
+            {panel.eyebrow}
+          </span>
+        )}
+        <h2 className="mt-5 max-w-2xl text-4xl font-black leading-[0.96] tracking-[-0.025em] text-white sm:text-5xl">
+          {panel.title}
+        </h2>
+        {panel.body && (
+          <div className="mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
+            {panel.body}
+          </div>
+        )}
+        <div className="mt-10 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          <span className="h-px w-10 bg-white/25" />
+          <span>{String(total).padStart(2, '0')}</span>
+        </div>
+      </motion.div>
+    </div>
   </div>
 );
 
 const PanelPlaceholder = () => (
   <div className="relative mx-auto aspect-[9/16] w-full max-w-[360px] overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.015] shadow-[0_40px_120px_hsl(var(--background)/0.6)] backdrop-blur-2xl">
     <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--secondary)/0.18),transparent_60%)]" />
-    <div className="relative flex h-full flex-col gap-4 p-6">
-      <div className="h-3 w-20 rounded-full bg-white/15" />
-      <div className="h-6 w-40 rounded-full bg-white/25" />
-      <div className="mt-4 flex-1 rounded-2xl border border-white/10 bg-white/[0.04]" />
-      <div className="flex gap-2">
-        <div className="h-11 flex-1 rounded-full bg-white/10" />
-        <div className="h-11 flex-1 rounded-full bg-secondary/80" />
-      </div>
-    </div>
   </div>
 );
 
