@@ -109,11 +109,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-[backdrop-filter,background-color,border-color] duration-500 ${
-          scrolled
-            ? 'bg-parium-navy/70 backdrop-blur-2xl border-b border-white/[0.04]'
-            : 'bg-transparent border-b border-transparent'
-        }`}
+        className="fixed top-0 left-0 right-0 z-50 bg-transparent"
         aria-label="Huvudnavigation"
       >
         <div className="max-w-[1400px] mx-auto px-5 sm:px-6 md:px-12 lg:px-24">
