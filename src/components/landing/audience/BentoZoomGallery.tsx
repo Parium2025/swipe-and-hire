@@ -272,7 +272,7 @@ const BentoZoomGallery = () => {
                     loop
                     playsInline
                     preload="auto"
-                    style={{ objectPosition: imagePositions[i] ?? '50% 50%', objectFit: 'cover', width: '100%', height: '100%', display: 'block' }}
+                    style={{ objectPosition: imagePositions[i] ?? '50% 50%', objectFit: 'contain', width: '100%', height: '100%', display: 'block', background: '#000' }}
                   />
                 ) : (
                   <img
