@@ -383,6 +383,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        // 🛡️ Already on /auth — user is logged out and where they need to be.
+        // Don't show "Du har loggats ut" toast or trigger another redirect/splash.
+        // This prevents duplicate toasts when refocusing a tab that was kicked
+        // or manually logged out earlier.
+        if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
+          console.log('🛡️ Already on /auth — skipping recovery toast/redirect');
+          finishInitialization();
+          return;
+        }
+
         const confirmedOnline = getIsOnline() || await forceConnectivityCheck().catch(() => false);
         if (!confirmedOnline) {
           console.log('📡 Connectivity still offline/unstable — aborting forced logout for now');
