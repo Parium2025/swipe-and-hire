@@ -30,7 +30,11 @@ const BottomChromeStrip = () => {
     return () => mq.removeEventListener?.('change', apply);
   }, []);
 
-  const color = isLandingVideoPath(location.pathname) ? LANDING_COLOR : PARIUM_COLOR;
+  const color = isLandingVideoPath(location.pathname)
+    ? LANDING_COLOR
+    : isAudienceLandingPath(location.pathname)
+      ? AUDIENCE_LANDING_COLOR
+      : PARIUM_COLOR;
 
   useEffect(() => {
     console.log('[BottomChromeStrip]', { path: location.pathname, color });
