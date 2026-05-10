@@ -198,10 +198,30 @@ const BentoZoomGallery = () => {
     scroller.addEventListener('scroll', requestRender, { passive: true });
     window.addEventListener('resize', onResize);
 
+    // Staggered batch reveal (ScrollTrigger.batch-style) — items fade in
+    // together with a small stagger when they enter the viewport.
+    const revealed = new WeakSet<Element>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const batch = entries
+          .filter((e) => e.isIntersecting && !revealed.has(e.target))
+          .map((e) => e.target as HTMLElement);
+        batch.forEach((el, i) => {
+          revealed.add(el);
+          el.style.transitionDelay = `${i * 0.2}s`;
+          el.style.opacity = '1';
+          el.style.visibility = 'visible';
+        });
+      },
+      { root: scroller instanceof Window ? null : scroller, threshold: 0.05 },
+    );
+    items.forEach((item) => observer.observe(item));
+
     return () => {
       if (frame) cancelAnimationFrame(frame);
       scroller.removeEventListener('scroll', requestRender);
       window.removeEventListener('resize', onResize);
+      observer.disconnect();
     };
   }, []);
 
@@ -243,7 +263,10 @@ const BentoZoomGallery = () => {
           contain: paint;
           transform-origin: 0 0;
           transform: translate3d(0, 0, 0);
-          will-change: transform, border-radius;
+          will-change: transform, border-radius, opacity;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 1s cubic-bezier(0.39, 0.575, 0.565, 1), visibility 0s;
         }
         .bz-gallery .gallery__item img {
           object-fit: cover;
