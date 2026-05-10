@@ -8,6 +8,7 @@ import type { JobPosting } from '@/hooks/useJobsData';
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { SystemHealthButton, SystemHealthPanelContent } from "@/components/SystemHealthPanel";
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useConversationsContext } from "@/contexts/ConversationsContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
