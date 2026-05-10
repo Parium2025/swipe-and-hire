@@ -240,7 +240,7 @@ const BentoZoomGallery = () => {
           user-select: none;
         }
         @media (max-width: 767px) {
-          .bz-section { height: 230svh; }
+          .bz-section { height: 320svh; }
         }
       `}</style>
 
