@@ -6,10 +6,11 @@ import img3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
 import img4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
+import real3 from '@/assets/landing/jobseeker-real-3.jpg';
 
-// 8 images for the bento grid. Two real photos in slots 0 and 3,
+// 8 images for the bento grid. Real photos in slots 0, 3 and 4,
 // rest are placeholders until final shoot is in.
-const images = [real1, img2, img3, real2, img1, img3, img2, img4];
+const images = [real1, img2, img3, real2, real3, img3, img2, img4];
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 
