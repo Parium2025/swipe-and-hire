@@ -1937,32 +1937,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try { sessionStorage.setItem(EMPLOYER_CANDIDATES_CACHE_KEY, '0'); } catch {}
       }
       
-      // Hämta antal olästa meddelanden från nya konversationssystemet
-      // Räknar meddelanden i konversationer där användaren är medlem men inte har läst
-      const { data: memberData } = await supabase
-        .from('conversation_members')
-        .select('conversation_id, last_read_at')
-        .eq('user_id', user.id);
-      
+      // Hämta antal olästa meddelanden via aggregerad RPC.
+      // 🔥 SCALED: Ett enda anrop istället för N+1 (en count-query per konversation).
+      // Vid 50+ chattar går detta från 50+ round-trips till 1.
       let unread = 0;
-      if (memberData && memberData.length > 0) {
-        // För varje konversation, räkna meddelanden nyare än last_read_at
-        for (const member of memberData) {
-          let query = supabase
-            .from('conversation_messages')
-            .select('id', { count: 'exact', head: true })
-            .eq('conversation_id', member.conversation_id)
-            .neq('sender_id', user.id); // Exkludera egna meddelanden
-          
-          if (member.last_read_at) {
-            query = query.gt('created_at', member.last_read_at);
-          }
-          
-          const { count } = await query;
-          unread += count || 0;
+      try {
+        const { data: unreadSummaries } = await supabase
+          .rpc('get_conversation_summaries', { p_user_id: user.id });
+        if (Array.isArray(unreadSummaries)) {
+          unread = unreadSummaries.reduce(
+            (sum: number, s: { unread_count?: number }) => sum + (Number(s?.unread_count) || 0),
+            0
+          );
         }
+      } catch {
+        // Tyst fel — behåller tidigare värde i state
       }
-      
+
       setPreloadedUnreadMessages(unread);
       try { sessionStorage.setItem(UNREAD_MESSAGES_CACHE_KEY, String(unread)); } catch {}
 
