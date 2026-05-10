@@ -40,7 +40,12 @@ const setThemeColor = (color: string) => {
  */
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
-  const color = isLandingVideo ? LANDING_CHROME_COLOR : PARIUM_CHROME_COLOR;
+  const isAudienceLanding = isAudienceLandingPath(pathname);
+  const color = isLandingVideo
+    ? LANDING_CHROME_COLOR
+    : isAudienceLanding
+      ? AUDIENCE_LANDING_CHROME_COLOR
+      : PARIUM_CHROME_COLOR;
 
   removeLegacySentinels();
 
