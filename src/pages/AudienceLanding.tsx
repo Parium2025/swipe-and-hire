@@ -224,7 +224,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {/* ──────────────── 2. SÅ FUNKAR DET (horisontell scroll-jacked) ──────────────── */}
           <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
             <h2 id="sa-funkar-det-heading" className="sr-only">Så funkar det</h2>
-            <HorizontalScrollSection panels={panels} panelScrollVh={1} />
+            <BentoZoomGallery />
           </section>
 
           {/* ──────────────── 3. STATEMENT (vertikal, lugn paus) ──────────────── */}
