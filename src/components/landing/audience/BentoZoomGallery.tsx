@@ -12,6 +12,20 @@ import real3 from '@/assets/landing/jobseeker-real-3.jpg';
 // rest are placeholders until final shoot is in.
 const images = [real1, img2, img3, real2, real3, img3, img2, img4];
 
+// Per-image object-position so faces/heads aren't cropped out by `object-fit: cover`.
+// Real photos have subjects centered horizontally with head in the upper portion,
+// so we anchor toward the top.
+const imagePositions: string[] = [
+  '50% 25%', // real1 — fitness coach, head upper-center
+  '50% 50%',
+  '50% 50%',
+  '50% 30%', // real2 — broker, head upper-center
+  '50% 22%', // real3 — chef, head upper-center
+  '50% 50%',
+  '50% 50%',
+  '50% 50%',
+];
+
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 
 type BentoArea = {
