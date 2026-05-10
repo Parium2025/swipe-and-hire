@@ -141,7 +141,29 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     >
       <AnimatedBackground />
       <div className="relative z-10 min-h-full">
-        <LandingNav onLoginClick={handleLogin} links={navLinks} />
+        <nav
+          className="fixed top-0 left-0 right-0 z-50 pointer-events-none"
+          aria-label="Sektioner"
+        >
+          <div className="hidden md:flex justify-center pt-6">
+            <div className="pointer-events-auto flex items-center gap-7">
+              {navLinks.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const el = document.getElementById(l.href.slice(1));
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className="text-[13px] font-medium text-white/70 hover:text-white transition-colors"
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </nav>
 
 
         <motion.main
