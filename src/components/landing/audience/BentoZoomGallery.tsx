@@ -263,7 +263,10 @@ const BentoZoomGallery = () => {
           contain: paint;
           transform-origin: 0 0;
           transform: translate3d(0, 0, 0);
-          will-change: transform, border-radius;
+          will-change: transform, border-radius, opacity;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 1s cubic-bezier(0.39, 0.575, 0.565, 1), visibility 0s;
         }
         .bz-gallery .gallery__item img {
           object-fit: cover;
