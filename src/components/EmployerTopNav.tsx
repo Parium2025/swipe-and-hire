@@ -278,9 +278,9 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                     <item.icon className="h-4 w-4" />
                     <span className="flex-1">{item.title}</span>
                     {count && <span className="text-white text-xs">({count})</span>}
-                    {isMessages && preloadedUnreadMessages > 0 && (
+                    {isMessages && unreadMessages > 0 && (
                       <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                        {preloadedUnreadMessages}
+                        {unreadMessages}
                       </span>
                     )}
                   </DropdownMenuItem>
@@ -290,9 +290,9 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
           </DropdownMenu>
 
           <div className="flex items-center gap-2">
-            {preloadedUnreadMessages > 0 && (
+            {unreadMessages > 0 && (
               <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center shrink-0">
-                {preloadedUnreadMessages}
+                {unreadMessages}
               </span>
             )}
             {/* Chattar Button */}
