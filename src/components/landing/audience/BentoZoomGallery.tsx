@@ -11,11 +11,12 @@ import real7 from '@/assets/landing/jobseeker-real-7.jpg';
 /**
  * Premium horizontal snap-carousel.
  *
- * - Auto-advances every ~5s (pauses on hover / touch / when off-screen)
- * - Native CSS scroll-snap = buttery on iOS / Android
- * - Swipe + arrow controls + dot indicators
- * - Active card scales up; neighbours sit slightly back (Apple TV feel)
- * - Inline videos autoplay only on the active slide
+ * Motion model (Apple-feel):
+ *  - Each slide's transform is a continuous function of its distance from the
+ *    viewport center (scale, opacity, slight translateX parallax). This makes
+ *    swipes/scroll feel physical instead of "snap then jump".
+ *  - All videos autoplay muted+loop so motion lives across every card.
+ *  - A subtle Ken Burns drift gives still images life.
  */
 
 type MediaItem = {
@@ -38,7 +39,7 @@ const items: MediaItem[] = [
   { type: 'image', src: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor & vårdpersonal' },
 ];
 
-const AUTOPLAY_MS = 5000;
+const AUTOPLAY_MS = 5500;
 
 const BentoZoomGallery = () => {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -56,34 +57,51 @@ const BentoZoomGallery = () => {
     track.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' });
   }, []);
 
-  // Track which slide is closest to center
+  // Continuous, per-slide transforms tied to scroll position (Apple feel).
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
     let raf = 0;
+
+    const update = () => {
+      raf = 0;
+      const center = track.scrollLeft + track.clientWidth / 2;
+      let best = 0;
+      let bestDist = Infinity;
+      const slides = Array.from(track.children) as HTMLElement[];
+      slides.forEach((el, i) => {
+        const mid = el.offsetLeft + el.clientWidth / 2;
+        const d = mid - center;
+        const w = el.clientWidth || 1;
+        // Normalised distance from center, clamped to [-1.4, 1.4]
+        const t = Math.max(-1.4, Math.min(1.4, d / w));
+        const abs = Math.abs(t);
+        // Smooth easing curve
+        const ease = 1 - Math.pow(1 - Math.min(abs, 1), 2);
+        const scale = 1 - ease * 0.12;          // 1 → 0.88
+        const opacity = 1 - ease * 0.55;        // 1 → 0.45
+        const translate = -t * 18;              // subtle parallax (px)
+        el.style.transform = `translate3d(${translate}px,0,0) scale(${scale})`;
+        el.style.opacity = String(opacity);
+        if (abs < bestDist) {
+          bestDist = abs;
+          best = i;
+        }
+      });
+      setActive((prev) => (prev === best ? prev : best));
+    };
+
     const onScroll = () => {
       if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        const center = track.scrollLeft + track.clientWidth / 2;
-        let best = 0;
-        let bestDist = Infinity;
-        Array.from(track.children).forEach((c, i) => {
-          const el = c as HTMLElement;
-          const mid = el.offsetLeft + el.clientWidth / 2;
-          const d = Math.abs(mid - center);
-          if (d < bestDist) {
-            bestDist = d;
-            best = i;
-          }
-        });
-        setActive(best);
-      });
+      raf = requestAnimationFrame(update);
     };
+
     track.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+    window.addEventListener('resize', onScroll);
+    update();
     return () => {
       track.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
   }, []);
@@ -118,18 +136,31 @@ const BentoZoomGallery = () => {
     return () => window.clearTimeout(t);
   }, [scrollToIndex]);
 
-  // Play/pause videos based on active state
+  // Make sure every video keeps playing (muted+loop) — gives motion across all cards.
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
-    Array.from(track.querySelectorAll('video')).forEach((v, i) => {
-      if (i === active) {
-        v.play().catch(() => {});
-      } else {
-        v.pause();
-      }
-    });
-  }, [active]);
+    const videos = Array.from(track.querySelectorAll('video'));
+    const tryPlayAll = () => {
+      videos.forEach((v) => {
+        v.muted = true;
+        v.playsInline = true;
+        const p = v.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      });
+    };
+    tryPlayAll();
+    const onVis = () => { if (document.visibilityState === 'visible') tryPlayAll(); };
+    document.addEventListener('visibilitychange', onVis);
+    const onFirstTouch = () => tryPlayAll();
+    window.addEventListener('touchstart', onFirstTouch, { passive: true, once: true });
+    window.addEventListener('pointerdown', onFirstTouch, { once: true });
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('touchstart', onFirstTouch);
+      window.removeEventListener('pointerdown', onFirstTouch);
+    };
+  }, []);
 
   const pause = () => { pausedRef.current = true; };
   const resume = () => { pausedRef.current = false; };
@@ -165,15 +196,12 @@ const BentoZoomGallery = () => {
           box-shadow:
             0 20px 50px -20px rgba(0, 0, 0, 0.55),
             0 0 0 1px rgba(255, 255, 255, 0.06);
-          transform: scale(0.92);
-          opacity: 0.55;
-          transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-                      opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+          transform: translate3d(0,0,0) scale(0.88);
+          opacity: 0.45;
           will-change: transform, opacity;
+          transition: box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .pcar-slide.is-active {
-          transform: scale(1);
-          opacity: 1;
           box-shadow:
             0 35px 80px -25px rgba(0, 0, 0, 0.75),
             0 0 0 1px rgba(255, 255, 255, 0.1);
@@ -189,6 +217,19 @@ const BentoZoomGallery = () => {
           display: block;
           pointer-events: none;
           user-select: none;
+        }
+
+        /* Subtle Ken Burns drift on images — gives life without distraction */
+        @keyframes pcar-kenburns {
+          0%   { transform: scale(1.04) translate3d(0, 0, 0); }
+          50%  { transform: scale(1.10) translate3d(-1.2%, -0.8%, 0); }
+          100% { transform: scale(1.04) translate3d(0, 0, 0); }
+        }
+        .pcar-slide img {
+          animation: pcar-kenburns 18s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .pcar-slide img { animation: none; }
         }
 
         .pcar-slide::after {
@@ -211,7 +252,8 @@ const BentoZoomGallery = () => {
           z-index: 2;
           opacity: 0;
           transform: translateY(12px);
-          transition: opacity 0.5s ease 0.1s, transform 0.5s ease 0.1s;
+          transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s,
+                      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s;
         }
         .pcar-slide.is-active .pcar-caption {
           opacity: 1;
@@ -298,7 +340,6 @@ const BentoZoomGallery = () => {
             <div
               key={i}
               className={`pcar-slide${i === active ? ' is-active' : ''}`}
-              aria-hidden={i !== active}
             >
               {item.type === 'video' ? (
                 <video
@@ -306,8 +347,9 @@ const BentoZoomGallery = () => {
                   poster={item.poster}
                   muted
                   loop
+                  autoPlay
                   playsInline
-                  preload={i < 2 ? 'auto' : 'metadata'}
+                  preload="auto"
                   style={{ objectPosition: item.position ?? '50% 50%' }}
                 />
               ) : (
