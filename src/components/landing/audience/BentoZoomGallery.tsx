@@ -271,7 +271,8 @@ const BentoZoomGallery = () => {
           visibility: hidden;
           transition: opacity 1s cubic-bezier(0.39, 0.575, 0.565, 1), visibility 0s;
         }
-        .bz-gallery .gallery__item img {
+        .bz-gallery .gallery__item img,
+        .bz-gallery .gallery__item video {
           object-fit: cover;
           width: 100%;
           height: 100%;
@@ -281,6 +282,16 @@ const BentoZoomGallery = () => {
         }
         @media (max-width: 767px) {
           .bz-section { height: 320svh; }
+          /* Show entire image/video on mobile so subjects aren't cropped.
+             Background fills the letterboxed area to keep the look cohesive. */
+          .bz-gallery .gallery__item {
+            background-color: hsl(var(--background));
+          }
+          .bz-gallery .gallery__item img,
+          .bz-gallery .gallery__item video {
+            object-fit: contain !important;
+            object-position: center center !important;
+          }
         }
       `}</style>
 
