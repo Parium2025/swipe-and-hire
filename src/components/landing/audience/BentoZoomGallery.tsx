@@ -116,15 +116,12 @@ const BentoZoomGallery = () => {
     const calculateLayout = () => {
       const vw = stageEl.clientWidth;
       const vh = stageEl.clientHeight;
-      const isMobile = vw < 768;
-      const gap = isMobile ? vh * 0.008 : vh * 0.01;
+      const gap = vh * 0.01;
 
-      // On mobile we start with a larger initial grid (so users can actually see
-      // the photos) and zoom in less aggressively (so faces aren't clipped).
-      const fromColumn = isMobile ? vw * 0.31 : vw * 0.325;
-      const fromRow = isMobile ? vh * 0.19 : vh * 0.23;
-      const toColumn = isMobile ? vw * 0.7 : vw;
-      const toRow = isMobile ? vh * 0.32 : vh * 0.495;
+      const fromColumn = vw * 0.325;
+      const fromRow = vh * 0.23;
+      const toColumn = vw;
+      const toRow = vh * 0.495;
 
       const fromX = (vw - (fromColumn * 3 + gap * 2)) / 2;
       const fromY = (vh - (fromRow * 4 + gap * 3)) / 2;
