@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
@@ -9,19 +9,19 @@ import real6 from '@/assets/landing/jobseeker-real-6.jpg';
 import real7 from '@/assets/landing/jobseeker-real-7.jpg';
 
 /**
- * Apple-style cinematic media sequence.
+ * Premium horizontal snap-carousel.
  *
- * The section pins for several viewport heights. As the user scrolls, each
- * media item enters fullscreen with a slow Ken Burns zoom, crossfades into
- * the next, and is paired with a clean caption. No bento, no cropping —
- * one hero at a time, premium and editorial.
+ * - Auto-advances every ~5s (pauses on hover / touch / when off-screen)
+ * - Native CSS scroll-snap = buttery on iOS / Android
+ * - Swipe + arrow controls + dot indicators
+ * - Active card scales up; neighbours sit slightly back (Apple TV feel)
+ * - Inline videos autoplay only on the active slide
  */
 
 type MediaItem = {
   type: 'image' | 'video';
   src: string;
   poster?: string;
-  /** object-position for portrait subjects so heads aren't cut off */
   position?: string;
   eyebrow: string;
   title: string;
@@ -38,165 +38,149 @@ const items: MediaItem[] = [
   { type: 'image', src: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor & vårdpersonal' },
 ];
 
-const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
-// Smooth s-curve so zoom feels like Apple keynote, not linear
-const easeInOut = (t: number) =>
-  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const AUTOPLAY_MS = 5000;
 
 const BentoZoomGallery = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const [active, setActive] = useState(0);
+  const pausedRef = useRef(false);
+  const inViewRef = useRef(true);
 
+  const scrollToIndex = useCallback((i: number, smooth = true) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const slide = track.children[i] as HTMLElement | undefined;
+    if (!slide) return;
+    const left = slide.offsetLeft - (track.clientWidth - slide.clientWidth) / 2;
+    track.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' });
+  }, []);
+
+  // Track which slide is closest to center
   useEffect(() => {
-    const sectionEl = sectionRef.current;
-    if (!sectionEl) return;
-
-    const scroller =
-      (sectionEl.closest('[data-landing-scroll-root]') as HTMLElement | null) ?? window;
-
-    const slides = Array.from(sectionEl.querySelectorAll<HTMLElement>('[data-slide]'));
-    const captions = Array.from(sectionEl.querySelectorAll<HTMLElement>('[data-caption]'));
-    const progressBar = sectionEl.querySelector<HTMLElement>('[data-progress]');
-    const counter = sectionEl.querySelector<HTMLElement>('[data-counter]');
-    const total = items.length;
-    let frame = 0;
-
-    const tick = () => {
-      frame = 0;
-      const sectionRect = sectionEl.getBoundingClientRect();
-      const viewportTop =
-        scroller instanceof Window ? 0 : scroller.getBoundingClientRect().top;
-      const viewportHeight =
-        scroller instanceof Window ? window.innerHeight : scroller.clientHeight;
-      const distance = sectionEl.offsetHeight - viewportHeight;
-      const overall = distance <= 0 ? 0 : clamp01((viewportTop - sectionRect.top) / distance);
-
-      // Map overall progress to a per-slide progress.
-      // Each slide gets 1/total of the scroll, with a small overlap window
-      // around boundaries for the crossfade.
-      const slot = 1 / total;
-      const overlap = slot * 0.35; // crossfade window between slides
-
-      let newActive = 0;
-      let maxOpacity = 0;
-
-      slides.forEach((slide, i) => {
-        const start = i * slot;
-        const end = start + slot;
-        // Local 0..1 progress within this slide's slot (extended by overlap on both sides)
-        const p = clamp01((overall - (start - overlap)) / (slot + overlap * 2));
-
-        // Ken Burns: 1.0 -> 1.12 across the slide
-        const eased = easeInOut(p);
-        const scale = 1.0 + 0.12 * eased;
-
-        // Opacity: ramp in over first overlap window, hold full, ramp out over last overlap window
-        let opacity: number;
-        if (overall < start) {
-          opacity = clamp01((overall - (start - overlap)) / overlap);
-        } else if (overall > end) {
-          opacity = clamp01(1 - (overall - end) / overlap);
-        } else {
-          opacity = 1;
-        }
-
-        slide.style.opacity = String(opacity);
-        slide.style.transform = `scale(${scale.toFixed(4)})`;
-        slide.style.zIndex = opacity > 0.01 ? String(10 + i) : '0';
-
-        // Pause off-screen videos to save battery / decode budget
-        const video = slide.querySelector('video');
-        if (video) {
-          if (opacity > 0.4) {
-            if (video.paused) video.play().catch(() => {});
-          } else {
-            if (!video.paused) video.pause();
+    const track = trackRef.current;
+    if (!track) return;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const center = track.scrollLeft + track.clientWidth / 2;
+        let best = 0;
+        let bestDist = Infinity;
+        Array.from(track.children).forEach((c, i) => {
+          const el = c as HTMLElement;
+          const mid = el.offsetLeft + el.clientWidth / 2;
+          const d = Math.abs(mid - center);
+          if (d < bestDist) {
+            bestDist = d;
+            best = i;
           }
-        }
-
-        if (opacity > maxOpacity) {
-          maxOpacity = opacity;
-          newActive = i;
-        }
-
-        // Caption mirrors the slide's opacity but with a small upward drift
-        const caption = captions[i];
-        if (caption) {
-          const cOpacity = Math.max(0, opacity * 1.15 - 0.15);
-          const drift = (1 - opacity) * 16;
-          caption.style.opacity = String(cOpacity);
-          caption.style.transform = `translateY(${drift}px)`;
-        }
+        });
+        setActive(best);
       });
-
-      if (progressBar) {
-        progressBar.style.transform = `scaleX(${overall.toFixed(4)})`;
-      }
-      if (counter) {
-        counter.textContent = `${String(newActive + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
-      }
-      setActiveIndex(newActive);
     };
-
-    const requestTick = () => {
-      if (!frame) frame = requestAnimationFrame(tick);
-    };
-
-    tick();
-    scroller.addEventListener('scroll', requestTick, { passive: true });
-    window.addEventListener('resize', requestTick);
-
+    track.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
     return () => {
-      if (frame) cancelAnimationFrame(frame);
-      scroller.removeEventListener('scroll', requestTick);
-      window.removeEventListener('resize', requestTick);
+      track.removeEventListener('scroll', onScroll);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
+
+  // Pause autoplay when section is off-screen
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        inViewRef.current = entries[0]?.isIntersecting ?? false;
+      },
+      { threshold: 0.25 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // Autoplay
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      if (pausedRef.current || !inViewRef.current) return;
+      const next = (active + 1) % items.length;
+      scrollToIndex(next);
+    }, AUTOPLAY_MS);
+    return () => window.clearInterval(id);
+  }, [active, scrollToIndex]);
+
+  // Center first slide on mount
+  useEffect(() => {
+    const t = window.setTimeout(() => scrollToIndex(0, false), 0);
+    return () => window.clearTimeout(t);
+  }, [scrollToIndex]);
+
+  // Play/pause videos based on active state
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    Array.from(track.querySelectorAll('video')).forEach((v, i) => {
+      if (i === active) {
+        v.play().catch(() => {});
+      } else {
+        v.pause();
+      }
+    });
+  }, [active]);
+
+  const pause = () => { pausedRef.current = true; };
+  const resume = () => { pausedRef.current = false; };
 
   return (
     <>
       <style>{`
-        .cinema-section {
+        .pcar-section {
           position: relative;
           width: 100%;
-          /* one viewport per slide for slow, deliberate Apple-like pacing */
-          height: calc(${items.length} * 100svh);
+          padding: clamp(40px, 8vw, 96px) 0;
         }
-        .cinema-stage {
-          position: sticky;
-          top: 0;
-          width: 100%;
-          height: 100svh;
-          overflow: hidden;
-          background: transparent;
-        }
-        .cinema-frame {
-          position: absolute;
-          inset: 0;
+        .pcar-track {
           display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: clamp(16px, 4vw, 64px);
-          padding-bottom: clamp(96px, 18vh, 200px);
+          gap: clamp(12px, 2vw, 24px);
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          padding: clamp(20px, 4vw, 40px) max(16px, calc((100% - min(720px, 88vw)) / 2));
+          scrollbar-width: none;
         }
-        .cinema-card {
+        .pcar-track::-webkit-scrollbar { display: none; }
+
+        .pcar-slide {
+          flex: 0 0 min(720px, 88vw);
+          aspect-ratio: 4 / 5;
+          scroll-snap-align: center;
           position: relative;
-          width: 100%;
-          height: 100%;
-          max-width: 1280px;
-          border-radius: clamp(20px, 3vw, 36px);
+          border-radius: clamp(20px, 2.4vw, 32px);
           overflow: hidden;
-          opacity: 0;
-          transform: scale(1);
-          transform-origin: center center;
-          will-change: transform, opacity;
-          box-shadow:
-            0 30px 80px -20px rgba(0, 0, 0, 0.55),
-            0 0 0 1px rgba(255, 255, 255, 0.06);
           background: rgba(0, 0, 0, 0.4);
+          box-shadow:
+            0 20px 50px -20px rgba(0, 0, 0, 0.55),
+            0 0 0 1px rgba(255, 255, 255, 0.06);
+          transform: scale(0.92);
+          opacity: 0.55;
+          transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                      opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+          will-change: transform, opacity;
         }
-        .cinema-card img,
-        .cinema-card video {
+        .pcar-slide.is-active {
+          transform: scale(1);
+          opacity: 1;
+          box-shadow:
+            0 35px 80px -25px rgba(0, 0, 0, 0.75),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .pcar-slide img,
+        .pcar-slide video {
           position: absolute;
           inset: 0;
           width: 100%;
@@ -206,161 +190,176 @@ const BentoZoomGallery = () => {
           pointer-events: none;
           user-select: none;
         }
-        /* Subtle vignette for cinematic depth */
-        .cinema-card::after {
+
+        .pcar-slide::after {
           content: '';
           position: absolute;
           inset: 0;
           background:
             radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.35) 100%),
-            linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 35%);
+            linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 45%);
           pointer-events: none;
         }
-        .cinema-captions {
+
+        .pcar-caption {
           position: absolute;
           left: 0;
           right: 0;
-          bottom: clamp(28px, 6vh, 64px);
-          padding: 0 clamp(24px, 6vw, 80px);
-          pointer-events: none;
-          z-index: 100;
-        }
-        .cinema-caption {
-          position: absolute;
-          left: 0;
-          right: 0;
-          padding: 0 clamp(24px, 6vw, 80px);
+          bottom: 0;
+          padding: clamp(20px, 3vw, 32px) clamp(20px, 3vw, 32px) clamp(24px, 3.5vw, 40px);
+          color: white;
+          z-index: 2;
           opacity: 0;
-          transform: translateY(16px);
-          transition: opacity 0.4s ease, transform 0.4s ease;
-          color: white;
-          text-align: center;
+          transform: translateY(12px);
+          transition: opacity 0.5s ease 0.1s, transform 0.5s ease 0.1s;
         }
-        .cinema-eyebrow {
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.7);
-          margin-bottom: 10px;
+        .pcar-slide.is-active .pcar-caption {
+          opacity: 1;
+          transform: translateY(0);
         }
-        .cinema-title {
-          font-size: clamp(22px, 4.2vw, 44px);
-          font-weight: 800;
-          letter-spacing: -0.02em;
-          line-height: 1.05;
-          color: white;
-          text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
-        }
-        .cinema-meta {
-          position: absolute;
-          top: clamp(20px, 4vh, 40px);
-          left: 50%;
-          transform: translateX(-50%);
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          z-index: 110;
+        .pcar-eyebrow {
           font-size: 11px;
           font-weight: 600;
           letter-spacing: 0.28em;
           text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.6);
+          color: rgba(255, 255, 255, 0.75);
+          margin-bottom: 8px;
         }
-        .cinema-progress {
-          position: relative;
-          width: clamp(80px, 14vw, 160px);
-          height: 2px;
-          background: rgba(255, 255, 255, 0.15);
+        .pcar-title {
+          font-size: clamp(20px, 2.6vw, 32px);
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+          text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5);
+        }
+
+        .pcar-controls {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 14px;
+          margin-top: clamp(16px, 2.4vw, 24px);
+          padding: 0 16px;
+        }
+        .pcar-arrow {
+          width: 44px;
+          height: 44px;
           border-radius: 999px;
-          overflow: hidden;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          color: white;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          transition: background 0.2s ease, transform 0.2s ease;
+          cursor: pointer;
         }
-        .cinema-progress::after {
-          content: '';
-          display: block;
-          width: 100%;
-          height: 100%;
-          background: white;
-          transform-origin: left center;
-          transform: scaleX(0);
-          transition: transform 0.15s linear;
+        .pcar-arrow:hover { background: rgba(255, 255, 255, 0.16); }
+        .pcar-arrow:active { transform: scale(0.94); }
+
+        .pcar-dots {
+          display: flex;
+          align-items: center;
+          gap: 6px;
         }
-        .cinema-progress[data-progress] {
-          /* the bar inside takes the data-progress transform via JS using ::after... fallback below */
+        .pcar-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.25);
+          transition: width 0.3s ease, background 0.3s ease;
+          cursor: pointer;
+          border: none;
+          padding: 0;
         }
-        /* We can't transform pseudo-elements from JS, so use a real child instead */
+        .pcar-dot.is-active {
+          width: 22px;
+          background: rgba(255, 255, 255, 0.95);
+        }
 
         @media (max-width: 767px) {
-          .cinema-frame {
-            padding: 12px;
-            padding-bottom: clamp(120px, 22vh, 180px);
-          }
-          .cinema-card {
-            border-radius: 20px;
-          }
+          .pcar-slide { flex-basis: 84vw; aspect-ratio: 3 / 4; }
         }
       `}</style>
 
-      <section ref={sectionRef} className="cinema-section" aria-label="Möt människorna bakom yrkena">
-        <div className="cinema-stage">
-          {/* Top meta: progress + counter */}
-          <div className="cinema-meta">
-            <span data-counter>01 / {String(items.length).padStart(2, '0')}</span>
-            <div className="cinema-progress">
-              <div
-                data-progress
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  background: 'white',
-                  transformOrigin: 'left center',
-                  transform: 'scaleX(0)',
-                  transition: 'transform 0.15s linear',
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Stacked media slides */}
+      <section
+        ref={sectionRef}
+        className="pcar-section"
+        aria-label="Möt människorna bakom yrkena"
+        onMouseEnter={pause}
+        onMouseLeave={resume}
+        onTouchStart={pause}
+        onTouchEnd={resume}
+      >
+        <div ref={trackRef} className="pcar-track">
           {items.map((item, i) => (
-            <div className="cinema-frame" key={i} data-slide style={{ opacity: 0 }}>
-              <div className="cinema-card">
-                {item.type === 'video' ? (
-                  <video
-                    src={item.src}
-                    poster={item.poster}
-                    muted
-                    loop
-                    playsInline
-                    preload={i < 2 ? 'auto' : 'metadata'}
-                    style={{ objectPosition: item.position ?? '50% 50%' }}
-                  />
-                ) : (
-                  <img
-                    src={item.src}
-                    alt={item.title}
-                    loading={i < 2 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    draggable={false}
-                    style={{ objectPosition: item.position ?? '50% 50%' }}
-                  />
-                )}
+            <div
+              key={i}
+              className={`pcar-slide${i === active ? ' is-active' : ''}`}
+              aria-hidden={i !== active}
+            >
+              {item.type === 'video' ? (
+                <video
+                  src={item.src}
+                  poster={item.poster}
+                  muted
+                  loop
+                  playsInline
+                  preload={i < 2 ? 'auto' : 'metadata'}
+                  style={{ objectPosition: item.position ?? '50% 50%' }}
+                />
+              ) : (
+                <img
+                  src={item.src}
+                  alt={item.title}
+                  loading={i < 2 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  draggable={false}
+                  style={{ objectPosition: item.position ?? '50% 50%' }}
+                />
+              )}
+              <div className="pcar-caption">
+                <div className="pcar-eyebrow">{item.eyebrow}</div>
+                <div className="pcar-title">{item.title}</div>
               </div>
             </div>
           ))}
+        </div>
 
-          {/* Captions overlay (one per slide, fades with its slide) */}
-          <div className="cinema-captions" aria-live="polite">
-            {items.map((item, i) => (
-              <div className="cinema-caption" key={i} data-caption>
-                <div className="cinema-eyebrow">{item.eyebrow}</div>
-                <div className="cinema-title">{item.title}</div>
-              </div>
+        <div className="pcar-controls">
+          <button
+            type="button"
+            className="pcar-arrow"
+            aria-label="Föregående"
+            onClick={() => scrollToIndex((active - 1 + items.length) % items.length)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+
+          <div className="pcar-dots" role="tablist">
+            {items.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                role="tab"
+                aria-selected={i === active}
+                aria-label={`Gå till bild ${i + 1}`}
+                className={`pcar-dot${i === active ? ' is-active' : ''}`}
+                onClick={() => scrollToIndex(i)}
+              />
             ))}
           </div>
 
-          {/* SR-only active label */}
-          <span className="sr-only">{items[activeIndex]?.title}</span>
+          <button
+            type="button"
+            className="pcar-arrow"
+            aria-label="Nästa"
+            onClick={() => scrollToIndex((active + 1) % items.length)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </button>
         </div>
       </section>
     </>
