@@ -1,9 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import img1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
-import img2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
-import img3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
-import img4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
 import real3 from '@/assets/landing/jobseeker-real-3.jpg';
@@ -12,320 +8,361 @@ import real5 from '@/assets/landing/jobseeker-real-5.jpg';
 import real6 from '@/assets/landing/jobseeker-real-6.jpg';
 import real7 from '@/assets/landing/jobseeker-real-7.jpg';
 
-// 8 images for the bento grid. Real photos in slots 0, 1, 3, 4, 5,
-// rest are placeholders until final shoot is in.
-type MediaItem = { type: 'image' | 'video'; src: string; poster?: string };
-const images: MediaItem[] = [
-  { type: 'image', src: real1 },
-  { type: 'image', src: real5 },
-  { type: 'video', src: '/landing/jobseeker-real-center.mp4', poster: img3 },
-  { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real2 },
-  { type: 'video', src: '/landing/jobseeker-real-3.mp4', poster: real3 },
-  { type: 'image', src: real4 },
-  { type: 'image', src: real7 },
-  { type: 'image', src: real6 },
-];
-
-// Per-image object-position so faces/heads aren't cropped out by `object-fit: cover`.
-// Real photos have subjects centered horizontally with head in the upper portion,
-// so we anchor toward the top.
-const imagePositions: string[] = [
-  '50% 25%', // real1 — fitness coach, head upper-center
-  '50% 30%', // real5 — rörmokare/byggare, head upper-center
-  '50% 50%',
-  '50% 30%', // real2 — broker, head upper-center
-  '50% 22%', // real3 — chef, head upper-center
-  '50% 28%', // real4 — electrician, head upper-center
-  '50% 35%', // real7 — lantbrukare i ladugård
-  '50% 25%', // real6 — undersköterska, head upper-center
-];
-
-const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
-
-type BentoArea = {
-  col: number;
-  row: number;
-  colSpan: number;
-  rowSpan: number;
-};
-
-type TileRect = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
-
-const areas: BentoArea[] = [
-  { col: 0, row: 0, colSpan: 1, rowSpan: 2 },
-  { col: 1, row: 0, colSpan: 1, rowSpan: 1 },
-  { col: 1, row: 1, colSpan: 1, rowSpan: 2 },
-  { col: 2, row: 0, colSpan: 1, rowSpan: 2 },
-  { col: 0, row: 2, colSpan: 1, rowSpan: 1 },
-  { col: 2, row: 2, colSpan: 1, rowSpan: 2 },
-  { col: 0, row: 3, colSpan: 1, rowSpan: 1 },
-  { col: 1, row: 3, colSpan: 1, rowSpan: 1 },
-];
-
-const getTileRect = (
-  area: BentoArea,
-  startX: number,
-  startY: number,
-  columnWidth: number,
-  rowHeight: number,
-  gap: number,
-): TileRect => ({
-  x: startX + area.col * (columnWidth + gap),
-  y: startY + area.row * (rowHeight + gap),
-  width: area.colSpan * columnWidth + (area.colSpan - 1) * gap,
-  height: area.rowSpan * rowHeight + (area.rowSpan - 1) * gap,
-});
-
 /**
- * Codrops-style pinned bento → fullscreen zoom.
+ * Apple-style cinematic media sequence.
  *
- * On scroll, the section pins and the 8-cell bento grid Flip-animates
- * from a small centered grid to a much larger grid where each tile
- * fills (close to) the entire viewport — creating the "drag-you-in"
- * cinematic zoom effect.
- *
- * Grid math mirrors the original Codrops pen exactly:
- *   initial: 3 × 32.5vw  /  4 × 23vh   (gap 1vh)
- *   final:   3 × 100vw   /  4 × 49.5vh (gap 1vh)
+ * The section pins for several viewport heights. As the user scrolls, each
+ * media item enters fullscreen with a slow Ken Burns zoom, crossfades into
+ * the next, and is paired with a clean caption. No bento, no cropping —
+ * one hero at a time, premium and editorial.
  */
+
+type MediaItem = {
+  type: 'image' | 'video';
+  src: string;
+  poster?: string;
+  /** object-position for portrait subjects so heads aren't cut off */
+  position?: string;
+  eyebrow: string;
+  title: string;
+};
+
+const items: MediaItem[] = [
+  { type: 'image', src: real1, position: '50% 30%', eyebrow: 'Riktiga människor', title: 'Personliga träningsledare' },
+  { type: 'image', src: real5, position: '50% 30%', eyebrow: 'Hantverk', title: 'Rörmokare & byggare' },
+  { type: 'video', src: '/landing/jobseeker-real-center.mp4', eyebrow: 'I rörelse', title: 'Yrkespersoner i sitt element' },
+  { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real2, eyebrow: 'Service', title: 'Mäklare & rådgivare' },
+  { type: 'video', src: '/landing/jobseeker-real-3.mp4', poster: real3, eyebrow: 'Restaurang', title: 'Kockar & köksmästare' },
+  { type: 'image', src: real4, position: '50% 28%', eyebrow: 'Tekniker', title: 'Elektriker & installatörer' },
+  { type: 'image', src: real7, position: '50% 35%', eyebrow: 'Lantbruk', title: 'Bönder & djurskötare' },
+  { type: 'image', src: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor & vårdpersonal' },
+];
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+// Smooth s-curve so zoom feels like Apple keynote, not linear
+const easeInOut = (t: number) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
 const BentoZoomGallery = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     const sectionEl = sectionRef.current;
-    const stageEl = stageRef.current;
-    if (!sectionEl || !stageEl) return;
+    if (!sectionEl) return;
 
-    // The landing page uses an inner scrollable container.
     const scroller =
       (sectionEl.closest('[data-landing-scroll-root]') as HTMLElement | null) ?? window;
 
-    const items = Array.from(stageEl.querySelectorAll<HTMLElement>('.gallery__item'));
-    let fromRects: TileRect[] = [];
-    let toRects: TileRect[] = [];
-    let targetProgress = 0;
-    let currentProgress = 0;
+    const slides = Array.from(sectionEl.querySelectorAll<HTMLElement>('[data-slide]'));
+    const captions = Array.from(sectionEl.querySelectorAll<HTMLElement>('[data-caption]'));
+    const progressBar = sectionEl.querySelector<HTMLElement>('[data-progress]');
+    const counter = sectionEl.querySelector<HTMLElement>('[data-counter]');
+    const total = items.length;
     let frame = 0;
 
-    const calculateLayout = () => {
-      const vw = stageEl.clientWidth;
-      const vh = stageEl.clientHeight;
-      const isMobile = vw < 768;
-      const gap = vh * (isMobile ? 0.006 : 0.01);
-
-      // On mobile, start the bento larger so faces/details are clearly visible —
-      // closer to how it feels on desktop. Tighter gaps + bigger tiles.
-      const fromColumn = vw * (isMobile ? 0.33 : 0.325);
-      const fromRow = vh * (isMobile ? 0.245 : 0.23);
-      const toColumn = vw;
-      const toRow = vh * 0.495;
-
-      const fromX = (vw - (fromColumn * 3 + gap * 2)) / 2;
-      const fromY = (vh - (fromRow * 4 + gap * 3)) / 2;
-      const toX = (vw - (toColumn * 3 + gap * 2)) / 2;
-      const toY = (vh - (toRow * 4 + gap * 3)) / 2;
-
-      fromRects = areas.map((area) => getTileRect(area, fromX, fromY, fromColumn, fromRow, gap));
-      toRects = areas.map((area) => getTileRect(area, toX, toY, toColumn, toRow, gap));
-
-      items.forEach((item, index) => {
-        const rect = fromRects[index];
-        item.style.width = `${rect.width}px`;
-        item.style.height = `${rect.height}px`;
-      });
-    };
-
-    // easeInOutCubic — gentle in the middle, no abrupt scaling jump
-    const ease = (t: number) =>
-      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-    const render = (progress: number) => {
-      const eased = ease(progress);
-      items.forEach((item, index) => {
-        const from = fromRects[index];
-        const to = toRects[index];
-        if (!from || !to) return;
-
-        const x = from.x + (to.x - from.x) * eased;
-        const y = from.y + (to.y - from.y) * eased;
-        const scaleX = (from.width + (to.width - from.width) * eased) / from.width;
-        const scaleY = (from.height + (to.height - from.height) * eased) / from.height;
-        const radius = 20 * (1 - eased);
-
-        item.style.transform = `translate3d(${x}px, ${y}px, 0) scale3d(${scaleX}, ${scaleY}, 1)`;
-        item.style.borderRadius = `${radius}px`;
-      });
-    };
-
-    const getProgress = () => {
-      const sectionRect = sectionEl.getBoundingClientRect();
-      const viewportTop = scroller instanceof Window ? 0 : scroller.getBoundingClientRect().top;
-      const viewportHeight = scroller instanceof Window ? window.innerHeight : scroller.clientHeight;
-      const distance = sectionEl.offsetHeight - viewportHeight;
-
-      return distance <= 0 ? 0 : clamp01((viewportTop - sectionRect.top) / distance);
-    };
-
     const tick = () => {
-      currentProgress += (targetProgress - currentProgress) * 0.18;
+      frame = 0;
+      const sectionRect = sectionEl.getBoundingClientRect();
+      const viewportTop =
+        scroller instanceof Window ? 0 : scroller.getBoundingClientRect().top;
+      const viewportHeight =
+        scroller instanceof Window ? window.innerHeight : scroller.clientHeight;
+      const distance = sectionEl.offsetHeight - viewportHeight;
+      const overall = distance <= 0 ? 0 : clamp01((viewportTop - sectionRect.top) / distance);
 
-      if (Math.abs(targetProgress - currentProgress) < 0.001) {
-        currentProgress = targetProgress;
+      // Map overall progress to a per-slide progress.
+      // Each slide gets 1/total of the scroll, with a small overlap window
+      // around boundaries for the crossfade.
+      const slot = 1 / total;
+      const overlap = slot * 0.35; // crossfade window between slides
+
+      let newActive = 0;
+      let maxOpacity = 0;
+
+      slides.forEach((slide, i) => {
+        const start = i * slot;
+        const end = start + slot;
+        // Local 0..1 progress within this slide's slot (extended by overlap on both sides)
+        const p = clamp01((overall - (start - overlap)) / (slot + overlap * 2));
+
+        // Ken Burns: 1.0 -> 1.12 across the slide
+        const eased = easeInOut(p);
+        const scale = 1.0 + 0.12 * eased;
+
+        // Opacity: ramp in over first overlap window, hold full, ramp out over last overlap window
+        let opacity: number;
+        if (overall < start) {
+          opacity = clamp01((overall - (start - overlap)) / overlap);
+        } else if (overall > end) {
+          opacity = clamp01(1 - (overall - end) / overlap);
+        } else {
+          opacity = 1;
+        }
+
+        slide.style.opacity = String(opacity);
+        slide.style.transform = `scale(${scale.toFixed(4)})`;
+        slide.style.zIndex = opacity > 0.01 ? String(10 + i) : '0';
+
+        // Pause off-screen videos to save battery / decode budget
+        const video = slide.querySelector('video');
+        if (video) {
+          if (opacity > 0.4) {
+            if (video.paused) video.play().catch(() => {});
+          } else {
+            if (!video.paused) video.pause();
+          }
+        }
+
+        if (opacity > maxOpacity) {
+          maxOpacity = opacity;
+          newActive = i;
+        }
+
+        // Caption mirrors the slide's opacity but with a small upward drift
+        const caption = captions[i];
+        if (caption) {
+          const cOpacity = Math.max(0, opacity * 1.15 - 0.15);
+          const drift = (1 - opacity) * 16;
+          caption.style.opacity = String(cOpacity);
+          caption.style.transform = `translateY(${drift}px)`;
+        }
+      });
+
+      if (progressBar) {
+        progressBar.style.transform = `scaleX(${overall.toFixed(4)})`;
       }
-
-      render(currentProgress);
-      frame = currentProgress === targetProgress ? 0 : requestAnimationFrame(tick);
+      if (counter) {
+        counter.textContent = `${String(newActive + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+      }
+      setActiveIndex(newActive);
     };
 
-    const requestRender = () => {
-      targetProgress = getProgress();
+    const requestTick = () => {
       if (!frame) frame = requestAnimationFrame(tick);
     };
 
-    const onResize = () => {
-      calculateLayout();
-      targetProgress = getProgress();
-      currentProgress = targetProgress;
-      render(currentProgress);
-    };
-
-    calculateLayout();
-    onResize();
-
-    scroller.addEventListener('scroll', requestRender, { passive: true });
-    window.addEventListener('resize', onResize);
-
-    // Staggered batch reveal (ScrollTrigger.batch-style) — items fade in
-    // together with a small stagger when they enter the viewport.
-    const revealed = new WeakSet<Element>();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const batch = entries
-          .filter((e) => e.isIntersecting && !revealed.has(e.target))
-          .map((e) => e.target as HTMLElement);
-        batch.forEach((el, i) => {
-          revealed.add(el);
-          el.style.transitionDelay = `${i * 0.2}s`;
-          el.style.opacity = '1';
-          el.style.visibility = 'visible';
-        });
-      },
-      { root: scroller instanceof Window ? null : scroller, threshold: 0.05 },
-    );
-    items.forEach((item) => observer.observe(item));
+    tick();
+    scroller.addEventListener('scroll', requestTick, { passive: true });
+    window.addEventListener('resize', requestTick);
 
     return () => {
       if (frame) cancelAnimationFrame(frame);
-      scroller.removeEventListener('scroll', requestRender);
-      window.removeEventListener('resize', onResize);
-      observer.disconnect();
+      scroller.removeEventListener('scroll', requestTick);
+      window.removeEventListener('resize', requestTick);
     };
   }, []);
 
   return (
     <>
       <style>{`
-        .bz-section {
+        .cinema-section {
           position: relative;
           width: 100%;
-          height: 380svh;
+          /* one viewport per slide for slow, deliberate Apple-like pacing */
+          height: calc(${items.length} * 100svh);
         }
-        .bz-stage {
+        .cinema-stage {
           position: sticky;
           top: 0;
           width: 100%;
           height: 100svh;
+          overflow: hidden;
+          background: hsl(var(--background));
+        }
+        .cinema-frame {
+          position: absolute;
+          inset: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          overflow: hidden;
-          contain: layout paint style;
+          padding: clamp(16px, 4vw, 64px);
+          padding-bottom: clamp(96px, 18vh, 200px);
         }
-        .bz-gallery {
+        .cinema-card {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          max-width: 1280px;
+          border-radius: clamp(20px, 3vw, 36px);
+          overflow: hidden;
+          opacity: 0;
+          transform: scale(1);
+          transform-origin: center center;
+          will-change: transform, opacity;
+          box-shadow:
+            0 30px 80px -20px rgba(0, 0, 0, 0.55),
+            0 0 0 1px rgba(255, 255, 255, 0.06);
+          background: hsl(var(--background));
+        }
+        .cinema-card img,
+        .cinema-card video {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
-        }
-        .bz-gallery .gallery__item {
-          position: absolute;
-          left: 0;
-          top: 0;
-          flex: none;
-          overflow: hidden;
-          border-radius: 20px;
-          background-position: 50% 50%;
-          background-size: cover;
-          backface-visibility: hidden;
-          contain: paint;
-          transform-origin: 0 0;
-          transform: translate3d(0, 0, 0);
-          will-change: transform, border-radius, opacity;
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 1s cubic-bezier(0.39, 0.575, 0.565, 1), visibility 0s;
-        }
-        .bz-gallery .gallery__item img,
-        .bz-gallery .gallery__item video {
           object-fit: cover;
-          width: 100%;
-          height: 100%;
           display: block;
           pointer-events: none;
           user-select: none;
         }
+        /* Subtle vignette for cinematic depth */
+        .cinema-card::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.35) 100%),
+            linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 35%);
+          pointer-events: none;
+        }
+        .cinema-captions {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: clamp(28px, 6vh, 64px);
+          padding: 0 clamp(24px, 6vw, 80px);
+          pointer-events: none;
+          z-index: 100;
+        }
+        .cinema-caption {
+          position: absolute;
+          left: 0;
+          right: 0;
+          padding: 0 clamp(24px, 6vw, 80px);
+          opacity: 0;
+          transform: translateY(16px);
+          transition: opacity 0.4s ease, transform 0.4s ease;
+          color: white;
+          text-align: center;
+        }
+        .cinema-eyebrow {
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.3em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.7);
+          margin-bottom: 10px;
+        }
+        .cinema-title {
+          font-size: clamp(22px, 4.2vw, 44px);
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          line-height: 1.05;
+          color: white;
+          text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+        }
+        .cinema-meta {
+          position: absolute;
+          top: clamp(20px, 4vh, 40px);
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          z-index: 110;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.6);
+        }
+        .cinema-progress {
+          position: relative;
+          width: clamp(80px, 14vw, 160px);
+          height: 2px;
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 999px;
+          overflow: hidden;
+        }
+        .cinema-progress::after {
+          content: '';
+          display: block;
+          width: 100%;
+          height: 100%;
+          background: white;
+          transform-origin: left center;
+          transform: scaleX(0);
+          transition: transform 0.15s linear;
+        }
+        .cinema-progress[data-progress] {
+          /* the bar inside takes the data-progress transform via JS using ::after... fallback below */
+        }
+        /* We can't transform pseudo-elements from JS, so use a real child instead */
+
         @media (max-width: 767px) {
-          .bz-section { height: 320svh; }
-          /* Show entire image/video on mobile so subjects aren't cropped.
-             Background fills the letterboxed area to keep the look cohesive. */
-          .bz-gallery .gallery__item {
-            background-color: hsl(var(--background));
+          .cinema-frame {
+            padding: 12px;
+            padding-bottom: clamp(120px, 22vh, 180px);
           }
-          .bz-gallery .gallery__item img,
-          .bz-gallery .gallery__item video {
-            object-fit: contain !important;
-            object-position: center center !important;
+          .cinema-card {
+            border-radius: 20px;
           }
         }
       `}</style>
 
-      <div ref={sectionRef} className="bz-section">
-        <div ref={stageRef} className="bz-stage">
-          <div className="bz-gallery">
-            {images.map((media, i) => (
-              <div className="gallery__item" key={i}>
-                {media.type === 'video' ? (
+      <section ref={sectionRef} className="cinema-section" aria-label="Möt människorna bakom yrkena">
+        <div className="cinema-stage">
+          {/* Top meta: progress + counter */}
+          <div className="cinema-meta">
+            <span data-counter>01 / {String(items.length).padStart(2, '0')}</span>
+            <div className="cinema-progress">
+              <div
+                data-progress
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  background: 'white',
+                  transformOrigin: 'left center',
+                  transform: 'scaleX(0)',
+                  transition: 'transform 0.15s linear',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Stacked media slides */}
+          {items.map((item, i) => (
+            <div className="cinema-frame" key={i} data-slide style={{ opacity: 0 }}>
+              <div className="cinema-card">
+                {item.type === 'video' ? (
                   <video
-                    src={media.src}
-                    poster={media.poster}
+                    src={item.src}
+                    poster={item.poster}
                     muted
-                    autoPlay
                     loop
                     playsInline
-                    preload="auto"
-                    style={{ objectPosition: imagePositions[i] ?? '50% 50%', objectFit: 'cover', width: '100%', height: '100%', display: 'block' }}
+                    preload={i < 2 ? 'auto' : 'metadata'}
+                    style={{ objectPosition: item.position ?? '50% 50%' }}
                   />
                 ) : (
                   <img
-                    src={media.src}
-                    alt=""
-                    loading={i < 4 ? 'eager' : 'lazy'}
+                    src={item.src}
+                    alt={item.title}
+                    loading={i < 2 ? 'eager' : 'lazy'}
                     decoding="async"
                     draggable={false}
-                    style={{ objectPosition: imagePositions[i] ?? '50% 50%' }}
+                    style={{ objectPosition: item.position ?? '50% 50%' }}
                   />
                 )}
               </div>
+            </div>
+          ))}
+
+          {/* Captions overlay (one per slide, fades with its slide) */}
+          <div className="cinema-captions" aria-live="polite">
+            {items.map((item, i) => (
+              <div className="cinema-caption" key={i} data-caption>
+                <div className="cinema-eyebrow">{item.eyebrow}</div>
+                <div className="cinema-title">{item.title}</div>
+              </div>
             ))}
           </div>
+
+          {/* SR-only active label */}
+          <span className="sr-only">{items[activeIndex]?.title}</span>
         </div>
-      </div>
+      </section>
     </>
   );
 };
