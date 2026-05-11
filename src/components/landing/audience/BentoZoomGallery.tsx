@@ -47,6 +47,8 @@ const BentoZoomGallery = () => {
   const [active, setActive] = useState(0);
   const pausedRef = useRef(false);
   const inViewRef = useRef(true);
+  const interactingRef = useRef(false);
+  const snapTimerRef = useRef<number | null>(null);
 
   const scrollToIndex = useCallback((i: number, smooth = true) => {
     const track = trackRef.current;
@@ -91,9 +93,27 @@ const BentoZoomGallery = () => {
       setActive((prev) => (prev === best ? prev : best));
     };
 
+    const scheduleSnap = () => {
+      if (snapTimerRef.current) window.clearTimeout(snapTimerRef.current);
+      snapTimerRef.current = window.setTimeout(() => {
+        if (interactingRef.current) return;
+        // find nearest slide to center and softly scroll there
+        const center = track.scrollLeft + track.clientWidth / 2;
+        let nearest = 0;
+        let nd = Infinity;
+        const sl = Array.from(track.children) as HTMLElement[];
+        sl.forEach((el, i) => {
+          const mid = el.offsetLeft + el.clientWidth / 2;
+          const d = Math.abs(mid - center);
+          if (d < nd) { nd = d; nearest = i; }
+        });
+        scrollToIndex(nearest);
+      }, 120);
+    };
+
     const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(update);
+      if (!raf) raf = requestAnimationFrame(update);
+      scheduleSnap();
     };
 
     track.addEventListener('scroll', onScroll, { passive: true });
@@ -162,8 +182,26 @@ const BentoZoomGallery = () => {
     };
   }, []);
 
-  const pause = () => { pausedRef.current = true; };
-  const resume = () => { pausedRef.current = false; };
+  const pause = () => { pausedRef.current = true; interactingRef.current = true; };
+  const resume = () => {
+    pausedRef.current = false;
+    interactingRef.current = false;
+    if (snapTimerRef.current) window.clearTimeout(snapTimerRef.current);
+    snapTimerRef.current = window.setTimeout(() => {
+      const track = trackRef.current;
+      if (!track) return;
+      const center = track.scrollLeft + track.clientWidth / 2;
+      let nearest = 0;
+      let nd = Infinity;
+      const sl = Array.from(track.children) as HTMLElement[];
+      sl.forEach((el, i) => {
+        const mid = el.offsetLeft + el.clientWidth / 2;
+        const d = Math.abs(mid - center);
+        if (d < nd) { nd = d; nearest = i; }
+      });
+      scrollToIndex(nearest);
+    }, 80);
+  };
 
   return (
     <>
@@ -177,7 +215,6 @@ const BentoZoomGallery = () => {
           display: flex;
           gap: clamp(12px, 2vw, 24px);
           overflow-x: auto;
-          scroll-snap-type: x mandatory;
           scroll-behavior: smooth;
           -webkit-overflow-scrolling: touch;
           padding: clamp(20px, 4vw, 40px) max(16px, calc((100% - min(720px, 88vw)) / 2));
@@ -188,7 +225,6 @@ const BentoZoomGallery = () => {
         .pcar-slide {
           flex: 0 0 min(720px, 88vw);
           aspect-ratio: 4 / 5;
-          scroll-snap-align: center;
           position: relative;
           border-radius: clamp(20px, 2.4vw, 32px);
           overflow: hidden;
