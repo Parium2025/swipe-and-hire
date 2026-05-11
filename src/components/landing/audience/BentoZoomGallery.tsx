@@ -47,6 +47,8 @@ const BentoZoomGallery = () => {
   const [active, setActive] = useState(0);
   const pausedRef = useRef(false);
   const inViewRef = useRef(true);
+  const interactingRef = useRef(false);
+  const snapTimerRef = useRef<number | null>(null);
 
   const scrollToIndex = useCallback((i: number, smooth = true) => {
     const track = trackRef.current;
