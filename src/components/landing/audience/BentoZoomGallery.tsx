@@ -286,12 +286,6 @@ const BentoZoomGallery = () => {
           padding: clamp(20px, 3vw, 32px) clamp(20px, 3vw, 32px) clamp(24px, 3.5vw, 40px);
           color: white;
           z-index: 2;
-          opacity: 0;
-          transform: translateY(12px);
-          transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s,
-                      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s;
-        }
-        .pcar-slide.is-active .pcar-caption {
           opacity: 1;
           transform: translateY(0);
         }
