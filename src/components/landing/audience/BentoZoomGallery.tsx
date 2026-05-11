@@ -182,8 +182,26 @@ const BentoZoomGallery = () => {
     };
   }, []);
 
-  const pause = () => { pausedRef.current = true; };
-  const resume = () => { pausedRef.current = false; };
+  const pause = () => { pausedRef.current = true; interactingRef.current = true; };
+  const resume = () => {
+    pausedRef.current = false;
+    interactingRef.current = false;
+    if (snapTimerRef.current) window.clearTimeout(snapTimerRef.current);
+    snapTimerRef.current = window.setTimeout(() => {
+      const track = trackRef.current;
+      if (!track) return;
+      const center = track.scrollLeft + track.clientWidth / 2;
+      let nearest = 0;
+      let nd = Infinity;
+      const sl = Array.from(track.children) as HTMLElement[];
+      sl.forEach((el, i) => {
+        const mid = el.offsetLeft + el.clientWidth / 2;
+        const d = Math.abs(mid - center);
+        if (d < nd) { nd = d; nearest = i; }
+      });
+      scrollToIndex(nearest);
+    }, 80);
+  };
 
   return (
     <>
