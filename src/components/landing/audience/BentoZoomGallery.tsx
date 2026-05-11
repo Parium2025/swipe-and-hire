@@ -168,7 +168,7 @@ const BentoZoomGallery = () => {
           width: 100%;
           height: 100svh;
           overflow: hidden;
-          background: hsl(var(--background));
+          background: transparent;
         }
         .cinema-frame {
           position: absolute;
