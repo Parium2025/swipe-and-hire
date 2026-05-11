@@ -93,9 +93,27 @@ const BentoZoomGallery = () => {
       setActive((prev) => (prev === best ? prev : best));
     };
 
+    const scheduleSnap = () => {
+      if (snapTimerRef.current) window.clearTimeout(snapTimerRef.current);
+      snapTimerRef.current = window.setTimeout(() => {
+        if (interactingRef.current) return;
+        // find nearest slide to center and softly scroll there
+        const center = track.scrollLeft + track.clientWidth / 2;
+        let nearest = 0;
+        let nd = Infinity;
+        const sl = Array.from(track.children) as HTMLElement[];
+        sl.forEach((el, i) => {
+          const mid = el.offsetLeft + el.clientWidth / 2;
+          const d = Math.abs(mid - center);
+          if (d < nd) { nd = d; nearest = i; }
+        });
+        scrollToIndex(nearest);
+      }, 120);
+    };
+
     const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(update);
+      if (!raf) raf = requestAnimationFrame(update);
+      scheduleSnap();
     };
 
     track.addEventListener('scroll', onScroll, { passive: true });
