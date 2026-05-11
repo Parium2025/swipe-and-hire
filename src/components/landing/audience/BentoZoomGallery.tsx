@@ -116,10 +116,13 @@ const BentoZoomGallery = () => {
     const calculateLayout = () => {
       const vw = stageEl.clientWidth;
       const vh = stageEl.clientHeight;
-      const gap = vh * 0.01;
+      const isMobile = vw < 768;
+      const gap = vh * (isMobile ? 0.006 : 0.01);
 
-      const fromColumn = vw * 0.325;
-      const fromRow = vh * 0.23;
+      // On mobile, start the bento larger so faces/details are clearly visible —
+      // closer to how it feels on desktop. Tighter gaps + bigger tiles.
+      const fromColumn = vw * (isMobile ? 0.33 : 0.325);
+      const fromRow = vh * (isMobile ? 0.245 : 0.23);
       const toColumn = vw;
       const toRow = vh * 0.495;
 
