@@ -44,17 +44,21 @@ type CardItemProps = {
 };
 
 const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
-  // Lugn, mjuk fade-in när scrollen börjar. Längre sträcka = mindre "snabbt" intryck.
-  const start = 0.04 + (index / total) * 0.18;   // staggered start
-  const end = start + 0.22;                       // längre fade
+  // Alla kort fadar in tidigt — innan strippen börjar glida horisontellt.
+  // Det säkerställer att första kortet (PT) hinner bli helt synligt
+  // medan det fortfarande står still i mitten av skärmen.
+  const FADE_WINDOW_END = 0.18;                          // hela fade-fasen klar @ 18% scroll
+  const perCard = FADE_WINDOW_END / total;               // staggered inom fade-fönstret
+  const start = index * perCard * 0.85;                  // lite överlapp för flow
+  const end = start + perCard * 2.2;                     // mjuk, lång fade per kort
   const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
-  const y = useTransform(scrollYProgress, [start, end], [60, 0]);
+  const y = useTransform(scrollYProgress, [start, end], [50, 0]);
 
-  // Caption fadar in strax efter själva kortet
-  const capStart = start + 0.08;
-  const capEnd = capStart + 0.18;
+  // Caption följer kortet med en liten fördröjning
+  const capStart = start + perCard * 0.6;
+  const capEnd = capStart + perCard * 1.6;
   const capOpacity = useTransform(scrollYProgress, [capStart, capEnd], [0, 1]);
-  const capY = useTransform(scrollYProgress, [capStart, capEnd], [14, 0]);
+  const capY = useTransform(scrollYProgress, [capStart, capEnd], [12, 0]);
 
   return (
     <motion.div className="phg-card" style={{ opacity, y }}>
@@ -108,12 +112,12 @@ const PinnedHorizontalGallery = () => {
     offset: ['start start', 'end end'],
   });
 
-  // Headline syns direkt, glider lugnt uppåt mot slutet
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.55, 0.85], [1, 1, 0.25]);
-  const headerY = useTransform(scrollYProgress, [0, 0.85], [0, -60]);
+  // Headline glider lugnt uppåt mot slutet (intro-fade hanteras av motion-variant nedan)
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.6, 0.9], [1, 1, 0.2]);
+  const headerY = useTransform(scrollYProgress, [0, 0.9], [0, -60]);
 
-  // Strip: glider höger → vänster, mjuk spring utan studs
-  const xRaw = useTransform(scrollYProgress, [0, 1], ['6vw', '-115vw']);
+  // Strip: håller still tills korten har fadat in, glider sedan höger → vänster
+  const xRaw = useTransform(scrollYProgress, [0, 0.2, 1], ['6vw', '6vw', '-115vw']);
   const x = useSpring(xRaw, { stiffness: 60, damping: 24, mass: 0.6 });
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
@@ -330,14 +334,44 @@ const PinnedHorizontalGallery = () => {
       <div ref={sectionRef} className="phg-section" style={{ height: `${SCROLL_VH}vh` }}>
         <div className="phg-sticky">
           <motion.div className="phg-header" style={{ opacity: headerOpacity, y: headerY }}>
-            <div className="phg-eyebrow">Så funkar det</div>
-            <h2 className="phg-title">
-              Yrken som <em>bygger</em> Sverige.
-            </h2>
-            <p className="phg-sub">
-              Från kockar till elektriker, från tränare till undersköterskor.
-              Parium är gjort för människorna som faktiskt utför jobben — och företagen som söker dem.
-            </p>
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.4 }}
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.14, delayChildren: 0.05 } },
+              }}
+            >
+              <motion.div
+                className="phg-eyebrow"
+                variants={{
+                  hidden: { opacity: 0, y: 16, filter: 'blur(6px)' },
+                  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                Så funkar det
+              </motion.div>
+              <motion.h2
+                className="phg-title"
+                variants={{
+                  hidden: { opacity: 0, y: 38, filter: 'blur(10px)' },
+                  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1.1, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                Yrken som <em>bygger</em> Sverige.
+              </motion.h2>
+              <motion.p
+                className="phg-sub"
+                variants={{
+                  hidden: { opacity: 0, y: 22, filter: 'blur(6px)' },
+                  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                Från kockar till elektriker, från tränare till undersköterskor.
+                Parium är gjort för människorna som faktiskt utför jobben — och företagen som söker dem.
+              </motion.p>
+            </motion.div>
           </motion.div>
 
           <div className="phg-strip-wrap">

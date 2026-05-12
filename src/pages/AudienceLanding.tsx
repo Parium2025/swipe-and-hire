@@ -6,6 +6,7 @@ import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
+import { useLenisOnElement } from '@/hooks/useLenisOnElement';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
 import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
@@ -40,6 +41,9 @@ const ease = [0.16, 1, 0.3, 1] as const;
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
+
+  // Premium smooth-scroll (Lenis) på det dedikerade scroll-roteret
+  useLenisOnElement('[data-landing-scroll-root]');
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
