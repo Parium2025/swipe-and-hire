@@ -320,15 +320,15 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } } }}
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
                 className="mt-12 grid gap-5 md:grid-cols-2"
               >
                 {['Start', 'Premium'].map((plan, i) => (
                   <motion.div
                     key={plan}
                     variants={{
-                      hidden: { opacity: 0, x: 80 },
-                      visible: { opacity: 1, x: 0, transition: { duration: 0.85, ease } },
+                      hidden: { opacity: 0 },
+                      visible: { opacity: 1, transition: { duration: 0.9, ease } },
                     }}
                     className={`relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 ${
                       i === 1
