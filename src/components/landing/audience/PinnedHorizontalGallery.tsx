@@ -79,10 +79,10 @@ const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       )}
-      <div className="phg-cap">
+      <motion.div className="phg-cap" style={{ opacity: capOpacity, y: capY }}>
         <div className="phg-cap-eyebrow">{item.eyebrow}</div>
         <div className="phg-cap-title">{item.title}</div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
