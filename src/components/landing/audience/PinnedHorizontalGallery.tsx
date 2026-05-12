@@ -44,17 +44,21 @@ type CardItemProps = {
 };
 
 const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
-  // Lugn, mjuk fade-in när scrollen börjar. Längre sträcka = mindre "snabbt" intryck.
-  const start = 0.04 + (index / total) * 0.18;   // staggered start
-  const end = start + 0.22;                       // längre fade
+  // Alla kort fadar in tidigt — innan strippen börjar glida horisontellt.
+  // Det säkerställer att första kortet (PT) hinner bli helt synligt
+  // medan det fortfarande står still i mitten av skärmen.
+  const FADE_WINDOW_END = 0.18;                          // hela fade-fasen klar @ 18% scroll
+  const perCard = FADE_WINDOW_END / total;               // staggered inom fade-fönstret
+  const start = index * perCard * 0.85;                  // lite överlapp för flow
+  const end = start + perCard * 2.2;                     // mjuk, lång fade per kort
   const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
-  const y = useTransform(scrollYProgress, [start, end], [60, 0]);
+  const y = useTransform(scrollYProgress, [start, end], [50, 0]);
 
-  // Caption fadar in strax efter själva kortet
-  const capStart = start + 0.08;
-  const capEnd = capStart + 0.18;
+  // Caption följer kortet med en liten fördröjning
+  const capStart = start + perCard * 0.6;
+  const capEnd = capStart + perCard * 1.6;
   const capOpacity = useTransform(scrollYProgress, [capStart, capEnd], [0, 1]);
-  const capY = useTransform(scrollYProgress, [capStart, capEnd], [14, 0]);
+  const capY = useTransform(scrollYProgress, [capStart, capEnd], [12, 0]);
 
   return (
     <motion.div className="phg-card" style={{ opacity, y }}>
