@@ -99,8 +99,8 @@ const PinnedHorizontalGallery = () => {
     setReady(true);
   }, []);
 
-  // Lagom scroll — innehållet är synligt direkt, ingen tom yta
-  const SCROLL_VH = 200;
+  // Lugnt scrollavstånd — ger tid för fade-ins att andas
+  const SCROLL_VH = 320;
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -112,9 +112,9 @@ const PinnedHorizontalGallery = () => {
   const headerOpacity = useTransform(scrollYProgress, [0, 0.55, 0.85], [1, 1, 0.25]);
   const headerY = useTransform(scrollYProgress, [0, 0.85], [0, -60]);
 
-  // Strip: synlig direkt, glider höger → vänster
+  // Strip: glider höger → vänster, mjuk spring utan studs
   const xRaw = useTransform(scrollYProgress, [0, 1], ['6vw', '-115vw']);
-  const x = useSpring(xRaw, { stiffness: 110, damping: 28, mass: 0.5 });
+  const x = useSpring(xRaw, { stiffness: 60, damping: 24, mass: 0.6 });
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
