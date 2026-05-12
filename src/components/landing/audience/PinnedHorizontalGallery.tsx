@@ -269,7 +269,7 @@ const PinnedHorizontalGallery = () => {
           </motion.div>
 
           <div className="phg-strip-wrap">
-            <motion.div ref={stripRef} className="phg-strip" style={{ x, opacity: stripOpacity }}>
+            <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
               {items.map((item, i) => (
                 <div key={i} className="phg-card">
                   {item.type === 'video' ? (
