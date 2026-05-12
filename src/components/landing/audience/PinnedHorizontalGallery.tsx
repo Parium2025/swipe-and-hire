@@ -120,20 +120,27 @@ const PinnedHorizontalGallery = () => {
           margin-bottom: 14px;
         }
         .phg-title {
-          font-size: clamp(2rem, 4.6vw, 4rem);
+          font-size: clamp(2.25rem, 5.4vw, 4.75rem);
           font-weight: 800;
-          line-height: 1.04;
-          letter-spacing: -0.025em;
+          line-height: 1.05;
+          letter-spacing: -0.028em;
           color: white;
-          max-width: 22ch;
+          max-width: 18ch;
           margin: 0 auto;
         }
+        .phg-title em {
+          font-style: normal;
+          background: linear-gradient(120deg, #ffffff 0%, #9bd3ff 50%, hsl(var(--secondary)) 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
         .phg-sub {
-          margin: 18px auto 0;
-          font-size: clamp(0.95rem, 1.15vw, 1.075rem);
-          line-height: 1.6;
-          color: rgba(255,255,255,0.6);
-          max-width: 56ch;
+          margin: 22px auto 0;
+          font-size: clamp(1rem, 1.2vw, 1.125rem);
+          line-height: 1.65;
+          color: rgba(255,255,255,0.62);
+          max-width: 52ch;
         }
 
         .phg-strip-wrap {
