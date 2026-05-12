@@ -155,7 +155,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* ──────────────── 1. HERO (vertikal) ──────────────── */}
-          <section className="relative flex min-h-[100svh] items-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
+          <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
@@ -164,7 +164,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             />
 
             <motion.div
-              className="relative z-10 mx-auto flex w-full max-w-[1280px] flex-col"
+              className="relative z-10 mx-auto flex w-full max-w-[1280px] flex-col items-center text-center"
               initial="hidden"
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
@@ -190,7 +190,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
               <motion.p
                 variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                className="mt-7 max-w-xl text-base leading-8 text-white/65 sm:text-lg"
+                className="mt-7 max-w-xl text-base leading-8 text-white sm:text-lg"
               >
                 {c.hero.subtitle}
               </motion.p>
@@ -202,10 +202,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 <button
                   type="button"
                   onPointerDown={handleStart}
-                  className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-secondary-foreground shadow-[0_18px_55px_hsl(var(--secondary)/0.32)] transition-shadow hover:shadow-[0_22px_70px_hsl(var(--secondary)/0.45)]"
+                  className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-xl shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
                 >
                   {c.hero.cta}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
                 </button>
               </motion.div>
             </motion.div>
