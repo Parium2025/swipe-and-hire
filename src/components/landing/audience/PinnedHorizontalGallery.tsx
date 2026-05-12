@@ -26,7 +26,7 @@ type MediaItem = {
 };
 
 const items: MediaItem[] = [
-  { type: 'image', src: real1, position: '50% 30%', eyebrow: 'Träning', title: 'Personliga tränare' },
+  { type: 'video', src: '/landing/jobseeker-pt.mp4', poster: real1, position: '50% 30%', eyebrow: 'Träning', title: 'Personliga tränare' },
   { type: 'image', src: real5, position: '50% 30%', eyebrow: 'Hantverk', title: 'Rörmokare & byggare' },
   { type: 'video', src: '/landing/jobseeker-real-center.mp4', eyebrow: 'I rörelse', title: 'Yrkespersoner i sitt element' },
   { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real2, eyebrow: 'Service', title: 'Mäklare & rådgivare' },
@@ -35,6 +35,52 @@ const items: MediaItem[] = [
   { type: 'image', src: real7, position: '50% 35%', eyebrow: 'Lantbruk', title: 'Bönder & djurskötare' },
   { type: 'image', src: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
 ];
+
+type CardItemProps = {
+  item: MediaItem;
+  index: number;
+  total: number;
+  scrollYProgress: ReturnType<typeof useScroll>['scrollYProgress'];
+};
+
+const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
+  // Fade-in only triggers as user starts scrolling. Each card has a slightly
+  // delayed start so they cascade in. All complete by ~12% scroll progress.
+  const start = (index / total) * 0.06;        // 0 → 0.06 across all cards
+  const end = start + 0.07;
+  const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
+  const y = useTransform(scrollYProgress, [start, end], [40, 0]);
+
+  return (
+    <motion.div className="phg-card" style={{ opacity, y }}>
+      {item.type === 'video' ? (
+        <video
+          src={item.src}
+          poster={item.poster}
+          muted
+          loop
+          autoPlay
+          playsInline
+          preload="auto"
+          style={{ objectPosition: item.position ?? '50% 50%' }}
+        />
+      ) : (
+        <img
+          src={item.src}
+          alt={item.title}
+          loading={index < 3 ? 'eager' : 'lazy'}
+          decoding="async"
+          draggable={false}
+          style={{ objectPosition: item.position ?? '50% 50%' }}
+        />
+      )}
+      <div className="phg-cap">
+        <div className="phg-cap-eyebrow">{item.eyebrow}</div>
+        <div className="phg-cap-title">{item.title}</div>
+      </div>
+    </motion.div>
+  );
+};
 
 const PinnedHorizontalGallery = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -291,44 +337,15 @@ const PinnedHorizontalGallery = () => {
 
           <div className="phg-strip-wrap">
             <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
-              {items.map((item, i) => {
-                // Subtil vertikal stagger: kort 0 = 0, 1 = -16, 2 = +12, … (rotation av 4 värden)
-                const offsets = [0, -18, 14, -8];
-                const dy = offsets[i % offsets.length];
-                return (
-                  <div
-                    key={i}
-                    className="phg-card"
-                    style={{ transform: `translateY(${dy}px)` }}
-                  >
-                  {item.type === 'video' ? (
-                    <video
-                      src={item.src}
-                      poster={item.poster}
-                      muted
-                      loop
-                      autoPlay
-                      playsInline
-                      preload="auto"
-                      style={{ objectPosition: item.position ?? '50% 50%' }}
-                    />
-                  ) : (
-                    <img
-                      src={item.src}
-                      alt={item.title}
-                      loading={i < 3 ? 'eager' : 'lazy'}
-                      decoding="async"
-                      draggable={false}
-                      style={{ objectPosition: item.position ?? '50% 50%' }}
-                    />
-                  )}
-                  <div className="phg-cap">
-                    <div className="phg-cap-eyebrow">{item.eyebrow}</div>
-                    <div className="phg-cap-title">{item.title}</div>
-                  </div>
-                  </div>
-                );
-              })}
+              {items.map((item, i) => (
+                <CardItem
+                  key={i}
+                  item={item}
+                  index={i}
+                  total={items.length}
+                  scrollYProgress={scrollYProgress}
+                />
+              ))}
             </motion.div>
           </div>
 
