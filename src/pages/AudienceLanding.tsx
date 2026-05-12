@@ -42,6 +42,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
 
+  // Premium smooth-scroll (Lenis) på det dedikerade scroll-roteret
+  useLenisOnElement('[data-landing-scroll-root]');
+
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
 
