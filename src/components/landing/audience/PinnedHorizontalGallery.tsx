@@ -158,22 +158,36 @@ const PinnedHorizontalGallery = () => {
         }
         .phg-card {
           flex: 0 0 auto;
-          width: clamp(220px, 22vw, 320px);
+          width: clamp(240px, 23vw, 340px);
           aspect-ratio: 4 / 5;
-          border-radius: 22px;
+          border-radius: 26px;
           overflow: hidden;
           position: relative;
           background: rgba(0,0,0,0.4);
           box-shadow:
-            0 22px 60px -25px rgba(0,0,0,0.65),
-            0 0 0 1px rgba(255,255,255,0.06);
+            0 30px 70px -28px rgba(0,0,0,0.7),
+            0 0 0 1px rgba(255,255,255,0.07);
           transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), box-shadow 0.6s ease;
         }
+        .phg-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          padding: 1px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 38%, hsl(var(--secondary) / 0.25) 100%);
+          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+          z-index: 3;
+        }
         .phg-card:hover {
-          transform: translateY(-6px);
+          transform: translateY(-8px);
           box-shadow:
-            0 32px 80px -25px rgba(0,0,0,0.8),
-            0 0 0 1px rgba(255,255,255,0.12);
+            0 44px 90px -28px rgba(0,0,0,0.85),
+            0 0 0 1px rgba(255,255,255,0.14),
+            0 0 60px -12px hsl(var(--secondary) / 0.4);
         }
         .phg-card img,
         .phg-card video {
@@ -199,30 +213,30 @@ const PinnedHorizontalGallery = () => {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.1) 45%, transparent 65%);
+          background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 42%, transparent 65%);
           pointer-events: none;
         }
         .phg-cap {
           position: absolute;
           left: 0; right: 0; bottom: 0;
-          padding: 18px 18px 20px;
+          padding: 22px 22px 24px;
           color: white;
           z-index: 2;
         }
         .phg-cap-eyebrow {
           font-size: 10px;
           font-weight: 700;
-          letter-spacing: 0.26em;
+          letter-spacing: 0.28em;
           text-transform: uppercase;
-          color: rgba(255,255,255,0.78);
-          margin-bottom: 4px;
+          color: hsl(var(--secondary) / 0.95);
+          margin-bottom: 6px;
         }
         .phg-cap-title {
-          font-size: 15px;
-          font-weight: 700;
-          letter-spacing: -0.01em;
-          line-height: 1.2;
-          text-shadow: 0 2px 12px rgba(0,0,0,0.55);
+          font-size: 17px;
+          font-weight: 800;
+          letter-spacing: -0.012em;
+          line-height: 1.18;
+          text-shadow: 0 2px 14px rgba(0,0,0,0.6);
         }
 
         .phg-footer {
