@@ -281,18 +281,26 @@ const PinnedHorizontalGallery = () => {
           <motion.div className="phg-header" style={{ opacity: headerOpacity, y: headerY }}>
             <div className="phg-eyebrow">Så funkar det</div>
             <h2 className="phg-title">
-              Riktiga människor. Riktiga yrken.
+              Yrken som <em>bygger</em> Sverige.
             </h2>
             <p className="phg-sub">
-              Parium är byggt för dem som faktiskt utför jobben — inte bara läser om dem.
-              Möt några av människorna bakom yrkena.
+              Från kockar till elektriker, från tränare till undersköterskor.
+              Parium är gjort för människorna som faktiskt utför jobben — och företagen som söker dem.
             </p>
           </motion.div>
 
           <div className="phg-strip-wrap">
             <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
-              {items.map((item, i) => (
-                <div key={i} className="phg-card">
+              {items.map((item, i) => {
+                // Subtil vertikal stagger: kort 0 = 0, 1 = -16, 2 = +12, … (rotation av 4 värden)
+                const offsets = [0, -18, 14, -8];
+                const dy = offsets[i % offsets.length];
+                return (
+                  <div
+                    key={i}
+                    className="phg-card"
+                    style={{ transform: `translateY(${dy}px)` }}
+                  >
                   {item.type === 'video' ? (
                     <video
                       src={item.src}
