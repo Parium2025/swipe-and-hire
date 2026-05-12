@@ -30,7 +30,7 @@ const AudienceHero = ({ role }: { role: AudienceRole }) => {
       />
 
       <motion.div
-        className="relative z-10 mx-auto flex min-h-[calc(100svh-8rem)] max-w-[1180px] flex-col items-center justify-center text-center"
+        className="relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center text-center"
         initial="hidden"
         animate="visible"
         variants={stagger(0.18, 0.1)}
