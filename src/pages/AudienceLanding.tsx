@@ -171,7 +171,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 {c.eyebrow}
               </motion.span>
 
-              <h1 className="mt-6 max-w-4xl text-[3.25rem] font-black leading-[0.94] tracking-[-0.03em] text-white sm:text-[5rem] lg:text-[7rem]">
+              <h1 className="mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-[5rem] sm:leading-[1.0] lg:text-[7rem] lg:leading-[0.98]">
                 {c.hero.headline.map((line, i) => (
                   <motion.span
                     key={i}
