@@ -30,71 +30,46 @@ const AudienceHero = ({ role }: { role: AudienceRole }) => {
       />
 
       <motion.div
-        className="relative z-10 mx-auto grid min-h-[calc(100svh-8rem)] max-w-[1180px] grid-cols-1 items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]"
+        className="relative z-10 mx-auto flex min-h-[calc(100svh-8rem)] max-w-[1180px] flex-col items-center justify-center text-center"
         initial="hidden"
         animate="visible"
         variants={stagger(0.18, 0.1)}
       >
-        <div className="flex flex-col">
-          <motion.span
-            variants={fadeUp}
-            className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80"
-          >
-            {c.eyebrow}
-          </motion.span>
-
-          <h1 className="mt-6 max-w-3xl text-[3.25rem] font-black leading-[0.94] tracking-[-0.03em] text-white sm:text-[5rem] lg:text-[6.25rem]">
-            {c.hero.headline.map((line, i) => (
-              <motion.span
-                key={i}
-                variants={fadeUp}
-                className="block"
-              >
-                {line}
-              </motion.span>
-            ))}
-          </h1>
-
-          <motion.p
-            variants={fadeUp}
-            className="mt-7 max-w-xl text-base leading-8 text-white/65 sm:text-lg"
-          >
-            {c.hero.subtitle}
-          </motion.p>
-
-          <motion.div variants={fadeUp} className="mt-10 flex flex-wrap items-center gap-4">
-            <button
-              type="button"
-              onPointerDown={handleStart}
-              className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-secondary-foreground shadow-[0_18px_55px_hsl(var(--secondary)/0.32)] transition-shadow hover:shadow-[0_22px_70px_hsl(var(--secondary)/0.45)]"
-            >
-              {c.hero.cta}
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </button>
-          </motion.div>
-        </div>
-
-        {/* Floating mockup placeholder card */}
-        <motion.div
+        <motion.span
           variants={fadeUp}
-          className="relative hidden lg:block"
+          className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80"
         >
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity }}
-            className="relative mx-auto aspect-[9/16] max-w-[340px] overflow-hidden rounded-[2.5rem] border border-white/12 bg-gradient-to-br from-white/[0.07] to-white/[0.02] shadow-[0_40px_120px_hsl(var(--background)/0.6)] backdrop-blur-2xl"
+          {c.eyebrow}
+        </motion.span>
+
+        <h1 className="mt-6 max-w-4xl text-[3.25rem] font-black leading-[0.94] tracking-[-0.03em] text-white sm:text-[5rem] lg:text-[6.25rem]">
+          {c.hero.headline.map((line, i) => (
+            <motion.span
+              key={i}
+              variants={fadeUp}
+              className="block"
+            >
+              {line}
+            </motion.span>
+          ))}
+        </h1>
+
+        <motion.p
+          variants={fadeUp}
+          className="mt-7 max-w-xl text-base leading-8 text-white/65 sm:text-lg"
+        >
+          {c.hero.subtitle}
+        </motion.p>
+
+        <motion.div variants={fadeUp} className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <button
+            type="button"
+            onPointerDown={handleStart}
+            className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full bg-white px-7 py-3.5 text-sm font-bold text-background shadow-[0_18px_55px_hsl(0_0%_100%/0.18)] transition-shadow hover:shadow-[0_22px_70px_hsl(0_0%_100%/0.28)]"
           >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--secondary)/0.18),transparent_60%)]" />
-            <div className="relative flex h-full flex-col gap-4 p-6">
-              <div className="h-3 w-20 rounded-full bg-white/15" />
-              <div className="h-6 w-40 rounded-full bg-white/25" />
-              <div className="mt-4 flex-1 rounded-2xl border border-white/10 bg-white/[0.04]" />
-              <div className="flex gap-2">
-                <div className="h-11 flex-1 rounded-full bg-white/10" />
-                <div className="h-11 flex-1 rounded-full bg-secondary/80" />
-              </div>
-            </div>
-          </motion.div>
+            {c.hero.cta}
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </button>
         </motion.div>
       </motion.div>
 
