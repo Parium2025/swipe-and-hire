@@ -286,7 +286,7 @@ const PinnedHorizontalGallery = () => {
               scale: headlineScale,
               opacity: headlineOpacity,
               y: headlineY,
-              filter: useTransform(headlineBlur, (b) => `blur(${b}px)`),
+              filter: headlineFilter,
             }}
           >
             <div className="phg-eyebrow">För jobbsökare</div>
