@@ -72,6 +72,7 @@ const PinnedHorizontalGallery = () => {
 
   // Subtle progress indicator
   const progressScale = useTransform(scrollYProgress, [0.28, 0.98], [0, 1]);
+  const headlineFilter = useTransform(headlineBlur, (b) => `blur(${b}px)`);
 
   // Try to keep videos playing
   useEffect(() => {
