@@ -26,7 +26,7 @@ type MediaItem = {
 };
 
 const items: MediaItem[] = [
-  { type: 'image', src: real1, position: '50% 30%', eyebrow: 'Träning', title: 'Personliga tränare' },
+  { type: 'video', src: '/landing/jobseeker-pt.mp4', poster: real1, position: '50% 30%', eyebrow: 'Träning', title: 'Personliga tränare' },
   { type: 'image', src: real5, position: '50% 30%', eyebrow: 'Hantverk', title: 'Rörmokare & byggare' },
   { type: 'video', src: '/landing/jobseeker-real-center.mp4', eyebrow: 'I rörelse', title: 'Yrkespersoner i sitt element' },
   { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real2, eyebrow: 'Service', title: 'Mäklare & rådgivare' },
