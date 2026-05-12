@@ -17,7 +17,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     eyebrow: 'För jobbsökare',
     hero: {
       headline: ['Hitta jobb', 'som faktiskt', 'passar dig.'],
-      subtitle: 'Slipp långa formulär. Bygg en profil som visar mer än ett CV — och få relevanta jobb först.',
+      subtitle: 'Att söka jobb ska vara enkelt och smidigt. Här får du allt i en plattform.',
       cta: 'Skapa jobbsökarprofil',
     },
     statement: {
