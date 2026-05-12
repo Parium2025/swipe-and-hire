@@ -291,44 +291,15 @@ const PinnedHorizontalGallery = () => {
 
           <div className="phg-strip-wrap">
             <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
-              {items.map((item, i) => {
-                // Subtil vertikal stagger: kort 0 = 0, 1 = -16, 2 = +12, … (rotation av 4 värden)
-                const offsets = [0, -18, 14, -8];
-                const dy = offsets[i % offsets.length];
-                return (
-                  <div
-                    key={i}
-                    className="phg-card"
-                    style={{ transform: `translateY(${dy}px)` }}
-                  >
-                  {item.type === 'video' ? (
-                    <video
-                      src={item.src}
-                      poster={item.poster}
-                      muted
-                      loop
-                      autoPlay
-                      playsInline
-                      preload="auto"
-                      style={{ objectPosition: item.position ?? '50% 50%' }}
-                    />
-                  ) : (
-                    <img
-                      src={item.src}
-                      alt={item.title}
-                      loading={i < 3 ? 'eager' : 'lazy'}
-                      decoding="async"
-                      draggable={false}
-                      style={{ objectPosition: item.position ?? '50% 50%' }}
-                    />
-                  )}
-                  <div className="phg-cap">
-                    <div className="phg-cap-eyebrow">{item.eyebrow}</div>
-                    <div className="phg-cap-title">{item.title}</div>
-                  </div>
-                  </div>
-                );
-              })}
+              {items.map((item, i) => (
+                <CardItem
+                  key={i}
+                  item={item}
+                  index={i}
+                  total={items.length}
+                  scrollYProgress={scrollYProgress}
+                />
+              ))}
             </motion.div>
           </div>
 
