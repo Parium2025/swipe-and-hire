@@ -205,20 +205,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </motion.div>
             </motion.div>
 
-            {/* scroll cue */}
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 0.55, y: 0 }}
-              transition={{ delay: 1.6, duration: 0.8, ease }}
-              className="pointer-events-none absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55"
-            >
-              <span>Scrolla</span>
-              <motion.span
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 1.8, ease: 'easeInOut', repeat: Infinity }}
-                className="h-6 w-px bg-white/40"
-              />
-            </motion.div>
           </section>
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
@@ -286,15 +272,15 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.15 }}
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } } }}
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
                 className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <motion.div
                     key={i}
                     variants={{
-                      hidden: { opacity: 0, y: 40, scale: 0.96 },
-                      visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease } },
+                      hidden: { opacity: 0 },
+                      visible: { opacity: 1, transition: { duration: 0.9, ease } },
                     }}
                     className="group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)]"
                   >
@@ -334,15 +320,15 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } } }}
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
                 className="mt-12 grid gap-5 md:grid-cols-2"
               >
                 {['Start', 'Premium'].map((plan, i) => (
                   <motion.div
                     key={plan}
                     variants={{
-                      hidden: { opacity: 0, x: 80 },
-                      visible: { opacity: 1, x: 0, transition: { duration: 0.85, ease } },
+                      hidden: { opacity: 0 },
+                      visible: { opacity: 1, transition: { duration: 0.9, ease } },
                     }}
                     className={`relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 ${
                       i === 1

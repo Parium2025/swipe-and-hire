@@ -44,12 +44,17 @@ type CardItemProps = {
 };
 
 const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
-  // Fade-in only triggers as user starts scrolling. Each card has a slightly
-  // delayed start so they cascade in. All complete by ~12% scroll progress.
-  const start = (index / total) * 0.06;        // 0 → 0.06 across all cards
-  const end = start + 0.07;
+  // Lugn, mjuk fade-in när scrollen börjar. Längre sträcka = mindre "snabbt" intryck.
+  const start = 0.04 + (index / total) * 0.18;   // staggered start
+  const end = start + 0.22;                       // längre fade
   const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
-  const y = useTransform(scrollYProgress, [start, end], [40, 0]);
+  const y = useTransform(scrollYProgress, [start, end], [60, 0]);
+
+  // Caption fadar in strax efter själva kortet
+  const capStart = start + 0.08;
+  const capEnd = capStart + 0.18;
+  const capOpacity = useTransform(scrollYProgress, [capStart, capEnd], [0, 1]);
+  const capY = useTransform(scrollYProgress, [capStart, capEnd], [14, 0]);
 
   return (
     <motion.div className="phg-card" style={{ opacity, y }}>
@@ -74,10 +79,10 @@ const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       )}
-      <div className="phg-cap">
+      <motion.div className="phg-cap" style={{ opacity: capOpacity, y: capY }}>
         <div className="phg-cap-eyebrow">{item.eyebrow}</div>
         <div className="phg-cap-title">{item.title}</div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
@@ -94,8 +99,8 @@ const PinnedHorizontalGallery = () => {
     setReady(true);
   }, []);
 
-  // Lagom scroll — innehållet är synligt direkt, ingen tom yta
-  const SCROLL_VH = 200;
+  // Lugnt scrollavstånd — ger tid för fade-ins att andas
+  const SCROLL_VH = 320;
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -107,9 +112,9 @@ const PinnedHorizontalGallery = () => {
   const headerOpacity = useTransform(scrollYProgress, [0, 0.55, 0.85], [1, 1, 0.25]);
   const headerY = useTransform(scrollYProgress, [0, 0.85], [0, -60]);
 
-  // Strip: synlig direkt, glider höger → vänster
+  // Strip: glider höger → vänster, mjuk spring utan studs
   const xRaw = useTransform(scrollYProgress, [0, 1], ['6vw', '-115vw']);
-  const x = useSpring(xRaw, { stiffness: 110, damping: 28, mass: 0.5 });
+  const x = useSpring(xRaw, { stiffness: 60, damping: 24, mass: 0.6 });
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
@@ -353,7 +358,6 @@ const PinnedHorizontalGallery = () => {
             <div className="phg-progress" aria-hidden>
               <motion.span style={{ scaleX: progressScale }} />
             </div>
-            <div className="phg-hint">Scrolla för att utforska</div>
           </div>
         </div>
       </div>
