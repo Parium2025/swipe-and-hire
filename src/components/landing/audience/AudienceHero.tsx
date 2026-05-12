@@ -14,7 +14,7 @@ const AudienceHero = ({ role }: { role: AudienceRole }) => {
   };
 
   return (
-    <section className="relative overflow-hidden px-5 pb-24 pt-28 sm:px-6 sm:pt-32 md:px-12 md:pb-32 lg:px-24">
+    <section className="relative overflow-hidden px-5 sm:px-6 md:px-12 lg:px-24">
       {/* Subtle floating glow */}
       <motion.div
         aria-hidden
