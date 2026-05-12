@@ -48,8 +48,8 @@ const PinnedHorizontalGallery = () => {
     setReady(true);
   }, []);
 
-  // 3 viewports = lagom scroll, inte överdrivet
-  const SCROLL_VH = 280;
+  // Lagom scroll — innehållet är synligt direkt, ingen tom yta
+  const SCROLL_VH = 200;
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -57,16 +57,15 @@ const PinnedHorizontalGallery = () => {
     offset: ['start start', 'end end'],
   });
 
-  // Headline: lugn fade-in + svag lyft, ingen aggressiv zoom
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.06, 0.32, 0.42], [0, 1, 1, 0.15]);
-  const headerY = useTransform(scrollYProgress, [0, 0.42], [24, -40]);
+  // Headline syns direkt, glider lugnt uppåt mot slutet
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.55, 0.85], [1, 1, 0.25]);
+  const headerY = useTransform(scrollYProgress, [0, 0.85], [0, -60]);
 
-  // Strip: glider lugnt höger → vänster under hela scrollen
-  const xRaw = useTransform(scrollYProgress, [0.05, 0.95], ['4vw', '-110vw']);
+  // Strip: synlig direkt, glider höger → vänster
+  const xRaw = useTransform(scrollYProgress, [0, 1], ['6vw', '-115vw']);
   const x = useSpring(xRaw, { stiffness: 110, damping: 28, mass: 0.5 });
-  const stripOpacity = useTransform(scrollYProgress, [0, 0.08, 0.92, 1], [0, 1, 1, 0.6]);
 
-  const progressScale = useTransform(scrollYProgress, [0.05, 0.95], [0, 1]);
+  const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   useEffect(() => {
     const strip = stripRef.current;
@@ -121,20 +120,27 @@ const PinnedHorizontalGallery = () => {
           margin-bottom: 14px;
         }
         .phg-title {
-          font-size: clamp(2rem, 4.6vw, 4rem);
+          font-size: clamp(2.25rem, 5.4vw, 4.75rem);
           font-weight: 800;
-          line-height: 1.04;
-          letter-spacing: -0.025em;
+          line-height: 1.05;
+          letter-spacing: -0.028em;
           color: white;
-          max-width: 22ch;
+          max-width: 18ch;
           margin: 0 auto;
         }
+        .phg-title em {
+          font-style: normal;
+          background: linear-gradient(120deg, #ffffff 0%, #9bd3ff 50%, hsl(var(--secondary)) 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
         .phg-sub {
-          margin: 18px auto 0;
-          font-size: clamp(0.95rem, 1.15vw, 1.075rem);
-          line-height: 1.6;
-          color: rgba(255,255,255,0.6);
-          max-width: 56ch;
+          margin: 22px auto 0;
+          font-size: clamp(1rem, 1.2vw, 1.125rem);
+          line-height: 1.65;
+          color: rgba(255,255,255,0.62);
+          max-width: 52ch;
         }
 
         .phg-strip-wrap {
@@ -152,22 +158,36 @@ const PinnedHorizontalGallery = () => {
         }
         .phg-card {
           flex: 0 0 auto;
-          width: clamp(220px, 22vw, 320px);
+          width: clamp(240px, 23vw, 340px);
           aspect-ratio: 4 / 5;
-          border-radius: 22px;
+          border-radius: 26px;
           overflow: hidden;
           position: relative;
           background: rgba(0,0,0,0.4);
           box-shadow:
-            0 22px 60px -25px rgba(0,0,0,0.65),
-            0 0 0 1px rgba(255,255,255,0.06);
+            0 30px 70px -28px rgba(0,0,0,0.7),
+            0 0 0 1px rgba(255,255,255,0.07);
           transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), box-shadow 0.6s ease;
         }
+        .phg-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          padding: 1px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 38%, hsl(var(--secondary) / 0.25) 100%);
+          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+          z-index: 3;
+        }
         .phg-card:hover {
-          transform: translateY(-6px);
+          transform: translateY(-8px);
           box-shadow:
-            0 32px 80px -25px rgba(0,0,0,0.8),
-            0 0 0 1px rgba(255,255,255,0.12);
+            0 44px 90px -28px rgba(0,0,0,0.85),
+            0 0 0 1px rgba(255,255,255,0.14),
+            0 0 60px -12px hsl(var(--secondary) / 0.4);
         }
         .phg-card img,
         .phg-card video {
@@ -193,30 +213,30 @@ const PinnedHorizontalGallery = () => {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.1) 45%, transparent 65%);
+          background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 42%, transparent 65%);
           pointer-events: none;
         }
         .phg-cap {
           position: absolute;
           left: 0; right: 0; bottom: 0;
-          padding: 18px 18px 20px;
+          padding: 22px 22px 24px;
           color: white;
           z-index: 2;
         }
         .phg-cap-eyebrow {
           font-size: 10px;
           font-weight: 700;
-          letter-spacing: 0.26em;
+          letter-spacing: 0.28em;
           text-transform: uppercase;
-          color: rgba(255,255,255,0.78);
-          margin-bottom: 4px;
+          color: hsl(var(--secondary) / 0.95);
+          margin-bottom: 6px;
         }
         .phg-cap-title {
-          font-size: 15px;
-          font-weight: 700;
-          letter-spacing: -0.01em;
-          line-height: 1.2;
-          text-shadow: 0 2px 12px rgba(0,0,0,0.55);
+          font-size: 17px;
+          font-weight: 800;
+          letter-spacing: -0.012em;
+          line-height: 1.18;
+          text-shadow: 0 2px 14px rgba(0,0,0,0.6);
         }
 
         .phg-footer {
@@ -261,18 +281,26 @@ const PinnedHorizontalGallery = () => {
           <motion.div className="phg-header" style={{ opacity: headerOpacity, y: headerY }}>
             <div className="phg-eyebrow">Så funkar det</div>
             <h2 className="phg-title">
-              Riktiga människor. Riktiga yrken.
+              Yrken som <em>bygger</em> Sverige.
             </h2>
             <p className="phg-sub">
-              Parium är byggt för dem som faktiskt utför jobben — inte bara läser om dem.
-              Möt några av människorna bakom yrkena.
+              Från kockar till elektriker, från tränare till undersköterskor.
+              Parium är gjort för människorna som faktiskt utför jobben — och företagen som söker dem.
             </p>
           </motion.div>
 
           <div className="phg-strip-wrap">
-            <motion.div ref={stripRef} className="phg-strip" style={{ x, opacity: stripOpacity }}>
-              {items.map((item, i) => (
-                <div key={i} className="phg-card">
+            <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
+              {items.map((item, i) => {
+                // Subtil vertikal stagger: kort 0 = 0, 1 = -16, 2 = +12, … (rotation av 4 värden)
+                const offsets = [0, -18, 14, -8];
+                const dy = offsets[i % offsets.length];
+                return (
+                  <div
+                    key={i}
+                    className="phg-card"
+                    style={{ transform: `translateY(${dy}px)` }}
+                  >
                   {item.type === 'video' ? (
                     <video
                       src={item.src}
@@ -298,8 +326,9 @@ const PinnedHorizontalGallery = () => {
                     <div className="phg-cap-eyebrow">{item.eyebrow}</div>
                     <div className="phg-cap-title">{item.title}</div>
                   </div>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </motion.div>
           </div>
 
