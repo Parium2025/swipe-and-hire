@@ -205,20 +205,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </motion.div>
             </motion.div>
 
-            {/* scroll cue */}
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 0.55, y: 0 }}
-              transition={{ delay: 1.6, duration: 0.8, ease }}
-              className="pointer-events-none absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55"
-            >
-              <span>Scrolla</span>
-              <motion.span
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 1.8, ease: 'easeInOut', repeat: Infinity }}
-                className="h-6 w-px bg-white/40"
-              />
-            </motion.div>
           </section>
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
