@@ -136,13 +136,12 @@ const PinnedHorizontalGallery = () => {
     return () => document.removeEventListener('visibilitychange', onVis);
   }, []);
 
-  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+  // Säkerställ att videos alltid spelas — aldrig pausa baserat på scroll
+  useMotionValueEvent(scrollYProgress, 'change', () => {
     const strip = stripRef.current;
     if (!strip) return;
-    const visible = v > -0.05 && v < 1.05;
     Array.from(strip.querySelectorAll('video')).forEach((vid) => {
-      if (visible && vid.paused) vid.play().catch(() => {});
-      else if (!visible && !vid.paused) vid.pause();
+      if (vid.paused) vid.play().catch(() => {});
     });
   });
 
