@@ -48,8 +48,8 @@ const PinnedHorizontalGallery = () => {
     setReady(true);
   }, []);
 
-  // 3 viewports = lagom scroll, inte överdrivet
-  const SCROLL_VH = 280;
+  // Lagom scroll — innehållet är synligt direkt, ingen tom yta
+  const SCROLL_VH = 200;
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -57,16 +57,15 @@ const PinnedHorizontalGallery = () => {
     offset: ['start start', 'end end'],
   });
 
-  // Headline: lugn fade-in + svag lyft, ingen aggressiv zoom
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.06, 0.32, 0.42], [0, 1, 1, 0.15]);
-  const headerY = useTransform(scrollYProgress, [0, 0.42], [24, -40]);
+  // Headline syns direkt, glider lugnt uppåt mot slutet
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.55, 0.85], [1, 1, 0.25]);
+  const headerY = useTransform(scrollYProgress, [0, 0.85], [0, -60]);
 
-  // Strip: glider lugnt höger → vänster under hela scrollen
-  const xRaw = useTransform(scrollYProgress, [0.05, 0.95], ['4vw', '-110vw']);
+  // Strip: synlig direkt, glider höger → vänster
+  const xRaw = useTransform(scrollYProgress, [0, 1], ['6vw', '-115vw']);
   const x = useSpring(xRaw, { stiffness: 110, damping: 28, mass: 0.5 });
-  const stripOpacity = useTransform(scrollYProgress, [0, 0.08, 0.92, 1], [0, 1, 1, 0.6]);
 
-  const progressScale = useTransform(scrollYProgress, [0.05, 0.95], [0, 1]);
+  const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   useEffect(() => {
     const strip = stripRef.current;
