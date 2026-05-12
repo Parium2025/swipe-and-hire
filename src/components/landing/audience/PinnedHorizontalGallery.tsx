@@ -44,12 +44,17 @@ type CardItemProps = {
 };
 
 const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
-  // Fade-in only triggers as user starts scrolling. Each card has a slightly
-  // delayed start so they cascade in. All complete by ~12% scroll progress.
-  const start = (index / total) * 0.06;        // 0 → 0.06 across all cards
-  const end = start + 0.07;
+  // Lugn, mjuk fade-in när scrollen börjar. Längre sträcka = mindre "snabbt" intryck.
+  const start = 0.04 + (index / total) * 0.18;   // staggered start
+  const end = start + 0.22;                       // längre fade
   const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
-  const y = useTransform(scrollYProgress, [start, end], [40, 0]);
+  const y = useTransform(scrollYProgress, [start, end], [60, 0]);
+
+  // Caption fadar in strax efter själva kortet
+  const capStart = start + 0.08;
+  const capEnd = capStart + 0.18;
+  const capOpacity = useTransform(scrollYProgress, [capStart, capEnd], [0, 1]);
+  const capY = useTransform(scrollYProgress, [capStart, capEnd], [14, 0]);
 
   return (
     <motion.div className="phg-card" style={{ opacity, y }}>
