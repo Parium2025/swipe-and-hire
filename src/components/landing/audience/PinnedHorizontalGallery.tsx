@@ -334,14 +334,44 @@ const PinnedHorizontalGallery = () => {
       <div ref={sectionRef} className="phg-section" style={{ height: `${SCROLL_VH}vh` }}>
         <div className="phg-sticky">
           <motion.div className="phg-header" style={{ opacity: headerOpacity, y: headerY }}>
-            <div className="phg-eyebrow">Så funkar det</div>
-            <h2 className="phg-title">
-              Yrken som <em>bygger</em> Sverige.
-            </h2>
-            <p className="phg-sub">
-              Från kockar till elektriker, från tränare till undersköterskor.
-              Parium är gjort för människorna som faktiskt utför jobben — och företagen som söker dem.
-            </p>
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.4 }}
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.14, delayChildren: 0.05 } },
+              }}
+            >
+              <motion.div
+                className="phg-eyebrow"
+                variants={{
+                  hidden: { opacity: 0, y: 16, filter: 'blur(6px)' },
+                  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                Så funkar det
+              </motion.div>
+              <motion.h2
+                className="phg-title"
+                variants={{
+                  hidden: { opacity: 0, y: 38, filter: 'blur(10px)' },
+                  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1.1, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                Yrken som <em>bygger</em> Sverige.
+              </motion.h2>
+              <motion.p
+                className="phg-sub"
+                variants={{
+                  hidden: { opacity: 0, y: 22, filter: 'blur(6px)' },
+                  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                Från kockar till elektriker, från tränare till undersköterskor.
+                Parium är gjort för människorna som faktiskt utför jobben — och företagen som söker dem.
+              </motion.p>
+            </motion.div>
           </motion.div>
 
           <div className="phg-strip-wrap">
