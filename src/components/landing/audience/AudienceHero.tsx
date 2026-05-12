@@ -14,7 +14,7 @@ const AudienceHero = ({ role }: { role: AudienceRole }) => {
   };
 
   return (
-    <section className="relative overflow-hidden px-5 pb-24 pt-28 sm:px-6 sm:pt-32 md:px-12 md:pb-32 lg:px-24">
+    <section className="relative overflow-hidden px-5 sm:px-6 md:px-12 lg:px-24">
       {/* Subtle floating glow */}
       <motion.div
         aria-hidden
@@ -30,7 +30,7 @@ const AudienceHero = ({ role }: { role: AudienceRole }) => {
       />
 
       <motion.div
-        className="relative z-10 mx-auto flex min-h-[calc(100svh-8rem)] max-w-[1180px] flex-col items-center justify-center text-center"
+        className="relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center text-center"
         initial="hidden"
         animate="visible"
         variants={stagger(0.18, 0.1)}
@@ -56,7 +56,7 @@ const AudienceHero = ({ role }: { role: AudienceRole }) => {
 
         <motion.p
           variants={fadeUp}
-          className="mt-7 max-w-xl text-base leading-8 text-white/65 sm:text-lg"
+          className="mt-7 max-w-xl text-base leading-8 text-white sm:text-lg"
         >
           {c.hero.subtitle}
         </motion.p>
@@ -65,10 +65,10 @@ const AudienceHero = ({ role }: { role: AudienceRole }) => {
           <button
             type="button"
             onPointerDown={handleStart}
-            className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full bg-white px-7 py-3.5 text-sm font-bold text-background shadow-[0_18px_55px_hsl(0_0%_100%/0.18)] transition-shadow hover:shadow-[0_22px_70px_hsl(0_0%_100%/0.28)]"
+            className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-xl shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
           >
             {c.hero.cta}
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
           </button>
         </motion.div>
       </motion.div>
