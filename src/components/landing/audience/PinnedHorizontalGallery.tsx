@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion';
 
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
@@ -39,12 +39,20 @@ const items: MediaItem[] = [
 const PinnedHorizontalGallery = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
+  const [container, setContainer] = useState<HTMLElement | null>(null);
+
+  // Find the landing scroll container (AudienceLanding wraps in a fixed scroll root)
+  useEffect(() => {
+    const el = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    setContainer(el);
+  }, []);
 
   // 4 viewports tall = generous scroll distance for the pinned animation
   const SCROLL_VH = 420;
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
+    container: container ? { current: container } : undefined,
     offset: ['start start', 'end end'],
   });
 
