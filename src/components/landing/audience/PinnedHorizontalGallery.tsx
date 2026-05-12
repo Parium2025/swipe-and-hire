@@ -39,12 +39,14 @@ const items: MediaItem[] = [
 const PinnedHorizontalGallery = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
-  const [container, setContainer] = useState<HTMLElement | null>(null);
+  const containerRef = useRef<HTMLElement | null>(null);
+  const [containerReady, setContainerReady] = useState(false);
 
   // Find the landing scroll container (AudienceLanding wraps in a fixed scroll root)
   useEffect(() => {
     const el = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    setContainer(el);
+    containerRef.current = el;
+    setContainerReady(true);
   }, []);
 
   // 4 viewports tall = generous scroll distance for the pinned animation
@@ -52,9 +54,10 @@ const PinnedHorizontalGallery = () => {
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    container: container ? { current: container } : undefined,
+    container: containerRef as React.RefObject<HTMLElement>,
     offset: ['start start', 'end end'],
   });
+  void containerReady;
 
   // Phase 1 (0 → 0.18): headline enters + zooms toward viewer
   const headlineScale = useTransform(scrollYProgress, [0, 0.18, 0.32], [0.92, 1.08, 1.18]);
