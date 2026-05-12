@@ -36,6 +36,52 @@ const items: MediaItem[] = [
   { type: 'image', src: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
 ];
 
+type CardItemProps = {
+  item: MediaItem;
+  index: number;
+  total: number;
+  scrollYProgress: ReturnType<typeof useScroll>['scrollYProgress'];
+};
+
+const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
+  // Fade-in only triggers as user starts scrolling. Each card has a slightly
+  // delayed start so they cascade in. All complete by ~12% scroll progress.
+  const start = (index / total) * 0.06;        // 0 → 0.06 across all cards
+  const end = start + 0.07;
+  const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
+  const y = useTransform(scrollYProgress, [start, end], [40, 0]);
+
+  return (
+    <motion.div className="phg-card" style={{ opacity, y }}>
+      {item.type === 'video' ? (
+        <video
+          src={item.src}
+          poster={item.poster}
+          muted
+          loop
+          autoPlay
+          playsInline
+          preload="auto"
+          style={{ objectPosition: item.position ?? '50% 50%' }}
+        />
+      ) : (
+        <img
+          src={item.src}
+          alt={item.title}
+          loading={index < 3 ? 'eager' : 'lazy'}
+          decoding="async"
+          draggable={false}
+          style={{ objectPosition: item.position ?? '50% 50%' }}
+        />
+      )}
+      <div className="phg-cap">
+        <div className="phg-cap-eyebrow">{item.eyebrow}</div>
+        <div className="phg-cap-title">{item.title}</div>
+      </div>
+    </motion.div>
+  );
+};
+
 const PinnedHorizontalGallery = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
