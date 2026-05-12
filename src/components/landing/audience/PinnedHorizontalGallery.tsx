@@ -358,7 +358,6 @@ const PinnedHorizontalGallery = () => {
             <div className="phg-progress" aria-hidden>
               <motion.span style={{ scaleX: progressScale }} />
             </div>
-            <div className="phg-hint">Scrolla för att utforska</div>
           </div>
         </div>
       </div>
