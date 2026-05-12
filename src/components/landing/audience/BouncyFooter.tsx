@@ -22,23 +22,24 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
   const pathRef = useRef<SVGPathElement>(null);
   const startRef = useRef<number | null>(null);
   const [animating, setAnimating] = useState(false);
-  const [played, setPlayed] = useState(false);
 
-  // Trigger elastic morph when footer enters viewport
+  // Re-trigger elastic morph every time footer enters viewport
   useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
 
-    // Find scrollable container (landing root) or fall back to window
     const root = (document.querySelector('[data-landing-scroll-root]') as HTMLElement) ?? null;
+    let wasInside = false;
 
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting && !played) {
-            setPlayed(true);
-            setAnimating(true);
+          if (entry.isIntersecting && !wasInside) {
+            wasInside = true;
             startRef.current = null;
+            setAnimating(true);
+          } else if (!entry.isIntersecting && wasInside) {
+            wasInside = false;
           }
         }
       },
@@ -47,7 +48,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
 
     io.observe(el);
     return () => io.disconnect();
-  }, [played]);
+  }, []);
 
   useAnimationFrame((t) => {
     if (!animating || !pathRef.current) return;
