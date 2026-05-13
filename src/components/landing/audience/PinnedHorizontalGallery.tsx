@@ -103,7 +103,7 @@ const PinnedHorizontalGallery = () => {
   }, []);
 
   // Kortare scrollavstånd → inget tomt gap under sektionen, känns tajt & premium
-  const SCROLL_VH = 260;
+  const SCROLL_VH = 320;
 
   // Starta progress redan när sektionen närmar sig viewport (inte först vid pin).
   // Det gör att korten fadar in DIREKT efter hero, utan tomt mellanrum.
