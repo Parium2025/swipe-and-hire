@@ -178,9 +178,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="absolute inset-0 h-full w-full object-cover"
                 aria-hidden="true"
               />
-              {/* Premium dark overlay för läsbarhet */}
-              <div className="absolute inset-0 bg-gradient-to-b from-background/55 via-background/35 to-background/85" />
-              <div className="absolute inset-0 bg-background/25" />
+              {/* Subtil overlay endast i botten för läsbarhet — ingen vit/ljus film över hela videon */}
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background/70 via-background/30 to-transparent" />
             </div>
 
             <motion.div
