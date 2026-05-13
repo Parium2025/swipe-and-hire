@@ -195,9 +195,16 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 {c.hero.subtitle}
               </motion.p>
 
+              <motion.p
+                variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.85, ease } } }}
+                className="mt-6 max-w-2xl text-[15px] leading-[1.75] text-white/75 sm:text-base"
+              >
+                Oavsett om du söker jobb inom träning, hantverk, vård, restaurang, lantbruk eller något helt annat — nedan ser du några exempel på de yrken som faktiskt bygger Sverige. Vi har skapat en plattform där du har allt samlat på ett ställe, och med vår app kan du söka direkt, smidigt och utan krångel.
+              </motion.p>
+
               <motion.div
                 variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                className="mt-10"
+                className="mt-12"
               >
                 <button
                   type="button"
