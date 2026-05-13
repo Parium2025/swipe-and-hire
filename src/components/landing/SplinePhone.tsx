@@ -24,9 +24,10 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
   const previousOverflowRef = useRef<string>('');
   const previousTouchActionRef = useRef<string>('');
 
-  const getScrollRoot = useCallback(() =>
-    wrapperRef.current?.closest<HTMLElement>('[data-landing-scroll-root]') ?? null;
-  , []);
+  const getScrollRoot = useCallback(
+    () => wrapperRef.current?.closest<HTMLElement>('[data-landing-scroll-root]') ?? null,
+    []
+  );
 
   const stopPageScroll = useCallback((event: Event) => {
     event.preventDefault();
