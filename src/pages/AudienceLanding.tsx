@@ -172,7 +172,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 src={pariumPhone}
                 alt=""
                 aria-hidden="true"
-                className="h-auto w-[78%] max-w-[420px] opacity-90 drop-shadow-[0_40px_80px_hsl(var(--background)/0.6)]"
+                className="h-auto w-[125%] max-w-none opacity-95 drop-shadow-[0_40px_80px_hsl(var(--background)/0.6)]"
               />
             </div>
 
