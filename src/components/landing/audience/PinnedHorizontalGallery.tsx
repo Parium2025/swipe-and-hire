@@ -103,8 +103,8 @@ const PinnedHorizontalGallery = () => {
     setReady(true);
   }, []);
 
-  // Lugnt scrollavstånd — ger tid för fade-ins att andas
-  const SCROLL_VH = 320;
+  // Lugnt, premium scrollavstånd — ger motstånd och tyngd utan att kännas tungt
+  const SCROLL_VH = 420;
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -112,13 +112,10 @@ const PinnedHorizontalGallery = () => {
     offset: ['start start', 'end end'],
   });
 
-  // Headline glider lugnt uppåt mot slutet (intro-fade hanteras av motion-variant nedan)
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.6, 0.9], [1, 1, 0.2]);
-  const headerY = useTransform(scrollYProgress, [0, 0.9], [0, -60]);
-
   // Strip: håller still tills korten har fadat in, glider sedan höger → vänster
-  const xRaw = useTransform(scrollYProgress, [0, 0.2, 1], ['6vw', '6vw', '-115vw']);
-  const x = useSpring(xRaw, { stiffness: 60, damping: 24, mass: 0.6 });
+  // Mjukare spring (lägre stiffness, högre damping) = premium, viktig känsla
+  const xRaw = useTransform(scrollYProgress, [0, 0.18, 1], ['6vw', '6vw', '-115vw']);
+  const x = useSpring(xRaw, { stiffness: 38, damping: 30, mass: 0.9 });
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
@@ -332,46 +329,6 @@ const PinnedHorizontalGallery = () => {
 
       <div ref={sectionRef} className="phg-section" style={{ height: `${SCROLL_VH}vh` }}>
         <div className="phg-sticky">
-          <motion.div className="phg-header" style={{ opacity: headerOpacity, y: headerY }}>
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.4 }}
-              variants={{
-                hidden: {},
-                visible: { transition: { staggerChildren: 0.14, delayChildren: 0.05 } },
-              }}
-            >
-              <motion.div
-                className="phg-eyebrow"
-                variants={{
-                  hidden: { opacity: 0, y: 16, filter: 'blur(6px)' },
-                  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] } },
-                }}
-              >
-                Så funkar det
-              </motion.div>
-              <motion.h2
-                className="phg-title"
-                variants={{
-                  hidden: { opacity: 0, y: 38, filter: 'blur(10px)' },
-                  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1.1, ease: [0.16, 1, 0.3, 1] } },
-                }}
-              >
-                Yrken som <em>bygger</em> Sverige.
-              </motion.h2>
-              <motion.p
-                className="phg-sub"
-                variants={{
-                  hidden: { opacity: 0, y: 22, filter: 'blur(6px)' },
-                  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } },
-                }}
-              >
-                Från kockar till elektriker, från tränare till undersköterskor.
-                Parium är gjort för människorna som faktiskt utför jobben — och företagen som söker dem.
-              </motion.p>
-            </motion.div>
-          </motion.div>
 
           <div className="phg-strip-wrap">
             <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
