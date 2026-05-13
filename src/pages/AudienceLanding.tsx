@@ -13,7 +13,7 @@ import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
 import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
 import panelImg3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
 import panelImg4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
-import audienceHeroVideo from '@/assets/landing/audience-hero.mp4';
+import pariumPhone from '@/assets/landing/parium-phone.png';
 
 // 🖼️ Provisional placeholder images for the 4 horizontal scroll panels.
 // Swap these out via the imports above when final brand photography is ready.
@@ -166,20 +166,14 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             }}
             aria-labelledby="audience-hero-heading-mobile"
           >
-            {/* Background video — fyller hela viewporten */}
-            <div className="absolute inset-0 -z-0">
-              <video
-                src={audienceHeroVideo}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                className="absolute inset-0 h-full w-full object-cover"
+            {/* Telefonbild — transparent PNG centrerad bakom texten */}
+            <div className="absolute inset-0 -z-0 flex items-center justify-center pointer-events-none">
+              <img
+                src={pariumPhone}
+                alt=""
                 aria-hidden="true"
+                className="h-auto w-[78%] max-w-[420px] opacity-90 drop-shadow-[0_40px_80px_hsl(var(--background)/0.6)]"
               />
-              {/* Subtil overlay endast i botten för läsbarhet — ingen vit/ljus film över hela videon */}
-              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background/70 via-background/30 to-transparent" />
             </div>
 
             <motion.div
@@ -264,19 +258,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
               <motion.div
                 variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
-                className="relative mx-auto w-full max-w-[460px] aspect-[9/16] overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] shadow-[0_50px_140px_hsl(var(--background)/0.65)]"
+                className="relative mx-auto flex w-full max-w-[460px] items-center justify-center"
               >
-                <video
-                  src={audienceHeroVideo}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  aria-hidden="true"
+                <img
+                  src={pariumPhone}
+                  alt="Parium-appen visad på en mobiltelefon"
+                  className="h-auto w-full drop-shadow-[0_50px_120px_hsl(var(--background)/0.7)]"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
               </motion.div>
             </motion.div>
           </section>
