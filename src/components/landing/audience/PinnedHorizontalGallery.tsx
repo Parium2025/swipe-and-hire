@@ -120,7 +120,9 @@ const PinnedHorizontalGallery = () => {
   // Slutposition beräknad så att SISTA kortet är helt synligt med luft till höger
   // innan pin släpps. 8 kort × ~27vw + gaps ≈ 230vw → -138vw tar sista kortet in.
   const xRaw = useTransform(scrollYProgress, [0, 0.28, 1], ['6vw', '6vw', '-138vw']);
-  const x = useSpring(xRaw, { stiffness: 38, damping: 30, mass: 0.9 });
+  // Tightare spring → följer scrollen tätt även vid snabb scroll, ingen "overshoot"
+  // som gör att korten flyger förbi efter att pin släppts
+  const x = useSpring(xRaw, { stiffness: 90, damping: 32, mass: 0.5 });
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
