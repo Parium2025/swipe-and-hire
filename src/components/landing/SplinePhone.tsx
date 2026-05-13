@@ -11,13 +11,15 @@ const SCENE_URL = 'https://my.spline.design/untitled-R9AE3iFR515l7EKvHCNavLb7/';
  */
 export const SplinePhone = ({ className }: SplinePhoneProps) => {
   return (
-    <div className={className}>
+    <div className={`${className ?? ''} pointer-events-none select-none`}>
       <iframe
         src={SCENE_URL}
         title="Parium 3D-telefon"
         loading="lazy"
         allow="autoplay; fullscreen"
-        className="h-full w-full border-0 bg-transparent"
+        scrolling="no"
+        tabIndex={-1}
+        className="pointer-events-none h-full w-full border-0 bg-transparent"
         style={{ colorScheme: 'normal' }}
       />
     </div>
