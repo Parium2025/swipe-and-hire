@@ -155,8 +155,8 @@ const PinnedHorizontalGallery = () => {
           width: 100%;
           overflow: hidden;
           display: grid;
-          grid-template-rows: auto 1fr auto;
-          align-items: stretch;
+          grid-template-rows: 1fr auto;
+          align-items: center;
         }
         .phg-header {
           padding: clamp(48px, 8vh, 96px) 24px clamp(24px, 4vh, 48px);
