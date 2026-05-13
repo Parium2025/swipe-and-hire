@@ -199,7 +199,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.85, ease } } }}
                 className="mt-6 max-w-2xl text-[15px] leading-[1.75] text-white/75 sm:text-base"
               >
-                Oavsett om du söker jobb inom träning, hantverk, vård, restaurang, lantbruk eller något helt annat — nedan ser du några exempel på de yrken som faktiskt bygger Sverige. Vi har skapat en plattform där du har allt samlat på ett ställe, och med vår app kan du söka direkt, smidigt och utan krångel.
+                Att söka jobb ska vara enkelt — oavsett om du letar efter lediga jobb inom <strong className="font-semibold text-white/90">träning, hantverk, vård, restaurang, lantbruk</strong> eller något helt eget. Parium samlar Sveriges yrken på ett ställe, matchar dig mot arbetsgivare som faktiskt passar din profil, och låter dig ansöka direkt i appen — utan CV-krångel, personliga brev eller långa formulär.
               </motion.p>
 
               <motion.div
