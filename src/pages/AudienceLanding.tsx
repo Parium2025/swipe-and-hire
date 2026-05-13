@@ -166,20 +166,14 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             }}
             aria-labelledby="audience-hero-heading-mobile"
           >
-            {/* Background video — fyller hela viewporten */}
-            <div className="absolute inset-0 -z-0">
-              <video
-                src={audienceHeroVideo}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                className="absolute inset-0 h-full w-full object-cover"
+            {/* Telefonbild — transparent PNG centrerad bakom texten */}
+            <div className="absolute inset-0 -z-0 flex items-center justify-center pointer-events-none">
+              <img
+                src={pariumPhone}
+                alt=""
                 aria-hidden="true"
+                className="h-auto w-[78%] max-w-[420px] opacity-90 drop-shadow-[0_40px_80px_hsl(var(--background)/0.6)]"
               />
-              {/* Subtil overlay endast i botten för läsbarhet — ingen vit/ljus film över hela videon */}
-              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background/70 via-background/30 to-transparent" />
             </div>
 
             <motion.div
