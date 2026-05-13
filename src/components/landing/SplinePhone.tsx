@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Application } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
@@ -24,10 +24,11 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
   const previousOverflowRef = useRef<string>('');
   const previousTouchActionRef = useRef<string>('');
 
-  const getScrollRoot = () =>
+  const getScrollRoot = useCallback(() =>
     wrapperRef.current?.closest<HTMLElement>('[data-landing-scroll-root]') ?? null;
+  , []);
 
-  const stopPageScroll = (event: Event) => {
+  const stopPageScroll = useCallback((event: Event) => {
     event.preventDefault();
     event.stopPropagation();
     if ('stopImmediatePropagation' in event) event.stopImmediatePropagation();
@@ -36,7 +37,7 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
     if (root && lockedScrollTopRef.current !== null) {
       root.scrollTop = lockedScrollTopRef.current;
     }
-  };
+  }, [getScrollRoot]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -52,7 +53,7 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
       app.dispose();
       appRef.current = null;
     };
-  }, []);
+  }, [stopPageScroll]);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
