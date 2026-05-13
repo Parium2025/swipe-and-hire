@@ -172,7 +172,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
 
             <motion.div
-              className="relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
+              className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
               initial="hidden"
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}

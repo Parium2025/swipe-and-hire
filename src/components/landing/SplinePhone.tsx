@@ -1,70 +1,103 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { Application } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
   className?: string;
 }
 
-const SCENE_URL = 'https://my.spline.design/untitled-R9AE3iFR515l7EKvHCNavLb7/';
+const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
 /**
- * Renderar Parium-telefonen som en interaktiv 3D-scen från Spline via iframe.
+ * Renderar Parium-telefonen som en interaktiv 3D-scen från Spline på en canvas.
  *
  * Interaktion:
- * - En transparent overlay ligger ovanpå iframen och fångar normalt all input
- *   så sidan kan scrollas (wheel/touch) utan att Spline-scenen "stjäl" gesten.
- * - När användaren håller in/trycker på telefonen kopplas overlayen bort
- *   tillfälligt så att Spline tar emot pointer-events och man kan vrida 3D-modellen.
- * - När pekaren släpps återaktiveras overlayen.
+ * När användaren håller/draggar på telefonen låses landningssidans scroll
+ * tillfälligt, så gesten bara roterar modellen och inte flyttar bort hero-telefonen.
  */
 export const SplinePhone = ({ className }: SplinePhoneProps) => {
-  const [interactive, setInteractive] = useState(false);
-  const releaseTimer = useRef<number | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const appRef = useRef<Application | null>(null);
+  const lockedRootRef = useRef<HTMLElement | null>(null);
+  const previousOverflowRef = useRef<string>('');
+  const previousTouchActionRef = useRef<string>('');
 
-  const enableInteraction = () => {
-    if (releaseTimer.current) {
-      window.clearTimeout(releaseTimer.current);
-      releaseTimer.current = null;
-    }
-    setInteractive(true);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const release = () => {
-      // Liten fördröjning så Spline hinner ta emot pointerup innan overlayen återkommer
-      releaseTimer.current = window.setTimeout(() => setInteractive(false), 150);
-      window.removeEventListener('pointerup', release);
-      window.removeEventListener('pointercancel', release);
+    const app = new Application(canvas, { renderMode: 'continuous' });
+    appRef.current = app;
+    app.load(SCENE_URL).catch((error) => {
+      console.error('Kunde inte ladda Spline-telefonen:', error);
+    });
+
+    return () => {
+      app.dispose();
+      appRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const preventPageScroll = (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
     };
 
-    window.addEventListener('pointerup', release, { once: true });
-    window.addEventListener('pointercancel', release, { once: true });
+    wrapper.addEventListener('wheel', preventPageScroll, { passive: false });
+    wrapper.addEventListener('touchmove', preventPageScroll, { passive: false });
+
+    return () => {
+      wrapper.removeEventListener('wheel', preventPageScroll);
+      wrapper.removeEventListener('touchmove', preventPageScroll);
+    };
+  }, []);
+
+  const unlockScroll = () => {
+    const root = lockedRootRef.current;
+    if (!root) return;
+
+    root.style.overflowY = previousOverflowRef.current;
+    root.style.touchAction = previousTouchActionRef.current;
+    lockedRootRef.current = null;
+  };
+
+  const lockScrollForRotation = () => {
+    const root = wrapperRef.current?.closest<HTMLElement>('[data-landing-scroll-root]');
+    if (!root || lockedRootRef.current) return;
+
+    lockedRootRef.current = root;
+    previousOverflowRef.current = root.style.overflowY;
+    previousTouchActionRef.current = root.style.touchAction;
+    root.style.overflowY = 'hidden';
+    root.style.touchAction = 'none';
+
+    window.addEventListener('pointerup', unlockScroll, { once: true });
+    window.addEventListener('pointercancel', unlockScroll, { once: true });
   };
 
   return (
-    <div className={`relative ${className ?? ''}`}>
-      <iframe
-        src={SCENE_URL}
+    <div
+      ref={wrapperRef}
+      data-lenis-prevent
+      data-lenis-prevent-wheel
+      data-lenis-prevent-touch
+      className={`relative ${className ?? ''}`}
+      onPointerDown={lockScrollForRotation}
+      onPointerUp={unlockScroll}
+      onPointerCancel={unlockScroll}
+      style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
+    >
+      <canvas
+        ref={canvasRef}
         title="Parium 3D-telefon"
-        loading="lazy"
-        allow="autoplay; fullscreen"
-        scrolling="no"
         tabIndex={-1}
-        className="h-full w-full border-0 bg-transparent"
+        className="h-full w-full bg-transparent outline-none"
+        draggable={false}
         style={{ colorScheme: 'normal' }}
-      />
-      {/*
-        Transparent overlay – fångar scroll/wheel/touch så sidan kan rullas,
-        men släpper igenom interaktionen när användaren aktivt trycker ner pekaren
-        för att vrida 3D-modellen.
-      */}
-      <div
-        aria-hidden="true"
-        onPointerDown={enableInteraction}
-        className="absolute inset-0"
-        style={{
-          pointerEvents: interactive ? 'none' : 'auto',
-          touchAction: 'pan-y',
-          background: 'transparent',
-          cursor: 'grab',
-        }}
       />
     </div>
   );
