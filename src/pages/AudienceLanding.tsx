@@ -165,60 +165,103 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             />
 
             <motion.div
-              className="relative z-10 mx-auto flex w-full max-w-[1280px] flex-col items-center text-center"
+              className="relative z-10 mx-auto flex w-full max-w-[1280px] flex-col items-center"
               initial="hidden"
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
             >
-              <motion.span
-                variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80"
-              >
-                {c.eyebrow}
-              </motion.span>
+              {/* Top row: text (left on desktop) + video (right on desktop / behind on mobile) */}
+              <div className="grid w-full gap-10 md:grid-cols-2 md:items-center md:gap-12 lg:gap-16">
+                {/* Text column with mobile-only video backdrop */}
+                <div className="relative text-center md:text-left">
+                  {/* Mobile-only: video sits behind the headline area */}
+                  <div className="pointer-events-none absolute inset-x-[-1.25rem] -top-12 -bottom-6 -z-10 overflow-hidden md:hidden">
+                    <video
+                      src={audienceHeroVideo}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="auto"
+                      className="absolute inset-0 h-full w-full object-cover opacity-55"
+                      aria-hidden="true"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/55 to-background" />
+                  </div>
 
-              <h1 className="mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.06] tracking-[-0.025em] text-white sm:text-[5rem] lg:text-[7rem]">
-                {c.hero.headline.map((line, i) => (
                   <motion.span
-                    key={i}
-                    variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease } } }}
-                    className="block"
+                    variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
+                    className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80"
                   >
-                    {line}
+                    {c.eyebrow}
                   </motion.span>
-                ))}
-              </h1>
 
-              <motion.p
-                variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                className="mt-7 max-w-xl text-base leading-8 text-white sm:text-lg"
-              >
-                {c.hero.subtitle}
-              </motion.p>
+                  <h1 className="mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.06] tracking-[-0.025em] text-white sm:text-[5rem] lg:text-[6rem]">
+                    {c.hero.headline.map((line, i) => (
+                      <motion.span
+                        key={i}
+                        variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease } } }}
+                        className="block"
+                      >
+                        {line}
+                      </motion.span>
+                    ))}
+                  </h1>
 
-              <motion.p
-                variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.85, ease } } }}
-                className="mt-6 max-w-2xl text-[15px] leading-[1.75] text-white/75 sm:text-base"
-              >
-                Att söka jobb ska vara enkelt — oavsett om du letar lediga jobb inom <strong className="font-semibold text-white/90">träning, hantverk, vård, restaurang, lantbruk</strong> eller något helt eget. På Parium hittar du annonser från arbetsgivare över hela Sverige och ansöker direkt i appen: ditt CV ligger sparat, du svarar på frågorna på plats och bokar intervjuer utan att lämna telefonen. Slut på att jaga mellan Arbetsförmedlingen, Indeed och tio andra sidor — allt som rör din jobbsökning samlat på ett ställe.
-              </motion.p>
+                  <motion.p
+                    variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
+                    className="mt-7 max-w-xl text-base leading-8 text-white sm:text-lg md:mx-0 mx-auto"
+                  >
+                    {c.hero.subtitle}
+                  </motion.p>
+                </div>
 
-              <motion.div
-                variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                className="mt-12"
-              >
-                <button
-                  type="button"
-                  onPointerDown={handleStart}
-                  className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-xl shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
+                {/* Video column — desktop only, premium framed card */}
+                <motion.div
+                  variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
+                  className="hidden md:block relative mx-auto w-full max-w-[460px] aspect-[9/16] overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] shadow-[0_50px_140px_hsl(var(--background)/0.65)]"
                 >
-                  {c.hero.cta}
-                  <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
-                </button>
-              </motion.div>
+                  <video
+                    src={audienceHeroVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    className="absolute inset-0 h-full w-full object-cover"
+                    aria-hidden="true"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
+                </motion.div>
+              </div>
+
+              {/* Body text + CTA — clean island, no video behind */}
+              <div className="relative mt-14 w-full md:mt-20">
+                <motion.p
+                  variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.85, ease } } }}
+                  className="mx-auto max-w-2xl text-center text-[15px] leading-[1.75] text-white/75 sm:text-base"
+                >
+                  Att söka jobb ska vara enkelt — oavsett om du letar lediga jobb inom <strong className="font-semibold text-white/90">träning, hantverk, vård, restaurang, lantbruk</strong> eller något helt eget. På Parium hittar du annonser från arbetsgivare över hela Sverige och ansöker direkt i appen: ditt CV ligger sparat, du svarar på frågorna på plats och bokar intervjuer utan att lämna telefonen. Slut på att jaga mellan Arbetsförmedlingen, Indeed och tio andra sidor — allt som rör din jobbsökning samlat på ett ställe.
+                </motion.p>
+
+                <motion.div
+                  variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
+                  className="mt-12 flex justify-center"
+                >
+                  <button
+                    type="button"
+                    onPointerDown={handleStart}
+                    className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-xl shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
+                  >
+                    {c.hero.cta}
+                    <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
+                  </button>
+                </motion.div>
+              </div>
             </motion.div>
 
           </section>
+
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
           <section id="sa-funkar-det" aria-labelledby="sa-funkar-det-heading" className="scroll-mt-24">
