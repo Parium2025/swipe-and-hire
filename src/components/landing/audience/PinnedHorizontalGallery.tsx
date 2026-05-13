@@ -104,17 +104,20 @@ const PinnedHorizontalGallery = () => {
   }, []);
 
   // Lugnt, premium scrollavstånd — ger motstånd och tyngd utan att kännas tungt
-  const SCROLL_VH = 420;
+  const SCROLL_VH = 380;
 
+  // Starta progress redan när sektionen närmar sig viewport (inte först vid pin).
+  // Det gör att korten fadar in DIREKT efter hero, utan tomt mellanrum.
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     container: containerRef as React.RefObject<HTMLElement>,
-    offset: ['start start', 'end end'],
+    offset: ['start end', 'end end'],
   });
 
-  // Strip: håller still tills korten har fadat in, glider sedan höger → vänster
-  // Mjukare spring (lägre stiffness, högre damping) = premium, viktig känsla
-  const xRaw = useTransform(scrollYProgress, [0, 0.18, 1], ['6vw', '6vw', '-115vw']);
+  // Med ovan offset: approach ≈ 100vh / (100+280)vh ≈ 0.26 av total progress.
+  // Korten fadar in under approach (0 → ~0.22), står still tills pin börjar,
+  // glider sedan höger → vänster genom pin-fasen.
+  const xRaw = useTransform(scrollYProgress, [0, 0.28, 1], ['6vw', '6vw', '-115vw']);
   const x = useSpring(xRaw, { stiffness: 38, damping: 30, mass: 0.9 });
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
