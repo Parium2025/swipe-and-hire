@@ -22,11 +22,15 @@ export function useLenisOnElement(selector: string, enabled = true) {
     const lenis = new Lenis({
       wrapper,
       content,
-      duration: 1.2,
+      // Längre duration + lägre lerp = tyngre, mer "premium" scrollkänsla
+      // som matchar pinned-galleriets tempo och tar bort plötsliga växlingar.
+      duration: 1.6,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      touchMultiplier: 1.1,
-      lerp: 0.1,
+      // Dämpar snabba scroll-utbrott så även "blixtscroll" känns kontrollerad
+      wheelMultiplier: 0.85,
+      touchMultiplier: 1.0,
+      lerp: 0.07,
     });
 
     let rafId = 0;
