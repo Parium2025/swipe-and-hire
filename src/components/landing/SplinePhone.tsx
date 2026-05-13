@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Application } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
@@ -19,8 +19,26 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<Application | null>(null);
   const lockedRootRef = useRef<HTMLElement | null>(null);
+  const pointerInsideRef = useRef(false);
+  const lockedScrollTopRef = useRef<number | null>(null);
   const previousOverflowRef = useRef<string>('');
   const previousTouchActionRef = useRef<string>('');
+
+  const getScrollRoot = useCallback(
+    () => wrapperRef.current?.closest<HTMLElement>('[data-landing-scroll-root]') ?? null,
+    []
+  );
+
+  const stopPageScroll = useCallback((event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if ('stopImmediatePropagation' in event) event.stopImmediatePropagation();
+
+    const root = getScrollRoot();
+    if (root && lockedScrollTopRef.current !== null) {
+      root.scrollTop = lockedScrollTopRef.current;
+    }
+  }, [getScrollRoot]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -42,19 +60,27 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
 
-    const preventPageScroll = (event: Event) => {
-      event.preventDefault();
-      event.stopPropagation();
+    const shouldBlock = (event: Event) => {
+      const path = 'composedPath' in event ? event.composedPath() : [];
+      return pointerInsideRef.current || path.includes(wrapper);
     };
 
-    wrapper.addEventListener('wheel', preventPageScroll, { passive: false });
-    wrapper.addEventListener('touchmove', preventPageScroll, { passive: false });
+    const preventScrollBeforeLenis = (event: Event) => {
+      if (shouldBlock(event)) stopPageScroll(event);
+    };
+
+    wrapper.addEventListener('wheel', stopPageScroll, { passive: false, capture: true });
+    wrapper.addEventListener('touchmove', stopPageScroll, { passive: false, capture: true });
+    document.addEventListener('wheel', preventScrollBeforeLenis, { passive: false, capture: true });
+    document.addEventListener('touchmove', preventScrollBeforeLenis, { passive: false, capture: true });
 
     return () => {
-      wrapper.removeEventListener('wheel', preventPageScroll);
-      wrapper.removeEventListener('touchmove', preventPageScroll);
+      wrapper.removeEventListener('wheel', stopPageScroll, true);
+      wrapper.removeEventListener('touchmove', stopPageScroll, true);
+      document.removeEventListener('wheel', preventScrollBeforeLenis, true);
+      document.removeEventListener('touchmove', preventScrollBeforeLenis, true);
     };
-  }, []);
+  }, [stopPageScroll]);
 
   const unlockScroll = () => {
     const root = lockedRootRef.current;
@@ -63,13 +89,15 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
     root.style.overflowY = previousOverflowRef.current;
     root.style.touchAction = previousTouchActionRef.current;
     lockedRootRef.current = null;
+    lockedScrollTopRef.current = null;
   };
 
   const lockScrollForRotation = () => {
-    const root = wrapperRef.current?.closest<HTMLElement>('[data-landing-scroll-root]');
+    const root = getScrollRoot();
     if (!root || lockedRootRef.current) return;
 
     lockedRootRef.current = root;
+    lockedScrollTopRef.current = root.scrollTop;
     previousOverflowRef.current = root.style.overflowY;
     previousTouchActionRef.current = root.style.touchAction;
     root.style.overflowY = 'hidden';
@@ -86,6 +114,14 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
       data-lenis-prevent-wheel
       data-lenis-prevent-touch
       className={`relative ${className ?? ''}`}
+      onPointerEnter={() => {
+        pointerInsideRef.current = true;
+        lockedScrollTopRef.current = getScrollRoot()?.scrollTop ?? null;
+      }}
+      onPointerLeave={() => {
+        pointerInsideRef.current = false;
+        if (!lockedRootRef.current) lockedScrollTopRef.current = null;
+      }}
       onPointerDown={lockScrollForRotation}
       onPointerUp={unlockScroll}
       onPointerCancel={unlockScroll}
