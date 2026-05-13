@@ -13,6 +13,7 @@ import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
 import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
 import panelImg3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
 import panelImg4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
+import audienceHeroVideo from '@/assets/landing/audience-hero.mp4';
 
 // 🖼️ Provisional placeholder images for the 4 horizontal scroll panels.
 // Swap these out via the imports above when final brand photography is ready.
