@@ -172,7 +172,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 src={pariumPhone}
                 alt=""
                 aria-hidden="true"
-                className="h-auto w-[78%] max-w-[420px] opacity-90 drop-shadow-[0_40px_80px_hsl(var(--background)/0.6)]"
+                className="h-auto w-[125%] max-w-none opacity-95 drop-shadow-[0_40px_80px_hsl(var(--background)/0.6)]"
               />
             </div>
 
@@ -258,12 +258,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
               <motion.div
                 variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
-                className="relative mx-auto flex w-full max-w-[460px] items-center justify-center"
+                className="relative mx-auto flex w-full items-center justify-center"
               >
                 <img
                   src={pariumPhone}
                   alt="Parium-appen visad på en mobiltelefon"
-                  className="h-auto w-full drop-shadow-[0_50px_120px_hsl(var(--background)/0.7)]"
+                  className="h-auto w-full max-w-[760px] scale-[1.15] drop-shadow-[0_50px_120px_hsl(var(--background)/0.7)]"
                 />
               </motion.div>
             </motion.div>
