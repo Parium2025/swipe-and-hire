@@ -13,7 +13,7 @@ import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
 import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
 import panelImg3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
 import panelImg4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
-import pariumPhone from '@/assets/landing/parium-phone-premium.png';
+import { SplinePhone } from '@/components/landing/SplinePhone';
 
 // 🖼️ Provisional placeholder images for the 4 horizontal scroll panels.
 // Swap these out via the imports above when final brand photography is ready.
@@ -166,14 +166,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             }}
             aria-labelledby="audience-hero-heading-mobile"
           >
-            {/* Telefonbild — transparent PNG centrerad bakom texten */}
+            {/* 3D-telefon från Spline centrerad bakom texten */}
             <div className="absolute inset-0 -z-0 flex items-center justify-center pointer-events-none">
-              <img
-                src={pariumPhone}
-                alt=""
-                aria-hidden="true"
-                className="h-auto w-[58%] max-w-[280px] opacity-95 drop-shadow-[0_36px_72px_hsl(var(--background)/0.55)]"
-              />
+              <SplinePhone className="h-[80svh] w-full max-w-[520px]" />
             </div>
 
             <motion.div
@@ -260,11 +255,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
                 className="relative mx-auto flex w-full items-center justify-center"
               >
-                <img
-                  src={pariumPhone}
-                  alt="Parium-appen visad på en mobiltelefon"
-                  className="h-auto w-full max-w-[360px] drop-shadow-[0_44px_110px_hsl(var(--background)/0.62)]"
-                />
+                <SplinePhone className="aspect-[9/16] w-full max-w-[520px]" />
               </motion.div>
             </motion.div>
           </section>
