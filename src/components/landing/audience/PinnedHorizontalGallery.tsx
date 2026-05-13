@@ -103,8 +103,8 @@ const PinnedHorizontalGallery = () => {
     setReady(true);
   }, []);
 
-  // Lugnt scrollavstånd — ger tid för fade-ins att andas
-  const SCROLL_VH = 320;
+  // Lugnt, premium scrollavstånd — ger motstånd och tyngd utan att kännas tungt
+  const SCROLL_VH = 420;
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -112,13 +112,10 @@ const PinnedHorizontalGallery = () => {
     offset: ['start start', 'end end'],
   });
 
-  // Headline glider lugnt uppåt mot slutet (intro-fade hanteras av motion-variant nedan)
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.6, 0.9], [1, 1, 0.2]);
-  const headerY = useTransform(scrollYProgress, [0, 0.9], [0, -60]);
-
   // Strip: håller still tills korten har fadat in, glider sedan höger → vänster
-  const xRaw = useTransform(scrollYProgress, [0, 0.2, 1], ['6vw', '6vw', '-115vw']);
-  const x = useSpring(xRaw, { stiffness: 60, damping: 24, mass: 0.6 });
+  // Mjukare spring (lägre stiffness, högre damping) = premium, viktig känsla
+  const xRaw = useTransform(scrollYProgress, [0, 0.18, 1], ['6vw', '6vw', '-115vw']);
+  const x = useSpring(xRaw, { stiffness: 38, damping: 30, mass: 0.9 });
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
