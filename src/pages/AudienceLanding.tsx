@@ -13,7 +13,7 @@ import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
 import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
 import panelImg3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
 import panelImg4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
-import pariumPhone from '@/assets/landing/parium-phone.png';
+import pariumPhone from '@/assets/landing/parium-phone-premium.png';
 
 // 🖼️ Provisional placeholder images for the 4 horizontal scroll panels.
 // Swap these out via the imports above when final brand photography is ready.
@@ -172,7 +172,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 src={pariumPhone}
                 alt=""
                 aria-hidden="true"
-                className="h-auto w-[78%] max-w-[360px] opacity-95 drop-shadow-[0_40px_80px_hsl(var(--background)/0.6)]"
+                className="h-auto w-[58%] max-w-[280px] opacity-95 drop-shadow-[0_36px_72px_hsl(var(--background)/0.55)]"
               />
             </div>
 
@@ -263,7 +263,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 <img
                   src={pariumPhone}
                   alt="Parium-appen visad på en mobiltelefon"
-                  className="h-auto w-full max-w-[460px] drop-shadow-[0_50px_120px_hsl(var(--background)/0.7)]"
+                  className="h-auto w-full max-w-[360px] drop-shadow-[0_44px_110px_hsl(var(--background)/0.62)]"
                 />
               </motion.div>
             </motion.div>
