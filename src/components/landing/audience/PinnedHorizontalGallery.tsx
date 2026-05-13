@@ -211,7 +211,7 @@ const PinnedHorizontalGallery = () => {
         }
         .phg-card {
           flex: 0 0 auto;
-          width: clamp(240px, 23vw, 340px);
+          width: clamp(280px, 27vw, 400px);
           aspect-ratio: 4 / 5;
           border-radius: 26px;
           overflow: hidden;
