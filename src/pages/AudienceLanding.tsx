@@ -263,7 +263,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 <img
                   src={pariumPhone}
                   alt="Parium-appen visad på en mobiltelefon"
-                  className="h-auto w-full max-w-[760px] scale-[1.15] drop-shadow-[0_50px_120px_hsl(var(--background)/0.7)]"
+                  className="h-auto w-full max-w-[460px] drop-shadow-[0_50px_120px_hsl(var(--background)/0.7)]"
                 />
               </motion.div>
             </motion.div>
