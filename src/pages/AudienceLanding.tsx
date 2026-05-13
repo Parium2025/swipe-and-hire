@@ -258,19 +258,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
               <motion.div
                 variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
-                className="relative mx-auto w-full max-w-[460px] aspect-[9/16] overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] shadow-[0_50px_140px_hsl(var(--background)/0.65)]"
+                className="relative mx-auto flex w-full max-w-[460px] items-center justify-center"
               >
-                <video
-                  src={audienceHeroVideo}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  aria-hidden="true"
+                <img
+                  src={pariumPhone}
+                  alt="Parium-appen visad på en mobiltelefon"
+                  className="h-auto w-full drop-shadow-[0_50px_120px_hsl(var(--background)/0.7)]"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
               </motion.div>
             </motion.div>
           </section>
