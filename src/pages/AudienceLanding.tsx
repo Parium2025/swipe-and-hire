@@ -199,7 +199,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.85, ease } } }}
                 className="mt-6 max-w-2xl text-[15px] leading-[1.75] text-white/75 sm:text-base"
               >
-                Att söka jobb ska vara enkelt — oavsett om du letar efter lediga jobb inom <strong className="font-semibold text-white/90">träning, hantverk, vård, restaurang, lantbruk</strong> eller något helt eget. Parium samlar Sveriges yrken på ett ställe, matchar dig mot arbetsgivare som faktiskt passar din profil, och låter dig ansöka direkt i appen — utan CV-krångel, personliga brev eller långa formulär.
+                Att söka jobb ska vara enkelt — oavsett om du letar lediga jobb inom <strong className="font-semibold text-white/90">träning, hantverk, vård, restaurang, lantbruk</strong> eller något helt eget. På Parium hittar du annonser från arbetsgivare över hela Sverige och ansöker direkt i appen: ditt CV ligger sparat, du svarar på frågorna på plats och bokar intervjuer utan att lämna telefonen. Slut på att jaga mellan Arbetsförmedlingen, Indeed och tio andra sidor — allt som rör din jobbsökning samlat på ett ställe.
               </motion.p>
 
               <motion.div
