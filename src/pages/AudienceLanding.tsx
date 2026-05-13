@@ -155,8 +155,73 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* ──────────────── 1. HERO (vertikal) ──────────────── */}
-          <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
+          {/* ──────────────── 1. HERO ──────────────── */}
+          {/* MOBILE HERO — full-bleed video bakom centrerad text (matchar LandingHero) */}
+          <section
+            className="relative md:hidden w-screen overflow-hidden"
+            style={{
+              marginLeft: 'calc(50% - 50vw)',
+              marginRight: 'calc(50% - 50vw)',
+              minHeight: '100svh',
+            }}
+            aria-labelledby="audience-hero-heading-mobile"
+          >
+            {/* Background video — fyller hela viewporten */}
+            <div className="absolute inset-0 -z-0">
+              <video
+                src={audienceHeroVideo}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className="absolute inset-0 h-full w-full object-cover"
+                aria-hidden="true"
+              />
+              {/* Premium dark overlay för läsbarhet */}
+              <div className="absolute inset-0 bg-gradient-to-b from-background/55 via-background/35 to-background/85" />
+              <div className="absolute inset-0 bg-background/25" />
+            </div>
+
+            <motion.div
+              className="relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
+              initial="hidden"
+              animate="visible"
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
+            >
+              <motion.span
+                variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
+                className="text-xs font-bold uppercase tracking-[0.28em] text-secondary drop-shadow-[0_2px_8px_hsl(var(--background)/0.6)]"
+              >
+                {c.eyebrow}
+              </motion.span>
+
+              <h1
+                id="audience-hero-heading-mobile"
+                className="mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-[4rem]"
+              >
+                {c.hero.headline.map((line, i) => (
+                  <motion.span
+                    key={i}
+                    variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease } } }}
+                    className="block"
+                  >
+                    {line}
+                  </motion.span>
+                ))}
+              </h1>
+
+              <motion.p
+                variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
+                className="mt-7 max-w-xl text-base leading-8 text-white drop-shadow-[0_2px_12px_hsl(var(--background)/0.55)]"
+              >
+                {c.hero.subtitle}
+              </motion.p>
+            </motion.div>
+          </section>
+
+          {/* DESKTOP HERO — split: text till vänster, framad video till höger */}
+          <section className="relative hidden md:flex min-h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
@@ -165,101 +230,88 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             />
 
             <motion.div
-              className="relative z-10 mx-auto flex w-full max-w-[1280px] flex-col items-center"
+              className="relative z-10 mx-auto grid w-full max-w-[1280px] gap-12 md:grid-cols-2 md:items-center lg:gap-16"
               initial="hidden"
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
             >
-              {/* Top row: text (left on desktop) + video (right on desktop / behind on mobile) */}
-              <div className="grid w-full gap-10 md:grid-cols-2 md:items-center md:gap-12 lg:gap-16">
-                {/* Text column with mobile-only video backdrop */}
-                <div className="relative text-center md:text-left">
-                  {/* Mobile-only: video sits behind the headline area */}
-                  <div className="pointer-events-none absolute inset-x-[-1.25rem] -top-12 -bottom-6 -z-10 overflow-hidden md:hidden">
-                    <video
-                      src={audienceHeroVideo}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      preload="auto"
-                      className="absolute inset-0 h-full w-full object-cover opacity-55"
-                      aria-hidden="true"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/55 to-background" />
-                  </div>
-
-                  <motion.span
-                    variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                    className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80"
-                  >
-                    {c.eyebrow}
-                  </motion.span>
-
-                  <h1 className="mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.06] tracking-[-0.025em] text-white sm:text-[5rem] lg:text-[6rem]">
-                    {c.hero.headline.map((line, i) => (
-                      <motion.span
-                        key={i}
-                        variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease } } }}
-                        className="block"
-                      >
-                        {line}
-                      </motion.span>
-                    ))}
-                  </h1>
-
-                  <motion.p
-                    variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                    className="mt-7 max-w-xl text-base leading-8 text-white sm:text-lg md:mx-0 mx-auto"
-                  >
-                    {c.hero.subtitle}
-                  </motion.p>
-                </div>
-
-                {/* Video column — desktop only, premium framed card */}
-                <motion.div
-                  variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
-                  className="hidden md:block relative mx-auto w-full max-w-[460px] aspect-[9/16] overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] shadow-[0_50px_140px_hsl(var(--background)/0.65)]"
+              <div className="text-left">
+                <motion.span
+                  variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
+                  className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80"
                 >
-                  <video
-                    src={audienceHeroVideo}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    className="absolute inset-0 h-full w-full object-cover"
-                    aria-hidden="true"
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
-                </motion.div>
-              </div>
+                  {c.eyebrow}
+                </motion.span>
 
-              {/* Body text + CTA — clean island, no video behind */}
-              <div className="relative mt-14 w-full md:mt-20">
+                <h1 className="mt-6 max-w-4xl text-[5rem] font-black leading-[1.04] tracking-[-0.025em] text-white lg:text-[6rem]">
+                  {c.hero.headline.map((line, i) => (
+                    <motion.span
+                      key={i}
+                      variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease } } }}
+                      className="block"
+                    >
+                      {line}
+                    </motion.span>
+                  ))}
+                </h1>
+
                 <motion.p
-                  variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.85, ease } } }}
-                  className="mx-auto max-w-2xl text-center text-[15px] leading-[1.75] text-white/75 sm:text-base"
-                >
-                  Att söka jobb ska vara enkelt — oavsett om du letar lediga jobb inom <strong className="font-semibold text-white/90">träning, hantverk, vård, restaurang, lantbruk</strong> eller något helt eget. På Parium hittar du annonser från arbetsgivare över hela Sverige och ansöker direkt i appen: ditt CV ligger sparat, du svarar på frågorna på plats och bokar intervjuer utan att lämna telefonen. Slut på att jaga mellan Arbetsförmedlingen, Indeed och tio andra sidor — allt som rör din jobbsökning samlat på ett ställe.
-                </motion.p>
-
-                <motion.div
                   variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                  className="mt-12 flex justify-center"
+                  className="mt-7 max-w-xl text-lg leading-8 text-white"
                 >
-                  <button
-                    type="button"
-                    onPointerDown={handleStart}
-                    className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-xl shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
-                  >
-                    {c.hero.cta}
-                    <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
-                  </button>
-                </motion.div>
+                  {c.hero.subtitle}
+                </motion.p>
               </div>
-            </motion.div>
 
+              <motion.div
+                variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
+                className="relative mx-auto w-full max-w-[460px] aspect-[9/16] overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] shadow-[0_50px_140px_hsl(var(--background)/0.65)]"
+              >
+                <video
+                  src={audienceHeroVideo}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  aria-hidden="true"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
+              </motion.div>
+            </motion.div>
+          </section>
+
+          {/* ──────────────── 1b. BRÖDTEXT + CTA — separat sektion utan video ──────────────── */}
+          <section className="relative px-5 pt-16 pb-20 sm:px-6 sm:pt-20 sm:pb-24 md:px-12 lg:px-24">
+            <div className="mx-auto max-w-2xl">
+              <motion.p
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.85, ease }}
+                className="text-center text-[15px] leading-[1.75] text-white/75 sm:text-base"
+              >
+                Att söka jobb ska vara enkelt — oavsett om du letar lediga jobb inom <strong className="font-semibold text-white/90">träning, hantverk, vård, restaurang, lantbruk</strong> eller något helt eget. På Parium hittar du annonser från arbetsgivare över hela Sverige och ansöker direkt i appen: ditt CV ligger sparat, du svarar på frågorna på plats och bokar intervjuer utan att lämna telefonen. Slut på att jaga mellan Arbetsförmedlingen, Indeed och tio andra sidor — allt som rör din jobbsökning samlat på ett ställe.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.8, ease, delay: 0.1 }}
+                className="mt-12 flex justify-center"
+              >
+                <button
+                  type="button"
+                  onPointerDown={handleStart}
+                  className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-xl shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
+                >
+                  {c.hero.cta}
+                  <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
+                </button>
+              </motion.div>
+            </div>
           </section>
 
 
