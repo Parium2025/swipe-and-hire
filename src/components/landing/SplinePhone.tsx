@@ -54,7 +54,7 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
       app.dispose();
       appRef.current = null;
     };
-  }, [stopPageScroll]);
+  }, []);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -80,7 +80,7 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
       document.removeEventListener('wheel', preventScrollBeforeLenis, true);
       document.removeEventListener('touchmove', preventScrollBeforeLenis, true);
     };
-  }, []);
+  }, [stopPageScroll]);
 
   const unlockScroll = () => {
     const root = lockedRootRef.current;
