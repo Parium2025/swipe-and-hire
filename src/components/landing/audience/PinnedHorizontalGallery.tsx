@@ -102,8 +102,8 @@ const PinnedHorizontalGallery = () => {
     setReady(true);
   }, []);
 
-  // Lugnt, premium scrollavstånd — ger motstånd och tyngd utan att kännas tungt
-  const SCROLL_VH = 380;
+  // Kortare scrollavstånd → inget tomt gap under sektionen, känns tajt & premium
+  const SCROLL_VH = 260;
 
   // Starta progress redan när sektionen närmar sig viewport (inte först vid pin).
   // Det gör att korten fadar in DIREKT efter hero, utan tomt mellanrum.
@@ -155,8 +155,8 @@ const PinnedHorizontalGallery = () => {
           width: 100%;
           overflow: hidden;
           display: grid;
-          grid-template-rows: auto 1fr auto;
-          align-items: stretch;
+          grid-template-rows: 1fr auto;
+          align-items: center;
         }
         .phg-header {
           padding: clamp(48px, 8vh, 96px) 24px clamp(24px, 4vh, 48px);
@@ -211,7 +211,7 @@ const PinnedHorizontalGallery = () => {
         }
         .phg-card {
           flex: 0 0 auto;
-          width: clamp(240px, 23vw, 340px);
+          width: clamp(280px, 27vw, 400px);
           aspect-ratio: 4 / 5;
           border-radius: 26px;
           overflow: hidden;
