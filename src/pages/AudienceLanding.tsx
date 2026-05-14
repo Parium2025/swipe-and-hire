@@ -264,7 +264,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
                   className="relative mx-auto flex w-full items-center justify-center self-center"
                 >
-                  {isDesktopHero && <SplinePhone className="h-[min(74svh,720px)] w-auto aspect-[9/19.5]" />}
+                  {isDesktopHero && <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" />}
                 </motion.div>
               </motion.div>
             </section>
@@ -273,16 +273,16 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {/* INTRO PANEL — snap-stop 2 (slide-up animation vid in-view) */}
           <motion.section
             aria-label="Introduktion"
-            className="relative flex h-[100svh] w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-6 md:px-12 lg:px-24"
+            className="relative -mt-[100svh] flex h-[100svh] w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-6 md:px-12 lg:px-24"
             style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
-            initial={{ opacity: 0, y: 80 }}
+            initial={{ y: '100%' }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.35 }}
-            transition={{ duration: 0.9, ease }}
+            transition={{ duration: 0.95, ease }}
           >
             <div className="absolute inset-x-0 top-0 h-px bg-white/15" />
             <div className="relative z-10 flex max-w-4xl flex-col items-center">
-              <SplitRevealText
+              <IntroText
                 paragraphs={[
                   'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
                   'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
