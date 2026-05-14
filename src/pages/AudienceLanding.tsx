@@ -59,12 +59,14 @@ type HeroIntroStageProps = {
 const FixedPhoneLayer = () => {
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
   const phoneControls = useAnimationControls();
+  const [interactive, setInteractive] = useState(false);
   const parkedRef = useRef(true);
   const heroIndexRef = useRef(0);
   const returnTimerRef = useRef<number | null>(null);
 
   const setPhoneParked = (value: boolean) => {
     parkedRef.current = value;
+    setInteractive(!value);
   };
 
   // Telefonen är bara dekorativ här: den får aldrig fånga wheel/touch och låsa
@@ -152,23 +154,10 @@ const FixedPhoneLayer = () => {
 
     isHeroZone() ? revealPhone(0) : parkPhoneBelow();
 
-    // Telefonen ska kunna roteras med musen (3D), men wheel-events får
-    // ALDRIG nå Spline — annars zoomar/flyttas kameran och telefonen blir
-    // klippt. Vi fångar wheel i capture-fas, blockerar Spline, och
-    // vidarebefordrar scrollen till sidans scroll-root så sidan ändå rör sig.
-    const frame = phoneFrameRef.current;
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      scrollRoot?.scrollBy({ top: e.deltaY, left: 0, behavior: 'auto' });
-    };
-    frame?.addEventListener('wheel', onWheel, { passive: false, capture: true });
-
     window.addEventListener('parium:hero-index', onIndex);
     scrollRoot?.addEventListener('scroll', syncVisibilityToScroll, { passive: true });
     return () => {
       clearReturnTimer();
-      frame?.removeEventListener('wheel', onWheel, { capture: true } as EventListenerOptions);
       window.removeEventListener('parium:hero-index', onIndex);
       scrollRoot?.removeEventListener('scroll', syncVisibilityToScroll);
     };
@@ -185,7 +174,7 @@ const FixedPhoneLayer = () => {
           ref={phoneFrameRef}
           initial={{ opacity: 0, x: 60, scale: 0.96 }}
           animate={phoneControls}
-          className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10"
+          className={`${interactive ? 'pointer-events-auto' : 'pointer-events-none'} relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
