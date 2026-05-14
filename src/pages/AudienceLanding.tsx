@@ -204,6 +204,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   return (
     <div
+      ref={scrollRootRef}
       data-landing-scroll-root
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
@@ -222,139 +223,98 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* ──────────────── 1. HERO ──────────────── */}
-          {/* MOBILE HERO — full-bleed video bakom centrerad text (matchar LandingHero) */}
-          <section
-            className="relative lg:hidden w-screen overflow-hidden"
-            style={{
-              marginLeft: 'calc(50% - 50vw)',
-              marginRight: 'calc(50% - 50vw)',
-              minHeight: '100svh',
-            }}
-            aria-labelledby="audience-hero-heading-mobile"
-          >
-            {/* 3D-telefon från Spline centrerad bakom texten */}
-            <div className="absolute inset-0 -z-0 flex items-center justify-center">
-              {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
-            </div>
-
-            <motion.div
-              className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
-              initial="hidden"
-              animate="visible"
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
-            >
-              <HeroText
-                eyebrow={c.eyebrow}
-                headline={c.hero.headline}
-                subtitle={c.hero.subtitle}
-                variant="mobile"
-                headingId="audience-hero-heading-mobile"
-              />
-            </motion.div>
-          </section>
-
-          {/* DESKTOP HERO — split: text till vänster, framad video till höger */}
-          <section className="relative hidden lg:flex h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
-            <motion.div
-              aria-hidden
-              className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
-              animate={{ opacity: [0.5, 0.75, 0.5] }}
-              transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
-            />
-
-            <motion.div
-              className="relative z-10 mx-auto grid w-full max-w-[1280px] gap-12 md:grid-cols-2 md:items-center lg:gap-16 2xl:max-w-[1440px]"
-              initial="hidden"
-              animate="visible"
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
-            >
-              <div className="text-left">
-                <HeroText
-                  eyebrow={c.eyebrow}
-                  headline={c.hero.headline}
-                  subtitle={c.hero.subtitle}
-                  variant="desktop"
-                />
-              </div>
-
-              <motion.div
-                variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
-                className="relative mx-auto flex w-full items-center justify-center"
-              >
-                {isDesktopHero && <SplinePhone className="h-[min(82svh,820px)] w-auto aspect-[9/19.5]" />}
-              </motion.div>
-            </motion.div>
-          </section>
-
-          {/* ──────────────── 1b. BRÖDTEXT + CTA — slide-up panel (GSAP-stil), korten följer direkt efter ──────────────── */}
-          <section className="relative overflow-hidden px-5 pt-20 pb-12 sm:px-6 sm:pt-24 sm:pb-14 md:px-12 md:pt-28 md:pb-16 lg:px-24">
-            <motion.div
-              className="mx-auto max-w-2xl"
-              initial={{ y: '100%', opacity: 0 }}
-              whileInView={{ y: '0%', opacity: 1 }}
-              viewport={{ once: true, amount: 0.35 }}
-              transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.35 }}
-                variants={{
-                  hidden: {},
-                  visible: { transition: { staggerChildren: 0.012, delayChildren: 0.45 } },
-                }}
-              >
-                <p className="text-center text-[15px] leading-[1.75] text-white sm:text-base md:text-lg">
-                  {[
-                    'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben. Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
-                    'Parium är utvecklat för att göra jobbsökandet modernare, snabbare och mer användarvänligt. Du kan enkelt upptäcka nya jobbmöjligheter, läsa mer om tjänster och ansöka direkt. Utan krångliga processer eller onödigt många steg.',
-                  ].map((paragraph, pIdx) => (
-                    <span key={pIdx} className={pIdx > 0 ? 'mt-6 block' : 'block'}>
-                      {paragraph.split(' ').map((word, wIdx, words) => (
-                        <span key={wIdx} className="inline-block whitespace-nowrap">
-                          {word.split('').map((char, cIdx) => (
-                            <motion.span
-                              key={cIdx}
-                              className="inline-block"
-                              variants={{
-                                hidden: { opacity: 0, y: 28, filter: 'blur(8px)' },
-                                visible: {
-                                  opacity: 1,
-                                  y: 0,
-                                  filter: 'blur(0px)',
-                                  transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
-                                },
-                              }}
-                            >
-                              {char}
-                            </motion.span>
-                          ))}
-                          {wIdx < words.length - 1 && '\u00A0'}
-                        </span>
-                      ))}
-                    </span>
-                  ))}
-                </p>
-
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, y: 24, scale: 0.96 },
-                    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease, delay: 0.6 } },
-                  }}
-                  className="mt-12 flex justify-center"
+          <section ref={introStageRef} className="relative h-[220svh] w-full">
+            <div className="sticky top-0 h-[100svh] overflow-hidden">
+              <motion.div style={{ y: heroY, scale: heroScale }} className="absolute inset-0 origin-center">
+                {/* MOBILE HERO — full-bleed video bakom centrerad text (matchar LandingHero) */}
+                <section
+                  className="relative flex h-[100svh] w-screen overflow-hidden lg:hidden"
+                  style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
+                  aria-labelledby="audience-hero-heading-mobile"
                 >
-                  <button
-                    type="button"
-                    onPointerDown={handleStart}
-                    className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-xl shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
+                  <div className="absolute inset-0 -z-0 flex items-center justify-center">
+                    {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
+                  </div>
+
+                  <motion.div
+                    className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
                   >
-                    {c.hero.cta}
-                    <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
-                  </button>
-                </motion.div>
+                    <HeroText
+                      eyebrow={c.eyebrow}
+                      headline={c.hero.headline}
+                      subtitle={c.hero.subtitle}
+                      variant="mobile"
+                      headingId="audience-hero-heading-mobile"
+                    />
+                  </motion.div>
+                </section>
+
+                {/* DESKTOP HERO — split: text till vänster, framad video till höger */}
+                <section className="relative hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
+                  <motion.div
+                    aria-hidden
+                    className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
+                    animate={{ opacity: [0.5, 0.75, 0.5] }}
+                    transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
+                  />
+
+                  <motion.div
+                    className="relative z-10 mx-auto grid w-full max-w-[1280px] gap-12 md:grid-cols-2 md:items-center lg:gap-16 2xl:max-w-[1440px]"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
+                  >
+                    <div className="text-left">
+                      <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
+                    </div>
+
+                    <motion.div
+                      variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
+                      className="relative mx-auto flex w-full items-center justify-center"
+                    >
+                      {isDesktopHero && <SplinePhone className="h-[min(82svh,820px)] w-auto aspect-[9/19.5]" />}
+                    </motion.div>
+                  </motion.div>
+                </section>
               </motion.div>
-            </motion.div>
+
+              <motion.section
+                aria-label="Introduktion"
+                className="absolute inset-0 z-20 flex items-center justify-center overflow-hidden px-5 py-24 sm:px-6 md:px-12 lg:px-24"
+                style={{ y: panelY, opacity: panelOpacity }}
+              >
+                <div className="absolute inset-0 bg-primary/95 backdrop-blur-xl" />
+                <div className="absolute inset-x-0 top-0 h-px bg-white/15" />
+                <motion.div style={{ y: panelTextY, opacity: panelTextOpacity }} className="relative z-10 flex max-w-4xl flex-col items-center">
+                  <SplitRevealText
+                    paragraphs={[
+                      'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
+                      'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
+                    ]}
+                  />
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true, amount: 0.45 }}
+                    transition={{ duration: 0.7, ease, delay: 0.55 }}
+                    className="mt-10 flex justify-center"
+                  >
+                    <button
+                      type="button"
+                      onPointerDown={handleStart}
+                      className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-xl shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
+                    >
+                      {c.hero.cta}
+                      <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
+                    </button>
+                  </motion.div>
+                </motion.div>
+              </motion.section>
+            </div>
           </section>
 
 
