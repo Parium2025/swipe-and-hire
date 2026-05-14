@@ -161,6 +161,7 @@ const FixedPhoneLayer = () => {
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <div
+          data-phone-scroll-forward
           className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
