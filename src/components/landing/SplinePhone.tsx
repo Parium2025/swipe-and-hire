@@ -13,7 +13,6 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
 
-  const [shouldLoad, setShouldLoad] = useState(true); // Hero — ladda direkt
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -22,7 +21,7 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
-    if (!shouldLoad || reducedMotion) return;
+    if (reducedMotion) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -62,7 +61,7 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
       app?.dispose();
       appRef.current = null;
     };
-  }, [shouldLoad, reducedMotion, zoom]);
+  }, [reducedMotion, zoom]);
 
   if (reducedMotion || hasError) {
     return (
@@ -83,15 +82,6 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
     >
-      {!isReady && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 flex items-start justify-center pt-2"
-        >
-          <div className="aspect-[9/19] h-[82%] max-h-[420px] animate-pulse rounded-[2.25rem] border border-white/10 bg-white/[0.04]" />
-        </div>
-      )}
-
       <canvas
         ref={canvasRef}
         role="img"
