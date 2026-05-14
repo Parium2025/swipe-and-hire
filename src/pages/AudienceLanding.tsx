@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -41,9 +41,61 @@ type AudienceLandingProps = {
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
+const SplitRevealText = ({ paragraphs }: { paragraphs: string[] }) => (
+  <motion.div
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: true, amount: 0.45 }}
+    variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.012, delayChildren: 0.22 } } }}
+  >
+    <p className="max-w-3xl text-center text-base leading-[1.75] text-white/80 sm:text-lg md:text-xl">
+      {paragraphs.map((paragraph, pIdx) => (
+        <span key={pIdx} className={pIdx > 0 ? 'mt-6 block' : 'block'}>
+          {paragraph.split(' ').map((word, wIdx, words) => (
+            <span key={wIdx} className="inline-block whitespace-nowrap">
+              {word.split('').map((char, cIdx) => (
+                <motion.span
+                  key={cIdx}
+                  className="inline-block"
+                  variants={{
+                    hidden: { opacity: 0, y: 30, filter: 'blur(10px)' },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      filter: 'blur(0px)',
+                      transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+                    },
+                  }}
+                >
+                  {char}
+                </motion.span>
+              ))}
+              {wIdx < words.length - 1 && '\u00A0'}
+            </span>
+          ))}
+        </span>
+      ))}
+    </p>
+  </motion.div>
+);
+
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
+  const scrollRootRef = useRef<HTMLDivElement | null>(null);
+  const introStageRef = useRef<HTMLElement | null>(null);
+
+  const { scrollYProgress: introProgress } = useScroll({
+    target: introStageRef,
+    container: scrollRootRef,
+    offset: ['start start', 'center start'],
+  });
+  const heroY = useTransform(introProgress, [0, 1], [0, -90]);
+  const heroScale = useTransform(introProgress, [0, 1], [1, 0.965]);
+  const panelY = useTransform(introProgress, [0, 0.08, 0.78, 1], ['104%', '86%', '0%', '0%']);
+  const panelOpacity = useTransform(introProgress, [0, 0.08, 0.18], [0, 1, 1]);
+  const panelTextY = useTransform(introProgress, [0.42, 1], [54, 0]);
+  const panelTextOpacity = useTransform(introProgress, [0.38, 0.78], [0, 1]);
 
   // Premium smooth-scroll (Lenis) på det dedikerade scroll-roteret
   useLenisOnElement('[data-landing-scroll-root]');
