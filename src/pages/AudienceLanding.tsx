@@ -125,6 +125,7 @@ const FixedPhoneLayer = () => {
   return (
     <div
       className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
+      style={{ visibility: hidden ? 'hidden' : 'visible' }}
       aria-hidden={hidden}
     >
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
