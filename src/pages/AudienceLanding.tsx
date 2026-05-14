@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -141,6 +141,23 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const indexRef = useRef(0); // 0 = hero, 1 = intro
   const animatingRef = useRef(false);
   const releaseLockedRef = useRef(false);
+
+  useLayoutEffect(() => {
+    const heroOuter = heroOuterRef.current;
+    const heroInner = heroInnerRef.current;
+    const introOuter = introOuterRef.current;
+    const introInner = introInnerRef.current;
+    if (!heroOuter || !heroInner || !introOuter || !introInner) return;
+
+    heroOuter.style.transform = 'translate3d(0,0,0)';
+    heroOuter.style.opacity = '1';
+    heroOuter.style.visibility = 'visible';
+    heroInner.style.transform = 'translate3d(0,0,0)';
+    introOuter.style.transform = 'translate3d(0,100%,0)';
+    introOuter.style.opacity = '0';
+    introOuter.style.visibility = 'hidden';
+    introInner.style.transform = 'translate3d(0,-100%,0)';
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
