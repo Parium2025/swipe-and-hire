@@ -150,12 +150,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   return (
     <div
       data-landing-scroll-root
-      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden text-primary-foreground"
+      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-background text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
-        backgroundColor: 'hsl(215 100% 12%)',
         backgroundImage:
-          'radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 22%) 50%, hsl(215 100% 12%) 100%)',
+          'radial-gradient(1200px 700px at 12% -10%, hsl(var(--primary) / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(var(--primary) / 0.45), transparent 65%), linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--primary) / 0.7) 50%, hsl(var(--background)) 100%)',
       }}
     >
       <AnimatedBackground />
