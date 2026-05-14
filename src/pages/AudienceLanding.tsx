@@ -286,7 +286,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
       const releaseAndScrollNext = () => {
         const elapsed = performance.now() - lastTransitionAtRef.current;
-        if (elapsed < 760) {
+        if (elapsed < 1100) {
           return;
         }
         // Användaren är på Intro och scrollar ner igen → släpp kontrollen.
@@ -343,15 +343,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       );
       intersectObs.observe(stage);
 
-      // Snap till Intro-vyn när användaren kommer TILLBAKA uppifrån galleriet.
-      // Annars klipps stage förbi utan animation. Vi sätter Intro som synligt
-      // lager, snappar scrollTop exakt till stage-toppen och triggar sedan
-      // GSAP-animationen Intro → Hero på nästa scroll-up gest.
-      const snapBackToIntro = () => {
+      const settleToIntroFromBelow = () => {
         if (!scrollRoot) return;
         if (animatingRef.current) return;
         const stageTopAbs = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        // Lås layren i Intro-läge utan animation
         gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 100 });
         gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
@@ -359,19 +354,16 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         indexRef.current = 1;
         lastTransitionAtRef.current = performance.now();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
-        // Stoppa farten och snappa exakt till stage-toppen
         // @ts-expect-error gsap Observer har enable/disable
         observer?.disable?.();
-        scrollRoot.scrollTo({ top: stageTopAbs, behavior: 'smooth' });
+        scrollRoot.scrollTo({ top: stageTopAbs, behavior: 'auto' });
         inView = true;
-        // Vänta tills snappen lugnat sig — då aktiveras Observer igen och
-        // nästa scroll-up triggar den fina Intro → Hero animationen.
         window.setTimeout(() => {
           if (observer) {
             // @ts-expect-error gsap Observer har enable/disable
             observer.enable?.();
           }
-        }, 900);
+        }, 120);
       };
 
       // Riktningskänslig scroll-watcher: när användaren scrollar UPP och stage
