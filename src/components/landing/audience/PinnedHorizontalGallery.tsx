@@ -328,13 +328,7 @@ const PinnedHorizontalGallery = () => {
           <div className="phg-strip-wrap">
             <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
               {items.map((item, i) => (
-                <CardItem
-                  key={i}
-                  item={item}
-                  index={i}
-                  total={items.length}
-                  scrollYProgress={scrollYProgress}
-                />
+                <CardItem key={i} item={item} index={i} />
               ))}
             </motion.div>
           </div>
