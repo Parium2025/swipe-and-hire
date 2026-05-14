@@ -1,4 +1,4 @@
-import { type WheelEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -53,8 +53,6 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
-  const scrollRootRef = useRef<HTMLDivElement | null>(null);
-  const firstScrollAnimatingRef = useRef(false);
 
   // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
   // åt gången — annars initieras Spline-runtime två gånger på desktop.
@@ -122,18 +120,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     navigate('/auth', { state: { mode: 'register', role: audience } });
   };
 
-  const handleLandingWheel = (event: WheelEvent<HTMLDivElement>) => {
-    const root = scrollRootRef.current;
-    if (!root || event.deltaY <= 0 || root.scrollTop > 8 || firstScrollAnimatingRef.current) return;
-
-    event.preventDefault();
-    firstScrollAnimatingRef.current = true;
-    root.scrollTo({ top: root.clientHeight, behavior: 'smooth' });
-    window.setTimeout(() => {
-      firstScrollAnimatingRef.current = false;
-    }, 750);
-  };
-
   // 4-panel scroll-jacked horizontal section. Texterna är platshållare.
   const panels = [
     {
@@ -172,9 +158,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   return (
     <div
-      ref={scrollRootRef}
       data-landing-scroll-root
-      onWheelCapture={handleLandingWheel}
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
