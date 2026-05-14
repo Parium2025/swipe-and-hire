@@ -197,9 +197,11 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const heroInnerRef = useRef<HTMLDivElement | null>(null);
   const introOuterRef = useRef<HTMLDivElement | null>(null);
   const introInnerRef = useRef<HTMLDivElement | null>(null);
+  const heroTextRef = useRef<HTMLDivElement | null>(null);
+  const introTextRef = useRef<HTMLDivElement | null>(null);
   const indexRef = useRef(0); // 0 = hero, 1 = intro
   const animatingRef = useRef(false);
-  const lastTransitionAtRef = useRef(0);
+  const releaseLockedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
