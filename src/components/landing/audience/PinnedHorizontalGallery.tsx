@@ -44,23 +44,21 @@ type CardItemProps = {
 };
 
 const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
-  // Korten fadar in under approach-fasen (innan pin) så de möter användaren
-  // direkt när de börjar scrolla efter hero — inget tomt mellanrum.
+  // Korten fadar in EXAKT som intro-texten — ren opacity, ingen rörelse.
+  // Smooth, premium, samma rytm som "Söka jobb ska vara enkelt…".
   const FADE_WINDOW_END = 0.22;
   const perCard = FADE_WINDOW_END / total;
   const start = index * perCard * 0.7;
   const end = start + perCard * 2.4;
   const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
-  const y = useTransform(scrollYProgress, [start, end], [50, 0]);
 
-  // Caption följer kortet med en liten fördröjning
+  // Caption följer kortet med en liten fördröjning — också ren opacity
   const capStart = start + perCard * 0.6;
   const capEnd = capStart + perCard * 1.6;
   const capOpacity = useTransform(scrollYProgress, [capStart, capEnd], [0, 1]);
-  const capY = useTransform(scrollYProgress, [capStart, capEnd], [12, 0]);
 
   return (
-    <motion.div className="phg-card" style={{ opacity, y }}>
+    <motion.div className="phg-card" style={{ opacity }}>
       {item.type === 'video' ? (
         <video
           src={item.src}
@@ -82,7 +80,7 @@ const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       )}
-      <motion.div className="phg-cap" style={{ opacity: capOpacity, y: capY }}>
+      <motion.div className="phg-cap" style={{ opacity: capOpacity }}>
         <div className="phg-cap-eyebrow">{item.eyebrow}</div>
         <div className="phg-cap-title">{item.title}</div>
       </motion.div>

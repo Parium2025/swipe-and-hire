@@ -554,13 +554,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             aria-label="Introduktion"
             className="relative flex h-full w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
           >
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage:
-                  'radial-gradient(1200px 700px at 12% -10%, hsl(var(--secondary) / 0.18), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
-              }}
-            />
             <AnimatedBackground variant="card" />
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center">
               <IntroText
@@ -704,8 +697,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
-        backgroundImage:
-          'radial-gradient(1200px 700px at 12% -10%, hsl(var(--secondary) / 0.18), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
       }}
     >
       <AnimatedBackground />
