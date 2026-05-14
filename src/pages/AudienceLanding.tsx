@@ -94,11 +94,7 @@ const FixedPhoneLayer = () => {
     const sync = () => {
       const nextVisible = isHeroZone();
       if (!nextVisible) wasAwayFromHeroRef.current = true;
-      if (nextVisible && wasAwayFromHeroRef.current) {
-        wasAwayFromHeroRef.current = false;
-        schedulePhoneRefresh();
-        return;
-      }
+      if (nextVisible && wasAwayFromHeroRef.current) return;
       setVisible(nextVisible);
     };
 
@@ -111,20 +107,23 @@ const FixedPhoneLayer = () => {
         setVisible(false);
         return;
       }
-      if (wasAwayFromHeroRef.current) {
-        wasAwayFromHeroRef.current = false;
-        schedulePhoneRefresh();
-        return;
-      }
+      if (wasAwayFromHeroRef.current) setVisible(false);
       setVisible(isHeroZone());
+    };
+
+    const onRefresh = () => {
+      wasAwayFromHeroRef.current = false;
+      schedulePhoneRefresh();
     };
 
     sync();
     window.addEventListener('parium:hero-index', onIndex);
+    window.addEventListener('parium:phone-refresh', onRefresh);
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
     return () => {
       clearRefreshTimer();
       window.removeEventListener('parium:hero-index', onIndex);
+      window.removeEventListener('parium:phone-refresh', onRefresh);
       scrollRoot?.removeEventListener('scroll', sync);
     };
   }, []);
