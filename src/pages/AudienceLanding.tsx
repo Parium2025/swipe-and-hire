@@ -635,7 +635,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           'radial-gradient(1200px 700px at 12% -10%, hsl(var(--secondary) / 0.18), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
       }}
     >
-      <AnimatedBackground showBubbles={false} />
+      <AnimatedBackground />
       {isDesktopHero && <FixedPhoneLayer />}
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
