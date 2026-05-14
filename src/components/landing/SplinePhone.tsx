@@ -1,34 +1,129 @@
-import pariumPhoneScreen from '@/assets/parium-phone-screen.png';
+import { useEffect, useRef, useState } from 'react';
+import type { Application as SplineApplication } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
   className?: string;
   zoom?: number;
 }
 
-export const SplinePhone = ({ className }: SplinePhoneProps) => {
+const SCENE_URL = '/spline/parium-phone-scene.splinecode';
+
+export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const appRef = useRef<SplineApplication | null>(null);
+
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setShouldLoad(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(wrapper);
+    return () => observer.disconnect();
+  }, [reducedMotion]);
+
+  useEffect(() => {
+    if (!shouldLoad || reducedMotion) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let cancelled = false;
+    let app: SplineApplication | null = null;
+
+    (async () => {
+      try {
+        const { Application } = await import('@splinetool/runtime');
+        if (cancelled) return;
+
+        if (typeof window !== 'undefined' && 'devicePixelRatio' in window) {
+          try {
+            Object.defineProperty(canvas, '_dprCap', {
+              value: Math.min(window.devicePixelRatio || 1, 2),
+              configurable: true,
+            });
+          } catch {
+            /* no-op */
+          }
+        }
+
+        app = new Application(canvas, { renderMode: 'continuous' });
+        appRef.current = app;
+        await app.load(SCENE_URL);
+        app.setZoom(zoom);
+        requestAnimationFrame(() => app?.setZoom(zoom));
+        if (!cancelled) setIsReady(true);
+      } catch (error) {
+        console.error('Kunde inte ladda Spline-telefonen:', error);
+        if (!cancelled) setHasError(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      app?.dispose();
+      appRef.current = null;
+    };
+  }, [shouldLoad, reducedMotion, zoom]);
+
+  if (reducedMotion || hasError) {
+    return (
+      <div
+        ref={wrapperRef}
+        className={`relative flex items-center justify-center ${className ?? ''}`}
+        role="img"
+        aria-label="Parium 3D-telefon (statisk vy)"
+      >
+        <div className="aspect-[9/19] w-[58%] max-w-[260px] rounded-[2.25rem] border border-white/15 bg-gradient-to-b from-white/10 to-white/[0.03] shadow-[0_30px_90px_hsl(var(--background)/0.5)] backdrop-blur-sm" />
+      </div>
+    );
+  }
+
   return (
     <div
-      className={`pointer-events-none relative flex select-none items-center justify-center ${className ?? ''}`}
-      role="img"
-      aria-label="Parium-telefon"
+      ref={wrapperRef}
+      className={`pointer-events-none relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'pan-y', overscrollBehavior: 'auto' }}
     >
-      <div className="relative aspect-[9/19.5] h-full max-h-full rounded-[2.25rem] border-[5px] border-white/10 bg-[hsl(var(--background))] shadow-[0_22px_55px_hsl(var(--background)/0.45)]">
-        <div className="absolute -left-2 top-[16%] h-8 w-1 rounded-l-full bg-white/25" />
-        <div className="absolute -left-2 top-[26%] h-12 w-1 rounded-l-full bg-white/20" />
-        <div className="absolute -right-2 top-[22%] h-16 w-1 rounded-r-full bg-white/20" />
-        <div className="absolute inset-[5px] overflow-hidden rounded-[1.8rem] bg-primary">
-          <img
-            src={pariumPhoneScreen}
-            alt="Parium på telefonskärm"
-            className="h-full w-full object-contain object-center"
-            draggable={false}
-            loading="eager"
-            decoding="async"
-          />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.04] via-transparent to-white/[0.02]" />
+      {!isReady && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 flex items-start justify-center pt-2"
+        >
+          <div className="aspect-[9/19] h-[82%] max-h-[420px] animate-pulse rounded-[2.25rem] border border-white/10 bg-white/[0.04]" />
         </div>
-      </div>
+      )}
+
+      <canvas
+        ref={canvasRef}
+        role="img"
+        aria-label="Parium 3D-telefon"
+        tabIndex={-1}
+        className="pointer-events-none h-full w-full bg-transparent outline-none transition-opacity duration-500"
+        draggable={false}
+        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
+      />
     </div>
   );
 };
