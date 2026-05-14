@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { TouchEvent, WheelEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -56,6 +57,56 @@ type HeroIntroStageProps = {
   onStart: () => void;
 };
 
+const FixedPhoneLayer = () => {
+  const phoneFrameRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const frame = phoneFrameRef.current;
+    if (!frame) return;
+
+    const stopScroll = (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if ('stopImmediatePropagation' in event) {
+        (event as Event & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
+      }
+    };
+
+    frame.addEventListener('wheel', stopScroll, { capture: true, passive: false });
+    frame.addEventListener('touchmove', stopScroll, { capture: true, passive: false });
+
+    return () => {
+      frame.removeEventListener('wheel', stopScroll, true);
+      frame.removeEventListener('touchmove', stopScroll, true);
+    };
+  }, []);
+
+  const stopScrollOnPhone = (event: WheelEvent | TouchEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
+      <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+        <div aria-hidden />
+        <motion.div
+          ref={phoneFrameRef}
+          initial={{ opacity: 0, x: 60, scale: 0.96 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 1.1, ease }}
+          className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 xl:pt-10"
+          onWheelCapture={stopScrollOnPhone}
+          onTouchMoveCapture={stopScrollOnPhone}
+          style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
+        >
+          <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
 const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const stageRef = useRef<HTMLElement | null>(null);
   const scrollRootRef = useRef<HTMLElement | null>(null);
@@ -97,7 +148,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
   const heroOpacity = progress < 0.4 ? 1 : progress < 0.58 ? 1 - (progress - 0.4) / 0.18 : 0;
   const heroY = -72 * Math.min(1, progress / 0.58);
-  const phoneOpacity = progress < 0.72 ? 1 : progress < 0.9 ? 1 - (progress - 0.72) / 0.18 : 0;
   const introProgress = Math.min(1, Math.max(0, (progress - 0.12) / 0.46));
   const introY = `${110 - introProgress * 110}%`;
   const introOpacity = progress < 0.12 ? 0 : progress < 0.28 ? (progress - 0.12) / 0.16 : 1;
@@ -143,9 +193,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
           aria-labelledby="audience-hero-heading-mobile"
         >
-          <motion.div style={{ opacity: phoneOpacity }} className="absolute inset-0 -z-0 flex items-center justify-center">
+          <div className="absolute inset-0 -z-0 flex items-center justify-center">
             {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
-          </motion.div>
+          </div>
 
           <motion.div
             style={{ opacity: heroOpacity, y: heroY }}
@@ -184,15 +234,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
               <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
             </motion.div>
 
-            <motion.div
-              style={{ opacity: phoneOpacity }}
-              initial={{ opacity: 0, x: 60, scale: 0.96 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              transition={{ duration: 1.1, ease }}
-              className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10"
-            >
-              {isDesktopHero && <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />}
-            </motion.div>
+            <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
           </div>
         </section>
 
@@ -356,6 +398,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       }}
     >
       <AnimatedBackground />
+      {isDesktopHero && <FixedPhoneLayer />}
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
