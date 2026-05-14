@@ -573,11 +573,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-6 md:px-12 lg:px-24"
             style={{
               backgroundImage:
-                'linear-gradient(180deg, hsl(215 80% 22%) 0px, hsl(var(--primary)) 900px)',
+                'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
+              backgroundAttachment: 'fixed',
+              backgroundSize: '100% 100svh',
+              backgroundRepeat: 'no-repeat',
               backgroundColor: 'hsl(var(--primary))',
             }}
           >
-            <AnimatedBackground variant="card" />
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center">
               <IntroText
                 paragraphs={[
@@ -721,7 +723,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       style={{
         overscrollBehavior: 'none',
         backgroundImage:
-          'linear-gradient(180deg, hsl(215 80% 22%) 0px, hsl(var(--primary)) 900px)',
+          'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
+        backgroundAttachment: 'fixed',
+        backgroundSize: '100% 100svh',
         backgroundRepeat: 'no-repeat',
         backgroundColor: 'hsl(var(--primary))',
       }}
