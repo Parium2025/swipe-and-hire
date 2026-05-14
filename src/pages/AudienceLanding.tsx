@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { TouchEvent, WheelEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useAnimationControls } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -59,49 +58,53 @@ type HeroIntroStageProps = {
 
 const FixedPhoneLayer = () => {
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
+  const phoneControls = useAnimationControls();
   const [hidden, setHidden] = useState(false);
 
-  // Telefonen syns bara på Hero-lagret (index 0). När GSAP Observer växlar till
-  // Intro (index 1) skickas ett window-event och vi fadear ut.
+  // Telefonen är bara dekorativ här: den får aldrig fånga wheel/touch och låsa
+  // scrollen. Animationsstate styrs imperativt så den inte "poppar" tillbaka.
   useEffect(() => {
     const onIndex = (e: Event) => {
-      const detail = (e as CustomEvent<{ index: number }>).detail;
-      setHidden(detail?.index === 1);
+      const detail = (e as CustomEvent<{ index: number; direction?: 'next' | 'prev' }>).detail;
+
+      if (detail?.index === 1) {
+        setHidden(true);
+        phoneControls.start({
+          opacity: 0,
+          y: -64,
+          scale: 0.965,
+          transition: { duration: 0.72, ease },
+        });
+        return;
+      }
+
+      setHidden(false);
+      phoneControls.stop();
+      phoneControls.set({ opacity: 0, x: 0, y: 72, scale: 0.965 });
+      phoneControls.start({
+        opacity: 1,
+        x: 0,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.82, ease, delay: 0.08 },
+      });
     };
+
+    phoneControls.start({
+      opacity: 1,
+      x: 0,
+      y: 0,
+      scale: 1,
+      transition: { duration: 1.1, ease },
+    });
+
     window.addEventListener('parium:hero-index', onIndex);
     return () => window.removeEventListener('parium:hero-index', onIndex);
-  }, []);
-
-  useEffect(() => {
-    const frame = phoneFrameRef.current;
-    if (!frame) return;
-
-    const stopScroll = (event: Event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if ('stopImmediatePropagation' in event) {
-        (event as Event & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
-      }
-    };
-
-    frame.addEventListener('wheel', stopScroll, { capture: true, passive: false });
-    frame.addEventListener('touchmove', stopScroll, { capture: true, passive: false });
-
-    return () => {
-      frame.removeEventListener('wheel', stopScroll, true);
-      frame.removeEventListener('touchmove', stopScroll, true);
-    };
-  }, []);
-
-  const stopScrollOnPhone = (event: WheelEvent | TouchEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
+  }, [phoneControls]);
 
   return (
     <div
       className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
-      style={{ opacity: hidden ? 0 : 1, transition: 'opacity 380ms cubic-bezier(0.16, 1, 0.3, 1)' }}
       aria-hidden={hidden}
     >
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
@@ -109,11 +112,8 @@ const FixedPhoneLayer = () => {
         <motion.div
           ref={phoneFrameRef}
           initial={{ opacity: 0, x: 60, scale: 0.96 }}
-          animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ duration: 1.1, ease }}
-          className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 xl:pt-10"
-          onWheelCapture={stopScrollOnPhone}
-          onTouchMoveCapture={stopScrollOnPhone}
+          animate={phoneControls}
+          className="pointer-events-none relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10"
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
