@@ -107,7 +107,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
             </a>
 
             {links.length > 0 && (
-              <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
+              <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.055] px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
                 {links.map((l) => {
                   const id = l.href.replace('#', '');
                   const isActive = activeId === id;
@@ -156,7 +156,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
       </nav>
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="fixed inset-0 bg-[hsl(220_20%_4%/0.98)] backdrop-blur-2xl pt-24 px-6">
+          <div className="fixed inset-0 bg-[hsl(220_20%_4%/0.98)] pt-24 px-6">
             <div className="flex flex-col gap-1">
               {links.map((l) => (
                 <a
