@@ -345,14 +345,39 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         const root = scrollRoot;
         const next = document.getElementById('sa-funkar-det');
         if (!root || !next) return;
+        if (animatingRef.current) return;
+        animatingRef.current = true;
         releasedToGallery = true;
         programmaticReturn = false;
         setObserverActive(false);
-        const target = root.scrollTop + next.getBoundingClientRect().top;
-        root.scrollTo({ top: target, behavior: 'smooth' });
-        returnTimer = window.setTimeout(() => {
-          releaseLockedRef.current = false;
-        }, 700);
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
+
+        const targetScroll = root.scrollTop + next.getBoundingClientRect().top;
+        const scrollProxy = { y: root.scrollTop };
+
+        const tl = gsap.timeline({
+          defaults: { duration: 1.08, ease: 'power2.inOut' },
+          onComplete: () => {
+            animatingRef.current = false;
+            releaseLockedRef.current = false;
+            // Reset intro layer to its resting position so a return-to-intro
+            // (returnFromGalleryToIntro) finds layers in a known state.
+            gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
+            gsap.set(introInner, { yPercent: 0 });
+            gsap.set(introTextItems, { y: 44, opacity: 0 });
+          },
+        });
+        // Intro slides UP and reveals — mirror of hero→intro motion
+        tl.to(introTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out' }, 0);
+        tl.to(introOuter, { yPercent: -100 }, 0);
+        tl.to(introInner, { yPercent: 100 }, 0);
+        // Camera scrolls in lockstep so the gallery section glides up from below
+        tl.to(scrollProxy, {
+          y: targetScroll,
+          duration: 1.08,
+          ease: 'power2.inOut',
+          onUpdate: () => { root.scrollTo({ top: scrollProxy.y, behavior: 'auto' }); },
+        }, 0);
       };
 
       const returnFromGalleryToIntro = () => {
