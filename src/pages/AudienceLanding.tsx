@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -40,47 +40,21 @@ type AudienceLandingProps = {
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-const SplitRevealText = ({ paragraphs }: { paragraphs: string[] }) => (
-  <motion.div
-    initial="hidden"
-    whileInView="visible"
-    viewport={{ once: true, amount: 0.45 }}
-    variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.012, delayChildren: 0.22 } } }}
-  >
-    <p className="max-w-3xl text-center text-base leading-[1.75] text-white/80 sm:text-lg md:text-xl">
-      {paragraphs.map((paragraph, pIdx) => (
-        <span key={pIdx} className={pIdx > 0 ? 'mt-6 block' : 'block'}>
-          {paragraph.split(' ').map((word, wIdx, words) => (
-            <span key={wIdx} className="inline-block whitespace-nowrap">
-              {word.split('').map((char, cIdx) => (
-                <motion.span
-                  key={cIdx}
-                  className="inline-block"
-                  variants={{
-                    hidden: { opacity: 0, y: 30, filter: 'blur(10px)' },
-                    visible: {
-                      opacity: 1,
-                      y: 0,
-                      filter: 'blur(0px)',
-                      transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
-                    },
-                  }}
-                >
-                  {char}
-                </motion.span>
-              ))}
-              {wIdx < words.length - 1 && '\u00A0'}
-            </span>
-          ))}
-        </span>
-      ))}
-    </p>
-  </motion.div>
+const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
+  <div className="max-w-3xl text-center text-base leading-[1.75] text-white/80 sm:text-lg md:text-xl">
+    {paragraphs.map((paragraph, pIdx) => (
+      <p key={pIdx} className={pIdx > 0 ? 'mt-6' : undefined}>
+        {paragraph}
+      </p>
+    ))}
+  </div>
 );
 
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
+  const scrollRootRef = useRef<HTMLDivElement | null>(null);
+  const snapLockRef = useRef(false);
 
   // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
   // åt gången — annars initieras Spline-runtime två gånger på desktop.
