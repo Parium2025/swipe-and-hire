@@ -81,7 +81,16 @@ const FixedPhoneLayer = () => {
       }
     };
 
-    const isHeroTop = () => !scrollRoot || scrollRoot.scrollTop <= Math.max(48, window.innerHeight * 0.08);
+    const isHeroZone = () => {
+      if (heroIndexRef.current !== 0) return false;
+      if (!scrollRoot) return true;
+
+      const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
+      if (!stage) return scrollRoot.scrollTop <= window.innerHeight * 0.65;
+
+      const rect = stage.getBoundingClientRect();
+      return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * 0.55;
+    };
 
     const parkPhoneBelow = () => {
       clearReturnTimer();
@@ -97,7 +106,7 @@ const FixedPhoneLayer = () => {
       phoneControls.set({ opacity: 0, x: 0, y: 96, scale: 0.94 });
       returnTimerRef.current = window.setTimeout(() => {
         returnTimerRef.current = null;
-        if (heroIndexRef.current !== 0 || !isHeroTop()) {
+        if (!isHeroZone()) {
           parkPhoneBelow();
           return;
         }
@@ -114,7 +123,7 @@ const FixedPhoneLayer = () => {
 
     const syncVisibilityToScroll = () => {
       if (heroIndexRef.current !== 0) return;
-      if (!isHeroTop()) {
+      if (!isHeroZone()) {
         if (!hiddenRef.current) parkPhoneBelow();
         return;
       }
@@ -145,7 +154,7 @@ const FixedPhoneLayer = () => {
       revealPhone(1120);
     };
 
-    isHeroTop() ? revealPhone(0) : parkPhoneBelow();
+    isHeroZone() ? revealPhone(0) : parkPhoneBelow();
 
     window.addEventListener('parium:hero-index', onIndex);
     scrollRoot?.addEventListener('scroll', syncVisibilityToScroll, { passive: true });
