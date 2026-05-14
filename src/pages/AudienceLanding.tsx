@@ -559,6 +559,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
               backgroundColor: 'hsl(var(--primary))',
             }}
           >
+            <AnimatedBackground variant="card" />
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center">
               <IntroText
                 paragraphs={[
