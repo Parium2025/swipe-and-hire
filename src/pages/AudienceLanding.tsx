@@ -151,7 +151,7 @@ const FixedPhoneLayer = () => {
           ref={phoneFrameRef}
           initial={{ opacity: 0, x: 60, scale: 0.96 }}
           animate={phoneControls}
-          className="pointer-events-none relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10"
+          className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10"
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
