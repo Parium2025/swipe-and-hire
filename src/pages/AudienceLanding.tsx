@@ -61,30 +61,15 @@ const FixedPhoneLayer = () => {
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
   const [hidden, setHidden] = useState(false);
 
-  // Fadea ut telefonen så fort intro-panelen ("Söka jobb ska vara enkelt…") börjar komma upp.
-  // Den ska bara synas på själva hero-sektionen ("Hitta jobb som faktiskt passar dig").
+  // Telefonen syns bara på Hero-lagret (index 0). När GSAP Observer växlar till
+  // Intro (index 1) skickas ett window-event och vi fadear ut.
   useEffect(() => {
-    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    if (!root) return;
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
-      if (!stage) return;
-      const rect = stage.getBoundingClientRect();
-      const distance = Math.max(1, stage.offsetHeight - window.innerHeight);
-      const progress = Math.min(1, Math.max(0, -rect.top / distance));
-      setHidden(progress > 0.12);
+    const onIndex = (e: Event) => {
+      const detail = (e as CustomEvent<{ index: number }>).detail;
+      setHidden(detail?.index === 1);
     };
-    const onScroll = () => { if (!raf) raf = window.requestAnimationFrame(update); };
-    update();
-    root.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    return () => {
-      root.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      if (raf) window.cancelAnimationFrame(raf);
-    };
+    window.addEventListener('parium:hero-index', onIndex);
+    return () => window.removeEventListener('parium:hero-index', onIndex);
   }, []);
 
   useEffect(() => {
