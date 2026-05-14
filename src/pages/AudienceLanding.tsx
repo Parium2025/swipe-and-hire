@@ -320,12 +320,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         onUp: () => {
           if (!inView) return;
           if (animatingRef.current) return;
+            snapStageToTop();
           if (indexRef.current === 0) goToIntro();
           else releaseAndScrollNext();
         },
         onDown: () => {
           if (!inView) return;
           if (animatingRef.current) return;
+            snapStageToTop();
           if (indexRef.current === 1) goToHero();
         },
       });
