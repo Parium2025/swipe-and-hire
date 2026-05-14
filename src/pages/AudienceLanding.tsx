@@ -81,7 +81,7 @@ const FixedPhoneLayer = () => {
       }
     };
 
-    const isHeroTop = () => !scrollRoot || scrollRoot.scrollTop <= 24;
+    const isHeroTop = () => !scrollRoot || scrollRoot.scrollTop <= Math.max(48, window.innerHeight * 0.08);
 
     const parkPhoneBelow = () => {
       clearReturnTimer();
@@ -277,14 +277,26 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         if (!next) return;
         const rect = next.getBoundingClientRect();
         const target = root.scrollTop + rect.top;
+        inView = false;
+        // Släpp Observer direkt så smooth-scrollen och nästa hjulgest aldrig fastnar.
+        // @ts-expect-error gsap Observer har enable/disable
+        observer?.disable?.();
         root.scrollTo({ top: target, behavior: 'smooth' });
+        window.setTimeout(() => {
+          const stageRect = stage.getBoundingClientRect();
+          inView = stageRect.bottom > window.innerHeight * 0.4 && stageRect.top < window.innerHeight * 0.6;
+          if (observer) {
+            // @ts-expect-error gsap Observer har enable/disable
+            inView ? observer.enable?.() : observer.disable?.();
+          }
+        }, 900);
       };
 
       observer = Observer.create({
         target: scrollRoot ?? window,
         type: 'wheel,touch',
         wheelSpeed: -1,
-        tolerance: 32,
+        tolerance: 16,
         preventDefault: true,
         onUp: () => {
           if (!inView) return;
