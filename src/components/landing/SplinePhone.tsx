@@ -5,18 +5,16 @@ interface SplinePhoneProps {
   className?: string;
   zoom?: number;
   pauseWhenHidden?: boolean;
-  loadDelayMs?: number;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78, pauseWhenHidden = false, loadDelayMs = 0 }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.78, pauseWhenHidden = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
   const shouldPlayRef = useRef(true);
 
-  const [shouldLoad, setShouldLoad] = useState(loadDelayMs === 0);
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -25,20 +23,7 @@ export const SplinePhone = ({ className, zoom = 0.78, pauseWhenHidden = false, l
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
-    if (loadDelayMs === 0) return;
-    const start = () => setShouldLoad(true);
-    const timer = window.setTimeout(() => {
-      if ('requestIdleCallback' in window) {
-        (window as Window & { requestIdleCallback: (cb: IdleRequestCallback, options?: IdleRequestOptions) => number }).requestIdleCallback(start, { timeout: 900 });
-      } else {
-        start();
-      }
-    }, loadDelayMs);
-    return () => window.clearTimeout(timer);
-  }, [loadDelayMs]);
-
-  useEffect(() => {
-    if (reducedMotion || !shouldLoad) return;
+    if (reducedMotion) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -61,7 +46,7 @@ export const SplinePhone = ({ className, zoom = 0.78, pauseWhenHidden = false, l
           }
         }
 
-        app = new Application(canvas, { renderMode: 'manual' });
+        app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
         await app.load(SCENE_URL);
         app.setZoom(zoom);
@@ -83,7 +68,7 @@ export const SplinePhone = ({ className, zoom = 0.78, pauseWhenHidden = false, l
       app?.dispose();
       appRef.current = null;
     };
-  }, [pauseWhenHidden, reducedMotion, shouldLoad, zoom]);
+  }, [pauseWhenHidden, reducedMotion, zoom]);
 
   useEffect(() => {
     if (!pauseWhenHidden || reducedMotion) return;
@@ -104,10 +89,6 @@ export const SplinePhone = ({ className, zoom = 0.78, pauseWhenHidden = false, l
     window.addEventListener('parium:phone-visible', onVisibility);
     return () => window.removeEventListener('parium:phone-visible', onVisibility);
   }, [pauseWhenHidden, reducedMotion]);
-
-  if (!shouldLoad) {
-    return <div ref={wrapperRef} className={`relative select-none overflow-visible ${className ?? ''}`} aria-hidden="true" />;
-  }
 
   if (reducedMotion || hasError) {
     return (
