@@ -58,13 +58,11 @@ type HeroIntroStageProps = {
 
 const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
-  // Bump key för att tvinga remount av SplinePhone → telefonen återställs
-  // alltid till exakt sitt utgångsläge (precis som en page-refresh) när vi
-  // kommer tillbaka till Hero-ytan.
-  const [mountKey, setMountKey] = useState(0);
   const heroIndexRef = useRef(0);
-  const wasVisibleRef = useRef(true);
 
+  // Telefonen lever i ett eget fixed-lager och flyttas aldrig av scroll —
+  // den ligger alltid på rätt position. Vi togglar bara opacity (ingen
+  // remount av Spline-scenen, för det orsakar lagg vid retur till Hero).
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
 
@@ -77,22 +75,12 @@ const FixedPhoneLayer = () => {
       return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * 0.55;
     };
 
-    const apply = (next: boolean) => {
-      // När vi går från dold → synlig: remounta så telefonen alltid hamnar
-      // i sin ursprungliga position (ingen "pop-up hur som helst").
-      if (next && !wasVisibleRef.current) {
-        setMountKey((k) => k + 1);
-      }
-      wasVisibleRef.current = next;
-      setVisible(next);
-    };
-
-    const sync = () => apply(isHeroZone());
+    const sync = () => setVisible(isHeroZone());
 
     const onIndex = (e: Event) => {
       const detail = (e as CustomEvent<{ index: number }>).detail;
       heroIndexRef.current = detail?.index ?? 0;
-      apply(detail?.index !== 1 && isHeroZone());
+      setVisible(detail?.index !== 1 && isHeroZone());
     };
 
     sync();
@@ -113,15 +101,9 @@ const FixedPhoneLayer = () => {
         <div aria-hidden />
         <div
           className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
-          style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
+          style={{ touchAction: 'none', overscrollBehavior: 'contain', willChange: 'opacity' }}
         >
-          {visible && (
-            <SplinePhone
-              key={mountKey}
-              className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
-              zoom={0.78}
-            />
-          )}
+          <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
         </div>
       </div>
     </div>
