@@ -114,7 +114,11 @@ const FixedPhoneLayer = () => {
   };
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
+    <div
+      className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
+      style={{ opacity: hidden ? 0 : 1, transition: 'opacity 380ms cubic-bezier(0.16, 1, 0.3, 1)' }}
+      aria-hidden={hidden}
+    >
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <motion.div
