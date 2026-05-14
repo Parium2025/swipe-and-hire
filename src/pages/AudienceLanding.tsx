@@ -349,20 +349,25 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         animatingRef.current = true;
         releasedToGallery = true;
         programmaticReturn = false;
-        setObserverActive(false);
+        // Behåll Observer aktiv under den programstyrda sliden så att nya
+        // wheel/touch-gester inte kan rycka scrollen och lämna halvvägs-lager.
+        setObserverActive(true);
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
 
-        const targetScroll = root.scrollTop + next.getBoundingClientRect().top;
+        const targetScroll = root.scrollTop + next.getBoundingClientRect().top + 1;
         const scrollProxy = { y: root.scrollTop };
 
         const tl = gsap.timeline({
           defaults: { duration: 1.08, ease: 'power2.inOut' },
           onComplete: () => {
+            root.scrollTo({ top: targetScroll, behavior: 'auto' });
             animatingRef.current = false;
             releaseLockedRef.current = false;
+            setObserverActive(false);
             // Reset intro layer to its resting position so a return-to-intro
             // (returnFromGalleryToIntro) finds layers in a known state.
-            gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
+            gsap.set(heroOuter, { autoAlpha: 0 });
+            gsap.set(introOuter, { yPercent: 0, autoAlpha: 0 });
             gsap.set(introInner, { yPercent: 0 });
             gsap.set(introTextItems, { y: 44, opacity: 0 });
           },
@@ -386,7 +391,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         programmaticReturn = true;
         releasedToGallery = false;
         releaseLockedRef.current = false;
-        setObserverActive(false);
+        animatingRef.current = true;
+        setObserverActive(true);
 
         // Land DIRECT on Intro (stage 2) — no Hero flash. Layers are placed
         // in their resting Intro position immediately; only the text gets a
@@ -402,39 +408,26 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
         const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
-        const startedAt = performance.now();
+        const scrollProxy = { y: scrollRoot.scrollTop };
 
-        const playIntroTextIn = () => {
-          gsap.to(introTextItems, {
-            y: 0,
-            opacity: 1,
-            duration: 0.7,
-            stagger: 0.08,
-            ease: 'power3.out',
-            onComplete: () => {
-              setIntroResting();
-              animatingRef.current = false;
-              releaseLockedRef.current = false;
-              programmaticReturn = false;
-              setObserverActive(true);
-            },
-          });
-        };
-
-        const waitForStageTop = () => {
-          const rect = stage.getBoundingClientRect();
-          if (Math.abs(rect.top) < 3 || performance.now() - startedAt > 700) {
-            scrollRoot.scrollTo({ top: scrollRoot.scrollTop + rect.top, behavior: 'auto' });
-            returnFrame = null;
-            animatingRef.current = true;
-            playIntroTextIn();
-            return;
-          }
-          returnFrame = window.requestAnimationFrame(waitForStageTop);
-        };
-
-        returnFrame = window.requestAnimationFrame(waitForStageTop);
+        const tl = gsap.timeline({
+          defaults: { duration: 1.08, ease: 'power2.inOut' },
+          onComplete: () => {
+            scrollRoot.scrollTo({ top: target, behavior: 'auto' });
+            setIntroResting();
+            animatingRef.current = false;
+            releaseLockedRef.current = false;
+            programmaticReturn = false;
+            setObserverActive(true);
+          },
+        });
+        tl.to(scrollProxy, {
+          y: target,
+          duration: 1.08,
+          ease: 'power2.inOut',
+          onUpdate: () => { scrollRoot.scrollTo({ top: scrollProxy.y, behavior: 'auto' }); },
+        }, 0);
+        tl.to(introTextItems, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.48);
       };
 
       observer = Observer.create({
@@ -580,11 +573,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-6 md:px-12 lg:px-24"
             style={{
               backgroundImage:
-                'linear-gradient(180deg, hsl(215 80% 22%) 0px, hsl(var(--primary)) 900px)',
+                'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
+              backgroundAttachment: 'fixed',
+              backgroundSize: '100% 100svh',
+              backgroundRepeat: 'no-repeat',
               backgroundColor: 'hsl(var(--primary))',
             }}
           >
-            <AnimatedBackground variant="card" />
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center">
               <IntroText
                 paragraphs={[
@@ -728,7 +723,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       style={{
         overscrollBehavior: 'none',
         backgroundImage:
-          'linear-gradient(180deg, hsl(215 80% 22%) 0px, hsl(var(--primary)) 900px)',
+          'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
+        backgroundAttachment: 'fixed',
+        backgroundSize: '100% 100svh',
         backgroundRepeat: 'no-repeat',
         backgroundColor: 'hsl(var(--primary))',
       }}
