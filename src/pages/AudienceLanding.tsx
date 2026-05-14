@@ -552,9 +552,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         <div ref={introInnerRef} className="absolute inset-0 overflow-hidden">
           <section
             aria-label="Introduktion"
-            className="relative flex h-full w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
+            className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-6 md:px-12 lg:px-24"
+            style={{
+              backgroundImage:
+                'linear-gradient(180deg, hsl(215 80% 22%) 0px, hsl(var(--primary)) 900px)',
+              backgroundColor: 'hsl(var(--primary))',
+            }}
           >
-            <AnimatedBackground variant="card" />
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center">
               <IntroText
                 paragraphs={[
