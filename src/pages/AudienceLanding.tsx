@@ -215,31 +215,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
             >
               <div className="text-left">
-                <motion.span
-                  variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                  className="text-xs font-bold uppercase tracking-[0.28em] text-secondary/80"
-                >
-                  {c.eyebrow}
-                </motion.span>
-
-                <h1 className="mt-6 max-w-4xl text-[5rem] font-black leading-[1.04] tracking-[-0.025em] text-white lg:text-[6rem]">
-                  {c.hero.headline.map((line, i) => (
-                    <motion.span
-                      key={i}
-                      variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease } } }}
-                      className="block"
-                    >
-                      {line}
-                    </motion.span>
-                  ))}
-                </h1>
-
-                <motion.p
-                  variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                  className="mt-7 max-w-xl text-lg leading-8 text-white"
-                >
-                  {c.hero.subtitle}
-                </motion.p>
+                <HeroText
+                  eyebrow={c.eyebrow}
+                  headline={c.hero.headline}
+                  subtitle={c.hero.subtitle}
+                  variant="desktop"
+                />
               </div>
 
               <motion.div
