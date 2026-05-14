@@ -181,7 +181,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           >
             {/* 3D-telefon från Spline centrerad bakom texten */}
             <div className="absolute inset-0 -z-0 flex items-center justify-center">
-              <SplinePhone className="h-[80svh] w-full max-w-[520px]" />
+              {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
             </div>
 
             <motion.div
