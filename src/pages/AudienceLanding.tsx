@@ -316,14 +316,19 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         onUp: () => {
           if (!inView) return;
           if (animatingRef.current) return;
-            snapStageToTop();
-          if (indexRef.current === 0) goToIntro();
-          else releaseAndScrollNext();
+          if (indexRef.current === 0) {
+            goToIntro();
+          } else {
+            // Liten paus efter intro-animation så det inte känns hetsigt,
+            // men ingen snap → ingen "skakning".
+            const elapsed = performance.now() - lastTransitionAtRef.current;
+            if (elapsed < 350) return;
+            releaseAndScrollNext();
+          }
         },
         onDown: () => {
           if (!inView) return;
           if (animatingRef.current) return;
-            snapStageToTop();
           if (indexRef.current === 1) goToHero();
         },
       });
