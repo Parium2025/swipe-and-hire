@@ -59,14 +59,14 @@ type HeroIntroStageProps = {
 const FixedPhoneLayer = () => {
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
   const phoneControls = useAnimationControls();
-  const [hidden, setHiddenState] = useState(false);
-  const hiddenRef = useRef(false);
+  const [interactive, setInteractive] = useState(false);
+  const parkedRef = useRef(true);
   const heroIndexRef = useRef(0);
   const returnTimerRef = useRef<number | null>(null);
 
-  const setPhoneHidden = (value: boolean) => {
-    hiddenRef.current = value;
-    setHiddenState(value);
+  const setPhoneParked = (value: boolean) => {
+    parkedRef.current = value;
+    setInteractive(!value);
   };
 
   // Telefonen är bara dekorativ här: den får aldrig fånga wheel/touch och låsa
@@ -94,14 +94,13 @@ const FixedPhoneLayer = () => {
 
     const parkPhoneBelow = () => {
       clearReturnTimer();
+      setPhoneParked(true);
       phoneControls.stop();
       phoneControls.set({ opacity: 0, x: 0, y: 72, scale: 0.965 });
-      setPhoneHidden(true);
     };
 
     const revealPhone = (delay = 0) => {
       clearReturnTimer();
-      setPhoneHidden(false);
       phoneControls.stop();
       phoneControls.set({ opacity: 0, x: 0, y: 96, scale: 0.94 });
       returnTimerRef.current = window.setTimeout(() => {
@@ -110,7 +109,7 @@ const FixedPhoneLayer = () => {
           parkPhoneBelow();
           return;
         }
-        setPhoneHidden(false);
+        setPhoneParked(false);
         phoneControls.start({
           opacity: 1,
           x: 0,
@@ -124,10 +123,10 @@ const FixedPhoneLayer = () => {
     const syncVisibilityToScroll = () => {
       if (heroIndexRef.current !== 0) return;
       if (!isHeroZone()) {
-        if (!hiddenRef.current) parkPhoneBelow();
+        if (!parkedRef.current) parkPhoneBelow();
         return;
       }
-      if (hiddenRef.current && !returnTimerRef.current) revealPhone(0);
+      if (parkedRef.current && !returnTimerRef.current) revealPhone(0);
     };
 
     const onIndex = (e: Event) => {
@@ -137,14 +136,13 @@ const FixedPhoneLayer = () => {
 
       if (detail?.index === 1) {
         // Telefonen åker UPP och försvinner mjukt när intron tar över
+        setPhoneParked(true);
         phoneControls.stop();
         phoneControls.start({
           opacity: 0,
           y: -120,
           scale: 0.94,
           transition: { duration: 0.55, ease },
-        }).then(() => {
-          if (heroIndexRef.current === 1) setPhoneHidden(true);
         });
         return;
       }
@@ -168,8 +166,7 @@ const FixedPhoneLayer = () => {
   return (
     <div
       className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
-      style={{ visibility: hidden ? 'hidden' : 'visible' }}
-      aria-hidden={hidden}
+      aria-hidden="true"
     >
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
@@ -177,7 +174,7 @@ const FixedPhoneLayer = () => {
           ref={phoneFrameRef}
           initial={{ opacity: 0, x: 60, scale: 0.96 }}
           animate={phoneControls}
-          className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10"
+          className={`${interactive ? 'pointer-events-auto' : 'pointer-events-none'} relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
@@ -200,9 +197,11 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const heroInnerRef = useRef<HTMLDivElement | null>(null);
   const introOuterRef = useRef<HTMLDivElement | null>(null);
   const introInnerRef = useRef<HTMLDivElement | null>(null);
+  const heroTextRef = useRef<HTMLDivElement | null>(null);
+  const introTextRef = useRef<HTMLDivElement | null>(null);
   const indexRef = useRef(0); // 0 = hero, 1 = intro
   const animatingRef = useRef(false);
-  const lastTransitionAtRef = useRef(0);
+  const releaseLockedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -222,15 +221,22 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const heroInner = heroInnerRef.current;
       const introOuter = introOuterRef.current;
       const introInner = introInnerRef.current;
+      const heroText = heroTextRef.current;
+      const introText = introTextRef.current;
       const stage = stageRef.current;
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
+      const heroTextItems = heroText ? gsap.utils.toArray<HTMLElement>(heroText.querySelectorAll('span, h1 span, p')) : [];
+      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p, button')) : [];
+      let releasedToGallery = false;
 
       // Initial state: hero synlig, intro gömd UNDER skärmen.
       gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
       gsap.set(heroInner, { yPercent: 0 });
       gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
       gsap.set(introInner, { yPercent: -100 });
+      gsap.set(heroTextItems, { y: 0, opacity: 1 });
+      gsap.set(introTextItems, { y: 36, opacity: 0 });
 
       const snapStageToTop = () => {
         if (!scrollRoot) return;
@@ -244,7 +250,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         if (animatingRef.current || indexRef.current === 1) return;
         animatingRef.current = true;
         indexRef.current = 1;
-        lastTransitionAtRef.current = performance.now();
         snapStageToTop();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
@@ -252,36 +257,43 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           defaults: { duration: 1.1, ease: 'power2.inOut' },
           onComplete: () => {
             animatingRef.current = false;
+            releaseLockedRef.current = false;
           },
         });
         // Hero åker UPP och ut
+        tl.to(heroTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out' }, 0);
         tl.to(heroOuter, { yPercent: -100 }, 0);
         tl.to(heroInner, { yPercent: 100 }, 0);
         // Intro kommer UPP nerifrån
         tl.set(introOuter, { autoAlpha: 1 }, 0);
         tl.fromTo(introOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
         tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
+        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.48);
       };
 
       const goToHero = () => {
         if (animatingRef.current || indexRef.current === 0) return;
         animatingRef.current = true;
         indexRef.current = 0;
-        lastTransitionAtRef.current = performance.now();
         snapStageToTop();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
         const tl = gsap.timeline({
           defaults: { duration: 1.1, ease: 'power2.inOut' },
-          onComplete: () => { animatingRef.current = false; },
+          onComplete: () => {
+            animatingRef.current = false;
+            releaseLockedRef.current = false;
+          },
         });
         // Intro åker NED och ut
+        tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in' }, 0);
         tl.to(introOuter, { yPercent: 100 }, 0);
         tl.to(introInner, { yPercent: -100 }, 0);
         tl.set(introOuter, { autoAlpha: 0 });
         // Hero kommer tillbaka uppifrån
         tl.fromTo(heroOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
         tl.fromTo(heroInner, { yPercent: 100 }, { yPercent: 0 }, 0);
+        tl.fromTo(heroTextItems, { y: -44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.06, ease: 'power2.out' }, 0.48);
       };
 
       const releaseAndScrollNext = () => {
@@ -293,18 +305,11 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         const rect = next.getBoundingClientRect();
         const target = root.scrollTop + rect.top;
         inView = false;
+        releasedToGallery = true;
         // Släpp Observer direkt så smooth-scrollen och nästa hjulgest aldrig fastnar.
         // @ts-expect-error gsap Observer har enable/disable
         observer?.disable?.();
         root.scrollTo({ top: target, behavior: 'smooth' });
-        window.setTimeout(() => {
-          const stageRect = stage.getBoundingClientRect();
-          inView = stageRect.bottom > window.innerHeight * 0.4 && stageRect.top < window.innerHeight * 0.6;
-          if (observer) {
-            // @ts-expect-error gsap Observer har enable/disable
-            inView ? observer.enable?.() : observer.disable?.();
-          }
-        }, 900);
       };
 
       observer = Observer.create({
@@ -319,10 +324,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           if (indexRef.current === 0) {
             goToIntro();
           } else {
-            // Liten paus efter intro-animation så det inte känns hetsigt,
-            // men ingen snap → ingen "skakning".
-            const elapsed = performance.now() - lastTransitionAtRef.current;
-            if (elapsed < 350) return;
+            if (releaseLockedRef.current) return;
+            releaseLockedRef.current = true;
             releaseAndScrollNext();
           }
         },
@@ -339,7 +342,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           for (const e of entries) inView = e.isIntersecting && e.intersectionRatio > 0.4;
           if (observer) {
             // @ts-expect-error gsap Observer har enable/disable
-            inView ? observer.enable?.() : observer.disable?.();
+            inView && !releasedToGallery ? observer.enable?.() : observer.disable?.();
           }
         },
         { root: scrollRoot, threshold: [0, 0.4, 0.6, 1] }
@@ -349,6 +352,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const settleToIntroFromBelow = () => {
         if (!scrollRoot) return;
         if (animatingRef.current) return;
+        releasedToGallery = false;
+        releaseLockedRef.current = false;
         const stageTopAbs = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
         // Sätt Hero som startläge — så att vi kan spela exakt samma 1→2-animation
         // som när man scrollar nedåt från Hero till Intro.
@@ -483,6 +488,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             />
             <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
               <motion.div
+                ref={heroTextRef}
                 className="-translate-y-16 pt-8 text-left xl:pt-10"
                 initial="hidden"
                 animate="visible"
@@ -511,7 +517,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
                   'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
               }}
             />
-            <div className="relative z-10 flex max-w-4xl flex-col items-center">
+            <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center">
               <IntroText
                 paragraphs={[
                   'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
