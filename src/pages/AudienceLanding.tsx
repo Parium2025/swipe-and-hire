@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { TouchEvent, WheelEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -57,7 +58,7 @@ type HeroIntroStageProps = {
 };
 
 const FixedPhoneLayer = () => {
-  const stopScrollOnPhone = (event: React.WheelEvent | React.TouchEvent) => {
+  const stopScrollOnPhone = (event: WheelEvent | TouchEvent) => {
     event.preventDefault();
     event.stopPropagation();
   };
