@@ -62,9 +62,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const lockReleaseRef = useRef<number | null>(null);
   const lockCleanupRef = useRef<(() => void) | null>(null);
   const introLockDoneRef = useRef(false);
+  const [scrollRoot, setScrollRoot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    scrollRootRef.current = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    scrollRootRef.current = root;
+    setScrollRoot(root);
 
     return () => {
       if (lockReleaseRef.current) window.clearTimeout(lockReleaseRef.current);
@@ -74,7 +77,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
   const { scrollYProgress } = useScroll({
     target: stageRef,
-    container: scrollRootRef as React.RefObject<HTMLElement>,
+    container: { current: scrollRoot },
     offset: ['start start', 'end end'],
   });
 
