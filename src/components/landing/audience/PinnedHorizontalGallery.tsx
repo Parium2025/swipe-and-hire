@@ -168,9 +168,11 @@ const PinnedHorizontalGallery = () => {
           height: 100vh;
           width: 100%;
           overflow: hidden;
-          display: grid;
-          grid-template-rows: 1fr auto;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
           align-items: center;
+          contain: layout paint;
         }
         .phg-header {
           padding: clamp(48px, 8vh, 96px) 24px clamp(24px, 4vh, 48px);
@@ -212,16 +214,20 @@ const PinnedHorizontalGallery = () => {
 
         .phg-strip-wrap {
           position: relative;
+          width: 100%;
+          min-height: clamp(360px, 58vh, 620px);
           display: flex;
           align-items: center;
           overflow: hidden;
           z-index: 2;
+          transform: translateZ(0);
         }
         .phg-strip {
           display: flex;
           gap: clamp(14px, 1.6vw, 22px);
-          padding: 0 6vw;
+          padding: clamp(40px, 8vh, 120px) 6vw clamp(8px, 1vh, 18px);
           will-change: transform, opacity;
+          transform: translateZ(0);
         }
         .phg-card {
           flex: 0 0 auto;
@@ -235,18 +241,21 @@ const PinnedHorizontalGallery = () => {
             0 30px 70px -28px rgba(0,0,0,0.7),
             0 0 0 1px rgba(255,255,255,0.07);
           transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), box-shadow 0.6s ease;
+          will-change: transform, opacity;
+          transform: translateZ(0);
         }
         .phg-card-enter {
           opacity: 0;
-          transform: translateY(28px);
+          transform: translate3d(0, 70px, 0) scale(0.985);
         }
         .phg-strip.phg-entered .phg-card-enter {
-          animation: phg-card-in 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+          animation: phg-card-in 1.08s cubic-bezier(0.16,1,0.3,1) forwards;
           animation-delay: var(--enter-delay, 0ms);
         }
         @keyframes phg-card-in {
-          from { opacity: 0; transform: translateY(28px); }
-          to   { opacity: 1; transform: translateY(0); }
+          0% { opacity: 0; transform: translate3d(0, 70px, 0) scale(0.985); }
+          55% { opacity: 1; }
+          100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
         }
         @media (prefers-reduced-motion: reduce) {
           .phg-strip.phg-entered .phg-card-enter { animation: none; opacity: 1; transform: none; }
