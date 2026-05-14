@@ -4,13 +4,11 @@ import type { Application as SplineApplication } from '@splinetool/runtime';
 interface SplinePhoneProps {
   className?: string;
   zoom?: number;
-  lockPageScroll?: boolean;
-  resetToken?: number;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78, lockPageScroll = false, resetToken = 0 }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
@@ -21,43 +19,6 @@ export const SplinePhone = ({ className, zoom = 0.78, lockPageScroll = false, re
   const reducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-  useEffect(() => {
-    if (!lockPageScroll) return;
-    const wrapper = wrapperRef.current;
-    const canvas = canvasRef.current;
-    if (!wrapper) return;
-
-    const blockScroll = (event: WheelEvent | TouchEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-    };
-
-    const options = { passive: false, capture: true } as AddEventListenerOptions;
-    wrapper.addEventListener('wheel', blockScroll, options);
-    wrapper.addEventListener('touchmove', blockScroll, options);
-    canvas?.addEventListener('wheel', blockScroll, options);
-    canvas?.addEventListener('touchmove', blockScroll, options);
-
-    return () => {
-      wrapper.removeEventListener('wheel', blockScroll);
-      wrapper.removeEventListener('touchmove', blockScroll);
-      canvas?.removeEventListener('wheel', blockScroll);
-      canvas?.removeEventListener('touchmove', blockScroll);
-    };
-  }, [lockPageScroll]);
-
-  useEffect(() => {
-    if (!resetToken || !appRef.current) return;
-    const app = appRef.current as SplineApplication & {
-      controls?: { reset?: () => void; update?: () => void };
-      _controls?: { reset?: () => void; update?: () => void };
-    };
-    app.setZoom(zoom);
-    (app.controls ?? app._controls)?.reset?.();
-    (app.controls ?? app._controls)?.update?.();
-    app.requestRender?.();
-  }, [resetToken, zoom]);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -119,14 +80,14 @@ export const SplinePhone = ({ className, zoom = 0.78, lockPageScroll = false, re
     <div
       ref={wrapperRef}
       className={`relative select-none overflow-visible ${className ?? ''}`}
-      style={{ touchAction: lockPageScroll ? 'none' : 'pan-y', overscrollBehavior: 'contain' }}
+      style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
     >
       <canvas
         ref={canvasRef}
         role="img"
         aria-label="Parium 3D-telefon"
         tabIndex={-1}
-        className="h-full w-full cursor-grab bg-transparent outline-none active:cursor-grabbing"
+        className="h-full w-full cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing"
         draggable={false}
         style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
       />
