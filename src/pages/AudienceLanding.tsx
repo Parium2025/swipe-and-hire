@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
-import { useLenisOnElement } from '@/hooks/useLenisOnElement';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
 import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
