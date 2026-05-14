@@ -116,7 +116,7 @@ const FixedPhoneLayer = () => {
           className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 opacity-100 transition-opacity duration-500 ease-out xl:pt-10"
           style={{ touchAction: 'none', overscrollBehavior: 'contain', willChange: 'opacity' }}
         >
-          <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} pauseWhenHidden />
+          <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} pauseWhenHidden loadDelayMs={900} />
         </div>
       </div>
     </div>
