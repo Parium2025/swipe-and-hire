@@ -39,26 +39,16 @@ const items: MediaItem[] = [
 type CardItemProps = {
   item: MediaItem;
   index: number;
-  total: number;
-  scrollYProgress: ReturnType<typeof useScroll>['scrollYProgress'];
 };
 
-const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
-  // Korten fadar in EXAKT som intro-texten — ren opacity, ingen rörelse.
-  // Smooth, premium, samma rytm som "Söka jobb ska vara enkelt…".
-  const FADE_WINDOW_END = 0.22;
-  const perCard = FADE_WINDOW_END / total;
-  const start = index * perCard * 0.7;
-  const end = start + perCard * 2.4;
-  const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
-
-  // Caption följer kortet med en liten fördröjning — också ren opacity
-  const capStart = start + perCard * 0.6;
-  const capEnd = capStart + perCard * 1.6;
-  const capOpacity = useTransform(scrollYProgress, [capStart, capEnd], [0, 1]);
-
+const CardItem = ({ item, index }: CardItemProps) => {
+  // Korten fadar in som intro-texten — staggered, ren opacity + lätt y-lyft.
+  // Triggas via .phg-entered klass på föräldern (sätts av IntersectionObserver).
   return (
-    <motion.div className="phg-card" style={{ opacity }}>
+    <div
+      className="phg-card phg-card-enter"
+      style={{ ['--enter-delay' as string]: `${index * 90}ms` }}
+    >
       {item.type === 'video' ? (
         <video
           src={item.src}
@@ -80,11 +70,11 @@ const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       )}
-      <motion.div className="phg-cap" style={{ opacity: capOpacity }}>
+      <div className="phg-cap">
         <div className="phg-cap-eyebrow">{item.eyebrow}</div>
         <div className="phg-cap-title">{item.title}</div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
