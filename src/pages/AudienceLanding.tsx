@@ -173,7 +173,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {/* ──────────────── 1. HERO ──────────────── */}
           {/* MOBILE HERO — full-bleed video bakom centrerad text (matchar LandingHero) */}
           <section
-            className="relative md:hidden w-screen overflow-hidden"
+            className="relative lg:hidden w-screen overflow-hidden"
             style={{
               marginLeft: 'calc(50% - 50vw)',
               marginRight: 'calc(50% - 50vw)',
