@@ -485,8 +485,19 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
     <section
       ref={stageRef}
       data-hero-intro-stage
-      className="relative h-[100svh] w-full overflow-hidden"
+      className="relative h-[100svh] w-full overflow-hidden bg-primary"
     >
+      {/* Delad bakgrund — exakt samma gradient som intro-lagret så hero (bild 1)
+          och intro (bild 2) har identisk färg/ljus. Ligger bakom båda lagren. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
+        }}
+      />
+
       {/* HERO LAGER */}
       <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
         <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
