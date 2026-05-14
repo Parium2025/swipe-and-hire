@@ -216,7 +216,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   }, [progress]);
 
   return (
-    <section ref={stageRef} className="relative h-[260svh] w-full" style={{ scrollSnapAlign: 'start' }}>
+    <section ref={stageRef} data-hero-intro-stage className="relative h-[260svh] w-full" style={{ scrollSnapAlign: 'start' }}>
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
         {/* MOBILE HERO */}
         <section
