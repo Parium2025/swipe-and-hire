@@ -58,12 +58,7 @@ type HeroIntroStageProps = {
 
 const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
-  // Bump key för att tvinga remount av SplinePhone → telefonen återställs
-  // alltid till exakt sitt utgångsläge (precis som en page-refresh) när vi
-  // kommer tillbaka till Hero-ytan.
-  const [mountKey, setMountKey] = useState(0);
   const heroIndexRef = useRef(0);
-  const wasVisibleRef = useRef(true);
 
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
