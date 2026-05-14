@@ -56,13 +56,12 @@ type HeroIntroStageProps = {
   onStart: () => void;
 };
 
-// Telefonen monteras EN gång och lever hela sidans livslängd. När vi växlar
-// mellan Hero och Intro togglas endast opacity — ingen remount, ingen
-// återladdning av Spline-scenen. Det är det som fixar laggen vid scroll
-// uppåt (förut kördes `new Application()` + `app.load()` mitt i GSAP-tweenen).
 const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
+  const [phoneKey, setPhoneKey] = useState(0);
   const heroIndexRef = useRef(0);
+  const wasAwayFromHeroRef = useRef(false);
+  const refreshTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
@@ -76,18 +75,55 @@ const FixedPhoneLayer = () => {
       return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * 0.55;
     };
 
-    const sync = () => setVisible(isHeroZone());
+    const clearRefreshTimer = () => {
+      if (!refreshTimerRef.current) return;
+      window.clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    };
+
+    const schedulePhoneRefresh = () => {
+      clearRefreshTimer();
+      setVisible(false);
+      refreshTimerRef.current = window.setTimeout(() => {
+        setPhoneKey((key) => key + 1);
+        setVisible(isHeroZone());
+        refreshTimerRef.current = null;
+      }, 120);
+    };
+
+    const sync = () => {
+      const nextVisible = isHeroZone();
+      if (!nextVisible) wasAwayFromHeroRef.current = true;
+      if (nextVisible && wasAwayFromHeroRef.current) {
+        wasAwayFromHeroRef.current = false;
+        schedulePhoneRefresh();
+        return;
+      }
+      setVisible(nextVisible);
+    };
 
     const onIndex = (e: Event) => {
       const detail = (e as CustomEvent<{ index: number }>).detail;
       heroIndexRef.current = detail?.index ?? 0;
-      setVisible(detail?.index !== 1 && isHeroZone());
+      if (detail?.index === 1) {
+        wasAwayFromHeroRef.current = true;
+        clearRefreshTimer();
+        setVisible(false);
+        return;
+      }
+      if (wasAwayFromHeroRef.current) {
+        wasAwayFromHeroRef.current = false;
+        schedulePhoneRefresh();
+        return;
+      }
+      setVisible(isHeroZone());
     };
 
     sync();
     window.addEventListener('parium:hero-index', onIndex);
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
     return () => {
+      clearRefreshTimer();
       window.removeEventListener('parium:hero-index', onIndex);
       scrollRoot?.removeEventListener('scroll', sync);
     };
@@ -105,8 +141,10 @@ const FixedPhoneLayer = () => {
           style={{ touchAction: 'none', overscrollBehavior: 'contain', willChange: 'opacity' }}
         >
           <SplinePhone
+            key={phoneKey}
             className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
             zoom={0.78}
+            lockPageScroll
           />
         </div>
       </div>
