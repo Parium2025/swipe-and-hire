@@ -33,10 +33,19 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     ? 'mt-7 max-w-xl text-base leading-8 text-white drop-shadow-[0_2px_12px_hsl(var(--background)/0.55)]'
     : 'mt-7 max-w-xl text-lg leading-8 text-white';
 
+  // Pure opacity-fade (ingen y-translate på stora bold-rubriker) — translate
+  // på 7rem font-black + ev. drop-shadow tvingar fram tunga repaints varje
+  // frame och hackar. Opacity composit:as på GPU och förblir smooth även
+  // medan Spline + bubblor renderas i bakgrunden.
+  const fadeStyle = { willChange: 'opacity', transform: 'translateZ(0)' } as const;
+
   return (
     <>
       <motion.span
-        variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.7, ease, delay: 0.05 }}
+        style={fadeStyle}
         className={eyebrowClass}
       >
         {eyebrow}
@@ -46,7 +55,10 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
         {headline.map((line, i) => (
           <motion.span
             key={i}
-            variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease } } }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.85, ease, delay: 0.18 + i * 0.14 }}
+            style={fadeStyle}
             className="block"
           >
             {line}
@@ -55,7 +67,10 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
       </h1>
 
       <motion.p
-        variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.7, ease, delay: 0.18 + headline.length * 0.14 }}
+        style={fadeStyle}
         className={subtitleClass}
       >
         {subtitle}
