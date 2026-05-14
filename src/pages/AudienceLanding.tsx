@@ -230,70 +230,77 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
                 className="relative mx-auto flex w-full items-center justify-center"
               >
-                {isDesktopHero && <SplinePhone className="aspect-[9/16] w-full max-w-[520px] max-h-[78svh]" />}
+                {isDesktopHero && <SplinePhone className="h-[min(82svh,820px)] w-auto aspect-[9/19.5]" />}
               </motion.div>
             </motion.div>
           </section>
 
-          {/* ──────────────── 1b. BRÖDTEXT + CTA — pop-in på scroll, korten följer direkt efter ──────────────── */}
-          <section className="relative px-5 pt-20 pb-12 sm:px-6 sm:pt-24 sm:pb-14 md:px-12 md:pt-28 md:pb-16 lg:px-24">
+          {/* ──────────────── 1b. BRÖDTEXT + CTA — slide-up panel (GSAP-stil), korten följer direkt efter ──────────────── */}
+          <section className="relative overflow-hidden px-5 pt-20 pb-12 sm:px-6 sm:pt-24 sm:pb-14 md:px-12 md:pt-28 md:pb-16 lg:px-24">
             <motion.div
               className="mx-auto max-w-2xl"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.5 }}
-              variants={{
-                hidden: {},
-                visible: { transition: { staggerChildren: 0.012, delayChildren: 0.05 } },
-              }}
+              initial={{ y: '100%', opacity: 0 }}
+              whileInView={{ y: '0%', opacity: 1 }}
+              viewport={{ once: true, amount: 0.35 }}
+              transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
             >
-              <p className="text-center text-[15px] leading-[1.75] text-white sm:text-base md:text-lg">
-                {[
-                  'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben. Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
-                  'Parium är utvecklat för att göra jobbsökandet modernare, snabbare och mer användarvänligt. Du kan enkelt upptäcka nya jobbmöjligheter, läsa mer om tjänster och ansöka direkt. Utan krångliga processer eller onödigt många steg.',
-                ].map((paragraph, pIdx) => (
-                  <span key={pIdx} className={pIdx > 0 ? 'mt-6 block' : 'block'}>
-                    {paragraph.split(' ').map((word, wIdx) => (
-                      <span key={wIdx} className="inline-block whitespace-nowrap">
-                        {word.split('').map((char, cIdx) => (
-                          <motion.span
-                            key={cIdx}
-                            className="inline-block"
-                            variants={{
-                              hidden: { opacity: 0, y: 28, filter: 'blur(8px)' },
-                              visible: {
-                                opacity: 1,
-                                y: 0,
-                                filter: 'blur(0px)',
-                                transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
-                              },
-                            }}
-                          >
-                            {char}
-                          </motion.span>
-                        ))}
-                        {wIdx < paragraph.split(' ').length - 1 && '\u00A0'}
-                      </span>
-                    ))}
-                  </span>
-                ))}
-              </p>
-
               <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.35 }}
                 variants={{
-                  hidden: { opacity: 0, y: 24, scale: 0.96 },
-                  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease, delay: 0.4 } },
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.012, delayChildren: 0.45 } },
                 }}
-                className="mt-12 flex justify-center"
               >
-                <button
-                  type="button"
-                  onPointerDown={handleStart}
-                  className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-xl shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
+                <p className="text-center text-[15px] leading-[1.75] text-white sm:text-base md:text-lg">
+                  {[
+                    'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben. Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
+                    'Parium är utvecklat för att göra jobbsökandet modernare, snabbare och mer användarvänligt. Du kan enkelt upptäcka nya jobbmöjligheter, läsa mer om tjänster och ansöka direkt. Utan krångliga processer eller onödigt många steg.',
+                  ].map((paragraph, pIdx) => (
+                    <span key={pIdx} className={pIdx > 0 ? 'mt-6 block' : 'block'}>
+                      {paragraph.split(' ').map((word, wIdx, words) => (
+                        <span key={wIdx} className="inline-block whitespace-nowrap">
+                          {word.split('').map((char, cIdx) => (
+                            <motion.span
+                              key={cIdx}
+                              className="inline-block"
+                              variants={{
+                                hidden: { opacity: 0, y: 28, filter: 'blur(8px)' },
+                                visible: {
+                                  opacity: 1,
+                                  y: 0,
+                                  filter: 'blur(0px)',
+                                  transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+                                },
+                              }}
+                            >
+                              {char}
+                            </motion.span>
+                          ))}
+                          {wIdx < words.length - 1 && '\u00A0'}
+                        </span>
+                      ))}
+                    </span>
+                  ))}
+                </p>
+
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 24, scale: 0.96 },
+                    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease, delay: 0.6 } },
+                  }}
+                  className="mt-12 flex justify-center"
                 >
-                  {c.hero.cta}
-                  <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
-                </button>
+                  <button
+                    type="button"
+                    onPointerDown={handleStart}
+                    className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-xl shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
+                  >
+                    {c.hero.cta}
+                    <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
+                  </button>
+                </motion.div>
               </motion.div>
             </motion.div>
           </section>
