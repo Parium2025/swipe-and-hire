@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -40,47 +40,21 @@ type AudienceLandingProps = {
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-const SplitRevealText = ({ paragraphs }: { paragraphs: string[] }) => (
-  <motion.div
-    initial="hidden"
-    whileInView="visible"
-    viewport={{ once: true, amount: 0.45 }}
-    variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.012, delayChildren: 0.22 } } }}
-  >
-    <p className="max-w-3xl text-center text-base leading-[1.75] text-white/80 sm:text-lg md:text-xl">
-      {paragraphs.map((paragraph, pIdx) => (
-        <span key={pIdx} className={pIdx > 0 ? 'mt-6 block' : 'block'}>
-          {paragraph.split(' ').map((word, wIdx, words) => (
-            <span key={wIdx} className="inline-block whitespace-nowrap">
-              {word.split('').map((char, cIdx) => (
-                <motion.span
-                  key={cIdx}
-                  className="inline-block"
-                  variants={{
-                    hidden: { opacity: 0, y: 30, filter: 'blur(10px)' },
-                    visible: {
-                      opacity: 1,
-                      y: 0,
-                      filter: 'blur(0px)',
-                      transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
-                    },
-                  }}
-                >
-                  {char}
-                </motion.span>
-              ))}
-              {wIdx < words.length - 1 && '\u00A0'}
-            </span>
-          ))}
-        </span>
-      ))}
-    </p>
-  </motion.div>
+const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
+  <div className="max-w-3xl text-center text-base leading-[1.75] text-white/80 sm:text-lg md:text-xl">
+    {paragraphs.map((paragraph, pIdx) => (
+      <p key={pIdx} className={pIdx > 0 ? 'mt-6' : undefined}>
+        {paragraph}
+      </p>
+    ))}
+  </div>
 );
 
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
+  const scrollRootRef = useRef<HTMLDivElement | null>(null);
+  const snapLockRef = useRef(false);
 
   // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
   // åt gången — annars initieras Spline-runtime två gånger på desktop.
@@ -139,6 +113,36 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     canonical.href = url;
   }, [audience]);
 
+  useEffect(() => {
+    const root = scrollRootRef.current;
+    if (!root || audience !== 'job_seeker') return;
+
+    const unlock = () => {
+      window.setTimeout(() => {
+        snapLockRef.current = false;
+      }, 650);
+    };
+
+    const snapToIntro = (event: WheelEvent | TouchEvent) => {
+      if (snapLockRef.current || root.scrollTop > 12 || root.scrollTop < -1) return;
+
+      const delta = 'deltaY' in event ? event.deltaY : 1;
+      if (delta <= 0) return;
+
+      event.preventDefault();
+      snapLockRef.current = true;
+      root.scrollTo({ top: root.clientHeight, behavior: 'smooth' });
+      unlock();
+    };
+
+    root.addEventListener('wheel', snapToIntro, { passive: false });
+    root.addEventListener('touchmove', snapToIntro, { passive: false });
+    return () => {
+      root.removeEventListener('wheel', snapToIntro);
+      root.removeEventListener('touchmove', snapToIntro);
+    };
+  }, [audience]);
+
   const handleLogin = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth');
@@ -186,6 +190,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   return (
     <div
+      ref={scrollRootRef}
       data-landing-scroll-root
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
@@ -207,7 +212,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         >
           {/* HERO — snap-stop 1 */}
           <section
-            className="relative h-[100svh] w-full overflow-hidden"
+            className="sticky top-0 z-0 h-[100svh] w-full overflow-hidden"
             style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
           >
             {/* MOBILE HERO */}
@@ -259,7 +264,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
                   className="relative mx-auto flex w-full items-center justify-center self-center"
                 >
-                  {isDesktopHero && <SplinePhone className="h-[min(74svh,720px)] w-auto aspect-[9/19.5]" />}
+                  {isDesktopHero && <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5] translate-y-16" />}
                 </motion.div>
               </motion.div>
             </section>
@@ -268,16 +273,17 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {/* INTRO PANEL — snap-stop 2 (slide-up animation vid in-view) */}
           <motion.section
             aria-label="Introduktion"
-            className="relative flex h-[100svh] w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-6 md:px-12 lg:px-24"
-            style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
-            initial={{ opacity: 0, y: 80 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.35 }}
-            transition={{ duration: 0.9, ease }}
+            className="relative z-20 flex h-[100svh] w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
+            style={{
+              scrollSnapAlign: 'start',
+              scrollSnapStop: 'always',
+              backgroundImage:
+                'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
+            }}
           >
             <div className="absolute inset-x-0 top-0 h-px bg-white/15" />
             <div className="relative z-10 flex max-w-4xl flex-col items-center">
-              <SplitRevealText
+              <IntroText
                 paragraphs={[
                   'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
                   'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
