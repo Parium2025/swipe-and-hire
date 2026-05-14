@@ -36,6 +36,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
   return (
     <>
       <motion.span
+        data-hero-anim-item
         variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
         className={eyebrowClass}
       >
@@ -46,6 +47,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
         {headline.map((line, i) => (
           <motion.span
             key={i}
+            data-hero-anim-item
             variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease } } }}
             className="block"
           >
@@ -55,6 +57,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
       </h1>
 
       <motion.p
+        data-hero-anim-item
         variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
         className={subtitleClass}
       >
