@@ -154,10 +154,23 @@ const FixedPhoneLayer = () => {
 
     isHeroZone() ? revealPhone(0) : parkPhoneBelow();
 
+    // Hindra Spline-canvasen från att äta wheel-events. När musen råkar
+    // hamna över telefonen ska scrollen alltid gå vidare till sidans scroll-
+    // root istället för att zooma/flytta 3D-scenen — annars blir telefonen
+    // "klippt" eftersom kamera-positionen aldrig nollställs.
+    const frame = phoneFrameRef.current;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      scrollRoot?.scrollBy({ top: e.deltaY, left: 0, behavior: 'auto' });
+    };
+    frame?.addEventListener('wheel', onWheel, { passive: false, capture: true });
+
     window.addEventListener('parium:hero-index', onIndex);
     scrollRoot?.addEventListener('scroll', syncVisibilityToScroll, { passive: true });
     return () => {
       clearReturnTimer();
+      frame?.removeEventListener('wheel', onWheel, { capture: true } as EventListenerOptions);
       window.removeEventListener('parium:hero-index', onIndex);
       scrollRoot?.removeEventListener('scroll', syncVisibilityToScroll);
     };
