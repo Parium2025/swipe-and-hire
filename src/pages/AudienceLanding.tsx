@@ -179,7 +179,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         >
           {/* HERO — snap-stop 1 */}
           <section
-            className="sticky top-0 z-0 h-[100svh] w-full overflow-hidden"
+            className="relative h-[100svh] w-full overflow-hidden"
             style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
           >
             {/* MOBILE HERO */}
@@ -218,20 +218,20 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               />
 
               <motion.div
-                className="relative z-10 mx-auto grid w-full max-w-[1280px] items-center gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]"
+                className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]"
                 initial="hidden"
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
               >
-                <div className="text-left self-center">
+                <div className="text-left pt-8 xl:pt-10">
                   <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
                 </div>
 
                 <motion.div
                   variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
-                  className="relative mx-auto flex w-full items-center justify-center self-center"
+                  className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10"
                 >
-                  {isDesktopHero && <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5] translate-y-16" />}
+                  {isDesktopHero && <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" />}
                 </motion.div>
               </motion.div>
             </section>
