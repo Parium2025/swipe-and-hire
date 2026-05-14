@@ -428,7 +428,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       className="relative h-[100svh] w-full overflow-hidden"
     >
       {/* HERO LAGER */}
-      <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden" style={{ transform: 'translate3d(0,0,0)', opacity: 1 }}>
+      <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden" style={{ transform: 'translate3d(0,0,0)', opacity: 1, visibility: 'visible' }}>
         <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden" style={{ transform: 'translate3d(0,0,0)' }}>
           {/* Mobile hero */}
           <section
@@ -457,7 +457,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
           {/* Desktop hero */}
           <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
-            <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-secondary/[0.025]" />
+            <div aria-hidden className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]" />
             <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
               <motion.div
                 ref={heroTextRef}
@@ -475,7 +475,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       </div>
 
       {/* INTRO LAGER (kommer uppifrån) */}
-      <div ref={introOuterRef} className="absolute inset-0 z-30 overflow-hidden opacity-0" style={{ transform: 'translate3d(0,100%,0)' }}>
+      <div ref={introOuterRef} className="absolute inset-0 z-30 overflow-hidden opacity-0 invisible" style={{ transform: 'translate3d(0,100%,0)' }}>
         <div ref={introInnerRef} className="absolute inset-0 overflow-hidden" style={{ transform: 'translate3d(0,-100%,0)' }}>
           <section
             aria-label="Introduktion"
