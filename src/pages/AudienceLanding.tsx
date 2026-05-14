@@ -59,6 +59,33 @@ type HeroIntroStageProps = {
 
 const FixedPhoneLayer = () => {
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
+  const [hidden, setHidden] = useState(false);
+
+  // Fadea ut telefonen så fort intro-panelen ("Söka jobb ska vara enkelt…") börjar komma upp.
+  // Den ska bara synas på själva hero-sektionen ("Hitta jobb som faktiskt passar dig").
+  useEffect(() => {
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    if (!root) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
+      if (!stage) return;
+      const rect = stage.getBoundingClientRect();
+      const distance = Math.max(1, stage.offsetHeight - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, -rect.top / distance));
+      setHidden(progress > 0.12);
+    };
+    const onScroll = () => { if (!raf) raf = window.requestAnimationFrame(update); };
+    update();
+    root.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      root.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
 
   useEffect(() => {
     const frame = phoneFrameRef.current;
@@ -87,7 +114,11 @@ const FixedPhoneLayer = () => {
   };
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
+    <div
+      className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
+      style={{ opacity: hidden ? 0 : 1, transition: 'opacity 380ms cubic-bezier(0.16, 1, 0.3, 1)' }}
+      aria-hidden={hidden}
+    >
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <motion.div
@@ -185,7 +216,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   }, [progress]);
 
   return (
-    <section ref={stageRef} className="relative h-[260svh] w-full" style={{ scrollSnapAlign: 'start' }}>
+    <section ref={stageRef} data-hero-intro-stage className="relative h-[260svh] w-full" style={{ scrollSnapAlign: 'start' }}>
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
         {/* MOBILE HERO */}
         <section
