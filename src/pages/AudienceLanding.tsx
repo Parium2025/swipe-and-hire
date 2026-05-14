@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -49,6 +49,166 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
     ))}
   </div>
 );
+
+type HeroIntroStageProps = {
+  c: typeof audienceContent[AudienceRole];
+  audience: AudienceRole;
+  isDesktopHero: boolean;
+  onStart: () => void;
+};
+
+const HeroIntroStage = ({ c, audience, isDesktopHero, onStart }: HeroIntroStageProps) => {
+  const stageRef = useRef<HTMLElement | null>(null);
+  const scrollRootRef = useRef<HTMLElement | null>(null);
+  const lockReleaseRef = useRef<number | null>(null);
+  const introLockDoneRef = useRef(false);
+
+  useEffect(() => {
+    scrollRootRef.current = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+
+    return () => {
+      if (lockReleaseRef.current) window.clearTimeout(lockReleaseRef.current);
+    };
+  }, []);
+
+  const { scrollYProgress } = useScroll({
+    target: stageRef,
+    container: scrollRootRef as React.RefObject<HTMLElement>,
+    offset: ['start start', 'end end'],
+  });
+
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.4, 0.58], [1, 1, 0]);
+  const heroY = useTransform(scrollYProgress, [0, 0.58], [0, -72]);
+  const phoneOpacity = useTransform(scrollYProgress, [0, 0.72, 0.9], [1, 1, 0]);
+  const introY = useTransform(scrollYProgress, [0.12, 0.58], ['110%', '0%']);
+  const introOpacity = useTransform(scrollYProgress, [0.12, 0.28, 0.58], [0, 1, 1]);
+
+  useMotionValueEvent(scrollYProgress, 'change', (latest) => {
+    if (latest < 0.2) introLockDoneRef.current = false;
+    if (latest < 0.58 || latest > 0.82 || introLockDoneRef.current) return;
+
+    const root = scrollRootRef.current;
+    if (!root) return;
+
+    introLockDoneRef.current = true;
+    const stop = (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    const stopKeys = (event: KeyboardEvent) => {
+      if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) stop(event);
+    };
+    root.addEventListener('wheel', stop, { capture: true, passive: false });
+    root.addEventListener('touchmove', stop, { capture: true, passive: false });
+    window.addEventListener('keydown', stopKeys, { capture: true });
+
+    lockReleaseRef.current = window.setTimeout(() => {
+      root.removeEventListener('wheel', stop, true);
+      root.removeEventListener('touchmove', stop, true);
+      window.removeEventListener('keydown', stopKeys, true);
+      lockReleaseRef.current = null;
+    }, 2450);
+  });
+
+  return (
+    <section ref={stageRef} className="relative h-[260svh] w-full" style={{ scrollSnapAlign: 'start' }}>
+      <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
+        {/* MOBILE HERO */}
+        <section
+          className="relative flex h-[100svh] w-screen overflow-hidden lg:hidden"
+          style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
+          aria-labelledby="audience-hero-heading-mobile"
+        >
+          <motion.div style={{ opacity: phoneOpacity }} className="absolute inset-0 -z-0 flex items-center justify-center">
+            {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
+          </motion.div>
+
+          <motion.div
+            style={{ opacity: heroOpacity, y: heroY }}
+            className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
+            initial="hidden"
+            animate="visible"
+            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
+          >
+            <HeroText
+              eyebrow={c.eyebrow}
+              headline={c.hero.headline}
+              subtitle={c.hero.subtitle}
+              variant="mobile"
+              headingId="audience-hero-heading-mobile"
+            />
+          </motion.div>
+        </section>
+
+        {/* DESKTOP HERO — telefonen ligger i samma sticky viewport och kan därför inte scrollas bort under intro-övergången. */}
+        <section className="relative hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
+            animate={{ opacity: [0.5, 0.75, 0.5] }}
+            transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
+          />
+
+          <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+            <motion.div
+              style={{ opacity: heroOpacity, y: heroY }}
+              className="-translate-y-16 pt-8 text-left xl:pt-10"
+              initial="hidden"
+              animate="visible"
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
+            >
+              <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
+            </motion.div>
+
+            <motion.div
+              style={{ opacity: phoneOpacity }}
+              initial={{ opacity: 0, x: 60, scale: 0.96 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ duration: 1.1, ease }}
+              className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10"
+            >
+              {isDesktopHero && <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />}
+            </motion.div>
+          </div>
+        </section>
+
+        <motion.section
+          aria-label="Introduktion"
+          style={{ y: introY, opacity: introOpacity }}
+          className="absolute inset-x-0 bottom-0 z-30 flex h-[100svh] w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
+        >
+          <div className="absolute inset-x-0 top-0 h-px bg-white/15" />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
+            }}
+          />
+          <div className="relative z-10 flex max-w-4xl flex-col items-center">
+            <IntroText
+              paragraphs={[
+                'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
+                'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
+              ]}
+            />
+
+            <div className="mt-10 flex justify-center">
+              <button
+                type="button"
+                onPointerDown={onStart}
+                className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
+              >
+                {c.hero.cta}
+                <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
+              </button>
+            </div>
+          </div>
+        </motion.section>
+      </div>
+    </section>
+  );
+};
 
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
