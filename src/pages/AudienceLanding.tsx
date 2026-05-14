@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { type WheelEvent, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -122,7 +122,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     navigate('/auth', { state: { mode: 'register', role: audience } });
   };
 
-  const handleLandingWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+  const handleLandingWheel = (event: WheelEvent<HTMLDivElement>) => {
     const root = scrollRootRef.current;
     if (!root || event.deltaY <= 0 || root.scrollTop > 8 || firstScrollAnimatingRef.current) return;
 
@@ -239,7 +239,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
               >
-                <div className="text-left pt-8 xl:pt-10">
+                <div className="-translate-y-16 text-left pt-8 xl:pt-10">
                   <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
                 </div>
 
