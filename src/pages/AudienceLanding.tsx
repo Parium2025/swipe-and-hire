@@ -133,14 +133,16 @@ const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
           transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
         />
 
-        <DesktopPhoneLayer active={phoneActive} resetToken={resetToken} />
+        <DesktopPhoneLayer active={phoneActive} resetToken={resetToken} layerRef={phoneLayerRef} />
 
         <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
           <motion.div
+            ref={heroTextRef}
             className="pointer-events-none mx-auto flex h-full max-w-[1180px] flex-col items-center justify-center text-center lg:pointer-events-auto lg:mx-0 lg:block lg:-translate-y-16 lg:pt-8 lg:text-left xl:pt-10"
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
+            style={{ willChange: 'opacity, transform' }}
           >
             <HeroText
               eyebrow={c.eyebrow}
