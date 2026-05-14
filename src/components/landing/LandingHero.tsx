@@ -75,8 +75,8 @@ const AudienceCard = ({
       onPointerMove={handlePointerMove}
       onPointerLeave={resetTilt}
       variants={{
-        hidden: { opacity: 0, y: 34, scale: 0.96 },
-        show: { opacity: 1, y: 0, scale: 1 },
+        hidden: { opacity: 0, y: 34, scale: 0.96, filter: 'blur(12px)' },
+        show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
       }}
       animate={isSelected ? { scale: 1.035, y: -3 } : isOtherSelected ? { opacity: 0.2, scale: 0.94 } : undefined}
       whileTap={!selectedRole ? { scale: 0.985 } : undefined}
@@ -84,10 +84,10 @@ const AudienceCard = ({
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
       className="group relative min-h-touch w-full max-w-[300px] rounded-full bg-transparent p-0 text-left outline-none sm:w-[300px]"
     >
-      <span className="pointer-events-none absolute -inset-1 rounded-full bg-secondary/15 opacity-0 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100" />
+      <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100" />
       <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-45 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100" />
       <motion.span
-        className="relative z-10 flex items-center gap-3.5 overflow-hidden rounded-full border border-white/12 bg-white/[0.07] px-5 py-3.5 shadow-[0_16px_48px_hsl(var(--background)/0.18)] transition-colors duration-500 ease-out [@media(hover:hover)]:group-hover:border-secondary/34 [@media(hover:hover)]:group-hover:bg-white/[0.09] group-focus-visible:border-secondary/45 sm:px-6 sm:py-4"
+        className="relative z-10 flex items-center gap-3.5 overflow-hidden rounded-full border border-white/12 bg-white/[0.045] px-5 py-3.5 shadow-[0_16px_48px_hsl(var(--background)/0.18)] backdrop-blur-xl transition-colors duration-500 ease-out [@media(hover:hover)]:group-hover:border-secondary/34 [@media(hover:hover)]:group-hover:bg-white/[0.06] group-focus-visible:border-secondary/45 sm:px-6 sm:py-4"
         style={{ x: innerX, y: innerY }}
       >
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary transition-shadow duration-500 ease-out [@media(hover:hover)]:group-hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] group-focus-visible:shadow-[0_0_30px_hsl(var(--secondary)/0.28)]">
