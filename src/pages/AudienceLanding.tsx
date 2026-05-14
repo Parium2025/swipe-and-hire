@@ -69,71 +69,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     return () => mq.removeEventListener('change', onChange);
   }, []);
 
-  // Scroll-jack: när intro-panelen kommer in i view, lås scroll i 2.5s så att
-  // användaren känner att rutan "kommer upp" till dem och inte kan scrolla förbi direkt.
-  const introSectionRef = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    const root = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
-    const intro = introSectionRef.current;
-    if (!root || !intro) return;
-
-    let lockedUntil = 0;
-    let lastScrollTop = root.scrollTop;
-    let introVisible = false;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const wasVisible = introVisible;
-          introVisible = entry.intersectionRatio >= 0.6;
-          // Lås scroll när intro nyligen blev synlig (oavsett riktning)
-          if (introVisible && !wasVisible) {
-            lockedUntil = performance.now() + 2500;
-          }
-        }
-      },
-      { root, threshold: [0, 0.6, 1] }
-    );
-    observer.observe(intro);
-
-    const isLocked = () => performance.now() < lockedUntil;
-
-    const onWheel = (e: WheelEvent) => {
-      if (isLocked()) {
-        e.preventDefault();
-      }
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (isLocked()) e.preventDefault();
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (!isLocked()) return;
-      if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Spacebar'].includes(e.key)) {
-        e.preventDefault();
-      }
-    };
-    const onScroll = () => {
-      if (isLocked()) {
-        // Tvinga tillbaka scroll-positionen om något försöker scrolla
-        root.scrollTop = lastScrollTop;
-      } else {
-        lastScrollTop = root.scrollTop;
-      }
-    };
-
-    root.addEventListener('wheel', onWheel, { passive: false });
-    root.addEventListener('touchmove', onTouchMove, { passive: false });
-    window.addEventListener('keydown', onKey);
-    root.addEventListener('scroll', onScroll, { passive: true });
-
-    return () => {
-      observer.disconnect();
-      root.removeEventListener('wheel', onWheel);
-      root.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('keydown', onKey);
-      root.removeEventListener('scroll', onScroll);
-    };
-  }, []);
+  // (Tidigare scroll-jack med IntersectionObserver + tvingad scrollTop togs bort —
+  // den slogs mot CSS scroll-snap och orsakade lagg/jitter. CSS scroll-snap
+  // (scrollSnapType: 'y mandatory' + scrollSnapStop: 'always') sköter snappet.)
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
