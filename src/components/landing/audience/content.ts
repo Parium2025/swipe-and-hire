@@ -17,7 +17,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     eyebrow: 'För jobbsökare',
     hero: {
       headline: ['Hitta jobb', 'som faktiskt', 'passar dig.'],
-      subtitle: 'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben. Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.\n\nParium är utvecklat för att göra jobbsökandet modernare, snabbare och mer användarvänligt. Du kan enkelt upptäcka nya jobbmöjligheter, läsa mer om tjänster och ansöka direkt. Utan krångliga processer eller onödigt många steg.',
+      subtitle: 'Söka jobb ska vara enkelt och smidigt. Här får du allt i en plattform. Vi finns både på webben och som en nedladdningsbar app!',
       cta: 'Skapa jobbsökarprofil',
     },
     statement: {
