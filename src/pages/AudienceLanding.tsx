@@ -553,6 +553,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
                   'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
               }}
             />
+            <FloatingBubbles />
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center">
               <IntroText
                 paragraphs={[
