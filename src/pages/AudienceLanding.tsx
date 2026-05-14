@@ -228,6 +228,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
       const heroTextItems = heroText ? gsap.utils.toArray<HTMLElement>(heroText.querySelectorAll('span, h1 span, p')) : [];
       const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p, button')) : [];
+      let releasedToGallery = false;
 
       // Initial state: hero synlig, intro gömd UNDER skärmen.
       gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
@@ -304,18 +305,11 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         const rect = next.getBoundingClientRect();
         const target = root.scrollTop + rect.top;
         inView = false;
+        releasedToGallery = true;
         // Släpp Observer direkt så smooth-scrollen och nästa hjulgest aldrig fastnar.
         // @ts-expect-error gsap Observer har enable/disable
         observer?.disable?.();
         root.scrollTo({ top: target, behavior: 'smooth' });
-        window.setTimeout(() => {
-          const stageRect = stage.getBoundingClientRect();
-          inView = stageRect.bottom > window.innerHeight * 0.4 && stageRect.top < window.innerHeight * 0.6;
-          if (observer) {
-            // @ts-expect-error gsap Observer har enable/disable
-            inView ? observer.enable?.() : observer.disable?.();
-          }
-        }, 900);
       };
 
       observer = Observer.create({
@@ -348,7 +342,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           for (const e of entries) inView = e.isIntersecting && e.intersectionRatio > 0.4;
           if (observer) {
             // @ts-expect-error gsap Observer har enable/disable
-            inView ? observer.enable?.() : observer.disable?.();
+            inView && !releasedToGallery ? observer.enable?.() : observer.disable?.();
           }
         },
         { root: scrollRoot, threshold: [0, 0.4, 0.6, 1] }
@@ -358,6 +352,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const settleToIntroFromBelow = () => {
         if (!scrollRoot) return;
         if (animatingRef.current) return;
+        releasedToGallery = false;
+        releaseLockedRef.current = false;
         const stageTopAbs = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
         // Sätt Hero som startläge — så att vi kan spela exakt samma 1→2-animation
         // som när man scrollar nedåt från Hero till Intro.
