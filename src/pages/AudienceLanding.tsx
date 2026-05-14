@@ -241,9 +241,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </section>
           </section>
 
-          {/* INTRO PANEL — snap-stop 2 (slide-up från botten + scroll-lock 2.5s) */}
+          {/* INTRO PANEL — snap-stop 2 (slide-up animation vid in-view) */}
           <motion.section
-            ref={introSectionRef}
             aria-label="Introduktion"
             className="relative z-20 flex h-[100svh] w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
             style={{
