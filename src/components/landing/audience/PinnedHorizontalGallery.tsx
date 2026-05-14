@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
@@ -60,16 +60,15 @@ const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
   const capY = useTransform(scrollYProgress, [capStart, capEnd], [12, 0]);
 
   return (
-    <motion.div className="phg-card" style={{ opacity, y }}>
+    <motion.div className="phg-card" data-phg-card style={{ opacity, y }}>
       {item.type === 'video' ? (
         <video
           src={item.src}
           poster={item.poster}
           muted
           loop
-          autoPlay
           playsInline
-          preload="auto"
+          preload={index < 2 ? 'auto' : 'metadata'}
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       ) : (
@@ -130,24 +129,53 @@ const PinnedHorizontalGallery = () => {
     const strip = stripRef.current;
     if (!strip) return;
     const videos = Array.from(strip.querySelectorAll('video'));
-    const playAll = () => videos.forEach((v) => {
-      v.muted = true; v.playsInline = true;
-      const p = v.play(); if (p && typeof p.catch === 'function') p.catch(() => {});
-    });
-    playAll();
-    const onVis = () => { if (document.visibilityState === 'visible') playAll(); };
-    document.addEventListener('visibilitychange', onVis);
-    return () => document.removeEventListener('visibilitychange', onVis);
-  }, []);
+    const visibleVideos = new Set<HTMLVideoElement>();
 
-  // Säkerställ att videos alltid spelas — aldrig pausa baserat på scroll
-  useMotionValueEvent(scrollYProgress, 'change', () => {
-    const strip = stripRef.current;
-    if (!strip) return;
-    Array.from(strip.querySelectorAll('video')).forEach((vid) => {
-      if (vid.paused) vid.play().catch(() => {});
-    });
-  });
+    const play = (video: HTMLVideoElement) => {
+      video.muted = true;
+      video.playsInline = true;
+      if (video.paused) video.play().catch(() => {});
+    };
+
+    const pause = (video: HTMLVideoElement) => {
+      if (!video.paused) video.pause();
+    };
+
+    if (!('IntersectionObserver' in window)) {
+      videos.forEach(play);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target.querySelector('video');
+          if (!video) return;
+          if (entry.isIntersecting) {
+            visibleVideos.add(video);
+            play(video);
+          } else {
+            visibleVideos.delete(video);
+            pause(video);
+          }
+        });
+      },
+      { root: containerRef.current, threshold: 0.18, rootMargin: '20% 16%' }
+    );
+
+    strip.querySelectorAll<HTMLElement>('[data-phg-card]').forEach((card) => observer.observe(card));
+
+    const onVis = () => {
+      if (document.visibilityState === 'visible') visibleVideos.forEach(play);
+      else videos.forEach(pause);
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', onVis);
+      videos.forEach(pause);
+    };
+  }, []);
 
   return (
     <>
