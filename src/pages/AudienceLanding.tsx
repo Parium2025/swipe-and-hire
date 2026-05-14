@@ -235,8 +235,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </motion.div>
           </section>
 
-          {/* ──────────────── 1b. BRÖDTEXT + CTA — fullskärms pop-in (texten syns, korten nedanför göms) ──────────────── */}
-          <section className="relative flex min-h-[100svh] items-center justify-center px-5 py-20 sm:px-6 md:px-12 lg:px-24">
+          {/* ──────────────── 1b. BRÖDTEXT + CTA — pop-in på scroll, korten följer direkt efter ──────────────── */}
+          <section className="relative px-5 pt-20 pb-12 sm:px-6 sm:pt-24 sm:pb-14 md:px-12 md:pt-28 md:pb-16 lg:px-24">
             <motion.div
               className="mx-auto max-w-2xl"
               initial="hidden"
