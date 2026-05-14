@@ -290,6 +290,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           defaults: { duration: 1.08, ease: 'power2.inOut' },
           onComplete: () => {
             setHeroStart();
+            window.dispatchEvent(new CustomEvent('parium:phone-refresh'));
             animatingRef.current = false;
             releaseLockedRef.current = false;
             setObserverActive(true);
