@@ -3,6 +3,7 @@ import type { Application as SplineApplication } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
   className?: string;
+  zoom?: number;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
@@ -18,7 +19,7 @@ const SCENE_URL = '/spline/parium-phone-scene.splinecode';
  * - Scroll-lås när användaren drar/roterar telefonen — sidan rör sig inte
  * - A11y: aria-label på canvas
  */
-export const SplinePhone = ({ className }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.88 }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
@@ -84,6 +85,8 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
         app = new Application(canvas, { renderMode: 'continuous' });
         appRef.current = app;
         await app.load(SCENE_URL);
+        app.setZoom(zoom);
+        requestAnimationFrame(() => app?.setZoom(zoom));
         if (!cancelled) setIsReady(true);
       } catch (error) {
         console.error('Kunde inte ladda Spline-telefonen:', error);
@@ -96,7 +99,7 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
       app?.dispose();
       appRef.current = null;
     };
-  }, [shouldLoad, reducedMotion]);
+  }, [shouldLoad, reducedMotion, zoom]);
 
   // Reduced-motion eller fel: visa enkel statisk platshållare
   if (reducedMotion || hasError) {
