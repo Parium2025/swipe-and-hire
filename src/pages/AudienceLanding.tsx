@@ -73,12 +73,6 @@ const FixedPhoneLayer = () => {
     };
 
     const apply = (next: boolean) => {
-      // När vi går från dold → synlig: remounta så telefonen alltid hamnar
-      // i sin ursprungliga position (ingen "pop-up hur som helst").
-      if (next && !wasVisibleRef.current) {
-        setMountKey((k) => k + 1);
-      }
-      wasVisibleRef.current = next;
       setVisible(next);
     };
 
