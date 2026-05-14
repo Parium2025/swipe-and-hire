@@ -5,11 +5,12 @@ interface SplinePhoneProps {
   className?: string;
   zoom?: number;
   lockPageScroll?: boolean;
+  resetToken?: number;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78, lockPageScroll = false }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.78, lockPageScroll = false, resetToken = 0 }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
@@ -32,10 +33,11 @@ export const SplinePhone = ({ className, zoom = 0.78, lockPageScroll = false }: 
       event.stopPropagation();
     };
 
-    wrapper.addEventListener('wheel', blockScroll, { passive: false });
-    wrapper.addEventListener('touchmove', blockScroll, { passive: false });
-    canvas?.addEventListener('wheel', blockScroll, { passive: false });
-    canvas?.addEventListener('touchmove', blockScroll, { passive: false });
+    const options = { passive: false, capture: true } as AddEventListenerOptions;
+    wrapper.addEventListener('wheel', blockScroll, options);
+    wrapper.addEventListener('touchmove', blockScroll, options);
+    canvas?.addEventListener('wheel', blockScroll, options);
+    canvas?.addEventListener('touchmove', blockScroll, options);
 
     return () => {
       wrapper.removeEventListener('wheel', blockScroll);
@@ -44,6 +46,18 @@ export const SplinePhone = ({ className, zoom = 0.78, lockPageScroll = false }: 
       canvas?.removeEventListener('touchmove', blockScroll);
     };
   }, [lockPageScroll]);
+
+  useEffect(() => {
+    if (!resetToken || !appRef.current) return;
+    const app = appRef.current as SplineApplication & {
+      controls?: { reset?: () => void; update?: () => void };
+      _controls?: { reset?: () => void; update?: () => void };
+    };
+    app.setZoom(zoom);
+    (app.controls ?? app._controls)?.reset?.();
+    (app.controls ?? app._controls)?.update?.();
+    app.requestRender?.();
+  }, [resetToken, zoom]);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -112,7 +126,7 @@ export const SplinePhone = ({ className, zoom = 0.78, lockPageScroll = false }: 
         role="img"
         aria-label="Parium 3D-telefon"
         tabIndex={-1}
-        className="h-full w-full cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing"
+        className="h-full w-full cursor-grab bg-transparent outline-none active:cursor-grabbing"
         draggable={false}
         style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
       />

@@ -8,31 +8,8 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
-import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
-import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
-import panelImg3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
-import panelImg4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
-
-// 🖼️ Provisional placeholder images for the 4 horizontal scroll panels.
-// Swap these out via the imports above when final brand photography is ready.
-const panelImages = [panelImg1, panelImg2, panelImg3, panelImg4];
-
-const PanelImage = ({ src, alt }: { src: string; alt: string }) => (
-  <div className="relative mx-auto aspect-[9/16] w-full max-w-[360px] overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] shadow-[0_40px_120px_hsl(var(--background)/0.6)]">
-    <img
-      src={src}
-      alt={alt}
-      width={768}
-      height={1280}
-      loading="lazy"
-      decoding="async"
-      className="h-full w-full object-cover"
-    />
-    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-  </div>
-);
 
 type AudienceLandingProps = {
   audience: AudienceRole;
@@ -52,494 +29,145 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 
 type HeroIntroStageProps = {
   c: (typeof audienceContent)[AudienceRole];
-  isDesktopHero: boolean;
   onStart: () => void;
 };
 
-const FixedPhoneLayer = () => {
-  const [visible, setVisible] = useState(true);
-  const [phoneKey, setPhoneKey] = useState(0);
-  const heroIndexRef = useRef(0);
+const DesktopPhoneLayer = ({ active, resetToken }: { active: boolean; resetToken: number }) => (
+  <div
+    className={`${active ? 'visible' : 'invisible'} pointer-events-none fixed inset-0 z-20 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24`}
+    aria-hidden="true"
+  >
+    <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+      <div aria-hidden />
+      <div
+        className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 xl:pt-10"
+        style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
+      >
+        <SplinePhone
+          className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
+          zoom={0.78}
+          lockPageScroll
+          resetToken={resetToken}
+        />
+      </div>
+    </div>
+  </div>
+);
+
+const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
+  const heroRef = useRef<HTMLElement | null>(null);
   const wasAwayFromHeroRef = useRef(false);
-  const refreshTimerRef = useRef<number | null>(null);
+  const [phoneActive, setPhoneActive] = useState(true);
+  const [resetToken, setResetToken] = useState(0);
 
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    const hero = heroRef.current;
+    if (!hero) return;
 
-    const isHeroZone = () => {
-      if (heroIndexRef.current !== 0) return false;
-      if (!scrollRoot) return true;
-      const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
-      if (!stage) return scrollRoot.scrollTop <= window.innerHeight * 0.65;
-      const rect = stage.getBoundingClientRect();
-      return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * 0.55;
+    const isHeroInView = () => {
+      const rect = hero.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      return rect.top < vh * 0.55 && rect.bottom > vh * 0.45;
     };
 
-    const clearRefreshTimer = () => {
-      if (!refreshTimerRef.current) return;
-      window.clearTimeout(refreshTimerRef.current);
-      refreshTimerRef.current = null;
-    };
+    const syncPhone = () => {
+      const nextActive = isHeroInView();
+      setPhoneActive(nextActive);
 
-    const schedulePhoneRefresh = () => {
-      clearRefreshTimer();
-      setVisible(false);
-      refreshTimerRef.current = window.setTimeout(() => {
-        setPhoneKey((key) => key + 1);
-        setVisible(isHeroZone());
-        refreshTimerRef.current = null;
-      }, 120);
-    };
-
-    const sync = () => {
-      const nextVisible = isHeroZone();
-      if (!nextVisible) wasAwayFromHeroRef.current = true;
-      if (nextVisible && wasAwayFromHeroRef.current) return;
-      setVisible(nextVisible);
-    };
-
-    const onIndex = (e: Event) => {
-      const detail = (e as CustomEvent<{ index: number }>).detail;
-      heroIndexRef.current = detail?.index ?? 0;
-      if (detail?.index === 1) {
+      if (!nextActive) {
         wasAwayFromHeroRef.current = true;
-        clearRefreshTimer();
-        setVisible(false);
         return;
       }
-      if (wasAwayFromHeroRef.current) setVisible(false);
-      setVisible(isHeroZone());
+
+      if (wasAwayFromHeroRef.current) {
+        wasAwayFromHeroRef.current = false;
+        setResetToken((token) => token + 1);
+      }
     };
 
-    const onRefresh = () => {
-      wasAwayFromHeroRef.current = false;
-      schedulePhoneRefresh();
-    };
+    syncPhone();
+    scrollRoot?.addEventListener('scroll', syncPhone, { passive: true });
+    window.addEventListener('resize', syncPhone);
 
-    sync();
-    window.addEventListener('parium:hero-index', onIndex);
-    window.addEventListener('parium:phone-refresh', onRefresh);
-    scrollRoot?.addEventListener('scroll', sync, { passive: true });
     return () => {
-      clearRefreshTimer();
-      window.removeEventListener('parium:hero-index', onIndex);
-      window.removeEventListener('parium:phone-refresh', onRefresh);
-      scrollRoot?.removeEventListener('scroll', sync);
+      scrollRoot?.removeEventListener('scroll', syncPhone);
+      window.removeEventListener('resize', syncPhone);
     };
   }, []);
 
   return (
-    <div
-      className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
-      aria-hidden="true"
-    >
-      <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
-        <div aria-hidden />
+    <>
+      <section
+        ref={heroRef}
+        data-hero-intro-stage
+        className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24"
+        aria-labelledby="audience-hero-heading"
+      >
+        <div className="absolute inset-0 -z-0 flex items-center justify-center lg:hidden">
+          <SplinePhone className="h-[80svh] w-full max-w-[520px]" resetToken={resetToken} />
+        </div>
+
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute -top-40 right-[-25%] hidden h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px] lg:block"
+          animate={{ opacity: [0.5, 0.75, 0.5] }}
+          transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
+        />
+
+        <DesktopPhoneLayer active={phoneActive} resetToken={resetToken} />
+
+        <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+          <motion.div
+            className="pointer-events-none mx-auto flex h-full max-w-[1180px] flex-col items-center justify-center text-center lg:pointer-events-auto lg:mx-0 lg:block lg:-translate-y-16 lg:pt-8 lg:text-left xl:pt-10"
+            initial="hidden"
+            animate="visible"
+            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
+          >
+            <HeroText
+              eyebrow={c.eyebrow}
+              headline={c.hero.headline}
+              subtitle={c.hero.subtitle}
+              variant="desktop"
+              headingId="audience-hero-heading"
+            />
+          </motion.div>
+          <div aria-hidden className="hidden lg:block" />
+        </div>
+      </section>
+
+      <section
+        aria-label="Introduktion"
+        className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
+      >
+        <div className="absolute inset-x-0 top-0 h-px bg-white/15" />
         <div
-          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
-          style={{ touchAction: 'none', overscrollBehavior: 'contain', willChange: 'opacity' }}
-        >
-          <SplinePhone
-            key={phoneKey}
-            className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
-            zoom={0.78}
-            lockPageScroll
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
+          }}
+        />
+        <div className="relative z-10 flex max-w-4xl flex-col items-center">
+          <IntroText
+            paragraphs={[
+              'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
+              'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
+            ]}
           />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// HeroIntroStage — GSAP Observer
-// Två lager (Hero + Intro) i samma 100svh-yta. Wheel/touch fångas av Observer
-// och animerar lagren in/ut (Intro kommer UPPIFRÅN). När man redan är på Intro
-// och scrollar nedåt igen släpps kontrollen och sidan scrollar vidare normalt.
-// Inga scroll-snap, ingen sticky, inga konkurrerande wheel-locks.
-// ─────────────────────────────────────────────────────────────────────────────
-const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
-  const stageRef = useRef<HTMLElement | null>(null);
-  const heroOuterRef = useRef<HTMLDivElement | null>(null);
-  const heroInnerRef = useRef<HTMLDivElement | null>(null);
-  const introOuterRef = useRef<HTMLDivElement | null>(null);
-  const introInnerRef = useRef<HTMLDivElement | null>(null);
-  const heroTextRef = useRef<HTMLDivElement | null>(null);
-  const introTextRef = useRef<HTMLDivElement | null>(null);
-  const indexRef = useRef(0); // 0 = hero, 1 = intro
-  const animatingRef = useRef(false);
-  const releaseLockedRef = useRef(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    let observer: { kill: () => void; enable?: () => void; disable?: () => void; isEnabled?: boolean } | null = null;
-    let returnFrame: number | null = null;
-    let returnTimer: number | null = null;
-
-    const setup = async () => {
-      const [{ default: gsap }, { Observer }] = await Promise.all([
-        import('gsap'),
-        import('gsap/Observer'),
-      ]);
-      if (cancelled) return;
-      gsap.registerPlugin(Observer);
-
-      const heroOuter = heroOuterRef.current;
-      const heroInner = heroInnerRef.current;
-      const introOuter = introOuterRef.current;
-      const introInner = introInnerRef.current;
-      const heroText = heroTextRef.current;
-      const introText = introTextRef.current;
-      const stage = stageRef.current;
-      const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-      if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
-
-      const heroTextItems = heroText ? gsap.utils.toArray<HTMLElement>(heroText.querySelectorAll('span, h1 span, p')) : [];
-      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p, button')) : [];
-      let releasedToGallery = false;
-      let programmaticReturn = false;
-      let prevScrollTop = scrollRoot?.scrollTop ?? 0;
-
-      const setObserverActive = (active: boolean) => {
-        if (!observer) return;
-        if (active && !observer.isEnabled) observer.enable?.();
-        if (!active && observer.isEnabled) observer.disable?.();
-      };
-
-      const clearReturnWork = () => {
-        if (returnFrame) {
-          window.cancelAnimationFrame(returnFrame);
-          returnFrame = null;
-        }
-        if (returnTimer) {
-          window.clearTimeout(returnTimer);
-          returnTimer = null;
-        }
-      };
-
-      const snapStageToTop = () => {
-        if (!scrollRoot) return;
-        const top = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        if (Math.abs(scrollRoot.scrollTop - top) > 1) {
-          scrollRoot.scrollTo({ top, behavior: 'auto' });
-        }
-      };
-
-      const setHeroStart = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
-        gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
-        gsap.set(heroInner, { yPercent: 0 });
-        gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
-        gsap.set(introInner, { yPercent: -100 });
-        gsap.set(heroTextItems, { y: 0, opacity: 1 });
-        gsap.set(introTextItems, { y: 44, opacity: 0 });
-        indexRef.current = 0;
-      };
-
-      const setIntroResting = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
-        gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
-        gsap.set(heroInner, { yPercent: 100 });
-        gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
-        gsap.set(introInner, { yPercent: 0 });
-        gsap.set(heroTextItems, { y: -44, opacity: 0 });
-        gsap.set(introTextItems, { y: 0, opacity: 1 });
-        indexRef.current = 1;
-      };
-
-      setHeroStart();
-
-      const goToIntro = ({ snap = true } = {}) => {
-        if (animatingRef.current || indexRef.current === 1) return;
-        clearReturnWork();
-        animatingRef.current = true;
-        indexRef.current = 1;
-        if (snap) snapStageToTop();
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
-
-        const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power2.inOut' },
-          onComplete: () => {
-            setIntroResting();
-            animatingRef.current = false;
-            releaseLockedRef.current = false;
-            programmaticReturn = false;
-            if (!releasedToGallery) setObserverActive(true);
-          },
-        });
-        tl.to(heroTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out' }, 0);
-        tl.to(heroOuter, { yPercent: -100 }, 0);
-        tl.to(heroInner, { yPercent: 100 }, 0);
-        tl.set(introOuter, { autoAlpha: 1 }, 0);
-        tl.fromTo(introOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
-        tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
-        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.48);
-      };
-
-      const goToHero = () => {
-        if (animatingRef.current || indexRef.current === 0) return;
-        clearReturnWork();
-        releasedToGallery = false;
-        programmaticReturn = false;
-        animatingRef.current = true;
-        indexRef.current = 0;
-        snapStageToTop();
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
-
-        const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power2.inOut' },
-          onComplete: () => {
-            setHeroStart();
-            window.dispatchEvent(new CustomEvent('parium:phone-refresh'));
-            animatingRef.current = false;
-            releaseLockedRef.current = false;
-            setObserverActive(true);
-          },
-        });
-        tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in' }, 0);
-        tl.to(introOuter, { yPercent: 100 }, 0);
-        tl.to(introInner, { yPercent: -100 }, 0);
-        tl.set(introOuter, { autoAlpha: 0 });
-        tl.fromTo(heroOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
-        tl.fromTo(heroInner, { yPercent: 100 }, { yPercent: 0 }, 0);
-        tl.fromTo(heroTextItems, { y: -44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.06, ease: 'power2.out' }, 0.48);
-      };
-
-      const releaseAndScrollNext = () => {
-        const root = scrollRoot;
-        const next = document.getElementById('sa-funkar-det');
-        if (!root || !next) return;
-        releasedToGallery = true;
-        programmaticReturn = false;
-        setObserverActive(false);
-        const target = root.scrollTop + next.getBoundingClientRect().top;
-        root.scrollTo({ top: target, behavior: 'smooth' });
-        returnTimer = window.setTimeout(() => {
-          releaseLockedRef.current = false;
-        }, 700);
-      };
-
-      const returnFromGalleryToIntro = () => {
-        if (!scrollRoot || programmaticReturn || animatingRef.current) return;
-        clearReturnWork();
-        programmaticReturn = true;
-        releasedToGallery = false;
-        releaseLockedRef.current = false;
-        setObserverActive(false);
-
-        // Land DIRECT on Intro (stage 2) — no Hero flash. Layers are placed
-        // in their resting Intro position immediately; only the text gets a
-        // premium staggered entrance so it still feels polished.
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
-        gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
-        gsap.set(heroInner, { yPercent: 100 });
-        gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
-        gsap.set(introInner, { yPercent: 0 });
-        gsap.set(heroTextItems, { y: -44, opacity: 0 });
-        gsap.set(introTextItems, { y: 44, opacity: 0 });
-        indexRef.current = 1;
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
-
-        const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
-        const startedAt = performance.now();
-
-        const playIntroTextIn = () => {
-          gsap.to(introTextItems, {
-            y: 0,
-            opacity: 1,
-            duration: 0.7,
-            stagger: 0.08,
-            ease: 'power3.out',
-            onComplete: () => {
-              setIntroResting();
-              animatingRef.current = false;
-              releaseLockedRef.current = false;
-              programmaticReturn = false;
-              setObserverActive(true);
-            },
-          });
-        };
-
-        const waitForStageTop = () => {
-          const rect = stage.getBoundingClientRect();
-          if (Math.abs(rect.top) < 3 || performance.now() - startedAt > 700) {
-            scrollRoot.scrollTo({ top: scrollRoot.scrollTop + rect.top, behavior: 'auto' });
-            returnFrame = null;
-            animatingRef.current = true;
-            playIntroTextIn();
-            return;
-          }
-          returnFrame = window.requestAnimationFrame(waitForStageTop);
-        };
-
-        returnFrame = window.requestAnimationFrame(waitForStageTop);
-      };
-
-      observer = Observer.create({
-        target: scrollRoot ?? window,
-        type: 'wheel,touch',
-        wheelSpeed: -1,
-        tolerance: 16,
-        preventDefault: true,
-        onUp: () => {
-          if (releasedToGallery || programmaticReturn || animatingRef.current) return;
-          if (indexRef.current === 0) {
-            goToIntro();
-            return;
-          }
-          if (releaseLockedRef.current) return;
-          releaseLockedRef.current = true;
-          releaseAndScrollNext();
-        },
-        onDown: () => {
-          if (releasedToGallery || programmaticReturn || animatingRef.current) return;
-          if (indexRef.current === 1) goToHero();
-        },
-      });
-
-      const onScrollWatch = () => {
-        if (!scrollRoot) return;
-        const cur = scrollRoot.scrollTop;
-        const direction = cur < prevScrollTop ? 'up' : 'down';
-        prevScrollTop = cur;
-        const rect = stage.getBoundingClientRect();
-        const vh = window.innerHeight;
-
-        if (programmaticReturn || animatingRef.current) return;
-
-        if (releasedToGallery) {
-          setObserverActive(false);
-          if (direction === 'up' && rect.bottom > vh * 0.18 && rect.top < vh * 0.82) {
-            returnFromGalleryToIntro();
-          }
-          return;
-        }
-
-        const stageIsDocked = Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
-        if (stageIsDocked) {
-          setObserverActive(true);
-          if (indexRef.current !== 0 && indexRef.current !== 1) setIntroResting();
-        } else if (rect.bottom <= 0 || rect.top >= vh) {
-          setObserverActive(false);
-        }
-      };
-
-      scrollRoot?.addEventListener('scroll', onScrollWatch, { passive: true });
-
-      return () => {
-        clearReturnWork();
-        scrollRoot?.removeEventListener('scroll', onScrollWatch);
-      };
-    };
-
-    let teardown: (() => void) | undefined;
-    setup().then((t) => { if (typeof t === 'function') teardown = t; });
-
-    return () => {
-      cancelled = true;
-      if (returnFrame) { window.cancelAnimationFrame(returnFrame); returnFrame = null; }
-      if (returnTimer) { window.clearTimeout(returnTimer); returnTimer = null; }
-      observer?.kill();
-      teardown?.();
-    };
-  }, []);
-
-  return (
-    <section
-      ref={stageRef}
-      data-hero-intro-stage
-      className="relative h-[100svh] w-full overflow-hidden"
-    >
-      {/* HERO LAGER */}
-      <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
-        <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
-          {/* Mobile hero */}
-          <section
-            className="relative flex h-full w-screen overflow-hidden lg:hidden"
-            style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
-            aria-labelledby="audience-hero-heading-mobile"
-          >
-            <div className="absolute inset-0 -z-0 flex items-center justify-center">
-              {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
-            </div>
-            <motion.div
-              className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
-              initial="hidden"
-              animate="visible"
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              onPointerDown={onStart}
+              className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
             >
-              <HeroText
-                eyebrow={c.eyebrow}
-                headline={c.hero.headline}
-                subtitle={c.hero.subtitle}
-                variant="mobile"
-                headingId="audience-hero-heading-mobile"
-              />
-            </motion.div>
-          </section>
-
-          {/* Desktop hero */}
-          <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
-            <motion.div
-              aria-hidden
-              className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
-              animate={{ opacity: [0.5, 0.75, 0.5] }}
-              transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
-            />
-            <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
-              <motion.div
-                ref={heroTextRef}
-                className="-translate-y-16 pt-8 text-left xl:pt-10"
-                initial="hidden"
-                animate="visible"
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
-              >
-                <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
-              </motion.div>
-              <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
-            </div>
-          </section>
+              {c.hero.cta}
+              <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
         </div>
-      </div>
-
-      {/* INTRO LAGER (kommer uppifrån) */}
-      <div ref={introOuterRef} className="absolute inset-0 z-30 overflow-hidden">
-        <div ref={introInnerRef} className="absolute inset-0 overflow-hidden">
-          <section
-            aria-label="Introduktion"
-            className="relative flex h-full w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
-          >
-            <div className="absolute inset-x-0 top-0 h-px bg-white/15" />
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage:
-                  'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
-              }}
-            />
-            <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center">
-              <IntroText
-                paragraphs={[
-                  'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
-                  'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
-                ]}
-              />
-              <div className="mt-10 flex justify-center">
-                <button
-                  type="button"
-                  onPointerDown={onStart}
-                  className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
-                >
-                  {c.hero.cta}
-                  <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
-                </button>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 
@@ -547,25 +175,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
-
-  // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
-  // åt gången — annars initieras Spline-runtime två gånger på desktop.
-  // Mobil-hero används för telefon OCH surfplattor (< 1024px) så iPad/Android-tabs
-  // får samma full-bleed-Spline-upplevelse som telefon. Desktop-split tar över ≥ 1024px.
-  const [isDesktopHero, setIsDesktopHero] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return window.matchMedia('(min-width: 1024px)').matches;
-  });
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)');
-    const onChange = (e: MediaQueryListEvent) => setIsDesktopHero(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-
-  // (Tidigare scroll-jack med IntersectionObserver + tvingad scrollTop togs bort —
-  // den slogs mot CSS scroll-snap och orsakade lagg/jitter. CSS scroll-snap
-  // (scrollSnapType: 'y mandatory' + scrollSnapStop: 'always') sköter snappet.)
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
@@ -618,34 +227,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     navigate('/auth', { state: { mode: 'register', role: audience } });
   };
 
-  // 4-panel scroll-jacked horizontal section. Texterna är platshållare.
-  const panels = [
-    {
-      eyebrow: c.eyebrow,
-      title: <>Något som <span className="text-secondary">fångar</span> direkt.</>,
-      body: 'Platshållartext. Här ska första budskapet ligga — det som hookar besökaren.',
-      visual: <PanelImage src={panelImages[0]} alt="Person som arbetar fokuserat vid laptop" />,
-    },
-    {
-      eyebrow: 'Steg 01',
-      title: <>Berätta vad du <span className="text-secondary">söker</span>.</>,
-      body: 'Platshållartext. Förklarar steg 1 i flödet.',
-      visual: <PanelImage src={panelImages[1]} alt="Person som ler och tittar på sin telefon" />,
-    },
-    {
-      eyebrow: 'Steg 02',
-      title: <>Vi matchar <span className="text-secondary">automatiskt</span>.</>,
-      body: 'Platshållartext. Förklarar matchnings­logiken på ett enkelt sätt.',
-      visual: <PanelImage src={panelImages[2]} alt="Två kollegor i samtal på ett modernt kontor" />,
-    },
-    {
-      eyebrow: 'Steg 03',
-      title: <>Ta kontakt på <span className="text-secondary">sekunder</span>.</>,
-      body: 'Platshållartext. Sista steget — handling, dialog, nästa steg.',
-      visual: <PanelImage src={panelImages[3]} alt="Hantverkare som arbetar i en ljus verkstad" />,
-    },
-  ];
-
   const navLinks: LandingNavLink[] = [
     { label: 'Så funkar det', href: '#sa-funkar-det' },
     { label: 'Funktioner', href: '#funktioner' },
@@ -665,7 +246,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       }}
     >
       <AnimatedBackground />
-      {isDesktopHero && <FixedPhoneLayer />}
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
@@ -675,7 +255,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
-          <HeroIntroStage c={c} isDesktopHero={isDesktopHero} onStart={handleStart} />
+          <HeroIntroStage c={c} onStart={handleStart} />
 
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
