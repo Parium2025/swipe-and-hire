@@ -440,11 +440,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
           {/* Desktop hero */}
           <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
-              style={{ opacity: 0.58 }}
-            />
+            <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-secondary/[0.025]" />
             <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
               <motion.div
                 ref={heroTextRef}
