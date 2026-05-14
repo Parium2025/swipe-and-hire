@@ -713,16 +713,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       <AnimatedBackground />
       {isDesktopHero && <FixedPhoneLayer />}
 
-      {/* Boot-skeleton: täcker vyn ~850ms medan GSAP/Spline hinner sätta sig */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-[60] bg-primary transition-opacity duration-500 ease-out"
-        style={{
-          opacity: bootSkeleton ? 1 : 0,
-          backgroundImage:
-            'radial-gradient(1200px 700px at 12% -10%, hsl(var(--secondary) / 0.18), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
-        }}
-      />
 
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
