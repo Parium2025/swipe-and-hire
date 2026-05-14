@@ -60,12 +60,25 @@ const FixedPhoneLayer = () => {
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
   const phoneControls = useAnimationControls();
   const [hidden, setHidden] = useState(false);
+  const heroIndexRef = useRef(0);
 
   // Telefonen är bara dekorativ här: den får aldrig fånga wheel/touch och låsa
   // scrollen. Animationsstate styrs imperativt så den inte "poppar" tillbaka.
   useEffect(() => {
+    const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+
+    const syncVisibilityToScroll = () => {
+      if (!scrollRoot) return;
+      const shouldHide = heroIndexRef.current !== 0 || scrollRoot.scrollTop > 24;
+      setHidden(shouldHide);
+      if (shouldHide && heroIndexRef.current === 0) {
+        phoneControls.set({ opacity: 0, y: 72, scale: 0.965 });
+      }
+    };
+
     const onIndex = (e: Event) => {
       const detail = (e as CustomEvent<{ index: number; direction?: 'next' | 'prev' }>).detail;
+      heroIndexRef.current = detail?.index ?? 0;
 
       if (detail?.index === 1) {
         setHidden(true);
@@ -90,16 +103,23 @@ const FixedPhoneLayer = () => {
       });
     };
 
-    phoneControls.start({
-      opacity: 1,
-      x: 0,
-      y: 0,
-      scale: 1,
-      transition: { duration: 1.1, ease },
-    });
+    syncVisibilityToScroll();
+    if (!scrollRoot || scrollRoot.scrollTop <= 24) {
+      phoneControls.start({
+        opacity: 1,
+        x: 0,
+        y: 0,
+        scale: 1,
+        transition: { duration: 1.1, ease },
+      });
+    }
 
     window.addEventListener('parium:hero-index', onIndex);
-    return () => window.removeEventListener('parium:hero-index', onIndex);
+    scrollRoot?.addEventListener('scroll', syncVisibilityToScroll, { passive: true });
+    return () => {
+      window.removeEventListener('parium:hero-index', onIndex);
+      scrollRoot?.removeEventListener('scroll', syncVisibilityToScroll);
+    };
   }, [phoneControls]);
 
   return (
