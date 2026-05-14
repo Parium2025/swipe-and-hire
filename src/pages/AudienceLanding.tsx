@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -85,17 +85,34 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const scrollRootRef = useRef<HTMLDivElement | null>(null);
   const introStageRef = useRef<HTMLElement | null>(null);
 
-  const { scrollYProgress: introProgress } = useScroll({
-    target: introStageRef,
-    container: scrollRootRef,
-    offset: ['start start', 'center start'],
-  });
+  const introProgress = useMotionValue(0);
   const heroY = useTransform(introProgress, [0, 1], [0, -90]);
   const heroScale = useTransform(introProgress, [0, 1], [1, 0.965]);
   const panelY = useTransform(introProgress, [0, 0.08, 0.78, 1], ['104%', '86%', '0%', '0%']);
   const panelOpacity = useTransform(introProgress, [0, 0.08, 0.18], [0, 1, 1]);
   const panelTextY = useTransform(introProgress, [0.42, 1], [54, 0]);
   const panelTextOpacity = useTransform(introProgress, [0.38, 0.78], [0, 1]);
+
+  useEffect(() => {
+    const root = scrollRootRef.current;
+    const stage = introStageRef.current;
+    if (!root || !stage) return;
+
+    const update = () => {
+      const start = stage.offsetTop;
+      const travel = Math.max(stage.offsetHeight - root.clientHeight, 1);
+      const progress = Math.min(Math.max((root.scrollTop - start) / travel, 0), 1);
+      introProgress.set(progress);
+    };
+
+    update();
+    root.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      root.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, [introProgress]);
 
   // Premium smooth-scroll (Lenis) på det dedikerade scroll-roteret
   useLenisOnElement('[data-landing-scroll-root]');
