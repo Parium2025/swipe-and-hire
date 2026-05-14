@@ -157,6 +157,7 @@ const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
       </section>
 
       <section
+        ref={introRef}
         aria-label="Introduktion"
         className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
       >
@@ -168,7 +169,7 @@ const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
               'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
           }}
         />
-        <div className="relative z-10 flex max-w-4xl flex-col items-center">
+        <div ref={introContentRef} className="relative z-10 flex max-w-4xl flex-col items-center" style={{ willChange: 'opacity, transform' }}>
           <IntroText
             paragraphs={[
               'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
