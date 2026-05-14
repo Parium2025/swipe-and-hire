@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -46,6 +46,19 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   // Premium smooth-scroll (Lenis) på det dedikerade scroll-roteret
   useLenisOnElement('[data-landing-scroll-root]');
+
+  // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
+  // åt gången — annars initieras Spline-runtime två gånger på desktop.
+  const [isDesktopHero, setIsDesktopHero] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.matchMedia('(min-width: 768px)').matches;
+  });
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const onChange = (e: MediaQueryListEvent) => setIsDesktopHero(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
@@ -168,7 +181,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           >
             {/* 3D-telefon från Spline centrerad bakom texten */}
             <div className="absolute inset-0 -z-0 flex items-center justify-center">
-              <SplinePhone className="h-[80svh] w-full max-w-[520px]" />
+              {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
             </div>
 
             <motion.div
@@ -255,7 +268,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
                 className="relative mx-auto flex w-full items-center justify-center"
               >
-                <SplinePhone className="aspect-[9/16] w-full max-w-[520px]" />
+                {isDesktopHero && <SplinePhone className="aspect-[9/16] w-full max-w-[520px]" />}
               </motion.div>
             </motion.div>
           </section>
