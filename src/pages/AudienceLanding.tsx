@@ -50,12 +50,14 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
   // åt gången — annars initieras Spline-runtime två gånger på desktop.
+  // Mobil-hero används för telefon OCH surfplattor (< 1024px) så iPad/Android-tabs
+  // får samma full-bleed-Spline-upplevelse som telefon. Desktop-split tar över ≥ 1024px.
   const [isDesktopHero, setIsDesktopHero] = useState(() => {
     if (typeof window === 'undefined') return true;
-    return window.matchMedia('(min-width: 768px)').matches;
+    return window.matchMedia('(min-width: 1024px)').matches;
   });
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)');
+    const mq = window.matchMedia('(min-width: 1024px)');
     const onChange = (e: MediaQueryListEvent) => setIsDesktopHero(e.matches);
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
@@ -171,7 +173,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {/* ──────────────── 1. HERO ──────────────── */}
           {/* MOBILE HERO — full-bleed video bakom centrerad text (matchar LandingHero) */}
           <section
-            className="relative md:hidden w-screen overflow-hidden"
+            className="relative lg:hidden w-screen overflow-hidden"
             style={{
               marginLeft: 'calc(50% - 50vw)',
               marginRight: 'calc(50% - 50vw)',
@@ -201,7 +203,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* DESKTOP HERO — split: text till vänster, framad video till höger */}
-          <section className="relative hidden md:flex min-h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
+          <section className="relative hidden lg:flex min-h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
@@ -210,7 +212,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             />
 
             <motion.div
-              className="relative z-10 mx-auto grid w-full max-w-[1280px] gap-12 md:grid-cols-2 md:items-center lg:gap-16"
+              className="relative z-10 mx-auto grid w-full max-w-[1280px] gap-12 md:grid-cols-2 md:items-center lg:gap-16 2xl:max-w-[1440px]"
               initial="hidden"
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
