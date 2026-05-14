@@ -46,11 +46,15 @@ export const SplinePhone = ({ className, zoom = 0.78, pauseWhenHidden = false }:
           }
         }
 
-        app = new Application(canvas, { renderMode: 'auto' });
+        app = new Application(canvas, { renderMode: 'manual' });
         appRef.current = app;
         await app.load(SCENE_URL);
         app.setZoom(zoom);
-        requestAnimationFrame(() => app?.setZoom(zoom));
+        app.requestRender?.();
+        requestAnimationFrame(() => {
+          app?.setZoom(zoom);
+          app?.requestRender?.();
+        });
         if (pauseWhenHidden && !shouldPlayRef.current) app.stop();
         if (!cancelled) setIsReady(true);
       } catch (error) {
