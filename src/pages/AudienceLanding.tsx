@@ -95,7 +95,7 @@ const FixedPhoneLayer = () => {
           initial={{ opacity: 0, x: 60, scale: 0.96 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 1.1, ease }}
-          className="pointer-events-auto relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10"
+          className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 xl:pt-10"
           onWheelCapture={stopScrollOnPhone}
           onTouchMoveCapture={stopScrollOnPhone}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
