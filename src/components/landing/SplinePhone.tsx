@@ -103,8 +103,8 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
   return (
     <div
       ref={wrapperRef}
-      className={`pointer-events-none relative select-none overflow-visible ${className ?? ''}`}
-      style={{ touchAction: 'pan-y', overscrollBehavior: 'auto' }}
+      className={`relative select-none overflow-visible ${className ?? ''}`}
+      style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
     >
       {!isReady && (
         <div
@@ -120,7 +120,7 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
         role="img"
         aria-label="Parium 3D-telefon"
         tabIndex={-1}
-        className="pointer-events-none h-full w-full bg-transparent outline-none transition-opacity duration-500"
+        className="h-full w-full cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing"
         draggable={false}
         style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
       />
