@@ -609,14 +609,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     return () => mq.removeEventListener('change', onChange);
   }, []);
 
-  // Skeleton-overlay som täcker hela vyn medan GSAP/Spline initierar.
-  // Förhindrar flash av intro-text OCH laggig fade-in på hero-rubriken.
-  const [bootSkeleton, setBootSkeleton] = useState(true);
-  useEffect(() => {
-    const t = window.setTimeout(() => setBootSkeleton(false), 850);
-    return () => window.clearTimeout(t);
-  }, []);
-
   // (Tidigare scroll-jack med IntersectionObserver + tvingad scrollTop togs bort —
   // den slogs mot CSS scroll-snap och orsakade lagg/jitter. CSS scroll-snap
   // (scrollSnapType: 'y mandatory' + scrollSnapStop: 'always') sköter snappet.)
