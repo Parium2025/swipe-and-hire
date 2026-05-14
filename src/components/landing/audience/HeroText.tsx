@@ -30,8 +30,8 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     : 'mt-6 max-w-4xl text-[5rem] font-black leading-[1.04] tracking-[-0.025em] text-white lg:text-[6rem] 2xl:text-[7rem]';
 
   const subtitleClass = isMobile
-    ? 'mt-7 max-w-xl text-base leading-8 text-white whitespace-pre-line drop-shadow-[0_2px_12px_hsl(var(--background)/0.55)]'
-    : 'mt-7 max-w-xl text-lg leading-8 text-white whitespace-pre-line';
+    ? 'mt-7 max-w-xl text-base leading-8 text-white drop-shadow-[0_2px_12px_hsl(var(--background)/0.55)]'
+    : 'mt-7 max-w-xl text-lg leading-8 text-white';
 
   return (
     <>
