@@ -243,7 +243,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         if (animatingRef.current || indexRef.current === 1) return;
         animatingRef.current = true;
         indexRef.current = 1;
-        lastTransitionAtRef.current = performance.now();
         snapStageToTop();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
@@ -266,7 +265,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         if (animatingRef.current || indexRef.current === 0) return;
         animatingRef.current = true;
         indexRef.current = 0;
-        lastTransitionAtRef.current = performance.now();
         snapStageToTop();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
@@ -318,10 +316,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           if (indexRef.current === 0) {
             goToIntro();
           } else {
-            // Liten paus efter intro-animation så det inte känns hetsigt,
-            // men ingen snap → ingen "skakning".
-            const elapsed = performance.now() - lastTransitionAtRef.current;
-            if (elapsed < 350) return;
+            if (releaseLockedRef.current) return;
+            releaseLockedRef.current = true;
             releaseAndScrollNext();
           }
         },
