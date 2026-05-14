@@ -228,7 +228,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         target: scrollRoot ?? window,
         type: 'wheel,touch',
         wheelSpeed: -1,
-        tolerance: 12,
+        tolerance: 32,
         preventDefault: true,
         onUp: () => {
           if (!inView) return;
