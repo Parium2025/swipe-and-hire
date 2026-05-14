@@ -258,6 +258,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           onComplete: () => {
             animatingRef.current = false;
             releaseLockedRef.current = false;
+            if (inView && !releasedToGallery) {
+              // @ts-expect-error gsap Observer har enable/disable
+              observer?.enable?.();
+            }
           },
         });
         // Hero åker UPP och ut
@@ -283,6 +287,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           onComplete: () => {
             animatingRef.current = false;
             releaseLockedRef.current = false;
+            if (inView && !releasedToGallery) {
+              // @ts-expect-error gsap Observer har enable/disable
+              observer?.enable?.();
+            }
           },
         });
         // Intro åker NED och ut
@@ -393,6 +401,26 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
         const rect = stage.getBoundingClientRect();
         const vh = window.innerHeight;
+
+        // Om man kommer tillbaka från korten och landar exakt på intro-stage
+        // måste Observer slås på igen; annars finns ingen native scroll kvar uppåt.
+        if (releasedToGallery && rect.top < 4 && rect.bottom > vh * 0.9) {
+          releasedToGallery = false;
+          inView = true;
+          releaseLockedRef.current = false;
+          if (indexRef.current !== 1 && !animatingRef.current) {
+            gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
+            gsap.set(heroInner, { yPercent: 100 });
+            gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
+            gsap.set(introInner, { yPercent: 0 });
+            gsap.set(heroTextItems, { y: -44, opacity: 0 });
+            gsap.set(introTextItems, { y: 0, opacity: 1 });
+            indexRef.current = 1;
+            window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
+          }
+          // @ts-expect-error gsap Observer har enable/disable
+          observer?.enable?.();
+        }
 
         // Avväpna när vi är långt under stage; återväpna när vi närmar oss.
         if (rect.top > vh * 1.05) snapBackArmed = true;
