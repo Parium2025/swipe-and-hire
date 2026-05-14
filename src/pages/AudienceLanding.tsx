@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -53,8 +53,6 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
-  const scrollRootRef = useRef<HTMLDivElement | null>(null);
-  const snapLockRef = useRef(false);
 
   // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
   // åt gången — annars initieras Spline-runtime två gånger på desktop.
@@ -113,36 +111,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     canonical.href = url;
   }, [audience]);
 
-  useEffect(() => {
-    const root = scrollRootRef.current;
-    if (!root || audience !== 'job_seeker') return;
-
-    const unlock = () => {
-      window.setTimeout(() => {
-        snapLockRef.current = false;
-      }, 650);
-    };
-
-    const snapToIntro = (event: WheelEvent | TouchEvent) => {
-      if (snapLockRef.current || root.scrollTop > 12 || root.scrollTop < -1) return;
-
-      const delta = 'deltaY' in event ? event.deltaY : 1;
-      if (delta <= 0) return;
-
-      event.preventDefault();
-      snapLockRef.current = true;
-      root.scrollTo({ top: root.clientHeight, behavior: 'smooth' });
-      unlock();
-    };
-
-    root.addEventListener('wheel', snapToIntro, { passive: false });
-    root.addEventListener('touchmove', snapToIntro, { passive: false });
-    return () => {
-      root.removeEventListener('wheel', snapToIntro);
-      root.removeEventListener('touchmove', snapToIntro);
-    };
-  }, [audience]);
-
   const handleLogin = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth');
@@ -190,7 +158,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   return (
     <div
-      ref={scrollRootRef}
       data-landing-scroll-root
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
