@@ -158,6 +158,10 @@ const FixedPhoneLayer = () => {
       phoneWrapper?.removeEventListener('touchstart', onTouchStart, true);
       phoneWrapper?.removeEventListener('touchmove', onTouchMove, true);
       phoneWrapper?.removeEventListener('touchend', onTouchEnd, true);
+      if (showTimerRef.current) {
+        clearTimeout(showTimerRef.current);
+        showTimerRef.current = null;
+      }
     };
   }, []);
 
