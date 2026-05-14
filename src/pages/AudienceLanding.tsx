@@ -256,15 +256,18 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           defaults: { duration: 1.1, ease: 'power2.inOut' },
           onComplete: () => {
             animatingRef.current = false;
+            releaseLockedRef.current = false;
           },
         });
         // Hero åker UPP och ut
+        tl.to(heroTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out' }, 0);
         tl.to(heroOuter, { yPercent: -100 }, 0);
         tl.to(heroInner, { yPercent: 100 }, 0);
         // Intro kommer UPP nerifrån
         tl.set(introOuter, { autoAlpha: 1 }, 0);
         tl.fromTo(introOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
         tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
+        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.48);
       };
 
       const goToHero = () => {
@@ -276,15 +279,20 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
         const tl = gsap.timeline({
           defaults: { duration: 1.1, ease: 'power2.inOut' },
-          onComplete: () => { animatingRef.current = false; },
+          onComplete: () => {
+            animatingRef.current = false;
+            releaseLockedRef.current = false;
+          },
         });
         // Intro åker NED och ut
+        tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in' }, 0);
         tl.to(introOuter, { yPercent: 100 }, 0);
         tl.to(introInner, { yPercent: -100 }, 0);
         tl.set(introOuter, { autoAlpha: 0 });
         // Hero kommer tillbaka uppifrån
         tl.fromTo(heroOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
         tl.fromTo(heroInner, { yPercent: 100 }, { yPercent: 0 }, 0);
+        tl.fromTo(heroTextItems, { y: -44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.06, ease: 'power2.out' }, 0.48);
       };
 
       const releaseAndScrollNext = () => {
