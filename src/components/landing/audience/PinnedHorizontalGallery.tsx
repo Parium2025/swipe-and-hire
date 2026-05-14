@@ -336,6 +336,17 @@ const PinnedHorizontalGallery = () => {
 
       <div ref={sectionRef} className="phg-section" style={{ height: `${SCROLL_VH}vh` }}>
         <div className="phg-sticky">
+          <motion.header
+            className="phg-header"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.35, root: containerRef }}
+            transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="phg-eyebrow">Så funkar det</div>
+            <h2 className="phg-title">Jobb som känns <em>nära</em> direkt.</h2>
+            <p className="phg-sub">Bläddra genom yrken, upptäck möjligheter och gå vidare när något faktiskt passar.</p>
+          </motion.header>
 
           <div className="phg-strip-wrap">
             <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
