@@ -81,7 +81,16 @@ const FixedPhoneLayer = () => {
       }
     };
 
-    const isHeroTop = () => !scrollRoot || scrollRoot.scrollTop <= Math.max(48, window.innerHeight * 0.08);
+    const isHeroZone = () => {
+      if (heroIndexRef.current !== 0) return false;
+      if (!scrollRoot) return true;
+
+      const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
+      if (!stage) return scrollRoot.scrollTop <= window.innerHeight * 0.65;
+
+      const rect = stage.getBoundingClientRect();
+      return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * 0.55;
+    };
 
     const parkPhoneBelow = () => {
       clearReturnTimer();
@@ -97,7 +106,7 @@ const FixedPhoneLayer = () => {
       phoneControls.set({ opacity: 0, x: 0, y: 96, scale: 0.94 });
       returnTimerRef.current = window.setTimeout(() => {
         returnTimerRef.current = null;
-        if (heroIndexRef.current !== 0 || !isHeroTop()) {
+        if (!isHeroZone()) {
           parkPhoneBelow();
           return;
         }
@@ -114,7 +123,7 @@ const FixedPhoneLayer = () => {
 
     const syncVisibilityToScroll = () => {
       if (heroIndexRef.current !== 0) return;
-      if (!isHeroTop()) {
+      if (!isHeroZone()) {
         if (!hiddenRef.current) parkPhoneBelow();
         return;
       }
@@ -145,7 +154,7 @@ const FixedPhoneLayer = () => {
       revealPhone(1120);
     };
 
-    isHeroTop() ? revealPhone(0) : parkPhoneBelow();
+    isHeroZone() ? revealPhone(0) : parkPhoneBelow();
 
     window.addEventListener('parium:hero-index', onIndex);
     scrollRoot?.addEventListener('scroll', syncVisibilityToScroll, { passive: true });
@@ -276,10 +285,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       };
 
       const releaseAndScrollNext = () => {
-        const elapsed = performance.now() - lastTransitionAtRef.current;
-        if (elapsed < 760) {
-          return;
-        }
         // Användaren är på Intro och scrollar ner igen → släpp kontrollen.
         const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
         if (!root) return;
@@ -311,8 +316,15 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         onUp: () => {
           if (!inView) return;
           if (animatingRef.current) return;
-          if (indexRef.current === 0) goToIntro();
-          else releaseAndScrollNext();
+          if (indexRef.current === 0) {
+            goToIntro();
+          } else {
+            // Liten paus efter intro-animation så det inte känns hetsigt,
+            // men ingen snap → ingen "skakning".
+            const elapsed = performance.now() - lastTransitionAtRef.current;
+            if (elapsed < 350) return;
+            releaseAndScrollNext();
+          }
         },
         onDown: () => {
           if (!inView) return;
@@ -334,38 +346,85 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       );
       intersectObs.observe(stage);
 
-      // Snap-on-settle: stage får aldrig hamna i ett halvscrollat "dött" läge.
-      // När scrollningen lugnat sig (~140 ms) och stage är delvis synlig, snappa
-      // antingen tillbaka till stage-toppen eller framåt till nästa section.
-      let settleTimer: number | null = null;
-      const onScrollSettle = () => {
+      const settleToIntroFromBelow = () => {
         if (!scrollRoot) return;
+        if (animatingRef.current) return;
+        const stageTopAbs = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
+        // Sätt Hero som startläge — så att vi kan spela exakt samma 1→2-animation
+        // som när man scrollar nedåt från Hero till Intro.
+        gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
+        gsap.set(heroInner, { yPercent: 0 });
+        gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
+        gsap.set(introInner, { yPercent: -100 });
+        indexRef.current = 0;
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
+        // @ts-expect-error gsap Observer har enable/disable
+        observer?.disable?.();
+        scrollRoot.scrollTo({ top: stageTopAbs, behavior: 'smooth' });
+        inView = true;
+        // När den mjuka scrollen landat → spela Hero→Intro-animationen.
+        window.setTimeout(() => {
+          goToIntro();
+        }, 480);
+        window.setTimeout(() => {
+          if (observer) {
+            // @ts-expect-error gsap Observer har enable/disable
+            observer.enable?.();
+          }
+        }, 1700);
+      };
+
+      // Riktningskänslig scroll-watcher: när användaren scrollar UPP och stage
+      // dyker upp underifrån → landa alltid i Intro först. Nästa scroll-up
+      // triggar den mjuka Intro → Hero-animationen.
+      let prevScrollTop = scrollRoot?.scrollTop ?? 0;
+      let snapBackArmed = true; // anti-loop: triggas en gång per "ankomst"
+      let settleTimer: number | null = null;
+      const onScrollWatch = () => {
+        if (!scrollRoot) return;
+        const cur = scrollRoot.scrollTop;
+        const direction = cur < prevScrollTop ? 'up' : 'down';
+        prevScrollTop = cur;
+
+        const rect = stage.getBoundingClientRect();
+        const vh = window.innerHeight;
+
+        // Avväpna när vi är långt under stage; återväpna när vi närmar oss.
+        if (rect.top > vh * 1.05) snapBackArmed = true;
+
+        // Snap-back: scrollar uppåt och stage börjar synas underifrån.
+        if (
+          direction === 'up' &&
+          snapBackArmed &&
+          !animatingRef.current &&
+          rect.top < vh * 0.92 &&
+          rect.bottom > vh * 0.35
+        ) {
+          snapBackArmed = false;
+          settleToIntroFromBelow();
+          return;
+        }
+
+        // Settle-snap för "döda" halvscrollade lägen (säkerhetsnät).
         if (settleTimer) window.clearTimeout(settleTimer);
         settleTimer = window.setTimeout(() => {
           settleTimer = null;
           if (animatingRef.current) return;
-          const rect = stage.getBoundingClientRect();
-          const vh = window.innerHeight;
-          const top = rect.top;
-          const bottom = rect.bottom;
-          // Helt utanför → ignorera
-          if (bottom <= 0 || top >= vh) return;
-          // Helt aligned (±2 px) → inget att göra
-          if (Math.abs(top) < 2) return;
-          // Partiellt synlig → snappa
-          const stageTopAbs = scrollRoot.scrollTop + top;
+          const r = stage.getBoundingClientRect();
+          if (r.bottom <= 0 || r.top >= vh) return;
+          if (Math.abs(r.top) < 2) return;
+          const stageTopAbs = scrollRoot.scrollTop + r.top;
           const next = document.getElementById('sa-funkar-det');
           const nextTopAbs = next ? scrollRoot.scrollTop + next.getBoundingClientRect().top : stageTopAbs + vh;
-          // Bestäm riktning: om mer än halva stage redan passerat uppåt → gå framåt
-          const target = top < -vh * 0.5 ? nextTopAbs : stageTopAbs;
+          const target = r.top < -vh * 0.5 ? nextTopAbs : stageTopAbs;
           scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
         }, 140);
       };
-      scrollRoot?.addEventListener('scroll', onScrollSettle, { passive: true });
+      scrollRoot?.addEventListener('scroll', onScrollWatch, { passive: true });
 
       return () => {
         if (settleTimer) window.clearTimeout(settleTimer);
-        scrollRoot?.removeEventListener('scroll', onScrollSettle);
+        scrollRoot?.removeEventListener('scroll', onScrollWatch);
       };
     };
 
