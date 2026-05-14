@@ -139,6 +139,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const indexRef = useRef(0); // 0 = hero, 1 = intro
   const animatingRef = useRef(false);
   const armedForNextRef = useRef(false);
+  const releaseTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -162,6 +163,22 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
+      const clearReleaseTimer = () => {
+        if (releaseTimerRef.current) {
+          window.clearTimeout(releaseTimerRef.current);
+          releaseTimerRef.current = null;
+        }
+      };
+
+      const armAfterGestureStops = () => {
+        clearReleaseTimer();
+        releaseTimerRef.current = window.setTimeout(() => {
+          if (indexRef.current === 1 && !animatingRef.current) {
+            armedForNextRef.current = true;
+          }
+        }, 420);
+      };
+
       // Initial state: hero synlig, intro gömd UNDER skärmen.
       gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
       gsap.set(heroInner, { yPercent: 0 });
@@ -172,6 +189,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         if (animatingRef.current || indexRef.current === 1) return;
         animatingRef.current = true;
         armedForNextRef.current = false;
+        clearReleaseTimer();
         indexRef.current = 1;
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
@@ -179,7 +197,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           defaults: { duration: 1.1, ease: 'power2.inOut' },
           onComplete: () => {
             animatingRef.current = false;
-            window.setTimeout(() => { armedForNextRef.current = true; }, 120);
+            armAfterGestureStops();
           },
         });
         // Hero åker UPP och ut
@@ -195,6 +213,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         if (animatingRef.current || indexRef.current === 0) return;
         animatingRef.current = true;
         armedForNextRef.current = false;
+        clearReleaseTimer();
         indexRef.current = 0;
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
@@ -212,8 +231,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       };
 
       const releaseAndScrollNext = () => {
-        if (!armedForNextRef.current) return;
+        if (!armedForNextRef.current) {
+          armAfterGestureStops();
+          return;
+        }
         armedForNextRef.current = false;
+        clearReleaseTimer();
         // Användaren är på Intro och scrollar ner igen → släpp kontrollen.
         const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
         if (!root) return;
