@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -62,34 +62,49 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const lockReleaseRef = useRef<number | null>(null);
   const lockCleanupRef = useRef<(() => void) | null>(null);
   const introLockDoneRef = useRef(false);
-  const [scrollRoot, setScrollRoot] = useState<HTMLElement | null>(null);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
     scrollRootRef.current = root;
-    setScrollRoot(root);
+    if (!root) return undefined;
+
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const stage = stageRef.current;
+      if (!stage) return;
+      const rect = stage.getBoundingClientRect();
+      const distance = Math.max(1, stage.offsetHeight - window.innerHeight);
+      const next = Math.min(1, Math.max(0, -rect.top / distance));
+      setProgress(next);
+    };
+    const onScroll = () => {
+      if (!raf) raf = window.requestAnimationFrame(update);
+    };
+    update();
+    root.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
 
     return () => {
+      root.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
       if (lockReleaseRef.current) window.clearTimeout(lockReleaseRef.current);
       lockCleanupRef.current?.();
     };
   }, []);
 
-  const { scrollYProgress } = useScroll({
-    target: stageRef,
-    container: { current: scrollRoot },
-    offset: ['start start', 'end end'],
-  });
+  const heroOpacity = progress < 0.4 ? 1 : progress < 0.58 ? 1 - (progress - 0.4) / 0.18 : 0;
+  const heroY = -72 * Math.min(1, progress / 0.58);
+  const phoneOpacity = progress < 0.72 ? 1 : progress < 0.9 ? 1 - (progress - 0.72) / 0.18 : 0;
+  const introProgress = Math.min(1, Math.max(0, (progress - 0.12) / 0.46));
+  const introY = `${110 - introProgress * 110}%`;
+  const introOpacity = progress < 0.12 ? 0 : progress < 0.28 ? (progress - 0.12) / 0.16 : 1;
 
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.4, 0.58], [1, 1, 0]);
-  const heroY = useTransform(scrollYProgress, [0, 0.58], [0, -72]);
-  const phoneOpacity = useTransform(scrollYProgress, [0, 0.72, 0.9], [1, 1, 0]);
-  const introY = useTransform(scrollYProgress, [0.12, 0.58], ['110%', '0%']);
-  const introOpacity = useTransform(scrollYProgress, [0.12, 0.28, 0.58], [0, 1, 1]);
-
-  useMotionValueEvent(scrollYProgress, 'change', (latest) => {
-    if (latest < 0.2) introLockDoneRef.current = false;
-    if (latest < 0.58 || latest > 0.82 || introLockDoneRef.current) return;
+  useEffect(() => {
+    if (progress < 0.2) introLockDoneRef.current = false;
+    if (progress < 0.58 || progress > 0.82 || introLockDoneRef.current) return;
 
     const root = scrollRootRef.current;
     if (!root) return;
@@ -117,7 +132,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       lockCleanupRef.current = null;
       lockReleaseRef.current = null;
     }, 2450);
-  });
+  }, [progress]);
 
   return (
     <section ref={stageRef} className="relative h-[260svh] w-full" style={{ scrollSnapAlign: 'start' }}>
