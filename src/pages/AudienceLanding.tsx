@@ -13,6 +13,7 @@ import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
 import panelImg3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
 import panelImg4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
 import { SplinePhone } from '@/components/landing/SplinePhone';
+import { FloatingBubbles } from '@/components/FloatingBubbles';
 import { HeroText } from '@/components/landing/audience/HeroText';
 
 // 🖼️ Provisional placeholder images for the 4 horizontal scroll panels.
@@ -553,6 +554,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
                   'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
               }}
             />
+            <FloatingBubbles />
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center">
               <IntroText
                 paragraphs={[
