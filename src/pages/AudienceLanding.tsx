@@ -470,7 +470,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
     return () => {
       cancelled = true;
-      clearReturnWork();
+      if (returnFrame) { window.cancelAnimationFrame(returnFrame); returnFrame = null; }
+      if (returnTimer) { window.clearTimeout(returnTimer); returnTimer = null; }
       observer?.kill();
       teardown?.();
     };
