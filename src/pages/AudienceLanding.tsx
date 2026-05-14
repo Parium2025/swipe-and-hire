@@ -114,6 +114,71 @@ const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
     };
   }, []);
 
+  // GSAP scrub: smooth fade/scale from Hero → Intro tied to scroll position.
+  useEffect(() => {
+    const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    const hero = heroRef.current;
+    const intro = introRef.current;
+    if (!scrollRoot || !hero || !intro) return;
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+
+    const ctx = gsap.context(() => {
+      const heroOutTargets = [heroTextRef.current, phoneLayerRef.current].filter(Boolean) as Element[];
+
+      // Hero fades + scales out as it leaves the viewport.
+      if (heroOutTargets.length) {
+        gsap.fromTo(
+          heroOutTargets,
+          { opacity: 1, scale: 1, y: 0 },
+          {
+            opacity: 0,
+            scale: 0.94,
+            y: -40,
+            ease: 'none',
+            scrollTrigger: {
+              scroller: scrollRoot,
+              trigger: hero,
+              start: 'bottom bottom',
+              end: 'bottom top',
+              scrub: 0.4,
+            },
+          }
+        );
+      }
+
+      // Intro fades + scales in as it enters.
+      if (introContentRef.current) {
+        gsap.fromTo(
+          introContentRef.current,
+          { opacity: 0, scale: 0.96, y: 40 },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            ease: 'none',
+            scrollTrigger: {
+              scroller: scrollRoot,
+              trigger: intro,
+              start: 'top bottom',
+              end: 'top center',
+              scrub: 0.4,
+            },
+          }
+        );
+      }
+    });
+
+    const refresh = () => ScrollTrigger.refresh();
+    window.addEventListener('resize', refresh);
+
+    return () => {
+      window.removeEventListener('resize', refresh);
+      ctx.revert();
+    };
+  }, []);
+
   return (
     <>
       <section
