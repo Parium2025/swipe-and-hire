@@ -259,6 +259,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         animatingRef.current = true;
         indexRef.current = 0;
         lastTransitionAtRef.current = performance.now();
+        snapStageToTop();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
         const tl = gsap.timeline({
