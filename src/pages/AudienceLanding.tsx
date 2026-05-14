@@ -158,6 +158,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const introOuter = introOuterRef.current;
       const introInner = introInnerRef.current;
       const stage = stageRef.current;
+      const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
       // Initial state: hero synlig, intro gömd ovanför skärmen.
@@ -216,7 +217,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       };
 
       observer = Observer.create({
-        target: document.querySelector('[data-landing-scroll-root]') ?? window,
+        target: scrollRoot ?? window,
         type: 'wheel,touch',
         wheelSpeed: -1,
         tolerance: 12,
@@ -243,7 +244,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             inView ? observer.enable?.() : observer.disable?.();
           }
         },
-        { threshold: [0, 0.4, 0.6, 1] }
+        { root: scrollRoot, threshold: [0, 0.4, 0.6, 1] }
       );
       intersectObs.observe(stage);
     };
