@@ -358,14 +358,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
         // @ts-expect-error gsap Observer har enable/disable
         observer?.disable?.();
-        scrollRoot.scrollTo({ top: stageTopAbs, behavior: 'auto' });
+        scrollRoot.scrollTo({ top: stageTopAbs, behavior: 'smooth' });
         inView = true;
         window.setTimeout(() => {
           if (observer) {
             // @ts-expect-error gsap Observer har enable/disable
             observer.enable?.();
           }
-        }, 120);
+        }, 760);
       };
 
       // Riktningskänslig scroll-watcher: när användaren scrollar UPP och stage
