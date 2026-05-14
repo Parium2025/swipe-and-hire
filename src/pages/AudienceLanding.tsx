@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -57,13 +57,14 @@ type HeroIntroStageProps = {
 };
 
 const FixedPhoneLayer = () => {
-  const phoneWrapRef = useRef<HTMLDivElement | null>(null);
-  const visibleRef = useRef(true);
+  const [visible, setVisible] = useState(true);
+  // Bump key för att tvinga remount av SplinePhone → telefonen återställs
+  // alltid till exakt sitt utgångsläge (precis som en page-refresh) när vi
+  // kommer tillbaka till Hero-ytan.
+  const [mountKey, setMountKey] = useState(0);
   const heroIndexRef = useRef(0);
+  const wasVisibleRef = useRef(true);
 
-  // Telefonen lever i ett eget fixed-lager och flyttas aldrig av scroll —
-  // den ligger alltid på rätt position. Vi togglar bara opacity (ingen
-  // remount av Spline-scenen, för det orsakar lagg vid retur till Hero).
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
 
@@ -76,23 +77,22 @@ const FixedPhoneLayer = () => {
       return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * 0.55;
     };
 
-    const setPhoneVisible = (nextVisible: boolean) => {
-      if (visibleRef.current === nextVisible) return;
-      visibleRef.current = nextVisible;
-      const node = phoneWrapRef.current;
-      if (node) {
-        node.style.opacity = nextVisible ? '1' : '0';
-        node.style.pointerEvents = nextVisible ? 'auto' : 'none';
+    const apply = (next: boolean) => {
+      // När vi går från dold → synlig: remounta så telefonen alltid hamnar
+      // i sin ursprungliga position (ingen "pop-up hur som helst").
+      if (next && !wasVisibleRef.current) {
+        setMountKey((k) => k + 1);
       }
-      window.dispatchEvent(new CustomEvent('parium:phone-visible', { detail: { visible: nextVisible } }));
+      wasVisibleRef.current = next;
+      setVisible(next);
     };
 
-    const sync = () => setPhoneVisible(isHeroZone());
+    const sync = () => apply(isHeroZone());
 
     const onIndex = (e: Event) => {
       const detail = (e as CustomEvent<{ index: number }>).detail;
       heroIndexRef.current = detail?.index ?? 0;
-      setPhoneVisible(detail?.index !== 1 && isHeroZone());
+      apply(detail?.index !== 1 && isHeroZone());
     };
 
     sync();
@@ -112,11 +112,16 @@ const FixedPhoneLayer = () => {
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <div
-          ref={phoneWrapRef}
-          className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 opacity-100 transition-opacity duration-500 ease-out xl:pt-10"
-          style={{ touchAction: 'none', overscrollBehavior: 'contain', willChange: 'opacity' }}
+          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
+          style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
-          <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} pauseWhenHidden />
+          {visible && (
+            <SplinePhone
+              key={mountKey}
+              className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
+              zoom={0.78}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -141,23 +146,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const indexRef = useRef(0); // 0 = hero, 1 = intro
   const animatingRef = useRef(false);
   const releaseLockedRef = useRef(false);
-
-  useLayoutEffect(() => {
-    const heroOuter = heroOuterRef.current;
-    const heroInner = heroInnerRef.current;
-    const introOuter = introOuterRef.current;
-    const introInner = introInnerRef.current;
-    if (!heroOuter || !heroInner || !introOuter || !introInner) return;
-
-    heroOuter.style.transform = 'translate3d(0,0,0)';
-    heroOuter.style.opacity = '1';
-    heroOuter.style.visibility = 'visible';
-    heroInner.style.transform = 'translate3d(0,0,0)';
-    introOuter.style.transform = 'translate3d(0,100%,0)';
-    introOuter.style.opacity = '0';
-    introOuter.style.visibility = 'hidden';
-    introInner.style.transform = 'translate3d(0,-100%,0)';
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -329,8 +317,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
         const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        scrollRoot.scrollTo({ top: target, behavior: 'auto' });
-        animatingRef.current = true;
+        scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
+        const startedAt = performance.now();
 
         const playIntroTextIn = () => {
           gsap.to(introTextItems, {
@@ -349,7 +337,19 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           });
         };
 
-        playIntroTextIn();
+        const waitForStageTop = () => {
+          const rect = stage.getBoundingClientRect();
+          if (Math.abs(rect.top) < 3 || performance.now() - startedAt > 700) {
+            scrollRoot.scrollTo({ top: scrollRoot.scrollTop + rect.top, behavior: 'auto' });
+            returnFrame = null;
+            animatingRef.current = true;
+            playIntroTextIn();
+            return;
+          }
+          returnFrame = window.requestAnimationFrame(waitForStageTop);
+        };
+
+        returnFrame = window.requestAnimationFrame(waitForStageTop);
       };
 
       observer = Observer.create({
@@ -428,8 +428,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       className="relative h-[100svh] w-full overflow-hidden"
     >
       {/* HERO LAGER */}
-      <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden" style={{ transform: 'translate3d(0,0,0)', opacity: 1, visibility: 'visible' }}>
-        <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden" style={{ transform: 'translate3d(0,0,0)' }}>
+      <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
+        <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
           {/* Mobile hero */}
           <section
             className="relative flex h-full w-screen overflow-hidden lg:hidden"
@@ -457,7 +457,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
           {/* Desktop hero */}
           <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
-            <div aria-hidden className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]" />
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
+              animate={{ opacity: [0.5, 0.75, 0.5] }}
+              transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
+            />
             <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
               <motion.div
                 ref={heroTextRef}
@@ -475,8 +480,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       </div>
 
       {/* INTRO LAGER (kommer uppifrån) */}
-      <div ref={introOuterRef} className="absolute inset-0 z-30 overflow-hidden opacity-0 invisible" style={{ transform: 'translate3d(0,100%,0)' }}>
-        <div ref={introInnerRef} className="absolute inset-0 overflow-hidden" style={{ transform: 'translate3d(0,-100%,0)' }}>
+      <div ref={introOuterRef} className="absolute inset-0 z-30 overflow-hidden">
+        <div ref={introInnerRef} className="absolute inset-0 overflow-hidden">
           <section
             aria-label="Introduktion"
             className="relative flex h-full w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"

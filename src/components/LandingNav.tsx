@@ -19,6 +19,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const goHome = (e?: React.SyntheticEvent) => {
@@ -42,6 +43,31 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
       setMobileMenuOpen(false);
     }
   };
+
+  useEffect(() => {
+    // Hitta faktisk scroll-container (fixed inset-0 overflow-y-auto används på audience-sidor)
+    const findScroller = (): HTMLElement | Window => {
+      const candidates = Array.from(document.querySelectorAll<HTMLElement>('div'));
+      for (const el of candidates) {
+        const cs = getComputedStyle(el);
+        if (
+          (cs.overflowY === 'auto' || cs.overflowY === 'scroll') &&
+          cs.position === 'fixed' &&
+          el.scrollHeight > el.clientHeight
+        ) {
+          return el;
+        }
+      }
+      return window;
+    };
+    const scroller = findScroller();
+    const getY = () =>
+      scroller === window ? window.scrollY : (scroller as HTMLElement).scrollTop;
+    const onScroll = () => setScrolled(getY() > 40);
+    onScroll();
+    scroller.addEventListener('scroll', onScroll, { passive: true } as any);
+    return () => scroller.removeEventListener('scroll', onScroll as any);
+  }, [location.pathname]);
 
   // Tracka aktiv sektion baserat på vilken som är synligast
   useEffect(() => {

@@ -4,16 +4,14 @@ import type { Application as SplineApplication } from '@splinetool/runtime';
 interface SplinePhoneProps {
   className?: string;
   zoom?: number;
-  pauseWhenHidden?: boolean;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78, pauseWhenHidden = false }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
-  const shouldPlayRef = useRef(true);
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -46,16 +44,11 @@ export const SplinePhone = ({ className, zoom = 0.78, pauseWhenHidden = false }:
           }
         }
 
-        app = new Application(canvas, { renderMode: 'auto' });
+        app = new Application(canvas, { renderMode: 'continuous' });
         appRef.current = app;
         await app.load(SCENE_URL);
         app.setZoom(zoom);
-        app.requestRender?.();
-        requestAnimationFrame(() => {
-          app?.setZoom(zoom);
-          app?.requestRender?.();
-        });
-        if (pauseWhenHidden && !shouldPlayRef.current) app.stop();
+        requestAnimationFrame(() => app?.setZoom(zoom));
         if (!cancelled) setIsReady(true);
       } catch (error) {
         console.error('Kunde inte ladda Spline-telefonen:', error);
@@ -68,27 +61,7 @@ export const SplinePhone = ({ className, zoom = 0.78, pauseWhenHidden = false }:
       app?.dispose();
       appRef.current = null;
     };
-  }, [pauseWhenHidden, reducedMotion, zoom]);
-
-  useEffect(() => {
-    if (!pauseWhenHidden || reducedMotion) return;
-
-    const onVisibility = (event: Event) => {
-      const visible = (event as CustomEvent<{ visible?: boolean }>).detail?.visible !== false;
-      shouldPlayRef.current = visible;
-      const app = appRef.current;
-      if (!app) return;
-      if (visible) {
-        app.play();
-        app.requestRender?.();
-      } else {
-        app.stop();
-      }
-    };
-
-    window.addEventListener('parium:phone-visible', onVisibility);
-    return () => window.removeEventListener('parium:phone-visible', onVisibility);
-  }, [pauseWhenHidden, reducedMotion]);
+  }, [reducedMotion, zoom]);
 
   if (reducedMotion || hasError) {
     return (
