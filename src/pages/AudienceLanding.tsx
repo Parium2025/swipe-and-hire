@@ -301,11 +301,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         programmaticReturn = true;
         releasedToGallery = false;
         releaseLockedRef.current = false;
+        animatingRef.current = true;
         setObserverActive(false);
 
-        // Land DIRECT on Intro (stage 2) — no Hero flash. Layers are placed
-        // in their resting Intro position immediately; only the text gets a
-        // premium staggered entrance so it still feels polished.
+        // Layers placeras direkt i Intro-resting. INGEN smooth scrollTo —
+        // den slogs mot Lenis och rAF-pollen och orsakade hack. Vi snappar
+        // scroll-positionen instant till stage-top och animerar bara texten.
         gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
         gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 100 });
@@ -316,40 +317,25 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         indexRef.current = 1;
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
+        // Instant snap — Lenis och native scrollTo slogs tidigare, nu kör vi rakt.
         const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
-        const startedAt = performance.now();
+        scrollRoot.scrollTo({ top: target, behavior: 'auto' });
+        prevScrollTop = scrollRoot.scrollTop;
 
-        const playIntroTextIn = () => {
-          gsap.to(introTextItems, {
-            y: 0,
-            opacity: 1,
-            duration: 0.7,
-            stagger: 0.08,
-            ease: 'power3.out',
-            onComplete: () => {
-              setIntroResting();
-              animatingRef.current = false;
-              releaseLockedRef.current = false;
-              programmaticReturn = false;
-              setObserverActive(true);
-            },
-          });
-        };
-
-        const waitForStageTop = () => {
-          const rect = stage.getBoundingClientRect();
-          if (Math.abs(rect.top) < 3 || performance.now() - startedAt > 700) {
-            scrollRoot.scrollTo({ top: scrollRoot.scrollTop + rect.top, behavior: 'auto' });
-            returnFrame = null;
-            animatingRef.current = true;
-            playIntroTextIn();
-            return;
-          }
-          returnFrame = window.requestAnimationFrame(waitForStageTop);
-        };
-
-        returnFrame = window.requestAnimationFrame(waitForStageTop);
+        gsap.to(introTextItems, {
+          y: 0,
+          opacity: 1,
+          duration: 0.7,
+          stagger: 0.08,
+          ease: 'power3.out',
+          onComplete: () => {
+            setIntroResting();
+            animatingRef.current = false;
+            releaseLockedRef.current = false;
+            programmaticReturn = false;
+            setObserverActive(true);
+          },
+        });
       };
 
       observer = Observer.create({
