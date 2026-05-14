@@ -103,8 +103,8 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
   return (
     <div
       ref={wrapperRef}
-      className={`pointer-events-none relative select-none overflow-visible ${className ?? ''}`}
-      style={{ touchAction: 'pan-y', overscrollBehavior: 'auto' }}
+      className={`relative select-none overflow-visible ${className ?? ''}`}
+      style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
     >
       {!isReady && (
         <div
