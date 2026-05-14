@@ -58,6 +58,29 @@ type HeroIntroStageProps = {
 };
 
 const FixedPhoneLayer = () => {
+  const phoneFrameRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const frame = phoneFrameRef.current;
+    if (!frame) return;
+
+    const stopScroll = (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if ('stopImmediatePropagation' in event) {
+        (event as Event & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
+      }
+    };
+
+    frame.addEventListener('wheel', stopScroll, { capture: true, passive: false });
+    frame.addEventListener('touchmove', stopScroll, { capture: true, passive: false });
+
+    return () => {
+      frame.removeEventListener('wheel', stopScroll, true);
+      frame.removeEventListener('touchmove', stopScroll, true);
+    };
+  }, []);
+
   const stopScrollOnPhone = (event: WheelEvent | TouchEvent) => {
     event.preventDefault();
     event.stopPropagation();
@@ -68,12 +91,14 @@ const FixedPhoneLayer = () => {
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <motion.div
+          ref={phoneFrameRef}
           initial={{ opacity: 0, x: 60, scale: 0.96 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 1.1, ease }}
           className="pointer-events-auto relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10"
           onWheelCapture={stopScrollOnPhone}
           onTouchMoveCapture={stopScrollOnPhone}
+          style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
         </motion.div>
