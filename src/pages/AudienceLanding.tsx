@@ -14,6 +14,7 @@ import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
 import panelImg3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
 import panelImg4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
 import { SplinePhone } from '@/components/landing/SplinePhone';
+import { HeroText } from '@/components/landing/audience/HeroText';
 
 // 🖼️ Provisional placeholder images for the 4 horizontal scroll panels.
 // Swap these out via the imports above when final brand photography is ready.
