@@ -205,9 +205,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
   useEffect(() => {
     let cancelled = false;
-    let observer: { kill: () => void } | null = null;
-    let intersectObs: IntersectionObserver | null = null;
-    let inView = true;
+    let observer: { kill: () => void; enable?: () => void; disable?: () => void; isEnabled?: boolean } | null = null;
+    let returnFrame: number | null = null;
+    let returnTimer: number | null = null;
 
     const setup = async () => {
       const [{ default: gsap }, { Observer }] = await Promise.all([
@@ -226,17 +226,29 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const stage = stageRef.current;
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
+
       const heroTextItems = heroText ? gsap.utils.toArray<HTMLElement>(heroText.querySelectorAll('span, h1 span, p')) : [];
       const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p, button')) : [];
       let releasedToGallery = false;
+      let programmaticReturn = false;
+      let prevScrollTop = scrollRoot?.scrollTop ?? 0;
 
-      // Initial state: hero synlig, intro gömd UNDER skärmen.
-      gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
-      gsap.set(heroInner, { yPercent: 0 });
-      gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
-      gsap.set(introInner, { yPercent: -100 });
-      gsap.set(heroTextItems, { y: 0, opacity: 1 });
-      gsap.set(introTextItems, { y: 36, opacity: 0 });
+      const setObserverActive = (active: boolean) => {
+        if (!observer) return;
+        if (active && !observer.isEnabled) observer.enable?.();
+        if (!active && observer.isEnabled) observer.disable?.();
+      };
+
+      const clearReturnWork = () => {
+        if (returnFrame) {
+          window.cancelAnimationFrame(returnFrame);
+          returnFrame = null;
+        }
+        if (returnTimer) {
+          window.clearTimeout(returnTimer);
+          returnTimer = null;
+        }
+      };
 
       const snapStageToTop = () => {
         if (!scrollRoot) return;
@@ -246,29 +258,51 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         }
       };
 
-      const goToIntro = () => {
+      const setHeroStart = () => {
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
+        gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
+        gsap.set(heroInner, { yPercent: 0 });
+        gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
+        gsap.set(introInner, { yPercent: -100 });
+        gsap.set(heroTextItems, { y: 0, opacity: 1 });
+        gsap.set(introTextItems, { y: 44, opacity: 0 });
+        indexRef.current = 0;
+      };
+
+      const setIntroResting = () => {
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
+        gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
+        gsap.set(heroInner, { yPercent: 100 });
+        gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
+        gsap.set(introInner, { yPercent: 0 });
+        gsap.set(heroTextItems, { y: -44, opacity: 0 });
+        gsap.set(introTextItems, { y: 0, opacity: 1 });
+        indexRef.current = 1;
+      };
+
+      setHeroStart();
+
+      const goToIntro = ({ snap = true } = {}) => {
         if (animatingRef.current || indexRef.current === 1) return;
+        clearReturnWork();
         animatingRef.current = true;
         indexRef.current = 1;
-        snapStageToTop();
+        if (snap) snapStageToTop();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
         const tl = gsap.timeline({
-          defaults: { duration: 1.1, ease: 'power2.inOut' },
+          defaults: { duration: 1.08, ease: 'power2.inOut' },
           onComplete: () => {
+            setIntroResting();
             animatingRef.current = false;
             releaseLockedRef.current = false;
-            if (inView && !releasedToGallery) {
-              // @ts-expect-error gsap Observer har enable/disable
-              observer?.enable?.();
-            }
+            programmaticReturn = false;
+            if (!releasedToGallery) setObserverActive(true);
           },
         });
-        // Hero åker UPP och ut
         tl.to(heroTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out' }, 0);
         tl.to(heroOuter, { yPercent: -100 }, 0);
         tl.to(heroInner, { yPercent: 100 }, 0);
-        // Intro kommer UPP nerifrån
         tl.set(introOuter, { autoAlpha: 1 }, 0);
         tl.fromTo(introOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
         tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
@@ -277,47 +311,72 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
       const goToHero = () => {
         if (animatingRef.current || indexRef.current === 0) return;
+        clearReturnWork();
+        releasedToGallery = false;
+        programmaticReturn = false;
         animatingRef.current = true;
         indexRef.current = 0;
         snapStageToTop();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
         const tl = gsap.timeline({
-          defaults: { duration: 1.1, ease: 'power2.inOut' },
+          defaults: { duration: 1.08, ease: 'power2.inOut' },
           onComplete: () => {
+            setHeroStart();
             animatingRef.current = false;
             releaseLockedRef.current = false;
-            if (inView && !releasedToGallery) {
-              // @ts-expect-error gsap Observer har enable/disable
-              observer?.enable?.();
-            }
+            setObserverActive(true);
           },
         });
-        // Intro åker NED och ut
         tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in' }, 0);
         tl.to(introOuter, { yPercent: 100 }, 0);
         tl.to(introInner, { yPercent: -100 }, 0);
         tl.set(introOuter, { autoAlpha: 0 });
-        // Hero kommer tillbaka uppifrån
         tl.fromTo(heroOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
         tl.fromTo(heroInner, { yPercent: 100 }, { yPercent: 0 }, 0);
         tl.fromTo(heroTextItems, { y: -44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.06, ease: 'power2.out' }, 0.48);
       };
 
       const releaseAndScrollNext = () => {
-        // Användaren är på Intro och scrollar ner igen → släpp kontrollen.
-        const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-        if (!root) return;
+        const root = scrollRoot;
         const next = document.getElementById('sa-funkar-det');
-        if (!next) return;
-        const rect = next.getBoundingClientRect();
-        const target = root.scrollTop + rect.top;
-        inView = false;
+        if (!root || !next) return;
         releasedToGallery = true;
-        // Släpp Observer direkt så smooth-scrollen och nästa hjulgest aldrig fastnar.
-        // @ts-expect-error gsap Observer har enable/disable
-        observer?.disable?.();
+        programmaticReturn = false;
+        setObserverActive(false);
+        const target = root.scrollTop + next.getBoundingClientRect().top;
         root.scrollTo({ top: target, behavior: 'smooth' });
+        returnTimer = window.setTimeout(() => {
+          releaseLockedRef.current = false;
+        }, 700);
+      };
+
+      const returnFromGalleryToIntro = () => {
+        if (!scrollRoot || programmaticReturn || animatingRef.current) return;
+        clearReturnWork();
+        programmaticReturn = true;
+        releasedToGallery = false;
+        releaseLockedRef.current = false;
+        setObserverActive(false);
+        setHeroStart();
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
+
+        const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
+        scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
+        const startedAt = performance.now();
+
+        const waitForStageTop = () => {
+          const rect = stage.getBoundingClientRect();
+          if (Math.abs(rect.top) < 3 || performance.now() - startedAt > 950) {
+            scrollRoot.scrollTo({ top: scrollRoot.scrollTop + rect.top, behavior: 'auto' });
+            returnFrame = null;
+            goToIntro({ snap: false });
+            return;
+          }
+          returnFrame = window.requestAnimationFrame(waitForStageTop);
+        };
+
+        returnFrame = window.requestAnimationFrame(waitForStageTop);
       };
 
       observer = Observer.create({
@@ -327,136 +386,52 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         tolerance: 16,
         preventDefault: true,
         onUp: () => {
-          if (!inView) return;
-          if (animatingRef.current) return;
+          if (releasedToGallery || programmaticReturn || animatingRef.current) return;
           if (indexRef.current === 0) {
             goToIntro();
-          } else {
-            if (releaseLockedRef.current) return;
-            releaseLockedRef.current = true;
-            releaseAndScrollNext();
+            return;
           }
+          if (releaseLockedRef.current) return;
+          releaseLockedRef.current = true;
+          releaseAndScrollNext();
         },
         onDown: () => {
-          if (!inView) return;
-          if (animatingRef.current) return;
+          if (releasedToGallery || programmaticReturn || animatingRef.current) return;
           if (indexRef.current === 1) goToHero();
         },
       });
 
-      // Stäng av Observer när stage inte är i viewport (så resten av sidan kan scrollas fritt).
-      intersectObs = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) inView = e.isIntersecting && e.intersectionRatio > 0.4;
-          if (observer) {
-            // @ts-expect-error gsap Observer har enable/disable
-            inView && !releasedToGallery ? observer.enable?.() : observer.disable?.();
-          }
-        },
-        { root: scrollRoot, threshold: [0, 0.4, 0.6, 1] }
-      );
-      intersectObs.observe(stage);
-
-      const settleToIntroFromBelow = () => {
-        if (!scrollRoot) return;
-        if (animatingRef.current) return;
-        releasedToGallery = false;
-        releaseLockedRef.current = false;
-        const stageTopAbs = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        // Sätt Hero som startläge — så att vi kan spela exakt samma 1→2-animation
-        // som när man scrollar nedåt från Hero till Intro.
-        gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
-        gsap.set(heroInner, { yPercent: 0 });
-        gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
-        gsap.set(introInner, { yPercent: -100 });
-        indexRef.current = 0;
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
-        // @ts-expect-error gsap Observer har enable/disable
-        observer?.disable?.();
-        scrollRoot.scrollTo({ top: stageTopAbs, behavior: 'smooth' });
-        inView = true;
-        // När den mjuka scrollen landat → spela Hero→Intro-animationen.
-        window.setTimeout(() => {
-          goToIntro();
-        }, 480);
-        window.setTimeout(() => {
-          if (observer) {
-            // @ts-expect-error gsap Observer har enable/disable
-            observer.enable?.();
-          }
-        }, 1700);
-      };
-
-      // Riktningskänslig scroll-watcher: när användaren scrollar UPP och stage
-      // dyker upp underifrån → landa alltid i Intro först. Nästa scroll-up
-      // triggar den mjuka Intro → Hero-animationen.
-      let prevScrollTop = scrollRoot?.scrollTop ?? 0;
-      let snapBackArmed = true; // anti-loop: triggas en gång per "ankomst"
-      let settleTimer: number | null = null;
       const onScrollWatch = () => {
         if (!scrollRoot) return;
         const cur = scrollRoot.scrollTop;
         const direction = cur < prevScrollTop ? 'up' : 'down';
         prevScrollTop = cur;
-
         const rect = stage.getBoundingClientRect();
         const vh = window.innerHeight;
 
-        // Om man kommer tillbaka från korten och landar exakt på intro-stage
-        // måste Observer slås på igen; annars finns ingen native scroll kvar uppåt.
-        if (releasedToGallery && rect.top < 4 && rect.bottom > vh * 0.9) {
-          releasedToGallery = false;
-          inView = true;
-          releaseLockedRef.current = false;
-          if (indexRef.current !== 1 && !animatingRef.current) {
-            gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
-            gsap.set(heroInner, { yPercent: 100 });
-            gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
-            gsap.set(introInner, { yPercent: 0 });
-            gsap.set(heroTextItems, { y: -44, opacity: 0 });
-            gsap.set(introTextItems, { y: 0, opacity: 1 });
-            indexRef.current = 1;
-            window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
+        if (programmaticReturn || animatingRef.current) return;
+
+        if (releasedToGallery) {
+          setObserverActive(false);
+          if (direction === 'up' && rect.bottom > vh * 0.18 && rect.top < vh * 0.82) {
+            returnFromGalleryToIntro();
           }
-          // @ts-expect-error gsap Observer har enable/disable
-          observer?.enable?.();
-        }
-
-        // Avväpna när vi är långt under stage; återväpna när vi närmar oss.
-        if (rect.top > vh * 1.05) snapBackArmed = true;
-
-        // Snap-back: scrollar uppåt och stage börjar synas underifrån.
-        if (
-          direction === 'up' &&
-          snapBackArmed &&
-          !animatingRef.current &&
-          rect.top < vh * 0.92 &&
-          rect.bottom > vh * 0.35
-        ) {
-          snapBackArmed = false;
-          settleToIntroFromBelow();
           return;
         }
 
-        // Settle-snap för "döda" halvscrollade lägen (säkerhetsnät).
-        if (settleTimer) window.clearTimeout(settleTimer);
-        settleTimer = window.setTimeout(() => {
-          settleTimer = null;
-          if (animatingRef.current) return;
-          const r = stage.getBoundingClientRect();
-          if (r.bottom <= 0 || r.top >= vh) return;
-          if (Math.abs(r.top) < 2) return;
-          const stageTopAbs = scrollRoot.scrollTop + r.top;
-          const next = document.getElementById('sa-funkar-det');
-          const nextTopAbs = next ? scrollRoot.scrollTop + next.getBoundingClientRect().top : stageTopAbs + vh;
-          const target = r.top < -vh * 0.5 ? nextTopAbs : stageTopAbs;
-          scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
-        }, 140);
+        const stageIsDocked = Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
+        if (stageIsDocked) {
+          setObserverActive(true);
+          if (indexRef.current !== 0 && indexRef.current !== 1) setIntroResting();
+        } else if (rect.bottom <= 0 || rect.top >= vh) {
+          setObserverActive(false);
+        }
       };
+
       scrollRoot?.addEventListener('scroll', onScrollWatch, { passive: true });
 
       return () => {
-        if (settleTimer) window.clearTimeout(settleTimer);
+        clearReturnWork();
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
       };
     };
@@ -466,8 +441,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
 
     return () => {
       cancelled = true;
+      clearReturnWork();
       observer?.kill();
-      intersectObs?.disconnect();
       teardown?.();
     };
   }, []);
