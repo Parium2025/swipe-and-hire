@@ -203,7 +203,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* DESKTOP HERO — split: text till vänster, framad video till höger */}
-          <section className="relative hidden lg:flex min-h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
+          <section className="relative hidden lg:flex h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:px-24">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
@@ -230,13 +230,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
                 className="relative mx-auto flex w-full items-center justify-center"
               >
-                {isDesktopHero && <SplinePhone className="aspect-[9/16] w-full max-w-[520px]" />}
+                {isDesktopHero && <SplinePhone className="aspect-[9/16] w-full max-w-[520px] max-h-[78svh]" />}
               </motion.div>
             </motion.div>
           </section>
 
-          {/* ──────────────── 1b. BRÖDTEXT + CTA — fullskärms pop-in (texten syns, korten nedanför göms) ──────────────── */}
-          <section className="relative flex min-h-[100svh] items-center justify-center px-5 py-20 sm:px-6 md:px-12 lg:px-24">
+          {/* ──────────────── 1b. BRÖDTEXT + CTA — pop-in på scroll, korten följer direkt efter ──────────────── */}
+          <section className="relative px-5 pt-20 pb-12 sm:px-6 sm:pt-24 sm:pb-14 md:px-12 md:pt-28 md:pb-16 lg:px-24">
             <motion.div
               className="mx-auto max-w-2xl"
               initial="hidden"
