@@ -59,6 +59,33 @@ type HeroIntroStageProps = {
 
 const FixedPhoneLayer = () => {
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
+  const [hidden, setHidden] = useState(false);
+
+  // Fadea ut telefonen så fort intro-panelen ("Söka jobb ska vara enkelt…") börjar komma upp.
+  // Den ska bara synas på själva hero-sektionen ("Hitta jobb som faktiskt passar dig").
+  useEffect(() => {
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    if (!root) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
+      if (!stage) return;
+      const rect = stage.getBoundingClientRect();
+      const distance = Math.max(1, stage.offsetHeight - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, -rect.top / distance));
+      setHidden(progress > 0.12);
+    };
+    const onScroll = () => { if (!raf) raf = window.requestAnimationFrame(update); };
+    update();
+    root.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      root.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
 
   useEffect(() => {
     const frame = phoneFrameRef.current;
