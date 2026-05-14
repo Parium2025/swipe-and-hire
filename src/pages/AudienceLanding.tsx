@@ -216,17 +216,20 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       };
 
       observer = Observer.create({
-        target: window,
+        target: document.querySelector('[data-landing-scroll-root]') ?? window,
         type: 'wheel,touch',
+        wheelSpeed: -1,
         tolerance: 12,
         preventDefault: true,
         onUp: () => {
           if (!inView) return;
+          if (animatingRef.current) return;
           if (indexRef.current === 0) goToIntro();
           else releaseAndScrollNext();
         },
         onDown: () => {
           if (!inView) return;
+          if (animatingRef.current) return;
           if (indexRef.current === 1) goToHero();
         },
       });
