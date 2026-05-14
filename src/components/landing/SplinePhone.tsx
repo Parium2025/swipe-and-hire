@@ -4,11 +4,12 @@ import type { Application as SplineApplication } from '@splinetool/runtime';
 interface SplinePhoneProps {
   className?: string;
   zoom?: number;
+  lockPageScroll?: boolean;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.78, lockPageScroll = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
@@ -19,6 +20,30 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
   const reducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  useEffect(() => {
+    if (!lockPageScroll) return;
+    const wrapper = wrapperRef.current;
+    const canvas = canvasRef.current;
+    if (!wrapper) return;
+
+    const blockScroll = (event: WheelEvent | TouchEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    wrapper.addEventListener('wheel', blockScroll, { passive: false });
+    wrapper.addEventListener('touchmove', blockScroll, { passive: false });
+    canvas?.addEventListener('wheel', blockScroll, { passive: false });
+    canvas?.addEventListener('touchmove', blockScroll, { passive: false });
+
+    return () => {
+      wrapper.removeEventListener('wheel', blockScroll);
+      wrapper.removeEventListener('touchmove', blockScroll);
+      canvas?.removeEventListener('wheel', blockScroll);
+      canvas?.removeEventListener('touchmove', blockScroll);
+    };
+  }, [lockPageScroll]);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -80,7 +105,7 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
     <div
       ref={wrapperRef}
       className={`relative select-none overflow-visible ${className ?? ''}`}
-      style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+      style={{ touchAction: lockPageScroll ? 'none' : 'pan-y', overscrollBehavior: 'contain' }}
     >
       <canvas
         ref={canvasRef}
