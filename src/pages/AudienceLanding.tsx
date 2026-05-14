@@ -176,25 +176,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
 
-  // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
-  // åt gången — annars initieras Spline-runtime två gånger på desktop.
-  // Mobil-hero används för telefon OCH surfplattor (< 1024px) så iPad/Android-tabs
-  // får samma full-bleed-Spline-upplevelse som telefon. Desktop-split tar över ≥ 1024px.
-  const [isDesktopHero, setIsDesktopHero] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return window.matchMedia('(min-width: 1024px)').matches;
-  });
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)');
-    const onChange = (e: MediaQueryListEvent) => setIsDesktopHero(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-
-  // (Tidigare scroll-jack med IntersectionObserver + tvingad scrollTop togs bort —
-  // den slogs mot CSS scroll-snap och orsakade lagg/jitter. CSS scroll-snap
-  // (scrollSnapType: 'y mandatory' + scrollSnapStop: 'always') sköter snappet.)
-
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
 
@@ -265,7 +246,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       }}
     >
       <AnimatedBackground />
-      {isDesktopHero && <FixedPhoneLayer />}
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
@@ -275,7 +255,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
-          <HeroIntroStage c={c} isDesktopHero={isDesktopHero} onStart={handleStart} />
+          <HeroIntroStage c={c} onStart={handleStart} />
 
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
