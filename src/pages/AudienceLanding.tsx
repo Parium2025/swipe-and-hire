@@ -285,10 +285,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       };
 
       const releaseAndScrollNext = () => {
-        const elapsed = performance.now() - lastTransitionAtRef.current;
-        if (elapsed < 1100) {
-          return;
-        }
         // Användaren är på Intro och scrollar ner igen → släpp kontrollen.
         const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
         if (!root) return;
@@ -320,14 +316,19 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         onUp: () => {
           if (!inView) return;
           if (animatingRef.current) return;
-            snapStageToTop();
-          if (indexRef.current === 0) goToIntro();
-          else releaseAndScrollNext();
+          if (indexRef.current === 0) {
+            goToIntro();
+          } else {
+            // Liten paus efter intro-animation så det inte känns hetsigt,
+            // men ingen snap → ingen "skakning".
+            const elapsed = performance.now() - lastTransitionAtRef.current;
+            if (elapsed < 350) return;
+            releaseAndScrollNext();
+          }
         },
         onDown: () => {
           if (!inView) return;
           if (animatingRef.current) return;
-            snapStageToTop();
           if (indexRef.current === 1) goToHero();
         },
       });
@@ -349,23 +350,28 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         if (!scrollRoot) return;
         if (animatingRef.current) return;
         const stageTopAbs = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
-        gsap.set(heroInner, { yPercent: 100 });
-        gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
-        gsap.set(introInner, { yPercent: 0 });
-        indexRef.current = 1;
-        lastTransitionAtRef.current = performance.now();
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
+        // Sätt Hero som startläge — så att vi kan spela exakt samma 1→2-animation
+        // som när man scrollar nedåt från Hero till Intro.
+        gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
+        gsap.set(heroInner, { yPercent: 0 });
+        gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
+        gsap.set(introInner, { yPercent: -100 });
+        indexRef.current = 0;
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
         // @ts-expect-error gsap Observer har enable/disable
         observer?.disable?.();
         scrollRoot.scrollTo({ top: stageTopAbs, behavior: 'smooth' });
         inView = true;
+        // När den mjuka scrollen landat → spela Hero→Intro-animationen.
+        window.setTimeout(() => {
+          goToIntro();
+        }, 480);
         window.setTimeout(() => {
           if (observer) {
             // @ts-expect-error gsap Observer har enable/disable
             observer.enable?.();
           }
-        }, 760);
+        }, 1700);
       };
 
       // Riktningskänslig scroll-watcher: när användaren scrollar UPP och stage
