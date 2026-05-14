@@ -98,11 +98,60 @@ const FixedPhoneLayer = () => {
     sync();
     window.addEventListener('parium:hero-index', onIndex);
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
+
+    // 🔁 Spline-canvasen fångar wheel/touch internt (för 3D-rotation/zoom),
+    // vilket gör att GSAP Observer inte ser scrollen och sidan "fastnar".
+    // Vi forwarder därför scroll-gester från telefonens wrapper till scrollRoot
+    // så att Hero → Intro-animationen triggas precis som utanför telefonen.
+    const phoneWrapper = document.querySelector('[data-phone-scroll-forward]') as HTMLElement | null;
+    let touchY: number | null = null;
+
+    const forwardWheel = (e: WheelEvent) => {
+      if (!scrollRoot) return;
+      e.preventDefault();
+      e.stopPropagation();
+      scrollRoot.dispatchEvent(
+        new WheelEvent('wheel', {
+          deltaY: e.deltaY,
+          deltaX: e.deltaX,
+          deltaMode: e.deltaMode,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchY = e.touches[0]?.clientY ?? null;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (touchY === null || !scrollRoot) return;
+      const cy = e.touches[0]?.clientY ?? touchY;
+      const dy = touchY - cy;
+      if (Math.abs(dy) < 6) return;
+      e.preventDefault();
+      // Skicka motsvarande wheel så Observer plockar upp riktningen
+      scrollRoot.dispatchEvent(
+        new WheelEvent('wheel', { deltaY: dy * 2, bubbles: true, cancelable: true }),
+      );
+      touchY = cy;
+    };
+    const onTouchEnd = () => { touchY = null; };
+
+    phoneWrapper?.addEventListener('wheel', forwardWheel, { passive: false, capture: true });
+    phoneWrapper?.addEventListener('touchstart', onTouchStart, { passive: true, capture: true });
+    phoneWrapper?.addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
+    phoneWrapper?.addEventListener('touchend', onTouchEnd, { passive: true, capture: true });
+
     return () => {
       window.removeEventListener('parium:hero-index', onIndex);
       scrollRoot?.removeEventListener('scroll', sync);
+      phoneWrapper?.removeEventListener('wheel', forwardWheel, true);
+      phoneWrapper?.removeEventListener('touchstart', onTouchStart, true);
+      phoneWrapper?.removeEventListener('touchmove', onTouchMove, true);
+      phoneWrapper?.removeEventListener('touchend', onTouchEnd, true);
     };
-  }, []);
+  }, [visible, mountKey]);
 
   return (
     <div
@@ -112,6 +161,7 @@ const FixedPhoneLayer = () => {
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <div
+          data-phone-scroll-forward
           className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
