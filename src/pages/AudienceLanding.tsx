@@ -59,6 +59,8 @@ type HeroIntroStageProps = {
 const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
   const heroIndexRef = useRef(0);
+  const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastVisibleRef = useRef(true);
 
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
@@ -73,7 +75,24 @@ const FixedPhoneLayer = () => {
     };
 
     const apply = (next: boolean) => {
-      setVisible(next);
+      if (next === lastVisibleRef.current && showTimerRef.current === null) return;
+      // Dölj direkt, men vänta ~900ms innan vi visar igen så att
+      // bild 1 hinner lägga sig på plats innan telefonen fade:as in.
+      if (next) {
+        if (showTimerRef.current) return; // redan inplanerad
+        showTimerRef.current = setTimeout(() => {
+          showTimerRef.current = null;
+          lastVisibleRef.current = true;
+          setVisible(true);
+        }, 900);
+      } else {
+        if (showTimerRef.current) {
+          clearTimeout(showTimerRef.current);
+          showTimerRef.current = null;
+        }
+        lastVisibleRef.current = false;
+        setVisible(false);
+      }
     };
 
     const sync = () => apply(isHeroZone());
@@ -139,6 +158,10 @@ const FixedPhoneLayer = () => {
       phoneWrapper?.removeEventListener('touchstart', onTouchStart, true);
       phoneWrapper?.removeEventListener('touchmove', onTouchMove, true);
       phoneWrapper?.removeEventListener('touchend', onTouchEnd, true);
+      if (showTimerRef.current) {
+        clearTimeout(showTimerRef.current);
+        showTimerRef.current = null;
+      }
     };
   }, []);
 
