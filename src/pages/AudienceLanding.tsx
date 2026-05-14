@@ -701,6 +701,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
+        backgroundImage:
+          'linear-gradient(180deg, hsl(215 80% 22%) 0px, hsl(var(--primary)) 900px)',
+        backgroundRepeat: 'no-repeat',
+        backgroundColor: 'hsl(var(--primary))',
       }}
     >
       <AnimatedBackground />
