@@ -239,7 +239,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
-      const heroTextItems = heroText ? gsap.utils.toArray<HTMLElement>(heroText.querySelectorAll('span, h1 span, p')) : [];
+        const heroTextItems = heroText ? gsap.utils.toArray<HTMLElement>(heroText.querySelectorAll('[data-hero-anim-item]')) : [];
       const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p, button')) : [];
       let releasedToGallery = false;
       let programmaticReturn = false;
@@ -346,7 +346,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         tl.set(introOuter, { autoAlpha: 0 });
         tl.fromTo(heroOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
         tl.fromTo(heroInner, { yPercent: 100 }, { yPercent: 0 }, 0);
-        tl.fromTo(heroTextItems, { y: -44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.06, ease: 'power2.out' }, 0.48);
+        tl.fromTo(heroTextItems, { y: -28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.035, ease: 'power2.out' }, 0.36);
       };
 
       const releaseAndScrollNext = () => {
