@@ -212,7 +212,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         >
           {/* HERO — snap-stop 1 */}
           <section
-            className="relative h-[100svh] w-full overflow-hidden"
+            className="sticky top-0 z-0 h-[100svh] w-full overflow-hidden"
             style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
           >
             {/* MOBILE HERO */}
@@ -264,7 +264,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
                   className="relative mx-auto flex w-full items-center justify-center self-center"
                 >
-                  {isDesktopHero && <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" />}
+                  {isDesktopHero && <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5] translate-y-16" />}
                 </motion.div>
               </motion.div>
             </section>
@@ -273,12 +273,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {/* INTRO PANEL — snap-stop 2 (slide-up animation vid in-view) */}
           <motion.section
             aria-label="Introduktion"
-            className="relative -mt-[100svh] flex h-[100svh] w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-6 md:px-12 lg:px-24"
-            style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
-            initial={{ y: '100%' }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.35 }}
-            transition={{ duration: 0.95, ease }}
+            className="relative z-20 flex h-[100svh] w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
+            style={{
+              scrollSnapAlign: 'start',
+              scrollSnapStop: 'always',
+              backgroundImage:
+                'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
+            }}
           >
             <div className="absolute inset-x-0 top-0 h-px bg-white/15" />
             <div className="relative z-10 flex max-w-4xl flex-col items-center">
