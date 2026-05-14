@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { Application } from '@splinetool/runtime';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Application as SplineApplication } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
   className?: string;
@@ -8,63 +8,128 @@ interface SplinePhoneProps {
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
 /**
- * Renderar Parium-telefonen som en interaktiv 3D-scen från Spline på en canvas.
+ * Produktionsklar Spline-telefon.
  *
- * Interaktion:
- * När användaren håller/draggar på telefonen låses landningssidans scroll
- * tillfälligt, så gesten bara roterar modellen och inte flyttar bort hero-telefonen.
+ * Optimeringar:
+ * - Lazy load via IntersectionObserver (Spline-runtime ~400KB laddas först när man når sektionen)
+ * - `prefers-reduced-motion`: fallback utan 3D
+ * - Loading-skeleton tills scenen är redo
+ * - DPR-clamp till 2 (sparar GPU på Retina)
+ * - Scroll-lås när användaren drar/roterar telefonen — sidan rör sig inte
+ * - A11y: aria-label på canvas
  */
 export const SplinePhone = ({ className }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const appRef = useRef<Application | null>(null);
+  const appRef = useRef<SplineApplication | null>(null);
   const lockedRootRef = useRef<HTMLElement | null>(null);
   const pointerInsideRef = useRef(false);
   const lockedScrollTopRef = useRef<number | null>(null);
   const previousOverflowRef = useRef<string>('');
   const previousTouchActionRef = useRef<string>('');
 
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
   const getScrollRoot = useCallback(
     () => wrapperRef.current?.closest<HTMLElement>('[data-landing-scroll-root]') ?? null,
     []
   );
 
-  const stopPageScroll = useCallback((event: Event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if ('stopImmediatePropagation' in event) event.stopImmediatePropagation();
+  const stopPageScroll = useCallback(
+    (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if ('stopImmediatePropagation' in event) event.stopImmediatePropagation();
+      const root = getScrollRoot();
+      if (root && lockedScrollTopRef.current !== null) {
+        root.scrollTop = lockedScrollTopRef.current;
+      }
+    },
+    [getScrollRoot]
+  );
 
-    const root = getScrollRoot();
-    if (root && lockedScrollTopRef.current !== null) {
-      root.scrollTop = lockedScrollTopRef.current;
-    }
-  }, [getScrollRoot]);
-
+  // Lazy-load: börja ladda Spline först när telefonen är synlig
   useEffect(() => {
+    if (reducedMotion) return;
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setShouldLoad(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(wrapper);
+    return () => observer.disconnect();
+  }, [reducedMotion]);
+
+  // Ladda Spline-runtime + scenen
+  useEffect(() => {
+    if (!shouldLoad || reducedMotion) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const app = new Application(canvas, { renderMode: 'continuous' });
-    appRef.current = app;
-    app.load(SCENE_URL).catch((error) => {
-      console.error('Kunde inte ladda Spline-telefonen:', error);
-    });
+    let cancelled = false;
+    let app: SplineApplication | null = null;
+
+    (async () => {
+      try {
+        const { Application } = await import('@splinetool/runtime');
+        if (cancelled) return;
+
+        // DPR-clamp för bättre prestanda på Retina
+        if (typeof window !== 'undefined' && 'devicePixelRatio' in window) {
+          try {
+            Object.defineProperty(canvas, '_dprCap', {
+              value: Math.min(window.devicePixelRatio || 1, 2),
+              configurable: true,
+            });
+          } catch {
+            /* no-op */
+          }
+        }
+
+        app = new Application(canvas, { renderMode: 'continuous' });
+        appRef.current = app;
+        await app.load(SCENE_URL);
+        if (!cancelled) setIsReady(true);
+      } catch (error) {
+        console.error('Kunde inte ladda Spline-telefonen:', error);
+        if (!cancelled) setHasError(true);
+      }
+    })();
 
     return () => {
-      app.dispose();
+      cancelled = true;
+      app?.dispose();
       appRef.current = null;
     };
-  }, []);
+  }, [shouldLoad, reducedMotion]);
 
+  // Scroll-block när pekaren är över telefonen
   useEffect(() => {
     const wrapper = wrapperRef.current;
-    if (!wrapper) return;
+    if (!wrapper || reducedMotion) return;
 
     const shouldBlock = (event: Event) => {
       const path = 'composedPath' in event ? event.composedPath() : [];
       return pointerInsideRef.current || path.includes(wrapper);
     };
-
     const preventScrollBeforeLenis = (event: Event) => {
       if (shouldBlock(event)) stopPageScroll(event);
     };
@@ -80,12 +145,11 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
       document.removeEventListener('wheel', preventScrollBeforeLenis, true);
       document.removeEventListener('touchmove', preventScrollBeforeLenis, true);
     };
-  }, [stopPageScroll]);
+  }, [stopPageScroll, reducedMotion]);
 
   const unlockScroll = () => {
     const root = lockedRootRef.current;
     if (!root) return;
-
     root.style.overflowY = previousOverflowRef.current;
     root.style.touchAction = previousTouchActionRef.current;
     lockedRootRef.current = null;
@@ -95,17 +159,29 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
   const lockScrollForRotation = () => {
     const root = getScrollRoot();
     if (!root || lockedRootRef.current) return;
-
     lockedRootRef.current = root;
     lockedScrollTopRef.current = root.scrollTop;
     previousOverflowRef.current = root.style.overflowY;
     previousTouchActionRef.current = root.style.touchAction;
     root.style.overflowY = 'hidden';
     root.style.touchAction = 'none';
-
     window.addEventListener('pointerup', unlockScroll, { once: true });
     window.addEventListener('pointercancel', unlockScroll, { once: true });
   };
+
+  // Reduced-motion eller fel: visa enkel statisk platshållare
+  if (reducedMotion || hasError) {
+    return (
+      <div
+        ref={wrapperRef}
+        className={`relative flex items-center justify-center ${className ?? ''}`}
+        role="img"
+        aria-label="Parium 3D-telefon (statisk vy)"
+      >
+        <div className="aspect-[9/19] w-[58%] max-w-[260px] rounded-[2.25rem] border border-white/15 bg-gradient-to-b from-white/10 to-white/[0.03] shadow-[0_30px_90px_hsl(var(--background)/0.5)] backdrop-blur-sm" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -127,13 +203,24 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
       onPointerCancel={unlockScroll}
       style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
     >
+      {/* Loading-skeleton tills Spline är klar */}
+      {!isReady && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 flex items-center justify-center"
+        >
+          <div className="aspect-[9/19] w-[58%] max-w-[260px] animate-pulse rounded-[2.25rem] border border-white/10 bg-white/[0.04]" />
+        </div>
+      )}
+
       <canvas
         ref={canvasRef}
-        title="Parium 3D-telefon"
+        role="img"
+        aria-label="Interaktiv 3D-telefon. Klicka och dra för att rotera."
         tabIndex={-1}
-        className="h-full w-full bg-transparent outline-none"
+        className="h-full w-full bg-transparent outline-none transition-opacity duration-500"
         draggable={false}
-        style={{ colorScheme: 'normal' }}
+        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0 }}
       />
     </div>
   );
