@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
@@ -32,10 +36,20 @@ type HeroIntroStageProps = {
   onStart: () => void;
 };
 
-const DesktopPhoneLayer = ({ active, resetToken }: { active: boolean; resetToken: number }) => (
+const DesktopPhoneLayer = ({
+  active,
+  resetToken,
+  layerRef,
+}: {
+  active: boolean;
+  resetToken: number;
+  layerRef: React.RefObject<HTMLDivElement>;
+}) => (
   <div
+    ref={layerRef}
     className={`${active ? 'visible' : 'invisible'} pointer-events-none fixed inset-0 z-20 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24`}
     aria-hidden="true"
+    style={{ willChange: 'opacity, transform' }}
   >
     <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
       <div aria-hidden />
@@ -56,6 +70,10 @@ const DesktopPhoneLayer = ({ active, resetToken }: { active: boolean; resetToken
 
 const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
   const heroRef = useRef<HTMLElement | null>(null);
+  const introRef = useRef<HTMLElement | null>(null);
+  const heroTextRef = useRef<HTMLDivElement | null>(null);
+  const introContentRef = useRef<HTMLDivElement | null>(null);
+  const phoneLayerRef = useRef<HTMLDivElement | null>(null);
   const wasAwayFromHeroRef = useRef(false);
   const [phoneActive, setPhoneActive] = useState(true);
   const [resetToken, setResetToken] = useState(0);
@@ -96,6 +114,71 @@ const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
     };
   }, []);
 
+  // GSAP scrub: smooth fade/scale from Hero → Intro tied to scroll position.
+  useEffect(() => {
+    const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    const hero = heroRef.current;
+    const intro = introRef.current;
+    if (!scrollRoot || !hero || !intro) return;
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+
+    const ctx = gsap.context(() => {
+      const heroOutTargets = [heroTextRef.current, phoneLayerRef.current].filter(Boolean) as Element[];
+
+      // Hero fades + scales out as it leaves the viewport.
+      if (heroOutTargets.length) {
+        gsap.fromTo(
+          heroOutTargets,
+          { opacity: 1, scale: 1, y: 0 },
+          {
+            opacity: 0,
+            scale: 0.94,
+            y: -40,
+            ease: 'none',
+            scrollTrigger: {
+              scroller: scrollRoot,
+              trigger: hero,
+              start: 'bottom bottom',
+              end: 'bottom top',
+              scrub: 0.4,
+            },
+          }
+        );
+      }
+
+      // Intro fades + scales in as it enters.
+      if (introContentRef.current) {
+        gsap.fromTo(
+          introContentRef.current,
+          { opacity: 0, scale: 0.96, y: 40 },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            ease: 'none',
+            scrollTrigger: {
+              scroller: scrollRoot,
+              trigger: intro,
+              start: 'top bottom',
+              end: 'top center',
+              scrub: 0.4,
+            },
+          }
+        );
+      }
+    });
+
+    const refresh = () => ScrollTrigger.refresh();
+    window.addEventListener('resize', refresh);
+
+    return () => {
+      window.removeEventListener('resize', refresh);
+      ctx.revert();
+    };
+  }, []);
+
   return (
     <>
       <section
@@ -115,14 +198,16 @@ const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
           transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
         />
 
-        <DesktopPhoneLayer active={phoneActive} resetToken={resetToken} />
+        <DesktopPhoneLayer active={phoneActive} resetToken={resetToken} layerRef={phoneLayerRef} />
 
         <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
           <motion.div
+            ref={heroTextRef}
             className="pointer-events-none mx-auto flex h-full max-w-[1180px] flex-col items-center justify-center text-center lg:pointer-events-auto lg:mx-0 lg:block lg:-translate-y-16 lg:pt-8 lg:text-left xl:pt-10"
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
+            style={{ willChange: 'opacity, transform' }}
           >
             <HeroText
               eyebrow={c.eyebrow}
@@ -137,6 +222,7 @@ const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
       </section>
 
       <section
+        ref={introRef}
         aria-label="Introduktion"
         className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
       >
@@ -148,7 +234,7 @@ const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
               'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
           }}
         />
-        <div className="relative z-10 flex max-w-4xl flex-col items-center">
+        <div ref={introContentRef} className="relative z-10 flex max-w-4xl flex-col items-center" style={{ willChange: 'opacity, transform' }}>
           <IntroText
             paragraphs={[
               'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
