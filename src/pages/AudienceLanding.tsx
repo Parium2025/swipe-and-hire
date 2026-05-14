@@ -59,9 +59,15 @@ type HeroIntroStageProps = {
 
 const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
+  const [phoneMounted, setPhoneMounted] = useState(false);
   const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setPhoneMounted(true), 650);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
@@ -178,10 +184,12 @@ const FixedPhoneLayer = () => {
           className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
-          <SplinePhone
-            className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
-            zoom={0.78}
-          />
+          {phoneMounted && (
+            <SplinePhone
+              className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
+              zoom={0.78}
+            />
+          )}
         </div>
       </div>
     </div>
