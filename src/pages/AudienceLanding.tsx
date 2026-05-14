@@ -138,6 +138,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const introInnerRef = useRef<HTMLDivElement | null>(null);
   const indexRef = useRef(0); // 0 = hero, 1 = intro
   const animatingRef = useRef(false);
+  const armedForNextRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -170,12 +171,16 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const goToIntro = () => {
         if (animatingRef.current || indexRef.current === 1) return;
         animatingRef.current = true;
+        armedForNextRef.current = false;
         indexRef.current = 1;
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1 } }));
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
         const tl = gsap.timeline({
           defaults: { duration: 1.1, ease: 'power2.inOut' },
-          onComplete: () => { animatingRef.current = false; },
+          onComplete: () => {
+            animatingRef.current = false;
+            window.setTimeout(() => { armedForNextRef.current = true; }, 120);
+          },
         });
         // Hero åker UPP och ut
         tl.to(heroOuter, { yPercent: -100 }, 0);
@@ -189,8 +194,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const goToHero = () => {
         if (animatingRef.current || indexRef.current === 0) return;
         animatingRef.current = true;
+        armedForNextRef.current = false;
         indexRef.current = 0;
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0 } }));
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
         const tl = gsap.timeline({
           defaults: { duration: 1.1, ease: 'power2.inOut' },
@@ -206,6 +212,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       };
 
       const releaseAndScrollNext = () => {
+        if (!armedForNextRef.current) return;
+        armedForNextRef.current = false;
         // Användaren är på Intro och scrollar ner igen → släpp kontrollen.
         const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
         if (!root) return;
