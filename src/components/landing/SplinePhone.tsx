@@ -115,22 +115,8 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
   return (
     <div
       ref={wrapperRef}
-      data-lenis-prevent
-      data-lenis-prevent-wheel
-      data-lenis-prevent-touch
       className={`relative ${className ?? ''}`}
-      onPointerEnter={() => {
-        pointerInsideRef.current = true;
-        lockedScrollTopRef.current = getScrollRoot()?.scrollTop ?? null;
-      }}
-      onPointerLeave={() => {
-        pointerInsideRef.current = false;
-        if (!lockedRootRef.current) lockedScrollTopRef.current = null;
-      }}
-      onPointerDown={lockScrollForRotation}
-      onPointerUp={unlockScroll}
-      onPointerCancel={unlockScroll}
-      style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
+      style={{ touchAction: 'pan-y', overscrollBehavior: 'auto' }}
     >
       {/* Loading-skeleton tills Spline är klar */}
       {!isReady && (
