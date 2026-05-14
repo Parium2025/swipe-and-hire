@@ -59,14 +59,12 @@ type HeroIntroStageProps = {
 const FixedPhoneLayer = () => {
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
   const phoneControls = useAnimationControls();
-  const [interactive, setInteractive] = useState(false);
   const parkedRef = useRef(true);
   const heroIndexRef = useRef(0);
   const returnTimerRef = useRef<number | null>(null);
 
   const setPhoneParked = (value: boolean) => {
     parkedRef.current = value;
-    setInteractive(!value);
   };
 
   // Telefonen är bara dekorativ här: den får aldrig fånga wheel/touch och låsa
