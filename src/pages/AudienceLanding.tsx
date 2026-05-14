@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { TouchEvent, WheelEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useAnimationControls } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -59,49 +58,74 @@ type HeroIntroStageProps = {
 
 const FixedPhoneLayer = () => {
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
+  const phoneControls = useAnimationControls();
   const [hidden, setHidden] = useState(false);
+  const heroIndexRef = useRef(0);
 
-  // Telefonen syns bara på Hero-lagret (index 0). När GSAP Observer växlar till
-  // Intro (index 1) skickas ett window-event och vi fadear ut.
+  // Telefonen är bara dekorativ här: den får aldrig fånga wheel/touch och låsa
+  // scrollen. Animationsstate styrs imperativt så den inte "poppar" tillbaka.
   useEffect(() => {
-    const onIndex = (e: Event) => {
-      const detail = (e as CustomEvent<{ index: number }>).detail;
-      setHidden(detail?.index === 1);
-    };
-    window.addEventListener('parium:hero-index', onIndex);
-    return () => window.removeEventListener('parium:hero-index', onIndex);
-  }, []);
+    const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
 
-  useEffect(() => {
-    const frame = phoneFrameRef.current;
-    if (!frame) return;
-
-    const stopScroll = (event: Event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if ('stopImmediatePropagation' in event) {
-        (event as Event & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
+    const syncVisibilityToScroll = () => {
+      if (!scrollRoot) return;
+      const shouldHide = heroIndexRef.current !== 0 || scrollRoot.scrollTop > 24;
+      setHidden(shouldHide);
+      if (shouldHide && heroIndexRef.current === 0) {
+        phoneControls.set({ opacity: 0, y: 72, scale: 0.965 });
       }
     };
 
-    frame.addEventListener('wheel', stopScroll, { capture: true, passive: false });
-    frame.addEventListener('touchmove', stopScroll, { capture: true, passive: false });
+    const onIndex = (e: Event) => {
+      const detail = (e as CustomEvent<{ index: number; direction?: 'next' | 'prev' }>).detail;
+      heroIndexRef.current = detail?.index ?? 0;
 
-    return () => {
-      frame.removeEventListener('wheel', stopScroll, true);
-      frame.removeEventListener('touchmove', stopScroll, true);
+      if (detail?.index === 1) {
+        setHidden(true);
+        phoneControls.start({
+          opacity: 0,
+          y: -64,
+          scale: 0.965,
+          transition: { duration: 0.72, ease },
+        });
+        return;
+      }
+
+      setHidden(false);
+      phoneControls.stop();
+      phoneControls.set({ opacity: 0, x: 0, y: 72, scale: 0.965 });
+      phoneControls.start({
+        opacity: 1,
+        x: 0,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.82, ease, delay: 0.08 },
+      });
     };
-  }, []);
 
-  const stopScrollOnPhone = (event: WheelEvent | TouchEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
+    syncVisibilityToScroll();
+    if (!scrollRoot || scrollRoot.scrollTop <= 24) {
+      phoneControls.start({
+        opacity: 1,
+        x: 0,
+        y: 0,
+        scale: 1,
+        transition: { duration: 1.1, ease },
+      });
+    }
+
+    window.addEventListener('parium:hero-index', onIndex);
+    scrollRoot?.addEventListener('scroll', syncVisibilityToScroll, { passive: true });
+    return () => {
+      window.removeEventListener('parium:hero-index', onIndex);
+      scrollRoot?.removeEventListener('scroll', syncVisibilityToScroll);
+    };
+  }, [phoneControls]);
 
   return (
     <div
       className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
-      style={{ opacity: hidden ? 0 : 1, transition: 'opacity 380ms cubic-bezier(0.16, 1, 0.3, 1)' }}
+      style={{ visibility: hidden ? 'hidden' : 'visible' }}
       aria-hidden={hidden}
     >
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
@@ -109,11 +133,8 @@ const FixedPhoneLayer = () => {
         <motion.div
           ref={phoneFrameRef}
           initial={{ opacity: 0, x: 60, scale: 0.96 }}
-          animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ duration: 1.1, ease }}
-          className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 xl:pt-10"
-          onWheelCapture={stopScrollOnPhone}
-          onTouchMoveCapture={stopScrollOnPhone}
+          animate={phoneControls}
+          className="pointer-events-none relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10"
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
@@ -138,6 +159,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const introInnerRef = useRef<HTMLDivElement | null>(null);
   const indexRef = useRef(0); // 0 = hero, 1 = intro
   const animatingRef = useRef(false);
+  const armedForNextRef = useRef(false);
+  const releaseTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -161,6 +184,22 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
+      const clearReleaseTimer = () => {
+        if (releaseTimerRef.current) {
+          window.clearTimeout(releaseTimerRef.current);
+          releaseTimerRef.current = null;
+        }
+      };
+
+      const armAfterGestureStops = () => {
+        clearReleaseTimer();
+        releaseTimerRef.current = window.setTimeout(() => {
+          if (indexRef.current === 1 && !animatingRef.current) {
+            armedForNextRef.current = true;
+          }
+        }, 420);
+      };
+
       // Initial state: hero synlig, intro gömd UNDER skärmen.
       gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
       gsap.set(heroInner, { yPercent: 0 });
@@ -170,12 +209,17 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const goToIntro = () => {
         if (animatingRef.current || indexRef.current === 1) return;
         animatingRef.current = true;
+        armedForNextRef.current = false;
+        clearReleaseTimer();
         indexRef.current = 1;
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1 } }));
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
         const tl = gsap.timeline({
           defaults: { duration: 1.1, ease: 'power2.inOut' },
-          onComplete: () => { animatingRef.current = false; },
+          onComplete: () => {
+            animatingRef.current = false;
+            armAfterGestureStops();
+          },
         });
         // Hero åker UPP och ut
         tl.to(heroOuter, { yPercent: -100 }, 0);
@@ -189,8 +233,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const goToHero = () => {
         if (animatingRef.current || indexRef.current === 0) return;
         animatingRef.current = true;
+        armedForNextRef.current = false;
+        clearReleaseTimer();
         indexRef.current = 0;
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0 } }));
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
         const tl = gsap.timeline({
           defaults: { duration: 1.1, ease: 'power2.inOut' },
@@ -206,6 +252,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       };
 
       const releaseAndScrollNext = () => {
+        if (!armedForNextRef.current) {
+          armAfterGestureStops();
+          return;
+        }
+        armedForNextRef.current = false;
+        clearReleaseTimer();
         // Användaren är på Intro och scrollar ner igen → släpp kontrollen.
         const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
         if (!root) return;
@@ -220,7 +272,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         target: scrollRoot ?? window,
         type: 'wheel,touch',
         wheelSpeed: -1,
-        tolerance: 12,
+        tolerance: 32,
         preventDefault: true,
         onUp: () => {
           if (!inView) return;
