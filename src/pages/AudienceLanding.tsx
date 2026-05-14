@@ -47,6 +47,19 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // Premium smooth-scroll (Lenis) på det dedikerade scroll-roteret
   useLenisOnElement('[data-landing-scroll-root]');
 
+  // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
+  // åt gången — annars initieras Spline-runtime två gånger på desktop.
+  const [isDesktopHero, setIsDesktopHero] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.matchMedia('(min-width: 768px)').matches;
+  });
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const onChange = (e: MediaQueryListEvent) => setIsDesktopHero(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
 
