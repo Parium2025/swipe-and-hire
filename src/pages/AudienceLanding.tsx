@@ -36,10 +36,20 @@ type HeroIntroStageProps = {
   onStart: () => void;
 };
 
-const DesktopPhoneLayer = ({ active, resetToken }: { active: boolean; resetToken: number }) => (
+const DesktopPhoneLayer = ({
+  active,
+  resetToken,
+  layerRef,
+}: {
+  active: boolean;
+  resetToken: number;
+  layerRef: React.RefObject<HTMLDivElement>;
+}) => (
   <div
+    ref={layerRef}
     className={`${active ? 'visible' : 'invisible'} pointer-events-none fixed inset-0 z-20 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24`}
     aria-hidden="true"
+    style={{ willChange: 'opacity, transform' }}
   >
     <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
       <div aria-hidden />
@@ -60,6 +70,10 @@ const DesktopPhoneLayer = ({ active, resetToken }: { active: boolean; resetToken
 
 const HeroIntroStage = ({ c, onStart }: HeroIntroStageProps) => {
   const heroRef = useRef<HTMLElement | null>(null);
+  const introRef = useRef<HTMLElement | null>(null);
+  const heroTextRef = useRef<HTMLDivElement | null>(null);
+  const introContentRef = useRef<HTMLDivElement | null>(null);
+  const phoneLayerRef = useRef<HTMLDivElement | null>(null);
   const wasAwayFromHeroRef = useRef(false);
   const [phoneActive, setPhoneActive] = useState(true);
   const [resetToken, setResetToken] = useState(0);
