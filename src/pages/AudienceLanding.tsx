@@ -161,11 +161,11 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
-      // Initial state: hero synlig, intro gömd ovanför skärmen.
+      // Initial state: hero synlig, intro gömd UNDER skärmen.
       gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
       gsap.set(heroInner, { yPercent: 0 });
-      gsap.set(introOuter, { yPercent: -100, autoAlpha: 0 });
-      gsap.set(introInner, { yPercent: 100 });
+      gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
+      gsap.set(introInner, { yPercent: -100 });
 
       const goToIntro = () => {
         if (animatingRef.current || indexRef.current === 1) return;
@@ -177,13 +177,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           defaults: { duration: 1.1, ease: 'power2.inOut' },
           onComplete: () => { animatingRef.current = false; },
         });
-        // Hero åker NED och ut
-        tl.to(heroOuter, { yPercent: 100 }, 0);
-        tl.to(heroInner, { yPercent: -100 }, 0);
-        // Intro kommer NER från toppen (curtain)
+        // Hero åker UPP och ut
+        tl.to(heroOuter, { yPercent: -100 }, 0);
+        tl.to(heroInner, { yPercent: 100 }, 0);
+        // Intro kommer UPP nerifrån
         tl.set(introOuter, { autoAlpha: 1 }, 0);
-        tl.fromTo(introOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
-        tl.fromTo(introInner, { yPercent: 100 }, { yPercent: 0 }, 0);
+        tl.fromTo(introOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
+        tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
       };
 
       const goToHero = () => {
@@ -196,13 +196,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           defaults: { duration: 1.1, ease: 'power2.inOut' },
           onComplete: () => { animatingRef.current = false; },
         });
-        // Intro åker UPP och ut
-        tl.to(introOuter, { yPercent: -100 }, 0);
-        tl.to(introInner, { yPercent: 100 }, 0);
+        // Intro åker NED och ut
+        tl.to(introOuter, { yPercent: 100 }, 0);
+        tl.to(introInner, { yPercent: -100 }, 0);
         tl.set(introOuter, { autoAlpha: 0 });
-        // Hero kommer tillbaka från botten
-        tl.fromTo(heroOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
-        tl.fromTo(heroInner, { yPercent: -100 }, { yPercent: 0 }, 0);
+        // Hero kommer tillbaka uppifrån
+        tl.fromTo(heroOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
+        tl.fromTo(heroInner, { yPercent: 100 }, { yPercent: 0 }, 0);
       };
 
       const releaseAndScrollNext = () => {
