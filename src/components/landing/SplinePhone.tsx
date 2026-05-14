@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Application as SplineApplication } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
@@ -22,11 +22,6 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
-  const lockedRootRef = useRef<HTMLElement | null>(null);
-  const pointerInsideRef = useRef(false);
-  const lockedScrollTopRef = useRef<number | null>(null);
-  const previousOverflowRef = useRef<string>('');
-  const previousTouchActionRef = useRef<string>('');
 
   const [shouldLoad, setShouldLoad] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -35,24 +30,6 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
   const reducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-  const getScrollRoot = useCallback(
-    () => wrapperRef.current?.closest<HTMLElement>('[data-landing-scroll-root]') ?? null,
-    []
-  );
-
-  const stopPageScroll = useCallback(
-    (event: Event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if ('stopImmediatePropagation' in event) event.stopImmediatePropagation();
-      const root = getScrollRoot();
-      if (root && lockedScrollTopRef.current !== null) {
-        root.scrollTop = lockedScrollTopRef.current;
-      }
-    },
-    [getScrollRoot]
-  );
 
   // Lazy-load: börja ladda Spline först när telefonen är synlig
   useEffect(() => {
@@ -120,54 +97,6 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
       appRef.current = null;
     };
   }, [shouldLoad, reducedMotion]);
-
-  // Scroll-block när pekaren är över telefonen
-  useEffect(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper || reducedMotion) return;
-
-    const shouldBlock = (event: Event) => {
-      const path = 'composedPath' in event ? event.composedPath() : [];
-      return pointerInsideRef.current || path.includes(wrapper);
-    };
-    const preventScrollBeforeLenis = (event: Event) => {
-      if (shouldBlock(event)) stopPageScroll(event);
-    };
-
-    wrapper.addEventListener('wheel', stopPageScroll, { passive: false, capture: true });
-    wrapper.addEventListener('touchmove', stopPageScroll, { passive: false, capture: true });
-    document.addEventListener('wheel', preventScrollBeforeLenis, { passive: false, capture: true });
-    document.addEventListener('touchmove', preventScrollBeforeLenis, { passive: false, capture: true });
-
-    return () => {
-      wrapper.removeEventListener('wheel', stopPageScroll, true);
-      wrapper.removeEventListener('touchmove', stopPageScroll, true);
-      document.removeEventListener('wheel', preventScrollBeforeLenis, true);
-      document.removeEventListener('touchmove', preventScrollBeforeLenis, true);
-    };
-  }, [stopPageScroll, reducedMotion]);
-
-  const unlockScroll = () => {
-    const root = lockedRootRef.current;
-    if (!root) return;
-    root.style.overflowY = previousOverflowRef.current;
-    root.style.touchAction = previousTouchActionRef.current;
-    lockedRootRef.current = null;
-    lockedScrollTopRef.current = null;
-  };
-
-  const lockScrollForRotation = () => {
-    const root = getScrollRoot();
-    if (!root || lockedRootRef.current) return;
-    lockedRootRef.current = root;
-    lockedScrollTopRef.current = root.scrollTop;
-    previousOverflowRef.current = root.style.overflowY;
-    previousTouchActionRef.current = root.style.touchAction;
-    root.style.overflowY = 'hidden';
-    root.style.touchAction = 'none';
-    window.addEventListener('pointerup', unlockScroll, { once: true });
-    window.addEventListener('pointercancel', unlockScroll, { once: true });
-  };
 
   // Reduced-motion eller fel: visa enkel statisk platshållare
   if (reducedMotion || hasError) {
