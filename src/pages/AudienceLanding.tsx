@@ -320,7 +320,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               className="relative z-10 flex max-w-4xl flex-col items-center"
               initial={{ opacity: 0, y: 120 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ root: { current: typeof document !== 'undefined' ? document.querySelector('[data-landing-scroll-root]') as HTMLElement | null : null }, once: true, amount: 0.4 }}
+              viewport={{ once: true, amount: 0.4 }}
               transition={{ duration: 0.9, ease }}
             >
               <IntroText
