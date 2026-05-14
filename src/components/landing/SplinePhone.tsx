@@ -131,11 +131,11 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
       <canvas
         ref={canvasRef}
         role="img"
-        aria-label="Interaktiv 3D-telefon. Klicka och dra för att rotera."
+        aria-label="Parium 3D-telefon"
         tabIndex={-1}
         className="pointer-events-none h-full w-full bg-transparent outline-none transition-opacity duration-500"
         draggable={false}
-        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0 }}
+        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
       />
     </div>
   );
