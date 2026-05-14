@@ -57,7 +57,8 @@ type HeroIntroStageProps = {
 };
 
 const FixedPhoneLayer = () => {
-  const [visible, setVisible] = useState(true);
+  const phoneWrapRef = useRef<HTMLDivElement | null>(null);
+  const visibleRef = useRef(true);
   const heroIndexRef = useRef(0);
 
   // Telefonen lever i ett eget fixed-lager och flyttas aldrig av scroll —
@@ -75,12 +76,23 @@ const FixedPhoneLayer = () => {
       return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * 0.55;
     };
 
-    const sync = () => setVisible(isHeroZone());
+    const setPhoneVisible = (nextVisible: boolean) => {
+      if (visibleRef.current === nextVisible) return;
+      visibleRef.current = nextVisible;
+      const node = phoneWrapRef.current;
+      if (node) {
+        node.style.opacity = nextVisible ? '1' : '0';
+        node.style.pointerEvents = nextVisible ? 'auto' : 'none';
+      }
+      window.dispatchEvent(new CustomEvent('parium:phone-visible', { detail: { visible: nextVisible } }));
+    };
+
+    const sync = () => setPhoneVisible(isHeroZone());
 
     const onIndex = (e: Event) => {
       const detail = (e as CustomEvent<{ index: number }>).detail;
       heroIndexRef.current = detail?.index ?? 0;
-      setVisible(detail?.index !== 1 && isHeroZone());
+      setPhoneVisible(detail?.index !== 1 && isHeroZone());
     };
 
     sync();
@@ -100,10 +112,11 @@ const FixedPhoneLayer = () => {
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <div
-          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
+          ref={phoneWrapRef}
+          className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 opacity-100 transition-opacity duration-500 ease-out xl:pt-10"
           style={{ touchAction: 'none', overscrollBehavior: 'contain', willChange: 'opacity' }}
         >
-          <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
+          <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} pauseWhenHidden />
         </div>
       </div>
     </div>
