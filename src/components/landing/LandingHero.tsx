@@ -158,8 +158,8 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       >
         <motion.h1
           id="landing-hero-heading"
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 1.4, ease, delay: 0.4 }}
           className="max-w-4xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-6xl md:text-7xl lg:text-[5.5rem] flex items-center justify-center gap-3 sm:gap-4 flex-wrap"
         >
