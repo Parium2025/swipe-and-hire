@@ -137,6 +137,27 @@ const PinnedHorizontalGallery = () => {
     });
   });
 
+  // Trigga staggered fade-in på korten när sektionen blir synlig (mirror av intro-textens entrance).
+  useEffect(() => {
+    const strip = stripRef.current;
+    const section = sectionRef.current;
+    if (!strip || !section) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            strip.classList.add('phg-entered');
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.08 }
+    );
+    io.observe(section);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <>
       <style>{`
