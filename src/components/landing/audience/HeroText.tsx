@@ -33,18 +33,18 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     ? 'mt-7 max-w-xl text-base leading-8 text-white drop-shadow-[0_2px_12px_hsl(var(--background)/0.55)]'
     : 'mt-7 max-w-xl text-lg leading-8 text-white';
 
-  // Pure opacity-fade (ingen y-translate på stora bold-rubriker) — translate
-  // på 7rem font-black + ev. drop-shadow tvingar fram tunga repaints varje
-  // frame och hackar. Opacity composit:as på GPU och förblir smooth även
-  // medan Spline + bubblor renderas i bakgrunden.
-  const fadeStyle = { willChange: 'opacity', transform: 'translateZ(0)' } as const;
+  // Sofistikerad entré: subtil blur-in + mjuk lyft + opacity. Hålls lätt
+  // (ingen tung translate på 7rem font-black) så det förblir GPU-smooth även
+  // medan Spline + bubblor renderas. Lång ease ger en lugn, "premium"-känsla.
+  const fadeStyle = { willChange: 'opacity, filter, transform' } as const;
+  const headlineEase = [0.22, 1, 0.36, 1] as const;
 
   return (
     <>
       <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.7, ease, delay: 0.05 }}
+        initial={{ opacity: 0, y: 8, filter: 'blur(8px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        transition={{ duration: 1.1, ease: headlineEase, delay: 0.15 }}
         style={fadeStyle}
         className={eyebrowClass}
       >
@@ -55,9 +55,14 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
         {headline.map((line, i) => (
           <motion.span
             key={i}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.85, ease, delay: 0.18 + i * 0.14 }}
+            initial={{ opacity: 0, y: 18, filter: 'blur(14px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{
+              duration: 1.4,
+              ease: headlineEase,
+              delay: 0.35 + i * 0.22,
+              filter: { duration: 1.1, ease: headlineEase, delay: 0.35 + i * 0.22 },
+            }}
             style={fadeStyle}
             className="block"
           >
@@ -67,9 +72,9 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
       </h1>
 
       <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.7, ease, delay: 0.18 + headline.length * 0.14 }}
+        initial={{ opacity: 0, y: 10, filter: 'blur(6px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        transition={{ duration: 1, ease: headlineEase, delay: 0.35 + headline.length * 0.22 + 0.1 }}
         style={fadeStyle}
         className={subtitleClass}
       >
