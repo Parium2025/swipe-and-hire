@@ -39,26 +39,16 @@ const items: MediaItem[] = [
 type CardItemProps = {
   item: MediaItem;
   index: number;
-  total: number;
-  scrollYProgress: ReturnType<typeof useScroll>['scrollYProgress'];
 };
 
-const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
-  // Korten fadar in EXAKT som intro-texten — ren opacity, ingen rörelse.
-  // Smooth, premium, samma rytm som "Söka jobb ska vara enkelt…".
-  const FADE_WINDOW_END = 0.22;
-  const perCard = FADE_WINDOW_END / total;
-  const start = index * perCard * 0.7;
-  const end = start + perCard * 2.4;
-  const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
-
-  // Caption följer kortet med en liten fördröjning — också ren opacity
-  const capStart = start + perCard * 0.6;
-  const capEnd = capStart + perCard * 1.6;
-  const capOpacity = useTransform(scrollYProgress, [capStart, capEnd], [0, 1]);
-
+const CardItem = ({ item, index }: CardItemProps) => {
+  // Korten fadar in som intro-texten — staggered, ren opacity + lätt y-lyft.
+  // Triggas via .phg-entered klass på föräldern (sätts av IntersectionObserver).
   return (
-    <motion.div className="phg-card" style={{ opacity }}>
+    <div
+      className="phg-card phg-card-enter"
+      style={{ ['--enter-delay' as string]: `${index * 90}ms` }}
+    >
       {item.type === 'video' ? (
         <video
           src={item.src}
@@ -80,11 +70,11 @@ const CardItem = ({ item, index, total, scrollYProgress }: CardItemProps) => {
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       )}
-      <motion.div className="phg-cap" style={{ opacity: capOpacity }}>
+      <div className="phg-cap">
         <div className="phg-cap-eyebrow">{item.eyebrow}</div>
         <div className="phg-cap-title">{item.title}</div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
@@ -146,6 +136,27 @@ const PinnedHorizontalGallery = () => {
       if (vid.paused) vid.play().catch(() => {});
     });
   });
+
+  // Trigga staggered fade-in på korten när sektionen blir synlig (mirror av intro-textens entrance).
+  useEffect(() => {
+    const strip = stripRef.current;
+    const section = sectionRef.current;
+    if (!strip || !section) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            strip.classList.add('phg-entered');
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.08 }
+    );
+    io.observe(section);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <>
@@ -224,6 +235,21 @@ const PinnedHorizontalGallery = () => {
             0 30px 70px -28px rgba(0,0,0,0.7),
             0 0 0 1px rgba(255,255,255,0.07);
           transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), box-shadow 0.6s ease;
+        }
+        .phg-card-enter {
+          opacity: 0;
+          transform: translateY(28px);
+        }
+        .phg-strip.phg-entered .phg-card-enter {
+          animation: phg-card-in 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+          animation-delay: var(--enter-delay, 0ms);
+        }
+        @keyframes phg-card-in {
+          from { opacity: 0; transform: translateY(28px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .phg-strip.phg-entered .phg-card-enter { animation: none; opacity: 1; transform: none; }
         }
         .phg-card::before {
           content: '';
@@ -338,13 +364,7 @@ const PinnedHorizontalGallery = () => {
           <div className="phg-strip-wrap">
             <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
               {items.map((item, i) => (
-                <CardItem
-                  key={i}
-                  item={item}
-                  index={i}
-                  total={items.length}
-                  scrollYProgress={scrollYProgress}
-                />
+                <CardItem key={i} item={item} index={i} />
               ))}
             </motion.div>
           </div>
