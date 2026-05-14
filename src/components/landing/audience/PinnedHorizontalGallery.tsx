@@ -90,16 +90,16 @@ const PinnedHorizontalGallery = () => {
     setReady(true);
   }, []);
 
-  // Kortare scrollavstånd → inget tomt gap under sektionen, känns tajt & premium
-  // Längre pin-distans = man MÅSTE scrolla igenom hela strippen, kan inte "fuska förbi"
-  const SCROLL_VH = 480;
+  // Längre pin-distans = man MÅSTE scrolla igenom hela strippen, kan inte "fuska förbi".
+  // Extra intro-yta inuti samma sticky sektion låter korten glida in utan en hård skarv.
+  const SCROLL_VH = 520;
 
   // Starta progress redan när sektionen närmar sig viewport (inte först vid pin).
   // Det gör att korten fadar in DIREKT efter hero, utan tomt mellanrum.
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     container: containerRef as React.RefObject<HTMLElement>,
-    offset: ['start end', 'end end'],
+    offset: ['start start', 'end end'],
   });
 
   // Med ovan offset: approach ≈ 100vh / (100+280)vh ≈ 0.26 av total progress.
@@ -107,10 +107,10 @@ const PinnedHorizontalGallery = () => {
   // glider sedan höger → vänster genom pin-fasen.
   // Slutposition beräknad så att SISTA kortet är helt synligt med luft till höger
   // innan pin släpps. 8 kort × ~27vw + gaps ≈ 230vw → -138vw tar sista kortet in.
-  const xRaw = useTransform(scrollYProgress, [0, 0.28, 1], ['6vw', '6vw', '-138vw']);
+  const xRaw = useTransform(scrollYProgress, [0, 0.24, 1], ['7vw', '7vw', '-138vw']);
   // Tightare spring → följer scrollen tätt även vid snabb scroll, ingen "overshoot"
   // som gör att korten flyger förbi efter att pin släppts
-  const x = useSpring(xRaw, { stiffness: 90, damping: 32, mass: 0.5 });
+  const x = useSpring(xRaw, { stiffness: 120, damping: 38, mass: 0.36 });
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
