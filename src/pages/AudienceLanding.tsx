@@ -138,174 +138,234 @@ const FixedPhoneLayer = () => {
   );
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// HeroIntroStage — GSAP Observer
+// Två lager (Hero + Intro) i samma 100svh-yta. Wheel/touch fångas av Observer
+// och animerar lagren in/ut (Intro kommer UPPIFRÅN). När man redan är på Intro
+// och scrollar nedåt igen släpps kontrollen och sidan scrollar vidare normalt.
+// Inga scroll-snap, ingen sticky, inga konkurrerande wheel-locks.
+// ─────────────────────────────────────────────────────────────────────────────
 const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const stageRef = useRef<HTMLElement | null>(null);
-  const scrollRootRef = useRef<HTMLElement | null>(null);
-  const lockReleaseRef = useRef<number | null>(null);
-  const lockCleanupRef = useRef<(() => void) | null>(null);
-  const introLockDoneRef = useRef(false);
-  const [progress, setProgress] = useState(0);
+  const heroOuterRef = useRef<HTMLDivElement | null>(null);
+  const heroInnerRef = useRef<HTMLDivElement | null>(null);
+  const introOuterRef = useRef<HTMLDivElement | null>(null);
+  const introInnerRef = useRef<HTMLDivElement | null>(null);
+  const indexRef = useRef(0); // 0 = hero, 1 = intro
+  const animatingRef = useRef(false);
 
   useEffect(() => {
-    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    scrollRootRef.current = root;
-    if (!root) return undefined;
+    let cancelled = false;
+    let observer: { kill: () => void } | null = null;
+    let intersectObs: IntersectionObserver | null = null;
+    let inView = true;
 
-    let raf = 0;
-    const update = () => {
-      raf = 0;
+    const setup = async () => {
+      const [{ default: gsap }, { Observer }] = await Promise.all([
+        import('gsap'),
+        import('gsap/Observer'),
+      ]);
+      if (cancelled) return;
+      gsap.registerPlugin(Observer);
+
+      const heroOuter = heroOuterRef.current;
+      const heroInner = heroInnerRef.current;
+      const introOuter = introOuterRef.current;
+      const introInner = introInnerRef.current;
       const stage = stageRef.current;
-      if (!stage) return;
-      const rect = stage.getBoundingClientRect();
-      const distance = Math.max(1, stage.offsetHeight - window.innerHeight);
-      const next = Math.min(1, Math.max(0, -rect.top / distance));
-      setProgress(next);
+      if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
+
+      // Initial state: hero synlig, intro gömd ovanför skärmen.
+      gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
+      gsap.set(heroInner, { yPercent: 0 });
+      gsap.set(introOuter, { yPercent: -100, autoAlpha: 0 });
+      gsap.set(introInner, { yPercent: 100 });
+
+      const goToIntro = () => {
+        if (animatingRef.current || indexRef.current === 1) return;
+        animatingRef.current = true;
+        indexRef.current = 1;
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1 } }));
+
+        const tl = gsap.timeline({
+          defaults: { duration: 1.1, ease: 'power2.inOut' },
+          onComplete: () => { animatingRef.current = false; },
+        });
+        // Hero åker NED och ut
+        tl.to(heroOuter, { yPercent: 100 }, 0);
+        tl.to(heroInner, { yPercent: -100 }, 0);
+        // Intro kommer NER från toppen (curtain)
+        tl.set(introOuter, { autoAlpha: 1 }, 0);
+        tl.fromTo(introOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
+        tl.fromTo(introInner, { yPercent: 100 }, { yPercent: 0 }, 0);
+      };
+
+      const goToHero = () => {
+        if (animatingRef.current || indexRef.current === 0) return;
+        animatingRef.current = true;
+        indexRef.current = 0;
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0 } }));
+
+        const tl = gsap.timeline({
+          defaults: { duration: 1.1, ease: 'power2.inOut' },
+          onComplete: () => { animatingRef.current = false; },
+        });
+        // Intro åker UPP och ut
+        tl.to(introOuter, { yPercent: -100 }, 0);
+        tl.to(introInner, { yPercent: 100 }, 0);
+        tl.set(introOuter, { autoAlpha: 0 });
+        // Hero kommer tillbaka från botten
+        tl.fromTo(heroOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
+        tl.fromTo(heroInner, { yPercent: -100 }, { yPercent: 0 }, 0);
+      };
+
+      const releaseAndScrollNext = () => {
+        // Användaren är på Intro och scrollar ner igen → släpp kontrollen.
+        const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+        if (!root) return;
+        const next = document.getElementById('sa-funkar-det');
+        if (!next) return;
+        const rect = next.getBoundingClientRect();
+        const target = root.scrollTop + rect.top;
+        root.scrollTo({ top: target, behavior: 'smooth' });
+      };
+
+      observer = Observer.create({
+        target: window,
+        type: 'wheel,touch',
+        tolerance: 12,
+        preventDefault: true,
+        onUp: () => {
+          if (!inView) return;
+          if (indexRef.current === 0) goToIntro();
+          else releaseAndScrollNext();
+        },
+        onDown: () => {
+          if (!inView) return;
+          if (indexRef.current === 1) goToHero();
+        },
+      });
+
+      // Stäng av Observer när stage inte är i viewport (så resten av sidan kan scrollas fritt).
+      intersectObs = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) inView = e.isIntersecting && e.intersectionRatio > 0.4;
+          if (observer) {
+            // @ts-expect-error gsap Observer har enable/disable
+            inView ? observer.enable?.() : observer.disable?.();
+          }
+        },
+        { threshold: [0, 0.4, 0.6, 1] }
+      );
+      intersectObs.observe(stage);
     };
-    const onScroll = () => {
-      if (!raf) raf = window.requestAnimationFrame(update);
-    };
-    update();
-    root.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
+
+    setup();
 
     return () => {
-      root.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      if (raf) window.cancelAnimationFrame(raf);
-      if (lockReleaseRef.current) window.clearTimeout(lockReleaseRef.current);
-      lockCleanupRef.current?.();
+      cancelled = true;
+      observer?.kill();
+      intersectObs?.disconnect();
     };
   }, []);
 
-  const heroOpacity = progress < 0.4 ? 1 : progress < 0.58 ? 1 - (progress - 0.4) / 0.18 : 0;
-  const heroY = -72 * Math.min(1, progress / 0.58);
-  const introProgress = Math.min(1, Math.max(0, (progress - 0.12) / 0.46));
-  const introY = `${110 - introProgress * 110}%`;
-  const introOpacity = progress < 0.12 ? 0 : progress < 0.28 ? (progress - 0.12) / 0.16 : 1;
-
-  useEffect(() => {
-    if (progress < 0.2) introLockDoneRef.current = false;
-    if (progress < 0.58 || progress > 0.82 || introLockDoneRef.current) return;
-
-    const root = scrollRootRef.current;
-    if (!root) return;
-
-    introLockDoneRef.current = true;
-    const stop = (event: Event) => {
-      event.preventDefault();
-      event.stopPropagation();
-    };
-    const stopKeys = (event: KeyboardEvent) => {
-      if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) stop(event);
-    };
-    lockCleanupRef.current?.();
-    root.addEventListener('wheel', stop, { capture: true, passive: false });
-    root.addEventListener('touchmove', stop, { capture: true, passive: false });
-    window.addEventListener('keydown', stopKeys, { capture: true });
-    lockCleanupRef.current = () => {
-      root.removeEventListener('wheel', stop, true);
-      root.removeEventListener('touchmove', stop, true);
-      window.removeEventListener('keydown', stopKeys, true);
-    };
-
-    lockReleaseRef.current = window.setTimeout(() => {
-      lockCleanupRef.current?.();
-      lockCleanupRef.current = null;
-      lockReleaseRef.current = null;
-    }, 2450);
-  }, [progress]);
-
   return (
-    <section ref={stageRef} data-hero-intro-stage className="relative h-[260svh] w-full" style={{ scrollSnapAlign: 'start' }}>
-      <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
-        {/* MOBILE HERO */}
-        <section
-          className="relative flex h-[100svh] w-screen overflow-hidden lg:hidden"
-          style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
-          aria-labelledby="audience-hero-heading-mobile"
-        >
-          <div className="absolute inset-0 -z-0 flex items-center justify-center">
-            {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
-          </div>
-
-          <motion.div
-            style={{ opacity: heroOpacity, y: heroY }}
-            className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
-            initial="hidden"
-            animate="visible"
-            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
+    <section
+      ref={stageRef}
+      data-hero-intro-stage
+      className="relative h-[100svh] w-full overflow-hidden"
+    >
+      {/* HERO LAGER */}
+      <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
+        <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
+          {/* Mobile hero */}
+          <section
+            className="relative flex h-full w-screen overflow-hidden lg:hidden"
+            style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
+            aria-labelledby="audience-hero-heading-mobile"
           >
-            <HeroText
-              eyebrow={c.eyebrow}
-              headline={c.hero.headline}
-              subtitle={c.hero.subtitle}
-              variant="mobile"
-              headingId="audience-hero-heading-mobile"
-            />
-          </motion.div>
-        </section>
-
-        {/* DESKTOP HERO — telefonen ligger i samma sticky viewport och kan därför inte scrollas bort under intro-övergången. */}
-        <section className="relative hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
-          <motion.div
-            aria-hidden
-            className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
-            animate={{ opacity: [0.5, 0.75, 0.5] }}
-            transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
-          />
-
-          <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+            <div className="absolute inset-0 -z-0 flex items-center justify-center">
+              {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
+            </div>
             <motion.div
-              style={{ opacity: heroOpacity, y: heroY }}
-              className="-translate-y-16 pt-8 text-left xl:pt-10"
+              className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
               initial="hidden"
               animate="visible"
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
             >
-              <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
+              <HeroText
+                eyebrow={c.eyebrow}
+                headline={c.hero.headline}
+                subtitle={c.hero.subtitle}
+                variant="mobile"
+                headingId="audience-hero-heading-mobile"
+              />
             </motion.div>
+          </section>
 
-            <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
-          </div>
-        </section>
-
-        <motion.section
-          aria-label="Introduktion"
-          style={{ y: introY, opacity: introOpacity }}
-          className="absolute inset-x-0 bottom-0 z-30 flex h-[100svh] w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
-        >
-          <div className="absolute inset-x-0 top-0 h-px bg-white/15" />
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
-            }}
-          />
-          <div className="relative z-10 flex max-w-4xl flex-col items-center">
-            <IntroText
-              paragraphs={[
-                'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
-                'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
-              ]}
+          {/* Desktop hero */}
+          <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
+              animate={{ opacity: [0.5, 0.75, 0.5] }}
+              transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
             />
-
-            <div className="mt-10 flex justify-center">
-              <button
-                type="button"
-                onPointerDown={onStart}
-                className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
+            <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+              <motion.div
+                className="-translate-y-16 pt-8 text-left xl:pt-10"
+                initial="hidden"
+                animate="visible"
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
               >
-                {c.hero.cta}
-                <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
-              </button>
+                <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
+              </motion.div>
+              <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
             </div>
-          </div>
-        </motion.section>
+          </section>
+        </div>
+      </div>
+
+      {/* INTRO LAGER (kommer uppifrån) */}
+      <div ref={introOuterRef} className="absolute inset-0 z-30 overflow-hidden">
+        <div ref={introInnerRef} className="absolute inset-0 overflow-hidden">
+          <section
+            aria-label="Introduktion"
+            className="relative flex h-full w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
+          >
+            <div className="absolute inset-x-0 top-0 h-px bg-white/15" />
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  'radial-gradient(900px 600px at 100% 110%, hsl(var(--secondary) / 0.14), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 80% 22%) 50%, hsl(var(--primary)) 100%)',
+              }}
+            />
+            <div className="relative z-10 flex max-w-4xl flex-col items-center">
+              <IntroText
+                paragraphs={[
+                  'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
+                  'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
+                ]}
+              />
+              <div className="mt-10 flex justify-center">
+                <button
+                  type="button"
+                  onPointerDown={onStart}
+                  className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
+                >
+                  {c.hero.cta}
+                  <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </section>
   );
 };
+
 
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
