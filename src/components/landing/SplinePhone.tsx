@@ -21,7 +21,7 @@ export const SplinePhone = ({ className }: SplinePhoneProps) => {
           <img
             src={pariumPhoneScreen}
             alt="Parium på telefonskärm"
-            className="h-full w-full object-cover object-center"
+            className="h-full w-full object-contain object-center"
             draggable={false}
             loading="eager"
             decoding="async"
