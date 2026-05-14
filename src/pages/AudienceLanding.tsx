@@ -230,7 +230,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: { opacity: 0, x: 60, scale: 0.96 }, visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 1.1, ease } } }}
                 className="relative mx-auto flex w-full items-center justify-center"
               >
-                {isDesktopHero && <SplinePhone className="aspect-[9/16] w-full max-w-[520px] max-h-[78svh]" />}
+                {isDesktopHero && <SplinePhone className="h-[min(82svh,820px)] w-auto aspect-[9/19.5]" />}
               </motion.div>
             </motion.div>
           </section>
