@@ -235,24 +235,55 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </motion.div>
           </section>
 
-          {/* ──────────────── 1b. BRÖDTEXT + CTA — separat sektion utan video ──────────────── */}
-          <section className="relative px-5 pt-16 pb-20 sm:px-6 sm:pt-20 sm:pb-24 md:px-12 lg:px-24">
-            <div className="mx-auto max-w-2xl">
-              <motion.p
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.85, ease }}
-                className="text-center text-[15px] leading-[1.75] text-white whitespace-pre-line sm:text-base"
-              >
-                {`Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben. Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.\n\nParium är utvecklat för att göra jobbsökandet modernare, snabbare och mer användarvänligt. Du kan enkelt upptäcka nya jobbmöjligheter, läsa mer om tjänster och ansöka direkt. Utan krångliga processer eller onödigt många steg.`}
-              </motion.p>
+          {/* ──────────────── 1b. BRÖDTEXT + CTA — fullskärms pop-in (texten syns, korten nedanför göms) ──────────────── */}
+          <section className="relative flex min-h-[100svh] items-center justify-center px-5 py-20 sm:px-6 md:px-12 lg:px-24">
+            <motion.div
+              className="mx-auto max-w-2xl"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.5 }}
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.012, delayChildren: 0.05 } },
+              }}
+            >
+              <p className="text-center text-[15px] leading-[1.75] text-white sm:text-base md:text-lg">
+                {[
+                  'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben. Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
+                  'Parium är utvecklat för att göra jobbsökandet modernare, snabbare och mer användarvänligt. Du kan enkelt upptäcka nya jobbmöjligheter, läsa mer om tjänster och ansöka direkt. Utan krångliga processer eller onödigt många steg.',
+                ].map((paragraph, pIdx) => (
+                  <span key={pIdx} className={pIdx > 0 ? 'mt-6 block' : 'block'}>
+                    {paragraph.split(' ').map((word, wIdx) => (
+                      <span key={wIdx} className="inline-block whitespace-nowrap">
+                        {word.split('').map((char, cIdx) => (
+                          <motion.span
+                            key={cIdx}
+                            className="inline-block"
+                            variants={{
+                              hidden: { opacity: 0, y: 28, filter: 'blur(8px)' },
+                              visible: {
+                                opacity: 1,
+                                y: 0,
+                                filter: 'blur(0px)',
+                                transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+                              },
+                            }}
+                          >
+                            {char}
+                          </motion.span>
+                        ))}
+                        {wIdx < paragraph.split(' ').length - 1 && '\u00A0'}
+                      </span>
+                    ))}
+                  </span>
+                ))}
+              </p>
 
               <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.8, ease, delay: 0.1 }}
+                variants={{
+                  hidden: { opacity: 0, y: 24, scale: 0.96 },
+                  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease, delay: 0.4 } },
+                }}
                 className="mt-12 flex justify-center"
               >
                 <button
@@ -264,7 +295,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
                 </button>
               </motion.div>
-            </div>
+            </motion.div>
           </section>
 
 
