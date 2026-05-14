@@ -223,11 +223,20 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
       gsap.set(introInner, { yPercent: -100 });
 
+      const snapStageToTop = () => {
+        if (!scrollRoot) return;
+        const top = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
+        if (Math.abs(scrollRoot.scrollTop - top) > 1) {
+          scrollRoot.scrollTo({ top, behavior: 'auto' });
+        }
+      };
+
       const goToIntro = () => {
         if (animatingRef.current || indexRef.current === 1) return;
         animatingRef.current = true;
         indexRef.current = 1;
         lastTransitionAtRef.current = performance.now();
+        snapStageToTop();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
         const tl = gsap.timeline({
