@@ -367,8 +367,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       };
 
       // Riktningskänslig scroll-watcher: när användaren scrollar UPP och stage
-      // dyker upp underifrån (rect.top går från > vh ner mot 0) → snap-back.
-      // Plus: settle-snap så stage aldrig fastnar halvscrollat ("dött" läge).
+      // dyker upp underifrån → landa alltid i Intro först. Nästa scroll-up
+      // triggar den mjuka Intro → Hero-animationen.
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
       let snapBackArmed = true; // anti-loop: triggas en gång per "ankomst"
       let settleTimer: number | null = null;
@@ -389,11 +389,11 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           direction === 'up' &&
           snapBackArmed &&
           !animatingRef.current &&
-          rect.top < vh * 0.95 &&
-          rect.top < 0 // stage är fortfarande delvis under toppen
+          rect.top < vh * 0.92 &&
+          rect.bottom > vh * 0.35
         ) {
           snapBackArmed = false;
-          snapBackToIntro();
+          settleToIntroFromBelow();
           return;
         }
 
