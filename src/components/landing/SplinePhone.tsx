@@ -13,36 +13,13 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
 
-  const [shouldLoad, setShouldLoad] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(true); // Hero — ladda direkt
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   const reducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-  useEffect(() => {
-    if (reducedMotion) return;
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-
-    if (typeof IntersectionObserver === 'undefined') {
-      setShouldLoad(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setShouldLoad(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    observer.observe(wrapper);
-    return () => observer.disconnect();
-  }, [reducedMotion]);
 
   useEffect(() => {
     if (!shouldLoad || reducedMotion) return;
