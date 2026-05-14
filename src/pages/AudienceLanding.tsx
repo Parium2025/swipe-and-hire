@@ -58,41 +58,49 @@ type HeroIntroStageProps = {
 
 const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
+  // Bump key för att tvinga remount av SplinePhone → telefonen återställs
+  // alltid till exakt sitt utgångsläge (precis som en page-refresh) när vi
+  // kommer tillbaka till Hero-ytan.
+  const [mountKey, setMountKey] = useState(0);
   const heroIndexRef = useRef(0);
+  const wasVisibleRef = useRef(true);
 
-  // Telefonen är fixed och ägs av ett eget lager, så den påverkas aldrig av
-  // landningssidans scroll-lager. Vi gömmer den bara när Intro-lagret är aktivt.
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
 
     const isHeroZone = () => {
       if (heroIndexRef.current !== 0) return false;
       if (!scrollRoot) return true;
-
       const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
       if (!stage) return scrollRoot.scrollTop <= window.innerHeight * 0.65;
-
       const rect = stage.getBoundingClientRect();
       return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * 0.55;
     };
 
-    const syncVisibilityToScroll = () => {
-      setVisible(isHeroZone());
+    const apply = (next: boolean) => {
+      // När vi går från dold → synlig: remounta så telefonen alltid hamnar
+      // i sin ursprungliga position (ingen "pop-up hur som helst").
+      if (next && !wasVisibleRef.current) {
+        setMountKey((k) => k + 1);
+      }
+      wasVisibleRef.current = next;
+      setVisible(next);
     };
+
+    const sync = () => apply(isHeroZone());
 
     const onIndex = (e: Event) => {
-      const detail = (e as CustomEvent<{ index: number; direction?: 'next' | 'prev' }>).detail;
+      const detail = (e as CustomEvent<{ index: number }>).detail;
       heroIndexRef.current = detail?.index ?? 0;
-      setVisible(detail?.index !== 1 && isHeroZone());
+      apply(detail?.index !== 1 && isHeroZone());
     };
 
-    syncVisibilityToScroll();
-
+    sync();
     window.addEventListener('parium:hero-index', onIndex);
-    scrollRoot?.addEventListener('scroll', syncVisibilityToScroll, { passive: true });
+    scrollRoot?.addEventListener('scroll', sync, { passive: true });
     return () => {
       window.removeEventListener('parium:hero-index', onIndex);
-      scrollRoot?.removeEventListener('scroll', syncVisibilityToScroll);
+      scrollRoot?.removeEventListener('scroll', sync);
     };
   }, []);
 
@@ -103,15 +111,18 @@ const FixedPhoneLayer = () => {
     >
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
-        <motion.div
-          initial={false}
-          animate={{ opacity: visible ? 1 : 0 }}
-          transition={{ duration: 0.45, ease }}
-          className={`${visible ? 'pointer-events-auto' : 'pointer-events-none'} relative mx-auto flex w-fit items-start justify-center pt-8 xl:pt-10`}
+        <div
+          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
-          <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
-        </motion.div>
+          {visible && (
+            <SplinePhone
+              key={mountKey}
+              className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
+              zoom={0.78}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
