@@ -133,6 +133,7 @@ const FixedPhoneLayer = () => {
     window.addEventListener('parium:hero-index', onIndex);
     scrollRoot?.addEventListener('scroll', syncVisibilityToScroll, { passive: true });
     return () => {
+      clearReturnTimer();
       window.removeEventListener('parium:hero-index', onIndex);
       scrollRoot?.removeEventListener('scroll', syncVisibilityToScroll);
     };
