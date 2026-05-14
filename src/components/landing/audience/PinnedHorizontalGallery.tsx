@@ -215,6 +215,21 @@ const PinnedHorizontalGallery = () => {
             0 0 0 1px rgba(255,255,255,0.07);
           transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), box-shadow 0.6s ease;
         }
+        .phg-card-enter {
+          opacity: 0;
+          transform: translateY(28px);
+        }
+        .phg-strip.phg-entered .phg-card-enter {
+          animation: phg-card-in 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+          animation-delay: var(--enter-delay, 0ms);
+        }
+        @keyframes phg-card-in {
+          from { opacity: 0; transform: translateY(28px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .phg-strip.phg-entered .phg-card-enter { animation: none; opacity: 1; transform: none; }
+        }
         .phg-card::before {
           content: '';
           position: absolute;
