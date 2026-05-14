@@ -333,14 +333,50 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         { root: scrollRoot, threshold: [0, 0.4, 0.6, 1] }
       );
       intersectObs.observe(stage);
+
+      // Snap-on-settle: stage får aldrig hamna i ett halvscrollat "dött" läge.
+      // När scrollningen lugnat sig (~140 ms) och stage är delvis synlig, snappa
+      // antingen tillbaka till stage-toppen eller framåt till nästa section.
+      let settleTimer: number | null = null;
+      const onScrollSettle = () => {
+        if (!scrollRoot) return;
+        if (settleTimer) window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(() => {
+          settleTimer = null;
+          if (animatingRef.current) return;
+          const rect = stage.getBoundingClientRect();
+          const vh = window.innerHeight;
+          const top = rect.top;
+          const bottom = rect.bottom;
+          // Helt utanför → ignorera
+          if (bottom <= 0 || top >= vh) return;
+          // Helt aligned (±2 px) → inget att göra
+          if (Math.abs(top) < 2) return;
+          // Partiellt synlig → snappa
+          const stageTopAbs = scrollRoot.scrollTop + top;
+          const next = document.getElementById('sa-funkar-det');
+          const nextTopAbs = next ? scrollRoot.scrollTop + next.getBoundingClientRect().top : stageTopAbs + vh;
+          // Bestäm riktning: om mer än halva stage redan passerat uppåt → gå framåt
+          const target = top < -vh * 0.5 ? nextTopAbs : stageTopAbs;
+          scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
+        }, 140);
+      };
+      scrollRoot?.addEventListener('scroll', onScrollSettle, { passive: true });
+
+      return () => {
+        if (settleTimer) window.clearTimeout(settleTimer);
+        scrollRoot?.removeEventListener('scroll', onScrollSettle);
+      };
     };
 
-    setup();
+    let teardown: (() => void) | undefined;
+    setup().then((t) => { if (typeof t === 'function') teardown = t; });
 
     return () => {
       cancelled = true;
       observer?.kill();
       intersectObs?.disconnect();
+      teardown?.();
     };
   }, []);
 
