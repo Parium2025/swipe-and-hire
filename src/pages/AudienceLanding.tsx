@@ -189,34 +189,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
             >
-              <motion.span
-                variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                className="text-xs font-bold uppercase tracking-[0.28em] text-secondary drop-shadow-[0_2px_8px_hsl(var(--background)/0.6)]"
-              >
-                {c.eyebrow}
-              </motion.span>
-
-              <h1
-                id="audience-hero-heading-mobile"
-                className="mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-[4rem]"
-              >
-                {c.hero.headline.map((line, i) => (
-                  <motion.span
-                    key={i}
-                    variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease } } }}
-                    className="block"
-                  >
-                    {line}
-                  </motion.span>
-                ))}
-              </h1>
-
-              <motion.p
-                variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }}
-                className="mt-7 max-w-xl text-base leading-8 text-white drop-shadow-[0_2px_12px_hsl(var(--background)/0.55)]"
-              >
-                {c.hero.subtitle}
-              </motion.p>
+              <HeroText
+                eyebrow={c.eyebrow}
+                headline={c.hero.headline}
+                subtitle={c.hero.subtitle}
+                variant="mobile"
+                headingId="audience-hero-heading-mobile"
+              />
             </motion.div>
           </section>
 
