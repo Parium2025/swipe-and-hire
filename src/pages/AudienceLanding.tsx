@@ -312,8 +312,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
         const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
-        const startedAt = performance.now();
+        scrollRoot.scrollTo({ top: target, behavior: 'auto' });
+        animatingRef.current = true;
 
         const playIntroTextIn = () => {
           gsap.to(introTextItems, {
@@ -332,19 +332,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           });
         };
 
-        const waitForStageTop = () => {
-          const rect = stage.getBoundingClientRect();
-          if (Math.abs(rect.top) < 3 || performance.now() - startedAt > 700) {
-            scrollRoot.scrollTo({ top: scrollRoot.scrollTop + rect.top, behavior: 'auto' });
-            returnFrame = null;
-            animatingRef.current = true;
-            playIntroTextIn();
-            return;
-          }
-          returnFrame = window.requestAnimationFrame(waitForStageTop);
-        };
-
-        returnFrame = window.requestAnimationFrame(waitForStageTop);
+        playIntroTextIn();
       };
 
       observer = Observer.create({
