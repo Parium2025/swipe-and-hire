@@ -540,17 +540,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       </div>
 
       {/* INTRO LAGER (kommer uppifrån) */}
-      {/* Inline-start: göms tills GSAP tar över → ingen "flash" av intro-texten vid mount */}
-      <div
-        ref={introOuterRef}
-        className="absolute inset-0 z-30 overflow-hidden"
-        style={{ transform: 'translateY(100%)', opacity: 0, visibility: 'hidden' }}
-      >
-        <div
-          ref={introInnerRef}
-          className="absolute inset-0 overflow-hidden"
-          style={{ transform: 'translateY(-100%)' }}
-        >
+      <div ref={introOuterRef} className="absolute inset-0 z-30 overflow-hidden">
+        <div ref={introInnerRef} className="absolute inset-0 overflow-hidden">
           <section
             aria-label="Introduktion"
             className="relative flex h-full w-full items-center justify-center overflow-hidden bg-primary px-5 py-24 sm:px-6 md:px-12 lg:px-24"
