@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useAnimationControls } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -57,29 +57,13 @@ type HeroIntroStageProps = {
 };
 
 const FixedPhoneLayer = () => {
-  const phoneFrameRef = useRef<HTMLDivElement | null>(null);
-  const phoneControls = useAnimationControls();
-  const [interactive, setInteractive] = useState(false);
-  const parkedRef = useRef(true);
+  const [visible, setVisible] = useState(true);
   const heroIndexRef = useRef(0);
-  const returnTimerRef = useRef<number | null>(null);
 
-  const setPhoneParked = (value: boolean) => {
-    parkedRef.current = value;
-    setInteractive(!value);
-  };
-
-  // Telefonen är bara dekorativ här: den får aldrig fånga wheel/touch och låsa
-  // scrollen. Animationsstate styrs imperativt så den inte "poppar" tillbaka.
+  // Telefonen är fixed och ägs av ett eget lager, så den påverkas aldrig av
+  // landningssidans scroll-lager. Vi gömmer den bara när Intro-lagret är aktivt.
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-
-    const clearReturnTimer = () => {
-      if (returnTimerRef.current) {
-        window.clearTimeout(returnTimerRef.current);
-        returnTimerRef.current = null;
-      }
-    };
 
     const isHeroZone = () => {
       if (heroIndexRef.current !== 0) return false;
@@ -92,76 +76,25 @@ const FixedPhoneLayer = () => {
       return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * 0.55;
     };
 
-    const parkPhoneBelow = () => {
-      clearReturnTimer();
-      setPhoneParked(true);
-      phoneControls.stop();
-      phoneControls.set({ opacity: 0, x: 0, y: 72, scale: 0.965 });
-    };
-
-    const revealPhone = (delay = 0) => {
-      clearReturnTimer();
-      phoneControls.stop();
-      phoneControls.set({ opacity: 0, x: 0, y: 96, scale: 0.94 });
-      returnTimerRef.current = window.setTimeout(() => {
-        returnTimerRef.current = null;
-        if (!isHeroZone()) {
-          parkPhoneBelow();
-          return;
-        }
-        setPhoneParked(false);
-        phoneControls.start({
-          opacity: 1,
-          x: 0,
-          y: 0,
-          scale: 1,
-          transition: { duration: 0.95, ease },
-        });
-      }, delay);
-    };
-
     const syncVisibilityToScroll = () => {
-      if (heroIndexRef.current !== 0) return;
-      if (!isHeroZone()) {
-        if (!parkedRef.current) parkPhoneBelow();
-        return;
-      }
-      if (parkedRef.current && !returnTimerRef.current) revealPhone(0);
+      setVisible(isHeroZone());
     };
 
     const onIndex = (e: Event) => {
       const detail = (e as CustomEvent<{ index: number; direction?: 'next' | 'prev' }>).detail;
       heroIndexRef.current = detail?.index ?? 0;
-      clearReturnTimer();
-
-      if (detail?.index === 1) {
-        // Telefonen åker UPP och försvinner mjukt när intron tar över
-        setPhoneParked(true);
-        phoneControls.stop();
-        phoneControls.start({
-          opacity: 0,
-          y: -120,
-          scale: 0.94,
-          transition: { duration: 0.55, ease },
-        });
-        return;
-      }
-
-      // Tillbaka till hero: vänta tills intron har lämnat skärmen,
-      // så telefonen inte poppar upp över texten.
-      revealPhone(1120);
+      setVisible(detail?.index !== 1 && isHeroZone());
     };
 
-    isHeroZone() ? revealPhone(0) : parkPhoneBelow();
+    syncVisibilityToScroll();
 
     window.addEventListener('parium:hero-index', onIndex);
     scrollRoot?.addEventListener('scroll', syncVisibilityToScroll, { passive: true });
     return () => {
-      clearReturnTimer();
       window.removeEventListener('parium:hero-index', onIndex);
       scrollRoot?.removeEventListener('scroll', syncVisibilityToScroll);
     };
-  }, [phoneControls]);
+  }, []);
 
   return (
     <div
@@ -171,10 +104,10 @@ const FixedPhoneLayer = () => {
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <motion.div
-          ref={phoneFrameRef}
-          initial={{ opacity: 0, x: 60, scale: 0.96 }}
-          animate={phoneControls}
-          className={`${interactive ? 'pointer-events-auto' : 'pointer-events-none'} relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10`}
+          initial={false}
+          animate={{ opacity: visible ? 1 : 0 }}
+          transition={{ duration: 0.45, ease }}
+          className={`${visible ? 'pointer-events-auto' : 'pointer-events-none'} relative mx-auto flex w-fit items-start justify-center pt-8 xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
