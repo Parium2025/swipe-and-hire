@@ -221,15 +221,21 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       const heroInner = heroInnerRef.current;
       const introOuter = introOuterRef.current;
       const introInner = introInnerRef.current;
+      const heroText = heroTextRef.current;
+      const introText = introTextRef.current;
       const stage = stageRef.current;
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
+      const heroTextItems = heroText ? gsap.utils.toArray<HTMLElement>(heroText.querySelectorAll('span, h1 span, p')) : [];
+      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p, button')) : [];
 
       // Initial state: hero synlig, intro gömd UNDER skärmen.
       gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
       gsap.set(heroInner, { yPercent: 0 });
       gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
       gsap.set(introInner, { yPercent: -100 });
+      gsap.set(heroTextItems, { y: 0, opacity: 1 });
+      gsap.set(introTextItems, { y: 36, opacity: 0 });
 
       const snapStageToTop = () => {
         if (!scrollRoot) return;
