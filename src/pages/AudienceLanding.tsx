@@ -139,7 +139,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const indexRef = useRef(0); // 0 = hero, 1 = intro
   const animatingRef = useRef(false);
   const armedForNextRef = useRef(false);
-  const releaseTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const releaseTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
