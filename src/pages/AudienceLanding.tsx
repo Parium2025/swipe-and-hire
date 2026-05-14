@@ -243,9 +243,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.85, ease }}
-                className="text-center text-[15px] leading-[1.75] text-white/75 sm:text-base"
+                className="text-center text-[15px] leading-[1.75] text-white whitespace-pre-line sm:text-base"
               >
-                Att söka jobb ska vara enkelt — oavsett om du letar lediga jobb inom <strong className="font-semibold text-white/90">träning, hantverk, vård, restaurang, lantbruk</strong> eller något helt eget. På Parium hittar du annonser från arbetsgivare över hela Sverige och ansöker direkt i appen: ditt CV ligger sparat, du svarar på frågorna på plats och bokar intervjuer utan att lämna telefonen. Slut på att jaga mellan Arbetsförmedlingen, Indeed och tio andra sidor — allt som rör din jobbsökning samlat på ett ställe.
+                {`Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben. Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.\n\nParium är utvecklat för att göra jobbsökandet modernare, snabbare och mer användarvänligt. Du kan enkelt upptäcka nya jobbmöjligheter, läsa mer om tjänster och ansöka direkt. Utan krångliga processer eller onödigt många steg.`}
               </motion.p>
 
               <motion.div
