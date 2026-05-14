@@ -59,14 +59,14 @@ type HeroIntroStageProps = {
 const FixedPhoneLayer = () => {
   const phoneFrameRef = useRef<HTMLDivElement | null>(null);
   const phoneControls = useAnimationControls();
-  const [hidden, setHiddenState] = useState(false);
-  const hiddenRef = useRef(false);
+  const [interactive, setInteractive] = useState(false);
+  const parkedRef = useRef(true);
   const heroIndexRef = useRef(0);
   const returnTimerRef = useRef<number | null>(null);
 
-  const setPhoneHidden = (value: boolean) => {
-    hiddenRef.current = value;
-    setHiddenState(value);
+  const setPhoneParked = (value: boolean) => {
+    parkedRef.current = value;
+    setInteractive(!value);
   };
 
   // Telefonen är bara dekorativ här: den får aldrig fånga wheel/touch och låsa
@@ -94,14 +94,13 @@ const FixedPhoneLayer = () => {
 
     const parkPhoneBelow = () => {
       clearReturnTimer();
+      setPhoneParked(true);
       phoneControls.stop();
       phoneControls.set({ opacity: 0, x: 0, y: 72, scale: 0.965 });
-      setPhoneHidden(true);
     };
 
     const revealPhone = (delay = 0) => {
       clearReturnTimer();
-      setPhoneHidden(false);
       phoneControls.stop();
       phoneControls.set({ opacity: 0, x: 0, y: 96, scale: 0.94 });
       returnTimerRef.current = window.setTimeout(() => {
@@ -110,7 +109,7 @@ const FixedPhoneLayer = () => {
           parkPhoneBelow();
           return;
         }
-        setPhoneHidden(false);
+        setPhoneParked(false);
         phoneControls.start({
           opacity: 1,
           x: 0,
@@ -124,10 +123,10 @@ const FixedPhoneLayer = () => {
     const syncVisibilityToScroll = () => {
       if (heroIndexRef.current !== 0) return;
       if (!isHeroZone()) {
-        if (!hiddenRef.current) parkPhoneBelow();
+        if (!parkedRef.current) parkPhoneBelow();
         return;
       }
-      if (hiddenRef.current && !returnTimerRef.current) revealPhone(0);
+      if (parkedRef.current && !returnTimerRef.current) revealPhone(0);
     };
 
     const onIndex = (e: Event) => {
@@ -137,14 +136,13 @@ const FixedPhoneLayer = () => {
 
       if (detail?.index === 1) {
         // Telefonen åker UPP och försvinner mjukt när intron tar över
+        setPhoneParked(true);
         phoneControls.stop();
         phoneControls.start({
           opacity: 0,
           y: -120,
           scale: 0.94,
           transition: { duration: 0.55, ease },
-        }).then(() => {
-          if (heroIndexRef.current === 1) setPhoneHidden(true);
         });
         return;
       }
@@ -168,8 +166,7 @@ const FixedPhoneLayer = () => {
   return (
     <div
       className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
-      style={{ visibility: hidden ? 'hidden' : 'visible' }}
-      aria-hidden={hidden}
+      aria-hidden="true"
     >
       <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
@@ -177,7 +174,7 @@ const FixedPhoneLayer = () => {
           ref={phoneFrameRef}
           initial={{ opacity: 0, x: 60, scale: 0.96 }}
           animate={phoneControls}
-          className="pointer-events-auto relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10"
+          className={`${interactive ? 'pointer-events-auto' : 'pointer-events-none'} relative mx-auto flex w-fit items-start justify-center pt-8 will-change-transform xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]" zoom={0.78} />
