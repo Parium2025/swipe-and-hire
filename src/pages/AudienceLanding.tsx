@@ -76,31 +76,47 @@ const FixedPhoneLayer = () => {
       }
     };
 
+    let returnTimer: number | null = null;
+    const clearReturnTimer = () => {
+      if (returnTimer) {
+        window.clearTimeout(returnTimer);
+        returnTimer = null;
+      }
+    };
+
     const onIndex = (e: Event) => {
       const detail = (e as CustomEvent<{ index: number; direction?: 'next' | 'prev' }>).detail;
       heroIndexRef.current = detail?.index ?? 0;
+      clearReturnTimer();
 
       if (detail?.index === 1) {
-        setHidden(true);
+        // Telefonen åker UPP och försvinner mjukt när intron tar över
+        phoneControls.stop();
         phoneControls.start({
           opacity: 0,
-          y: -64,
-          scale: 0.965,
-          transition: { duration: 0.72, ease },
+          y: -120,
+          scale: 0.94,
+          transition: { duration: 0.55, ease },
+        }).then(() => {
+          if (heroIndexRef.current === 1) setHidden(true);
         });
         return;
       }
 
+      // Tillbaka till hero: vänta tills intron har lämnat skärmen,
+      // så telefonen inte poppar upp över texten.
       setHidden(false);
       phoneControls.stop();
-      phoneControls.set({ opacity: 0, x: 0, y: 72, scale: 0.965 });
-      phoneControls.start({
-        opacity: 1,
-        x: 0,
-        y: 0,
-        scale: 1,
-        transition: { duration: 0.82, ease, delay: 0.08 },
-      });
+      phoneControls.set({ opacity: 0, x: 0, y: 96, scale: 0.94 });
+      returnTimer = window.setTimeout(() => {
+        phoneControls.start({
+          opacity: 1,
+          x: 0,
+          y: 0,
+          scale: 1,
+          transition: { duration: 0.95, ease },
+        });
+      }, 720);
     };
 
     syncVisibilityToScroll();
