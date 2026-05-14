@@ -51,16 +51,16 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 );
 
 type HeroIntroStageProps = {
-  c: typeof audienceContent[AudienceRole];
-  audience: AudienceRole;
+  c: (typeof audienceContent)[AudienceRole];
   isDesktopHero: boolean;
   onStart: () => void;
 };
 
-const HeroIntroStage = ({ c, audience, isDesktopHero, onStart }: HeroIntroStageProps) => {
+const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
   const stageRef = useRef<HTMLElement | null>(null);
   const scrollRootRef = useRef<HTMLElement | null>(null);
   const lockReleaseRef = useRef<number | null>(null);
+  const lockCleanupRef = useRef<(() => void) | null>(null);
   const introLockDoneRef = useRef(false);
 
   useEffect(() => {
@@ -68,6 +68,7 @@ const HeroIntroStage = ({ c, audience, isDesktopHero, onStart }: HeroIntroStageP
 
     return () => {
       if (lockReleaseRef.current) window.clearTimeout(lockReleaseRef.current);
+      lockCleanupRef.current?.();
     };
   }, []);
 
@@ -98,14 +99,19 @@ const HeroIntroStage = ({ c, audience, isDesktopHero, onStart }: HeroIntroStageP
     const stopKeys = (event: KeyboardEvent) => {
       if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) stop(event);
     };
+    lockCleanupRef.current?.();
     root.addEventListener('wheel', stop, { capture: true, passive: false });
     root.addEventListener('touchmove', stop, { capture: true, passive: false });
     window.addEventListener('keydown', stopKeys, { capture: true });
-
-    lockReleaseRef.current = window.setTimeout(() => {
+    lockCleanupRef.current = () => {
       root.removeEventListener('wheel', stop, true);
       root.removeEventListener('touchmove', stop, true);
       window.removeEventListener('keydown', stopKeys, true);
+    };
+
+    lockReleaseRef.current = window.setTimeout(() => {
+      lockCleanupRef.current?.();
+      lockCleanupRef.current = null;
       lockReleaseRef.current = null;
     }, 2450);
   });
@@ -341,7 +347,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
-          <HeroIntroStage c={c} audience={audience} isDesktopHero={isDesktopHero} onStart={handleStart} />
+          <HeroIntroStage c={c} isDesktopHero={isDesktopHero} onStart={handleStart} />
 
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
