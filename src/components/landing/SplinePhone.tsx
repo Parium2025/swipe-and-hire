@@ -4,14 +4,16 @@ import type { Application as SplineApplication } from '@splinetool/runtime';
 interface SplinePhoneProps {
   className?: string;
   zoom?: number;
+  active?: boolean;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
+  const activeRef = useRef(active);
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -19,6 +21,17 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
   const reducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  useEffect(() => {
+    activeRef.current = active;
+    const app = appRef.current;
+    if (!app) return;
+    if (active) {
+      if (app.isStopped) app.play();
+    } else if (!app.isStopped) {
+      app.stop();
+    }
+  }, [active, isReady]);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -49,6 +62,7 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
         await app.load(SCENE_URL);
         app.setZoom(zoom);
         requestAnimationFrame(() => app?.setZoom(zoom));
+        if (!activeRef.current) app.stop();
         if (!cancelled) setIsReady(true);
       } catch (error) {
         console.error('Kunde inte ladda Spline-telefonen:', error);

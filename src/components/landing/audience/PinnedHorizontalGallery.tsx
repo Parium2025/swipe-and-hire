@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
@@ -81,6 +81,9 @@ const PinnedHorizontalGallery = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLElement | null>(null);
+  const targetProgressRef = useRef(0);
+  const renderedProgressRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
   const [, setReady] = useState(false);
 
   useEffect(() => {
@@ -93,25 +96,49 @@ const PinnedHorizontalGallery = () => {
   // Extra intro-yta inuti samma sticky sektion låter korten glida in utan en hård skarv.
   const SCROLL_VH = 520;
 
-  // Starta progress redan när sektionen närmar sig viewport (inte först vid pin).
-  // Det gör att korten fadar in DIREKT efter hero, utan tomt mellanrum.
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    container: containerRef as React.RefObject<HTMLElement>,
-    offset: ['start start', 'end end'],
-  });
+  // Egen RAF-driven progress istället för Framer useScroll. Då läser och skriver
+  // galleriet i exakt samma animation-frame som GSAP-scrollen vid 2↔3, utan
+  // dubbel scroll-prenumeration som kan ge en frame av skak/jitter.
+  useEffect(() => {
+    const root = containerRef.current;
+    const section = sectionRef.current;
+    const strip = stripRef.current;
+    if (!root || !section || !strip) return;
 
-  // Med ovan offset: approach ≈ 100vh / (100+280)vh ≈ 0.26 av total progress.
-  // Korten fadar in under approach (0 → ~0.22), står still tills pin börjar,
-  // glider sedan höger → vänster genom pin-fasen.
-  // Slutposition beräknad så att SISTA kortet är helt synligt med luft till höger
-  // innan pin släpps. 8 kort × ~27vw + gaps ≈ 230vw → -138vw tar sista kortet in.
-  const xRaw = useTransform(scrollYProgress, [0, 0.24, 1], ['7vw', '7vw', '-138vw']);
-  // Direkt progress utan extra spring: undviker dubbel easing mot GSAP-scrollen
-  // i 2↔3, vilket var orsaken till att galleriet kändes snabbare/jitterigt.
-  const x = xRaw;
+    const applyProgress = (progress: number) => {
+      const p = Math.min(1, Math.max(0, progress));
+      const move = p <= 0.24 ? 0 : (p - 0.24) / 0.76;
+      strip.style.setProperty('--phg-x', `${7 + (-145 * move)}vw`);
+      section.style.setProperty('--phg-progress', `${p}`);
+    };
 
-  const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+    const measure = () => {
+      const rect = section.getBoundingClientRect();
+      const distance = Math.max(1, section.offsetHeight - root.clientHeight);
+      targetProgressRef.current = Math.min(1, Math.max(0, -rect.top / distance));
+      if (rafRef.current === null) rafRef.current = window.requestAnimationFrame(tick);
+    };
+
+    const tick = () => {
+      rafRef.current = null;
+      const current = renderedProgressRef.current;
+      const target = targetProgressRef.current;
+      const next = Math.abs(target - current) < 0.001 ? target : current + (target - current) * 0.32;
+      renderedProgressRef.current = next;
+      applyProgress(next);
+      if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
+    };
+
+    applyProgress(0);
+    measure();
+    root.addEventListener('scroll', measure, { passive: true });
+    window.addEventListener('resize', measure);
+    return () => {
+      root.removeEventListener('scroll', measure);
+      window.removeEventListener('resize', measure);
+      if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   // Trigga staggered fade-in på korten enbart via custom event från
   // AudienceLanding's release-timeline. Tidigare IntersectionObserver kunde
@@ -123,6 +150,12 @@ const PinnedHorizontalGallery = () => {
     if (!strip) return;
 
     let playTimer: number | null = null;
+    let disposed = false;
+    let gsapInstance: typeof import('gsap').default | null = null;
+
+    import('gsap').then(({ default: gsap }) => {
+      if (!disposed) gsapInstance = gsap;
+    });
 
     const playSafe = (v: HTMLVideoElement) => {
       v.muted = true;
@@ -134,6 +167,11 @@ const PinnedHorizontalGallery = () => {
     const enter = () => {
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
+      const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
+      if (gsapInstance) {
+        gsapInstance.killTweensOf(cards);
+        gsapInstance.fromTo(cards, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out', force3D: true });
+      }
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       // Vänta tills slide-in-tween (0.62s) + sista stagger (~640ms) är klar
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
@@ -146,6 +184,11 @@ const PinnedHorizontalGallery = () => {
     const leave = () => {
       strip.classList.remove('phg-entered');
       strip.classList.add('phg-leaving');
+      const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
+      if (gsapInstance) {
+        gsapInstance.killTweensOf(cards);
+        gsapInstance.to(cards, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in', force3D: true });
+      }
       // Pausa direkt — frigör GPU/decode under 3→2 transformen.
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
@@ -158,6 +201,7 @@ const PinnedHorizontalGallery = () => {
     window.addEventListener('parium:gallery-leave', onLeave);
 
     return () => {
+      disposed = true;
       if (playTimer) window.clearTimeout(playTimer);
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
@@ -233,7 +277,7 @@ const PinnedHorizontalGallery = () => {
           gap: clamp(14px, 1.6vw, 22px);
           padding: clamp(8px, 1.5vh, 20px) 6vw clamp(8px, 1vh, 18px);
           will-change: transform, opacity;
-          transform: translateZ(0);
+          transform: translate3d(var(--phg-x, 7vw), 0, 0);
         }
         .phg-card {
           flex: 0 0 auto;
@@ -260,22 +304,14 @@ const PinnedHorizontalGallery = () => {
            duration 0.62s, ease power2.out, stagger 0.08s (80ms via --enter-delay).
            Triggas vid +0.48s i timeline (samma offset som intro-text i 1→2). */
         .phg-strip.phg-entered .phg-card-enter {
-          animation: phg-card-in 0.62s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-          animation-delay: var(--enter-delay, 0ms);
-        }
-        @keyframes phg-card-in {
-          0% { opacity: 0; transform: translate3d(0, 44px, 0); }
-          100% { opacity: 1; transform: translate3d(0, 0, 0); }
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
         }
         /* Exit — kopia av introTextItems-tween i goToHero (2→1):
            duration 0.42s, ease power2.in, stagger 0.055s (55ms via --leave-delay). */
         .phg-strip.phg-leaving .phg-card-enter {
-          animation: phg-card-out 0.42s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
-          animation-delay: var(--leave-delay, 0ms);
-        }
-        @keyframes phg-card-out {
-          0% { opacity: 1; transform: translate3d(0, 0, 0); }
-          100% { opacity: 0; transform: translate3d(0, 44px, 0); }
+          opacity: 0;
+          transform: translate3d(0, 44px, 0);
         }
         @media (prefers-reduced-motion: reduce) {
           .phg-strip.phg-entered .phg-card-enter,
@@ -295,7 +331,6 @@ const PinnedHorizontalGallery = () => {
           z-index: 3;
         }
         .phg-strip.phg-entered:not(.phg-leaving) .phg-card:hover {
-          transform: translate3d(0, -8px, 0);
           box-shadow:
             0 44px 90px -28px rgba(0,0,0,0.85),
             0 0 0 1px rgba(255,255,255,0.14),
@@ -371,6 +406,7 @@ const PinnedHorizontalGallery = () => {
           height: 100%;
           background: linear-gradient(90deg, hsl(var(--secondary)), #7cc6ff);
           transform-origin: left center;
+          transform: scaleX(var(--phg-progress, 0));
           will-change: transform;
         }
         .phg-hint {
@@ -393,7 +429,7 @@ const PinnedHorizontalGallery = () => {
         <div className="phg-sticky">
 
           <div className="phg-strip-wrap">
-            <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
+            <motion.div ref={stripRef} className="phg-strip">
               {items.map((item, i) => (
                 <CardItem key={i} item={item} index={i} />
               ))}
@@ -402,7 +438,7 @@ const PinnedHorizontalGallery = () => {
 
           <div className="phg-footer">
             <div className="phg-progress" aria-hidden>
-              <motion.span style={{ scaleX: progressScale }} />
+              <motion.span />
             </div>
           </div>
         </div>
