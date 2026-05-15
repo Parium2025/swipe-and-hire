@@ -322,7 +322,6 @@ const PinnedHorizontalGallery = () => {
           z-index: 3;
         }
         .phg-strip.phg-entered:not(.phg-leaving) .phg-card:hover {
-          transform: translate3d(0, -8px, 0);
           box-shadow:
             0 44px 90px -28px rgba(0,0,0,0.85),
             0 0 0 1px rgba(255,255,255,0.14),
