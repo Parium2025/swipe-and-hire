@@ -400,14 +400,15 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         animatingRef.current = true;
         setObserverActive(true);
 
-        // Land DIRECT on Intro (stage 2) — no Hero flash. Layers are placed
-        // in their resting Intro position immediately; only the text gets a
-        // premium staggered entrance so it still feels polished.
+        // 3→2 ska vara EXAKT spegel av 2→1 (goToHero):
+        // hero slidar från yPercent -100 → 0 med parallax-inner och staggered text in vid 0.48.
+        // Här slidar intro från yPercent -100 → 0 (där den hamnade efter 2→3),
+        // intro-inner parallax 100 → 0, scroll i lockstep, text in vid 0.48.
         gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
         gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 100 });
-        gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
-        gsap.set(introInner, { yPercent: 0 });
+        gsap.set(introOuter, { yPercent: -100, autoAlpha: 1 });
+        gsap.set(introInner, { yPercent: 100 });
         gsap.set(heroTextItems, { y: -44, opacity: 0 });
         gsap.set(introTextItems, { y: 44, opacity: 0 });
         indexRef.current = 1;
@@ -427,19 +428,22 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             setObserverActive(true);
           },
         });
-        // Fade ut korten i lockstep med scrollen (mirror av hur intro-texten
-        // fadar ut i 1→2 medan layret slidar bort). Detta gör att galleriet
-        // inte "klipps" bort utan glider ut harmoniskt.
+        // Fade ut korten i lockstep med slide+scroll (mirror av hero-text out i 2→1).
         tl.call(() => {
           window.dispatchEvent(new Event('parium:gallery-leave'));
         }, [], 0);
+        // Camera scroll i lockstep med samma kurva som layer-sliden
         tl.to(scrollProxy, {
           y: target,
           duration: 1.08,
           ease: 'power2.inOut',
           onUpdate: () => { scrollRoot.scrollTo({ top: scrollProxy.y, behavior: 'auto' }); },
         }, 0);
-        tl.to(introTextItems, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.48);
+        // Intro-lagret slidar IN från ovan (mirror av hero i 2→1)
+        tl.fromTo(introOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
+        tl.fromTo(introInner, { yPercent: 100 }, { yPercent: 0 }, 0);
+        // Text in samma timing som hero-text i 2→1 (0.48s delay, 0.62s, stagger 0.08, power2.out)
+        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.48);
       };
 
       observer = Observer.create({
