@@ -260,7 +260,7 @@ const PinnedHorizontalGallery = () => {
           gap: clamp(14px, 1.6vw, 22px);
           padding: clamp(8px, 1.5vh, 20px) 6vw clamp(8px, 1vh, 18px);
           will-change: transform, opacity;
-          transform: translateZ(0);
+          transform: translate3d(var(--phg-x, 7vw), 0, 0);
         }
         .phg-card {
           flex: 0 0 auto;
@@ -398,6 +398,7 @@ const PinnedHorizontalGallery = () => {
           height: 100%;
           background: linear-gradient(90deg, hsl(var(--secondary)), #7cc6ff);
           transform-origin: left center;
+          transform: scaleX(var(--phg-progress, 0));
           will-change: transform;
         }
         .phg-hint {
@@ -420,7 +421,7 @@ const PinnedHorizontalGallery = () => {
         <div className="phg-sticky">
 
           <div className="phg-strip-wrap">
-            <motion.div ref={stripRef} className="phg-strip" style={{ x }}>
+            <motion.div ref={stripRef} className="phg-strip">
               {items.map((item, i) => (
                 <CardItem key={i} item={item} index={i} />
               ))}
@@ -429,7 +430,7 @@ const PinnedHorizontalGallery = () => {
 
           <div className="phg-footer">
             <div className="phg-progress" aria-hidden>
-              <motion.span style={{ scaleX: progressScale }} />
+              <motion.span />
             </div>
           </div>
         </div>
