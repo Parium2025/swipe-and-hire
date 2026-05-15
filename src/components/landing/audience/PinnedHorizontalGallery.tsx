@@ -113,44 +113,43 @@ const PinnedHorizontalGallery = () => {
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
-  useEffect(() => {
-    const strip = stripRef.current;
-    if (!strip) return;
-    const videos = Array.from(strip.querySelectorAll('video')).slice(0, 2);
-    const playAll = () => videos.forEach((v) => {
-      v.muted = true; v.playsInline = true;
-      const p = v.play(); if (p && typeof p.catch === 'function') p.catch(() => {});
-    });
-    playAll();
-    const onVis = () => { if (document.visibilityState === 'visible') playAll(); };
-    document.addEventListener('visibilitychange', onVis);
-    return () => document.removeEventListener('visibilitychange', onVis);
-  }, []);
-
   // Trigga staggered fade-in på korten enbart via custom event från
   // AudienceLanding's release-timeline. Tidigare IntersectionObserver kunde
   // starta samma animation för tidigt under den programstyrda 2→3-scrollen.
+  // Videos startas EFTER att slide-in-animationen är klar, för att undvika
+  // att video-decode konkurrerar med transformen och orsakar skakningar.
   useEffect(() => {
     const strip = stripRef.current;
     if (!strip) return;
+
+    let playTimer: number | null = null;
+
+    const playSafe = (v: HTMLVideoElement) => {
+      v.muted = true;
+      v.playsInline = true;
+      const p = v.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    };
 
     const enter = () => {
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
-      const videos = Array.from(strip.querySelectorAll('video'));
-      const play = (v: HTMLVideoElement) => {
-        v.muted = true;
-        v.playsInline = true;
-        const p = v.play(); if (p && typeof p.catch === 'function') p.catch(() => {});
-      };
-      videos.slice(0, 3).forEach(play);
-      window.setTimeout(() => videos.slice(3).forEach(play), 1200);
+      const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
+      // Vänta tills slide-in-tween (0.62s) + sista stagger (~640ms) är klar
+      // innan videos börjar dekoda — då är allt på plats och ingen jitter.
+      if (playTimer) window.clearTimeout(playTimer);
+      playTimer = window.setTimeout(() => {
+        videos.slice(0, 3).forEach(playSafe);
+        window.setTimeout(() => videos.slice(3).forEach(playSafe), 600);
+      }, 800);
     };
     const leave = () => {
-      // Spela exit-animationen (mirror av introTextItems-out i 2→1):
-      // ta bort 'phg-entered' så .phg-leaving-regeln matchar och kör phg-card-out.
       strip.classList.remove('phg-entered');
       strip.classList.add('phg-leaving');
+      // Pausa direkt — frigör GPU/decode under 3→2 transformen.
+      if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
+      const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
+      videos.forEach((v) => { try { v.pause(); } catch {} });
     };
 
     const onEnter = () => enter();
@@ -159,6 +158,7 @@ const PinnedHorizontalGallery = () => {
     window.addEventListener('parium:gallery-leave', onLeave);
 
     return () => {
+      if (playTimer) window.clearTimeout(playTimer);
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
     };
