@@ -109,7 +109,7 @@ const PinnedHorizontalGallery = () => {
       const p = Math.min(1, Math.max(0, progress));
       const move = p <= 0.24 ? 0 : (p - 0.24) / 0.76;
       strip.style.setProperty('--phg-x', `${7 + (-145 * move)}vw`);
-      strip.style.setProperty('--phg-progress', `${p}`);
+      section.style.setProperty('--phg-progress', `${p}`);
     };
 
     const measure = () => {
