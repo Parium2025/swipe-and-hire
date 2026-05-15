@@ -47,7 +47,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
   return (
     <div
       className="phg-card phg-card-enter"
-      style={{ ['--enter-delay' as string]: `${index * 90}ms` }}
+      style={{ ['--enter-delay' as string]: `${index * 80}ms`, ['--leave-delay' as string]: `${index * 55}ms` }}
     >
       {item.type === 'video' ? (
         <video
@@ -146,8 +146,16 @@ const PinnedHorizontalGallery = () => {
     const section = sectionRef.current;
     if (!strip || !section) return;
 
-    const enter = () => strip.classList.add('phg-entered');
-    const leave = () => strip.classList.remove('phg-entered');
+    const enter = () => {
+      strip.classList.remove('phg-leaving');
+      strip.classList.add('phg-entered');
+    };
+    const leave = () => {
+      // Spela exit-animationen (mirror av introTextItems-out i 2→1):
+      // ta bort 'phg-entered' så .phg-leaving-regeln matchar och kör phg-card-out.
+      strip.classList.remove('phg-entered');
+      strip.classList.add('phg-leaving');
+    };
 
     const onEnter = () => enter();
     const onLeave = () => leave();
@@ -260,21 +268,36 @@ const PinnedHorizontalGallery = () => {
           will-change: transform, opacity;
           transform: translateZ(0);
         }
+        /* Initial state — exakt match med introTextItems i goToIntro (1→2):
+           y: 44, opacity: 0. Inga scales eller andra extra transforms. */
         .phg-card-enter {
           opacity: 0;
-          transform: translate3d(0, 70px, 0) scale(0.985);
+          transform: translate3d(0, 44px, 0);
         }
+        /* Entrance — kopia av introTextItems-tween i goToIntro:
+           duration 0.62s, ease power2.out, stagger 0.08s (80ms via --enter-delay).
+           Triggas vid +0.48s i timeline (samma offset som intro-text i 1→2). */
         .phg-strip.phg-entered .phg-card-enter {
-          animation: phg-card-in 1.08s cubic-bezier(0.16,1,0.3,1) forwards;
+          animation: phg-card-in 0.62s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
           animation-delay: var(--enter-delay, 0ms);
         }
         @keyframes phg-card-in {
-          0% { opacity: 0; transform: translate3d(0, 70px, 0) scale(0.985); }
-          55% { opacity: 1; }
-          100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+          0% { opacity: 0; transform: translate3d(0, 44px, 0); }
+          100% { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        /* Exit — kopia av introTextItems-tween i goToHero (2→1):
+           duration 0.42s, ease power2.in, stagger 0.055s (55ms via --leave-delay). */
+        .phg-strip.phg-leaving .phg-card-enter {
+          animation: phg-card-out 0.42s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+          animation-delay: var(--leave-delay, 0ms);
+        }
+        @keyframes phg-card-out {
+          0% { opacity: 1; transform: translate3d(0, 0, 0); }
+          100% { opacity: 0; transform: translate3d(0, 44px, 0); }
         }
         @media (prefers-reduced-motion: reduce) {
-          .phg-strip.phg-entered .phg-card-enter { animation: none; opacity: 1; transform: none; }
+          .phg-strip.phg-entered .phg-card-enter,
+          .phg-strip.phg-leaving .phg-card-enter { animation: none; opacity: 1; transform: none; }
         }
         .phg-card::before {
           content: '';
