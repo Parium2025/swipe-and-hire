@@ -146,8 +146,16 @@ const PinnedHorizontalGallery = () => {
     const section = sectionRef.current;
     if (!strip || !section) return;
 
-    const enter = () => strip.classList.add('phg-entered');
-    const leave = () => strip.classList.remove('phg-entered');
+    const enter = () => {
+      strip.classList.remove('phg-leaving');
+      strip.classList.add('phg-entered');
+    };
+    const leave = () => {
+      // Spela exit-animationen (mirror av introTextItems-out i 2→1):
+      // ta bort 'phg-entered' så .phg-leaving-regeln matchar och kör phg-card-out.
+      strip.classList.remove('phg-entered');
+      strip.classList.add('phg-leaving');
+    };
 
     const onEnter = () => enter();
     const onLeave = () => leave();
