@@ -137,16 +137,28 @@ const PinnedHorizontalGallery = () => {
     });
   });
 
-  // Trigga staggered fade-in på korten när sektionen blir synlig (mirror av intro-textens entrance).
+  // Trigga staggered fade-in på korten — primärt via custom event från
+  // AudienceLanding's release-timeline (lockstep med layer-sliden, exakt som
+  // intro-textens entrance i 1→2). IntersectionObserver finns kvar som fallback
+  // ifall användaren scrollar förbi via tangentbord/anchor utan att triggra eventet.
   useEffect(() => {
     const strip = stripRef.current;
     const section = sectionRef.current;
     if (!strip || !section) return;
+
+    const enter = () => strip.classList.add('phg-entered');
+    const leave = () => strip.classList.remove('phg-entered');
+
+    const onEnter = () => enter();
+    const onLeave = () => leave();
+    window.addEventListener('parium:gallery-enter', onEnter);
+    window.addEventListener('parium:gallery-leave', onLeave);
+
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           if (e.isIntersecting) {
-            strip.classList.add('phg-entered');
+            enter();
             io.disconnect();
             break;
           }
@@ -155,7 +167,11 @@ const PinnedHorizontalGallery = () => {
       { threshold: 0.08 }
     );
     io.observe(section);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      window.removeEventListener('parium:gallery-enter', onEnter);
+      window.removeEventListener('parium:gallery-leave', onLeave);
+    };
   }, []);
 
   return (

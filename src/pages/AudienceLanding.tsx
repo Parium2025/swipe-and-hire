@@ -372,7 +372,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             gsap.set(introTextItems, { y: 44, opacity: 0 });
           },
         });
-        // Intro slides UP and reveals — mirror of hero→intro motion
+        // Intro slides UP and reveals — mirror of hero→intro motion (1→2)
         tl.to(introTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out' }, 0);
         tl.to(introOuter, { yPercent: -100 }, 0);
         tl.to(introInner, { yPercent: 100 }, 0);
@@ -383,6 +383,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           ease: 'power2.inOut',
           onUpdate: () => { root.scrollTo({ top: scrollProxy.y, behavior: 'auto' }); },
         }, 0);
+        // Trigga kortens staggered entrance i SAMMA takt som intro-texten i 1→2
+        // (samma 0.48s delay relativt timelinens start). Korten fadar in lockstep
+        // med slide:n istället för att poppa upp via IntersectionObserver senare.
+        tl.call(() => {
+          window.dispatchEvent(new Event('parium:gallery-enter'));
+        }, [], 0.48);
       };
 
       const returnFromGalleryToIntro = () => {
@@ -421,6 +427,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             setObserverActive(true);
           },
         });
+        // Fade ut korten i lockstep med scrollen (mirror av hur intro-texten
+        // fadar ut i 1→2 medan layret slidar bort). Detta gör att galleriet
+        // inte "klipps" bort utan glider ut harmoniskt.
+        tl.call(() => {
+          window.dispatchEvent(new Event('parium:gallery-leave'));
+        }, [], 0);
         tl.to(scrollProxy, {
           y: target,
           duration: 1.08,
