@@ -225,7 +225,7 @@ const PinnedHorizontalGallery = () => {
         .phg-strip {
           display: flex;
           gap: clamp(14px, 1.6vw, 22px);
-          padding: clamp(40px, 8vh, 120px) 6vw clamp(8px, 1vh, 18px);
+          padding: clamp(8px, 1.5vh, 20px) 6vw clamp(8px, 1vh, 18px);
           will-change: transform, opacity;
           transform: translateZ(0);
         }
