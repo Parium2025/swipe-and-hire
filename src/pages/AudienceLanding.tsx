@@ -355,6 +355,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         // Släpp Observer under programstyrd slide så den inte påverkar
         // kortens scroll-drivna position i galleriet.
         setObserverActive(false);
+        // Tysta scroll-lyssnare (både här och i galleriet) under transitionen
+        // så att getBoundingClientRect-läsningar inte triggas varje frame när
+        // GSAP skriver scrollTop. Det var källan till skakningarna i 2↔3.
+        window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: true } }));
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
 
         const targetScroll = root.scrollTop + next.getBoundingClientRect().top + 1;
