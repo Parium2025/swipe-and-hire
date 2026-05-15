@@ -377,6 +377,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             gsap.set(introOuter, { yPercent: 0, autoAlpha: 0 });
             gsap.set(introInner, { yPercent: 0 });
             gsap.set(introTextItems, { y: 44, opacity: 0 });
+            // Återöppna scroll-lyssnare nu när allt har landat.
+            prevScrollTop = root.scrollTop;
+            window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: false } }));
           },
         });
         // Intro slides UP and reveals — mirror of hero→intro motion (1→2)
