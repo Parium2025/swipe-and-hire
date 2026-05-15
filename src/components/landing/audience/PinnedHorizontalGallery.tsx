@@ -55,9 +55,8 @@ const CardItem = ({ item, index }: CardItemProps) => {
           poster={item.poster}
           muted
           loop
-          autoPlay
           playsInline
-          preload={index < 2 ? 'metadata' : 'none'}
+          preload="none"
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       ) : (
