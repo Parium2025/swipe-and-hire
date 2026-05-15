@@ -427,6 +427,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             setObserverActive(true);
           },
         });
+        // Fade ut korten i lockstep med scrollen (mirror av hur intro-texten
+        // fadar ut i 1→2 medan layret slidar bort). Detta gör att galleriet
+        // inte "klipps" bort utan glider ut harmoniskt.
+        tl.call(() => {
+          window.dispatchEvent(new Event('parium:gallery-leave'));
+        }, [], 0);
         tl.to(scrollProxy, {
           y: target,
           duration: 1.08,
