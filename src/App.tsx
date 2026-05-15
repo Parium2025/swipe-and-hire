@@ -11,7 +11,6 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Landing from "./pages/Landing";
 import AudienceLanding from "./pages/AudienceLanding";
 import Auth from "./pages/Auth";
-import Index from "./pages/Index";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
@@ -56,6 +55,7 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
 }
 
 // Heavy pages that can still be lazy-loaded safely
+const Index = lazyWithRetry(() => import("./pages/Index"));
 const JobApplication = lazyWithRetry(() => import("./pages/JobApplication"));
 const JobView = lazyWithRetry(() => import("./pages/JobView"));
 const CvTunnel = lazyWithRetry(() => import("./pages/CvTunnel"));
@@ -129,6 +129,8 @@ const LazyFallback = () => (
   <div className="min-h-screen bg-parium-gradient" />
 );
 
+const LIGHTWEIGHT_ROUTES = ['/', '/auth', '/jobbsokare', '/arbetsgivare'];
+
 // Routes without animations for instant navigation
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -193,7 +195,7 @@ const AnimatedRoutes = () => {
 
 const AppShell = ({ showHeader }: { showHeader: boolean }) => {
   const location = useLocation();
-  const isLightweightRoute = ['/', '/auth'].includes(location.pathname);
+  const isLightweightRoute = LIGHTWEIGHT_ROUTES.includes(location.pathname);
 
   return (
     <>
@@ -224,9 +226,10 @@ const App = () => {
   const showHeader = false; // Header removed for cleaner UI
 
   // Förladdda alla kritiska bilder globalt vid app-start.
-  // Viktigt: på /auth vill vi INTE starta tunga preloads som kan konkurrera med loggans first paint.
+  // Viktigt: på publika landningssidor vill vi INTE starta tunga app-preloads
+  // som konkurrerar med hero/3D/videons first paint.
   const preloadEnabled = typeof window !== 'undefined'
-    ? !['/', '/auth'].includes(window.location.pathname)
+    ? !LIGHTWEIGHT_ROUTES.includes(window.location.pathname)
     : true;
   useGlobalImagePreloader(preloadEnabled);
 

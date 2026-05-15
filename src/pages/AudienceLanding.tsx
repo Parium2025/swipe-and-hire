@@ -590,7 +590,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             style={{
               backgroundImage:
                 'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
-              backgroundAttachment: 'fixed',
+              backgroundAttachment: 'scroll',
               backgroundSize: '100% 100svh',
               backgroundRepeat: 'no-repeat',
               backgroundColor: 'hsl(var(--primary))',
@@ -740,7 +740,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         overscrollBehavior: 'none',
         backgroundImage:
           'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
-        backgroundAttachment: 'fixed',
+        backgroundAttachment: 'scroll',
         backgroundSize: '100% 100svh',
         backgroundRepeat: 'no-repeat',
         backgroundColor: 'hsl(var(--primary))',
@@ -752,11 +752,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
 
-        <motion.main
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        >
+        <main>
           <HeroIntroStage c={c} isDesktopHero={isDesktopHero} onStart={handleStart} />
 
 
@@ -975,7 +971,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
           <BouncyFooter audience={audience} onCta={handleStart} />
 
-        </motion.main>
+        </main>
       </div>
     </div>
   );

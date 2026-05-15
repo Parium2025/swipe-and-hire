@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
@@ -57,7 +57,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
           loop
           autoPlay
           playsInline
-          preload="auto"
+          preload={index < 2 ? 'metadata' : 'none'}
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       ) : (
@@ -108,16 +108,16 @@ const PinnedHorizontalGallery = () => {
   // Slutposition beräknad så att SISTA kortet är helt synligt med luft till höger
   // innan pin släpps. 8 kort × ~27vw + gaps ≈ 230vw → -138vw tar sista kortet in.
   const xRaw = useTransform(scrollYProgress, [0, 0.24, 1], ['7vw', '7vw', '-138vw']);
-  // Tightare spring → följer scrollen tätt även vid snabb scroll, ingen "overshoot"
-  // som gör att korten flyger förbi efter att pin släppts
-  const x = useSpring(xRaw, { stiffness: 120, damping: 38, mass: 0.36 });
+  // Direkt progress utan extra spring: undviker dubbel easing mot GSAP-scrollen
+  // i 2↔3, vilket var orsaken till att galleriet kändes snabbare/jitterigt.
+  const x = xRaw;
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   useEffect(() => {
     const strip = stripRef.current;
     if (!strip) return;
-    const videos = Array.from(strip.querySelectorAll('video'));
+    const videos = Array.from(strip.querySelectorAll('video')).slice(0, 2);
     const playAll = () => videos.forEach((v) => {
       v.muted = true; v.playsInline = true;
       const p = v.play(); if (p && typeof p.catch === 'function') p.catch(() => {});
@@ -128,27 +128,24 @@ const PinnedHorizontalGallery = () => {
     return () => document.removeEventListener('visibilitychange', onVis);
   }, []);
 
-  // Säkerställ att videos alltid spelas — aldrig pausa baserat på scroll
-  useMotionValueEvent(scrollYProgress, 'change', () => {
-    const strip = stripRef.current;
-    if (!strip) return;
-    Array.from(strip.querySelectorAll('video')).forEach((vid) => {
-      if (vid.paused) vid.play().catch(() => {});
-    });
-  });
-
-  // Trigga staggered fade-in på korten — primärt via custom event från
-  // AudienceLanding's release-timeline (lockstep med layer-sliden, exakt som
-  // intro-textens entrance i 1→2). IntersectionObserver finns kvar som fallback
-  // ifall användaren scrollar förbi via tangentbord/anchor utan att triggra eventet.
+  // Trigga staggered fade-in på korten enbart via custom event från
+  // AudienceLanding's release-timeline. Tidigare IntersectionObserver kunde
+  // starta samma animation för tidigt under den programstyrda 2→3-scrollen.
   useEffect(() => {
     const strip = stripRef.current;
-    const section = sectionRef.current;
-    if (!strip || !section) return;
+    if (!strip) return;
 
     const enter = () => {
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
+      const videos = Array.from(strip.querySelectorAll('video'));
+      const play = (v: HTMLVideoElement) => {
+        v.muted = true;
+        v.playsInline = true;
+        const p = v.play(); if (p && typeof p.catch === 'function') p.catch(() => {});
+      };
+      videos.slice(0, 3).forEach(play);
+      window.setTimeout(() => videos.slice(3).forEach(play), 1200);
     };
     const leave = () => {
       // Spela exit-animationen (mirror av introTextItems-out i 2→1):
@@ -162,21 +159,7 @@ const PinnedHorizontalGallery = () => {
     window.addEventListener('parium:gallery-enter', onEnter);
     window.addEventListener('parium:gallery-leave', onLeave);
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            enter();
-            io.disconnect();
-            break;
-          }
-        }
-      },
-      { threshold: 0.08 }
-    );
-    io.observe(section);
     return () => {
-      io.disconnect();
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
     };
@@ -264,7 +247,7 @@ const PinnedHorizontalGallery = () => {
           box-shadow:
             0 30px 70px -28px rgba(0,0,0,0.7),
             0 0 0 1px rgba(255,255,255,0.07);
-          transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), box-shadow 0.6s ease;
+          transition: box-shadow 0.6s ease;
           will-change: transform, opacity;
           transform: translateZ(0);
         }
@@ -312,8 +295,8 @@ const PinnedHorizontalGallery = () => {
           pointer-events: none;
           z-index: 3;
         }
-        .phg-card:hover {
-          transform: translateY(-8px);
+        .phg-strip.phg-entered:not(.phg-leaving) .phg-card:hover {
+          transform: translate3d(0, -8px, 0);
           box-shadow:
             0 44px 90px -28px rgba(0,0,0,0.85),
             0 0 0 1px rgba(255,255,255,0.14),
