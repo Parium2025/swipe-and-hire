@@ -349,9 +349,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         animatingRef.current = true;
         releasedToGallery = true;
         programmaticReturn = false;
-        // Behåll Observer aktiv under den programstyrda sliden så att nya
-        // wheel/touch-gester inte kan rycka scrollen och lämna halvvägs-lager.
-        setObserverActive(true);
+        // Släpp Observer under programstyrd slide så den inte påverkar
+        // kortens scroll-drivna position i galleriet.
+        setObserverActive(false);
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
 
         const targetScroll = root.scrollTop + next.getBoundingClientRect().top + 1;
