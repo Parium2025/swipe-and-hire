@@ -44,7 +44,7 @@ export const SplinePhone = ({ className, zoom = 0.78 }: SplinePhoneProps) => {
           }
         }
 
-        app = new Application(canvas, { renderMode: 'onDemand' });
+        app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
         await app.load(SCENE_URL);
         app.setZoom(zoom);
