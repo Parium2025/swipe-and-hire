@@ -410,6 +410,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         releaseLockedRef.current = false;
         animatingRef.current = true;
         setObserverActive(true);
+        // Tysta scroll-lyssnare under transitionen — samma fix som i 2→3
+        // för att undvika layout-thrash när GSAP skriver scrollTop varje frame.
+        window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: true } }));
 
         // 3→2 ska vara EXAKT spegel av 2→1 (goToHero):
         // hero slidar från yPercent -100 → 0 med parallax-inner och staggered text in vid 0.48.
@@ -438,6 +441,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             releaseLockedRef.current = false;
             programmaticReturn = false;
             setObserverActive(true);
+            prevScrollTop = scrollRoot.scrollTop;
+            window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: false } }));
           },
         });
         // Fade ut korten i lockstep med slide+scroll (mirror av hero-text out i 2→1).
