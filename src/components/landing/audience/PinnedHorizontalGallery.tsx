@@ -170,7 +170,7 @@ const PinnedHorizontalGallery = () => {
           overflow: hidden;
           display: flex;
           flex-direction: column;
-          justify-content: flex-end;
+          justify-content: center;
           align-items: center;
           contain: layout paint;
         }
