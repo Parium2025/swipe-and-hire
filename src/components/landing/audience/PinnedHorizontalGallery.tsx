@@ -304,22 +304,14 @@ const PinnedHorizontalGallery = () => {
            duration 0.62s, ease power2.out, stagger 0.08s (80ms via --enter-delay).
            Triggas vid +0.48s i timeline (samma offset som intro-text i 1→2). */
         .phg-strip.phg-entered .phg-card-enter {
-          animation: phg-card-in 0.62s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-          animation-delay: var(--enter-delay, 0ms);
-        }
-        @keyframes phg-card-in {
-          0% { opacity: 0; transform: translate3d(0, 44px, 0); }
-          100% { opacity: 1; transform: translate3d(0, 0, 0); }
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
         }
         /* Exit — kopia av introTextItems-tween i goToHero (2→1):
            duration 0.42s, ease power2.in, stagger 0.055s (55ms via --leave-delay). */
         .phg-strip.phg-leaving .phg-card-enter {
-          animation: phg-card-out 0.42s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
-          animation-delay: var(--leave-delay, 0ms);
-        }
-        @keyframes phg-card-out {
-          0% { opacity: 1; transform: translate3d(0, 0, 0); }
-          100% { opacity: 0; transform: translate3d(0, 44px, 0); }
+          opacity: 0;
+          transform: translate3d(0, 44px, 0);
         }
         @media (prefers-reduced-motion: reduce) {
           .phg-strip.phg-entered .phg-card-enter,
