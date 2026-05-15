@@ -11,7 +11,6 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Landing from "./pages/Landing";
 import AudienceLanding from "./pages/AudienceLanding";
 import Auth from "./pages/Auth";
-import Index from "./pages/Index";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
@@ -56,6 +55,7 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
 }
 
 // Heavy pages that can still be lazy-loaded safely
+const Index = lazyWithRetry(() => import("./pages/Index"));
 const JobApplication = lazyWithRetry(() => import("./pages/JobApplication"));
 const JobView = lazyWithRetry(() => import("./pages/JobView"));
 const CvTunnel = lazyWithRetry(() => import("./pages/CvTunnel"));
