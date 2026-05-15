@@ -59,6 +59,7 @@ type HeroIntroStageProps = {
 
 const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
+  const [active, setActive] = useState(true);
   const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
@@ -101,6 +102,7 @@ const FixedPhoneLayer = () => {
     const onIndex = (e: Event) => {
       const detail = (e as CustomEvent<{ index: number }>).detail;
       heroIndexRef.current = detail?.index ?? 0;
+      setActive((detail?.index ?? 0) === 0);
       apply(detail?.index !== 1 && isHeroZone());
     };
 
@@ -181,6 +183,7 @@ const FixedPhoneLayer = () => {
           <SplinePhone
             className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
             zoom={0.78}
+            active={active}
           />
         </div>
       </div>
