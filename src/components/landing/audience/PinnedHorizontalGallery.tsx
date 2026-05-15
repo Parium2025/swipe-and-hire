@@ -150,6 +150,12 @@ const PinnedHorizontalGallery = () => {
     if (!strip) return;
 
     let playTimer: number | null = null;
+    let disposed = false;
+    let gsapInstance: typeof import('gsap').default | null = null;
+
+    import('gsap').then(({ default: gsap }) => {
+      if (!disposed) gsapInstance = gsap;
+    });
 
     const playSafe = (v: HTMLVideoElement) => {
       v.muted = true;
@@ -161,6 +167,11 @@ const PinnedHorizontalGallery = () => {
     const enter = () => {
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
+      const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
+      if (gsapInstance) {
+        gsapInstance.killTweensOf(cards);
+        gsapInstance.fromTo(cards, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out', force3D: true });
+      }
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       // Vänta tills slide-in-tween (0.62s) + sista stagger (~640ms) är klar
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
@@ -173,6 +184,11 @@ const PinnedHorizontalGallery = () => {
     const leave = () => {
       strip.classList.remove('phg-entered');
       strip.classList.add('phg-leaving');
+      const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
+      if (gsapInstance) {
+        gsapInstance.killTweensOf(cards);
+        gsapInstance.to(cards, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in', force3D: true });
+      }
       // Pausa direkt — frigör GPU/decode under 3→2 transformen.
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
@@ -185,6 +201,7 @@ const PinnedHorizontalGallery = () => {
     window.addEventListener('parium:gallery-leave', onLeave);
 
     return () => {
+      disposed = true;
       if (playTimer) window.clearTimeout(playTimer);
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
