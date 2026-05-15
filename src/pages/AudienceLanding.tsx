@@ -484,15 +484,24 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         },
       });
 
+      let transitionActive = false;
+      const onTransition = (e: Event) => {
+        transitionActive = !!(e as CustomEvent<{ active: boolean }>).detail?.active;
+        if (!transitionActive) prevScrollTop = scrollRoot?.scrollTop ?? 0;
+      };
+      window.addEventListener('parium:transition', onTransition);
+
       const onScrollWatch = () => {
         if (!scrollRoot) return;
+        // Bail TIDIGT så vi inte gör layout-läsningar (getBoundingClientRect)
+        // varje frame medan GSAP skriver scrollTop under en transition.
+        if (transitionActive || programmaticReturn || animatingRef.current) return;
+
         const cur = scrollRoot.scrollTop;
         const direction = cur < prevScrollTop ? 'up' : 'down';
         prevScrollTop = cur;
         const rect = stage.getBoundingClientRect();
         const vh = window.innerHeight;
-
-        if (programmaticReturn || animatingRef.current) return;
 
         if (releasedToGallery) {
           setObserverActive(false);
@@ -516,6 +525,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       return () => {
         clearReturnWork();
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
+        window.removeEventListener('parium:transition', onTransition);
       };
     };
 
