@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
@@ -128,15 +128,6 @@ const PinnedHorizontalGallery = () => {
     return () => document.removeEventListener('visibilitychange', onVis);
   }, []);
 
-  // Säkerställ att videos alltid spelas — aldrig pausa baserat på scroll
-  useMotionValueEvent(scrollYProgress, 'change', () => {
-    const strip = stripRef.current;
-    if (!strip) return;
-    Array.from(strip.querySelectorAll('video')).forEach((vid) => {
-      if (vid.paused) vid.play().catch(() => {});
-    });
-  });
-
   // Trigga staggered fade-in på korten enbart via custom event från
   // AudienceLanding's release-timeline. Tidigare IntersectionObserver kunde
   // starta samma animation för tidigt under den programstyrda 2→3-scrollen.
@@ -148,11 +139,13 @@ const PinnedHorizontalGallery = () => {
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
       const videos = Array.from(strip.querySelectorAll('video'));
-      videos.forEach((v) => {
+      const play = (v: HTMLVideoElement) => {
         v.muted = true;
         v.playsInline = true;
         const p = v.play(); if (p && typeof p.catch === 'function') p.catch(() => {});
-      });
+      };
+      videos.slice(0, 3).forEach(play);
+      window.setTimeout(() => videos.slice(3).forEach(play), 1200);
     };
     const leave = () => {
       // Spela exit-animationen (mirror av introTextItems-out i 2→1):
