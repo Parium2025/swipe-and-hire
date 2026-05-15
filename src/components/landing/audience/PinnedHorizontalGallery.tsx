@@ -170,7 +170,7 @@ const PinnedHorizontalGallery = () => {
           overflow: hidden;
           display: flex;
           flex-direction: column;
-          justify-content: flex-end;
+          justify-content: center;
           align-items: center;
           contain: layout paint;
         }
@@ -220,7 +220,7 @@ const PinnedHorizontalGallery = () => {
           align-items: center;
           overflow: hidden;
           z-index: 2;
-          transform: translateZ(0);
+          transform: translate3d(0, -8vh, 0);
         }
         .phg-strip {
           display: flex;
@@ -361,6 +361,7 @@ const PinnedHorizontalGallery = () => {
         }
 
         @media (max-width: 767px) {
+          .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
           .phg-title { font-size: clamp(1.75rem, 7vw, 2.25rem); }
           .phg-strip { padding: 0 18vw 0 8vw; }
