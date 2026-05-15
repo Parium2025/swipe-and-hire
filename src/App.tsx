@@ -129,6 +129,8 @@ const LazyFallback = () => (
   <div className="min-h-screen bg-parium-gradient" />
 );
 
+const LIGHTWEIGHT_ROUTES = ['/', '/auth', '/jobbsokare', '/arbetsgivare'];
+
 // Routes without animations for instant navigation
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -193,7 +195,7 @@ const AnimatedRoutes = () => {
 
 const AppShell = ({ showHeader }: { showHeader: boolean }) => {
   const location = useLocation();
-  const isLightweightRoute = ['/', '/auth'].includes(location.pathname);
+  const isLightweightRoute = LIGHTWEIGHT_ROUTES.includes(location.pathname);
 
   return (
     <>
@@ -224,9 +226,10 @@ const App = () => {
   const showHeader = false; // Header removed for cleaner UI
 
   // Förladdda alla kritiska bilder globalt vid app-start.
-  // Viktigt: på /auth vill vi INTE starta tunga preloads som kan konkurrera med loggans first paint.
+  // Viktigt: på publika landningssidor vill vi INTE starta tunga app-preloads
+  // som konkurrerar med hero/3D/videons first paint.
   const preloadEnabled = typeof window !== 'undefined'
-    ? !['/', '/auth'].includes(window.location.pathname)
+    ? !LIGHTWEIGHT_ROUTES.includes(window.location.pathname)
     : true;
   useGlobalImagePreloader(preloadEnabled);
 
