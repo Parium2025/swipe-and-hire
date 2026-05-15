@@ -379,13 +379,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         tl.to(introTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out' }, 0);
         tl.to(introOuter, { yPercent: -100 }, 0);
         tl.to(introInner, { yPercent: 100 }, 0);
-        // Camera scrolls in lockstep so the gallery section glides up from below
-        tl.to(scrollProxy, {
-          y: targetScroll,
-          duration: 1.08,
-          ease: 'power2.inOut',
-          onUpdate: () => { root.scrollTo({ top: scrollProxy.y, behavior: 'auto' }); },
-        }, 0);
+        // Camera scrolls in lockstep via GSAP's ticker. Using a DOM tween
+        // onUpdate here made Framer's scroll listener + GSAP write to the same
+        // frame in different phases, which caused the visible 2↔3 shake.
+        const startScroll = root.scrollTop;
+        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power2.inOut' }, 0);
+        tl.eventCallback('onUpdate', () => {
+          root.scrollTop = startScroll + (targetScroll - startScroll) * scrollProxy.y;
+        });
         // Trigga kortens staggered entrance i SAMMA takt som intro-texten i 1→2
         // (samma 0.48s delay relativt timelinens start). Korten fadar in lockstep
         // med slide:n istället för att poppa upp via IntersectionObserver senare.
@@ -418,7 +419,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
         const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        const scrollProxy = { y: scrollRoot.scrollTop };
+        const startScroll = scrollRoot.scrollTop;
+        const scrollProxy = { y: 0 };
 
         const tl = gsap.timeline({
           defaults: { duration: 1.08, ease: 'power2.inOut' },
@@ -435,13 +437,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         tl.call(() => {
           window.dispatchEvent(new Event('parium:gallery-leave'));
         }, [], 0);
-        // Camera scroll i lockstep med samma kurva som layer-sliden
-        tl.to(scrollProxy, {
-          y: target,
-          duration: 1.08,
-          ease: 'power2.inOut',
-          onUpdate: () => { scrollRoot.scrollTo({ top: scrollProxy.y, behavior: 'auto' }); },
-        }, 0);
+        // Camera scroll i samma ticker som layer-sliden — inga separata
+        // scrollTo-callbacks som kan hamna ur fas med kortens transform.
+        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power2.inOut' }, 0);
+        tl.eventCallback('onUpdate', () => {
+          scrollRoot.scrollTop = startScroll + (target - startScroll) * scrollProxy.y;
+        });
         // Intro-lagret slidar IN från ovan (mirror av hero i 2→1)
         tl.fromTo(introOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
         tl.fromTo(introInner, { yPercent: 100 }, { yPercent: 0 }, 0);
