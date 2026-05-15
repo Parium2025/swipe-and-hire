@@ -105,6 +105,8 @@ const PinnedHorizontalGallery = () => {
     const strip = stripRef.current;
     if (!root || !section || !strip) return;
 
+    let transitionActive = false;
+
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
       const move = p <= 0.24 ? 0 : (p - 0.24) / 0.76;
@@ -113,6 +115,10 @@ const PinnedHorizontalGallery = () => {
     };
 
     const measure = () => {
+      // Skippa layout-läsning helt under en programstyrd transition (2↔3).
+      // GSAP skriver scrollTop varje frame och vi vill inte läsa
+      // getBoundingClientRect i samma frame — det är källan till skakningarna.
+      if (transitionActive) return;
       const rect = section.getBoundingClientRect();
       const distance = Math.max(1, section.offsetHeight - root.clientHeight);
       targetProgressRef.current = Math.min(1, Math.max(0, -rect.top / distance));
@@ -129,13 +135,23 @@ const PinnedHorizontalGallery = () => {
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
     };
 
+    const onTransition = (e: Event) => {
+      transitionActive = !!(e as CustomEvent<{ active: boolean }>).detail?.active;
+      if (!transitionActive) {
+        // När transition är klar — synca progress mot faktisk scroll-position.
+        measure();
+      }
+    };
+
     applyProgress(0);
     measure();
     root.addEventListener('scroll', measure, { passive: true });
     window.addEventListener('resize', measure);
+    window.addEventListener('parium:transition', onTransition);
     return () => {
       root.removeEventListener('scroll', measure);
       window.removeEventListener('resize', measure);
+      window.removeEventListener('parium:transition', onTransition);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
     };
   }, []);

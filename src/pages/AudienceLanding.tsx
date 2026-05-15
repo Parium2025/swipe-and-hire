@@ -355,6 +355,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         // Släpp Observer under programstyrd slide så den inte påverkar
         // kortens scroll-drivna position i galleriet.
         setObserverActive(false);
+        // Tysta scroll-lyssnare (både här och i galleriet) under transitionen
+        // så att getBoundingClientRect-läsningar inte triggas varje frame när
+        // GSAP skriver scrollTop. Det var källan till skakningarna i 2↔3.
+        window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: true } }));
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
 
         const targetScroll = root.scrollTop + next.getBoundingClientRect().top + 1;
@@ -373,6 +377,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             gsap.set(introOuter, { yPercent: 0, autoAlpha: 0 });
             gsap.set(introInner, { yPercent: 0 });
             gsap.set(introTextItems, { y: 44, opacity: 0 });
+            // Återöppna scroll-lyssnare nu när allt har landat.
+            prevScrollTop = root.scrollTop;
+            window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: false } }));
           },
         });
         // Intro slides UP and reveals — mirror of hero→intro motion (1→2)
@@ -403,6 +410,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         releaseLockedRef.current = false;
         animatingRef.current = true;
         setObserverActive(true);
+        // Tysta scroll-lyssnare under transitionen — samma fix som i 2→3
+        // för att undvika layout-thrash när GSAP skriver scrollTop varje frame.
+        window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: true } }));
 
         // 3→2 ska vara EXAKT spegel av 2→1 (goToHero):
         // hero slidar från yPercent -100 → 0 med parallax-inner och staggered text in vid 0.48.
@@ -431,6 +441,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             releaseLockedRef.current = false;
             programmaticReturn = false;
             setObserverActive(true);
+            prevScrollTop = scrollRoot.scrollTop;
+            window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: false } }));
           },
         });
         // Fade ut korten i lockstep med slide+scroll (mirror av hero-text out i 2→1).
@@ -472,15 +484,24 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         },
       });
 
+      let transitionActive = false;
+      const onTransition = (e: Event) => {
+        transitionActive = !!(e as CustomEvent<{ active: boolean }>).detail?.active;
+        if (!transitionActive) prevScrollTop = scrollRoot?.scrollTop ?? 0;
+      };
+      window.addEventListener('parium:transition', onTransition);
+
       const onScrollWatch = () => {
         if (!scrollRoot) return;
+        // Bail TIDIGT så vi inte gör layout-läsningar (getBoundingClientRect)
+        // varje frame medan GSAP skriver scrollTop under en transition.
+        if (transitionActive || programmaticReturn || animatingRef.current) return;
+
         const cur = scrollRoot.scrollTop;
         const direction = cur < prevScrollTop ? 'up' : 'down';
         prevScrollTop = cur;
         const rect = stage.getBoundingClientRect();
         const vh = window.innerHeight;
-
-        if (programmaticReturn || animatingRef.current) return;
 
         if (releasedToGallery) {
           setObserverActive(false);
@@ -504,6 +525,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       return () => {
         clearReturnWork();
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
+        window.removeEventListener('parium:transition', onTransition);
       };
     };
 
