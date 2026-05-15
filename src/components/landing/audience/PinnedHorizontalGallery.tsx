@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
@@ -81,6 +81,9 @@ const PinnedHorizontalGallery = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLElement | null>(null);
+  const targetProgressRef = useRef(0);
+  const renderedProgressRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
   const [, setReady] = useState(false);
 
   useEffect(() => {
@@ -93,25 +96,49 @@ const PinnedHorizontalGallery = () => {
   // Extra intro-yta inuti samma sticky sektion låter korten glida in utan en hård skarv.
   const SCROLL_VH = 520;
 
-  // Starta progress redan när sektionen närmar sig viewport (inte först vid pin).
-  // Det gör att korten fadar in DIREKT efter hero, utan tomt mellanrum.
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    container: containerRef as React.RefObject<HTMLElement>,
-    offset: ['start start', 'end end'],
-  });
+  // Egen RAF-driven progress istället för Framer useScroll. Då läser och skriver
+  // galleriet i exakt samma animation-frame som GSAP-scrollen vid 2↔3, utan
+  // dubbel scroll-prenumeration som kan ge en frame av skak/jitter.
+  useEffect(() => {
+    const root = containerRef.current;
+    const section = sectionRef.current;
+    const strip = stripRef.current;
+    if (!root || !section || !strip) return;
 
-  // Med ovan offset: approach ≈ 100vh / (100+280)vh ≈ 0.26 av total progress.
-  // Korten fadar in under approach (0 → ~0.22), står still tills pin börjar,
-  // glider sedan höger → vänster genom pin-fasen.
-  // Slutposition beräknad så att SISTA kortet är helt synligt med luft till höger
-  // innan pin släpps. 8 kort × ~27vw + gaps ≈ 230vw → -138vw tar sista kortet in.
-  const xRaw = useTransform(scrollYProgress, [0, 0.24, 1], ['7vw', '7vw', '-138vw']);
-  // Direkt progress utan extra spring: undviker dubbel easing mot GSAP-scrollen
-  // i 2↔3, vilket var orsaken till att galleriet kändes snabbare/jitterigt.
-  const x = xRaw;
+    const applyProgress = (progress: number) => {
+      const p = Math.min(1, Math.max(0, progress));
+      const move = p <= 0.24 ? 0 : (p - 0.24) / 0.76;
+      strip.style.setProperty('--phg-x', `${7 + (-145 * move)}vw`);
+      strip.style.setProperty('--phg-progress', `${p}`);
+    };
 
-  const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+    const measure = () => {
+      const rect = section.getBoundingClientRect();
+      const distance = Math.max(1, section.offsetHeight - root.clientHeight);
+      targetProgressRef.current = Math.min(1, Math.max(0, -rect.top / distance));
+      if (rafRef.current === null) rafRef.current = window.requestAnimationFrame(tick);
+    };
+
+    const tick = () => {
+      rafRef.current = null;
+      const current = renderedProgressRef.current;
+      const target = targetProgressRef.current;
+      const next = Math.abs(target - current) < 0.001 ? target : current + (target - current) * 0.32;
+      renderedProgressRef.current = next;
+      applyProgress(next);
+      if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
+    };
+
+    applyProgress(0);
+    measure();
+    root.addEventListener('scroll', measure, { passive: true });
+    window.addEventListener('resize', measure);
+    return () => {
+      root.removeEventListener('scroll', measure);
+      window.removeEventListener('resize', measure);
+      if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   // Trigga staggered fade-in på korten enbart via custom event från
   // AudienceLanding's release-timeline. Tidigare IntersectionObserver kunde
