@@ -47,7 +47,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
   return (
     <div
       className="phg-card phg-card-enter"
-      style={{ ['--enter-delay' as string]: `${index * 90}ms` }}
+      style={{ ['--enter-delay' as string]: `${index * 80}ms`, ['--leave-delay' as string]: `${index * 55}ms` }}
     >
       {item.type === 'video' ? (
         <video
