@@ -109,8 +109,8 @@ const PinnedHorizontalGallery = () => {
 
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
-      const move = p <= 0.24 ? 0 : (p - 0.24) / 0.76;
-      strip.style.setProperty('--phg-x', `${7 + (-145 * move)}vw`);
+      // Ingen deadzone — korten & progressbaren rör sig från första scrollpixeln.
+      strip.style.setProperty('--phg-x', `${7 + (-152 * p)}vw`);
       section.style.setProperty('--phg-progress', `${p}`);
     };
 
