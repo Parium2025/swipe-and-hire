@@ -208,13 +208,13 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       const heroInner = heroInnerRef.current;
       const introOuter = introOuterRef.current;
       const introInner = introInnerRef.current;
-      const heroText = heroTextRef.current;
       const introText = introTextRef.current;
       const stage = stageRef.current;
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
-      const heroTextItems = heroText ? gsap.utils.toArray<HTMLElement>(heroText.querySelectorAll('span, h1 span, p')) : [];
+      // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
+      // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
       const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p')) : [];
       let releasedToGallery = false;
       let programmaticReturn = false;
