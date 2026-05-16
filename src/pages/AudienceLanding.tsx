@@ -9,6 +9,7 @@ import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
+import MorphingHeading from '@/components/landing/audience/MorphingHeading';
 
 type AudienceLandingProps = {
   audience: AudienceRole;
