@@ -49,8 +49,7 @@ export const MorphingHeading = () => {
         aria-label={TEXT}
         className="morphing-heading select-none font-sans"
         initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.4 }}
+        animate="visible"
         variants={containerVariants}
       >
         {TEXT.split('').map((ch, i) => (
