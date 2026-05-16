@@ -72,7 +72,20 @@ export const MorphingHeading = () => {
           font-size: clamp(3.5rem, 11vw, 8.5rem);
           line-height: 1;
           letter-spacing: -0.04em;
-          background: linear-gradient(
+          filter: drop-shadow(0 6px 28px hsl(var(--secondary) / 0.35));
+        }
+
+        .morphing-heading__slot {
+          display: inline-flex;
+          overflow: hidden;
+          line-height: 1;
+          padding-bottom: 0.12em;
+        }
+
+        .morphing-heading__letter {
+          display: inline-block;
+          will-change: transform, opacity;
+          background-image: linear-gradient(
             92deg,
             hsl(var(--secondary)) 0%,
             #9bd3ff 45%,
@@ -84,22 +97,9 @@ export const MorphingHeading = () => {
           background-position: 100% 0;
           -webkit-background-clip: text;
           background-clip: text;
-          color: transparent;
           -webkit-text-fill-color: transparent;
+          color: transparent;
           animation: morphing-heading-sheen 5.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) 1.6s infinite;
-          filter: drop-shadow(0 6px 28px hsl(var(--secondary) / 0.35));
-        }
-
-        .morphing-heading__slot {
-          display: inline-flex;
-          overflow: hidden;
-          line-height: 1;
-          padding-bottom: 0.1em;
-        }
-
-        .morphing-heading__letter {
-          display: inline-block;
-          will-change: transform, opacity;
         }
 
         @keyframes morphing-heading-sheen {
@@ -109,7 +109,7 @@ export const MorphingHeading = () => {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .morphing-heading { animation: none; }
+          .morphing-heading__letter { animation: none; }
         }
       `}</style>
     </div>
