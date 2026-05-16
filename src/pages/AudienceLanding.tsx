@@ -343,7 +343,10 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         gsap.set(heroInner, { yPercent: 100 });
         gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(introInner, { yPercent: 0 });
-        gsap.set(introTextItems, { y: 0, opacity: 1 });
+        // När intro ligger stilla ska texten inte längre ligga på ett GSAP-
+        // transformlager. På hård scroll mot 3:an kunde compositing annars ge
+        // en ghost/dubblett-frame av texten i Chrome/Lovable-preview.
+        gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
         indexRef.current = 1;
       };
 
@@ -428,6 +431,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
         const startScroll = root.scrollTop;
         const targetScroll = startScroll + next.getBoundingClientRect().top;
+        gsap.killTweensOf(introTextItems);
+        gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
         prevScrollTop = startScroll;
         root.scrollTo({ top: targetScroll, behavior: 'smooth' });
         window.dispatchEvent(new Event('parium:gallery-enter'));
