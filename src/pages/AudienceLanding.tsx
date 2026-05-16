@@ -347,125 +347,42 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         tl.fromTo(heroTextItems, { y: -44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.06, ease: 'power2.out' }, 0.48);
       };
 
+      // 2↔3 = NATURLIG scroll. Inget GSAP-driv av scrollTop, inga
+      // programstyrda transitions. Anledningen: 1↔2 är smooth eftersom
+      // det är en ren CSS-transform utan scroll inblandat. När vi i 2↔3
+      // körde GSAP som skrev scrollTop varje frame SAMTIDIGT som galleriet
+      // läste scrollTop för att rita kortens transform fick vi två källor
+      // till sanning per frame → synligt skak/hopp. Lösning: släpp scrollen
+      // helt till browsern, så följer både intro-lagret (i normalt flöde)
+      // och galleriets sticky-progress samma scroll-position automatiskt.
       const releaseAndScrollNext = () => {
         const root = scrollRoot;
         const next = document.getElementById('sa-funkar-det');
         if (!root || !next) return;
         if (animatingRef.current) return;
-        animatingRef.current = true;
         releasedToGallery = true;
         programmaticReturn = false;
-        // Släpp Observer under programstyrd slide så den inte påverkar
-        // kortens scroll-drivna position i galleriet.
         setObserverActive(false);
-        // Tysta scroll-lyssnare (både här och i galleriet) under transitionen
-        // så att getBoundingClientRect-läsningar inte triggas varje frame när
-        // GSAP skriver scrollTop. Det var källan till skakningarna i 2↔3.
-        window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: true } }));
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
-
         const targetScroll = root.scrollTop + next.getBoundingClientRect().top;
-        // OBS: proxy MÅSTE starta på 0 — den används som 0→1-multiplikator i onUpdate.
-        // Tidigare var den `y: root.scrollTop` vilket gjorde att första framen sköt
-        // scrollTop långt förbi målet och sen "smög" tillbaka — det syntes som ett hopp.
-        const scrollProxy = { y: 0 };
-
-        const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power2.inOut' },
-          onComplete: () => {
-            root.scrollTo({ top: targetScroll, behavior: 'auto' });
-            animatingRef.current = false;
-            releaseLockedRef.current = false;
-            setObserverActive(false);
-            // Reset intro layer to its resting position so a return-to-intro
-            // (returnFromGalleryToIntro) finds layers in a known state.
-            gsap.set(heroOuter, { autoAlpha: 0 });
-            gsap.set(introOuter, { yPercent: 0, autoAlpha: 0 });
-            gsap.set(introInner, { yPercent: 0 });
-            gsap.set(introTextItems, { y: 44, opacity: 0 });
-            // Återöppna scroll-lyssnare nu när allt har landat.
-            prevScrollTop = root.scrollTop;
-            window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: false } }));
-          },
-        });
-        // Intro slides UP and reveals — mirror of hero→intro motion (1→2)
-        tl.to(introTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out', force3D: true }, 0);
-        tl.to(introOuter, { yPercent: -100, force3D: true }, 0);
-        tl.to(introInner, { yPercent: 100, force3D: true }, 0);
-        // Camera scrolls in lockstep via GSAP's ticker. Using a DOM tween
-        // onUpdate here made Framer's scroll listener + GSAP write to the same
-        // frame in different phases, which caused the visible 2↔3 shake.
-        const startScroll = root.scrollTop;
-        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power2.inOut' }, 0);
-        tl.eventCallback('onUpdate', () => {
-          root.scrollTop = Math.round(startScroll + (targetScroll - startScroll) * scrollProxy.y);
-        });
-        // Trigga kortens staggered entrance i SAMMA takt som intro-texten i 1→2
-        // (samma 0.48s delay relativt timelinens start). Korten fadar in lockstep
-        // med slide:n istället för att poppa upp via IntersectionObserver senare.
-        tl.call(() => {
-          window.dispatchEvent(new Event('parium:gallery-enter'));
-        }, [], 0.48);
+        root.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        prevScrollTop = targetScroll;
       };
 
       const returnFromGalleryToIntro = () => {
         if (!scrollRoot || programmaticReturn || animatingRef.current) return;
-        clearReturnWork();
         programmaticReturn = true;
         releasedToGallery = false;
         releaseLockedRef.current = false;
-        animatingRef.current = true;
         setObserverActive(true);
-        // Tysta scroll-lyssnare under transitionen — samma fix som i 2→3
-        // för att undvika layout-thrash när GSAP skriver scrollTop varje frame.
-        window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: true } }));
-
-        // 3→2 ska vara EXAKT spegel av 2→1 (goToHero):
-        // hero slidar från yPercent -100 → 0 med parallax-inner och staggered text in vid 0.48.
-        // Här slidar intro från yPercent -100 → 0 (där den hamnade efter 2→3),
-        // intro-inner parallax 100 → 0, scroll i lockstep, text in vid 0.48.
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
-        gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
-        gsap.set(heroInner, { yPercent: 100 });
-        gsap.set(introOuter, { yPercent: -100, autoAlpha: 1 });
-        gsap.set(introInner, { yPercent: 100 });
-        gsap.set(heroTextItems, { y: -44, opacity: 0 });
-        gsap.set(introTextItems, { y: 44, opacity: 0 });
-        indexRef.current = 1;
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
-
+        setIntroResting();
         const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        const startScroll = scrollRoot.scrollTop;
-        const scrollProxy = { y: 0 };
-
-        const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power2.inOut' },
-          onComplete: () => {
-            scrollRoot.scrollTo({ top: target, behavior: 'auto' });
-            setIntroResting();
-            animatingRef.current = false;
-            releaseLockedRef.current = false;
-            programmaticReturn = false;
-            setObserverActive(true);
-            prevScrollTop = scrollRoot.scrollTop;
-            window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: false } }));
-          },
-        });
-        // Fade ut korten i lockstep med slide+scroll (mirror av hero-text out i 2→1).
-        tl.call(() => {
-          window.dispatchEvent(new Event('parium:gallery-leave'));
-        }, [], 0);
-        // Camera scroll i samma ticker som layer-sliden — inga separata
-        // scrollTo-callbacks som kan hamna ur fas med kortens transform.
-        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power2.inOut' }, 0);
-        tl.eventCallback('onUpdate', () => {
-          scrollRoot.scrollTop = Math.round(startScroll + (target - startScroll) * scrollProxy.y);
-        });
-        // Intro-lagret slidar IN från ovan (mirror av hero i 2→1)
-        tl.fromTo(introOuter, { yPercent: -100 }, { yPercent: 0, force3D: true }, 0);
-        tl.fromTo(introInner, { yPercent: 100 }, { yPercent: 0, force3D: true }, 0);
-        // Text in samma timing som hero-text i 2→1 (0.48s delay, 0.62s, stagger 0.08, power2.out)
-        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out', force3D: true }, 0.48);
+        scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
+        window.setTimeout(() => {
+          programmaticReturn = false;
+          prevScrollTop = scrollRoot.scrollTop;
+        }, 700);
       };
 
       observer = Observer.create({
