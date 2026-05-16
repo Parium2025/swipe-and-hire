@@ -1,261 +1,118 @@
-import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 
 /**
  * MorphingHeading
  * ---------------
- * Morfar 6 primitiva former (triangel, kvadrat, cirkel, diamant, pentagon,
- * hexagon) till bokstäverna i "Parium" via flubber-pathinterpolation och
- * gsap-tweens. Bokstavspaths hämtas dynamiskt från Inter (Black, 900) via
- * opentype.js så att vi får exakta glyph-konturer i brand-fonten.
+ * Premium text-reveal för "Parium" rubriken i intro-sektionen.
  *
- * Färg: brand-blue gradient (samma som scrollbaren på 3:an).
+ * Effekter:
+ *  • Per-letter stagger med klipp/mask (bokstäverna "stiger upp" från baseline)
+ *  • Gradient-fill i brand-blå (samma som scrollbaren på 3:an)
+ *  • Loopande shimmer/sheen som glider över texten
+ *  • Subtil glow bakom hela ordet
  *
- * Allt tungt (opentype.js, flubber, gsap) laddas dynamiskt så att intro-
- * sektionens initiala paint inte påverkas.
+ * Ingen extern dependency utöver framer-motion (redan i projektet).
  */
 
 const TEXT = 'Parium';
-const FONT_SIZE = 160; // px-höjd på glyfer
-const PADDING_X = 24;
-const PADDING_Y = 32;
 
-// 6 startformer (en per bokstav) – returnerar en path-d sträng kring (cx,cy)
-// med bredd w och höjd h. Hålls visuellt enkla så morfen blir tydlig.
-const shapePath = (
-  type: 'triangle' | 'square' | 'circle' | 'diamond' | 'pentagon' | 'hexagon',
-  cx: number,
-  cy: number,
-  w: number,
-  h: number,
-): string => {
-  const rx = w / 2;
-  const ry = h / 2;
-  switch (type) {
-    case 'triangle':
-      return `M${cx},${cy - ry} L${cx + rx},${cy + ry} L${cx - rx},${cy + ry} Z`;
-    case 'square':
-      return `M${cx - rx},${cy - ry} L${cx + rx},${cy - ry} L${cx + rx},${cy + ry} L${cx - rx},${cy + ry} Z`;
-    case 'circle': {
-      // Approximera cirkel/ellips med 4 cubic bezier-segment
-      const kx = rx * 0.5523;
-      const ky = ry * 0.5523;
-      return (
-        `M${cx - rx},${cy} ` +
-        `C${cx - rx},${cy - ky} ${cx - kx},${cy - ry} ${cx},${cy - ry} ` +
-        `C${cx + kx},${cy - ry} ${cx + rx},${cy - ky} ${cx + rx},${cy} ` +
-        `C${cx + rx},${cy + ky} ${cx + kx},${cy + ry} ${cx},${cy + ry} ` +
-        `C${cx - kx},${cy + ry} ${cx - rx},${cy + ky} ${cx - rx},${cy} Z`
-      );
-    }
-    case 'diamond':
-      return `M${cx},${cy - ry} L${cx + rx},${cy} L${cx},${cy + ry} L${cx - rx},${cy} Z`;
-    case 'pentagon': {
-      const pts = [0, 1, 2, 3, 4].map((i) => {
-        const ang = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
-        return `${cx + Math.cos(ang) * rx},${cy + Math.sin(ang) * ry}`;
-      });
-      return `M${pts.join(' L')} Z`;
-    }
-    case 'hexagon': {
-      const pts = [0, 1, 2, 3, 4, 5].map((i) => {
-        const ang = -Math.PI / 2 + (i * 2 * Math.PI) / 6;
-        return `${cx + Math.cos(ang) * rx},${cy + Math.sin(ang) * ry}`;
-      });
-      return `M${pts.join(' L')} Z`;
-    }
-  }
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.08, delayChildren: 0.15 },
+  },
 };
 
-const SHAPE_ORDER: Array<'triangle' | 'square' | 'circle' | 'diamond' | 'pentagon' | 'hexagon'> = [
-  'triangle',
-  'square',
-  'circle',
-  'diamond',
-  'pentagon',
-  'hexagon',
-];
-
-type LetterSlot = {
-  // Slutgiltiga letter-subpaths (en per subpath – 'i' har t.ex. prick + stam)
-  letterPaths: string[];
-  // Startform-path (en per subpath; samma form upprepad om flera subpaths)
-  shapePaths: string[];
-  // BoundingBox (för viewBox-uträkning)
-  bbox: { x1: number; y1: number; x2: number; y2: number };
+const letterVariants = {
+  hidden: { y: '110%', opacity: 0 },
+  visible: {
+    y: '0%',
+    opacity: 1,
+    transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] as const },
+  },
 };
-
-// Split en path-d sträng på subpaths (varje "M" startar en ny subpath).
-const splitSubpaths = (d: string): string[] => {
-  const parts = d.match(/M[^M]+/g);
-  return parts ? parts.map((p) => p.trim()) : [d];
-};
-
-// Inter Black (900) i WOFF format från fontsource (jsDelivr CDN).
-// opentype.js stödjer woff. CORS är öppet på jsdelivr.
-const FONT_URL =
-  'https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.16/files/inter-latin-900-normal.woff';
 
 export const MorphingHeading = () => {
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  const [slots, setSlots] = useState<LetterSlot[] | null>(null);
-  const [viewBox, setViewBox] = useState<string>('0 0 900 220');
-  const pathRefs = useRef<Array<Array<SVGPathElement | null>>>([]);
-
-  // ── 1) Bygg paths från font + startformer ─────────────────────────────
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const opentypeMod: any = await import('opentype.js');
-        const opentype = opentypeMod.default ?? opentypeMod;
-        const buf = await fetch(FONT_URL).then((r) => r.arrayBuffer());
-        if (cancelled) return;
-        const font = opentype.parse(buf);
-
-        let cursor = 0;
-        const built: LetterSlot[] = [];
-        let minY = Infinity;
-        let maxY = -Infinity;
-
-        TEXT.split('').forEach((ch, idx) => {
-          const glyph = font.charToGlyph(ch);
-          // y=0 = baseline. opentype ritar glyfer med Y nedåt-positiv i SVG.
-          const path = glyph.getPath(cursor, 0, FONT_SIZE);
-          const d = path.toPathData(2);
-          const bb = path.getBoundingBox();
-          const advance = ((glyph.advanceWidth ?? FONT_SIZE * 0.6) / font.unitsPerEm) * FONT_SIZE;
-          const letterPaths = splitSubpaths(d);
-          // Centrum + storlek på startformen baseras på letterns bbox.
-          const w = Math.max(bb.x2 - bb.x1, 20);
-          const h = Math.max(bb.y2 - bb.y1, 20);
-          const cx = (bb.x1 + bb.x2) / 2;
-          const cy = (bb.y1 + bb.y2) / 2;
-          // Startformen är något mindre och uniform – ger snyggare morph.
-          const shapeSize = Math.min(w, h) * 0.95;
-          const shape = shapePath(SHAPE_ORDER[idx % SHAPE_ORDER.length], cx, cy, shapeSize, shapeSize);
-          const shapePaths = letterPaths.map(() => shape);
-
-          built.push({
-            letterPaths,
-            shapePaths,
-            bbox: { x1: bb.x1, y1: bb.y1, x2: bb.x2, y2: bb.y2 },
-          });
-          minY = Math.min(minY, bb.y1);
-          maxY = Math.max(maxY, bb.y2);
-          cursor += advance;
-        });
-
-        const totalW = cursor + PADDING_X * 2;
-        const totalH = maxY - minY + PADDING_Y * 2;
-        const vbX = -PADDING_X;
-        const vbY = minY - PADDING_Y;
-        setViewBox(`${vbX} ${vbY} ${totalW} ${totalH}`);
-        setSlots(built);
-      } catch (e) {
-        // Tyst fallback: om CDN/parse failar visar vi bara texten via <text>.
-        console.error('[MorphingHeading] font load failed', e);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // ── 2) Driv morph-animationen med gsap + flubber ──────────────────────
-  useEffect(() => {
-    if (!slots) return;
-    let cancelled = false;
-    let tl: gsap.core.Timeline | null = null;
-
-    (async () => {
-      const [{ default: gsap }, flubber] = await Promise.all([
-        import('gsap'),
-        import('flubber'),
-      ]);
-      if (cancelled || !svgRef.current) return;
-
-      tl = gsap.timeline({ repeat: -1, repeatDelay: 1.6, yoyo: true, defaults: { ease: 'power2.inOut' } });
-
-      slots.forEach((slot, slotIdx) => {
-        const subpaths = slot.letterPaths;
-        const interpolators = subpaths.map((letterD, sIdx) => {
-          const shapeD = slot.shapePaths[sIdx];
-          try {
-            return flubber.interpolate(shapeD, letterD, { maxSegmentLength: 6 });
-          } catch {
-            // Fallback om flubber failar – statisk slutpath
-            return (_t: number) => letterD;
-          }
-        });
-
-        const refs = pathRefs.current[slotIdx] ?? [];
-        const proxy = { t: 0 };
-        const stepStart = slotIdx * 0.35;
-
-        tl!.to(
-          proxy,
-          {
-            t: 1,
-            duration: 1.1,
-            onUpdate: () => {
-              const v = proxy.t;
-              interpolators.forEach((interp, i) => {
-                const el = refs[i];
-                if (el) el.setAttribute('d', interp(v));
-              });
-            },
-          },
-          stepStart,
-        );
-      });
-    })();
-
-    return () => {
-      cancelled = true;
-      tl?.kill();
-    };
-  }, [slots]);
-
-  // ── 3) Render ─────────────────────────────────────────────────────────
   return (
-    <div className="relative mx-auto w-full max-w-3xl">
-      <svg
-        ref={svgRef}
-        viewBox={viewBox}
-        className="block h-auto w-full"
-        aria-label={TEXT}
-        role="img"
-      >
-        <defs>
-          <linearGradient id="morph-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="hsl(var(--secondary))" />
-            <stop offset="100%" stopColor="#7cc6ff" />
-          </linearGradient>
-          <filter id="morph-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="2.4" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
+    <div className="relative mx-auto w-full max-w-3xl text-center">
+      {/* Soft glow bakom rubriken */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 mx-auto blur-3xl"
+        style={{
+          background:
+            'radial-gradient(60% 60% at 50% 50%, hsl(var(--secondary) / 0.35) 0%, transparent 70%)',
+        }}
+      />
 
-        {slots?.map((slot, slotIdx) => {
-          if (!pathRefs.current[slotIdx]) pathRefs.current[slotIdx] = [];
-          return slot.shapePaths.map((shapeD, subIdx) => (
-            <path
-              key={`${slotIdx}-${subIdx}`}
-              ref={(el) => {
-                pathRefs.current[slotIdx][subIdx] = el;
-              }}
-              d={shapeD}
-              fill="url(#morph-grad)"
-              filter="url(#morph-glow)"
-              fillRule="evenodd"
-            />
-          ));
-        })}
-      </svg>
+      <motion.h2
+        aria-label={TEXT}
+        className="morphing-heading select-none font-sans"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.4 }}
+        variants={containerVariants}
+      >
+        {TEXT.split('').map((ch, i) => (
+          <span key={i} className="morphing-heading__slot" aria-hidden="true">
+            <motion.span className="morphing-heading__letter" variants={letterVariants}>
+              {ch}
+            </motion.span>
+          </span>
+        ))}
+      </motion.h2>
+
+      <style>{`
+        .morphing-heading {
+          display: flex;
+          justify-content: center;
+          align-items: baseline;
+          gap: 0.02em;
+          margin: 0;
+          font-weight: 900;
+          font-size: clamp(3.5rem, 11vw, 8.5rem);
+          line-height: 1;
+          letter-spacing: -0.04em;
+          background: linear-gradient(
+            92deg,
+            hsl(var(--secondary)) 0%,
+            #9bd3ff 45%,
+            #ffffff 50%,
+            #9bd3ff 55%,
+            hsl(var(--secondary)) 100%
+          );
+          background-size: 220% 100%;
+          background-position: 100% 0;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          -webkit-text-fill-color: transparent;
+          animation: morphing-heading-sheen 5.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) 1.6s infinite;
+          filter: drop-shadow(0 6px 28px hsl(var(--secondary) / 0.35));
+        }
+
+        .morphing-heading__slot {
+          display: inline-flex;
+          overflow: hidden;
+          line-height: 1;
+          padding-bottom: 0.1em;
+        }
+
+        .morphing-heading__letter {
+          display: inline-block;
+          will-change: transform, opacity;
+        }
+
+        @keyframes morphing-heading-sheen {
+          0%   { background-position: 100% 0; }
+          55%  { background-position: -20% 0; }
+          100% { background-position: -20% 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .morphing-heading { animation: none; }
+        }
+      `}</style>
     </div>
   );
 };
