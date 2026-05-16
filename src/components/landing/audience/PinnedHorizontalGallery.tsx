@@ -140,6 +140,7 @@ const PinnedHorizontalGallery = () => {
           window.cancelAnimationFrame(rafRef.current);
           rafRef.current = null;
         }
+        applyProgress(renderedProgressRef.current);
         targetProgressRef.current = renderedProgressRef.current;
         return;
       }
