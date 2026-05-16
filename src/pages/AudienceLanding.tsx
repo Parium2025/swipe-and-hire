@@ -367,6 +367,11 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
             root.scrollTo({ top: targetScroll, behavior: 'auto' });
           }
           prevScrollTop = root.scrollTop;
+          // Säkerhetsnät: släpp ALLTID releaseLockedRef efter att 2→3 är klart,
+          // även om scroll-positionen inte hann triggra normalisering. Annars
+          // kunde låset bli "kvar i true" om användaren scrollar snabbt 20-30
+          // gånger och en gest kapas av nästa innan onScrollWatch hann reagera.
+          releaseLockedRef.current = false;
           forwardTimer = null;
         }, 900);
       };
@@ -645,6 +650,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
+        // -webkit-overflow-scrolling: touch ger iOS Safari momentum-scroll
+        // i fixed-containrar; utan denna känns 2↔3-overgången "stelare" på
+        // iPhone/iPad jämfört med desktop. scrollBehavior: 'smooth' säkrar
+        // att Android Chrome och Firefox använder samma native easing som
+        // Safari för scrollTo(..., {behavior: 'smooth'}).
+        WebkitOverflowScrolling: 'touch',
+        scrollBehavior: 'smooth',
         backgroundImage:
           'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
         backgroundAttachment: 'scroll',

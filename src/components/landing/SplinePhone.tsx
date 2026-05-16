@@ -60,15 +60,26 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
         await app.load(SCENE_URL);
+        // Spline-scenen kan ha en egen background-color som annars syns som
+        // en vit ram innan WebGL fyller canvasen. Tvinga transparent.
+        try {
+          (app as unknown as { setBackgroundColor?: (c: string) => void })
+            .setBackgroundColor?.('rgba(0,0,0,0)');
+        } catch { /* no-op */ }
         app.setZoom(zoom);
         requestAnimationFrame(() => app?.setZoom(zoom));
         if (!activeRef.current) app.stop();
-        // Vänta två rAF så Spline hinner rita sin första WebGL-frame innan
-        // vi fade:ar in canvasen — annars syns scenens default-bakgrund
-        // (vit) i en frame och det upplevs som en "vit ram" runt telefonen.
-        await new Promise<void>((resolve) =>
-          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-        );
+        // Vänta 3 rAF så Spline garanterat hunnit rita sin första WebGL-frame
+        // innan vi fade:ar in canvasen. På throttlade enheter (Lovable preview-
+        // iframe, äldre Androids) räcker inte 2 rAF — då syns scenens
+        // default-bakgrund i en frame som "vit ram" runt telefonen.
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => resolve()),
+            ),
+          );
+        });
         if (!cancelled) {
           setIsReady(true);
           // Signal till FixedPhoneLayer att vi får visa wrappern utan att
