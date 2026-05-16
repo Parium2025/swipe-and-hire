@@ -351,6 +351,19 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       // till sanning per frame → synligt skak/hopp. Lösning: släpp scrollen
       // helt till browsern, så följer både intro-lagret (i normalt flöde)
       // och galleriets sticky-progress samma scroll-position automatiskt.
+      // Kort wheel/touch-block (~700ms) under 2→3 smooth-scroll så att
+      // användarens kvarvarande wheel-momentum inte konkurrerar med
+      // browserns native smooth-scroll → annars syns "hack" vid hård scroll.
+      let transitionBlockUntil = 0;
+      const blockNativeInput = (e: Event) => {
+        if (performance.now() < transitionBlockUntil) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+      scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
+      scrollRoot?.addEventListener('touchmove', blockNativeInput, { passive: false, capture: true });
+
       const releaseAndScrollNext = () => {
         const root = scrollRoot;
         const next = document.getElementById('sa-funkar-det');
@@ -368,10 +381,11 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
           gsap.fromTo(
             introText,
             { y: 0, opacity: 1 },
-            { y: -24, opacity: 0, duration: 0.34, ease: 'power2.out', force3D: true },
+            { y: -24, opacity: 0, duration: 0.42, ease: 'power2.out', force3D: true },
           );
         }
         prevScrollTop = startScroll;
+        transitionBlockUntil = performance.now() + 700;
         root.scrollTo({ top: targetScroll, behavior: 'smooth' });
         window.dispatchEvent(new Event('parium:gallery-enter'));
         forwardTimer = window.setTimeout(() => {
