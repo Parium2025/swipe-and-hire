@@ -362,8 +362,15 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
         const startScroll = root.scrollTop;
         const targetScroll = startScroll + next.getBoundingClientRect().top;
-        gsap.killTweensOf(introTextItems);
+        gsap.killTweensOf([introText, ...introTextItems].filter(Boolean));
         gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
+        if (introText) {
+          gsap.fromTo(
+            introText,
+            { y: 0, opacity: 1 },
+            { y: -24, opacity: 0, duration: 0.34, ease: 'power2.out', force3D: true },
+          );
+        }
         prevScrollTop = startScroll;
         root.scrollTo({ top: targetScroll, behavior: 'smooth' });
         window.dispatchEvent(new Event('parium:gallery-enter'));
