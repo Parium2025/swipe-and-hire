@@ -334,7 +334,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         tl.set(introOuter, { autoAlpha: 0 });
         tl.fromTo(heroOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
         tl.fromTo(heroInner, { yPercent: 100 }, { yPercent: 0 }, 0);
-        tl.fromTo(heroTextItems, { y: -44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.06, ease: 'power2.out' }, 0.48);
+        // heroTextItems-tween borttagen — framer-motion ägde entrén och
+        // återkomst-fade hanteras visuellt via layerns yPercent-slide.
       };
 
       // 2↔3 = NATURLIG scroll. Inget GSAP-driv av scrollTop, inga
