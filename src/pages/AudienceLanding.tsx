@@ -302,7 +302,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
         const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power2.inOut' },
+          defaults: { duration: 1.08, ease: 'power3.inOut' },
           onComplete: () => {
             setIntroResting();
             animatingRef.current = false;
@@ -458,15 +458,15 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         }, [], 0);
         // Camera scroll i samma ticker som layer-sliden — inga separata
         // scrollTo-callbacks som kan hamna ur fas med kortens transform.
-        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power2.inOut' }, 0);
+        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power3.inOut' }, 0);
         tl.eventCallback('onUpdate', () => {
           scrollRoot.scrollTop = startScroll + (target - startScroll) * scrollProxy.y;
         });
         // Intro-lagret slidar IN från ovan (mirror av hero i 2→1)
-        tl.fromTo(introOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
-        tl.fromTo(introInner, { yPercent: 100 }, { yPercent: 0 }, 0);
+        tl.fromTo(introOuter, { yPercent: -100 }, { yPercent: 0, force3D: true }, 0);
+        tl.fromTo(introInner, { yPercent: 100 }, { yPercent: 0, force3D: true }, 0);
         // Text in samma timing som hero-text i 2→1 (0.48s delay, 0.62s, stagger 0.08, power2.out)
-        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.48);
+        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out', force3D: true }, 0.48);
       };
 
       observer = Observer.create({
