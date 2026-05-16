@@ -63,6 +63,12 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         app.setZoom(zoom);
         requestAnimationFrame(() => app?.setZoom(zoom));
         if (!activeRef.current) app.stop();
+        // Vänta två rAF så Spline hinner rita sin första WebGL-frame innan
+        // vi fade:ar in canvasen — annars syns scenens default-bakgrund
+        // (vit) i en frame och det upplevs som en "vit ram" runt telefonen.
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        );
         if (!cancelled) {
           setIsReady(true);
           // Signal till FixedPhoneLayer att vi får visa wrappern utan att
