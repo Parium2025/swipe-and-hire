@@ -371,12 +371,17 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         programmaticReturn = true;
         setObserverActive(false);
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
-        const targetScroll = root.scrollTop + next.getBoundingClientRect().top;
-        prevScrollTop = root.scrollTop;
+        const startScroll = root.scrollTop;
+        const targetScroll = startScroll + next.getBoundingClientRect().top;
+        prevScrollTop = startScroll;
         root.scrollTo({ top: targetScroll, behavior: 'smooth' });
         window.dispatchEvent(new Event('parium:gallery-enter'));
         forwardTimer = window.setTimeout(() => {
           programmaticReturn = false;
+          const moved = Math.abs(root.scrollTop - startScroll);
+          if (moved < 24) {
+            root.scrollTo({ top: targetScroll, behavior: 'auto' });
+          }
           prevScrollTop = root.scrollTop;
           forwardTimer = null;
         }, 900);
