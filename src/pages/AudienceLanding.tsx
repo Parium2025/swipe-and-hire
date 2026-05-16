@@ -398,7 +398,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         const startScroll = root.scrollTop;
         tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power2.inOut' }, 0);
         tl.eventCallback('onUpdate', () => {
-          root.scrollTop = startScroll + (targetScroll - startScroll) * scrollProxy.y;
+          root.scrollTop = Math.round(startScroll + (targetScroll - startScroll) * scrollProxy.y);
         });
         // Trigga kortens staggered entrance i SAMMA takt som intro-texten i 1→2
         // (samma 0.48s delay relativt timelinens start). Korten fadar in lockstep
@@ -459,7 +459,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         // scrollTo-callbacks som kan hamna ur fas med kortens transform.
         tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power2.inOut' }, 0);
         tl.eventCallback('onUpdate', () => {
-          scrollRoot.scrollTop = startScroll + (target - startScroll) * scrollProxy.y;
+          scrollRoot.scrollTop = Math.round(startScroll + (target - startScroll) * scrollProxy.y);
         });
         // Intro-lagret slidar IN från ovan (mirror av hero i 2→1)
         tl.fromTo(introOuter, { yPercent: -100 }, { yPercent: 0, force3D: true }, 0);
