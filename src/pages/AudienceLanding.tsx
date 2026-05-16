@@ -242,10 +242,12 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
 
+      let observerActive = false;
       const setObserverActive = (active: boolean) => {
-        if (!observer) return;
-        if (active && !observer.isEnabled) observer.enable?.();
-        if (!active && observer.isEnabled) observer.disable?.();
+        if (!observer || active === observerActive) return;
+        observerActive = active;
+        if (active) observer.enable?.();
+        else observer.disable?.();
       };
 
       const clearReturnWork = () => {
@@ -366,6 +368,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
         const targetScroll = root.scrollTop + next.getBoundingClientRect().top;
         root.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        window.dispatchEvent(new Event('parium:gallery-enter'));
         prevScrollTop = targetScroll;
       };
 
@@ -376,6 +379,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         releaseLockedRef.current = false;
         setObserverActive(true);
         setIntroResting();
+        window.dispatchEvent(new Event('parium:gallery-leave'));
         const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
         scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
@@ -406,6 +410,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
           if (indexRef.current === 1) goToHero();
         },
       });
+      observerActive = true;
 
       let transitionActive = false;
       const onTransition = (e: Event) => {
