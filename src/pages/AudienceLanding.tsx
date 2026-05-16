@@ -368,6 +368,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
         const targetScroll = root.scrollTop + next.getBoundingClientRect().top;
         root.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        window.dispatchEvent(new Event('parium:gallery-enter'));
         prevScrollTop = targetScroll;
       };
 
@@ -378,6 +379,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         releaseLockedRef.current = false;
         setObserverActive(true);
         setIntroResting();
+        window.dispatchEvent(new Event('parium:gallery-leave'));
         const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
         scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
