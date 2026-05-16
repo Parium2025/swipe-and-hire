@@ -242,10 +242,12 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
 
+      let observerActive = false;
       const setObserverActive = (active: boolean) => {
-        if (!observer) return;
-        if (active && !observer.isEnabled) observer.enable?.();
-        if (!active && observer.isEnabled) observer.disable?.();
+        if (!observer || active === observerActive) return;
+        observerActive = active;
+        if (active) observer.enable?.();
+        else observer.disable?.();
       };
 
       const clearReturnWork = () => {
@@ -406,6 +408,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
           if (indexRef.current === 1) goToHero();
         },
       });
+      observerActive = true;
 
       let transitionActive = false;
       const onTransition = (e: Event) => {
