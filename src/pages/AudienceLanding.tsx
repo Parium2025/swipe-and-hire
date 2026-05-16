@@ -584,6 +584,9 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
             }}
           >
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center will-change-transform">
+              <div className="mb-8 w-full sm:mb-10 md:mb-12">
+                <MorphingHeading />
+              </div>
               <IntroText
                 paragraphs={[
                   'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
