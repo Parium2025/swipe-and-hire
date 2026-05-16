@@ -166,6 +166,7 @@ const PinnedHorizontalGallery = () => {
     let playTimer: number | null = null;
     const warmTimers: number[] = [];
     let disposed = false;
+    let warmed = false;
     let gsapInstance: typeof import('gsap').default | null = null;
 
     import('gsap').then(({ default: gsap }) => {
@@ -180,6 +181,8 @@ const PinnedHorizontalGallery = () => {
     };
 
     const warmVideos = () => {
+      if (warmed) return;
+      warmed = true;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       videos.forEach((v, index) => {
         warmTimers.push(window.setTimeout(() => {
