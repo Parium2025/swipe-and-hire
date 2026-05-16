@@ -60,6 +60,7 @@ type HeroIntroStageProps = {
 const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
+  const [phoneReady, setPhoneReady] = useState(false);
   const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
