@@ -108,7 +108,9 @@ const FixedPhoneLayer = () => {
     };
 
     sync();
+    const onSplineReady = () => setPhoneReady(true);
     window.addEventListener('parium:hero-index', onIndex);
+    window.addEventListener('parium:spline-ready', onSplineReady);
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
 
     // 🔁 Spline-canvasen fångar wheel/touch internt (för 3D-rotation/zoom),
