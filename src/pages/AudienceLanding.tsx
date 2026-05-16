@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
@@ -54,7 +53,6 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 type HeroIntroStageProps = {
   c: (typeof audienceContent)[AudienceRole];
   isDesktopHero: boolean;
-  onStart: () => void;
 };
 
 const FixedPhoneLayer = () => {
@@ -202,7 +200,7 @@ const FixedPhoneLayer = () => {
 // och scrollar nedåt igen släpps kontrollen och sidan scrollar vidare normalt.
 // Inga scroll-snap, ingen sticky, inga konkurrerande wheel-locks.
 // ─────────────────────────────────────────────────────────────────────────────
-const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
+const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
   const stageRef = useRef<HTMLElement | null>(null);
   const heroOuterRef = useRef<HTMLDivElement | null>(null);
   const heroInnerRef = useRef<HTMLDivElement | null>(null);
@@ -239,7 +237,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
       const heroTextItems = heroText ? gsap.utils.toArray<HTMLElement>(heroText.querySelectorAll('span, h1 span, p')) : [];
-      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p, button')) : [];
+      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p')) : [];
       let releasedToGallery = false;
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
@@ -637,16 +635,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
                   'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
                 ]}
               />
-              <div className="mt-10 flex justify-center">
-                <button
-                  type="button"
-                  onPointerDown={onStart}
-                  className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-bold text-white shadow-[0_18px_55px_hsl(var(--background)/0.4)] transition-all hover:bg-white/15 hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
-                >
-                  {c.hero.cta}
-                  <ArrowRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
-                </button>
-              </div>
             </div>
           </section>
         </div>
@@ -787,7 +775,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
         <main>
-          <HeroIntroStage c={c} isDesktopHero={isDesktopHero} onStart={handleStart} />
+          <HeroIntroStage c={c} isDesktopHero={isDesktopHero} />
 
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
