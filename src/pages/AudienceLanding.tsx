@@ -60,6 +60,7 @@ type HeroIntroStageProps = {
 const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
+  const [phoneReady, setPhoneReady] = useState(false);
   const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
@@ -107,7 +108,9 @@ const FixedPhoneLayer = () => {
     };
 
     sync();
+    const onSplineReady = () => setPhoneReady(true);
     window.addEventListener('parium:hero-index', onIndex);
+    window.addEventListener('parium:spline-ready', onSplineReady);
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
 
     // 🔁 Spline-canvasen fångar wheel/touch internt (för 3D-rotation/zoom),
@@ -156,6 +159,7 @@ const FixedPhoneLayer = () => {
 
     return () => {
       window.removeEventListener('parium:hero-index', onIndex);
+      window.removeEventListener('parium:spline-ready', onSplineReady);
       scrollRoot?.removeEventListener('scroll', sync);
       phoneWrapper?.removeEventListener('wheel', forwardWheel, true);
       phoneWrapper?.removeEventListener('touchstart', onTouchStart, true);
@@ -177,7 +181,7 @@ const FixedPhoneLayer = () => {
         <div aria-hidden />
         <div
           data-phone-scroll-forward
-          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
+          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
@@ -362,7 +366,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
 
         const targetScroll = root.scrollTop + next.getBoundingClientRect().top + 1;
-        const scrollProxy = { y: root.scrollTop };
+        // OBS: proxy MÅSTE starta på 0 — den används som 0→1-multiplikator i onUpdate.
+        // Tidigare var den `y: root.scrollTop` vilket gjorde att första framen sköt
+        // scrollTop långt förbi målet och sen "smög" tillbaka — det syntes som ett hopp.
+        const scrollProxy = { y: 0 };
 
         const tl = gsap.timeline({
           defaults: { duration: 1.08, ease: 'power2.inOut' },
