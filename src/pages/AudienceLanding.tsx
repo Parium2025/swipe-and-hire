@@ -259,21 +259,23 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       // Hero-text-layern (heroOuter) skiftar yPercent → texten lämnar
       // viewporten visuellt utan att vi behöver röra textens opacity.
       const setHeroStart = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...introTextItems]);
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, ...introTextItems].filter(Boolean));
         gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 0 });
         gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
         gsap.set(introInner, { yPercent: -100 });
+        if (introText) gsap.set(introText, { opacity: 1, clearProps: 'transform' });
         gsap.set(introTextItems, { y: 44, opacity: 0 });
         indexRef.current = 0;
       };
 
       const setIntroResting = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...introTextItems]);
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, ...introTextItems].filter(Boolean));
         gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 100 });
         gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(introInner, { yPercent: 0 });
+        if (introText) gsap.set(introText, { opacity: 1, clearProps: 'transform' });
         // När intro ligger stilla ska texten inte längre ligga på ett GSAP-
         // transformlager. På hård scroll mot 3:an kunde compositing annars ge
         // en ghost/dubblett-frame av texten i Chrome/Lovable-preview.
