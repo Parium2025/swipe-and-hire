@@ -466,14 +466,15 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         }, 700);
       };
 
+      scrollRoot?.addEventListener('wheel', markWheelGesture, { passive: true, capture: true });
+      scrollRoot?.addEventListener('touchstart', markTouchGesture, { passive: true, capture: true });
+
       observer = Observer.create({
         target: scrollRoot ?? window,
         type: 'wheel,touch',
         wheelSpeed: -1,
         tolerance: 16,
         preventDefault: true,
-        onWheel: markWheelGesture,
-        onPress: markTouchGesture,
         onUp: () => {
           if (releasedToGallery || programmaticReturn || animatingRef.current) return;
           if (indexRef.current === 0) {
@@ -525,6 +526,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
       setupTeardown = () => {
         clearReturnWork();
+        scrollRoot?.removeEventListener('wheel', markWheelGesture, true);
+        scrollRoot?.removeEventListener('touchstart', markTouchGesture, true);
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
       };
     };
