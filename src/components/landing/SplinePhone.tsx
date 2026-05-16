@@ -17,6 +17,16 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
+  // showFallback = true ENDAST om Spline-scenen inte hunnit ladda inom 6s,
+  // eller om laddningen failat. Vid normal refresh visas INGEN skeleton —
+  // canvasen fade:as in tom (svart/transparent) tills första frame ritas.
+  const [showFallback, setShowFallback] = useState(false);
+
+  useEffect(() => {
+    if (isReady || hasError) return;
+    const timer = window.setTimeout(() => setShowFallback(true), 6000);
+    return () => window.clearTimeout(timer);
+  }, [isReady, hasError]);
 
   const reducedMotion =
     typeof window !== 'undefined' &&
@@ -118,40 +128,40 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
     >
-      {/* Skeleton — mjuk telefon-silhuett med shimmer som visas medan
-          WebGL-scenen laddar. Fadar ut när Spline ritat första frame.
-          Inga ord, ingen "laddar..."-text — bara form i Parium-färger
-          så att sidan alltid känns levande, även offline eller på 3G. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-700 ease-out"
-        style={{ opacity: isReady ? 0 : 1 }}
-      >
+      {/* Nödfallback — visas ENDAST om Spline-scenen inte kommit upp inom
+          6 sekunder (långsamt nät, WebGL-fel, e.dyl.). Vid normal refresh
+          syns den aldrig — canvasen fadar in när första frame är ritad. */}
+      {showFallback && !isReady && (
         <div
-          className="relative aspect-[9/19] w-[58%] max-w-[260px] overflow-hidden rounded-[2.25rem] border border-white/10"
-          style={{
-            background:
-              'linear-gradient(180deg, hsl(var(--background) / 0.55) 0%, hsl(var(--background) / 0.25) 100%)',
-            boxShadow: '0 30px 90px hsl(var(--background) / 0.5)',
-          }}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center"
         >
           <div
-            className="absolute inset-0"
+            className="relative aspect-[9/19] w-[58%] max-w-[260px] overflow-hidden rounded-[2.25rem] border border-white/10"
             style={{
               background:
-                'linear-gradient(110deg, transparent 30%, hsl(var(--secondary) / 0.10) 50%, transparent 70%)',
-              backgroundSize: '220% 100%',
-              animation: 'parium-skeleton-shimmer 2.4s ease-in-out infinite',
+                'linear-gradient(180deg, hsl(var(--background) / 0.55) 0%, hsl(var(--background) / 0.25) 100%)',
+              boxShadow: '0 30px 90px hsl(var(--background) / 0.5)',
             }}
-          />
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  'linear-gradient(110deg, transparent 30%, hsl(var(--secondary) / 0.10) 50%, transparent 70%)',
+                backgroundSize: '220% 100%',
+                animation: 'parium-skeleton-shimmer 2.4s ease-in-out infinite',
+              }}
+            />
+          </div>
+          <style>{`
+            @keyframes parium-skeleton-shimmer {
+              0% { background-position: 200% 0; }
+              100% { background-position: -120% 0; }
+            }
+          `}</style>
         </div>
-        <style>{`
-          @keyframes parium-skeleton-shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -120% 0; }
-          }
-        `}</style>
-      </div>
+      )}
       <canvas
         ref={canvasRef}
         role="img"
