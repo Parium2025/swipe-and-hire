@@ -365,14 +365,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:transition', { detail: { active: true } }));
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
 
-        const targetScroll = root.scrollTop + next.getBoundingClientRect().top + 1;
+        const targetScroll = root.scrollTop + next.getBoundingClientRect().top;
         // OBS: proxy MÅSTE starta på 0 — den används som 0→1-multiplikator i onUpdate.
         // Tidigare var den `y: root.scrollTop` vilket gjorde att första framen sköt
         // scrollTop långt förbi målet och sen "smög" tillbaka — det syntes som ett hopp.
         const scrollProxy = { y: 0 };
 
         const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power2.inOut' },
+          defaults: { duration: 1.08, ease: 'power3.inOut' },
           onComplete: () => {
             root.scrollTo({ top: targetScroll, behavior: 'auto' });
             animatingRef.current = false;
@@ -390,14 +390,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
           },
         });
         // Intro slides UP and reveals — mirror of hero→intro motion (1→2)
-        tl.to(introTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out' }, 0);
-        tl.to(introOuter, { yPercent: -100 }, 0);
-        tl.to(introInner, { yPercent: 100 }, 0);
+        tl.to(introTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out', force3D: true }, 0);
+        tl.to(introOuter, { yPercent: -100, force3D: true }, 0);
+        tl.to(introInner, { yPercent: 100, force3D: true }, 0);
         // Camera scrolls in lockstep via GSAP's ticker. Using a DOM tween
         // onUpdate here made Framer's scroll listener + GSAP write to the same
         // frame in different phases, which caused the visible 2↔3 shake.
         const startScroll = root.scrollTop;
-        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power2.inOut' }, 0);
+        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power3.inOut' }, 0);
         tl.eventCallback('onUpdate', () => {
           root.scrollTop = startScroll + (targetScroll - startScroll) * scrollProxy.y;
         });
