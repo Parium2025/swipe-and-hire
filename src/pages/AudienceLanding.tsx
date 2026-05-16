@@ -302,7 +302,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
         const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power3.inOut' },
+          defaults: { duration: 1.08, ease: 'power2.inOut' },
           onComplete: () => {
             setIntroResting();
             animatingRef.current = false;
@@ -372,7 +372,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         const scrollProxy = { y: 0 };
 
         const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power3.inOut' },
+          defaults: { duration: 1.08, ease: 'power2.inOut' },
           onComplete: () => {
             root.scrollTo({ top: targetScroll, behavior: 'auto' });
             animatingRef.current = false;
@@ -397,7 +397,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         // onUpdate here made Framer's scroll listener + GSAP write to the same
         // frame in different phases, which caused the visible 2↔3 shake.
         const startScroll = root.scrollTop;
-        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power3.inOut' }, 0);
+        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power2.inOut' }, 0);
         tl.eventCallback('onUpdate', () => {
           root.scrollTop = startScroll + (targetScroll - startScroll) * scrollProxy.y;
         });
