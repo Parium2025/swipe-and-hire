@@ -163,11 +163,32 @@ const PinnedHorizontalGallery = () => {
       if (p && typeof p.catch === 'function') p.catch(() => {});
     };
 
+    // Adaptiv warmup: på data-saver eller långsamma nät (2G/3G) warm:ar vi
+    // bara de första 4 videorna direkt — resten warm:as först när användaren
+    // faktiskt scrollar nära dem. Sparar 50% bandbredd på mobil/sparsam data
+    // utan att försämra upplevelsen för dem som har snabbt nät.
+    const getNetworkProfile = (): 'slim' | 'full' => {
+      try {
+        const nav = navigator as Navigator & {
+          connection?: { saveData?: boolean; effectiveType?: string };
+        };
+        const conn = nav.connection;
+        if (!conn) return 'full';
+        if (conn.saveData) return 'slim';
+        const slow = conn.effectiveType && /(^|-)(2g|slow-2g|3g)$/i.test(conn.effectiveType);
+        return slow ? 'slim' : 'full';
+      } catch {
+        return 'full';
+      }
+    };
+
     const warmVideos = () => {
       if (warmed) return;
       warmed = true;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
-      videos.forEach((v, index) => {
+      const profile = getNetworkProfile();
+      const initialBatch = profile === 'slim' ? videos.slice(0, 4) : videos;
+      initialBatch.forEach((v, index) => {
         warmTimers.push(window.setTimeout(() => {
           try {
             v.preload = 'auto';

@@ -208,13 +208,13 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       const heroInner = heroInnerRef.current;
       const introOuter = introOuterRef.current;
       const introInner = introInnerRef.current;
-      const heroText = heroTextRef.current;
       const introText = introTextRef.current;
       const stage = stageRef.current;
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
-      const heroTextItems = heroText ? gsap.utils.toArray<HTMLElement>(heroText.querySelectorAll('span, h1 span, p')) : [];
+      // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
+      // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
       const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p')) : [];
       let releasedToGallery = false;
       let programmaticReturn = false;
@@ -251,24 +251,29 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         }
       };
 
+      // VIKTIGT: Vi rör INTE heroTextItems via GSAP. Hero-texten ägs av
+      // framer-motion (HeroText) som har en lång premium-fade (~3s totalt).
+      // Om GSAP gör `gsap.set(...opacity:1)` eller tween:ar opacity här
+      // kapas framer-motions pågående animation mitt i → text "hackar"
+      // eller "försvinner fel" vid första scrollen efter refresh.
+      // Hero-text-layern (heroOuter) skiftar yPercent → texten lämnar
+      // viewporten visuellt utan att vi behöver röra textens opacity.
       const setHeroStart = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...introTextItems]);
         gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 0 });
         gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
         gsap.set(introInner, { yPercent: -100 });
-        gsap.set(heroTextItems, { y: 0, opacity: 1 });
         gsap.set(introTextItems, { y: 44, opacity: 0 });
         indexRef.current = 0;
       };
 
       const setIntroResting = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...introTextItems]);
         gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 100 });
         gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(introInner, { yPercent: 0 });
-        gsap.set(heroTextItems, { y: -44, opacity: 0 });
         gsap.set(introTextItems, { y: 0, opacity: 1 });
         indexRef.current = 1;
       };
@@ -294,7 +299,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
             if (!releasedToGallery) setObserverActive(true);
           },
         });
-        tl.to(heroTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out' }, 0);
+        // heroTextItems-tween borttagen — framer-motion äger hero-textens
+        // opacitet. Layern (heroOuter) translateY tar texten ur viewporten.
         tl.to(heroOuter, { yPercent: -100 }, 0);
         tl.to(heroInner, { yPercent: 100 }, 0);
         tl.set(introOuter, { autoAlpha: 1 }, 0);
@@ -328,7 +334,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         tl.set(introOuter, { autoAlpha: 0 });
         tl.fromTo(heroOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
         tl.fromTo(heroInner, { yPercent: 100 }, { yPercent: 0 }, 0);
-        tl.fromTo(heroTextItems, { y: -44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.06, ease: 'power2.out' }, 0.48);
+        // heroTextItems-tween borttagen — framer-motion ägde entrén och
+        // återkomst-fade hanteras visuellt via layerns yPercent-slide.
       };
 
       // 2↔3 = NATURLIG scroll. Inget GSAP-driv av scrollTop, inga
