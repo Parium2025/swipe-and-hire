@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-
 import real1 from '@/assets/landing/jobseeker-real-1.jpg';
 import real2 from '@/assets/landing/jobseeker-real-2.jpg';
 import real3 from '@/assets/landing/jobseeker-real-3.jpg';
@@ -56,7 +54,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
           muted
           loop
           playsInline
-          preload="none"
+          preload="auto"
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       ) : (
@@ -166,6 +164,7 @@ const PinnedHorizontalGallery = () => {
     if (!strip) return;
 
     let playTimer: number | null = null;
+    const warmTimers: number[] = [];
     let disposed = false;
     let gsapInstance: typeof import('gsap').default | null = null;
 
@@ -179,6 +178,20 @@ const PinnedHorizontalGallery = () => {
       const p = v.play();
       if (p && typeof p.catch === 'function') p.catch(() => {});
     };
+
+    const warmVideos = () => {
+      const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
+      videos.forEach((v, index) => {
+        warmTimers.push(window.setTimeout(() => {
+          try {
+            v.preload = 'auto';
+            if (v.readyState < 2) v.load();
+          } catch {}
+        }, index * 140));
+      });
+    };
+
+    warmTimers.push(window.setTimeout(warmVideos, 500));
 
     const enter = () => {
       strip.classList.remove('phg-leaving');
@@ -205,10 +218,9 @@ const PinnedHorizontalGallery = () => {
         gsapInstance.killTweensOf(cards);
         gsapInstance.to(cards, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in', force3D: true });
       }
-      // Pausa direkt — frigör GPU/decode under 3→2 transformen.
+      // Pausa inte videorna vid 3→2 — de är redan varma och ska kännas levande
+      // när användaren går tillbaka igen. Vi stoppar bara eventuell start-timer.
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
-      const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
-      videos.forEach((v) => { try { v.pause(); } catch {} });
     };
 
     const onEnter = () => enter();
@@ -219,6 +231,7 @@ const PinnedHorizontalGallery = () => {
     return () => {
       disposed = true;
       if (playTimer) window.clearTimeout(playTimer);
+      warmTimers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
     };
@@ -445,16 +458,16 @@ const PinnedHorizontalGallery = () => {
         <div className="phg-sticky">
 
           <div className="phg-strip-wrap">
-            <motion.div ref={stripRef} className="phg-strip">
+            <div ref={stripRef} className="phg-strip">
               {items.map((item, i) => (
                 <CardItem key={i} item={item} index={i} />
               ))}
-            </motion.div>
+            </div>
           </div>
 
           <div className="phg-footer">
             <div className="phg-progress" aria-hidden>
-              <motion.span />
+              <span />
             </div>
           </div>
         </div>
