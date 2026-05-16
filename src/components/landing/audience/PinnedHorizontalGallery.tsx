@@ -23,10 +23,13 @@ type MediaItem = {
   title: string;
 };
 
+// VIKTIGT: Alla videos har en poster. Om videon failar att ladda (offline,
+// 404, codec-issue) renderas posterbilden istället för en svart ruta —
+// användaren ser alltid något meningsfullt i kortet.
 const items: MediaItem[] = [
   { type: 'video', src: '/landing/jobseeker-pt.mp4', poster: real1, position: '50% 30%', eyebrow: 'Träning', title: 'Personliga tränare' },
   { type: 'video', src: '/landing/jobseeker-plumber.mp4', poster: real5, position: '50% 30%', eyebrow: 'Hantverk', title: 'Rörmokare & byggare' },
-  { type: 'video', src: '/landing/jobseeker-real-center.mp4', eyebrow: 'I rörelse', title: 'Yrkespersoner i sitt element' },
+  { type: 'video', src: '/landing/jobseeker-real-center.mp4', poster: real1, eyebrow: 'I rörelse', title: 'Yrkespersoner i sitt element' },
   { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real2, eyebrow: 'Service', title: 'Mäklare & rådgivare' },
   { type: 'video', src: '/landing/jobseeker-real-3.mp4', poster: real3, eyebrow: 'Restaurang', title: 'Kockar & köksmästare' },
   { type: 'video', src: '/landing/jobseeker-electrician.mp4', poster: real4, position: '50% 28%', eyebrow: 'Tekniker', title: 'Elektriker' },
@@ -40,14 +43,17 @@ type CardItemProps = {
 };
 
 const CardItem = ({ item, index }: CardItemProps) => {
-  // Korten fadar in som intro-texten — staggered, ren opacity + lätt y-lyft.
-  // Triggas via .phg-entered klass på föräldern (sätts av IntersectionObserver).
+  // failed=true → byt ut <video> mot poster-bild som fallback. Triggas vid
+  // network error, 404, codec-fel eller om användaren är offline när videon
+  // ska laddas. Användaren ser alltid en relevant bild istället för svart ruta.
+  const [failed, setFailed] = useState(false);
+
   return (
     <div
       className="phg-card phg-card-enter"
       style={{ ['--enter-delay' as string]: `${index * 80}ms`, ['--leave-delay' as string]: `${index * 55}ms` }}
     >
-      {item.type === 'video' ? (
+      {item.type === 'video' && !failed ? (
         <video
           src={item.src}
           poster={item.poster}
@@ -55,11 +61,12 @@ const CardItem = ({ item, index }: CardItemProps) => {
           loop
           playsInline
           preload="metadata"
+          onError={() => setFailed(true)}
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       ) : (
         <img
-          src={item.src}
+          src={item.type === 'video' ? (item.poster ?? item.src) : item.src}
           alt={item.title}
           loading={index < 3 ? 'eager' : 'lazy'}
           decoding="async"
