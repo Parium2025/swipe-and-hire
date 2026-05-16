@@ -219,6 +219,36 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       let releasedToGallery = false;
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
+      let gestureId = 0;
+      let lastWheelInputAt = 0;
+      let introSettledGestureId = -1;
+      let introSettledAt = 0;
+      const GESTURE_IDLE_MS = 280;
+
+      const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+      const markWheelGesture = () => {
+        const t = now();
+        if (t - lastWheelInputAt > GESTURE_IDLE_MS) gestureId += 1;
+        lastWheelInputAt = t;
+      };
+
+      const markTouchGesture = () => {
+        gestureId += 1;
+        lastWheelInputAt = now();
+      };
+
+      const settleIntroExitGate = () => {
+        introSettledGestureId = gestureId;
+        introSettledAt = now();
+      };
+
+      const canExitIntroOnThisGesture = () => {
+        // Man ska alltid behöva en NY scroll-/touch-gest efter att intro (2:an)
+        // har landat. Då kan ett hårt första hjul-/trackpad-drag inte passera
+        // 1→2→3, och ett hårt uppdrag från 3 kan inte passera 3→2→1.
+        return gestureId !== introSettledGestureId && now() - introSettledAt > 80;
+      };
 
       let observerActive = false;
       const setObserverActive = (active: boolean) => {
@@ -295,6 +325,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
             animatingRef.current = false;
             releaseLockedRef.current = false;
             programmaticReturn = false;
+            settleIntroExitGate();
             window.dispatchEvent(new Event('parium:gallery-warm'));
             if (!releasedToGallery) setObserverActive(true);
           },
