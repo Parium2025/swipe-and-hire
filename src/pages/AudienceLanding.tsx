@@ -194,6 +194,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
     let returnFrame: number | null = null;
     let returnTimer: number | null = null;
     let forwardTimer: number | null = null;
+    let inputUnlockTimer: number | null = null;
     let setupTeardown: (() => void) | undefined;
 
     const setup = async () => {
@@ -256,6 +257,29 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         return gestureId !== introSettledGestureId && currentGestureStartedAt > introSettledAt + 120;
       };
 
+      let nativeInputLocked = false;
+      const stopNativeInput = (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+      };
+
+      const setNativeInputLocked = (locked: boolean) => {
+        if (!scrollRoot || nativeInputLocked === locked) return;
+        nativeInputLocked = locked;
+        const method = locked ? 'addEventListener' : 'removeEventListener';
+        scrollRoot[method]('wheel', stopNativeInput, { passive: false, capture: true });
+        scrollRoot[method]('touchmove', stopNativeInput, { passive: false, capture: true });
+      };
+
+      const lockNativeInputFor = (ms: number) => {
+        setNativeInputLocked(true);
+        if (inputUnlockTimer) window.clearTimeout(inputUnlockTimer);
+        inputUnlockTimer = window.setTimeout(() => {
+          setNativeInputLocked(false);
+          inputUnlockTimer = null;
+        }, ms);
+      };
+
       let observerActive = false;
       const setObserverActive = (active: boolean) => {
         if (!observer || active === observerActive) return;
@@ -277,6 +301,11 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
           window.clearTimeout(forwardTimer);
           forwardTimer = null;
         }
+        if (inputUnlockTimer) {
+          window.clearTimeout(inputUnlockTimer);
+          inputUnlockTimer = null;
+        }
+        setNativeInputLocked(false);
       };
 
       const snapStageToTop = () => {
