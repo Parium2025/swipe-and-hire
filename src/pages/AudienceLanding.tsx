@@ -560,7 +560,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
               backgroundColor: 'hsl(var(--primary))',
             }}
           >
-            <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center">
+            <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center will-change-transform">
               <IntroText
                 paragraphs={[
                   'Söka jobb ska vara enkelt, oavsett vilken typ av tjänst du letar efter. Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
