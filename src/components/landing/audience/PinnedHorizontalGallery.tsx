@@ -103,20 +103,13 @@ const PinnedHorizontalGallery = () => {
     const strip = stripRef.current;
     if (!root || !section || !strip) return;
 
-    let transitionActive = false;
-
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
-      // Ingen deadzone — korten & progressbaren rör sig från första scrollpixeln.
       strip.style.setProperty('--phg-x', `${7 + (-152 * p)}vw`);
       section.style.setProperty('--phg-progress', `${p}`);
     };
 
     const measure = () => {
-      // Skippa layout-läsning helt under en programstyrd transition (2↔3).
-      // GSAP skriver scrollTop varje frame och vi vill inte läsa
-      // getBoundingClientRect i samma frame — det är källan till skakningarna.
-      if (transitionActive) return;
       const rect = section.getBoundingClientRect();
       const distance = Math.max(1, section.offsetHeight - root.clientHeight);
       targetProgressRef.current = Math.min(1, Math.max(0, -rect.top / distance));
@@ -133,32 +126,13 @@ const PinnedHorizontalGallery = () => {
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
     };
 
-    const onTransition = (e: Event) => {
-      transitionActive = !!(e as CustomEvent<{ active: boolean }>).detail?.active;
-      if (transitionActive) {
-        if (rafRef.current !== null) {
-          window.cancelAnimationFrame(rafRef.current);
-          rafRef.current = null;
-        }
-        applyProgress(renderedProgressRef.current);
-        targetProgressRef.current = renderedProgressRef.current;
-        return;
-      }
-      if (!transitionActive) {
-        // När transition är klar — synca progress mot faktisk scroll-position.
-        measure();
-      }
-    };
-
     applyProgress(0);
     measure();
     root.addEventListener('scroll', measure, { passive: true });
     window.addEventListener('resize', measure);
-    window.addEventListener('parium:transition', onTransition);
     return () => {
       root.removeEventListener('scroll', measure);
       window.removeEventListener('resize', measure);
-      window.removeEventListener('parium:transition', onTransition);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
     };
   }, []);
@@ -242,8 +216,28 @@ const PinnedHorizontalGallery = () => {
     window.addEventListener('parium:gallery-enter', onEnter);
     window.addEventListener('parium:gallery-leave', onLeave);
 
+    // IntersectionObserver — kortens entrance/exit baseras på sektionens
+    // synlighet i viewporten. Eftersom 2↔3 nu är NATURLIG scroll (ingen
+    // GSAP-skrivning av scrollTop), kan vi använda IO utan att riskera
+    // att den triggas mitt i en programstyrd transition.
+    const section = sectionRef.current;
+    let io: IntersectionObserver | null = null;
+    if (section) {
+      io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.15) {
+            enter();
+          } else if (entry.intersectionRatio < 0.05) {
+            leave();
+          }
+        });
+      }, { threshold: [0, 0.05, 0.15, 0.3] });
+      io.observe(section);
+    }
+
     return () => {
       disposed = true;
+      io?.disconnect();
       if (playTimer) window.clearTimeout(playTimer);
       warmTimers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener('parium:gallery-warm', onWarm);
