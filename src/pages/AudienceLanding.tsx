@@ -362,7 +362,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
 
         const targetScroll = root.scrollTop + next.getBoundingClientRect().top + 1;
-        const scrollProxy = { y: root.scrollTop };
+        // OBS: proxy MÅSTE starta på 0 — den används som 0→1-multiplikator i onUpdate.
+        // Tidigare var den `y: root.scrollTop` vilket gjorde att första framen sköt
+        // scrollTop långt förbi målet och sen "smög" tillbaka — det syntes som ett hopp.
+        const scrollProxy = { y: 0 };
 
         const tl = gsap.timeline({
           defaults: { duration: 1.08, ease: 'power2.inOut' },
