@@ -217,6 +217,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
     let observer: { kill: () => void; enable?: () => void; disable?: () => void; isEnabled?: boolean } | null = null;
     let returnFrame: number | null = null;
     let returnTimer: number | null = null;
+    let forwardTimer: number | null = null;
+    let setupTeardown: (() => void) | undefined;
 
     const setup = async () => {
       const [{ default: gsap }, { Observer }] = await Promise.all([
@@ -258,6 +260,10 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         if (returnTimer) {
           window.clearTimeout(returnTimer);
           returnTimer = null;
+        }
+        if (forwardTimer) {
+          window.clearTimeout(forwardTimer);
+          forwardTimer = null;
         }
       };
 
@@ -363,13 +369,23 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         if (!root || !next) return;
         if (animatingRef.current) return;
         releasedToGallery = true;
-        programmaticReturn = false;
+        programmaticReturn = true;
         setObserverActive(false);
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
-        const targetScroll = root.scrollTop + next.getBoundingClientRect().top;
+        const startScroll = root.scrollTop;
+        const targetScroll = startScroll + next.getBoundingClientRect().top;
+        prevScrollTop = startScroll;
         root.scrollTo({ top: targetScroll, behavior: 'smooth' });
         window.dispatchEvent(new Event('parium:gallery-enter'));
-        prevScrollTop = targetScroll;
+        forwardTimer = window.setTimeout(() => {
+          programmaticReturn = false;
+          const moved = Math.abs(root.scrollTop - startScroll);
+          if (moved < 24) {
+            root.scrollTo({ top: targetScroll, behavior: 'auto' });
+          }
+          prevScrollTop = root.scrollTop;
+          forwardTimer = null;
+        }, 900);
       };
 
       const returnFromGalleryToIntro = () => {
@@ -450,22 +466,22 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
       scrollRoot?.addEventListener('scroll', onScrollWatch, { passive: true });
 
-      return () => {
+      setupTeardown = () => {
         clearReturnWork();
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
         window.removeEventListener('parium:transition', onTransition);
       };
     };
 
-    let teardown: (() => void) | undefined;
-    setup().then((t) => { if (typeof t === 'function') teardown = t; });
+    setup();
 
     return () => {
       cancelled = true;
       if (returnFrame) { window.cancelAnimationFrame(returnFrame); returnFrame = null; }
       if (returnTimer) { window.clearTimeout(returnTimer); returnTimer = null; }
+      if (forwardTimer) { window.clearTimeout(forwardTimer); forwardTimer = null; }
       observer?.kill();
-      teardown?.();
+      setupTeardown?.();
     };
   }, []);
 
