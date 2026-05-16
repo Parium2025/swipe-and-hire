@@ -413,6 +413,9 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         setIntroResting();
         window.dispatchEvent(new Event('parium:gallery-leave'));
         const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
+        // Blockera vidare wheel/touch ~700ms så att kvarvarande momentum inte
+        // sliter sönder den smooth-scrollade returen (samma princip som 2→3).
+        transitionBlockUntil = performance.now() + 700;
         scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
         window.setTimeout(() => {
@@ -458,11 +461,10 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
         if (releasedToGallery) {
           setObserverActive(false);
-          // Bredare fönster: även hård scroll uppåt som hoppar förbi det
-          // smala "i view"-intervallet ska trigga return till intro.
-          // Så snart vi rör oss uppåt och stage är åtminstone halvt i view
-          // (eller högst upp), snappar vi tillbaka.
-          if (direction === 'up' && rect.top > -vh * 0.5) {
+          // Trigga direkt när stagens nederkant precis börjar tittas fram
+          // underifrån — då ska 3→2-animationen sätta igång omedelbart och
+          // användaren ska inte kunna scrolla vidare upp i galleriet manuellt.
+          if (direction === 'up' && rect.bottom > 0) {
             returnFromGalleryToIntro();
           }
           return;
