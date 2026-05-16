@@ -458,7 +458,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
         }, [], 0);
         // Camera scroll i samma ticker som layer-sliden — inga separata
         // scrollTo-callbacks som kan hamna ur fas med kortens transform.
-        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power3.inOut' }, 0);
+        tl.to(scrollProxy, { y: 1, duration: 1.08, ease: 'power2.inOut' }, 0);
         tl.eventCallback('onUpdate', () => {
           scrollRoot.scrollTop = startScroll + (target - startScroll) * scrollProxy.y;
         });
