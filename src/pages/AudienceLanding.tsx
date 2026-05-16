@@ -159,6 +159,7 @@ const FixedPhoneLayer = () => {
 
     return () => {
       window.removeEventListener('parium:hero-index', onIndex);
+      window.removeEventListener('parium:spline-ready', onSplineReady);
       scrollRoot?.removeEventListener('scroll', sync);
       phoneWrapper?.removeEventListener('wheel', forwardWheel, true);
       phoneWrapper?.removeEventListener('touchstart', onTouchStart, true);
