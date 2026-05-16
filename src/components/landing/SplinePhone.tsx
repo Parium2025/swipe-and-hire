@@ -63,7 +63,12 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         app.setZoom(zoom);
         requestAnimationFrame(() => app?.setZoom(zoom));
         if (!activeRef.current) app.stop();
-        if (!cancelled) setIsReady(true);
+        if (!cancelled) {
+          setIsReady(true);
+          // Signal till FixedPhoneLayer att vi får visa wrappern utan att
+          // det blir ett synligt tomt/vitt lager innan WebGL ritar första frame.
+          window.dispatchEvent(new Event('parium:spline-ready'));
+        }
       } catch (error) {
         console.error('Kunde inte ladda Spline-telefonen:', error);
         if (!cancelled) setHasError(true);
