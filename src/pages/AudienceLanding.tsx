@@ -194,7 +194,6 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
     let returnFrame: number | null = null;
     let returnTimer: number | null = null;
     let forwardTimer: number | null = null;
-    let inputUnlockTimer: number | null = null;
     let setupTeardown: (() => void) | undefined;
 
     const setup = async () => {
@@ -220,71 +219,6 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       let releasedToGallery = false;
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
-      let gestureId = 0;
-      let lastWheelInputAt = 0;
-      let currentGestureStartedAt = 0;
-      let introSettledGestureId = -1;
-      let introSettledAt = 0;
-      const GESTURE_IDLE_MS = 140;
-
-      const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
-
-      const markWheelGesture = () => {
-        const t = now();
-        if (t - lastWheelInputAt > GESTURE_IDLE_MS) {
-          gestureId += 1;
-          currentGestureStartedAt = t;
-        }
-        lastWheelInputAt = t;
-      };
-
-      const markTouchGesture = () => {
-        gestureId += 1;
-        const t = now();
-        currentGestureStartedAt = t;
-        lastWheelInputAt = t;
-      };
-
-      const settleIntroExitGate = () => {
-        introSettledGestureId = gestureId;
-        introSettledAt = now();
-      };
-
-      const canExitIntroOnThisGesture = () => {
-        // Man ska alltid behöva en NY scroll-/touch-gest efter att intro (2:an)
-        // har landat. Då kan ett hårt första hjul-/trackpad-drag inte passera
-        // 1→2→3, och ett hårt uppdrag från 3 kan inte passera 3→2→1.
-        // Ingen extra väntetid: så fort användaren gör en ny wheel-notch/svep
-        // efter att tvåan landat reagerar sidan direkt.
-        return gestureId !== introSettledGestureId && currentGestureStartedAt >= introSettledAt;
-      };
-
-      let nativeInputLocked = false;
-      const stopNativeInput = (e: Event) => {
-        e.preventDefault();
-        e.stopPropagation();
-      };
-
-      const setNativeInputLocked = (locked: boolean) => {
-        if (!scrollRoot || nativeInputLocked === locked) return;
-        nativeInputLocked = locked;
-        if (locked) {
-          scrollRoot.addEventListener('wheel', stopNativeInput, { passive: false, capture: true });
-          scrollRoot.addEventListener('touchmove', stopNativeInput, { passive: false, capture: true });
-        } else {
-          scrollRoot.removeEventListener('wheel', stopNativeInput, true);
-          scrollRoot.removeEventListener('touchmove', stopNativeInput, true);
-        }
-      };
-
-      const lockNativeInputFor = (ms: number) => {
-        setNativeInputLocked(true);
-        if (inputUnlockTimer) window.clearTimeout(inputUnlockTimer);
-        inputUnlockTimer = window.setTimeout(() => {
-          setNativeInputLocked(false);
-          inputUnlockTimer = null;
-        }, ms);
-      };
 
       let observerActive = false;
       const setObserverActive = (active: boolean) => {
@@ -307,11 +241,6 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
           window.clearTimeout(forwardTimer);
           forwardTimer = null;
         }
-        if (inputUnlockTimer) {
-          window.clearTimeout(inputUnlockTimer);
-          inputUnlockTimer = null;
-        }
-        setNativeInputLocked(false);
       };
 
       const snapStageToTop = () => {
