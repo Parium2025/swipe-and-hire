@@ -286,7 +286,6 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       const goToIntro = ({ snap = true } = {}) => {
         if (animatingRef.current || indexRef.current === 1) return;
         clearReturnWork();
-        lockNativeInputFor(1080);
         animatingRef.current = true;
         indexRef.current = 1;
         if (snap) snapStageToTop();
@@ -299,7 +298,6 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
             animatingRef.current = false;
             releaseLockedRef.current = false;
             programmaticReturn = false;
-            settleIntroExitGate();
             window.dispatchEvent(new Event('parium:gallery-warm'));
             if (!releasedToGallery) setObserverActive(true);
           },
@@ -385,7 +383,6 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
       const returnFromGalleryToIntro = () => {
         if (!scrollRoot || programmaticReturn || animatingRef.current) return;
-        lockNativeInputFor(780);
         programmaticReturn = true;
         releasedToGallery = false;
         releaseLockedRef.current = false;
@@ -398,12 +395,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         window.setTimeout(() => {
           programmaticReturn = false;
           prevScrollTop = scrollRoot.scrollTop;
-          settleIntroExitGate();
         }, 700);
       };
-
-      scrollRoot?.addEventListener('wheel', markWheelGesture, { passive: true, capture: true });
-      scrollRoot?.addEventListener('touchstart', markTouchGesture, { passive: true, capture: true });
 
       observer = Observer.create({
         target: scrollRoot ?? window,
@@ -417,14 +410,13 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
             goToIntro();
             return;
           }
-          if (!canExitIntroOnThisGesture()) return;
           if (releaseLockedRef.current) return;
           releaseLockedRef.current = true;
           releaseAndScrollNext();
         },
         onDown: () => {
           if (releasedToGallery || programmaticReturn || animatingRef.current) return;
-          if (indexRef.current === 1 && canExitIntroOnThisGesture()) goToHero();
+          if (indexRef.current === 1) goToHero();
         },
       });
       observerActive = true;
@@ -462,8 +454,6 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
       setupTeardown = () => {
         clearReturnWork();
-        scrollRoot?.removeEventListener('wheel', markWheelGesture, true);
-        scrollRoot?.removeEventListener('touchstart', markTouchGesture, true);
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
       };
     };
