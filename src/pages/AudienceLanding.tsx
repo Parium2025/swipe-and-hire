@@ -7,32 +7,8 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
-import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
-import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
-import panelImg3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
-import panelImg4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
 import { SplinePhone } from '@/components/landing/SplinePhone';
-import { FloatingBubbles } from '@/components/FloatingBubbles';
 import { HeroText } from '@/components/landing/audience/HeroText';
-
-// 🖼️ Provisional placeholder images for the 4 horizontal scroll panels.
-// Swap these out via the imports above when final brand photography is ready.
-const panelImages = [panelImg1, panelImg2, panelImg3, panelImg4];
-
-const PanelImage = ({ src, alt }: { src: string; alt: string }) => (
-  <div className="relative mx-auto aspect-[9/16] w-full max-w-[360px] overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] shadow-[0_40px_120px_hsl(var(--background)/0.6)]">
-    <img
-      src={src}
-      alt={alt}
-      width={768}
-      height={1280}
-      loading="lazy"
-      decoding="async"
-      className="h-full w-full object-cover"
-    />
-    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-  </div>
-);
 
 type AudienceLandingProps = {
   audience: AudienceRole;
@@ -428,18 +404,11 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       });
       observerActive = true;
 
-      let transitionActive = false;
-      const onTransition = (e: Event) => {
-        transitionActive = !!(e as CustomEvent<{ active: boolean }>).detail?.active;
-        if (!transitionActive) prevScrollTop = scrollRoot?.scrollTop ?? 0;
-      };
-      window.addEventListener('parium:transition', onTransition);
-
       const onScrollWatch = () => {
         if (!scrollRoot) return;
         // Bail TIDIGT så vi inte gör layout-läsningar (getBoundingClientRect)
-        // varje frame medan GSAP skriver scrollTop under en transition.
-        if (transitionActive || programmaticReturn || animatingRef.current) return;
+        // varje frame medan programstyrda scrolls eller GSAP-animationer pågår.
+        if (programmaticReturn || animatingRef.current) return;
 
         const cur = scrollRoot.scrollTop;
         const direction = cur < prevScrollTop ? 'up' : 'down';
@@ -469,7 +438,6 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       setupTeardown = () => {
         clearReturnWork();
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
-        window.removeEventListener('parium:transition', onTransition);
       };
     };
 
@@ -655,34 +623,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth', { state: { mode: 'register', role: audience } });
   };
-
-  // 4-panel scroll-jacked horizontal section. Texterna är platshållare.
-  const panels = [
-    {
-      eyebrow: c.eyebrow,
-      title: <>Något som <span className="text-secondary">fångar</span> direkt.</>,
-      body: 'Platshållartext. Här ska första budskapet ligga — det som hookar besökaren.',
-      visual: <PanelImage src={panelImages[0]} alt="Person som arbetar fokuserat vid laptop" />,
-    },
-    {
-      eyebrow: 'Steg 01',
-      title: <>Berätta vad du <span className="text-secondary">söker</span>.</>,
-      body: 'Platshållartext. Förklarar steg 1 i flödet.',
-      visual: <PanelImage src={panelImages[1]} alt="Person som ler och tittar på sin telefon" />,
-    },
-    {
-      eyebrow: 'Steg 02',
-      title: <>Vi matchar <span className="text-secondary">automatiskt</span>.</>,
-      body: 'Platshållartext. Förklarar matchnings­logiken på ett enkelt sätt.',
-      visual: <PanelImage src={panelImages[2]} alt="Två kollegor i samtal på ett modernt kontor" />,
-    },
-    {
-      eyebrow: 'Steg 03',
-      title: <>Ta kontakt på <span className="text-secondary">sekunder</span>.</>,
-      body: 'Platshållartext. Sista steget — handling, dialog, nästa steg.',
-      visual: <PanelImage src={panelImages[3]} alt="Hantverkare som arbetar i en ljus verkstad" />,
-    },
-  ];
 
   const navLinks: LandingNavLink[] = [
     { label: 'Så funkar det', href: '#sa-funkar-det' },
