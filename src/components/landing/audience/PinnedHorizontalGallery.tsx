@@ -54,7 +54,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
       ) : (
@@ -191,11 +191,12 @@ const PinnedHorizontalGallery = () => {
       });
     };
 
-    warmTimers.push(window.setTimeout(warmVideos, 500));
+    const onWarm = () => warmVideos();
 
     const enter = () => {
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
+      warmVideos();
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
@@ -225,6 +226,7 @@ const PinnedHorizontalGallery = () => {
 
     const onEnter = () => enter();
     const onLeave = () => leave();
+    window.addEventListener('parium:gallery-warm', onWarm);
     window.addEventListener('parium:gallery-enter', onEnter);
     window.addEventListener('parium:gallery-leave', onLeave);
 
@@ -232,6 +234,7 @@ const PinnedHorizontalGallery = () => {
       disposed = true;
       if (playTimer) window.clearTimeout(playTimer);
       warmTimers.forEach((timer) => window.clearTimeout(timer));
+      window.removeEventListener('parium:gallery-warm', onWarm);
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
     };
