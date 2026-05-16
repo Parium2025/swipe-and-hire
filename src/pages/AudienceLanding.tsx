@@ -7,32 +7,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
-import panelImg1 from '@/assets/landing/jobseeker-placeholder-1.jpg';
-import panelImg2 from '@/assets/landing/jobseeker-placeholder-2.jpg';
-import panelImg3 from '@/assets/landing/jobseeker-placeholder-3.jpg';
-import panelImg4 from '@/assets/landing/jobseeker-placeholder-4.jpg';
 import { SplinePhone } from '@/components/landing/SplinePhone';
-import { FloatingBubbles } from '@/components/FloatingBubbles';
-import { HeroText } from '@/components/landing/audience/HeroText';
-
-// 🖼️ Provisional placeholder images for the 4 horizontal scroll panels.
-// Swap these out via the imports above when final brand photography is ready.
-const panelImages = [panelImg1, panelImg2, panelImg3, panelImg4];
-
-const PanelImage = ({ src, alt }: { src: string; alt: string }) => (
-  <div className="relative mx-auto aspect-[9/16] w-full max-w-[360px] overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] shadow-[0_40px_120px_hsl(var(--background)/0.6)]">
-    <img
-      src={src}
-      alt={alt}
-      width={768}
-      height={1280}
-      loading="lazy"
-      decoding="async"
-      className="h-full w-full object-cover"
-    />
-    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-  </div>
-);
 
 type AudienceLandingProps = {
   audience: AudienceRole;
