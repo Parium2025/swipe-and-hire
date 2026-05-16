@@ -194,6 +194,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
     let returnFrame: number | null = null;
     let returnTimer: number | null = null;
     let forwardTimer: number | null = null;
+    let inputUnlockTimer: number | null = null;
     let setupTeardown: (() => void) | undefined;
 
     const setup = async () => {
@@ -219,6 +220,69 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       let releasedToGallery = false;
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
+      let gestureId = 0;
+      let lastWheelInputAt = 0;
+      let currentGestureStartedAt = 0;
+      let introSettledGestureId = -1;
+      let introSettledAt = 0;
+      const GESTURE_IDLE_MS = 900;
+
+      const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+      const markWheelGesture = () => {
+        const t = now();
+        if (t - lastWheelInputAt > GESTURE_IDLE_MS) {
+          gestureId += 1;
+          currentGestureStartedAt = t;
+        }
+        lastWheelInputAt = t;
+      };
+
+      const markTouchGesture = () => {
+        gestureId += 1;
+        const t = now();
+        currentGestureStartedAt = t;
+        lastWheelInputAt = t;
+      };
+
+      const settleIntroExitGate = () => {
+        introSettledGestureId = gestureId;
+        introSettledAt = now();
+      };
+
+      const canExitIntroOnThisGesture = () => {
+        // Man ska alltid behöva en NY scroll-/touch-gest efter att intro (2:an)
+        // har landat. Då kan ett hårt första hjul-/trackpad-drag inte passera
+        // 1→2→3, och ett hårt uppdrag från 3 kan inte passera 3→2→1.
+        return gestureId !== introSettledGestureId && currentGestureStartedAt > introSettledAt + 120;
+      };
+
+      let nativeInputLocked = false;
+      const stopNativeInput = (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+      };
+
+      const setNativeInputLocked = (locked: boolean) => {
+        if (!scrollRoot || nativeInputLocked === locked) return;
+        nativeInputLocked = locked;
+        if (locked) {
+          scrollRoot.addEventListener('wheel', stopNativeInput, { passive: false, capture: true });
+          scrollRoot.addEventListener('touchmove', stopNativeInput, { passive: false, capture: true });
+        } else {
+          scrollRoot.removeEventListener('wheel', stopNativeInput, true);
+          scrollRoot.removeEventListener('touchmove', stopNativeInput, true);
+        }
+      };
+
+      const lockNativeInputFor = (ms: number) => {
+        setNativeInputLocked(true);
+        if (inputUnlockTimer) window.clearTimeout(inputUnlockTimer);
+        inputUnlockTimer = window.setTimeout(() => {
+          setNativeInputLocked(false);
+          inputUnlockTimer = null;
+        }, ms);
+      };
 
       let observerActive = false;
       const setObserverActive = (active: boolean) => {
@@ -241,6 +305,11 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
           window.clearTimeout(forwardTimer);
           forwardTimer = null;
         }
+        if (inputUnlockTimer) {
+          window.clearTimeout(inputUnlockTimer);
+          inputUnlockTimer = null;
+        }
+        setNativeInputLocked(false);
       };
 
       const snapStageToTop = () => {
@@ -274,7 +343,10 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         gsap.set(heroInner, { yPercent: 100 });
         gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(introInner, { yPercent: 0 });
-        gsap.set(introTextItems, { y: 0, opacity: 1 });
+        // När intro ligger stilla ska texten inte längre ligga på ett GSAP-
+        // transformlager. På hård scroll mot 3:an kunde compositing annars ge
+        // en ghost/dubblett-frame av texten i Chrome/Lovable-preview.
+        gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
         indexRef.current = 1;
       };
 
@@ -283,6 +355,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       const goToIntro = ({ snap = true } = {}) => {
         if (animatingRef.current || indexRef.current === 1) return;
         clearReturnWork();
+        lockNativeInputFor(1180);
         animatingRef.current = true;
         indexRef.current = 1;
         if (snap) snapStageToTop();
@@ -295,6 +368,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
             animatingRef.current = false;
             releaseLockedRef.current = false;
             programmaticReturn = false;
+            settleIntroExitGate();
             window.dispatchEvent(new Event('parium:gallery-warm'));
             if (!releasedToGallery) setObserverActive(true);
           },
@@ -357,6 +431,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
         const startScroll = root.scrollTop;
         const targetScroll = startScroll + next.getBoundingClientRect().top;
+        gsap.killTweensOf(introTextItems);
+        gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
         prevScrollTop = startScroll;
         root.scrollTo({ top: targetScroll, behavior: 'smooth' });
         window.dispatchEvent(new Event('parium:gallery-enter'));
@@ -378,6 +454,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
       const returnFromGalleryToIntro = () => {
         if (!scrollRoot || programmaticReturn || animatingRef.current) return;
+        lockNativeInputFor(780);
         programmaticReturn = true;
         releasedToGallery = false;
         releaseLockedRef.current = false;
@@ -390,8 +467,12 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         window.setTimeout(() => {
           programmaticReturn = false;
           prevScrollTop = scrollRoot.scrollTop;
+          settleIntroExitGate();
         }, 700);
       };
+
+      scrollRoot?.addEventListener('wheel', markWheelGesture, { passive: true, capture: true });
+      scrollRoot?.addEventListener('touchstart', markTouchGesture, { passive: true, capture: true });
 
       observer = Observer.create({
         target: scrollRoot ?? window,
@@ -405,13 +486,14 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
             goToIntro();
             return;
           }
+          if (!canExitIntroOnThisGesture()) return;
           if (releaseLockedRef.current) return;
           releaseLockedRef.current = true;
           releaseAndScrollNext();
         },
         onDown: () => {
           if (releasedToGallery || programmaticReturn || animatingRef.current) return;
-          if (indexRef.current === 1) goToHero();
+          if (indexRef.current === 1 && canExitIntroOnThisGesture()) goToHero();
         },
       });
       observerActive = true;
@@ -449,6 +531,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
       setupTeardown = () => {
         clearReturnWork();
+        scrollRoot?.removeEventListener('wheel', markWheelGesture, true);
+        scrollRoot?.removeEventListener('touchstart', markTouchGesture, true);
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
       };
     };
