@@ -367,6 +367,11 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
             root.scrollTo({ top: targetScroll, behavior: 'auto' });
           }
           prevScrollTop = root.scrollTop;
+          // Säkerhetsnät: släpp ALLTID releaseLockedRef efter att 2→3 är klart,
+          // även om scroll-positionen inte hann triggra normalisering. Annars
+          // kunde låset bli "kvar i true" om användaren scrollar snabbt 20-30
+          // gånger och en gest kapas av nästa innan onScrollWatch hann reagera.
+          releaseLockedRef.current = false;
           forwardTimer = null;
         }, 900);
       };
