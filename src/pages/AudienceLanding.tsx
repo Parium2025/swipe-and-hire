@@ -299,7 +299,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
             if (!releasedToGallery) setObserverActive(true);
           },
         });
-        tl.to(heroTextItems, { y: -44, opacity: 0, duration: 0.45, stagger: 0.045, ease: 'power2.out' }, 0);
+        // heroTextItems-tween borttagen — framer-motion äger hero-textens
+        // opacitet. Layern (heroOuter) translateY tar texten ur viewporten.
         tl.to(heroOuter, { yPercent: -100 }, 0);
         tl.to(heroInner, { yPercent: 100 }, 0);
         tl.set(introOuter, { autoAlpha: 1 }, 0);
