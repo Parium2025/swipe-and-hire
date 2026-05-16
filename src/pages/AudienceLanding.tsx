@@ -218,6 +218,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
     let returnFrame: number | null = null;
     let returnTimer: number | null = null;
     let forwardTimer: number | null = null;
+    let setupTeardown: (() => void) | undefined;
 
     const setup = async () => {
       const [{ default: gsap }, { Observer }] = await Promise.all([
@@ -465,15 +466,14 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
       scrollRoot?.addEventListener('scroll', onScrollWatch, { passive: true });
 
-      return () => {
+      setupTeardown = () => {
         clearReturnWork();
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
         window.removeEventListener('parium:transition', onTransition);
       };
     };
 
-    let teardown: (() => void) | undefined;
-    setup().then((t) => { if (typeof t === 'function') teardown = t; });
+    setup();
 
     return () => {
       cancelled = true;
@@ -481,7 +481,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       if (returnTimer) { window.clearTimeout(returnTimer); returnTimer = null; }
       if (forwardTimer) { window.clearTimeout(forwardTimer); forwardTimer = null; }
       observer?.kill();
-      teardown?.();
+      setupTeardown?.();
     };
   }, []);
 
