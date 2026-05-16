@@ -216,8 +216,28 @@ const PinnedHorizontalGallery = () => {
     window.addEventListener('parium:gallery-enter', onEnter);
     window.addEventListener('parium:gallery-leave', onLeave);
 
+    // IntersectionObserver — kortens entrance/exit baseras på sektionens
+    // synlighet i viewporten. Eftersom 2↔3 nu är NATURLIG scroll (ingen
+    // GSAP-skrivning av scrollTop), kan vi använda IO utan att riskera
+    // att den triggas mitt i en programstyrd transition.
+    const section = sectionRef.current;
+    let io: IntersectionObserver | null = null;
+    if (section) {
+      io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.15) {
+            enter();
+          } else if (entry.intersectionRatio < 0.05) {
+            leave();
+          }
+        });
+      }, { threshold: [0, 0.05, 0.15, 0.3] });
+      io.observe(section);
+    }
+
     return () => {
       disposed = true;
+      io?.disconnect();
       if (playTimer) window.clearTimeout(playTimer);
       warmTimers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener('parium:gallery-warm', onWarm);
