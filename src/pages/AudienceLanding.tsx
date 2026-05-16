@@ -308,6 +308,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onStart }: HeroIntroStageProps) => {
             animatingRef.current = false;
             releaseLockedRef.current = false;
             programmaticReturn = false;
+            window.dispatchEvent(new Event('parium:gallery-warm'));
             if (!releasedToGallery) setObserverActive(true);
           },
         });
