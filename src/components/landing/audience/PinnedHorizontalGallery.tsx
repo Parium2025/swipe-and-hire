@@ -135,6 +135,14 @@ const PinnedHorizontalGallery = () => {
 
     const onTransition = (e: Event) => {
       transitionActive = !!(e as CustomEvent<{ active: boolean }>).detail?.active;
+      if (transitionActive) {
+        if (rafRef.current !== null) {
+          window.cancelAnimationFrame(rafRef.current);
+          rafRef.current = null;
+        }
+        targetProgressRef.current = renderedProgressRef.current;
+        return;
+      }
       if (!transitionActive) {
         // När transition är klar — synca progress mot faktisk scroll-position.
         measure();
