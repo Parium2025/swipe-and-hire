@@ -106,7 +106,8 @@ export const MorphingHeading = () => {
     let cancelled = false;
     (async () => {
       try {
-        const opentype = (await import('opentype.js')).default;
+        const opentypeMod: any = await import('opentype.js');
+        const opentype = opentypeMod.default ?? opentypeMod;
         const buf = await fetch(FONT_URL).then((r) => r.arrayBuffer());
         if (cancelled) return;
         const font = opentype.parse(buf);
