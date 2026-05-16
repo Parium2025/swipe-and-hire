@@ -458,7 +458,11 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
         if (releasedToGallery) {
           setObserverActive(false);
-          if (direction === 'up' && rect.bottom > vh * 0.18 && rect.top < vh * 0.82) {
+          // Bredare fönster: även hård scroll uppåt som hoppar förbi det
+          // smala "i view"-intervallet ska trigga return till intro.
+          // Så snart vi rör oss uppåt och stage är åtminstone halvt i view
+          // (eller högst upp), snappar vi tillbaka.
+          if (direction === 'up' && rect.top > -vh * 0.5) {
             returnFromGalleryToIntro();
           }
           return;
@@ -478,6 +482,8 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       setupTeardown = () => {
         clearReturnWork();
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
+        scrollRoot?.removeEventListener('wheel', blockNativeInput, true);
+        scrollRoot?.removeEventListener('touchmove', blockNativeInput, true);
       };
     };
 
