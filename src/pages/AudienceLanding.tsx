@@ -251,24 +251,29 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         }
       };
 
+      // VIKTIGT: Vi rör INTE heroTextItems via GSAP. Hero-texten ägs av
+      // framer-motion (HeroText) som har en lång premium-fade (~3s totalt).
+      // Om GSAP gör `gsap.set(...opacity:1)` eller tween:ar opacity här
+      // kapas framer-motions pågående animation mitt i → text "hackar"
+      // eller "försvinner fel" vid första scrollen efter refresh.
+      // Hero-text-layern (heroOuter) skiftar yPercent → texten lämnar
+      // viewporten visuellt utan att vi behöver röra textens opacity.
       const setHeroStart = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...introTextItems]);
         gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 0 });
         gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
         gsap.set(introInner, { yPercent: -100 });
-        gsap.set(heroTextItems, { y: 0, opacity: 1 });
         gsap.set(introTextItems, { y: 44, opacity: 0 });
         indexRef.current = 0;
       };
 
       const setIntroResting = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...heroTextItems, ...introTextItems]);
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, ...introTextItems]);
         gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 100 });
         gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(introInner, { yPercent: 0 });
-        gsap.set(heroTextItems, { y: -44, opacity: 0 });
         gsap.set(introTextItems, { y: 0, opacity: 1 });
         indexRef.current = 1;
       };
