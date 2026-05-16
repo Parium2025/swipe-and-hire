@@ -266,9 +266,13 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       const setNativeInputLocked = (locked: boolean) => {
         if (!scrollRoot || nativeInputLocked === locked) return;
         nativeInputLocked = locked;
-        const method = locked ? 'addEventListener' : 'removeEventListener';
-        scrollRoot[method]('wheel', stopNativeInput, { passive: false, capture: true });
-        scrollRoot[method]('touchmove', stopNativeInput, { passive: false, capture: true });
+        if (locked) {
+          scrollRoot.addEventListener('wheel', stopNativeInput, { passive: false, capture: true });
+          scrollRoot.addEventListener('touchmove', stopNativeInput, { passive: false, capture: true });
+        } else {
+          scrollRoot.removeEventListener('wheel', stopNativeInput, true);
+          scrollRoot.removeEventListener('touchmove', stopNativeInput, true);
+        }
       };
 
       const lockNativeInputFor = (ms: number) => {
@@ -348,6 +352,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       const goToIntro = ({ snap = true } = {}) => {
         if (animatingRef.current || indexRef.current === 1) return;
         clearReturnWork();
+        lockNativeInputFor(1180);
         animatingRef.current = true;
         indexRef.current = 1;
         if (snap) snapStageToTop();
@@ -444,6 +449,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
       const returnFromGalleryToIntro = () => {
         if (!scrollRoot || programmaticReturn || animatingRef.current) return;
+        lockNativeInputFor(780);
         programmaticReturn = true;
         releasedToGallery = false;
         releaseLockedRef.current = false;
