@@ -221,21 +221,27 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
       let gestureId = 0;
       let lastWheelInputAt = 0;
+      let currentGestureStartedAt = 0;
       let introSettledGestureId = -1;
       let introSettledAt = 0;
-      const GESTURE_IDLE_MS = 280;
+      const GESTURE_IDLE_MS = 900;
 
       const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
       const markWheelGesture = () => {
         const t = now();
-        if (t - lastWheelInputAt > GESTURE_IDLE_MS) gestureId += 1;
+        if (t - lastWheelInputAt > GESTURE_IDLE_MS) {
+          gestureId += 1;
+          currentGestureStartedAt = t;
+        }
         lastWheelInputAt = t;
       };
 
       const markTouchGesture = () => {
         gestureId += 1;
-        lastWheelInputAt = now();
+        const t = now();
+        currentGestureStartedAt = t;
+        lastWheelInputAt = t;
       };
 
       const settleIntroExitGate = () => {
@@ -247,7 +253,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         // Man ska alltid behöva en NY scroll-/touch-gest efter att intro (2:an)
         // har landat. Då kan ett hårt första hjul-/trackpad-drag inte passera
         // 1→2→3, och ett hårt uppdrag från 3 kan inte passera 3→2→1.
-        return gestureId !== introSettledGestureId && now() - introSettledAt > 80;
+        return gestureId !== introSettledGestureId && currentGestureStartedAt > introSettledAt + 120;
       };
 
       let observerActive = false;
