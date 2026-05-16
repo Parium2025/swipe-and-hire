@@ -421,6 +421,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         window.setTimeout(() => {
           programmaticReturn = false;
           prevScrollTop = scrollRoot.scrollTop;
+          settleIntroExitGate();
         }, 700);
       };
 
@@ -430,19 +431,22 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
         wheelSpeed: -1,
         tolerance: 16,
         preventDefault: true,
+        onWheel: markWheelGesture,
+        onPress: markTouchGesture,
         onUp: () => {
           if (releasedToGallery || programmaticReturn || animatingRef.current) return;
           if (indexRef.current === 0) {
             goToIntro();
             return;
           }
+          if (!canExitIntroOnThisGesture()) return;
           if (releaseLockedRef.current) return;
           releaseLockedRef.current = true;
           releaseAndScrollNext();
         },
         onDown: () => {
           if (releasedToGallery || programmaticReturn || animatingRef.current) return;
-          if (indexRef.current === 1) goToHero();
+          if (indexRef.current === 1 && canExitIntroOnThisGesture()) goToHero();
         },
       });
       observerActive = true;
