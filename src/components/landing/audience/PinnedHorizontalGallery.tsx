@@ -295,10 +295,11 @@ const PinnedHorizontalGallery = () => {
           will-change: transform, opacity;
         }
         .phg-title {
-          font-size: clamp(2.25rem, 5.4vw, 4.75rem);
-          font-weight: 800;
-          line-height: 1.05;
-          letter-spacing: -0.028em;
+          /* Matchar bild 1 & 2: text-4xl→5xl→6xl→4.75rem, font-black, tracking -0.025em */
+          font-size: 2.25rem;
+          font-weight: 900;
+          line-height: 1.02;
+          letter-spacing: -0.025em;
           color: #ffffff;
           max-width: 18ch;
           margin: 0 auto;
@@ -307,8 +308,11 @@ const PinnedHorizontalGallery = () => {
         .phg-title em {
           font-style: normal;
           color: #ffffff;
-          font-weight: 800;
+          font-weight: 900;
         }
+        @media (min-width: 640px)  { .phg-title { font-size: 3rem; } }
+        @media (min-width: 768px)  { .phg-title { font-size: 3.75rem; } }
+        @media (min-width: 1024px) { .phg-title { font-size: 4.75rem; } }
         .phg-sub {
           margin: 22px auto 0;
           font-size: clamp(1rem, 1.2vw, 1.125rem);
