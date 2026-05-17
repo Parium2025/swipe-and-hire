@@ -180,6 +180,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   return (
     <div
       ref={wrapperRef}
+      data-phone-interactive
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'none', overscrollBehavior: 'contain', pointerEvents: 'auto' }}
     >
