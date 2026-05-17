@@ -605,7 +605,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
                   type="button"
                   data-intro-anim
                   onClick={onIntroCta}
-                  className="mt-10 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-primary shadow-[0_10px_40px_-12px_hsl(var(--secondary)/0.6)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:text-lg"
+                  className="mt-10 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white shadow-[0_10px_40px_-12px_hsl(var(--secondary)/0.6)] transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:text-lg"
                 >
                   {introCtaLabel ?? 'Skapa min profil idag'}
                 </button>
