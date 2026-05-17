@@ -116,7 +116,8 @@ const PinnedHorizontalGallery = () => {
       const stripWidth = strip.scrollWidth;
       const viewport = window.innerWidth || document.documentElement.clientWidth;
       const startPx = viewport * 0.07; // 7vw inledande marginal (matchar gammal start)
-      const endPx = Math.min(startPx, viewport - stripWidth + startPx); // negativ när strip > viewport
+      // Sluta så att sista kortet är helt synligt med samma 7vw marginal till höger
+      const endPx = Math.min(startPx, viewport - stripWidth - startPx);
       const xPx = startPx + (endPx - startPx) * p;
       strip.style.setProperty('--phg-x', `${xPx}px`);
       section.style.setProperty('--phg-progress', `${p}`);
