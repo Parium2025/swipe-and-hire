@@ -149,14 +149,14 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           regeln i index.css — den färgar body grå så Safari samplar grått. */}
 
 
-      {/* Hero heading — placerad högst upp, vertikalt i linje med Parium-loggan */}
+      {/* Hero heading — full storlek, centrerad och placerad i övre tredjedelen ovanför ansiktet */}
       <motion.h1
         id="landing-hero-heading"
         initial={{ opacity: 0, y: -12, filter: 'blur(14px)' }}
         animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
         transition={{ duration: 1.4, ease, delay: 0.4 }}
-        className="pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 text-balance px-5 text-center text-[1.5rem] font-semibold leading-[1.1] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-[1.75rem] md:text-[2rem] lg:text-[2.25rem]"
-        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 14px)' }}
+        className="pointer-events-none absolute left-1/2 z-10 max-w-4xl -translate-x-1/2 text-balance px-5 text-center text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-5xl md:text-6xl lg:text-7xl"
+        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 14svh)' }}
       >
         Välkommen till Parium
       </motion.h1>
