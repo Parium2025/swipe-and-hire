@@ -753,7 +753,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       }}
     >
       <AnimatedBackground />
-      {isDesktopHero && <FixedPhoneLayer />}
+      <FixedPhoneLayer />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
