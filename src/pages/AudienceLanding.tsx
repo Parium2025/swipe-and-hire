@@ -37,36 +37,52 @@ const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
   const [phoneReady, setPhoneReady] = useState(false);
-  const [phoneZoom, setPhoneZoom] = useState(() => {
-    if (typeof window === 'undefined') return 0.78;
+  const [phoneMetrics, setPhoneMetrics] = useState(() => {
+    if (typeof window === 'undefined') return { isDesktop: true, top: 0, height: 660, zoom: 0.78 };
     const width = window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
-    if (width >= 1024) return Math.max(0.62, Math.min(0.78, (height / 920) * 0.78));
+    if (width >= 1024) {
+      return { isDesktop: true, top: 0, height: Math.min(height * 0.66, 660), zoom: Math.max(0.62, Math.min(0.78, (height / 920) * 0.78)) };
+    }
     const fluidZoom = Math.min(width / 1024, height / 900) * 0.62;
-    return Math.max(0.29, Math.min(0.46, fluidZoom));
+    return { isDesktop: false, top: height * 0.58, height: Math.min(height * 0.35, 340), zoom: Math.max(0.29, Math.min(0.46, fluidZoom)) };
   });
   const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
 
   useEffect(() => {
-    const syncPhoneZoom = () => {
+    const syncPhoneMetrics = () => {
       const width = window.innerWidth;
       const height = window.visualViewport?.height ?? window.innerHeight;
       if (width >= 1024) {
-        setPhoneZoom(Math.max(0.62, Math.min(0.78, (height / 920) * 0.78)));
+        setPhoneMetrics({ isDesktop: true, top: 0, height: Math.min(height * 0.66, 660), zoom: Math.max(0.62, Math.min(0.78, (height / 920) * 0.78)) });
         return;
       }
+      const anchor = document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
+      const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.46;
+      const gap = height <= 640 ? 12 : Math.max(18, Math.min(42, height * 0.035));
+      const bottomSafe = Math.max(16, height * 0.025);
+      const top = Math.min(textBottom + gap, height - 132 - bottomSafe);
+      const desiredHeight = Math.max(height <= 640 ? 145 : 205, Math.min(height * 0.35, width >= 700 ? 390 : 340));
+      const availableHeight = Math.max(128, height - top - bottomSafe);
       const fluidZoom = Math.min(width / 1024, height / 900) * 0.62;
-      setPhoneZoom(Math.max(0.29, Math.min(0.46, fluidZoom)));
+      setPhoneMetrics({
+        isDesktop: false,
+        top,
+        height: Math.min(desiredHeight, availableHeight),
+        zoom: Math.max(0.29, Math.min(0.46, fluidZoom)),
+      });
     };
 
-    syncPhoneZoom();
-    window.addEventListener('resize', syncPhoneZoom, { passive: true });
-    window.visualViewport?.addEventListener('resize', syncPhoneZoom, { passive: true });
+    syncPhoneMetrics();
+    const frame = window.requestAnimationFrame(syncPhoneMetrics);
+    window.addEventListener('resize', syncPhoneMetrics, { passive: true });
+    window.visualViewport?.addEventListener('resize', syncPhoneMetrics, { passive: true });
     return () => {
-      window.removeEventListener('resize', syncPhoneZoom);
-      window.visualViewport?.removeEventListener('resize', syncPhoneZoom);
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('resize', syncPhoneMetrics);
+      window.visualViewport?.removeEventListener('resize', syncPhoneMetrics);
     };
   }, []);
 
