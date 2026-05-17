@@ -70,13 +70,13 @@ const FixedPhoneLayer = () => {
 
     const anchor = getVisibleAnchor();
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.52;
-    const gap = height <= 640 ? 8 : clamp(height * 0.018, 10, 18);
+    const gap = height <= 640 ? 12 : clamp(height * 0.024, 16, 24);
     const bottomSafe = Math.max(12, height * 0.018);
     const freeSpace = Math.max(120, height - textBottom - gap - bottomSafe);
     const targetVisualHeight = clamp(freeSpace * 0.62, width <= 380 ? 150 : 170, width >= 700 ? 300 : 260);
     const bufferRatio = width >= 700 ? 1.42 : 1.32;
     const finalHeight = Math.min(freeSpace, targetVisualHeight * bufferRatio);
-    const top = clamp(textBottom + gap - (finalHeight - targetVisualHeight) * 0.48, gap, height - bottomSafe - finalHeight);
+    const top = clamp(textBottom + gap, gap, height - bottomSafe - finalHeight);
     const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.82, 1.18) * 0.48;
     const metrics = {
       isDesktop: false,
