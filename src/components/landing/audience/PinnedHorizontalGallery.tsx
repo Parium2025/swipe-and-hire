@@ -84,6 +84,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
 const PinnedHorizontalGallery = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLElement | null>(null);
   const targetProgressRef = useRef(0);
   const renderedProgressRef = useRef(0);
@@ -219,9 +220,14 @@ const PinnedHorizontalGallery = () => {
       strip.classList.add('phg-entered');
       warmVideos();
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
+      const header = headerRef.current;
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
         gsapInstance.fromTo(cards, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out', force3D: true });
+        if (header) {
+          gsapInstance.killTweensOf(header);
+          gsapInstance.fromTo(header, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, ease: 'power2.out', force3D: true });
+        }
       }
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       // Vänta tills slide-in-tween (0.62s) + sista stagger (~640ms) är klar
@@ -236,9 +242,14 @@ const PinnedHorizontalGallery = () => {
       strip.classList.remove('phg-entered');
       strip.classList.add('phg-leaving');
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
+      const header = headerRef.current;
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
         gsapInstance.to(cards, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in', force3D: true });
+        if (header) {
+          gsapInstance.killTweensOf(header);
+          gsapInstance.to(header, { y: 44, opacity: 0, duration: 0.42, ease: 'power2.in', force3D: true });
+        }
       }
       // Pausa inte videorna vid 3→2 — de är redan varma och ska kännas levande
       // när användaren går tillbaka igen. Vi stoppar bara eventuell start-timer.
@@ -480,6 +491,10 @@ const PinnedHorizontalGallery = () => {
 
       <div ref={sectionRef} className="phg-section" style={{ height: `${SCROLL_VH}vh` }}>
         <div className="phg-sticky">
+
+          <div ref={headerRef} className="phg-header" style={{ opacity: 0, transform: 'translate3d(0, 44px, 0)' }}>
+            <h2 className="phg-title">Vi gör det <em>tillsammans</em></h2>
+          </div>
 
           <div className="phg-strip-wrap">
             <div ref={stripRef} className="phg-strip">
