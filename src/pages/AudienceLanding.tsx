@@ -149,11 +149,11 @@ const FixedPhoneLayer = () => {
       className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-center justify-center overflow-hidden px-4 pb-8 pt-20 sm:px-6 sm:pt-24 md:px-8 md:pb-12 lg:px-24 lg:pb-16 lg:pt-28"
       aria-hidden="true"
     >
-      <div className="mx-auto grid h-full w-full max-w-[1280px] grid-cols-1 grid-rows-[auto_1fr] items-stretch gap-4 sm:gap-6 md:gap-8 lg:grid-cols-2 lg:grid-rows-1 lg:items-center lg:gap-16 2xl:max-w-[1440px]">
+      <div className="mx-auto grid h-full w-full max-w-[1280px] grid-cols-1 grid-rows-[1fr_auto] items-stretch gap-4 sm:gap-6 md:gap-8 lg:grid-cols-2 lg:grid-rows-1 lg:items-center lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <div
           data-phone-scroll-forward
-          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex h-full w-full items-center justify-center transition-opacity duration-500 ease-out`}
+          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex h-full w-full items-end justify-center pb-2 transition-opacity duration-500 ease-out lg:items-center lg:pb-0`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
@@ -544,7 +544,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
         <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
           {/* Hero — split-layout på alla skärmar (text vänster, 3D-telefon höger) */}
-          <section className="relative flex h-full items-center justify-center overflow-hidden px-4 pb-8 pt-20 sm:px-6 sm:pt-24 md:px-8 md:pb-12 lg:px-24 lg:pb-16 lg:pt-28">
+          <section className="relative flex h-full items-start justify-center overflow-hidden px-4 pb-8 pt-20 sm:px-6 sm:pt-24 md:px-8 md:pb-12 lg:items-center lg:px-24 lg:pb-16 lg:pt-28">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
