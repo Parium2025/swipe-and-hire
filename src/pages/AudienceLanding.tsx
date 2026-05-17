@@ -547,17 +547,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       {/* HERO LAGER */}
       <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
         <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
-          {/* Mobile hero */}
+          {/* Mobile hero — flex-kolumn: text överst, telefonen tar resterande höjd och clampas så den aldrig klipps */}
           <section
-            className="relative flex h-full w-screen overflow-hidden lg:hidden"
+            className="relative flex h-full w-screen flex-col overflow-hidden lg:hidden"
             style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
             aria-labelledby="audience-hero-heading-mobile"
           >
-            <div className="absolute inset-x-0 bottom-0 -z-0 flex items-end justify-center">
-              {!isDesktopHero && <SplinePhone className="h-[52svh] w-full max-w-[380px]" />}
-            </div>
             <motion.div
-              className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1180px] flex-col items-center justify-start px-5 pb-20 pt-24 text-center"
+              className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] shrink-0 flex-col items-center px-5 pt-24 text-center"
               initial="hidden"
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
@@ -570,6 +567,11 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
                 headingId="audience-hero-heading-mobile"
               />
             </motion.div>
+            <div className="relative z-0 flex min-h-0 flex-1 items-end justify-center pb-4">
+              {!isDesktopHero && (
+                <SplinePhone className="h-full w-full max-h-[clamp(220px,40svh,520px)] max-w-[min(85vw,360px)]" />
+              )}
+            </div>
           </section>
 
           {/* Desktop hero */}

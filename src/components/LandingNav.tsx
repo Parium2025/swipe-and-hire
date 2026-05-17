@@ -133,7 +133,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
             </a>
 
             {links.length > 0 && (
-              <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
+              <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
                 {links.map((l) => {
                   const id = l.href.replace('#', '');
                   const isActive = activeId === id;
@@ -143,7 +143,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                       href={l.href}
                       onClick={(e) => handleAnchor(e, l.href)}
                       aria-current={isActive ? 'true' : undefined}
-                      className={`relative rounded-full px-4 py-2 text-[13px] font-medium transition-colors ${
+                      className={`relative whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-medium transition-colors ${
                         isActive ? 'text-white' : 'text-white/65 hover:text-white'
                       }`}
                     >
@@ -161,7 +161,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               </div>
             )}
 
-            <div className="hidden md:block ml-auto shrink-0">
+            <div className="hidden lg:block ml-auto shrink-0">
               <Button
                 onClick={onLoginClick}
                 size="sm"
@@ -172,7 +172,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
             </div>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-full text-white/50 hover:bg-white/[0.04] transition-colors"
+              className="lg:hidden ml-auto p-2 rounded-full text-white/50 hover:bg-white/[0.04] transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
