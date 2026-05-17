@@ -76,7 +76,6 @@ const CardItem = ({ item, index }: CardItemProps) => {
       )}
       <div className="phg-cap">
         <div className="phg-cap-eyebrow">{item.eyebrow}</div>
-        <div className="phg-cap-title">{item.title}</div>
       </div>
     </div>
   );
