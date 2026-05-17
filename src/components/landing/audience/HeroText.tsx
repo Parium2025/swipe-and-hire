@@ -23,15 +23,15 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
 
   const eyebrowClass = isMobile
     ? 'text-xs font-bold uppercase tracking-[0.28em] text-secondary drop-shadow-[0_2px_8px_hsl(var(--background)/0.6)]'
-    : 'text-[10px] sm:text-xs font-bold uppercase tracking-[0.24em] sm:tracking-[0.28em] text-secondary/80';
+    : 'text-xs font-bold uppercase tracking-[0.28em] text-secondary/80';
 
   const headlineClass = isMobile
     ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-[4rem] md:text-[5rem]'
-    : 'mt-3 sm:mt-5 lg:mt-6 max-w-4xl text-[1.75rem] xs:text-[2rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[5rem] xl:text-[6rem] 2xl:text-[7rem] font-black leading-[1.04] tracking-[-0.025em] text-white';
+    : 'mt-6 max-w-4xl text-[5rem] font-black leading-[1.04] tracking-[-0.025em] text-white lg:text-[6rem] 2xl:text-[7rem]';
 
   const subtitleClass = isMobile
     ? 'mt-7 max-w-xl text-base leading-8 text-white drop-shadow-[0_2px_12px_hsl(var(--background)/0.55)]'
-    : 'mt-3 sm:mt-5 lg:mt-7 max-w-xl text-xs sm:text-sm md:text-base lg:text-lg leading-6 sm:leading-7 lg:leading-8 text-white';
+    : 'mt-7 max-w-xl text-lg leading-8 text-white';
 
   // Premium-entré: enbart opacity. Ingen blur, ingen skugga, ingen translate.
   // Långsam, lugn ease (Apple-style) med en mjuk stagger rad-för-rad.

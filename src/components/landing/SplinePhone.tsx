@@ -9,17 +9,6 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-const getViewportFitZoom = (zoom: number) => {
-  if (typeof window === 'undefined') return zoom;
-
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const widthScale = width < 380 ? 0.28 : width < 480 ? 0.32 : width < 640 ? 0.4 : width < 768 ? 0.5 : width <= 1100 ? 0.64 : 1;
-  const heightScale = height < 560 ? 0.58 : height < 620 ? 0.66 : height < 760 ? 0.76 : 1;
-
-  return zoom * Math.min(widthScale, heightScale);
-};
-
 export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -39,6 +28,10 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
     return () => window.clearTimeout(timer);
   }, [isReady, hasError]);
 
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
   useEffect(() => {
     activeRef.current = active;
     const app = appRef.current;
@@ -51,6 +44,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   }, [active, isReady]);
 
   useEffect(() => {
+    if (reducedMotion) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -82,8 +76,8 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
           (app as unknown as { setBackgroundColor?: (c: string) => void })
             .setBackgroundColor?.('rgba(0,0,0,0)');
         } catch { /* no-op */ }
-        app.setZoom(getViewportFitZoom(zoom));
-        requestAnimationFrame(() => app?.setZoom(getViewportFitZoom(zoom)));
+        app.setZoom(zoom);
+        requestAnimationFrame(() => app?.setZoom(zoom));
         if (!activeRef.current) app.stop();
         // Vänta 3 rAF så Spline garanterat hunnit rita sin första WebGL-frame
         // innan vi fade:ar in canvasen. På throttlade enheter (Lovable preview-
@@ -113,24 +107,9 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
       app?.dispose();
       appRef.current = null;
     };
-  }, [zoom]);
+  }, [reducedMotion, zoom]);
 
-  useEffect(() => {
-    const app = appRef.current;
-    if (!app || !isReady) return;
-
-    const applyZoom = () => app.setZoom(getViewportFitZoom(zoom));
-    applyZoom();
-    window.addEventListener('resize', applyZoom);
-    window.addEventListener('orientationchange', applyZoom);
-
-    return () => {
-      window.removeEventListener('resize', applyZoom);
-      window.removeEventListener('orientationchange', applyZoom);
-    };
-  }, [isReady, zoom]);
-
-  if (hasError) {
+  if (reducedMotion || hasError) {
     return (
       <div
         ref={wrapperRef}
@@ -188,7 +167,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         role="img"
         aria-label="Parium 3D-telefon"
         tabIndex={-1}
-        className="absolute left-1/2 top-1/2 h-[400%] w-[340%] -translate-x-1/2 -translate-y-1/2 cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing lg:h-[185%] lg:w-[190%]"
+        className="relative h-full w-full cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing"
         draggable={false}
         style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
       />
