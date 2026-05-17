@@ -84,6 +84,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
 const PinnedHorizontalGallery = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLElement | null>(null);
   const targetProgressRef = useRef(0);
   const renderedProgressRef = useRef(0);
