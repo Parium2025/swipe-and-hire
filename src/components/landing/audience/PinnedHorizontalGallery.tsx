@@ -481,6 +481,10 @@ const PinnedHorizontalGallery = () => {
       <div ref={sectionRef} className="phg-section" style={{ height: `${SCROLL_VH}vh` }}>
         <div className="phg-sticky">
 
+          <div className="phg-header">
+            <h2 className="phg-title">Vi gör det <em>tillsammans</em></h2>
+          </div>
+
           <div className="phg-strip-wrap">
             <div ref={stripRef} className="phg-strip">
               {items.map((item, i) => (
