@@ -219,6 +219,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
       const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p')) : [];
       const introCtaEl = introText?.querySelector<HTMLElement>('[data-intro-anim]') ?? null;
+      const introHeadingEl = introText?.querySelector<HTMLElement>('[data-intro-heading]') ?? null;
       let releasedToGallery = false;
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
@@ -262,7 +263,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       // Hero-text-layern (heroOuter) skiftar yPercent → texten lämnar
       // viewporten visuellt utan att vi behöver röra textens opacity.
       const setHeroStart = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, ...introTextItems].filter(Boolean));
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, introHeadingEl, ...introTextItems].filter(Boolean));
         gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 0 });
         gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
@@ -270,11 +271,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (introText) gsap.set(introText, { opacity: 1, clearProps: 'transform' });
         gsap.set(introTextItems, { y: 44, opacity: 0 });
         if (introCtaEl) gsap.set(introCtaEl, { opacity: 0 });
+        if (introHeadingEl) gsap.set(introHeadingEl, { opacity: 0 });
         indexRef.current = 0;
       };
 
       const setIntroResting = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, ...introTextItems].filter(Boolean));
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, introHeadingEl, ...introTextItems].filter(Boolean));
         gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 100 });
         gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
@@ -285,6 +287,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // en ghost/dubblett-frame av texten i Chrome/Lovable-preview.
         gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
         if (introCtaEl) gsap.set(introCtaEl, { opacity: 1, clearProps: 'transform' });
+        if (introHeadingEl) gsap.set(introHeadingEl, { opacity: 1, clearProps: 'transform' });
         indexRef.current = 1;
       };
 
@@ -316,10 +319,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         tl.set(introOuter, { autoAlpha: 1 }, 0);
         tl.fromTo(introOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
         tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
-        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.48);
+        if (introHeadingEl) {
+          // Rubriken matchar hero-h1: opacity-only premium fade, lugn och lång.
+          tl.fromTo(introHeadingEl, { opacity: 0 }, { opacity: 1, duration: 1.2, ease: 'power3.out' }, 0.3);
+        }
+        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.62);
         if (introCtaEl) {
           // CTA fadar bara in (ingen y-translate) så den inte "sticker upp" i slutet.
-          tl.fromTo(introCtaEl, { opacity: 0 }, { opacity: 1, duration: 0.62, ease: 'power2.out' }, 0.48 + introTextItems.length * 0.08);
+          tl.fromTo(introCtaEl, { opacity: 0 }, { opacity: 1, duration: 0.62, ease: 'power2.out' }, 0.62 + introTextItems.length * 0.08);
         }
       };
 
@@ -344,6 +351,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         });
         tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in' }, 0);
         if (introCtaEl) tl.to(introCtaEl, { opacity: 0, duration: 0.32, ease: 'power2.in' }, 0);
+        if (introHeadingEl) tl.to(introHeadingEl, { opacity: 0, duration: 0.42, ease: 'power2.in' }, 0);
         tl.to(introOuter, { yPercent: 100 }, 0);
         tl.to(introInner, { yPercent: -100 }, 0);
         tl.set(introOuter, { autoAlpha: 0 });
@@ -592,7 +600,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
               backgroundColor: 'hsl(var(--primary))',
             }}
           >
-            <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center will-change-transform">
+            <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center text-center will-change-transform">
+              <h2
+                data-intro-heading
+                className="mb-8 max-w-3xl text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl"
+              >
+                Vi har gjort det enkelt för alla!
+              </h2>
               <IntroText
                 paragraphs={[
                   'Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
