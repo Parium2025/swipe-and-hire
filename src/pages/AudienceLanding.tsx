@@ -40,10 +40,10 @@ const FixedPhoneLayer = () => {
   const [phoneZoom, setPhoneZoom] = useState(() => {
     if (typeof window === 'undefined') return 0.78;
     const width = window.innerWidth;
-    if (width >= 1024) return 0.78;
     const height = window.visualViewport?.height ?? window.innerHeight;
-    const fluidZoom = Math.min(width / 1024, height / 900) * 0.50;
-    return Math.max(0.24, Math.min(0.40, fluidZoom));
+    if (width >= 1024) return Math.max(0.62, Math.min(0.78, (height / 920) * 0.78));
+    const fluidZoom = Math.min(width / 1024, height / 900) * 0.62;
+    return Math.max(0.29, Math.min(0.46, fluidZoom));
   });
   const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -52,13 +52,13 @@ const FixedPhoneLayer = () => {
   useEffect(() => {
     const syncPhoneZoom = () => {
       const width = window.innerWidth;
+      const height = window.visualViewport?.height ?? window.innerHeight;
       if (width >= 1024) {
-        setPhoneZoom(0.78);
+        setPhoneZoom(Math.max(0.62, Math.min(0.78, (height / 920) * 0.78)));
         return;
       }
-      const height = window.visualViewport?.height ?? window.innerHeight;
-      const fluidZoom = Math.min(width / 1024, height / 900) * 0.50;
-      setPhoneZoom(Math.max(0.24, Math.min(0.40, fluidZoom)));
+      const fluidZoom = Math.min(width / 1024, height / 900) * 0.62;
+      setPhoneZoom(Math.max(0.29, Math.min(0.46, fluidZoom)));
     };
 
     syncPhoneZoom();
@@ -186,11 +186,11 @@ const FixedPhoneLayer = () => {
         <div aria-hidden className="hidden lg:block" />
         <div
           data-phone-scroll-forward
-          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-end justify-center transition-opacity duration-500 ease-out lg:items-start lg:pt-8 xl:pt-10`}
+          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit -translate-y-[clamp(4.5rem,12svh,7rem)] items-end justify-center transition-opacity duration-500 ease-out sm:-translate-y-[clamp(5rem,12svh,8rem)] md:-translate-y-[clamp(6rem,13svh,9rem)] lg:translate-y-0 lg:items-start lg:pt-8 xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
-            className="h-[clamp(190px,33svh,320px)] w-auto aspect-[9/24] sm:h-[clamp(220px,35svh,360px)] md:h-[clamp(250px,37svh,420px)] lg:h-[min(68svh,660px)] lg:aspect-[9/19.5]"
+            className="h-[clamp(205px,35svh,340px)] w-auto aspect-[9/24] sm:h-[clamp(235px,37svh,380px)] md:h-[clamp(270px,39svh,440px)] lg:h-[min(66svh,660px)] lg:aspect-[9/23] xl:aspect-[9/21.5]"
             zoom={phoneZoom}
             active={active}
           />
