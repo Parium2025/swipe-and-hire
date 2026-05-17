@@ -220,9 +220,14 @@ const PinnedHorizontalGallery = () => {
       strip.classList.add('phg-entered');
       warmVideos();
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
+      const header = headerRef.current;
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
         gsapInstance.fromTo(cards, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out', force3D: true });
+        if (header) {
+          gsapInstance.killTweensOf(header);
+          gsapInstance.fromTo(header, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, ease: 'power2.out', force3D: true });
+        }
       }
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       // Vänta tills slide-in-tween (0.62s) + sista stagger (~640ms) är klar
