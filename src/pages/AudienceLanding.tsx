@@ -77,11 +77,12 @@ const FixedPhoneLayer = () => {
     const canvasHeight = Math.max(96, Math.min(desiredHeight, height - bottomSafe - gap));
     const top = clamp(textBottom + gap - (canvasHeight - visualHeight) * 0.5, gap, height - bottomSafe - canvasHeight);
     const availableHeight = Math.max(72, height - top - bottomSafe);
-    const fluidZoom = Math.min(width / 1024, height / 900) * 0.42 * (visualHeight / canvasHeight);
+    const finalHeight = Math.min(desiredHeight, availableHeight);
+    const fluidZoom = Math.min(width / 1024, height / 900) * 0.42 * (visualHeight / finalHeight);
     const metrics = {
       isDesktop: false,
       top,
-      height: Math.min(desiredHeight, availableHeight),
+      height: finalHeight,
       zoom: clamp(fluidZoom, 0.17, 0.27),
     };
     lastHeroMetricsRef.current = metrics;
