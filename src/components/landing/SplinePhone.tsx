@@ -54,6 +54,37 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   }, [active, isReady]);
 
   useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const stopAtPhoneSurface = (event: Event) => {
+      event.stopPropagation();
+    };
+
+    const events = [
+      'pointerdown',
+      'pointermove',
+      'pointerup',
+      'pointercancel',
+      'touchstart',
+      'touchmove',
+      'touchend',
+      'touchcancel',
+      'wheel',
+    ];
+
+    events.forEach((eventName) => {
+      wrapper.addEventListener(eventName, stopAtPhoneSurface, { passive: false });
+    });
+
+    return () => {
+      events.forEach((eventName) => {
+        wrapper.removeEventListener(eventName, stopAtPhoneSurface);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
