@@ -108,7 +108,7 @@ const FixedPhoneLayer = () => {
           className={`${visible ? 'opacity-100' : 'opacity-0'} pointer-events-none relative mx-auto flex h-full w-full items-end justify-center overflow-visible pb-2 transition-opacity duration-500 ease-out lg:items-center lg:pb-0`}
         >
           <SplinePhone
-            className="aspect-[9/19.5] h-[clamp(220px,38svh,330px)] w-auto translate-y-8 sm:h-[clamp(250px,39svh,380px)] sm:translate-y-10 md:h-[clamp(280px,38svh,420px)] md:translate-y-12 lg:h-[min(68svh,32vw,660px)] lg:translate-y-0"
+            className="aspect-[9/19.5] h-[clamp(220px,34svh,330px)] w-auto translate-y-4 sm:h-[clamp(250px,33svh,360px)] sm:translate-y-6 md:h-[clamp(270px,31svh,380px)] md:translate-y-8 lg:h-[min(68svh,32vw,660px)] lg:translate-y-0"
             zoom={0.78}
             active={active}
           />
