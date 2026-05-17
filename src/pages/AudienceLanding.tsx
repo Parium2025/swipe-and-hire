@@ -61,11 +61,13 @@ const FixedPhoneLayer = () => {
       }
       const anchor = document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
       const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.46;
-      const gap = height <= 640 ? 12 : Math.max(18, Math.min(42, height * 0.035));
+      const gap = height <= 640 ? 16 : Math.max(32, Math.min(58, height * 0.06));
       const bottomSafe = Math.max(16, height * 0.025);
-      const top = Math.min(textBottom + gap, height - 132 - bottomSafe);
-      const desiredHeight = Math.max(height <= 640 ? 145 : 205, Math.min(height * 0.35, width >= 700 ? 390 : 340));
-      const availableHeight = Math.max(128, height - top - bottomSafe);
+      const minCanvasHeight = height <= 640 ? 145 : 170;
+      const maxTop = height - minCanvasHeight - bottomSafe;
+      const top = Math.min(textBottom + gap, maxTop);
+      const desiredHeight = Math.max(minCanvasHeight, Math.min(height * 0.32, width >= 700 ? 340 : 310));
+      const availableHeight = Math.max(minCanvasHeight, height - top - bottomSafe);
       const fluidZoom = Math.min(width / 1024, height / 900) * 0.62;
       setPhoneMetrics({
         isDesktop: false,
