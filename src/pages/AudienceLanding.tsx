@@ -150,18 +150,18 @@ const FixedPhoneLayer = () => {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
+      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-center justify-center overflow-hidden px-4 pb-8 pt-20 sm:px-6 sm:pt-24 md:px-8 md:pb-12 lg:px-24 lg:pb-16 lg:pt-28"
       aria-hidden="true"
     >
-      <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+      <div className="mx-auto grid w-full max-w-[1280px] grid-cols-[1.15fr_0.85fr] items-start gap-3 sm:gap-6 md:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <div
           data-phone-scroll-forward
-          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
+          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-4 transition-opacity duration-500 ease-out lg:pt-8 xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
-            className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
+            className="h-[min(38svh,300px)] w-auto aspect-[9/19.5] sm:h-[min(50svh,440px)] md:h-[min(58svh,540px)] lg:h-[min(68svh,660px)]"
             zoom={0.78}
             active={active}
           />
