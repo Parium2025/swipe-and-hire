@@ -150,18 +150,18 @@ const FixedPhoneLayer = () => {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
+      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-end justify-center overflow-hidden px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-24 sm:px-6 md:px-12 lg:items-center lg:pb-16 lg:pt-28 lg:px-24"
       aria-hidden="true"
     >
-      <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
-        <div aria-hidden />
+      <div className="mx-auto flex w-full max-w-[1280px] items-end justify-center lg:grid lg:grid-cols-2 lg:items-start lg:gap-16 2xl:max-w-[1440px]">
+        <div aria-hidden className="hidden lg:block" />
         <div
           data-phone-scroll-forward
-          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
+          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-end justify-center transition-opacity duration-500 ease-out lg:items-start lg:pt-8 xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
-            className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
+            className="h-[min(46svh,420px)] w-auto aspect-[9/19.5] sm:h-[min(52svh,500px)] lg:h-[min(68svh,660px)]"
             zoom={0.78}
             active={active}
           />
@@ -547,9 +547,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       {/* HERO LAGER */}
       <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
         <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
-          {/* Mobile hero — texten får sin höjd först, telefonen skalar inom resterande yta och kan inte klippas/scrollas iväg */}
+          {/* Mobile hero — endast text. Telefonen renderas i FixedPhoneLayer (samma som desktop) så den aldrig kan scrollas iväg eller klippas. */}
           <section
-            className="relative grid h-full w-screen grid-rows-[auto_minmax(0,1fr)] overflow-hidden overscroll-none lg:hidden"
+            className="relative h-full w-screen overflow-hidden lg:hidden"
             style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
             aria-labelledby="audience-hero-heading-mobile"
           >
@@ -567,14 +567,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
                 headingId="audience-hero-heading-mobile"
               />
             </motion.div>
-            <div className="relative z-0 flex min-h-0 items-end justify-center overflow-hidden pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
-              {!isDesktopHero && (
-                <SplinePhone
-                  className="h-[min(100%,clamp(150px,30svh,360px))] w-[min(88vw,320px)] sm:h-[min(100%,clamp(190px,34svh,440px))] sm:w-[min(76vw,380px)] md:h-[min(100%,clamp(230px,38svh,520px))] md:w-[min(58vw,440px)]"
-                  zoom={0.52}
-                />
-              )}
-            </div>
           </section>
 
           {/* Desktop hero */}
@@ -761,7 +753,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       }}
     >
       <AnimatedBackground />
-      {isDesktopHero && <FixedPhoneLayer />}
+      <FixedPhoneLayer />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
