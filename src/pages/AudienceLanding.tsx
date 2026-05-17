@@ -42,8 +42,8 @@ const FixedPhoneLayer = () => {
     const width = window.innerWidth;
     if (width >= 1024) return 0.78;
     const height = window.visualViewport?.height ?? window.innerHeight;
-    const fluidZoom = Math.min(width / 1024, height / 900) * 0.72;
-    return Math.max(0.34, Math.min(0.56, fluidZoom));
+    const fluidZoom = Math.min(width / 1024, height / 900) * 0.58;
+    return Math.max(0.26, Math.min(0.44, fluidZoom));
   });
   const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -57,8 +57,8 @@ const FixedPhoneLayer = () => {
         return;
       }
       const height = window.visualViewport?.height ?? window.innerHeight;
-      const fluidZoom = Math.min(width / 1024, height / 900) * 0.72;
-      setPhoneZoom(Math.max(0.34, Math.min(0.56, fluidZoom)));
+      const fluidZoom = Math.min(width / 1024, height / 900) * 0.58;
+      setPhoneZoom(Math.max(0.26, Math.min(0.44, fluidZoom)));
     };
 
     syncPhoneZoom();
@@ -190,7 +190,7 @@ const FixedPhoneLayer = () => {
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
-            className="h-[clamp(150px,28svh,260px)] w-auto aspect-[9/19.5] sm:h-[clamp(170px,30svh,300px)] md:h-[clamp(190px,32svh,340px)] lg:h-[min(68svh,660px)]"
+            className="h-[clamp(120px,22svh,210px)] w-auto aspect-[9/19.5] sm:h-[clamp(135px,23svh,235px)] md:h-[clamp(150px,24svh,260px)] lg:h-[min(68svh,660px)]"
             zoom={phoneZoom}
             active={active}
           />
