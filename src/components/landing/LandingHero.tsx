@@ -149,9 +149,9 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           regeln i index.css — den färgar body grå så Safari samplar grått. */}
 
 
-      {/* Stacked hero: heading uppe → CTAs nere */}
+      {/* Stacked hero: heading → CTAs */}
       <motion.div
-        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-start px-5 pb-[14svh] pt-[12svh] text-center sm:px-6 sm:pb-[12svh] sm:pt-[14svh] md:px-12 md:pb-[14svh] md:pt-[14svh] lg:px-24 lg:pb-[16svh] lg:pt-[15svh]"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-end px-5 pb-[14svh] pt-24 text-center sm:px-6 sm:pb-[12svh] sm:pt-28 md:px-12 md:pb-[14svh] lg:px-24 lg:pb-[16svh]"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
@@ -170,7 +170,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease, delay: 0.9 }}
-          className="mt-auto max-w-xl text-base text-white sm:text-lg"
+          className="mt-6 max-w-xl text-base text-white sm:text-lg"
         >
           Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
         </motion.p>
