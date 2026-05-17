@@ -151,7 +151,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
 
       {/* Stacked hero: heading → CTAs */}
       <motion.div
-        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center px-5 pb-16 pt-24 text-center sm:px-6 sm:pt-28 md:px-12 lg:px-24"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-end px-5 pb-[14svh] pt-24 text-center sm:px-6 sm:pb-[12svh] sm:pt-28 md:px-12 md:pb-[14svh] lg:px-24 lg:pb-[16svh]"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
@@ -161,16 +161,9 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 1.4, ease, delay: 0.4 }}
-          className="max-w-4xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-6xl md:text-7xl lg:text-[5.5rem] flex items-center justify-center gap-3 sm:gap-4 flex-wrap"
+          className="max-w-4xl text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-5xl md:text-6xl lg:text-7xl"
         >
-          <span>Välkommen till</span>
-          <img
-            src={pariumLogoRings}
-            alt="Parium"
-            className="h-[1em] w-auto inline-block"
-            style={{ filter: 'drop-shadow(0 2px 8px hsl(var(--background)/0.5))' }}
-          />
-          <span className="md:hidden">Parium</span>
+          Välkommen till Parium
         </motion.h1>
 
         <motion.p
