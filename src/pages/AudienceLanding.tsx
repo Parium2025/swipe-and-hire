@@ -219,6 +219,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
       const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p')) : [];
       const introCtaEl = introText?.querySelector<HTMLElement>('[data-intro-anim]') ?? null;
+      const introHeadingEl = introText?.querySelector<HTMLElement>('[data-intro-heading]') ?? null;
       let releasedToGallery = false;
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
