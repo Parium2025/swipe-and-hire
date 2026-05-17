@@ -217,7 +217,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
       // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
       // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
-      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p, [data-intro-anim]')) : [];
+      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p')) : [];
+      const introCtaEl = introText?.querySelector<HTMLElement>('[data-intro-anim]') ?? null;
       let releasedToGallery = false;
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
@@ -261,18 +262,19 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       // Hero-text-layern (heroOuter) skiftar yPercent → texten lämnar
       // viewporten visuellt utan att vi behöver röra textens opacity.
       const setHeroStart = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, ...introTextItems].filter(Boolean));
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, ...introTextItems].filter(Boolean));
         gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 0 });
         gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
         gsap.set(introInner, { yPercent: -100 });
         if (introText) gsap.set(introText, { opacity: 1, clearProps: 'transform' });
         gsap.set(introTextItems, { y: 44, opacity: 0 });
+        if (introCtaEl) gsap.set(introCtaEl, { opacity: 0 });
         indexRef.current = 0;
       };
 
       const setIntroResting = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, ...introTextItems].filter(Boolean));
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, ...introTextItems].filter(Boolean));
         gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 100 });
         gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
@@ -282,6 +284,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // transformlager. På hård scroll mot 3:an kunde compositing annars ge
         // en ghost/dubblett-frame av texten i Chrome/Lovable-preview.
         gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
+        if (introCtaEl) gsap.set(introCtaEl, { opacity: 1, clearProps: 'transform' });
         indexRef.current = 1;
       };
 
@@ -314,6 +317,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         tl.fromTo(introOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
         tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
         tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.48);
+        if (introCtaEl) {
+          // CTA fadar bara in (ingen y-translate) så den inte "sticker upp" i slutet.
+          tl.fromTo(introCtaEl, { opacity: 0 }, { opacity: 1, duration: 0.62, ease: 'power2.out' }, 0.48 + introTextItems.length * 0.08);
+        }
       };
 
       const goToHero = () => {
@@ -336,6 +343,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           },
         });
         tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in' }, 0);
+        if (introCtaEl) tl.to(introCtaEl, { opacity: 0, duration: 0.32, ease: 'power2.in' }, 0);
         tl.to(introOuter, { yPercent: 100 }, 0);
         tl.to(introInner, { yPercent: -100 }, 0);
         tl.set(introOuter, { autoAlpha: 0 });
@@ -597,7 +605,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
                   type="button"
                   data-intro-anim
                   onClick={onIntroCta}
-                  className="mt-10 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-primary shadow-[0_10px_40px_-12px_hsl(var(--secondary)/0.6)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:text-lg"
+                  className="mt-10 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white shadow-[0_10px_40px_-12px_hsl(var(--secondary)/0.6)] transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:text-lg"
                 >
                   {introCtaLabel ?? 'Skapa min profil idag'}
                 </button>
