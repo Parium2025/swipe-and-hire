@@ -9,44 +9,21 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-const isCoarsePointer = () =>
-  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
-
-type RotatableSplineObject = {
-  rotation: { x: number; y: number; z: number };
-};
-
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
-
-const findPhoneRotationTarget = (app: SplineApplication): RotatableSplineObject | null => {
-  const byName = (name: string) => app.findObjectByName(name) as RotatableSplineObject | undefined;
-  return byName('iPhone 14 Pro') ?? byName('Group') ?? null;
-};
-
 const getViewportFitZoom = (zoom: number) => {
   if (typeof window === 'undefined') return zoom;
 
   const width = window.innerWidth;
   const height = window.innerHeight;
-  const widthScale = width < 380 ? 0.28 : width < 480 ? 0.32 : width < 640 ? 0.4 : width < 768 ? 0.5 : width < 960 ? 0.56 : width <= 1100 ? 0.64 : 1;
-  const heightScale = height < 560 ? 0.58 : height < 620 ? 0.66 : height < 760 ? 0.76 : height < 1040 ? 0.9 : 1;
-  const tabletPreviewScale = width >= 640 && width < 1024 && height >= 780 ? 0.9 : 1;
+  const widthScale = width < 380 ? 0.28 : width < 480 ? 0.32 : width < 640 ? 0.4 : width < 768 ? 0.5 : width <= 1100 ? 0.64 : 1;
+  const heightScale = height < 560 ? 0.58 : height < 620 ? 0.66 : height < 760 ? 0.76 : 1;
 
-  return zoom * Math.min(widthScale, heightScale) * tabletPreviewScale;
+  return zoom * Math.min(widthScale, heightScale);
 };
 
 export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
-  const rotationTargetRef = useRef<RotatableSplineObject | null>(null);
-  const dragStateRef = useRef<{
-    pointerId: number;
-    startX: number;
-    startY: number;
-    baseX: number;
-    baseY: number;
-  } | null>(null);
   const activeRef = useRef(active);
 
   const [isReady, setIsReady] = useState(false);
@@ -74,85 +51,6 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   }, [active, isReady]);
 
   useEffect(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-
-    const finishDrag = (event?: PointerEvent) => {
-      const drag = dragStateRef.current;
-      if (drag && event && wrapper.hasPointerCapture?.(drag.pointerId)) {
-        try { wrapper.releasePointerCapture(drag.pointerId); } catch { /* no-op */ }
-      }
-      dragStateRef.current = null;
-      wrapper.classList.remove('is-touch-rotating');
-    };
-
-    const onPointerDown = (event: PointerEvent) => {
-      if (event.pointerType === 'mouse' && event.button !== 0) return;
-      const target = rotationTargetRef.current;
-      if (!target) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-      try { wrapper.setPointerCapture(event.pointerId); } catch { /* no-op */ }
-      dragStateRef.current = {
-        pointerId: event.pointerId,
-        startX: event.clientX,
-        startY: event.clientY,
-        baseX: target.rotation.x,
-        baseY: target.rotation.y,
-      };
-      wrapper.classList.add('is-touch-rotating');
-    };
-
-    const onPointerMove = (event: PointerEvent) => {
-      const drag = dragStateRef.current;
-      const target = rotationTargetRef.current;
-      if (!drag || !target || drag.pointerId !== event.pointerId) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-      const dx = event.clientX - drag.startX;
-      const dy = event.clientY - drag.startY;
-      target.rotation.y = drag.baseY + dx * 0.008;
-      target.rotation.x = clamp(drag.baseX + dy * 0.006, -0.55, 0.55);
-      appRef.current?.requestRender?.();
-    };
-
-    const onPointerUp = (event: PointerEvent) => {
-      event.stopPropagation();
-      finishDrag(event);
-    };
-
-    const stopScrollFallback = (event: Event) => {
-      if (dragStateRef.current) event.preventDefault();
-      event.stopPropagation();
-    };
-
-    wrapper.addEventListener('pointerdown', onPointerDown, { passive: false });
-    wrapper.addEventListener('pointermove', onPointerMove, { passive: false });
-    wrapper.addEventListener('pointerup', onPointerUp, { passive: false });
-    wrapper.addEventListener('pointercancel', onPointerUp, { passive: false });
-    wrapper.addEventListener('touchstart', stopScrollFallback, { passive: false });
-    wrapper.addEventListener('touchmove', stopScrollFallback, { passive: false });
-    wrapper.addEventListener('touchend', stopScrollFallback, { passive: false });
-    wrapper.addEventListener('touchcancel', stopScrollFallback, { passive: false });
-    wrapper.addEventListener('wheel', stopScrollFallback, { passive: false });
-
-    return () => {
-      finishDrag();
-      wrapper.removeEventListener('pointerdown', onPointerDown);
-      wrapper.removeEventListener('pointermove', onPointerMove);
-      wrapper.removeEventListener('pointerup', onPointerUp);
-      wrapper.removeEventListener('pointercancel', onPointerUp);
-      wrapper.removeEventListener('touchstart', stopScrollFallback);
-      wrapper.removeEventListener('touchmove', stopScrollFallback);
-      wrapper.removeEventListener('touchend', stopScrollFallback);
-      wrapper.removeEventListener('touchcancel', stopScrollFallback);
-      wrapper.removeEventListener('wheel', stopScrollFallback);
-    };
-  }, []);
-
-  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -167,7 +65,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         if (typeof window !== 'undefined' && 'devicePixelRatio' in window) {
           try {
             Object.defineProperty(canvas, '_dprCap', {
-              value: Math.min(window.devicePixelRatio || 1, isCoarsePointer() ? 1.35 : 2),
+              value: Math.min(window.devicePixelRatio || 1, 2),
               configurable: true,
             });
           } catch {
@@ -178,8 +76,6 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
         await app.load(SCENE_URL);
-        app.setGlobalEvents(false);
-        rotationTargetRef.current = findPhoneRotationTarget(app);
         // Spline-scenen kan ha en egen background-color som annars syns som
         // en vit ram innan WebGL fyller canvasen. Tvinga transparent.
         try {
@@ -214,7 +110,6 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
 
     return () => {
       cancelled = true;
-      rotationTargetRef.current = null;
       app?.dispose();
       appRef.current = null;
     };
@@ -251,7 +146,6 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   return (
     <div
       ref={wrapperRef}
-      data-phone-interactive
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'none', overscrollBehavior: 'contain', pointerEvents: 'auto' }}
     >
@@ -294,9 +188,9 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         role="img"
         aria-label="Parium 3D-telefon"
         tabIndex={-1}
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[440%] w-[380%] -translate-x-1/2 -translate-y-1/2 cursor-grab bg-transparent outline-none transition-opacity duration-500 lg:h-[185%] lg:w-[190%]"
+        className="absolute left-1/2 top-1/2 h-[400%] w-[340%] -translate-x-1/2 -translate-y-1/2 cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing lg:h-[185%] lg:w-[190%]"
         draggable={false}
-        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
+        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none', pointerEvents: 'auto' }}
       />
     </div>
   );

@@ -37,9 +37,6 @@ const items: MediaItem[] = [
   { type: 'video', src: '/landing/jobseeker-nurse.mp4', poster: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
 ];
 
-const isCoarsePointer = () =>
-  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
-
 type CardItemProps = {
   item: MediaItem;
   index: number;
@@ -182,12 +179,6 @@ const PinnedHorizontalGallery = () => {
       if (p && typeof p.catch === 'function') p.catch(() => {});
     };
 
-    const pauseVideosOnTouch = () => {
-      if (!isCoarsePointer()) return;
-      const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
-      videos.forEach((video) => video.pause());
-    };
-
     // Adaptiv warmup: på data-saver eller långsamma nät (2G/3G) warm:ar vi
     // bara de första 4 videorna direkt — resten warm:as först när användaren
     // faktiskt scrollar nära dem. Sparar 50% bandbredd på mobil/sparsam data
@@ -265,10 +256,8 @@ const PinnedHorizontalGallery = () => {
           gsapInstance.to(header, { y: 44, opacity: 0, duration: 0.42, ease: 'power2.in', force3D: true });
         }
       }
-      // På touch-enheter pausas decode under 3→2-returen. Videorna är redan
-      // warmade, så de startar direkt igen vid nästa enter men konkurrerar inte
-      // med transform/scroll-frame:arna när användaren går tillbaka.
-      pauseVideosOnTouch();
+      // Pausa inte videorna vid 3→2 — de är redan varma och ska kännas levande
+      // när användaren går tillbaka igen. Vi stoppar bara eventuell start-timer.
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
     };
 
