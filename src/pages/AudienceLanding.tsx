@@ -150,18 +150,18 @@ const FixedPhoneLayer = () => {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
+      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-end justify-center overflow-hidden px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-24 sm:px-6 md:px-12 lg:items-center lg:pb-16 lg:pt-28 lg:px-24"
       aria-hidden="true"
     >
-      <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
-        <div aria-hidden />
+      <div className="mx-auto flex w-full max-w-[1280px] items-end justify-center lg:grid lg:grid-cols-2 lg:items-start lg:gap-16 2xl:max-w-[1440px]">
+        <div aria-hidden className="hidden lg:block" />
         <div
           data-phone-scroll-forward
-          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
+          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-end justify-center transition-opacity duration-500 ease-out lg:items-start lg:pt-8 xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
-            className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
+            className="h-[min(46svh,420px)] w-auto aspect-[9/19.5] sm:h-[min(52svh,500px)] lg:h-[min(68svh,660px)]"
             zoom={0.78}
             active={active}
           />
