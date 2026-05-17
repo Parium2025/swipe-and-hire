@@ -635,16 +635,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // åt gången — annars initieras Spline-runtime två gånger på desktop.
   // Mobil-hero används för telefon OCH surfplattor (< 1024px) så iPad/Android-tabs
   // får samma full-bleed-Spline-upplevelse som telefon. Desktop-split tar över ≥ 1024px.
-  const [isDesktopHero, setIsDesktopHero] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return window.matchMedia('(min-width: 1024px)').matches;
-  });
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)');
-    const onChange = (e: MediaQueryListEvent) => setIsDesktopHero(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
+  // Split-layout (text + 3D-telefon side-by-side) används på alla skärmstorlekar.
+  // FixedPhoneLayer renderar Spline-telefonen — alltid en enda instans.
+  const isDesktopHero = true;
 
   // (Tidigare scroll-jack med IntersectionObserver + tvingad scrollTop togs bort —
   // den slogs mot CSS scroll-snap och orsakade lagg/jitter. CSS scroll-snap
