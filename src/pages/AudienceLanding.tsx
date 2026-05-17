@@ -29,6 +29,8 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 type HeroIntroStageProps = {
   c: (typeof audienceContent)[AudienceRole];
   isDesktopHero: boolean;
+  onIntroCta?: () => void;
+  introCtaLabel?: string;
 };
 
 const FixedPhoneLayer = () => {
@@ -176,7 +178,7 @@ const FixedPhoneLayer = () => {
 // och scrollar nedåt igen släpps kontrollen och sidan scrollar vidare normalt.
 // Inga scroll-snap, ingen sticky, inga konkurrerande wheel-locks.
 // ─────────────────────────────────────────────────────────────────────────────
-const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
+const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   const stageRef = useRef<HTMLElement | null>(null);
   const heroOuterRef = useRef<HTMLDivElement | null>(null);
   const heroInnerRef = useRef<HTMLDivElement | null>(null);
@@ -215,7 +217,7 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
 
       // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
       // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
-      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p')) : [];
+      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p, [data-intro-anim]')) : [];
       let releasedToGallery = false;
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
@@ -590,6 +592,16 @@ const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
                   'I nästa sektion ser du olika exemplar på yrken som tar Sverige framåt!',
                 ]}
               />
+              {onIntroCta && (
+                <button
+                  type="button"
+                  data-intro-anim
+                  onClick={onIntroCta}
+                  className="mt-10 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-primary shadow-[0_10px_40px_-12px_hsl(var(--secondary)/0.6)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:text-lg"
+                >
+                  {introCtaLabel ?? 'Skapa min profil idag'}
+                </button>
+              )}
             </div>
           </section>
         </div>
@@ -709,7 +721,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
         <main>
-          <HeroIntroStage c={c} isDesktopHero={isDesktopHero} />
+          <HeroIntroStage c={c} isDesktopHero={isDesktopHero} onIntroCta={handleStart} introCtaLabel="Skapa min profil idag" />
 
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
