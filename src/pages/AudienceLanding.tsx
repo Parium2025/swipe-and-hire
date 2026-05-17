@@ -274,7 +274,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       };
 
       const setIntroResting = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, ...introTextItems].filter(Boolean));
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, ...introTextItems].filter(Boolean));
         gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 100 });
         gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
@@ -284,6 +284,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // transformlager. På hård scroll mot 3:an kunde compositing annars ge
         // en ghost/dubblett-frame av texten i Chrome/Lovable-preview.
         gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
+        if (introCtaEl) gsap.set(introCtaEl, { opacity: 1, clearProps: 'transform' });
         indexRef.current = 1;
       };
 
