@@ -165,6 +165,7 @@ const PinnedHorizontalGallery = () => {
     const warmTimers: number[] = [];
     let disposed = false;
     let warmed = false;
+    let entered = false;
     let gsapInstance: typeof import('gsap').default | null = null;
 
     import('gsap').then(({ default: gsap }) => {
@@ -216,6 +217,8 @@ const PinnedHorizontalGallery = () => {
     const onWarm = () => warmVideos();
 
     const enter = () => {
+      if (entered) return;
+      entered = true;
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
       warmVideos();
@@ -239,6 +242,8 @@ const PinnedHorizontalGallery = () => {
       }, 800);
     };
     const leave = () => {
+      if (!entered) return;
+      entered = false;
       strip.classList.remove('phg-entered');
       strip.classList.add('phg-leaving');
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
@@ -256,11 +261,24 @@ const PinnedHorizontalGallery = () => {
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
     };
 
+    const syncVisibleState = () => {
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      if (rect.top < vh * 0.92 && rect.bottom > vh * 0.08) enter();
+      else if (rect.bottom <= 0 || rect.top >= vh) leave();
+    };
+
     const onEnter = () => enter();
     const onLeave = () => leave();
     window.addEventListener('parium:gallery-warm', onWarm);
     window.addEventListener('parium:gallery-enter', onEnter);
     window.addEventListener('parium:gallery-leave', onLeave);
+    const root = containerRef.current ?? document.querySelector('[data-landing-scroll-root]');
+    root?.addEventListener('scroll', syncVisibleState, { passive: true });
+    window.addEventListener('resize', syncVisibleState);
+    syncVisibleState();
 
     return () => {
       disposed = true;
@@ -269,6 +287,8 @@ const PinnedHorizontalGallery = () => {
       window.removeEventListener('parium:gallery-warm', onWarm);
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
+      root?.removeEventListener('scroll', syncVisibleState);
+      window.removeEventListener('resize', syncVisibleState);
     };
   }, []);
 
@@ -295,10 +315,10 @@ const PinnedHorizontalGallery = () => {
           will-change: transform, opacity;
         }
         .phg-title {
-          /* Matchar bild 1 & 2: text-4xl→5xl→6xl→4.75rem, font-black, tracking -0.025em */
-          font-size: 2.25rem;
+          /* Matchar första hero-rubriken: 3.25rem → 4rem → 5rem → 6rem → 7rem */
+          font-size: 3.25rem;
           font-weight: 900;
-          line-height: 1.02;
+          line-height: 1.04;
           letter-spacing: -0.025em;
           color: #ffffff;
           max-width: 18ch;
@@ -310,9 +330,10 @@ const PinnedHorizontalGallery = () => {
           color: #ffffff;
           font-weight: 900;
         }
-        @media (min-width: 640px)  { .phg-title { font-size: 3rem; } }
-        @media (min-width: 768px)  { .phg-title { font-size: 3.75rem; } }
-        @media (min-width: 1024px) { .phg-title { font-size: 4.75rem; } }
+        @media (min-width: 640px)  { .phg-title { font-size: 4rem; } }
+        @media (min-width: 768px)  { .phg-title { font-size: 5rem; } }
+        @media (min-width: 1024px) { .phg-title { font-size: 6rem; } }
+        @media (min-width: 1536px) { .phg-title { font-size: 7rem; } }
         .phg-sub {
           margin: 22px auto 0;
           font-size: clamp(1rem, 1.2vw, 1.125rem);
@@ -479,7 +500,6 @@ const PinnedHorizontalGallery = () => {
         @media (max-width: 767px) {
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
-          .phg-title { font-size: clamp(1.75rem, 7vw, 2.25rem); }
           .phg-strip { padding: 0 18vw 0 8vw; }
         }
       `}</style>
