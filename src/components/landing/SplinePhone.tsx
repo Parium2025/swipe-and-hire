@@ -33,6 +33,11 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
+    if (!reducedMotion && !hasError && !showFallback) return;
+    window.dispatchEvent(new Event('parium:spline-ready'));
+  }, [reducedMotion, hasError, showFallback]);
+
+  useEffect(() => {
     activeRef.current = active;
     const app = appRef.current;
     if (!app) return;

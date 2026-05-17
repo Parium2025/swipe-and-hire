@@ -70,21 +70,19 @@ const FixedPhoneLayer = () => {
 
     const anchor = getVisibleAnchor();
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.52;
-    const gap = height <= 640 ? 10 : clamp(height * 0.026, 14, 24);
-    const bottomSafe = Math.max(14, height * 0.022);
-    const visualHeight = Math.min(height * (width >= 700 && height < 850 ? 0.25 : 0.28), width >= 700 ? 280 : 270);
-    const canvasBuffer = width >= 700 ? 1.9 : 1.62;
-    const desiredHeight = visualHeight * canvasBuffer;
-    const canvasHeight = Math.max(96, Math.min(desiredHeight, height - bottomSafe - gap));
-    const top = clamp(textBottom + gap - (canvasHeight - visualHeight) * 0.52, gap, height - bottomSafe - canvasHeight);
-    const availableHeight = Math.max(72, height - top - bottomSafe);
-    const finalHeight = Math.min(desiredHeight, availableHeight);
-    const fluidZoom = Math.min(width / 1024, height / 900) * 0.38 * (visualHeight / finalHeight);
+    const gap = height <= 640 ? 12 : clamp(height * 0.024, 16, 24);
+    const bottomSafe = Math.max(12, height * 0.018);
+    const freeSpace = Math.max(120, height - textBottom - gap - bottomSafe);
+    const targetVisualHeight = clamp(freeSpace * 0.62, width <= 380 ? 150 : 170, width >= 700 ? 300 : 260);
+    const bufferRatio = width >= 700 ? 1.42 : 1.32;
+    const finalHeight = Math.min(freeSpace, targetVisualHeight * bufferRatio);
+    const top = clamp(textBottom + gap, gap, height - bottomSafe - finalHeight);
+    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.82, 1.18) * 0.48;
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.14, 0.25),
+      zoom: clamp(fluidZoom, 0.28, 0.42),
     };
     lastHeroMetricsRef.current = metrics;
     return metrics;
