@@ -289,34 +289,26 @@ const PinnedHorizontalGallery = () => {
           contain: layout paint;
         }
         .phg-header {
-          padding: clamp(48px, 8vh, 96px) 24px clamp(24px, 4vh, 48px);
+          padding: clamp(24px, 4vh, 48px) 24px clamp(28px, 4.5vh, 56px);
           text-align: center;
           z-index: 3;
           will-change: transform, opacity;
         }
-        .phg-eyebrow {
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.32em;
-          text-transform: uppercase;
-          color: hsl(var(--secondary) / 0.9);
-          margin-bottom: 14px;
-        }
         .phg-title {
-          font-size: clamp(2.25rem, 5.4vw, 4.75rem);
-          font-weight: 800;
-          line-height: 1.05;
-          letter-spacing: -0.028em;
-          color: white;
-          max-width: 18ch;
+          font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+          font-weight: 600;
+          line-height: 1.4;
+          letter-spacing: 0.01em;
+          color: rgba(255,255,255,0.78);
+          max-width: 40ch;
           margin: 0 auto;
+          /* Säkerställ att descenders (G, j, p) aldrig nuddar korten */
+          padding-bottom: 0.2em;
         }
         .phg-title em {
           font-style: normal;
-          background: linear-gradient(120deg, #ffffff 0%, #9bd3ff 50%, hsl(var(--secondary)) 100%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
+          color: white;
+          font-weight: 700;
         }
         .phg-sub {
           margin: 22px auto 0;
