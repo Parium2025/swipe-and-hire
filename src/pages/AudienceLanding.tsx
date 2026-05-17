@@ -263,7 +263,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       // Hero-text-layern (heroOuter) skiftar yPercent → texten lämnar
       // viewporten visuellt utan att vi behöver röra textens opacity.
       const setHeroStart = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, ...introTextItems].filter(Boolean));
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, introHeadingEl, ...introTextItems].filter(Boolean));
         gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 0 });
         gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
@@ -271,11 +271,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (introText) gsap.set(introText, { opacity: 1, clearProps: 'transform' });
         gsap.set(introTextItems, { y: 44, opacity: 0 });
         if (introCtaEl) gsap.set(introCtaEl, { opacity: 0 });
+        if (introHeadingEl) gsap.set(introHeadingEl, { opacity: 0 });
         indexRef.current = 0;
       };
 
       const setIntroResting = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, ...introTextItems].filter(Boolean));
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, introHeadingEl, ...introTextItems].filter(Boolean));
         gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 100 });
         gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
@@ -286,6 +287,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // en ghost/dubblett-frame av texten i Chrome/Lovable-preview.
         gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
         if (introCtaEl) gsap.set(introCtaEl, { opacity: 1, clearProps: 'transform' });
+        if (introHeadingEl) gsap.set(introHeadingEl, { opacity: 1, clearProps: 'transform' });
         indexRef.current = 1;
       };
 
