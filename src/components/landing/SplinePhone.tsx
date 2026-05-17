@@ -147,7 +147,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
     <div
       ref={wrapperRef}
       className={`relative select-none overflow-visible ${className ?? ''}`}
-      style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+      style={{ touchAction: 'none', overscrollBehavior: 'contain', pointerEvents: 'auto' }}
     >
       {/* Nödfallback — visas ENDAST om Spline-scenen inte kommit upp inom
           6 sekunder (långsamt nät, WebGL-fel, e.dyl.). Vid normal refresh
@@ -190,7 +190,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         tabIndex={-1}
         className="absolute left-1/2 top-1/2 h-[400%] w-[340%] -translate-x-1/2 -translate-y-1/2 cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing lg:h-[185%] lg:w-[190%]"
         draggable={false}
-        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
+        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none', pointerEvents: 'auto' }}
       />
     </div>
   );
