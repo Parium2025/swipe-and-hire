@@ -63,11 +63,9 @@ const FixedPhoneLayer = () => {
       const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.46;
       const gap = height <= 640 ? 16 : Math.max(32, Math.min(58, height * 0.06));
       const bottomSafe = Math.max(16, height * 0.025);
-      const minCanvasHeight = height <= 640 ? 145 : 170;
-      const maxTop = height - minCanvasHeight - bottomSafe;
-      const top = Math.min(textBottom + gap, maxTop);
-      const desiredHeight = Math.max(minCanvasHeight, Math.min(height * 0.32, width >= 700 ? 340 : 310));
-      const availableHeight = Math.max(minCanvasHeight, height - top - bottomSafe);
+      const top = textBottom + gap;
+      const desiredHeight = Math.min(height * (width >= 700 && height < 850 ? 0.30 : 0.32), width >= 700 ? 320 : 310);
+      const availableHeight = Math.max(96, height - top - bottomSafe);
       const fluidZoom = Math.min(width / 1024, height / 900) * 0.62;
       setPhoneMetrics({
         isDesktop: false,
@@ -79,10 +77,15 @@ const FixedPhoneLayer = () => {
 
     syncPhoneMetrics();
     const frame = window.requestAnimationFrame(syncPhoneMetrics);
+    const anchor = document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
+    const observer = anchor ? new ResizeObserver(syncPhoneMetrics) : null;
+    if (anchor) observer?.observe(anchor);
+    document.fonts?.ready.then(syncPhoneMetrics).catch(() => undefined);
     window.addEventListener('resize', syncPhoneMetrics, { passive: true });
     window.visualViewport?.addEventListener('resize', syncPhoneMetrics, { passive: true });
     return () => {
       window.cancelAnimationFrame(frame);
+      observer?.disconnect();
       window.removeEventListener('resize', syncPhoneMetrics);
       window.visualViewport?.removeEventListener('resize', syncPhoneMetrics);
     };
