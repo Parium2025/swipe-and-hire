@@ -553,11 +553,11 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
             style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
             aria-labelledby="audience-hero-heading-mobile"
           >
-            <div className="absolute inset-0 -z-0 flex items-center justify-center">
-              {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
+            <div className="absolute inset-x-0 bottom-0 -z-0 flex items-end justify-center">
+              {!isDesktopHero && <SplinePhone className="h-[52svh] w-full max-w-[380px]" />}
             </div>
             <motion.div
-              className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
+              className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1180px] flex-col items-center justify-start px-5 pb-20 pt-24 text-center"
               initial="hidden"
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
