@@ -149,31 +149,28 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           regeln i index.css — den färgar body grå så Safari samplar grått. */}
 
 
-      {/* Hero heading — full storlek, centrerad och placerad i övre tredjedelen ovanför ansiktet */}
-      <motion.h1
-        id="landing-hero-heading"
-        initial={{ opacity: 0, y: -12, filter: 'blur(14px)' }}
-        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-        transition={{ duration: 1.4, ease, delay: 0.4 }}
-        className="pointer-events-none absolute left-1/2 z-10 max-w-4xl -translate-x-1/2 text-balance px-5 text-center text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-5xl md:text-6xl lg:text-7xl"
-        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 14svh)' }}
-      >
-        Välkommen till Parium
-      </motion.h1>
-
-      {/* Stacked hero: CTAs i nedre delen */}
+      {/* Stacked hero: heading uppe → CTAs nere */}
       <motion.div
-        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-end px-5 pb-[14svh] pt-24 text-center sm:px-6 sm:pb-[12svh] sm:pt-28 md:px-12 md:pb-[14svh] lg:px-24 lg:pb-[16svh]"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-start px-5 pb-[14svh] pt-[12svh] text-center sm:px-6 sm:pb-[12svh] sm:pt-[14svh] md:px-12 md:pb-[14svh] md:pt-[14svh] lg:px-24 lg:pb-[16svh] lg:pt-[15svh]"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
+        <motion.h1
+          id="landing-hero-heading"
+          initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 1.4, ease, delay: 0.4 }}
+          className="max-w-4xl text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-5xl md:text-6xl lg:text-7xl"
+        >
+          Välkommen till Parium
+        </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease, delay: 0.9 }}
-          className="mt-6 max-w-xl text-base text-white sm:text-lg"
+          className="mt-auto max-w-xl text-base text-white sm:text-lg"
         >
           Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
         </motion.p>
