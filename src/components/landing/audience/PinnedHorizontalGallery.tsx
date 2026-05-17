@@ -476,7 +476,7 @@ const PinnedHorizontalGallery = () => {
         @media (max-width: 767px) {
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
-          .phg-title { font-size: clamp(1.75rem, 7vw, 2.25rem); }
+          .phg-title { font-size: clamp(0.9rem, 3.6vw, 1.05rem); }
           .phg-strip { padding: 0 18vw 0 8vw; }
         }
       `}</style>
@@ -485,7 +485,7 @@ const PinnedHorizontalGallery = () => {
         <div className="phg-sticky">
 
           <div ref={headerRef} className="phg-header" style={{ opacity: 0, transform: 'translate3d(0, 44px, 0)' }}>
-            <h2 className="phg-title">Vi gör det <em>tillsammans</em></h2>
+            <p className="phg-title">Vi gör det <em>tillsammans!</em></p>
           </div>
 
           <div className="phg-strip-wrap">
