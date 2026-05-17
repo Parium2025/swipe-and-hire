@@ -161,7 +161,7 @@ const FixedPhoneLayer = () => {
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
-            className="aspect-[9/19.5] h-[min(30svh,28vw,220px)] w-auto sm:h-[min(38svh,30vw,300px)] md:h-[min(46svh,30vw,390px)] lg:h-[min(68svh,32vw,660px)]"
+            className="aspect-[9/19.5] h-[min(34svh,32vw,250px)] w-auto sm:h-[min(42svh,32vw,340px)] md:h-[min(50svh,31vw,430px)] lg:h-[min(68svh,32vw,660px)]"
             zoom={0.78}
             active={active}
           />
