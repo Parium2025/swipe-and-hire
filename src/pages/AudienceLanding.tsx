@@ -149,15 +149,15 @@ const FixedPhoneLayer = () => {
       className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-center justify-center overflow-hidden px-4 pb-8 pt-20 sm:px-6 sm:pt-24 md:px-8 md:pb-12 lg:px-24 lg:pb-16 lg:pt-28"
       aria-hidden="true"
     >
-      <div className="mx-auto grid h-full w-full max-w-[1280px] grid-cols-[1.15fr_0.85fr] items-center gap-3 sm:gap-6 md:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+      <div className="mx-auto grid h-full w-full max-w-[1280px] grid-cols-1 grid-rows-[auto_1fr] items-stretch gap-4 sm:gap-6 md:gap-8 lg:grid-cols-2 lg:grid-rows-1 lg:items-center lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <div
           data-phone-scroll-forward
-          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex h-full w-full translate-y-[10svh] items-center justify-center transition-opacity duration-500 ease-out sm:translate-y-[9svh] md:translate-y-[8svh] lg:translate-y-0`}
+          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex h-full w-full items-center justify-center transition-opacity duration-500 ease-out`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
-            className="aspect-[9/19.5] h-[clamp(270px,56vw,390px)] w-auto sm:h-[clamp(310px,46vw,450px)] md:h-[clamp(360px,38vw,520px)] lg:h-[min(68svh,32vw,660px)]"
+            className="aspect-[9/19.5] h-[clamp(240px,42svh,360px)] w-auto sm:h-[clamp(280px,44svh,420px)] md:h-[clamp(320px,46svh,480px)] lg:h-[min(68svh,32vw,660px)]"
             zoom={0.78}
             active={active}
           />
@@ -551,17 +551,17 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
               animate={{ opacity: [0.5, 0.75, 0.5] }}
               transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
             />
-            <div className="relative z-10 mx-auto grid w-full max-w-[1280px] grid-cols-[1.15fr_0.85fr] items-start gap-3 sm:gap-6 md:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+            <div className="relative z-10 mx-auto grid w-full max-w-[1280px] grid-cols-1 grid-rows-[auto_1fr] items-start gap-4 sm:gap-6 md:gap-8 lg:grid-cols-2 lg:grid-rows-1 lg:items-start lg:gap-16 2xl:max-w-[1440px]">
               <motion.div
                 ref={heroTextRef}
-                className="pt-4 text-left lg:-translate-y-16 lg:pt-8 xl:pt-10"
+                className="flex flex-col items-center pt-4 text-center lg:items-start lg:-translate-y-16 lg:pt-8 lg:text-left xl:pt-10 [&_h1]:mx-auto lg:[&_h1]:mx-0 [&_p]:mx-auto lg:[&_p]:mx-0"
                 initial="hidden"
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
               >
                 <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" headingId="audience-hero-heading-mobile" />
               </motion.div>
-              <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-4 lg:pt-8 xl:pt-10" />
+              <div aria-hidden className="relative mx-auto flex w-full items-start justify-center lg:pt-8 xl:pt-10" />
             </div>
           </section>
         </div>
