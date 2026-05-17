@@ -217,6 +217,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
       // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
       // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
+      const gallerySection = document.getElementById('sa-funkar-det');
       const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p')) : [];
       const introCtaEl = introText?.querySelector<HTMLElement>('[data-intro-anim]') ?? null;
       const introHeadingEl = introText?.querySelector<HTMLElement>('[data-intro-heading]') ?? null;
@@ -382,9 +383,17 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
       scrollRoot?.addEventListener('touchmove', blockNativeInput, { passive: false, capture: true });
 
+      const isStageDocked = () => {
+        const rect = stage.getBoundingClientRect();
+        const vh = window.innerHeight;
+        return Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
+      };
+
+      const isPastStage = () => stage.getBoundingClientRect().bottom <= 4;
+
       const releaseAndScrollNext = () => {
         const root = scrollRoot;
-        const next = document.getElementById('sa-funkar-det');
+        const next = gallerySection;
         if (!root || !next) return;
         if (animatingRef.current) return;
         releasedToGallery = true;
@@ -450,6 +459,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         preventDefault: true,
         onUp: () => {
           if (releasedToGallery || programmaticReturn || animatingRef.current) return;
+          if (!isStageDocked() || isPastStage()) {
+            setObserverActive(false);
+            return;
+          }
           if (indexRef.current === 0) {
             goToIntro();
             return;
@@ -460,10 +473,15 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         },
         onDown: () => {
           if (releasedToGallery || programmaticReturn || animatingRef.current) return;
+          if (!isStageDocked() || isPastStage()) {
+            setObserverActive(false);
+            return;
+          }
           if (indexRef.current === 1) goToHero();
         },
       });
-      observerActive = true;
+      observer.disable?.();
+      observerActive = false;
 
       const onScrollWatch = () => {
         if (!scrollRoot) return;
@@ -498,6 +516,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       };
 
       scrollRoot?.addEventListener('scroll', onScrollWatch, { passive: true });
+      onScrollWatch();
 
       setupTeardown = () => {
         clearReturnWork();
