@@ -29,6 +29,8 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 type HeroIntroStageProps = {
   c: (typeof audienceContent)[AudienceRole];
   isDesktopHero: boolean;
+  onIntroCta?: () => void;
+  introCtaLabel?: string;
 };
 
 const FixedPhoneLayer = () => {
