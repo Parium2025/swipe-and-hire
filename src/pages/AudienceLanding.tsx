@@ -217,7 +217,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
       // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
       // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
-      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p, [data-intro-anim]')) : [];
+      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p')) : [];
+      const introCtaEl = introText?.querySelector<HTMLElement>('[data-intro-anim]') ?? null;
       let releasedToGallery = false;
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
