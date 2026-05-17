@@ -36,7 +36,6 @@ type HeroIntroStageProps = {
 const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
-  const [phoneReady, setPhoneReady] = useState(false);
   const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
@@ -84,9 +83,7 @@ const FixedPhoneLayer = () => {
     };
 
     sync();
-    const onSplineReady = () => setPhoneReady(true);
     window.addEventListener('parium:hero-index', onIndex);
-    window.addEventListener('parium:spline-ready', onSplineReady);
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
 
     // 🔁 Spline-canvasen fångar wheel/touch internt (för 3D-rotation/zoom),
@@ -135,7 +132,6 @@ const FixedPhoneLayer = () => {
 
     return () => {
       window.removeEventListener('parium:hero-index', onIndex);
-      window.removeEventListener('parium:spline-ready', onSplineReady);
       scrollRoot?.removeEventListener('scroll', sync);
       phoneWrapper?.removeEventListener('wheel', forwardWheel, true);
       phoneWrapper?.removeEventListener('touchstart', onTouchStart, true);
@@ -157,7 +153,7 @@ const FixedPhoneLayer = () => {
         <div aria-hidden />
         <div
           data-phone-scroll-forward
-          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex h-full w-full translate-y-[10svh] items-center justify-center transition-opacity duration-500 ease-out sm:translate-y-[9svh] md:translate-y-[8svh] lg:translate-y-0`}
+          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex h-full w-full translate-y-[10svh] items-center justify-center transition-opacity duration-500 ease-out sm:translate-y-[9svh] md:translate-y-[8svh] lg:translate-y-0`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
