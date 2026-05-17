@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 const pickSrc = () => {
   if (typeof window === 'undefined') return '/hero-video-720.mp4';
   const w = window.innerWidth * (window.devicePixelRatio || 1);
-  return w >= 1800 ? '/hero-video.mp4' : '/hero-video-720.mp4';
+  return w >= 1400 ? '/hero-video.mp4' : '/hero-video-720.mp4';
 };
 
 const HeroVideo = () => {
