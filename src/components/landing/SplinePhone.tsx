@@ -14,8 +14,8 @@ const getViewportFitZoom = (zoom: number) => {
 
   const width = window.innerWidth;
   const height = window.innerHeight;
-  const widthScale = width < 480 ? 0.3 : width < 640 ? 0.38 : width < 768 ? 0.46 : width <= 1100 ? 0.52 : 1;
-  const heightScale = height < 620 ? 0.68 : height < 760 ? 0.82 : 1;
+  const widthScale = width < 480 ? 0.26 : width < 640 ? 0.33 : width < 768 ? 0.4 : width <= 1100 ? 0.46 : 1;
+  const heightScale = height < 620 ? 0.6 : height < 760 ? 0.74 : 1;
 
   return zoom * Math.min(widthScale, heightScale);
 };
