@@ -105,7 +105,7 @@ const FixedPhoneLayer = () => {
         <div aria-hidden />
         <div
           data-phone-scroll-forward
-          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex h-full w-full items-end justify-center pb-2 transition-opacity duration-500 ease-out lg:items-center lg:pb-0`}
+          className={`${visible ? 'opacity-100' : 'opacity-0'} pointer-events-none relative mx-auto flex h-full w-full items-end justify-center pb-2 transition-opacity duration-500 ease-out lg:items-center lg:pb-0`}
         >
           <SplinePhone
             className="aspect-[9/19.5] h-[clamp(240px,42svh,360px)] w-auto sm:h-[clamp(280px,44svh,420px)] md:h-[clamp(320px,46svh,480px)] lg:h-[min(68svh,32vw,660px)]"
