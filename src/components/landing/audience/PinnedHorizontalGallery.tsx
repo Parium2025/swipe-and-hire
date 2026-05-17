@@ -295,20 +295,19 @@ const PinnedHorizontalGallery = () => {
           will-change: transform, opacity;
         }
         .phg-title {
-          font-size: clamp(0.95rem, 1.2vw, 1.15rem);
-          font-weight: 600;
-          line-height: 1.4;
-          letter-spacing: 0.01em;
-          color: rgba(255,255,255,0.78);
-          max-width: 40ch;
+          font-size: clamp(2.25rem, 5.4vw, 4.75rem);
+          font-weight: 800;
+          line-height: 1.05;
+          letter-spacing: -0.028em;
+          color: #ffffff;
+          max-width: 18ch;
           margin: 0 auto;
-          /* Säkerställ att descenders (G, j, p) aldrig nuddar korten */
-          padding-bottom: 0.2em;
+          padding-bottom: 0.12em;
         }
         .phg-title em {
           font-style: normal;
-          color: white;
-          font-weight: 700;
+          color: #ffffff;
+          font-weight: 800;
         }
         .phg-sub {
           margin: 22px auto 0;
@@ -476,7 +475,7 @@ const PinnedHorizontalGallery = () => {
         @media (max-width: 767px) {
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
-          .phg-title { font-size: clamp(0.9rem, 3.6vw, 1.05rem); }
+          .phg-title { font-size: clamp(1.75rem, 7vw, 2.25rem); }
           .phg-strip { padding: 0 18vw 0 8vw; }
         }
       `}</style>
