@@ -42,10 +42,10 @@ const FixedPhoneLayer = () => {
     const width = window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
     if (width >= 1024) {
-      return { isDesktop: true, top: 0, height: Math.min(height * 0.66, 660), zoom: Math.max(0.62, Math.min(0.78, (height / 920) * 0.78)) };
+      return { isDesktop: true, top: 0, height: Math.min(height * 0.66, 660), zoom: Math.max(0.56, Math.min(0.74, (height / 980) * 0.74)) };
     }
-    const fluidZoom = Math.min(width / 1024, height / 900) * 0.62;
-    return { isDesktop: false, top: height * 0.58, height: Math.min(height * 0.35, 340), zoom: Math.max(0.29, Math.min(0.46, fluidZoom)) };
+    const fluidZoom = Math.min(width / 1024, height / 900) * 0.48;
+    return { isDesktop: false, top: height * 0.64, height: Math.min(height * 0.28, 300), zoom: Math.max(0.24, Math.min(0.34, fluidZoom)) };
   });
   const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -56,36 +56,41 @@ const FixedPhoneLayer = () => {
       const width = window.innerWidth;
       const height = window.visualViewport?.height ?? window.innerHeight;
       if (width >= 1024) {
-        setPhoneMetrics({ isDesktop: true, top: 0, height: Math.min(height * 0.66, 660), zoom: Math.max(0.62, Math.min(0.78, (height / 920) * 0.78)) });
+        setPhoneMetrics({ isDesktop: true, top: 0, height: Math.min(height * 0.66, 660), zoom: Math.max(0.56, Math.min(0.74, (height / 980) * 0.74)) });
         return;
       }
       const anchor = document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
-      const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.46;
-      const gap = height <= 640 ? 16 : Math.max(32, Math.min(58, height * 0.06));
+      const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.52;
+      const gap = height <= 640 ? 14 : Math.max(18, Math.min(34, height * 0.038));
       const bottomSafe = Math.max(16, height * 0.025);
       const top = textBottom + gap;
-      const desiredHeight = Math.min(height * (width >= 700 && height < 850 ? 0.30 : 0.32), width >= 700 ? 320 : 310);
-      const availableHeight = Math.max(96, height - top - bottomSafe);
-      const fluidZoom = Math.min(width / 1024, height / 900) * 0.62;
+      const desiredHeight = Math.min(height * (width >= 700 && height < 850 ? 0.26 : 0.30), width >= 700 ? 300 : 290);
+      const availableHeight = Math.max(0, height - top - bottomSafe);
+      const fluidZoom = Math.min(width / 1024, height / 900) * 0.48;
       setPhoneMetrics({
         isDesktop: false,
         top,
-        height: Math.min(desiredHeight, availableHeight),
-        zoom: Math.max(0.29, Math.min(0.46, fluidZoom)),
+        height: Math.max(72, Math.min(desiredHeight, availableHeight)),
+        zoom: Math.max(0.24, Math.min(0.34, fluidZoom)),
       });
     };
 
     syncPhoneMetrics();
     const frame = window.requestAnimationFrame(syncPhoneMetrics);
+    const timers = [80, 180, 360, 720, 1200].map((delay) => window.setTimeout(syncPhoneMetrics, delay));
     const anchor = document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
     const observer = anchor ? new ResizeObserver(syncPhoneMetrics) : null;
     if (anchor) observer?.observe(anchor);
+    const mutationObserver = new MutationObserver(syncPhoneMetrics);
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
     document.fonts?.ready.then(syncPhoneMetrics).catch(() => undefined);
     window.addEventListener('resize', syncPhoneMetrics, { passive: true });
     window.visualViewport?.addEventListener('resize', syncPhoneMetrics, { passive: true });
     return () => {
       window.cancelAnimationFrame(frame);
+      timers.forEach((timer) => window.clearTimeout(timer));
       observer?.disconnect();
+      mutationObserver.disconnect();
       window.removeEventListener('resize', syncPhoneMetrics);
       window.visualViewport?.removeEventListener('resize', syncPhoneMetrics);
     };
