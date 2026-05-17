@@ -44,6 +44,13 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   }, [active, isReady]);
 
   useEffect(() => {
+    const app = appRef.current;
+    if (!app || !isReady) return;
+    app.setZoom(zoom);
+    requestAnimationFrame(() => appRef.current?.setZoom(zoom));
+  }, [zoom, isReady]);
+
+  useEffect(() => {
     if (reducedMotion) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -107,7 +114,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
       app?.dispose();
       appRef.current = null;
     };
-  }, [reducedMotion, zoom]);
+  }, [reducedMotion]);
 
   if (reducedMotion || hasError) {
     return (
