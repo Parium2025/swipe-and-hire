@@ -602,6 +602,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
             aria-labelledby="audience-hero-heading-mobile"
           >
             <motion.div
+              data-hero-phone-anchor
               className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center px-5 pt-[clamp(5.25rem,12svh,6rem)] text-center"
               initial="hidden"
               animate="visible"
