@@ -9,6 +9,9 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
+const isCoarsePointer = () =>
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
 const getViewportFitZoom = (zoom: number) => {
   if (typeof window === 'undefined') return zoom;
 
@@ -51,6 +54,37 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   }, [active, isReady]);
 
   useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const stopAtPhoneSurface = (event: Event) => {
+      event.stopPropagation();
+    };
+
+    const events = [
+      'pointerdown',
+      'pointermove',
+      'pointerup',
+      'pointercancel',
+      'touchstart',
+      'touchmove',
+      'touchend',
+      'touchcancel',
+      'wheel',
+    ];
+
+    events.forEach((eventName) => {
+      wrapper.addEventListener(eventName, stopAtPhoneSurface, { passive: false });
+    });
+
+    return () => {
+      events.forEach((eventName) => {
+        wrapper.removeEventListener(eventName, stopAtPhoneSurface);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -65,7 +99,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         if (typeof window !== 'undefined' && 'devicePixelRatio' in window) {
           try {
             Object.defineProperty(canvas, '_dprCap', {
-              value: Math.min(window.devicePixelRatio || 1, 2),
+              value: Math.min(window.devicePixelRatio || 1, isCoarsePointer() ? 1.35 : 2),
               configurable: true,
             });
           } catch {
@@ -146,6 +180,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   return (
     <div
       ref={wrapperRef}
+      data-phone-interactive
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'none', overscrollBehavior: 'contain', pointerEvents: 'auto' }}
     >
