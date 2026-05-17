@@ -29,10 +29,10 @@ type MediaItem = {
 const items: MediaItem[] = [
   { type: 'video', src: '/landing/jobseeker-pt.mp4', poster: real1, position: '50% 30%', eyebrow: 'Träning', title: 'Personliga tränare' },
   { type: 'video', src: '/landing/jobseeker-plumber.mp4', poster: real5, position: '50% 30%', eyebrow: 'Hantverk', title: 'Rörmokare & byggare' },
-  { type: 'video', src: '/landing/jobseeker-real-center.mp4', poster: real1, eyebrow: 'I rörelse', title: 'Yrkespersoner i sitt element' },
+  { type: 'video', src: '/landing/jobseeker-real-center.mp4', poster: real1, eyebrow: 'Affärer', title: 'Yrkespersoner i sitt element' },
   { type: 'video', src: '/landing/jobseeker-real-4.mp4', poster: real2, eyebrow: 'Service', title: 'Mäklare & rådgivare' },
   { type: 'video', src: '/landing/jobseeker-real-3.mp4', poster: real3, eyebrow: 'Restaurang', title: 'Kockar & köksmästare' },
-  { type: 'video', src: '/landing/jobseeker-electrician.mp4', poster: real4, position: '50% 28%', eyebrow: 'Tekniker', title: 'Elektriker' },
+  { type: 'video', src: '/landing/jobseeker-electrician.mp4', poster: real4, position: '50% 28%', eyebrow: 'Elektriker', title: 'Elektriker' },
   { type: 'video', src: '/landing/jobseeker-farmer.mp4', poster: real7, eyebrow: 'Lantbruk', title: 'Bönder & djurskötare' },
   { type: 'video', src: '/landing/jobseeker-nurse.mp4', poster: real6, position: '50% 25%', eyebrow: 'Vård', title: 'Undersköterskor' },
 ];
