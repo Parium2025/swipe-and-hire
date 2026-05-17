@@ -65,9 +65,10 @@ const FixedPhoneLayer = () => {
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.52;
     const gap = height <= 640 ? 12 : clamp(height * 0.032, 16, 28);
     const bottomSafe = Math.max(14, height * 0.022);
-    const top = textBottom + gap;
-    const availableHeight = Math.max(88, height - top - bottomSafe);
     const desiredHeight = Math.min(height * (width >= 700 && height < 850 ? 0.28 : 0.32), width >= 700 ? 320 : 310);
+    const canvasHeight = Math.max(72, Math.min(desiredHeight, height - bottomSafe - gap));
+    const top = clamp(textBottom + gap, gap, height - bottomSafe - canvasHeight);
+    const availableHeight = Math.max(72, height - top - bottomSafe);
     const fluidZoom = Math.min(width / 1024, height / 900) * 0.46;
     return {
       isDesktop: false,
@@ -228,12 +229,12 @@ const FixedPhoneLayer = () => {
           data-phone-scroll-forward
           className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-500 ease-out'}`}
           style={phoneMetrics.isDesktop
-            ? { touchAction: 'none', overscrollBehavior: 'contain' }
+            ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px` }
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
           }
         >
           <SplinePhone
-            className={phoneMetrics.isDesktop ? "h-[min(66svh,660px)] w-auto aspect-[9/24] xl:aspect-[9/23] 2xl:aspect-[9/21.5]" : "h-full w-auto aspect-[9/24]"}
+            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[9/24] xl:aspect-[9/23] 2xl:aspect-[9/21.5]" : "h-full w-auto aspect-[9/24]"}
             zoom={phoneMetrics.zoom}
             active={active}
           />
