@@ -178,7 +178,7 @@ const FixedPhoneLayer = () => {
 // och scrollar nedåt igen släpps kontrollen och sidan scrollar vidare normalt.
 // Inga scroll-snap, ingen sticky, inga konkurrerande wheel-locks.
 // ─────────────────────────────────────────────────────────────────────────────
-const HeroIntroStage = ({ c, isDesktopHero }: HeroIntroStageProps) => {
+const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   const stageRef = useRef<HTMLElement | null>(null);
   const heroOuterRef = useRef<HTMLDivElement | null>(null);
   const heroInnerRef = useRef<HTMLDivElement | null>(null);
