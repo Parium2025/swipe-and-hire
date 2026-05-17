@@ -188,7 +188,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         role="img"
         aria-label="Parium 3D-telefon"
         tabIndex={-1}
-        className="absolute left-1/2 top-1/2 h-[230%] w-[220%] -translate-x-1/2 -translate-y-1/2 cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing lg:h-[185%] lg:w-[190%]"
+        className="absolute left-1/2 top-1/2 h-[320%] w-[280%] -translate-x-1/2 -translate-y-1/2 cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing lg:h-[185%] lg:w-[190%]"
         draggable={false}
         style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
       />
