@@ -39,21 +39,16 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
     return () => window.clearTimeout(timer);
   }, [isReady, hasError]);
 
-  const reducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
   useEffect(() => {
     activeRef.current = active;
     const app = appRef.current;
     if (!app) return;
-    const shouldPlay = active && !reducedMotion;
-    if (shouldPlay) {
+    if (active) {
       if (app.isStopped) app.play();
     } else if (!app.isStopped) {
       app.stop();
     }
-  }, [active, isReady, reducedMotion]);
+  }, [active, isReady]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -89,7 +84,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         } catch { /* no-op */ }
         app.setZoom(getViewportFitZoom(zoom));
         requestAnimationFrame(() => app?.setZoom(getViewportFitZoom(zoom)));
-        if (!activeRef.current || reducedMotion) app.stop();
+        if (!activeRef.current) app.stop();
         // Vänta 3 rAF så Spline garanterat hunnit rita sin första WebGL-frame
         // innan vi fade:ar in canvasen. På throttlade enheter (Lovable preview-
         // iframe, äldre Androids) räcker inte 2 rAF — då syns scenens
@@ -118,7 +113,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
       app?.dispose();
       appRef.current = null;
     };
-  }, [reducedMotion, zoom]);
+  }, [zoom]);
 
   useEffect(() => {
     const app = appRef.current;
