@@ -295,10 +295,10 @@ const PinnedHorizontalGallery = () => {
           will-change: transform, opacity;
         }
         .phg-title {
-          /* Matchar bild 1 & 2: text-4xl→5xl→6xl→4.75rem, font-black, tracking -0.025em */
-          font-size: 2.25rem;
+          /* Matchar första hero-rubriken: 3.25rem → 4rem → 5rem → 6rem → 7rem */
+          font-size: 3.25rem;
           font-weight: 900;
-          line-height: 1.02;
+          line-height: 1.04;
           letter-spacing: -0.025em;
           color: #ffffff;
           max-width: 18ch;
@@ -310,9 +310,10 @@ const PinnedHorizontalGallery = () => {
           color: #ffffff;
           font-weight: 900;
         }
-        @media (min-width: 640px)  { .phg-title { font-size: 3rem; } }
-        @media (min-width: 768px)  { .phg-title { font-size: 3.75rem; } }
-        @media (min-width: 1024px) { .phg-title { font-size: 4.75rem; } }
+        @media (min-width: 640px)  { .phg-title { font-size: 4rem; } }
+        @media (min-width: 768px)  { .phg-title { font-size: 5rem; } }
+        @media (min-width: 1024px) { .phg-title { font-size: 6rem; } }
+        @media (min-width: 1536px) { .phg-title { font-size: 7rem; } }
         .phg-sub {
           margin: 22px auto 0;
           font-size: clamp(1rem, 1.2vw, 1.125rem);
@@ -479,7 +480,6 @@ const PinnedHorizontalGallery = () => {
         @media (max-width: 767px) {
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
-          .phg-title { font-size: clamp(1.75rem, 7vw, 2.25rem); }
           .phg-strip { padding: 0 18vw 0 8vw; }
         }
       `}</style>
