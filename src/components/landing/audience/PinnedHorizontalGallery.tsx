@@ -492,7 +492,7 @@ const PinnedHorizontalGallery = () => {
       <div ref={sectionRef} className="phg-section" style={{ height: `${SCROLL_VH}vh` }}>
         <div className="phg-sticky">
 
-          <div className="phg-header">
+          <div ref={headerRef} className="phg-header" style={{ opacity: 0, transform: 'translate3d(0, 44px, 0)' }}>
             <h2 className="phg-title">Vi gör det <em>tillsammans</em></h2>
           </div>
 
