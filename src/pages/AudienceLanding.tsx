@@ -401,6 +401,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       observer = Observer.create({
         target: scrollRoot ?? window,
         type: 'wheel,touch',
+        ignore: '[data-phone-interactive], [data-phone-interactive] *',
         wheelSpeed: -1,
         tolerance: 16,
         preventDefault: true,
