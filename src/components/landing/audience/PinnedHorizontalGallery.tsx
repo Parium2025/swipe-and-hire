@@ -308,8 +308,11 @@ const PinnedHorizontalGallery = () => {
         .phg-title em {
           font-style: normal;
           color: #ffffff;
-          font-weight: 800;
+          font-weight: 900;
         }
+        @media (min-width: 640px)  { .phg-title { font-size: 3rem; } }
+        @media (min-width: 768px)  { .phg-title { font-size: 3.75rem; } }
+        @media (min-width: 1024px) { .phg-title { font-size: 4.75rem; } }
         .phg-sub {
           margin: 22px auto 0;
           font-size: clamp(1rem, 1.2vw, 1.125rem);
