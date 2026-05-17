@@ -262,13 +262,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       // Hero-text-layern (heroOuter) skiftar yPercent → texten lämnar
       // viewporten visuellt utan att vi behöver röra textens opacity.
       const setHeroStart = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, ...introTextItems].filter(Boolean));
+        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, ...introTextItems].filter(Boolean));
         gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
         gsap.set(heroInner, { yPercent: 0 });
         gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
         gsap.set(introInner, { yPercent: -100 });
         if (introText) gsap.set(introText, { opacity: 1, clearProps: 'transform' });
         gsap.set(introTextItems, { y: 44, opacity: 0 });
+        if (introCtaEl) gsap.set(introCtaEl, { opacity: 0 });
         indexRef.current = 0;
       };
 
