@@ -569,7 +569,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
             </motion.div>
             <div className="relative z-0 flex min-h-0 items-end justify-center overflow-hidden pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
               {!isDesktopHero && (
-                <SplinePhone className="aspect-[9/19.5] h-[min(100%,clamp(150px,30svh,360px))] w-auto max-w-[74vw] sm:h-[min(100%,clamp(190px,34svh,440px))] sm:max-w-[68vw] md:h-[min(100%,clamp(230px,38svh,520px))] md:max-w-[54vw]" />
+                <SplinePhone
+                  className="h-[min(100%,clamp(150px,30svh,360px))] w-[min(88vw,320px)] sm:h-[min(100%,clamp(190px,34svh,440px))] sm:w-[min(76vw,380px)] md:h-[min(100%,clamp(230px,38svh,520px))] md:w-[min(58vw,440px)]"
+                  zoom={0.52}
+                />
               )}
             </div>
           </section>
