@@ -9,6 +9,9 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
+const isCoarsePointer = () =>
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
 const getViewportFitZoom = (zoom: number) => {
   if (typeof window === 'undefined') return zoom;
 
@@ -65,7 +68,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         if (typeof window !== 'undefined' && 'devicePixelRatio' in window) {
           try {
             Object.defineProperty(canvas, '_dprCap', {
-              value: Math.min(window.devicePixelRatio || 1, 2),
+              value: Math.min(window.devicePixelRatio || 1, isCoarsePointer() ? 1.35 : 2),
               configurable: true,
             });
           } catch {
