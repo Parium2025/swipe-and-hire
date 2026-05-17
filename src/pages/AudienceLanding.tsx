@@ -35,30 +35,37 @@ type HeroIntroStageProps = {
 
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+  const heroIndexRef = useRef(0);
+  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; top: number; height: number; zoom: number } | null>(null);
   const getVisibleAnchor = () => {
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const anchors = Array.from(document.querySelectorAll('[data-hero-phone-anchor]')) as HTMLElement[];
     return anchors.find((anchor) => {
       const rect = anchor.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
+      return rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < viewportHeight;
     }) ?? null;
   };
   const calculatePhoneMetrics = () => {
     if (typeof window === 'undefined') return { isDesktop: true, top: 0, height: 660, zoom: 0.68 };
+    if (heroIndexRef.current !== 0 && lastHeroMetricsRef.current) return lastHeroMetricsRef.current;
     const width = window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
 
     if (width >= 1024) {
+      const isCompactLaptop = height <= 820;
       const desktopTopPadding = width >= 1280 ? 120 : 112;
-      const desktopBottomPadding = width >= 1280 ? 72 : 64;
+      const desktopBottomPadding = width >= 1280 ? 76 : 68;
       const wrapperTopPadding = width >= 1280 ? 40 : 32;
       const safeCanvasHeight = Math.max(360, height - desktopTopPadding - desktopBottomPadding - wrapperTopPadding - 10);
-      const desiredHeight = clamp(height * 0.74, 500, 720);
-      return {
+      const desiredHeight = clamp(height * (isCompactLaptop ? 0.68 : 0.72), 460, 690);
+      const metrics = {
         isDesktop: true,
         top: 0,
         height: Math.min(desiredHeight, safeCanvasHeight),
-        zoom: clamp((height / 980) * 0.68, 0.50, 0.68),
+        zoom: clamp((height / 980) * 0.62, 0.44, 0.62),
       };
+      lastHeroMetricsRef.current = metrics;
+      return metrics;
     }
 
     const anchor = getVisibleAnchor();
@@ -69,19 +76,20 @@ const FixedPhoneLayer = () => {
     const canvasHeight = Math.max(72, Math.min(desiredHeight, height - bottomSafe - gap));
     const top = clamp(textBottom + gap, gap, height - bottomSafe - canvasHeight);
     const availableHeight = Math.max(72, height - top - bottomSafe);
-    const fluidZoom = Math.min(width / 1024, height / 900) * 0.46;
-    return {
+    const fluidZoom = Math.min(width / 1024, height / 900) * 0.44;
+    const metrics = {
       isDesktop: false,
       top,
       height: Math.min(desiredHeight, availableHeight),
-      zoom: clamp(fluidZoom, 0.22, 0.32),
+      zoom: clamp(fluidZoom, 0.21, 0.30),
     };
+    lastHeroMetricsRef.current = metrics;
+    return metrics;
   };
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
   const [phoneReady, setPhoneReady] = useState(false);
   const [phoneMetrics, setPhoneMetrics] = useState(calculatePhoneMetrics);
-  const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
 
@@ -150,6 +158,7 @@ const FixedPhoneLayer = () => {
       const detail = (e as CustomEvent<{ index: number }>).detail;
       heroIndexRef.current = detail?.index ?? 0;
       setActive((detail?.index ?? 0) === 0);
+      setPhoneMetrics(calculatePhoneMetrics());
       apply(detail?.index !== 1 && isHeroZone());
     };
 
@@ -227,7 +236,7 @@ const FixedPhoneLayer = () => {
         <div aria-hidden className="hidden lg:block" />
         <div
           data-phone-scroll-forward
-          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-500 ease-out'}`}
+          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-500 ease-out'}`}
           style={phoneMetrics.isDesktop
             ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px` }
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
