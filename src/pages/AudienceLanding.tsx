@@ -551,17 +551,17 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
               animate={{ opacity: [0.5, 0.75, 0.5] }}
               transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
             />
-            <div className="relative z-10 mx-auto grid w-full max-w-[1280px] grid-cols-[1.15fr_0.85fr] items-start gap-3 sm:gap-6 md:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+            <div className="relative z-10 mx-auto grid w-full max-w-[1280px] grid-cols-1 grid-rows-[auto_1fr] items-start gap-4 sm:gap-6 md:gap-8 lg:grid-cols-2 lg:grid-rows-1 lg:items-start lg:gap-16 2xl:max-w-[1440px]">
               <motion.div
                 ref={heroTextRef}
-                className="pt-4 text-left lg:-translate-y-16 lg:pt-8 xl:pt-10"
+                className="flex flex-col items-center pt-4 text-center lg:items-start lg:-translate-y-16 lg:pt-8 lg:text-left xl:pt-10 [&_h1]:mx-auto lg:[&_h1]:mx-0 [&_p]:mx-auto lg:[&_p]:mx-0"
                 initial="hidden"
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
               >
                 <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" headingId="audience-hero-heading-mobile" />
               </motion.div>
-              <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-4 lg:pt-8 xl:pt-10" />
+              <div aria-hidden className="relative mx-auto flex w-full items-start justify-center lg:pt-8 xl:pt-10" />
             </div>
           </section>
         </div>
