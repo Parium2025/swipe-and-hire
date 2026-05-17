@@ -150,18 +150,18 @@ const FixedPhoneLayer = () => {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24"
+      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-center justify-center overflow-hidden px-4 pb-8 pt-20 sm:px-6 sm:pt-24 md:px-8 md:pb-12 lg:px-24 lg:pb-16 lg:pt-28"
       aria-hidden="true"
     >
-      <div className="mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+      <div className="mx-auto grid w-full max-w-[1280px] grid-cols-[1.15fr_0.85fr] items-start gap-3 sm:gap-6 md:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden />
         <div
           data-phone-scroll-forward
-          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10`}
+          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit items-start justify-center pt-4 transition-opacity duration-500 ease-out lg:pt-8 xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
-            className="h-[min(68svh,660px)] w-auto aspect-[9/19.5]"
+            className="h-[min(38svh,300px)] w-auto aspect-[9/19.5] sm:h-[min(50svh,440px)] md:h-[min(58svh,540px)] lg:h-[min(68svh,660px)]"
             zoom={0.78}
             active={active}
           />
@@ -547,50 +547,25 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       {/* HERO LAGER */}
       <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
         <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
-          {/* Mobile hero */}
-          <section
-            className="relative flex h-full w-screen overflow-hidden lg:hidden"
-            style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
-            aria-labelledby="audience-hero-heading-mobile"
-          >
-            <div className="absolute inset-0 -z-0 flex items-center justify-center">
-              {!isDesktopHero && <SplinePhone className="h-[80svh] w-full max-w-[520px]" />}
-            </div>
-            <motion.div
-              className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1180px] flex-col items-center justify-center px-5 pb-20 pt-28 text-center"
-              initial="hidden"
-              animate="visible"
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
-            >
-              <HeroText
-                eyebrow={c.eyebrow}
-                headline={c.hero.headline}
-                subtitle={c.hero.subtitle}
-                variant="mobile"
-                headingId="audience-hero-heading-mobile"
-              />
-            </motion.div>
-          </section>
-
-          {/* Desktop hero */}
-          <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 lg:flex lg:px-24">
+          {/* Hero — split-layout på alla skärmar (text vänster, 3D-telefon höger) */}
+          <section className="relative flex h-full items-center justify-center overflow-hidden px-4 pb-8 pt-20 sm:px-6 sm:pt-24 md:px-8 md:pb-12 lg:px-24 lg:pb-16 lg:pt-28">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
               animate={{ opacity: [0.5, 0.75, 0.5] }}
               transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
             />
-            <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+            <div className="relative z-10 mx-auto grid w-full max-w-[1280px] grid-cols-[1.15fr_0.85fr] items-start gap-3 sm:gap-6 md:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
               <motion.div
                 ref={heroTextRef}
-                className="-translate-y-16 pt-8 text-left xl:pt-10"
+                className="pt-4 text-left lg:-translate-y-16 lg:pt-8 xl:pt-10"
                 initial="hidden"
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
               >
-                <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
+                <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" headingId="audience-hero-heading-mobile" />
               </motion.div>
-              <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
+              <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-4 lg:pt-8 xl:pt-10" />
             </div>
           </section>
         </div>
@@ -660,16 +635,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // åt gången — annars initieras Spline-runtime två gånger på desktop.
   // Mobil-hero används för telefon OCH surfplattor (< 1024px) så iPad/Android-tabs
   // får samma full-bleed-Spline-upplevelse som telefon. Desktop-split tar över ≥ 1024px.
-  const [isDesktopHero, setIsDesktopHero] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return window.matchMedia('(min-width: 1024px)').matches;
-  });
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)');
-    const onChange = (e: MediaQueryListEvent) => setIsDesktopHero(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
+  // Split-layout (text + 3D-telefon side-by-side) används på alla skärmstorlekar.
+  // FixedPhoneLayer renderar Spline-telefonen — alltid en enda instans.
+  const isDesktopHero = true;
 
   // (Tidigare scroll-jack med IntersectionObserver + tvingad scrollTop togs bort —
   // den slogs mot CSS scroll-snap och orsakade lagg/jitter. CSS scroll-snap
