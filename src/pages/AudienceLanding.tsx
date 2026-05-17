@@ -105,7 +105,7 @@ const FixedPhoneLayer = () => {
         <div aria-hidden />
         <div
           data-phone-scroll-forward
-          className={`${visible ? 'opacity-100' : 'opacity-0'} pointer-events-none relative mx-auto flex h-full w-full items-end justify-center pb-2 transition-opacity duration-500 ease-out lg:items-center lg:pb-0`}
+          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex h-full w-full items-end justify-center overflow-visible pb-2 transition-opacity duration-500 ease-out lg:items-center lg:pb-0`}
         >
           <SplinePhone
             className="aspect-[9/19.5] h-[clamp(240px,42svh,360px)] w-auto sm:h-[clamp(280px,44svh,420px)] md:h-[clamp(320px,46svh,480px)] lg:h-[min(68svh,32vw,660px)]"
@@ -322,6 +322,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       // browserns native smooth-scroll → annars syns "hack" vid hård scroll.
       let transitionBlockUntil = 0;
       const blockNativeInput = (e: Event) => {
+        if (e.target instanceof Element && e.target.closest('[data-phone-interactive]')) return;
         if (performance.now() < transitionBlockUntil) {
           e.preventDefault();
           e.stopPropagation();
@@ -359,7 +360,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           );
         }
         prevScrollTop = startScroll;
-        transitionBlockUntil = performance.now() + 700;
+        transitionBlockUntil = performance.now() + (window.matchMedia('(pointer: coarse)').matches ? 420 : 700);
         root.scrollTo({ top: targetScroll, behavior: 'smooth' });
         window.dispatchEvent(new Event('parium:gallery-enter'));
         forwardTimer = window.setTimeout(() => {
@@ -375,7 +376,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           // gånger och en gest kapas av nästa innan onScrollWatch hann reagera.
           releaseLockedRef.current = false;
           forwardTimer = null;
-        }, 900);
+        }, window.matchMedia('(pointer: coarse)').matches ? 620 : 900);
       };
 
       const returnFromGalleryToIntro = () => {
@@ -389,13 +390,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
         // Blockera vidare wheel/touch ~700ms så att kvarvarande momentum inte
         // sliter sönder den smooth-scrollade returen (samma princip som 2→3).
-        transitionBlockUntil = performance.now() + 700;
+        transitionBlockUntil = performance.now() + (window.matchMedia('(pointer: coarse)').matches ? 420 : 700);
         scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
         window.setTimeout(() => {
           programmaticReturn = false;
           prevScrollTop = scrollRoot.scrollTop;
-        }, 700);
+        }, window.matchMedia('(pointer: coarse)').matches ? 520 : 700);
       };
 
       observer = Observer.create({
