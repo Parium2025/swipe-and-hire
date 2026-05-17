@@ -56,13 +56,13 @@ const FixedPhoneLayer = () => {
       const desktopTopPadding = width >= 1280 ? 116 : 104;
       const desktopBottomPadding = width >= 1280 ? 72 : 64;
       const safeCanvasHeight = Math.max(360, height - desktopTopPadding - desktopBottomPadding - 10);
-      const visualHeight = clamp(height * (isCompactLaptop ? 0.62 : 0.66), 420, 650);
-      const safeHeight = Math.min(safeCanvasHeight, visualHeight * 1.24);
+      const visualHeight = clamp(height * (isCompactLaptop ? 0.58 : 0.64), 400, 630);
+      const safeHeight = Math.min(safeCanvasHeight, visualHeight * 1.55);
       const metrics = {
         isDesktop: true,
         top: 0,
         height: safeHeight,
-        zoom: clamp((height / 980) * 0.58 * (visualHeight / safeHeight), 0.38, 0.58),
+        zoom: clamp((height / 980) * 0.54 * (visualHeight / safeHeight), 0.32, 0.54),
       };
       lastHeroMetricsRef.current = metrics;
       return metrics;
@@ -72,18 +72,19 @@ const FixedPhoneLayer = () => {
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.52;
     const gap = height <= 640 ? 10 : clamp(height * 0.026, 14, 24);
     const bottomSafe = Math.max(14, height * 0.022);
-    const visualHeight = Math.min(height * (width >= 700 && height < 850 ? 0.27 : 0.30), width >= 700 ? 300 : 290);
-    const desiredHeight = visualHeight * 1.34;
+    const visualHeight = Math.min(height * (width >= 700 && height < 850 ? 0.25 : 0.28), width >= 700 ? 280 : 270);
+    const canvasBuffer = width >= 700 ? 1.9 : 1.62;
+    const desiredHeight = visualHeight * canvasBuffer;
     const canvasHeight = Math.max(96, Math.min(desiredHeight, height - bottomSafe - gap));
-    const top = clamp(textBottom + gap - (canvasHeight - visualHeight) * 0.5, gap, height - bottomSafe - canvasHeight);
+    const top = clamp(textBottom + gap - (canvasHeight - visualHeight) * 0.52, gap, height - bottomSafe - canvasHeight);
     const availableHeight = Math.max(72, height - top - bottomSafe);
     const finalHeight = Math.min(desiredHeight, availableHeight);
-    const fluidZoom = Math.min(width / 1024, height / 900) * 0.42 * (visualHeight / finalHeight);
+    const fluidZoom = Math.min(width / 1024, height / 900) * 0.38 * (visualHeight / finalHeight);
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.17, 0.27),
+      zoom: clamp(fluidZoom, 0.14, 0.25),
     };
     lastHeroMetricsRef.current = metrics;
     return metrics;
