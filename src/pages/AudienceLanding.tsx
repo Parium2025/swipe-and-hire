@@ -547,14 +547,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       {/* HERO LAGER */}
       <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
         <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
-          {/* Mobile hero — flex-kolumn: text överst, telefonen tar resterande höjd och clampas så den aldrig klipps */}
+          {/* Mobile hero — texten får sin höjd först, telefonen skalar inom resterande yta och kan inte klippas/scrollas iväg */}
           <section
-            className="relative flex h-full w-screen flex-col overflow-hidden lg:hidden"
+            className="relative grid h-full w-screen grid-rows-[auto_minmax(0,1fr)] overflow-hidden overscroll-none lg:hidden"
             style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
             aria-labelledby="audience-hero-heading-mobile"
           >
             <motion.div
-              className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] shrink-0 flex-col items-center px-5 pt-24 text-center"
+              className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center px-5 pt-[clamp(5.25rem,12svh,6rem)] text-center"
               initial="hidden"
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
@@ -567,9 +567,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
                 headingId="audience-hero-heading-mobile"
               />
             </motion.div>
-            <div className="relative z-0 flex min-h-0 flex-1 items-end justify-center pb-4">
+            <div className="relative z-0 flex min-h-0 items-end justify-center overflow-hidden pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
               {!isDesktopHero && (
-                <SplinePhone className="h-full w-full max-h-[clamp(220px,40svh,520px)] max-w-[min(85vw,360px)]" />
+                <SplinePhone className="aspect-[9/19.5] h-[min(100%,clamp(150px,30svh,360px))] w-auto max-w-[74vw] sm:h-[min(100%,clamp(190px,34svh,440px))] sm:max-w-[68vw] md:h-[min(100%,clamp(230px,38svh,520px))] md:max-w-[54vw]" />
               )}
             </div>
           </section>
