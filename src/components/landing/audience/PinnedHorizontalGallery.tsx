@@ -165,6 +165,7 @@ const PinnedHorizontalGallery = () => {
     const warmTimers: number[] = [];
     let disposed = false;
     let warmed = false;
+    let entered = false;
     let gsapInstance: typeof import('gsap').default | null = null;
 
     import('gsap').then(({ default: gsap }) => {
@@ -216,6 +217,8 @@ const PinnedHorizontalGallery = () => {
     const onWarm = () => warmVideos();
 
     const enter = () => {
+      if (entered) return;
+      entered = true;
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
       warmVideos();
@@ -239,6 +242,8 @@ const PinnedHorizontalGallery = () => {
       }, 800);
     };
     const leave = () => {
+      if (!entered) return;
+      entered = false;
       strip.classList.remove('phg-entered');
       strip.classList.add('phg-leaving');
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
@@ -256,11 +261,24 @@ const PinnedHorizontalGallery = () => {
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
     };
 
+    const syncVisibleState = () => {
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      if (rect.top < vh * 0.92 && rect.bottom > vh * 0.08) enter();
+      else if (rect.bottom <= 0 || rect.top >= vh) leave();
+    };
+
     const onEnter = () => enter();
     const onLeave = () => leave();
     window.addEventListener('parium:gallery-warm', onWarm);
     window.addEventListener('parium:gallery-enter', onEnter);
     window.addEventListener('parium:gallery-leave', onLeave);
+    const root = containerRef.current ?? document.querySelector('[data-landing-scroll-root]');
+    root?.addEventListener('scroll', syncVisibleState, { passive: true });
+    window.addEventListener('resize', syncVisibleState);
+    syncVisibleState();
 
     return () => {
       disposed = true;
@@ -269,6 +287,8 @@ const PinnedHorizontalGallery = () => {
       window.removeEventListener('parium:gallery-warm', onWarm);
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
+      root?.removeEventListener('scroll', syncVisibleState);
+      window.removeEventListener('resize', syncVisibleState);
     };
   }, []);
 
