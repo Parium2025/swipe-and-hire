@@ -295,10 +295,11 @@ const PinnedHorizontalGallery = () => {
           will-change: transform, opacity;
         }
         .phg-title {
-          font-size: clamp(2.25rem, 5.4vw, 4.75rem);
-          font-weight: 800;
-          line-height: 1.05;
-          letter-spacing: -0.028em;
+          /* Matchar bild 1 & 2: text-4xl→5xl→6xl→4.75rem, font-black, tracking -0.025em */
+          font-size: 2.25rem;
+          font-weight: 900;
+          line-height: 1.02;
+          letter-spacing: -0.025em;
           color: #ffffff;
           max-width: 18ch;
           margin: 0 auto;
