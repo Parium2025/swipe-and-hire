@@ -111,7 +111,14 @@ const PinnedHorizontalGallery = () => {
 
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
-      strip.style.setProperty('--phg-x', `${7 + (-152 * p)}vw`);
+      // Mät faktisk overflow så att alla kort alltid exponeras oavsett viewport.
+      // Slutposition = visa sista kortet med samma marginal som första kortet får i start.
+      const stripWidth = strip.scrollWidth;
+      const viewport = window.innerWidth || document.documentElement.clientWidth;
+      const startPx = viewport * 0.07; // 7vw inledande marginal (matchar gammal start)
+      const endPx = Math.min(startPx, viewport - stripWidth + startPx); // negativ när strip > viewport
+      const xPx = startPx + (endPx - startPx) * p;
+      strip.style.setProperty('--phg-x', `${xPx}px`);
       section.style.setProperty('--phg-progress', `${p}`);
     };
 
