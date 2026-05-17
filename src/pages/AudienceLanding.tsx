@@ -195,19 +195,22 @@ const FixedPhoneLayer = () => {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-end justify-center overflow-hidden px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-24 sm:px-6 md:px-12 lg:items-center lg:pb-16 lg:pt-28 lg:px-24"
+      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:px-12 lg:items-center lg:px-24 lg:pb-16 lg:pt-28"
       aria-hidden="true"
     >
-      <div className="mx-auto flex w-full max-w-[1280px] items-end justify-center lg:grid lg:grid-cols-2 lg:items-start lg:gap-16 2xl:max-w-[1440px]">
+      <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center lg:grid lg:h-auto lg:grid-cols-2 lg:items-start lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden className="hidden lg:block" />
         <div
           data-phone-scroll-forward
-          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit -translate-y-[clamp(5.25rem,14svh,8rem)] items-end justify-center transition-opacity duration-500 ease-out [@media(max-height:640px)]:-translate-y-4 sm:-translate-y-[clamp(5.75rem,14svh,9rem)] md:-translate-y-[clamp(6.5rem,14svh,10rem)] lg:translate-y-0 lg:items-start lg:pt-8 xl:pt-10`}
-          style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
+          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-start justify-center pt-8 transition-opacity duration-500 ease-out xl:pt-10' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-500 ease-out'}`}
+          style={phoneMetrics.isDesktop
+            ? { touchAction: 'none', overscrollBehavior: 'contain' }
+            : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
+          }
         >
           <SplinePhone
-            className="h-[clamp(205px,35svh,340px)] w-auto aspect-[9/24] [@media(max-height:640px)]:h-[clamp(145px,29svh,180px)] sm:h-[clamp(235px,37svh,380px)] md:h-[clamp(270px,39svh,440px)] lg:h-[min(66svh,660px)] lg:aspect-[9/24] xl:aspect-[9/23] 2xl:aspect-[9/21.5]"
-            zoom={phoneZoom}
+            className={phoneMetrics.isDesktop ? "h-[min(66svh,660px)] w-auto aspect-[9/24] xl:aspect-[9/23] 2xl:aspect-[9/21.5]" : "h-full w-auto aspect-[9/24]"}
+            zoom={phoneMetrics.zoom}
             active={active}
           />
         </div>
