@@ -186,11 +186,11 @@ const FixedPhoneLayer = () => {
         <div aria-hidden className="hidden lg:block" />
         <div
           data-phone-scroll-forward
-          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit -translate-y-[clamp(4.5rem,12svh,7rem)] items-end justify-center transition-opacity duration-500 ease-out sm:-translate-y-[clamp(5rem,12svh,8rem)] md:-translate-y-[clamp(6rem,13svh,9rem)] lg:translate-y-0 lg:items-start lg:pt-8 xl:pt-10`}
+          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} relative mx-auto flex w-fit -translate-y-[clamp(4.5rem,12svh,7rem)] items-end justify-center transition-opacity duration-500 ease-out max-[640px]:-translate-y-4 sm:-translate-y-[clamp(5rem,12svh,8rem)] md:-translate-y-[clamp(6rem,13svh,9rem)] lg:translate-y-0 lg:items-start lg:pt-8 xl:pt-10`}
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
-            className="h-[clamp(205px,35svh,340px)] w-auto aspect-[9/24] sm:h-[clamp(235px,37svh,380px)] md:h-[clamp(270px,39svh,440px)] lg:h-[min(66svh,660px)] lg:aspect-[9/23] xl:aspect-[9/21.5]"
+            className="h-[clamp(205px,35svh,340px)] w-auto aspect-[9/24] max-[640px]:h-[clamp(145px,29svh,180px)] sm:h-[clamp(235px,37svh,380px)] md:h-[clamp(270px,39svh,440px)] lg:h-[min(66svh,660px)] lg:aspect-[9/23] xl:aspect-[9/21.5]"
             zoom={phoneZoom}
             active={active}
           />
