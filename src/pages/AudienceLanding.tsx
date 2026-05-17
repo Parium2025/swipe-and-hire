@@ -37,9 +37,38 @@ const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
   const [phoneReady, setPhoneReady] = useState(false);
+  const [phoneZoom, setPhoneZoom] = useState(() => {
+    if (typeof window === 'undefined') return 0.78;
+    const width = window.innerWidth;
+    if (width >= 1024) return 0.78;
+    const height = window.visualViewport?.height ?? window.innerHeight;
+    const fluidZoom = Math.min(width / 1024, height / 900) * 0.58;
+    return Math.max(0.26, Math.min(0.44, fluidZoom));
+  });
   const heroIndexRef = useRef(0);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
+
+  useEffect(() => {
+    const syncPhoneZoom = () => {
+      const width = window.innerWidth;
+      if (width >= 1024) {
+        setPhoneZoom(0.78);
+        return;
+      }
+      const height = window.visualViewport?.height ?? window.innerHeight;
+      const fluidZoom = Math.min(width / 1024, height / 900) * 0.58;
+      setPhoneZoom(Math.max(0.26, Math.min(0.44, fluidZoom)));
+    };
+
+    syncPhoneZoom();
+    window.addEventListener('resize', syncPhoneZoom, { passive: true });
+    window.visualViewport?.addEventListener('resize', syncPhoneZoom, { passive: true });
+    return () => {
+      window.removeEventListener('resize', syncPhoneZoom);
+      window.visualViewport?.removeEventListener('resize', syncPhoneZoom);
+    };
+  }, []);
 
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
@@ -161,8 +190,8 @@ const FixedPhoneLayer = () => {
           style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         >
           <SplinePhone
-            className="h-[min(46svh,420px)] w-auto aspect-[9/19.5] sm:h-[min(52svh,500px)] lg:h-[min(68svh,660px)]"
-            zoom={0.78}
+            className="h-[clamp(120px,22svh,210px)] w-auto aspect-[9/19.5] sm:h-[clamp(135px,23svh,235px)] md:h-[clamp(150px,24svh,260px)] lg:h-[min(68svh,660px)]"
+            zoom={phoneZoom}
             active={active}
           />
         </div>
