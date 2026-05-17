@@ -475,7 +475,7 @@ const PinnedHorizontalGallery = () => {
         @media (max-width: 767px) {
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
-          .phg-title { font-size: clamp(0.9rem, 3.6vw, 1.05rem); }
+          .phg-title { font-size: clamp(1.75rem, 7vw, 2.25rem); }
           .phg-strip { padding: 0 18vw 0 8vw; }
         }
       `}</style>
