@@ -600,7 +600,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
               backgroundColor: 'hsl(var(--primary))',
             }}
           >
-            <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center will-change-transform">
+            <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center text-center will-change-transform">
+              <h2
+                data-intro-heading
+                className="mb-8 max-w-3xl text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl"
+              >
+                Vi har gjort det enkelt för alla!
+              </h2>
               <IntroText
                 paragraphs={[
                   'Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
