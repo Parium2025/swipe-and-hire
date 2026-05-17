@@ -14,7 +14,7 @@ const getViewportFitZoom = (zoom: number) => {
 
   const width = window.innerWidth;
   const height = window.innerHeight;
-  const widthScale = width < 480 ? 0.34 : width < 640 ? 0.44 : width < 768 ? 0.56 : width < 1024 ? 0.72 : 1;
+  const widthScale = width < 480 ? 0.3 : width < 640 ? 0.38 : width < 768 ? 0.46 : width <= 1100 ? 0.52 : 1;
   const heightScale = height < 620 ? 0.68 : height < 760 ? 0.82 : 1;
 
   return zoom * Math.min(widthScale, heightScale);
@@ -193,7 +193,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         role="img"
         aria-label="Parium 3D-telefon"
         tabIndex={-1}
-        className="absolute left-1/2 top-1/2 h-[170%] w-[190%] -translate-x-1/2 -translate-y-1/2 cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing lg:relative lg:left-auto lg:top-auto lg:h-full lg:w-full lg:translate-x-0 lg:translate-y-0"
+        className="absolute left-1/2 top-1/2 h-[230%] w-[220%] -translate-x-1/2 -translate-y-1/2 cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing lg:h-[185%] lg:w-[190%]"
         draggable={false}
         style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
       />
