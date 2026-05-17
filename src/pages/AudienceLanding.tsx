@@ -319,10 +319,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         tl.set(introOuter, { autoAlpha: 1 }, 0);
         tl.fromTo(introOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
         tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
-        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.48);
+        if (introHeadingEl) {
+          // Rubriken matchar hero-h1: opacity-only premium fade, lugn och lång.
+          tl.fromTo(introHeadingEl, { opacity: 0 }, { opacity: 1, duration: 1.2, ease: 'power3.out' }, 0.3);
+        }
+        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.62);
         if (introCtaEl) {
           // CTA fadar bara in (ingen y-translate) så den inte "sticker upp" i slutet.
-          tl.fromTo(introCtaEl, { opacity: 0 }, { opacity: 1, duration: 0.62, ease: 'power2.out' }, 0.48 + introTextItems.length * 0.08);
+          tl.fromTo(introCtaEl, { opacity: 0 }, { opacity: 1, duration: 0.62, ease: 'power2.out' }, 0.62 + introTextItems.length * 0.08);
         }
       };
 
