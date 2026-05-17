@@ -58,11 +58,26 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   document.body.style.setProperty('background-color', color, 'important');
 
   setThemeColor(color);
+
+  // iOS Safari cache:ar theme-color hårt vid SPA-nav — topp-baren samplas en
+  // gång och uppdateras inte även om meta-taggen byts. Trick: sätt en
+  // omärkbart annan färg en frame senare och återgå direkt — det tvingar
+  // Safari att re-sampla utan att användaren ser någon flimmer.
+  if (typeof window !== 'undefined') {
+    window.requestAnimationFrame(() => {
+      // 1 enhets skillnad i sista hex-paret → osynligt för ögat, nytt värde för Safari
+      const nudge = color.length === 7
+        ? color.slice(0, -2) + (color.slice(-2) === 'ff' ? 'fe' : (parseInt(color.slice(-2), 16) ^ 1).toString(16).padStart(2, '0'))
+        : color;
+      setThemeColor(nudge);
+      window.requestAnimationFrame(() => setThemeColor(color));
+    });
+  }
 };
 
-// Mountar en pageshow/popstate-listener som re-syncar chrome när Safari
-// restorar sidan från bfcache (back/forward). Annars sitter den gamla
-// theme-color-färgen kvar i URL-baren även efter SPA-back.
+// Mountar pageshow/popstate/visibilitychange-listeners som re-syncar chrome
+// när Safari restorar sidan från bfcache eller när användaren växlar flik.
+// Annars sitter den gamla theme-color-färgen kvar i URL-baren efter SPA-back.
 let pageshowMounted = false;
 export const mountChromePopstateGuard = () => {
   if (pageshowMounted || typeof window === 'undefined') return;
@@ -70,6 +85,9 @@ export const mountChromePopstateGuard = () => {
   const resync = () => syncBrowserChrome(window.location.pathname);
   window.addEventListener('pageshow', resync);
   window.addEventListener('popstate', resync);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') resync();
+  });
 };
 
 export const noteChromePath = (_pathname: string) => {
