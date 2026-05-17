@@ -547,9 +547,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       {/* HERO LAGER */}
       <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
         <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
-          {/* Mobile hero — texten får sin höjd först, telefonen skalar inom resterande yta och kan inte klippas/scrollas iväg */}
+          {/* Mobile hero — endast text. Telefonen renderas i FixedPhoneLayer (samma som desktop) så den aldrig kan scrollas iväg eller klippas. */}
           <section
-            className="relative grid h-full w-screen grid-rows-[auto_minmax(0,1fr)] overflow-hidden overscroll-none lg:hidden"
+            className="relative h-full w-screen overflow-hidden lg:hidden"
             style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
             aria-labelledby="audience-hero-heading-mobile"
           >
@@ -567,14 +567,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
                 headingId="audience-hero-heading-mobile"
               />
             </motion.div>
-            <div className="relative z-0 flex min-h-0 items-end justify-center overflow-hidden pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
-              {!isDesktopHero && (
-                <SplinePhone
-                  className="h-[min(100%,clamp(150px,30svh,360px))] w-[min(88vw,320px)] sm:h-[min(100%,clamp(190px,34svh,440px))] sm:w-[min(76vw,380px)] md:h-[min(100%,clamp(230px,38svh,520px))] md:w-[min(58vw,440px)]"
-                  zoom={0.52}
-                />
-              )}
-            </div>
           </section>
 
           {/* Desktop hero */}
