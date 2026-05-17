@@ -9,6 +9,17 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
+const getViewportFitZoom = (zoom: number) => {
+  if (typeof window === 'undefined') return zoom;
+
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const widthScale = width < 480 ? 0.54 : width < 640 ? 0.62 : width < 768 ? 0.7 : width < 1024 ? 0.82 : 1;
+  const heightScale = height < 620 ? 0.78 : height < 760 ? 0.9 : 1;
+
+  return zoom * Math.min(widthScale, heightScale);
+};
+
 export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -76,8 +87,8 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
           (app as unknown as { setBackgroundColor?: (c: string) => void })
             .setBackgroundColor?.('rgba(0,0,0,0)');
         } catch { /* no-op */ }
-        app.setZoom(zoom);
-        requestAnimationFrame(() => app?.setZoom(zoom));
+        app.setZoom(getViewportFitZoom(zoom));
+        requestAnimationFrame(() => app?.setZoom(getViewportFitZoom(zoom)));
         if (!activeRef.current) app.stop();
         // Vänta 3 rAF så Spline garanterat hunnit rita sin första WebGL-frame
         // innan vi fade:ar in canvasen. På throttlade enheter (Lovable preview-
@@ -108,6 +119,21 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
       appRef.current = null;
     };
   }, [reducedMotion, zoom]);
+
+  useEffect(() => {
+    const app = appRef.current;
+    if (!app || !isReady) return;
+
+    const applyZoom = () => app.setZoom(getViewportFitZoom(zoom));
+    applyZoom();
+    window.addEventListener('resize', applyZoom);
+    window.addEventListener('orientationchange', applyZoom);
+
+    return () => {
+      window.removeEventListener('resize', applyZoom);
+      window.removeEventListener('orientationchange', applyZoom);
+    };
+  }, [isReady, zoom]);
 
   if (reducedMotion || hasError) {
     return (
