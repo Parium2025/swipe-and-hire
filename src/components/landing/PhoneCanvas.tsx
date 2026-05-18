@@ -29,7 +29,7 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
   useMemo(() => {
     screenTexture.colorSpace = THREE.SRGBColorSpace;
     screenTexture.anisotropy = 8;
-    screenTexture.flipY = false;
+    screenTexture.flipY = true;
     screenTexture.needsUpdate = true;
   }, [screenTexture]);
 
