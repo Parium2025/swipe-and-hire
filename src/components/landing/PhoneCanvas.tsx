@@ -45,7 +45,7 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
       if (!(child instanceof THREE.Mesh)) return;
       child.castShadow = false;
       child.receiveShadow = false;
-      const name = child.name.toLowerCase().replaceAll('_', ' ');
+      const name = child.name.toLowerCase().replace(/_/g, ' ');
       if (name === 'screen') child.material = screenMaterial;
       else if (name.includes('screen border') || name.includes('dynamic island')) child.material = glassMaterial;
       else if (name.includes('back side')) child.material = bodyMaterial;
