@@ -105,7 +105,6 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
   }, [syncCanvasSize]);
 
   useEffect(() => {
-    if (mobileFit) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
