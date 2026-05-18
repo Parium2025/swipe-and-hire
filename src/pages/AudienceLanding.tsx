@@ -46,7 +46,7 @@ const FixedPhoneLayer = () => {
     }) ?? null;
   };
   const calculatePhoneMetrics = () => {
-    if (typeof window === 'undefined') return { isDesktop: true, top: 0, height: 660, zoom: 0.68 };
+    if (typeof window === 'undefined') return { isDesktop: true, top: 0, height: 660, zoom: 0.68, yOffset: 0 };
     if (heroIndexRef.current !== 0 && lastHeroMetricsRef.current) return lastHeroMetricsRef.current;
     const width = window.visualViewport?.width ?? window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
