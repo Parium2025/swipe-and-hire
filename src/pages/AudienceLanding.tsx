@@ -229,6 +229,8 @@ const FixedPhoneLayer = () => {
     };
   }, []);
 
+  const shouldShowPhone = visible && (phoneReady || !phoneMetrics.isDesktop);
+
   return (
     <div
       className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:px-12 lg:items-center lg:px-24 lg:pb-16 lg:pt-28"
@@ -238,7 +240,7 @@ const FixedPhoneLayer = () => {
         <div aria-hidden className="hidden lg:block" />
         <div
           data-phone-scroll-forward
-          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-500 ease-out'}`}
+          className={`${shouldShowPhone ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-500 ease-out'}`}
           style={phoneMetrics.isDesktop
             ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px` }
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
