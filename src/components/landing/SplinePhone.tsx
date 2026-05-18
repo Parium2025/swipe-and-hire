@@ -9,6 +9,7 @@ interface SplinePhoneProps {
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
+const MOBILE_SCENE_URL = `${SCENE_URL}?v=mobile-spline-fit-2026-05-18`;
 
 export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -121,7 +122,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
           ? { renderMode: 'continuous', wasmPath: `${window.location.origin}/spline-wasm` }
           : { renderMode: 'auto' });
         appRef.current = app;
-        await app.load(SCENE_URL);
+        await app.load(mobileFitRef.current ? MOBILE_SCENE_URL : SCENE_URL);
         syncCanvasSize();
         try {
           (app as unknown as { setBackgroundColor?: (c: string) => void })
