@@ -252,6 +252,7 @@ const FixedPhoneLayer = () => {
             className="h-full w-full"
             zoom={phoneMetrics.zoom}
             active={active}
+            mobileFit={!phoneMetrics.isDesktop}
           />
         </div>
       </div>
