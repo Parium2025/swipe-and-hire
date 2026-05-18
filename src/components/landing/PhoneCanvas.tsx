@@ -24,7 +24,14 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
   const groupRef = useRef<THREE.Group>(null);
   const { size, camera } = useThree();
   const pointer = useRef({ x: 0, y: 0 });
-  const screenTexture = useMemo(createScreenTexture, []);
+  const screenTexture = useLoader(THREE.TextureLoader, screenTextureUrl) as THREE.Texture;
+
+  useMemo(() => {
+    screenTexture.colorSpace = THREE.SRGBColorSpace;
+    screenTexture.anisotropy = 8;
+    screenTexture.flipY = false;
+    screenTexture.needsUpdate = true;
+  }, [screenTexture]);
 
   // Centrera modellen och skala till enhetshöjd 1
   const centeredScene = useMemo(() => {
@@ -38,11 +45,11 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
       if (!(child instanceof THREE.Mesh)) return;
       child.castShadow = false;
       child.receiveShadow = false;
-      const name = child.name.toLowerCase();
+      const name = child.name.toLowerCase().replaceAll('_', ' ');
       if (name === 'screen') child.material = screenMaterial;
       else if (name.includes('screen border') || name.includes('dynamic island')) child.material = glassMaterial;
+      else if (name.includes('back side')) child.material = bodyMaterial;
       else if (name.includes('metal') || name.includes('button')) child.material = metalMaterial;
-      else child.material = bodyMaterial;
     });
 
     const box = new THREE.Box3().setFromObject(cloned);
@@ -60,19 +67,18 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
 
   useEffect(() => {
     onReady();
-    return () => screenTexture?.dispose();
-  }, [onReady, screenTexture]);
+  }, [onReady]);
 
   // Auto-fit ortografisk kamera till modellens projicerade storlek
   useEffect(() => {
     if (!(camera instanceof THREE.OrthographicCamera)) return;
     const aspect = size.width / size.height;
-    // Telefonens höjd/bredd-förhållande efter normalisering
-    const phoneAspect = 9 / 19.5;
-    // Behåll bredd ELLER höjd så hela telefonen syns med marginal
-      const targetHeight = 0.66 / fit;
-    const targetWidth = phoneAspect / fit;
-    const heightForAspect = Math.max(targetHeight, targetWidth / aspect);
+    const box = new THREE.Box3().setFromObject(centeredScene);
+    const modelSize = new THREE.Vector3();
+    box.getSize(modelSize);
+    const safeWidth = modelSize.x + modelSize.z * 0.75;
+    const safeHeight = modelSize.y + modelSize.z * 0.12;
+    const heightForAspect = Math.max(safeHeight, safeWidth / aspect) / Math.max(fit, 0.1);
     const halfH = heightForAspect / 2;
     const halfW = halfH * aspect;
     camera.left = -halfW;
@@ -84,7 +90,7 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
     camera.position.set(0, 0, 5);
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
-  }, [camera, size.width, size.height, fit]);
+  }, [camera, centeredScene, size.width, size.height, fit]);
 
   // Mouse tilt
   useEffect(() => {
