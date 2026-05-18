@@ -1,67 +1,41 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Application as SplineApplication } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
   className?: string;
   zoom?: number;
   active?: boolean;
-  mobileFit?: boolean;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit = false }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
-  const zoomRef = useRef(zoom);
-  const mobileFitRef = useRef(mobileFit);
-  const basePhoneYRef = useRef<number | null>(null);
-  const fitSceneToCanvas = useCallback((app: SplineApplication | null) => {
-    if (!app) return;
-    const phone = app.findObjectByName('iPhone 14 Pro');
-    if (!phone) return;
-    basePhoneYRef.current ??= phone.position.y;
-
-    // På mobil låg exporterad Spline-modell för högt i kameran, vilket gav
-    // visuell klippning trots att DOM/canvas hade rätt storlek. Flytta endast
-    // hela telefon-objektet nedåt i scenen så hela modellen ryms i canvasen.
-    phone.position.y = mobileFitRef.current ? -118 : basePhoneYRef.current;
-    app.requestRender?.();
-  }, []);
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
+  // showFallback = true ENDAST om Spline-scenen inte hunnit ladda inom 6s,
+  // eller om laddningen failat. Vid normal refresh visas INGEN skeleton —
+  // canvasen fade:as in tom (svart/transparent) tills första frame ritas.
+  const [showFallback, setShowFallback] = useState(false);
 
-  const syncCanvasSize = useCallback(() => {
-    const wrapper = wrapperRef.current;
-    const canvas = canvasRef.current;
-    if (!wrapper || !canvas) return;
-
-    const rect = wrapper.getBoundingClientRect();
-    const cssWidth = Math.max(1, Math.round(rect.width));
-    const cssHeight = Math.max(1, Math.round(rect.height));
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    canvas.style.width = `${cssWidth}px`;
-    canvas.style.height = `${cssHeight}px`;
-    canvas.width = Math.round(cssWidth * dpr);
-    canvas.height = Math.round(cssHeight * dpr);
-
-    const app = appRef.current;
-    app?.setSize(cssWidth, cssHeight);
-    app?.setZoom(zoomRef.current);
-    fitSceneToCanvas(app);
-  }, [fitSceneToCanvas]);
-
-  // Signal till ev. parent-layer att vi är "redo" att synas — även vid fel,
-  // så hero:n inte gömmer sig för alltid.
   useEffect(() => {
-    if (isReady || hasError) {
-      window.dispatchEvent(new Event('parium:spline-ready'));
-    }
+    if (isReady || hasError) return;
+    const timer = window.setTimeout(() => setShowFallback(true), 6000);
+    return () => window.clearTimeout(timer);
   }, [isReady, hasError]);
+
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  useEffect(() => {
+    if (!reducedMotion && !hasError && !showFallback) return;
+    window.dispatchEvent(new Event('parium:spline-ready'));
+  }, [reducedMotion, hasError, showFallback]);
 
   useEffect(() => {
     activeRef.current = active;
@@ -75,36 +49,14 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
   }, [active, isReady]);
 
   useEffect(() => {
-    mobileFitRef.current = mobileFit;
-    fitSceneToCanvas(appRef.current);
-  }, [mobileFit, fitSceneToCanvas]);
-
-  useEffect(() => {
     const app = appRef.current;
-    zoomRef.current = zoom;
-    if (!app) return;
-    syncCanvasSize();
+    if (!app || !isReady) return;
     app.setZoom(zoom);
     requestAnimationFrame(() => appRef.current?.setZoom(zoom));
-  }, [zoom, syncCanvasSize]);
+  }, [zoom, isReady]);
 
   useEffect(() => {
-    syncCanvasSize();
-    const wrapper = wrapperRef.current;
-    const observer = wrapper ? new ResizeObserver(syncCanvasSize) : null;
-    if (wrapper) observer?.observe(wrapper);
-    window.addEventListener('resize', syncCanvasSize, { passive: true });
-    window.visualViewport?.addEventListener('resize', syncCanvasSize, { passive: true });
-    const frame = requestAnimationFrame(syncCanvasSize);
-    return () => {
-      cancelAnimationFrame(frame);
-      observer?.disconnect();
-      window.removeEventListener('resize', syncCanvasSize);
-      window.visualViewport?.removeEventListener('resize', syncCanvasSize);
-    };
-  }, [syncCanvasSize]);
-
-  useEffect(() => {
+    if (reducedMotion) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -116,31 +68,46 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
         const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
 
-        syncCanvasSize();
-        app = new Application(canvas, mobileFitRef.current
-          ? { renderMode: 'continuous', wasmPath: `${window.location.origin}/spline-wasm` }
-          : { renderMode: 'auto' });
+        if (typeof window !== 'undefined' && 'devicePixelRatio' in window) {
+          try {
+            Object.defineProperty(canvas, '_dprCap', {
+              value: Math.min(window.devicePixelRatio || 1, 2),
+              configurable: true,
+            });
+          } catch {
+            /* no-op */
+          }
+        }
+
+        app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
         await app.load(SCENE_URL);
-        syncCanvasSize();
+        // Spline-scenen kan ha en egen background-color som annars syns som
+        // en vit ram innan WebGL fyller canvasen. Tvinga transparent.
         try {
           (app as unknown as { setBackgroundColor?: (c: string) => void })
             .setBackgroundColor?.('rgba(0,0,0,0)');
         } catch { /* no-op */ }
-        app.setZoom(zoomRef.current);
-        fitSceneToCanvas(app);
-        requestAnimationFrame(() => {
-          syncCanvasSize();
-          app?.setZoom(zoomRef.current);
-          fitSceneToCanvas(app);
-        });
+        app.setZoom(zoom);
+        requestAnimationFrame(() => app?.setZoom(zoom));
         if (!activeRef.current) app.stop();
+        // Vänta 3 rAF så Spline garanterat hunnit rita sin första WebGL-frame
+        // innan vi fade:ar in canvasen. På throttlade enheter (Lovable preview-
+        // iframe, äldre Androids) räcker inte 2 rAF — då syns scenens
+        // default-bakgrund i en frame som "vit ram" runt telefonen.
         await new Promise<void>((resolve) => {
           requestAnimationFrame(() =>
-            requestAnimationFrame(() => resolve()),
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => resolve()),
+            ),
           );
         });
-        if (!cancelled) setIsReady(true);
+        if (!cancelled) {
+          setIsReady(true);
+          // Signal till FixedPhoneLayer att vi får visa wrappern utan att
+          // det blir ett synligt tomt/vitt lager innan WebGL ritar första frame.
+          window.dispatchEvent(new Event('parium:spline-ready'));
+        }
       } catch (error) {
         console.error('Kunde inte ladda Spline-telefonen:', error);
         if (!cancelled) setHasError(true);
@@ -152,7 +119,20 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
       app?.dispose();
       appRef.current = null;
     };
-  }, [mobileFit, syncCanvasSize]);
+  }, [reducedMotion]);
+
+  if (reducedMotion || hasError) {
+    return (
+      <div
+        ref={wrapperRef}
+        className={`relative flex items-center justify-center ${className ?? ''}`}
+        role="img"
+        aria-label="Parium 3D-telefon (statisk vy)"
+      >
+        <div className="aspect-[9/19] w-[58%] max-w-[260px] rounded-[2.25rem] border border-white/15 bg-gradient-to-b from-white/10 to-white/[0.03] shadow-[0_30px_90px_hsl(var(--background)/0.5)] backdrop-blur-sm" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -160,14 +140,48 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
     >
+      {/* Nödfallback — visas ENDAST om Spline-scenen inte kommit upp inom
+          6 sekunder (långsamt nät, WebGL-fel, e.dyl.). Vid normal refresh
+          syns den aldrig — canvasen fadar in när första frame är ritad. */}
+      {showFallback && !isReady && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center"
+        >
+          <div
+            className="relative aspect-[9/19] w-[58%] max-w-[260px] overflow-hidden rounded-[2.25rem] border border-white/10"
+            style={{
+              background:
+                'linear-gradient(180deg, hsl(var(--background) / 0.55) 0%, hsl(var(--background) / 0.25) 100%)',
+              boxShadow: '0 30px 90px hsl(var(--background) / 0.5)',
+            }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  'linear-gradient(110deg, transparent 30%, hsl(var(--secondary) / 0.10) 50%, transparent 70%)',
+                backgroundSize: '220% 100%',
+                animation: 'parium-skeleton-shimmer 2.4s ease-in-out infinite',
+              }}
+            />
+          </div>
+          <style>{`
+            @keyframes parium-skeleton-shimmer {
+              0% { background-position: 200% 0; }
+              100% { background-position: -120% 0; }
+            }
+          `}</style>
+        </div>
+      )}
       <canvas
         ref={canvasRef}
         role="img"
         aria-label="Parium 3D-telefon"
         tabIndex={-1}
-        className="relative h-full w-full cursor-grab bg-transparent outline-none transition-opacity duration-700 active:cursor-grabbing"
+        className="relative h-full w-full cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing"
         draggable={false}
-        style={{ colorScheme: 'normal', opacity: 1, touchAction: 'none' }}
+        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
       />
     </div>
   );

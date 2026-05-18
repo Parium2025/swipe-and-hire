@@ -36,7 +36,7 @@ type HeroIntroStageProps = {
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   const heroIndexRef = useRef(0);
-  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; top: number; height: number; width: number; zoom: number; viewportHeight: number } | null>(null);
+  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; top: number; height: number; zoom: number } | null>(null);
   const getVisibleAnchor = () => {
     const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const anchors = Array.from(document.querySelectorAll('[data-hero-phone-anchor]')) as HTMLElement[];
@@ -46,7 +46,7 @@ const FixedPhoneLayer = () => {
     }) ?? null;
   };
   const calculatePhoneMetrics = () => {
-    if (typeof window === 'undefined') return { isDesktop: true, top: 0, height: 660, width: 258, zoom: 0.68, viewportHeight: 660 };
+    if (typeof window === 'undefined') return { isDesktop: true, top: 0, height: 660, zoom: 0.68 };
     if (heroIndexRef.current !== 0 && lastHeroMetricsRef.current) return lastHeroMetricsRef.current;
     const width = window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
@@ -62,9 +62,7 @@ const FixedPhoneLayer = () => {
         isDesktop: true,
         top: 0,
         height: safeHeight,
-        width: safeHeight * (9 / (width >= 1536 ? 21.5 : width >= 1280 ? 23 : 24)),
         zoom: clamp((height / 980) * 0.54 * (visualHeight / safeHeight), 0.32, 0.54),
-        viewportHeight: height,
       };
       lastHeroMetricsRef.current = metrics;
       return metrics;
@@ -75,28 +73,23 @@ const FixedPhoneLayer = () => {
     const gap = height <= 640 ? 12 : clamp(height * 0.024, 16, 24);
     const bottomSafe = Math.max(12, height * 0.018);
     const freeSpace = Math.max(120, height - textBottom - gap - bottomSafe);
-    const targetVisualHeight = clamp(freeSpace * 0.58, width <= 380 ? 140 : 156, width >= 700 ? 280 : 232);
-    const bufferRatio = width >= 700 ? 1.48 : 1.4;
+    const targetVisualHeight = clamp(freeSpace * 0.62, width <= 380 ? 150 : 170, width >= 700 ? 300 : 260);
+    const bufferRatio = width >= 700 ? 1.42 : 1.32;
     const finalHeight = Math.min(freeSpace, targetVisualHeight * bufferRatio);
     const top = clamp(textBottom + gap, gap, height - bottomSafe - finalHeight);
-    const canvasWidth = Math.min(width - 24, Math.max(finalHeight * 0.82, width * 0.62));
-    // Spline måste fit:a efter den faktiska canvas-höjden, inte efter önskad
-    // visuell storlek. Annars zoomas modellen upp på korta Safari-vyer och
-    // klipps inuti canvasen.
-    const fluidZoom = Math.min(finalHeight * 0.00148, canvasWidth * 0.0031);
+    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.82, 1.18) * 0.48;
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      width: canvasWidth,
-      zoom: clamp(fluidZoom, 0.18, width >= 700 ? 0.48 : 0.44),
-      viewportHeight: height,
+      zoom: clamp(fluidZoom, 0.28, 0.42),
     };
     lastHeroMetricsRef.current = metrics;
     return metrics;
   };
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
+  const [phoneReady, setPhoneReady] = useState(false);
   const [phoneMetrics, setPhoneMetrics] = useState(calculatePhoneMetrics);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
@@ -171,7 +164,9 @@ const FixedPhoneLayer = () => {
     };
 
     sync();
+    const onSplineReady = () => setPhoneReady(true);
     window.addEventListener('parium:hero-index', onIndex);
+    window.addEventListener('parium:spline-ready', onSplineReady);
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
 
     // 🔁 Spline-canvasen fångar wheel/touch internt (för 3D-rotation/zoom),
@@ -220,6 +215,7 @@ const FixedPhoneLayer = () => {
 
     return () => {
       window.removeEventListener('parium:hero-index', onIndex);
+      window.removeEventListener('parium:spline-ready', onSplineReady);
       scrollRoot?.removeEventListener('scroll', sync);
       phoneWrapper?.removeEventListener('wheel', forwardWheel, true);
       phoneWrapper?.removeEventListener('touchstart', onTouchStart, true);
@@ -234,25 +230,23 @@ const FixedPhoneLayer = () => {
 
   return (
     <div
-      className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-start justify-center overflow-hidden px-5 sm:px-6 md:px-12 lg:fixed lg:h-[100dvh] lg:items-center lg:px-24 lg:pb-16 lg:pt-28"
-      style={{ height: `${phoneMetrics.viewportHeight}px` }}
+      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:px-12 lg:items-center lg:px-24 lg:pb-16 lg:pt-28"
       aria-hidden="true"
     >
       <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center lg:grid lg:h-auto lg:grid-cols-2 lg:items-start lg:gap-16 2xl:max-w-[1440px]">
         <div aria-hidden className="hidden lg:block" />
         <div
           data-phone-scroll-forward
-          className={`${visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex shrink-0 items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex shrink-0 -translate-x-1/2 items-start justify-center transition-opacity duration-500 ease-out'}`}
+          className={`${visible && phoneReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-500 ease-out'}`}
           style={phoneMetrics.isDesktop
-            ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px`, width: `${phoneMetrics.width}px` }
-            : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneMetrics.width}px` }
+            ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px` }
+            : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
           }
         >
           <SplinePhone
-            className="h-full w-full"
+            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[9/24] xl:aspect-[9/23] 2xl:aspect-[9/21.5]" : "h-full w-auto aspect-[9/24]"}
             zoom={phoneMetrics.zoom}
             active={active}
-            mobileFit={!phoneMetrics.isDesktop}
           />
         </div>
       </div>
