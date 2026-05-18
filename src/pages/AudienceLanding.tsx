@@ -72,22 +72,22 @@ const FixedPhoneLayer = () => {
     }
 
     const anchor = getVisibleAnchor();
-    const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.52;
-    const gap = height <= 640 ? 8 : clamp(height * 0.018, 10, 18);
-    const bottomSafe = Math.max(10, height * 0.014);
-    const freeSpace = Math.max(170, height - textBottom - gap - bottomSafe);
+    const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.48;
+    const gap = height <= 640 ? 4 : clamp(height * 0.012, 8, 12);
+    const bottomSafe = Math.max(8, height * 0.012);
+    const freeSpace = Math.max(220, height - textBottom - gap - bottomSafe);
     const tablet = width >= 700;
-    const targetVisualHeight = clamp(freeSpace * (tablet ? 0.72 : 0.82), width <= 380 ? 178 : 198, tablet ? 430 : 360);
-    const bufferRatio = tablet ? 1.34 : 1.28;
-    const finalHeight = clamp(Math.min(freeSpace, targetVisualHeight * bufferRatio), width <= 380 ? 230 : 260, tablet ? 560 : 440);
+    const targetVisualHeight = clamp(freeSpace * (tablet ? 0.8 : 0.92), width <= 380 ? 250 : 280, tablet ? 520 : 430);
+    const bufferRatio = tablet ? 1.2 : 1.12;
+    const finalHeight = clamp(Math.min(freeSpace, targetVisualHeight * bufferRatio), width <= 380 ? 300 : 330, tablet ? 620 : 500);
     const yOffset = width >= 768 ? 18 : 0;
     const top = clamp(textBottom + gap + yOffset, gap, height - bottomSafe - finalHeight);
-    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.92, 1.18) * (tablet ? 0.48 : 0.56);
+    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.92, 1.18) * (tablet ? 0.78 : 0.96);
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.32, tablet ? 0.46 : 0.52),
+      zoom: clamp(fluidZoom, 0.68, tablet ? 0.82 : 0.9),
       yOffset,
     };
     lastHeroMetricsRef.current = metrics;
@@ -252,7 +252,7 @@ const FixedPhoneLayer = () => {
           }
         >
           <PhoneCanvas
-            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[13/19.5]" : "h-full w-auto min-w-[168px] max-w-[min(76vw,310px)] aspect-[13/19.5]"}
+            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[13/19.5]" : "h-full w-auto min-w-[168px] max-w-[min(84vw,340px)] aspect-[13/19.5]"}
             fit={phoneMetrics.zoom}
             active={active}
             instantFallback={!phoneMetrics.isDesktop}
