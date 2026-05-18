@@ -2,7 +2,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { useGLTF, Environment } from '@react-three/drei';
 import * as THREE from 'three';
-import screenTextureUrl from '@/assets/parium-phone-screen.png';
+import screenTextureUrl from '@/assets/parium-phone-logo-screen.jpg';
 
 interface PhoneCanvasProps {
   className?: string;
