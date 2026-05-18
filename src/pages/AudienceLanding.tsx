@@ -331,6 +331,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       let releasedToGallery = false;
       let programmaticReturn = false;
       let prevScrollTop = scrollRoot?.scrollTop ?? 0;
+      let restoreScrollBehavior: (() => void) | null = null;
 
       let observerActive = false;
       const setObserverActive = (active: boolean) => {
@@ -341,6 +342,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       };
 
       const clearReturnWork = () => {
+        if (scrollRoot) gsap.killTweensOf(scrollRoot);
+        restoreScrollBehavior?.();
+        restoreScrollBehavior = null;
         if (returnFrame) {
           window.cancelAnimationFrame(returnFrame);
           returnFrame = null;
@@ -543,19 +547,50 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         programmaticReturn = true;
         releasedToGallery = false;
         releaseLockedRef.current = false;
-        setObserverActive(true);
+        setObserverActive(false);
         setIntroResting();
+        if (introHeadingEl) gsap.set(introHeadingEl, { opacity: 0 });
+        gsap.set(introTextItems, { y: 44, opacity: 0 });
+        if (introCtaEl) gsap.set(introCtaEl, { opacity: 0 });
         window.dispatchEvent(new Event('parium:gallery-leave'));
-        const target = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        // Blockera vidare wheel/touch ~700ms så att kvarvarande momentum inte
-        // sliter sönder den smooth-scrollade returen (samma princip som 2→3).
-        transitionBlockUntil = performance.now() + 700;
-        scrollRoot.scrollTo({ top: target, behavior: 'smooth' });
+        const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
+        // 3→2 ska vara lika deterministic som 1↔2: native smooth-scroll på iOS
+        // kan avbrytas/variera med momentum och lämna användaren halvvägs mellan
+        // intro + galleri. Här tweenar vi scrollTop själva medan galleriets strip
+        // är fryst, så bara en tidslinje äger returen.
+        transitionBlockUntil = performance.now() + 1100;
+        restoreScrollBehavior?.();
+        const previousScrollBehavior = scrollRoot.style.scrollBehavior;
+        scrollRoot.style.scrollBehavior = 'auto';
+        restoreScrollBehavior = () => {
+          scrollRoot.style.scrollBehavior = previousScrollBehavior;
+        };
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
-        window.setTimeout(() => {
+        const finishReturn = () => {
+          scrollRoot.scrollTop = target;
+          restoreScrollBehavior?.();
+          restoreScrollBehavior = null;
+          transitionBlockUntil = 0;
           programmaticReturn = false;
           prevScrollTop = scrollRoot.scrollTop;
-        }, 700);
+          setObserverActive(true);
+        };
+        gsap.killTweensOf(scrollRoot);
+        gsap.killTweensOf([introTextItems, introCtaEl, introHeadingEl].filter(Boolean));
+        const returnTl = gsap.timeline({ onComplete: finishReturn, onInterrupt: finishReturn });
+        returnTl.to(scrollRoot, {
+          scrollTop: target,
+          duration: 0.92,
+          ease: 'power2.inOut',
+          overwrite: true,
+        }, 0);
+        if (introHeadingEl) {
+          returnTl.to(introHeadingEl, { opacity: 1, duration: 0.62, ease: 'power2.out' }, 0.3);
+        }
+        returnTl.to(introTextItems, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.42);
+        if (introCtaEl) {
+          returnTl.to(introCtaEl, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 0.42 + introTextItems.length * 0.08);
+        }
       };
 
       observer = Observer.create({
