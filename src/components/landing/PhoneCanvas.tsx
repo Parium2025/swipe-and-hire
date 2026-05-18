@@ -23,14 +23,36 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
   const { scene } = useGLTF(MODEL_URL);
   const groupRef = useRef<THREE.Group>(null);
   const { size, camera } = useThree();
-  const screenTexture = useLoader(THREE.TextureLoader, screenTextureUrl) as THREE.Texture;
+  const sourceImage = useLoader(THREE.TextureLoader, screenTextureUrl) as THREE.Texture;
 
-  useMemo(() => {
-    screenTexture.colorSpace = THREE.SRGBColorSpace;
-    screenTexture.anisotropy = 8;
-    screenTexture.flipY = true;
-    screenTexture.needsUpdate = true;
-  }, [screenTexture]);
+  // Bygg en portrait-anpassad skärmtextur så att loggan (ringarna) inte
+  // sträcks ut – fyller med mörkblå bakgrund och centrerar loggan.
+  const screenTexture = useMemo(() => {
+    const img: any = sourceImage.image;
+    const canvas = document.createElement('canvas');
+    const W = 1024;
+    const H = 2218; // ~9:19.5 portrait
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d')!;
+    // Mörkblå bakgrund matchande logon
+    ctx.fillStyle = '#0a1733';
+    ctx.fillRect(0, 0, W, H);
+    if (img && img.width) {
+      const scale = (W * 0.62) / img.width; // logo ca 62% av skärmbredd
+      const drawW = img.width * scale;
+      const drawH = img.height * scale;
+      const x = (W - drawW) / 2;
+      const y = (H - drawH) / 2;
+      ctx.drawImage(img, x, y, drawW, drawH);
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    tex.flipY = true;
+    tex.needsUpdate = true;
+    return tex;
+  }, [sourceImage]);
 
   // Centrera modellen och skala till enhetshöjd 1
   const centeredScene = useMemo(() => {
@@ -38,8 +60,8 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
     const screenMaterial = new THREE.MeshBasicMaterial({ map: screenTexture, side: THREE.DoubleSide, toneMapped: false });
     const glassMaterial = new THREE.MeshPhysicalMaterial({ color: '#05070f', roughness: 0.15, metalness: 0.2, transmission: 0.06, transparent: true, opacity: 0.98, side: THREE.DoubleSide });
     const bodyMaterial = new THREE.MeshStandardMaterial({ color: '#0a0d18', roughness: 0.42, metalness: 0.55, side: THREE.DoubleSide });
-    // Mörk titanium-ram (inte vit/silver)
-    const metalMaterial = new THREE.MeshStandardMaterial({ color: '#1b2030', roughness: 0.32, metalness: 0.92, side: THREE.DoubleSide });
+    // Mörk titanium-ram (matt så ingen vit ljusreflex syns)
+    const metalMaterial = new THREE.MeshStandardMaterial({ color: '#1b2030', roughness: 0.85, metalness: 0.35, side: THREE.DoubleSide });
 
     cloned.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) return;
