@@ -61,7 +61,6 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, instantFall
   }, [zoom, isReady]);
 
   useEffect(() => {
-    if (reducedMotion) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -126,7 +125,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, instantFall
     };
   }, [reducedMotion]);
 
-  if (reducedMotion || hasError) {
+  if (hasError) {
     return (
       <div
         ref={wrapperRef}
