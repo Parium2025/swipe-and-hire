@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
-import { useGLTF, Environment } from '@react-three/drei';
+import { Canvas, useLoader, useThree } from '@react-three/fiber';
+import { useGLTF, Environment, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import screenTextureUrl from '@/assets/parium-phone-logo-screen.jpg';
 
@@ -23,7 +23,6 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
   const { scene } = useGLTF(MODEL_URL);
   const groupRef = useRef<THREE.Group>(null);
   const { size, camera } = useThree();
-  const pointer = useRef({ x: 0, y: 0 });
   const screenTexture = useLoader(THREE.TextureLoader, screenTextureUrl) as THREE.Texture;
 
   useMemo(() => {
@@ -37,9 +36,10 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
   const centeredScene = useMemo(() => {
     const cloned = scene.clone(true);
     const screenMaterial = new THREE.MeshBasicMaterial({ map: screenTexture, side: THREE.DoubleSide, toneMapped: false });
-    const glassMaterial = new THREE.MeshPhysicalMaterial({ color: '#050812', roughness: 0.18, metalness: 0.05, transmission: 0.08, transparent: true, opacity: 0.98, side: THREE.DoubleSide });
-    const bodyMaterial = new THREE.MeshStandardMaterial({ color: '#11131c', roughness: 0.38, metalness: 0.28, side: THREE.DoubleSide });
-    const metalMaterial = new THREE.MeshStandardMaterial({ color: '#d6d8e0', roughness: 0.24, metalness: 0.82, side: THREE.DoubleSide });
+    const glassMaterial = new THREE.MeshPhysicalMaterial({ color: '#05070f', roughness: 0.15, metalness: 0.2, transmission: 0.06, transparent: true, opacity: 0.98, side: THREE.DoubleSide });
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color: '#0a0d18', roughness: 0.42, metalness: 0.55, side: THREE.DoubleSide });
+    // Mörk titanium-ram (inte vit/silver)
+    const metalMaterial = new THREE.MeshStandardMaterial({ color: '#1b2030', roughness: 0.32, metalness: 0.92, side: THREE.DoubleSide });
 
     cloned.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) return;
@@ -48,8 +48,15 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
       const name = child.name.toLowerCase().replace(/_/g, ' ');
       if (name === 'screen') child.material = screenMaterial;
       else if (name.includes('screen border') || name.includes('dynamic island')) child.material = glassMaterial;
-      else if (name.includes('back side')) child.material = bodyMaterial;
-      else if (name.includes('metal') || name.includes('button')) child.material = metalMaterial;
+      else if (name.includes('back side') || name.includes('back')) child.material = bodyMaterial;
+      else if (name.includes('metal') || name.includes('button') || name.includes('frame') || name.includes('side')) child.material = metalMaterial;
+      else {
+        // Fallback: allt övrigt (inkl. ramen om den inte heter "metal") får titanium
+        const existing = (child.material as THREE.MeshStandardMaterial | undefined);
+        if (!existing || (existing as any).color?.getHexString?.() === 'ffffff') {
+          child.material = metalMaterial;
+        }
+      }
     });
 
     const box = new THREE.Box3().setFromObject(cloned);
@@ -91,28 +98,6 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
   }, [camera, centeredScene, size.width, size.height, fit]);
-
-  // Mouse tilt
-  useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      const x = (e.clientX / window.innerWidth) * 2 - 1;
-      const y = (e.clientY / window.innerHeight) * 2 - 1;
-      pointer.current.x = x;
-      pointer.current.y = y;
-    };
-    window.addEventListener('pointermove', onMove, { passive: true });
-    return () => window.removeEventListener('pointermove', onMove);
-  }, []);
-
-  // Auto-rotate + tilt mot mus
-  useFrame((state) => {
-    if (!groupRef.current || !active) return;
-    const auto = Math.sin(state.clock.elapsedTime * 0.65) * 0.08;
-    const targetY = -0.18 + auto + pointer.current.x * 0.14;
-    const targetX = -0.04 + pointer.current.y * 0.08;
-    groupRef.current.rotation.y += (targetY - groupRef.current.rotation.y) * 0.07;
-    groupRef.current.rotation.x += (targetX - groupRef.current.rotation.x) * 0.07;
-  });
 
   return (
     <group ref={groupRef} rotation={[-0.04, -0.18, 0]}>
@@ -197,6 +182,16 @@ export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallb
         <Suspense fallback={null}>
           <Environment preset="city" />
           <PhoneModel fit={fit} active={active} onReady={() => requestAnimationFrame(() => setReady(true))} />
+          <OrbitControls
+            enableZoom={false}
+            enablePan={false}
+            enableDamping
+            dampingFactor={0.08}
+            rotateSpeed={0.9}
+            autoRotate={active}
+            autoRotateSpeed={0.8}
+            makeDefault
+          />
         </Suspense>
       </Canvas>
     </div>
