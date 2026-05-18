@@ -69,7 +69,7 @@
     "@tiptap/extension-task-list": "^3.15.3",
     "@tiptap/react": "^3.15.3",
     "@tiptap/starter-kit": "^3.15.3",
-    "@types/three": "^0.170",
+    "@types/three": "^0.160.0",
     "@vitejs/plugin-react": "^5.0.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -103,7 +103,7 @@
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.170",
+    "three": "^0.160.0",
     "vaul": "^0.9.3",
     "vitest": "^3.2.4",
     "zod": "^3.23.8"

@@ -7,7 +7,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
-import { SplinePhone } from '@/components/landing/SplinePhone';
+import { PhoneCanvas } from '@/components/landing/PhoneCanvas';
 import { HeroText } from '@/components/landing/audience/HeroText';
 
 type AudienceLandingProps = {
@@ -251,9 +251,9 @@ const FixedPhoneLayer = () => {
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
           }
         >
-          <SplinePhone
+          <PhoneCanvas
             className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[9/24] xl:aspect-[9/23] 2xl:aspect-[9/21.5]" : "h-full w-auto min-w-[132px] max-w-[min(58vw,230px)] aspect-[9/24]"}
-            zoom={phoneMetrics.zoom}
+            fit={phoneMetrics.zoom}
             active={active}
             instantFallback={!phoneMetrics.isDesktop}
           />
