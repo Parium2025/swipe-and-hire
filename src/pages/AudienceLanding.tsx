@@ -76,7 +76,7 @@ const FixedPhoneLayer = () => {
     const tablet = width >= 700;
     const gap = tablet ? clamp(height * 0.055, 44, 72) : clamp(height * 0.06, 40, 64);
     const topSafeGap = tablet ? clamp(height * 0.07, 56, 88) : clamp(height * 0.085, 58, 84);
-    const bottomSafe = tablet ? clamp(height * 0.06, 44, 76) : clamp(height * 0.065, 40, 64);
+    const bottomSafe = tablet ? clamp(height * 0.085, 64, 98) : clamp(height * 0.105, 74, 104);
     const canvasTopBreathingRoom = tablet ? clamp(height * 0.065, 46, 76) : clamp(height * 0.09, 64, 92);
     const availableHeight = Math.max(220, height - textBottom - gap - bottomSafe);
     const maxCanvasHeight = Math.max(220, height - gap - bottomSafe);
