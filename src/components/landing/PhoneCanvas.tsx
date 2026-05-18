@@ -182,6 +182,16 @@ export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallb
         <Suspense fallback={null}>
           <Environment preset="city" />
           <PhoneModel fit={fit} active={active} onReady={() => requestAnimationFrame(() => setReady(true))} />
+          <OrbitControls
+            enableZoom={false}
+            enablePan={false}
+            enableDamping
+            dampingFactor={0.08}
+            rotateSpeed={0.9}
+            autoRotate={active}
+            autoRotateSpeed={0.8}
+            makeDefault
+          />
         </Suspense>
       </Canvas>
     </div>
