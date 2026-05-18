@@ -122,7 +122,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
           ? { renderMode: 'continuous', wasmPath: `${window.location.origin}/spline-wasm` }
           : { renderMode: 'auto' });
         appRef.current = app;
-        await app.load(mobileFitRef.current ? MOBILE_SCENE_URL : SCENE_URL);
+        await app.load(SCENE_URL);
         syncCanvasSize();
         try {
           (app as unknown as { setBackgroundColor?: (c: string) => void })
