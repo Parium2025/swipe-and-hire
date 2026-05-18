@@ -252,16 +252,13 @@ export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallb
           transition: 'opacity 500ms ease',
           touchAction: 'none',
         }}
-        onCreated={() => {
-          requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
-        }}
       >
         <ambientLight intensity={0.85} />
         <directionalLight position={[3, 4, 5]} intensity={1.1} />
         <directionalLight position={[-3, -2, -4]} intensity={0.4} />
         <Suspense fallback={null}>
           <Environment preset="city" />
-          <PhoneModel fit={fit} active={active} />
+          <PhoneModel fit={fit} active={active} onReady={() => requestAnimationFrame(() => setReady(true))} />
         </Suspense>
       </Canvas>
     </div>
