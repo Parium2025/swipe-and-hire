@@ -75,13 +75,16 @@ const FixedPhoneLayer = () => {
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.48;
     const tablet = width >= 700;
     const gap = tablet ? clamp(height * 0.055, 44, 72) : clamp(height * 0.06, 40, 64);
+    const topSafeGap = tablet ? clamp(height * 0.07, 56, 88) : clamp(height * 0.085, 58, 84);
     const bottomSafe = tablet ? clamp(height * 0.06, 44, 76) : clamp(height * 0.065, 40, 64);
     const availableHeight = Math.max(220, height - textBottom - gap - bottomSafe);
     const maxCanvasHeight = Math.max(220, height - gap - bottomSafe);
     const targetVisualHeight = clamp(availableHeight * (tablet ? 0.63 : 0.7), width <= 380 ? 204 : 221, tablet ? 374 : 323);
     const finalHeight = clamp(availableHeight, width <= 380 ? 272 : 289, tablet ? 510 : 391);
-    const yOffset = width >= 768 ? 18 : 0;
-    const top = Math.max(gap, height - bottomSafe - Math.min(finalHeight, maxCanvasHeight));
+    const yOffset = width >= 768 ? 18 : clamp(height * 0.025, 16, 24);
+    const safeTop = textBottom + topSafeGap + (tablet ? 0 : yOffset);
+    const bottomAnchoredTop = height - bottomSafe - Math.min(finalHeight, maxCanvasHeight);
+    const top = Math.max(gap, safeTop, bottomAnchoredTop);
     const fluidZoom = (targetVisualHeight / Math.max(finalHeight, 1)) * clamp(width / 390, 0.92, 1.15) * (tablet ? 0.56 : 0.54);
     const metrics = {
       isDesktop: false,
