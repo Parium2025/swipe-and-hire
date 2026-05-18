@@ -121,6 +121,40 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
     };
   }, [reducedMotion]);
 
+  const StaticPhone = ({ shimmer = false }: { shimmer?: boolean }) => (
+    <div
+      className="relative aspect-[9/19] h-[82%] max-h-[320px] min-h-[188px] overflow-hidden rounded-[1.65rem] border border-white/20 bg-background/95 shadow-[0_24px_80px_hsl(var(--background)/0.55)] ring-1 ring-white/10"
+      style={{ width: 'auto' }}
+    >
+      <div className="absolute -left-1 top-[18%] h-8 w-1 rounded-full bg-white/15" />
+      <div className="absolute -left-1 top-[31%] h-11 w-1 rounded-full bg-white/15" />
+      <div className="absolute -right-1 top-[25%] h-14 w-1 rounded-full bg-white/12" />
+      <div className="absolute inset-[5px] overflow-hidden rounded-[1.35rem] border border-white/8 bg-primary">
+        <div className="absolute left-1/2 top-2 h-[9px] w-10 -translate-x-1/2 rounded-full bg-background/90" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_36%,hsl(var(--secondary)/0.16),transparent_38%)]" />
+        <div className="absolute inset-x-0 top-[42%] flex items-center justify-center gap-1.5 text-[12px] font-semibold text-white/78">
+          <span className="relative inline-flex h-4 w-6 items-center">
+            <span className="absolute left-0 h-3.5 w-3.5 rounded-full border-2 border-secondary/80" />
+            <span className="absolute right-0 h-3.5 w-3.5 rounded-full border-2 border-secondary/80" />
+          </span>
+          Parium
+        </div>
+        <div className="absolute inset-x-6 bottom-5 h-1 rounded-full bg-white/12" />
+        {shimmer && (
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(110deg, transparent 30%, hsl(var(--secondary) / 0.10) 50%, transparent 70%)',
+              backgroundSize: '220% 100%',
+              animation: 'parium-skeleton-shimmer 2.4s ease-in-out infinite',
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+
   if (reducedMotion || hasError) {
     return (
       <div
@@ -129,7 +163,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         role="img"
         aria-label="Parium 3D-telefon (statisk vy)"
       >
-        <div className="aspect-[9/19] w-[58%] max-w-[260px] rounded-[2.25rem] border border-white/15 bg-gradient-to-b from-white/10 to-white/[0.03] shadow-[0_30px_90px_hsl(var(--background)/0.5)] backdrop-blur-sm" />
+        <StaticPhone />
       </div>
     );
   }
@@ -148,28 +182,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 flex items-center justify-center"
         >
-          <div
-            className="relative aspect-[9/19] w-[62%] max-w-[260px] overflow-hidden rounded-[2.25rem] border border-white/10"
-            style={{
-              background:
-                'linear-gradient(180deg, hsl(var(--background) / 0.55) 0%, hsl(var(--background) / 0.25) 100%)',
-              boxShadow: '0 30px 90px hsl(var(--background) / 0.5)',
-            }}
-          >
-            <div className="absolute left-1/2 top-2 h-2 w-10 -translate-x-1/2 rounded-full bg-black/70" />
-            <div className="absolute inset-x-0 top-[42%] flex items-center justify-center text-[13px] font-semibold text-white/75">
-              Parium
-            </div>
-            <div
-              className={`${showFallback ? 'opacity-100' : 'opacity-0'} absolute inset-0 transition-opacity duration-500`}
-              style={{
-                background:
-                  'linear-gradient(110deg, transparent 30%, hsl(var(--secondary) / 0.10) 50%, transparent 70%)',
-                backgroundSize: '220% 100%',
-                animation: 'parium-skeleton-shimmer 2.4s ease-in-out infinite',
-              }}
-            />
-          </div>
+          <StaticPhone shimmer={showFallback} />
           <style>{`
             @keyframes parium-skeleton-shimmer {
               0% { background-position: 200% 0; }
