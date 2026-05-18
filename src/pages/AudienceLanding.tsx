@@ -77,19 +77,21 @@ const FixedPhoneLayer = () => {
     const gap = tablet ? clamp(height * 0.055, 44, 72) : clamp(height * 0.06, 40, 64);
     const topSafeGap = tablet ? clamp(height * 0.07, 56, 88) : clamp(height * 0.085, 58, 84);
     const bottomSafe = tablet ? clamp(height * 0.06, 44, 76) : clamp(height * 0.065, 40, 64);
+    const canvasTopBreathingRoom = tablet ? clamp(height * 0.04, 28, 52) : clamp(height * 0.055, 38, 58);
     const availableHeight = Math.max(220, height - textBottom - gap - bottomSafe);
     const maxCanvasHeight = Math.max(220, height - gap - bottomSafe);
     const targetVisualHeight = clamp(availableHeight * (tablet ? 0.63 : 0.7), width <= 380 ? 204 : 221, tablet ? 374 : 323);
-    const finalHeight = clamp(availableHeight, width <= 380 ? 272 : 289, tablet ? 510 : 391);
+    const visualHeight = clamp(availableHeight, width <= 380 ? 272 : 289, tablet ? 510 : 391);
+    const finalHeight = Math.min(visualHeight + canvasTopBreathingRoom, maxCanvasHeight);
     const yOffset = width >= 768 ? 18 : clamp(height * 0.025, 16, 24);
     const safeTop = textBottom + topSafeGap + (tablet ? 0 : yOffset);
-    const bottomAnchoredTop = height - bottomSafe - Math.min(finalHeight, maxCanvasHeight);
+    const bottomAnchoredTop = height - bottomSafe - visualHeight;
     const top = Math.max(gap, safeTop, bottomAnchoredTop);
-    const fluidZoom = (targetVisualHeight / Math.max(finalHeight, 1)) * clamp(width / 390, 0.92, 1.15) * (tablet ? 0.56 : 0.54);
+    const fluidZoom = (targetVisualHeight / Math.max(visualHeight, 1)) * clamp(width / 390, 0.92, 1.15) * (tablet ? 0.56 : 0.54);
     const metrics = {
       isDesktop: false,
       top,
-      height: Math.min(finalHeight, maxCanvasHeight),
+      height: finalHeight,
       zoom: clamp(fluidZoom, 0.34, tablet ? 0.51 : 0.49),
       yOffset,
     };
@@ -256,6 +258,7 @@ const FixedPhoneLayer = () => {
         >
           <SplinePhone
             className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[9/19.5]" : "h-full w-auto min-w-[140px] max-w-[min(72vw,270px)] aspect-[9/19.5]"}
+            style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
             zoom={phoneMetrics.zoom}
             active={active}
             instantFallback={!phoneMetrics.isDesktop}
