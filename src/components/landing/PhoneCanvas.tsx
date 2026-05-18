@@ -58,10 +58,10 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
   const centeredScene = useMemo(() => {
     const cloned = scene.clone(true);
     const screenMaterial = new THREE.MeshBasicMaterial({ map: screenTexture, side: THREE.DoubleSide, toneMapped: false });
-    const glassMaterial = new THREE.MeshPhysicalMaterial({ color: '#05070f', roughness: 0.15, metalness: 0.2, transmission: 0.06, transparent: true, opacity: 0.98, side: THREE.DoubleSide });
-    const bodyMaterial = new THREE.MeshStandardMaterial({ color: '#0a0d18', roughness: 0.42, metalness: 0.55, side: THREE.DoubleSide });
-    // Mörk titanium-ram (matt så ingen vit ljusreflex syns)
-    const metalMaterial = new THREE.MeshStandardMaterial({ color: '#1b2030', roughness: 0.85, metalness: 0.35, side: THREE.DoubleSide });
+    const glassMaterial = new THREE.MeshPhysicalMaterial({ color: '#081329', roughness: 0.18, metalness: 0.08, transmission: 0.03, transparent: true, opacity: 0.99, side: THREE.DoubleSide });
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color: '#101a2e', roughness: 0.56, metalness: 0.42, side: THREE.DoubleSide });
+    // Mörk blå-titanium: synlig mot bakgrunden men utan vita/silvriga reflektioner.
+    const metalMaterial = new THREE.MeshStandardMaterial({ color: '#27324a', roughness: 0.7, metalness: 0.48, side: THREE.DoubleSide });
 
     cloned.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) return;
@@ -199,8 +199,9 @@ export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallb
         }}
       >
         <ambientLight intensity={0.6} />
-        <directionalLight position={[3, 4, 5]} intensity={0.55} color="#a8b4d8" />
-        <directionalLight position={[-3, -2, -4]} intensity={0.25} color="#3a4a78" />
+      <directionalLight position={[3, 4, 5]} intensity={0.75} color="#9fb3e6" />
+      <directionalLight position={[-4, 1, 3]} intensity={0.42} color="#4f6fb0" />
+      <directionalLight position={[0, -3, 4]} intensity={0.2} color="#2c4d88" />
         <Suspense fallback={null}>
           <PhoneModel fit={fit} active={active} onReady={() => requestAnimationFrame(() => setReady(true))} />
           <OrbitControls
