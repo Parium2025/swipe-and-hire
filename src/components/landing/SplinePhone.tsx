@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Application as SplineApplication } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
@@ -14,13 +14,30 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
+  const zoomRef = useRef(zoom);
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  const reducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const syncCanvasSize = useCallback(() => {
+    const wrapper = wrapperRef.current;
+    const canvas = canvasRef.current;
+    if (!wrapper || !canvas) return;
+
+    const rect = wrapper.getBoundingClientRect();
+    const cssWidth = Math.max(1, Math.round(rect.width));
+    const cssHeight = Math.max(1, Math.round(rect.height));
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.style.width = `${cssWidth}px`;
+    canvas.style.height = `${cssHeight}px`;
+    canvas.width = Math.round(cssWidth * dpr);
+    canvas.height = Math.round(cssHeight * dpr);
+
+    const app = appRef.current;
+    app?.setSize(cssWidth, cssHeight);
+    app?.setZoom(zoomRef.current);
+  }, []);
 
   // Signal till ev. parent-layer att vi är "redo" att synas — även vid fel,
   // så hero:n inte gömmer sig för alltid.
