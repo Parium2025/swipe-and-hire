@@ -5,11 +5,12 @@ interface SplinePhoneProps {
   className?: string;
   zoom?: number;
   active?: boolean;
+  instantFallback?: boolean;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.78, active = true, instantFallback = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
@@ -17,16 +18,20 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
-  // showFallback = true ENDAST om Spline-scenen inte hunnit ladda inom 6s,
-  // eller om laddningen failat. Vid normal refresh visas INGEN skeleton —
-  // canvasen fade:as in tom (svart/transparent) tills första frame ritas.
+  // På mobil/surfplatta visar vi en premiumram direkt under laddning så hero aldrig
+  // upplevs tom om WebGL/Spline är långsamt eller stoppas av mobilbrowsern.
+  // På desktop väntar vi fortfarande några sekunder för att undvika skeleton-flash.
   const [showFallback, setShowFallback] = useState(false);
 
   useEffect(() => {
     if (isReady || hasError) return;
+    if (instantFallback) {
+      setShowFallback(true);
+      return undefined;
+    }
     const timer = window.setTimeout(() => setShowFallback(true), 6000);
     return () => window.clearTimeout(timer);
-  }, [isReady, hasError]);
+  }, [instantFallback, isReady, hasError]);
 
   const reducedMotion =
     typeof window !== 'undefined' &&
@@ -140,22 +145,21 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
     >
-      {/* Nödfallback — visas ENDAST om Spline-scenen inte kommit upp inom
-          6 sekunder (långsamt nät, WebGL-fel, e.dyl.). Vid normal refresh
-          syns den aldrig — canvasen fadar in när första frame är ritad. */}
+      {/* Premium fallback: direkt på mobil, fördröjd på desktop. */}
       {showFallback && !isReady && (
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-300"
         >
           <div
-            className="relative aspect-[9/19] w-[58%] max-w-[260px] overflow-hidden rounded-[2.25rem] border border-white/10"
+            className="relative aspect-[9/19] h-[82%] max-h-[360px] min-h-[190px] overflow-hidden rounded-[2.25rem] border border-white/15 backdrop-blur-sm"
             style={{
               background:
-                'linear-gradient(180deg, hsl(var(--background) / 0.55) 0%, hsl(var(--background) / 0.25) 100%)',
-              boxShadow: '0 30px 90px hsl(var(--background) / 0.5)',
+                'linear-gradient(180deg, hsl(var(--primary-foreground) / 0.13) 0%, hsl(var(--primary-foreground) / 0.035) 100%)',
+              boxShadow: '0 26px 86px hsl(var(--background) / 0.45), inset 0 1px 0 hsl(var(--primary-foreground) / 0.16)',
             }}
           >
+            <div className="absolute left-1/2 top-3 h-1.5 w-14 -translate-x-1/2 rounded-full bg-white/18" />
             <div
               className="absolute inset-0"
               style={{
