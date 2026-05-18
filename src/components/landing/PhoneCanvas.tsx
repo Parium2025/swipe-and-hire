@@ -138,7 +138,7 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
     // Telefonens höjd/bredd-förhållande efter normalisering
     const phoneAspect = 9 / 19.5;
     // Behåll bredd ELLER höjd så hela telefonen syns med marginal
-      const targetHeight = 0.86 / fit;
+      const targetHeight = 0.66 / fit;
     const targetWidth = phoneAspect / fit;
     const heightForAspect = Math.max(targetHeight, targetWidth / aspect);
     const halfH = heightForAspect / 2;
