@@ -53,18 +53,18 @@ const FixedPhoneLayer = () => {
 
     if (width >= 1024) {
       const isCompactLaptop = height <= 820;
-      const desktopTopPadding = isCompactLaptop ? 118 : 126;
-      const desktopBottomPadding = isCompactLaptop ? 56 : 66;
-      const safeCanvasHeight = Math.max(390, height - desktopTopPadding - desktopBottomPadding);
-      const widthFitHeight = (Math.min(width * 0.36, 520) * 24) / 9;
-      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), isCompactLaptop ? 410 : 470, isCompactLaptop ? 620 : 720);
-      const viewportScale = clamp(width / 1440, 0.86, 1.1);
-      const yOffset = isCompactLaptop ? 56 : 42;
+      const desktopTopPadding = isCompactLaptop ? 132 : 142;
+      const desktopBottomPadding = isCompactLaptop ? 84 : 96;
+      const safeCanvasHeight = Math.max(340, height - desktopTopPadding - desktopBottomPadding);
+      const widthFitHeight = (Math.min(width * 0.28, 390) * 19.5) / 9;
+      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), isCompactLaptop ? 340 : 390, isCompactLaptop ? 500 : 570);
+      const viewportScale = clamp(width / 1440, 0.82, 1);
+      const yOffset = isCompactLaptop ? 30 : 26;
       const metrics = {
         isDesktop: true,
         top: 0,
         height: safeHeight,
-        zoom: clamp((height / safeHeight) * (isCompactLaptop ? 0.48 : 0.52) * viewportScale, 0.42, isCompactLaptop ? 0.60 : 0.68),
+        zoom: clamp((height / safeHeight) * (isCompactLaptop ? 0.38 : 0.42) * viewportScale, 0.36, isCompactLaptop ? 0.5 : 0.56),
         yOffset,
       };
       lastHeroMetricsRef.current = metrics;
@@ -74,20 +74,20 @@ const FixedPhoneLayer = () => {
     const anchor = getVisibleAnchor();
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.48;
     const gap = height <= 640 ? 4 : clamp(height * 0.012, 8, 12);
-    const bottomSafe = Math.max(8, height * 0.012);
+    const bottomSafe = Math.max(18, height * 0.026);
     const freeSpace = Math.max(220, height - textBottom - gap - bottomSafe);
     const tablet = width >= 700;
-    const targetVisualHeight = clamp(freeSpace * (tablet ? 0.8 : 0.92), width <= 380 ? 250 : 280, tablet ? 520 : 430);
-    const bufferRatio = tablet ? 1.2 : 1.12;
-    const finalHeight = clamp(Math.min(freeSpace, targetVisualHeight * bufferRatio), width <= 380 ? 300 : 330, tablet ? 620 : 500);
+    const targetVisualHeight = clamp(freeSpace * (tablet ? 0.72 : 0.76), width <= 380 ? 210 : 230, tablet ? 420 : 330);
+    const bufferRatio = tablet ? 1.18 : 1.14;
+    const finalHeight = clamp(Math.min(freeSpace, targetVisualHeight * bufferRatio), width <= 380 ? 260 : 280, tablet ? 520 : 390);
     const yOffset = width >= 768 ? 18 : 0;
-    const top = clamp(textBottom + gap + yOffset, gap, height - bottomSafe - finalHeight);
-    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.92, 1.18) * (tablet ? 0.56 : 0.62);
+    const top = height - bottomSafe - finalHeight;
+    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.9, 1.08) * (tablet ? 0.48 : 0.5);
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.42, tablet ? 0.58 : 0.62),
+      zoom: clamp(fluidZoom, 0.34, tablet ? 0.48 : 0.52),
       yOffset,
     };
     lastHeroMetricsRef.current = metrics;
@@ -252,7 +252,7 @@ const FixedPhoneLayer = () => {
           }
         >
           <SplinePhone
-            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[13/19.5]" : "h-full w-auto min-w-[168px] max-w-[min(84vw,340px)] aspect-[13/19.5]"}
+            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[9/19.5]" : "h-full w-auto min-w-[140px] max-w-[min(72vw,270px)] aspect-[9/19.5]"}
             zoom={phoneMetrics.zoom}
             active={active}
             instantFallback={!phoneMetrics.isDesktop}
