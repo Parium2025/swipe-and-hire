@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Application as SplineApplication } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
@@ -9,8 +9,6 @@ interface SplinePhoneProps {
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
-const MOBILE_SCENE_URL = `${SCENE_URL}?v=mobile-spline-fit-2026-05-18`;
-const ReactSpline = lazy(() => import('@splinetool/react-spline'));
 
 export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -156,32 +154,6 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
       appRef.current = null;
     };
   }, [mobileFit, syncCanvasSize]);
-
-  if (mobileFit) {
-    return (
-      <div
-        ref={wrapperRef}
-        className={`relative h-full w-full select-none overflow-visible ${className ?? ''}`}
-        style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
-      >
-        <Suspense fallback={null}>
-          <ReactSpline
-            scene={MOBILE_SCENE_URL}
-            renderOnDemand={false}
-            wasmPath={`${window.location.origin}/spline-wasm`}
-            className="h-full w-full overflow-visible [&_canvas]:!block [&_canvas]:!h-full [&_canvas]:!w-full"
-            style={{ width: '100%', height: '100%', overflow: 'visible', touchAction: 'none' }}
-            onLoad={(app) => {
-              appRef.current = app;
-              app.setZoom(zoomRef.current);
-              fitSceneToCanvas(app);
-              setIsReady(true);
-            }}
-          />
-        </Suspense>
-      </div>
-    );
-  }
 
   return (
     <div
