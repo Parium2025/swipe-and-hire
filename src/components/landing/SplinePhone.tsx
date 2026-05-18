@@ -5,11 +5,12 @@ interface SplinePhoneProps {
   className?: string;
   zoom?: number;
   active?: boolean;
+  instantFallback?: boolean;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.78, active = true, instantFallback = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
@@ -17,9 +18,9 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
-  // showFallback = true ENDAST om Spline-scenen inte hunnit ladda inom 6s,
-  // eller om laddningen failat. Vid normal refresh visas INGEN skeleton —
-  // canvasen fade:as in tom (svart/transparent) tills första frame ritas.
+  // På mobil/surfplatta visar vi en premiumram direkt under laddning så hero aldrig
+  // upplevs tom om WebGL/Spline är långsamt eller stoppas av mobilbrowsern.
+  // På desktop väntar vi fortfarande några sekunder för att undvika skeleton-flash.
   const [showFallback, setShowFallback] = useState(false);
 
   useEffect(() => {
