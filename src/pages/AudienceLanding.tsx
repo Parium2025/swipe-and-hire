@@ -36,7 +36,7 @@ type HeroIntroStageProps = {
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   const heroIndexRef = useRef(0);
-  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; top: number; height: number; zoom: number } | null>(null);
+  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; top: number; height: number; zoom: number; yOffset: number } | null>(null);
   const getVisibleAnchor = () => {
     const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const anchors = Array.from(document.querySelectorAll('[data-hero-phone-anchor]')) as HTMLElement[];
@@ -56,14 +56,16 @@ const FixedPhoneLayer = () => {
       const desktopTopPadding = width >= 1280 ? (isCompactLaptop ? 128 : 132) : 124;
       const desktopBottomPadding = width >= 1280 ? (isCompactLaptop ? 64 : 76) : 60;
       const edgeSafety = isCompactLaptop ? 96 : 72;
-      const safeCanvasHeight = Math.max(320, height - desktopTopPadding - desktopBottomPadding - edgeSafety);
-      const visualHeight = clamp(height * (isCompactLaptop ? 0.44 : 0.52), 300, 560);
-      const safeHeight = Math.min(safeCanvasHeight, visualHeight * (isCompactLaptop ? 1.92 : 1.74));
+      const safeCanvasHeight = Math.max(340, height - desktopTopPadding - desktopBottomPadding - edgeSafety);
+      const visualHeight = clamp(height * (isCompactLaptop ? 0.40 : 0.48), 280, 520);
+      const safeHeight = Math.min(safeCanvasHeight, visualHeight * (isCompactLaptop ? 2.12 : 1.92));
+      const yOffset = isCompactLaptop ? (width < 1280 ? 42 : 34) : 22;
       const metrics = {
         isDesktop: true,
         top: 0,
         height: safeHeight,
-        zoom: clamp((visualHeight / safeHeight) * (isCompactLaptop ? 0.38 : 0.48), 0.22, 0.46),
+        zoom: clamp((visualHeight / safeHeight) * (isCompactLaptop ? 0.31 : 0.40), 0.18, 0.39),
+        yOffset,
       };
       lastHeroMetricsRef.current = metrics;
       return metrics;
@@ -77,13 +79,15 @@ const FixedPhoneLayer = () => {
     const targetVisualHeight = clamp(freeSpace * 0.54, width <= 380 ? 132 : 150, width >= 700 ? 280 : 238);
     const bufferRatio = width >= 700 ? 1.58 : 1.46;
     const finalHeight = Math.min(freeSpace, targetVisualHeight * bufferRatio);
-    const top = clamp(textBottom + gap, gap, height - bottomSafe - finalHeight);
-    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.78, 1.12) * 0.43;
+    const yOffset = width >= 768 ? 18 : 0;
+    const top = clamp(textBottom + gap + yOffset, gap, height - bottomSafe - finalHeight);
+    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.78, 1.12) * (width >= 768 ? 0.36 : 0.43);
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.22, 0.34),
+      zoom: clamp(fluidZoom, 0.18, width >= 768 ? 0.29 : 0.34),
+      yOffset,
     };
     lastHeroMetricsRef.current = metrics;
     return metrics;
