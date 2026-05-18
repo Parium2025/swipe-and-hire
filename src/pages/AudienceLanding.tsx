@@ -53,18 +53,18 @@ const FixedPhoneLayer = () => {
 
     if (width >= 1024) {
       const isCompactLaptop = height <= 820;
-      const desktopTopPadding = width >= 1280 ? (isCompactLaptop ? 128 : 132) : 124;
-      const desktopBottomPadding = width >= 1280 ? (isCompactLaptop ? 64 : 76) : 60;
-      const edgeSafety = isCompactLaptop ? 96 : 72;
-      const safeCanvasHeight = Math.max(340, height - desktopTopPadding - desktopBottomPadding - edgeSafety);
-      const visualHeight = clamp(height * (isCompactLaptop ? 0.40 : 0.48), 280, 520);
-      const safeHeight = Math.min(safeCanvasHeight, visualHeight * (isCompactLaptop ? 2.12 : 1.92));
-      const yOffset = isCompactLaptop ? (width < 1280 ? 42 : 34) : 22;
+      const desktopTopPadding = isCompactLaptop ? 118 : 126;
+      const desktopBottomPadding = isCompactLaptop ? 56 : 66;
+      const safeCanvasHeight = Math.max(390, height - desktopTopPadding - desktopBottomPadding);
+      const widthFitHeight = (Math.min(width * 0.36, 520) * 24) / 9;
+      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), isCompactLaptop ? 410 : 470, isCompactLaptop ? 620 : 720);
+      const viewportScale = clamp(width / 1440, 0.86, 1.1);
+      const yOffset = isCompactLaptop ? 48 : 34;
       const metrics = {
         isDesktop: true,
         top: 0,
         height: safeHeight,
-        zoom: clamp((visualHeight / safeHeight) * (isCompactLaptop ? 0.31 : 0.40), 0.18, 0.39),
+        zoom: clamp((height / safeHeight) * (isCompactLaptop ? 0.34 : 0.38) * viewportScale, 0.30, isCompactLaptop ? 0.44 : 0.50),
         yOffset,
       };
       lastHeroMetricsRef.current = metrics;
@@ -73,20 +73,21 @@ const FixedPhoneLayer = () => {
 
     const anchor = getVisibleAnchor();
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.52;
-    const gap = height <= 640 ? 14 : clamp(height * 0.028, 18, 28);
-    const bottomSafe = Math.max(16, height * 0.022);
-    const freeSpace = Math.max(120, height - textBottom - gap - bottomSafe);
-    const targetVisualHeight = clamp(freeSpace * 0.54, width <= 380 ? 132 : 150, width >= 700 ? 280 : 238);
-    const bufferRatio = width >= 700 ? 1.58 : 1.46;
-    const finalHeight = Math.min(freeSpace, targetVisualHeight * bufferRatio);
+    const gap = height <= 640 ? 8 : clamp(height * 0.018, 10, 18);
+    const bottomSafe = Math.max(10, height * 0.014);
+    const freeSpace = Math.max(170, height - textBottom - gap - bottomSafe);
+    const tablet = width >= 700;
+    const targetVisualHeight = clamp(freeSpace * (tablet ? 0.72 : 0.82), width <= 380 ? 178 : 198, tablet ? 430 : 360);
+    const bufferRatio = tablet ? 1.34 : 1.28;
+    const finalHeight = clamp(Math.min(freeSpace, targetVisualHeight * bufferRatio), width <= 380 ? 230 : 260, tablet ? 560 : 440);
     const yOffset = width >= 768 ? 18 : 0;
     const top = clamp(textBottom + gap + yOffset, gap, height - bottomSafe - finalHeight);
-    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.78, 1.12) * (width >= 768 ? 0.36 : 0.43);
+    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.92, 1.18) * (tablet ? 0.48 : 0.56);
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.18, width >= 768 ? 0.29 : 0.34),
+      zoom: clamp(fluidZoom, 0.32, tablet ? 0.46 : 0.52),
       yOffset,
     };
     lastHeroMetricsRef.current = metrics;
