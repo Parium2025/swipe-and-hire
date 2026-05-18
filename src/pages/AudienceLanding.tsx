@@ -234,7 +234,7 @@ const FixedPhoneLayer = () => {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 top-0 z-40 flex h-[100dvh] items-start justify-center overflow-hidden px-5 sm:px-6 md:px-12 lg:items-center lg:px-24 lg:pb-16 lg:pt-28"
+      className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-start justify-center overflow-hidden px-5 sm:px-6 md:px-12 lg:fixed lg:h-[100dvh] lg:items-center lg:px-24 lg:pb-16 lg:pt-28"
       style={{ height: `${phoneMetrics.viewportHeight}px` }}
       aria-hidden="true"
     >
