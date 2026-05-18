@@ -549,6 +549,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         releaseLockedRef.current = false;
         setObserverActive(false);
         setIntroResting();
+        if (introHeadingEl) gsap.set(introHeadingEl, { opacity: 0 });
+        gsap.set(introTextItems, { y: 44, opacity: 0 });
+        if (introCtaEl) gsap.set(introCtaEl, { opacity: 0 });
         window.dispatchEvent(new Event('parium:gallery-leave'));
         const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
         // 3→2 ska vara lika deterministic som 1↔2: native smooth-scroll på iOS
@@ -573,14 +576,21 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           setObserverActive(true);
         };
         gsap.killTweensOf(scrollRoot);
-        gsap.to(scrollRoot, {
+        gsap.killTweensOf([introTextItems, introCtaEl, introHeadingEl].filter(Boolean));
+        const returnTl = gsap.timeline({ onComplete: finishReturn, onInterrupt: finishReturn });
+        returnTl.to(scrollRoot, {
           scrollTop: target,
           duration: 0.92,
           ease: 'power2.inOut',
           overwrite: true,
-          onComplete: finishReturn,
-          onInterrupt: finishReturn,
-        });
+        }, 0);
+        if (introHeadingEl) {
+          returnTl.to(introHeadingEl, { opacity: 1, duration: 0.62, ease: 'power2.out' }, 0.3);
+        }
+        returnTl.to(introTextItems, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.42);
+        if (introCtaEl) {
+          returnTl.to(introCtaEl, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 0.42 + introTextItems.length * 0.08);
+        }
       };
 
       observer = Observer.create({
