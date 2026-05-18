@@ -77,13 +77,13 @@ const FixedPhoneLayer = () => {
     const gap = tablet ? clamp(height * 0.055, 44, 72) : clamp(height * 0.06, 40, 64);
     const topSafeGap = tablet ? clamp(height * 0.07, 56, 88) : clamp(height * 0.085, 58, 84);
     const bottomSafe = tablet ? clamp(height * 0.06, 44, 76) : clamp(height * 0.065, 40, 64);
-    const canvasTopBreathingRoom = tablet ? clamp(height * 0.04, 28, 52) : clamp(height * 0.055, 38, 58);
+    const canvasTopBreathingRoom = tablet ? clamp(height * 0.065, 46, 76) : clamp(height * 0.09, 64, 92);
     const availableHeight = Math.max(220, height - textBottom - gap - bottomSafe);
     const maxCanvasHeight = Math.max(220, height - gap - bottomSafe);
     const targetVisualHeight = clamp(availableHeight * (tablet ? 0.63 : 0.7), width <= 380 ? 204 : 221, tablet ? 374 : 323);
     const visualHeight = clamp(availableHeight, width <= 380 ? 272 : 289, tablet ? 510 : 391);
     const finalHeight = Math.min(visualHeight + canvasTopBreathingRoom, maxCanvasHeight);
-    const yOffset = width >= 768 ? 18 : clamp(height * 0.025, 16, 24);
+    const yOffset = width >= 768 ? 18 : clamp(height * 0.038, 28, 38);
     const safeTop = textBottom + topSafeGap + (tablet ? 0 : yOffset);
     const bottomAnchoredTop = height - bottomSafe - visualHeight;
     const top = Math.max(gap, safeTop, bottomAnchoredTop);
