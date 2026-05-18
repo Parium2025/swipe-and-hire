@@ -67,7 +67,7 @@ const createScreenTexture = () => {
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 8;
-  texture.flipY = false;
+  texture.flipY = true;
   texture.needsUpdate = true;
   return texture;
 };
@@ -138,7 +138,7 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
     // Telefonens höjd/bredd-förhållande efter normalisering
     const phoneAspect = 9 / 19.5;
     // Behåll bredd ELLER höjd så hela telefonen syns med marginal
-    const targetHeight = 1 / fit;
+      const targetHeight = 0.86 / fit;
     const targetWidth = phoneAspect / fit;
     const heightForAspect = Math.max(targetHeight, targetWidth / aspect);
     const halfH = heightForAspect / 2;
