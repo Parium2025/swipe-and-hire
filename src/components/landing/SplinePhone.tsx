@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Application as SplineApplication } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
   className?: string;
+  style?: CSSProperties;
   zoom?: number;
   active?: boolean;
   instantFallback?: boolean;
@@ -10,7 +11,7 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78, active = true, instantFallback = false }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, style, zoom = 0.78, active = true, instantFallback = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
@@ -142,7 +143,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, instantFall
     <div
       ref={wrapperRef}
       className={`relative select-none overflow-visible ${className ?? ''}`}
-      style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+      style={{ touchAction: 'pan-y', overscrollBehavior: 'contain', ...style }}
     >
       {/* Premium fallback: direkt på mobil, fördröjd på desktop. */}
       {showFallback && !isReady && (
