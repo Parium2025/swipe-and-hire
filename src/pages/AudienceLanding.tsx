@@ -245,14 +245,14 @@ const FixedPhoneLayer = () => {
         <div aria-hidden className="hidden lg:block" />
         <div
           data-phone-scroll-forward
-          className={`${shouldShowPhone ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-500 ease-out'}`}
+          className={`${shouldShowPhone ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-300 ease-out'}`}
           style={phoneMetrics.isDesktop
             ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
           }
         >
           <SplinePhone
-            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[9/24] xl:aspect-[9/23] 2xl:aspect-[9/21.5]" : "h-full w-auto aspect-[9/24]"}
+            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[9/24] xl:aspect-[9/23] 2xl:aspect-[9/21.5]" : "h-full w-auto min-w-[132px] max-w-[min(58vw,230px)] aspect-[9/24]"}
             zoom={phoneMetrics.zoom}
             active={active}
           />
