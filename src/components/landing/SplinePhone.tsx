@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import type { Application as SplineApplication } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
@@ -10,6 +10,7 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 const MOBILE_SCENE_URL = `${SCENE_URL}?v=mobile-spline-fit-2026-05-18`;
+const ReactSpline = lazy(() => import('@splinetool/react-spline'));
 
 export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
