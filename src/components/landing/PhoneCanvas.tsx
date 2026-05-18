@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useLoader, useThree } from '@react-three/fiber';
-import { useGLTF, Environment, OrbitControls } from '@react-three/drei';
+import { useGLTF, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import screenTextureUrl from '@/assets/parium-phone-logo-screen.jpg';
 
@@ -198,20 +198,18 @@ export const PhoneCanvas = ({ className, fit = 0.78, active = true, instantFallb
           touchAction: 'none',
         }}
       >
-        <ambientLight intensity={0.85} />
-        <directionalLight position={[3, 4, 5]} intensity={1.1} />
-        <directionalLight position={[-3, -2, -4]} intensity={0.4} />
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[3, 4, 5]} intensity={0.55} color="#a8b4d8" />
+        <directionalLight position={[-3, -2, -4]} intensity={0.25} color="#3a4a78" />
         <Suspense fallback={null}>
-          <Environment preset="city" />
           <PhoneModel fit={fit} active={active} onReady={() => requestAnimationFrame(() => setReady(true))} />
           <OrbitControls
             enableZoom={false}
             enablePan={false}
             enableDamping
-            dampingFactor={0.08}
+            dampingFactor={0.1}
             rotateSpeed={0.9}
-            autoRotate={active}
-            autoRotateSpeed={0.8}
+            autoRotate={false}
             makeDefault
           />
         </Suspense>
