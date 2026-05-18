@@ -110,6 +110,11 @@ const PinnedHorizontalGallery = () => {
     const strip = stripRef.current;
     if (!root || !section || !strip) return;
 
+    // Under 3→2-returen vill vi INTE att strippens scroll-drivna transform ska
+    // uppdateras varje frame — då tävlar den med GSAP-exit-tweenen på de 8 korten
+    // och browserns smooth-scroll, och kan ge synligt hack på svagare GPU:er.
+    let frozen = false;
+
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
       // Mät faktisk overflow så att alla kort alltid exponeras oavsett viewport.
@@ -125,6 +130,7 @@ const PinnedHorizontalGallery = () => {
     };
 
     const measure = () => {
+      if (frozen) return;
       const rect = section.getBoundingClientRect();
       const distance = Math.max(1, section.offsetHeight - root.clientHeight);
       targetProgressRef.current = Math.min(1, Math.max(0, -rect.top / distance));
@@ -133,6 +139,7 @@ const PinnedHorizontalGallery = () => {
 
     const tick = () => {
       rafRef.current = null;
+      if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
       const next = Math.abs(target - current) < 0.001 ? target : current + (target - current) * 0.32;
@@ -141,13 +148,34 @@ const PinnedHorizontalGallery = () => {
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
     };
 
+    // Frys vid 3→2 (gallery-leave) och tina vid 2→3 (gallery-enter). Under frysen
+    // står strippen still — den ena synliga rörelsen blir kortens GSAP-fade-out
+    // samtidigt som intro-lagret slidar in över, vilket är vad designen redan
+    // visar. När galleriet återinträder mäter vi om från scrollposition direkt.
+    const freeze = () => {
+      frozen = true;
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+    const thaw = () => {
+      if (!frozen) return;
+      frozen = false;
+      measure();
+    };
+
     applyProgress(0);
     measure();
     root.addEventListener('scroll', measure, { passive: true });
     window.addEventListener('resize', measure);
+    window.addEventListener('parium:gallery-leave', freeze);
+    window.addEventListener('parium:gallery-enter', thaw);
     return () => {
       root.removeEventListener('scroll', measure);
       window.removeEventListener('resize', measure);
+      window.removeEventListener('parium:gallery-leave', freeze);
+      window.removeEventListener('parium:gallery-enter', thaw);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
     };
   }, []);
