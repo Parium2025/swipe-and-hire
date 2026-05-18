@@ -25,9 +25,13 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, instantFall
 
   useEffect(() => {
     if (isReady || hasError) return;
+    if (instantFallback) {
+      setShowFallback(true);
+      return undefined;
+    }
     const timer = window.setTimeout(() => setShowFallback(true), 6000);
     return () => window.clearTimeout(timer);
-  }, [isReady, hasError]);
+  }, [instantFallback, isReady, hasError]);
 
   const reducedMotion =
     typeof window !== 'undefined' &&
