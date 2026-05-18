@@ -140,24 +140,28 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
     >
-      {/* Nödfallback — visas ENDAST om Spline-scenen inte kommit upp inom
-          6 sekunder (långsamt nät, WebGL-fel, e.dyl.). Vid normal refresh
-          syns den aldrig — canvasen fadar in när första frame är ritad. */}
-      {showFallback && !isReady && (
+      {/* Safari/iOS kan låta WebGL/Spline ladda länge utan tydligt fel.
+          Visa därför en statisk telefon direkt under canvasen, så hero:n aldrig
+          får ett tomt hål. När WebGL är redo fade:as canvasen in ovanpå. */}
+      {!isReady && (
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 flex items-center justify-center"
         >
           <div
-            className="relative aspect-[9/19] w-[58%] max-w-[260px] overflow-hidden rounded-[2.25rem] border border-white/10"
+            className="relative aspect-[9/19] w-[62%] max-w-[260px] overflow-hidden rounded-[2.25rem] border border-white/10"
             style={{
               background:
                 'linear-gradient(180deg, hsl(var(--background) / 0.55) 0%, hsl(var(--background) / 0.25) 100%)',
               boxShadow: '0 30px 90px hsl(var(--background) / 0.5)',
             }}
           >
+            <div className="absolute left-1/2 top-2 h-2 w-10 -translate-x-1/2 rounded-full bg-black/70" />
+            <div className="absolute inset-x-0 top-[42%] flex items-center justify-center text-[13px] font-semibold text-white/75">
+              Parium
+            </div>
             <div
-              className="absolute inset-0"
+              className={`${showFallback ? 'opacity-100' : 'opacity-0'} absolute inset-0 transition-opacity duration-500`}
               style={{
                 background:
                   'linear-gradient(110deg, transparent 30%, hsl(var(--secondary) / 0.10) 50%, transparent 70%)',
