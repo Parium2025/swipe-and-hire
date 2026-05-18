@@ -74,17 +74,18 @@ const FixedPhoneLayer = () => {
     const gap = height <= 640 ? 12 : clamp(height * 0.024, 16, 24);
     const bottomSafe = Math.max(12, height * 0.018);
     const freeSpace = Math.max(120, height - textBottom - gap - bottomSafe);
-    const targetVisualHeight = clamp(freeSpace * 0.62, width <= 380 ? 150 : 170, width >= 700 ? 300 : 260);
-    const bufferRatio = width >= 700 ? 1.42 : 1.32;
+    const targetVisualHeight = clamp(freeSpace * 0.58, width <= 380 ? 140 : 156, width >= 700 ? 280 : 232);
+    const bufferRatio = width >= 700 ? 1.48 : 1.4;
     const finalHeight = Math.min(freeSpace, targetVisualHeight * bufferRatio);
     const top = clamp(textBottom + gap, gap, height - bottomSafe - finalHeight);
-    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.82, 1.18) * 0.48;
+    const canvasWidth = Math.min(width - 24, Math.max(finalHeight * 0.82, width * 0.62));
+    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.82, 1.18) * 0.34;
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      width: finalHeight * (9 / 24),
-      zoom: clamp(fluidZoom, 0.28, 0.42),
+      width: canvasWidth,
+      zoom: clamp(fluidZoom, 0.18, 0.30),
     };
     lastHeroMetricsRef.current = metrics;
     return metrics;
