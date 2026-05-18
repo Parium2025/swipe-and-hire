@@ -5,16 +5,31 @@ interface SplinePhoneProps {
   className?: string;
   zoom?: number;
   active?: boolean;
+  mobileFit?: boolean;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePhoneProps) => {
+export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
   const zoomRef = useRef(zoom);
+  const mobileFitRef = useRef(mobileFit);
+  const basePhoneYRef = useRef<number | null>(null);
+  const fitSceneToCanvas = useCallback((app: SplineApplication | null) => {
+    if (!app) return;
+    const phone = app.findObjectByName('iPhone 14 Pro');
+    if (!phone) return;
+    basePhoneYRef.current ??= phone.position.y;
+
+    // På mobil låg exporterad Spline-modell för högt i kameran, vilket gav
+    // visuell klippning trots att DOM/canvas hade rätt storlek. Flytta endast
+    // hela telefon-objektet nedåt i scenen så hela modellen ryms i canvasen.
+    phone.position.y = mobileFitRef.current ? -118 : basePhoneYRef.current;
+    app.requestRender?.();
+  }, []);
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -37,7 +52,8 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
     const app = appRef.current;
     app?.setSize(cssWidth, cssHeight);
     app?.setZoom(zoomRef.current);
-  }, []);
+    fitSceneToCanvas(app);
+  }, [fitSceneToCanvas]);
 
   // Signal till ev. parent-layer att vi är "redo" att synas — även vid fel,
   // så hero:n inte gömmer sig för alltid.
@@ -57,6 +73,11 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
       app.stop();
     }
   }, [active, isReady]);
+
+  useEffect(() => {
+    mobileFitRef.current = mobileFit;
+    fitSceneToCanvas(appRef.current);
+  }, [mobileFit, fitSceneToCanvas]);
 
   useEffect(() => {
     const app = appRef.current;
@@ -105,9 +126,11 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
             .setBackgroundColor?.('rgba(0,0,0,0)');
         } catch { /* no-op */ }
         app.setZoom(zoomRef.current);
+        fitSceneToCanvas(app);
         requestAnimationFrame(() => {
           syncCanvasSize();
           app?.setZoom(zoomRef.current);
+          fitSceneToCanvas(app);
         });
         if (!activeRef.current) app.stop();
         await new Promise<void>((resolve) => {
