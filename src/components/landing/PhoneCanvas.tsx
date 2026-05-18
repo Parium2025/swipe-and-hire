@@ -1,7 +1,8 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { useGLTF, Environment } from '@react-three/drei';
 import * as THREE from 'three';
+import screenTextureUrl from '@/assets/parium-phone-logo-screen.jpg';
 
 interface PhoneCanvasProps {
   className?: string;
@@ -13,75 +14,6 @@ interface PhoneCanvasProps {
 
 const MODEL_URL = '/models/parium-phone.glb';
 
-const createScreenTexture = () => {
-  const canvas = document.createElement('canvas');
-  canvas.width = 720;
-  canvas.height = 1560;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
-
-  const bg = ctx.createLinearGradient(0, 0, 720, 1560);
-  bg.addColorStop(0, '#0a2a63');
-  bg.addColorStop(0.48, '#061b43');
-  bg.addColorStop(1, '#031126');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, 720, 1560);
-
-  const glow = ctx.createRadialGradient(570, 1180, 20, 570, 1180, 620);
-  glow.addColorStop(0, 'rgba(35, 174, 255, 0.46)');
-  glow.addColorStop(0.5, 'rgba(29, 88, 179, 0.18)');
-  glow.addColorStop(1, 'rgba(3, 17, 38, 0)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, 720, 1560);
-
-  ctx.fillStyle = 'rgba(255,255,255,0.92)';
-  ctx.font = '700 42px system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText('Parium', 72, 118);
-  ctx.fillStyle = 'rgba(255,255,255,0.62)';
-  ctx.font = '500 28px system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText('Jobb som passar dig', 72, 210);
-
-  const cards = [300, 512, 724, 936];
-  cards.forEach((y, i) => {
-    ctx.fillStyle = i === 0 ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.10)';
-    roundRect(ctx, 58, y, 604, 152, 30);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.88)';
-    ctx.font = '700 25px system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillText(['Barista', 'Receptionist', 'Servitör', 'Butikssäljare'][i], 96, y + 56);
-    ctx.fillStyle = 'rgba(255,255,255,0.48)';
-    ctx.font = '500 21px system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillText(['Stockholm · Deltid', 'Göteborg · Heltid', 'Malmö · Extra', 'Uppsala · Sommar'][i], 96, y + 98);
-    ctx.fillStyle = i === 0 ? '#38bdf8' : 'rgba(56,189,248,0.58)';
-    roundRect(ctx, 520, y + 52, 86, 44, 22);
-    ctx.fill();
-  });
-
-  ctx.fillStyle = 'rgba(255,255,255,0.10)';
-  roundRect(ctx, 86, 1348, 548, 86, 43);
-  ctx.fill();
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '700 25px system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText('Utforska jobb', 270, 1402);
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
-  texture.flipY = true;
-  texture.needsUpdate = true;
-  return texture;
-};
-
-const roundRect = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) => {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-};
-
 /**
  * Centrerar & skalar GLB-modellen så att den ALLTID ramas in i viewporten,
  * oavsett canvas-storlek. Använder ortografisk kamera + auto-fit baserat på
@@ -92,7 +24,14 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
   const groupRef = useRef<THREE.Group>(null);
   const { size, camera } = useThree();
   const pointer = useRef({ x: 0, y: 0 });
-  const screenTexture = useMemo(createScreenTexture, []);
+  const screenTexture = useLoader(THREE.TextureLoader, screenTextureUrl) as THREE.Texture;
+
+  useMemo(() => {
+    screenTexture.colorSpace = THREE.SRGBColorSpace;
+    screenTexture.anisotropy = 8;
+    screenTexture.flipY = true;
+    screenTexture.needsUpdate = true;
+  }, [screenTexture]);
 
   // Centrera modellen och skala till enhetshöjd 1
   const centeredScene = useMemo(() => {
@@ -106,11 +45,11 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
       if (!(child instanceof THREE.Mesh)) return;
       child.castShadow = false;
       child.receiveShadow = false;
-      const name = child.name.toLowerCase();
+      const name = child.name.toLowerCase().replace(/_/g, ' ');
       if (name === 'screen') child.material = screenMaterial;
       else if (name.includes('screen border') || name.includes('dynamic island')) child.material = glassMaterial;
+      else if (name.includes('back side')) child.material = bodyMaterial;
       else if (name.includes('metal') || name.includes('button')) child.material = metalMaterial;
-      else child.material = bodyMaterial;
     });
 
     const box = new THREE.Box3().setFromObject(cloned);
@@ -128,19 +67,18 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
 
   useEffect(() => {
     onReady();
-    return () => screenTexture?.dispose();
-  }, [onReady, screenTexture]);
+  }, [onReady]);
 
   // Auto-fit ortografisk kamera till modellens projicerade storlek
   useEffect(() => {
     if (!(camera instanceof THREE.OrthographicCamera)) return;
     const aspect = size.width / size.height;
-    // Telefonens höjd/bredd-förhållande efter normalisering
-    const phoneAspect = 9 / 19.5;
-    // Behåll bredd ELLER höjd så hela telefonen syns med marginal
-      const targetHeight = 0.66 / fit;
-    const targetWidth = phoneAspect / fit;
-    const heightForAspect = Math.max(targetHeight, targetWidth / aspect);
+    const box = new THREE.Box3().setFromObject(centeredScene);
+    const modelSize = new THREE.Vector3();
+    box.getSize(modelSize);
+    const safeWidth = modelSize.x + modelSize.z * 0.75;
+    const safeHeight = modelSize.y + modelSize.z * 0.12;
+    const heightForAspect = Math.max(safeHeight, safeWidth / aspect) / Math.max(fit, 0.1);
     const halfH = heightForAspect / 2;
     const halfW = halfH * aspect;
     camera.left = -halfW;
@@ -152,7 +90,7 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
     camera.position.set(0, 0, 5);
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
-  }, [camera, size.width, size.height, fit]);
+  }, [camera, centeredScene, size.width, size.height, fit]);
 
   // Mouse tilt
   useEffect(() => {

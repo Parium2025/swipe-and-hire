@@ -252,7 +252,7 @@ const FixedPhoneLayer = () => {
           }
         >
           <PhoneCanvas
-            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[9/19.5]" : "h-full w-auto min-w-[168px] max-w-[min(68vw,270px)] aspect-[9/19.5]"}
+            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[13/19.5]" : "h-full w-auto min-w-[168px] max-w-[min(76vw,310px)] aspect-[13/19.5]"}
             fit={phoneMetrics.zoom}
             active={active}
             instantFallback={!phoneMetrics.isDesktop}
