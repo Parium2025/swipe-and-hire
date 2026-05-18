@@ -59,12 +59,12 @@ const FixedPhoneLayer = () => {
       const widthFitHeight = (Math.min(width * 0.36, 520) * 24) / 9;
       const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), isCompactLaptop ? 410 : 470, isCompactLaptop ? 620 : 720);
       const viewportScale = clamp(width / 1440, 0.86, 1.1);
-      const yOffset = isCompactLaptop ? 48 : 34;
+      const yOffset = isCompactLaptop ? 56 : 42;
       const metrics = {
         isDesktop: true,
         top: 0,
         height: safeHeight,
-        zoom: clamp((height / safeHeight) * (isCompactLaptop ? 0.34 : 0.38) * viewportScale, 0.30, isCompactLaptop ? 0.44 : 0.50),
+        zoom: clamp((height / safeHeight) * (isCompactLaptop ? 0.48 : 0.52) * viewportScale, 0.42, isCompactLaptop ? 0.60 : 0.68),
         yOffset,
       };
       lastHeroMetricsRef.current = metrics;
