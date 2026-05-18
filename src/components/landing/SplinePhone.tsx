@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Application as SplineApplication } from '@splinetool/runtime';
 
 interface SplinePhoneProps {
@@ -14,13 +14,30 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
+  const zoomRef = useRef(zoom);
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  const reducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const syncCanvasSize = useCallback(() => {
+    const wrapper = wrapperRef.current;
+    const canvas = canvasRef.current;
+    if (!wrapper || !canvas) return;
+
+    const rect = wrapper.getBoundingClientRect();
+    const cssWidth = Math.max(1, Math.round(rect.width));
+    const cssHeight = Math.max(1, Math.round(rect.height));
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.style.width = `${cssWidth}px`;
+    canvas.style.height = `${cssHeight}px`;
+    canvas.width = Math.round(cssWidth * dpr);
+    canvas.height = Math.round(cssHeight * dpr);
+
+    const app = appRef.current;
+    app?.setSize(cssWidth, cssHeight);
+    app?.setZoom(zoomRef.current);
+  }, []);
 
   // Signal till ev. parent-layer att vi är "redo" att synas — även vid fel,
   // så hero:n inte gömmer sig för alltid.
@@ -43,13 +60,30 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
 
   useEffect(() => {
     const app = appRef.current;
-    if (!app || !isReady) return;
+    zoomRef.current = zoom;
+    if (!app) return;
+    syncCanvasSize();
     app.setZoom(zoom);
     requestAnimationFrame(() => appRef.current?.setZoom(zoom));
-  }, [zoom, isReady]);
+  }, [zoom, syncCanvasSize]);
 
   useEffect(() => {
-    if (reducedMotion) return;
+    syncCanvasSize();
+    const wrapper = wrapperRef.current;
+    const observer = wrapper ? new ResizeObserver(syncCanvasSize) : null;
+    if (wrapper) observer?.observe(wrapper);
+    window.addEventListener('resize', syncCanvasSize, { passive: true });
+    window.visualViewport?.addEventListener('resize', syncCanvasSize, { passive: true });
+    const frame = requestAnimationFrame(syncCanvasSize);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
+      window.removeEventListener('resize', syncCanvasSize);
+      window.visualViewport?.removeEventListener('resize', syncCanvasSize);
+    };
+  }, [syncCanvasSize]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -61,15 +95,20 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
 
+        syncCanvasSize();
         app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
         await app.load(SCENE_URL);
+        syncCanvasSize();
         try {
           (app as unknown as { setBackgroundColor?: (c: string) => void })
             .setBackgroundColor?.('rgba(0,0,0,0)');
         } catch { /* no-op */ }
-        app.setZoom(zoom);
-        requestAnimationFrame(() => app?.setZoom(zoom));
+        app.setZoom(zoomRef.current);
+        requestAnimationFrame(() => {
+          syncCanvasSize();
+          app?.setZoom(zoomRef.current);
+        });
         if (!activeRef.current) app.stop();
         await new Promise<void>((resolve) => {
           requestAnimationFrame(() =>
@@ -88,7 +127,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
       app?.dispose();
       appRef.current = null;
     };
-  }, [reducedMotion]);
+  }, [syncCanvasSize]);
 
   return (
     <div
@@ -103,7 +142,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
         tabIndex={-1}
         className="relative h-full w-full cursor-grab bg-transparent outline-none transition-opacity duration-700 active:cursor-grabbing"
         draggable={false}
-        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
+        style={{ colorScheme: 'normal', opacity: 1, touchAction: 'none' }}
       />
     </div>
   );
