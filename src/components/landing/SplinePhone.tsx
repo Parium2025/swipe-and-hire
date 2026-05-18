@@ -15,6 +15,17 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
   const zoomRef = useRef(zoom);
+  const fitSceneToCanvas = useCallback((app: SplineApplication | null) => {
+    if (!app) return;
+    const phone = app.findObjectByName('iPhone 14 Pro');
+    if (!phone) return;
+
+    // På mobil låg exporterad Spline-modell för högt i kameran, vilket gav
+    // visuell klippning trots att DOM/canvas hade rätt storlek. Flytta endast
+    // hela telefon-objektet nedåt i scenen så hela modellen ryms i canvasen.
+    phone.position.y = -118;
+    app.requestRender?.();
+  }, []);
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -37,7 +48,8 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
     const app = appRef.current;
     app?.setSize(cssWidth, cssHeight);
     app?.setZoom(zoomRef.current);
-  }, []);
+    fitSceneToCanvas(app);
+  }, [fitSceneToCanvas]);
 
   // Signal till ev. parent-layer att vi är "redo" att synas — även vid fel,
   // så hero:n inte gömmer sig för alltid.
@@ -105,9 +117,11 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true }: SplinePho
             .setBackgroundColor?.('rgba(0,0,0,0)');
         } catch { /* no-op */ }
         app.setZoom(zoomRef.current);
+        fitSceneToCanvas(app);
         requestAnimationFrame(() => {
           syncCanvasSize();
           app?.setZoom(zoomRef.current);
+          fitSceneToCanvas(app);
         });
         if (!activeRef.current) app.stop();
         await new Promise<void>((resolve) => {
