@@ -74,25 +74,30 @@ const FixedPhoneLayer = () => {
     const anchor = getVisibleAnchor();
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.48;
     const tablet = width >= 700;
-    const gap = tablet ? clamp(height * 0.055, 44, 72) : clamp(height * 0.06, 40, 64);
-    const topSafeGap = tablet ? clamp(height * 0.066, 52, 82) : clamp(height * 0.074, 50, 74);
-    const bottomSafe = tablet ? clamp(height * 0.085, 64, 98) : clamp(height * 0.105, 74, 104);
-    const canvasTopBreathingRoom = tablet ? clamp(height * 0.065, 46, 76) : clamp(height * 0.09, 64, 92);
+    // Proportional safe areas — scale with viewport height so phone never clips and breathes equally top/bottom across all devices.
+    const gap = tablet ? clamp(height * 0.055, 44, 96) : clamp(height * 0.06, 40, 88);
+    const topSafeGap = tablet ? clamp(height * 0.075, 56, 120) : clamp(height * 0.082, 54, 110);
+    const bottomSafe = tablet ? clamp(height * 0.095, 70, 140) : clamp(height * 0.11, 76, 132);
+    const canvasTopBreathingRoom = tablet ? clamp(height * 0.07, 50, 110) : clamp(height * 0.095, 64, 120);
+    // Fluidly fill space between text and bottom safe area — no hard cap so phone grows on tall devices.
     const availableHeight = Math.max(220, height - textBottom - gap - bottomSafe);
     const maxCanvasHeight = Math.max(220, height - gap - bottomSafe);
-    const targetVisualHeight = clamp(availableHeight * (tablet ? 0.63 : 0.7), width <= 380 ? 204 : 221, tablet ? 374 : 323);
-    const visualHeight = clamp(availableHeight, width <= 380 ? 272 : 289, tablet ? 510 : 391);
+    const visualHeight = Math.max(width <= 380 ? 272 : 289, availableHeight);
     const finalHeight = Math.min(visualHeight + canvasTopBreathingRoom, maxCanvasHeight);
-    const yOffset = width >= 768 ? 18 : clamp(height * 0.038, 28, 38);
+    const yOffset = width >= 768 ? 18 : clamp(height * 0.038, 28, 42);
     const safeTop = textBottom + topSafeGap + (tablet ? 0 : yOffset);
     const bottomAnchoredTop = height - bottomSafe - visualHeight;
     const top = Math.max(gap, safeTop, bottomAnchoredTop);
-    const fluidZoom = (targetVisualHeight / Math.max(visualHeight, 1)) * clamp(width / 390, 0.92, 1.15) * (tablet ? 0.56 : 0.54);
+    // Zoom scales with viewport height (baseline 844 ≈ iPhone 14 Pro Max) so phone visual grows/shrinks proportionally.
+    const heightScale = clamp(height / 844, 0.78, 1.25);
+    const widthScale = clamp(width / 390, 0.92, 1.18);
+    const baseZoom = tablet ? 0.46 : 0.44;
+    const fluidZoom = baseZoom * heightScale * widthScale;
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.34, tablet ? 0.51 : 0.49),
+      zoom: clamp(fluidZoom, 0.34, tablet ? 0.58 : 0.56),
       yOffset,
     };
     lastHeroMetricsRef.current = metrics;
