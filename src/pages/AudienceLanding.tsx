@@ -246,7 +246,7 @@ const FixedPhoneLayer = () => {
           data-phone-scroll-forward
           className={`${shouldShowPhone ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-500 ease-out'}`}
           style={phoneMetrics.isDesktop
-            ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px` }
+            ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
           }
         >
