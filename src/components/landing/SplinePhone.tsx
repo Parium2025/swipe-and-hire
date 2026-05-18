@@ -107,6 +107,7 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
   }, [syncCanvasSize]);
 
   useEffect(() => {
+    if (mobileFit) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -154,7 +155,33 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
       app?.dispose();
       appRef.current = null;
     };
-  }, [syncCanvasSize]);
+  }, [mobileFit, syncCanvasSize]);
+
+  if (mobileFit) {
+    return (
+      <div
+        ref={wrapperRef}
+        className={`relative h-full w-full select-none overflow-visible ${className ?? ''}`}
+        style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+      >
+        <Suspense fallback={null}>
+          <ReactSpline
+            scene={MOBILE_SCENE_URL}
+            renderOnDemand={false}
+            wasmPath={`${window.location.origin}/spline-wasm`}
+            className="h-full w-full overflow-visible [&_canvas]:!block [&_canvas]:!h-full [&_canvas]:!w-full"
+            style={{ width: '100%', height: '100%', overflow: 'visible', touchAction: 'none' }}
+            onLoad={(app) => {
+              appRef.current = app;
+              app.setZoom(zoomRef.current);
+              fitSceneToCanvas(app);
+              setIsReady(true);
+            }}
+          />
+        </Suspense>
+      </div>
+    );
+  }
 
   return (
     <div
