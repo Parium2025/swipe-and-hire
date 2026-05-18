@@ -149,7 +149,7 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
     camera.bottom = -halfH;
     camera.near = -10;
     camera.far = 10;
-    camera.position.set(0, 0, -5);
+    camera.position.set(0, 0, 5);
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
   }, [camera, size.width, size.height, fit]);
@@ -170,14 +170,14 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
   useFrame((state) => {
     if (!groupRef.current || !active) return;
     const auto = Math.sin(state.clock.elapsedTime * 0.65) * 0.08;
-    const targetY = 0.22 + auto + pointer.current.x * 0.14;
+    const targetY = -0.18 + auto + pointer.current.x * 0.14;
     const targetX = -0.04 + pointer.current.y * 0.08;
     groupRef.current.rotation.y += (targetY - groupRef.current.rotation.y) * 0.07;
     groupRef.current.rotation.x += (targetX - groupRef.current.rotation.x) * 0.07;
   });
 
   return (
-    <group ref={groupRef} rotation={[-0.04, 0.22, 0]}>
+    <group ref={groupRef} rotation={[-0.04, -0.18, 0]}>
       <primitive object={centeredScene} />
     </group>
   );
