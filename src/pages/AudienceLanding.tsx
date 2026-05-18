@@ -73,22 +73,21 @@ const FixedPhoneLayer = () => {
 
     const anchor = getVisibleAnchor();
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.48;
-    const gap = height <= 640 ? 4 : clamp(height * 0.012, 8, 12);
-    const bottomSafe = width <= 700 ? 0 : Math.max(18, height * 0.026);
-    const mobileDrop = width <= 700 ? clamp(height * 0.07, 42, 72) : 0;
-    const freeSpace = Math.max(220, height - textBottom - gap - bottomSafe);
     const tablet = width >= 700;
-    const targetVisualHeight = clamp(freeSpace * (tablet ? 0.72 : 0.76), width <= 380 ? 210 : 230, tablet ? 420 : 330);
-    const bufferRatio = tablet ? 1.18 : 1.14;
-    const finalHeight = clamp(Math.min(freeSpace, targetVisualHeight * bufferRatio), width <= 380 ? 260 : 280, tablet ? 520 : 390);
+    const gap = tablet ? clamp(height * 0.035, 28, 44) : clamp(height * 0.04, 26, 40);
+    const bottomSafe = tablet ? clamp(height * 0.04, 28, 52) : clamp(height * 0.045, 28, 42);
+    const availableHeight = Math.max(220, height - textBottom - gap - bottomSafe);
+    const maxCanvasHeight = Math.max(220, height - gap - bottomSafe);
+    const targetVisualHeight = clamp(availableHeight * (tablet ? 0.58 : 0.6), width <= 380 ? 170 : 185, tablet ? 340 : 260);
+    const finalHeight = clamp(availableHeight, width <= 380 ? 300 : 320, tablet ? 560 : 430);
     const yOffset = width >= 768 ? 18 : 0;
-    const top = height - bottomSafe - finalHeight + mobileDrop;
-    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.9, 1.08) * (tablet ? 0.48 : 0.5);
+    const top = Math.max(gap, height - bottomSafe - Math.min(finalHeight, maxCanvasHeight));
+    const fluidZoom = (targetVisualHeight / Math.max(finalHeight, 1)) * clamp(width / 390, 0.9, 1.08) * (tablet ? 0.46 : 0.44);
     const metrics = {
       isDesktop: false,
       top,
-      height: finalHeight,
-      zoom: clamp(fluidZoom, 0.34, tablet ? 0.48 : 0.52),
+      height: Math.min(finalHeight, maxCanvasHeight),
+      zoom: clamp(fluidZoom, 0.28, tablet ? 0.42 : 0.4),
       yOffset,
     };
     lastHeroMetricsRef.current = metrics;
