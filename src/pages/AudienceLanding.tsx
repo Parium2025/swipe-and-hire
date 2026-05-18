@@ -258,6 +258,7 @@ const FixedPhoneLayer = () => {
         >
           <SplinePhone
             className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[9/19.5]" : "h-full w-auto min-w-[140px] max-w-[min(72vw,270px)] aspect-[9/19.5]"}
+            style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
             zoom={phoneMetrics.zoom}
             active={active}
             instantFallback={!phoneMetrics.isDesktop}
