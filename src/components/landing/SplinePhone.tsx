@@ -117,10 +117,9 @@ export const SplinePhone = ({ className, zoom = 0.78, active = true, mobileFit =
         if (cancelled) return;
 
         syncCanvasSize();
-        app = new Application(canvas, {
-          renderMode: 'continuous',
-          wasmPath: `${window.location.origin}/spline-wasm`,
-        });
+        app = new Application(canvas, mobileFitRef.current
+          ? { renderMode: 'continuous', wasmPath: `${window.location.origin}/spline-wasm` }
+          : { renderMode: 'auto' });
         appRef.current = app;
         await app.load(SCENE_URL);
         syncCanvasSize();
