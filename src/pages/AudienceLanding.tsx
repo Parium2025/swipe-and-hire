@@ -82,12 +82,12 @@ const FixedPhoneLayer = () => {
     const finalHeight = clamp(Math.min(freeSpace, targetVisualHeight * bufferRatio), width <= 380 ? 300 : 330, tablet ? 620 : 500);
     const yOffset = width >= 768 ? 18 : 0;
     const top = clamp(textBottom + gap + yOffset, gap, height - bottomSafe - finalHeight);
-    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.92, 1.18) * (tablet ? 0.78 : 0.96);
+    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.92, 1.18) * (tablet ? 0.56 : 0.62);
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.68, tablet ? 0.82 : 0.9),
+      zoom: clamp(fluidZoom, 0.42, tablet ? 0.58 : 0.62),
       yOffset,
     };
     lastHeroMetricsRef.current = metrics;
