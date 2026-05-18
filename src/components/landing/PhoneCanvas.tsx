@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
+import { Canvas, useLoader, useThree } from '@react-three/fiber';
 import { useGLTF, Environment, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import screenTextureUrl from '@/assets/parium-phone-logo-screen.jpg';
@@ -23,7 +23,6 @@ function PhoneModel({ fit, active, onReady }: { fit: number; active: boolean; on
   const { scene } = useGLTF(MODEL_URL);
   const groupRef = useRef<THREE.Group>(null);
   const { size, camera } = useThree();
-  const pointer = useRef({ x: 0, y: 0 });
   const screenTexture = useLoader(THREE.TextureLoader, screenTextureUrl) as THREE.Texture;
 
   useMemo(() => {
