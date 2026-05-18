@@ -7,7 +7,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
-import { PhoneCanvas } from '@/components/landing/PhoneCanvas';
+import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
 
 type AudienceLandingProps = {
@@ -82,12 +82,12 @@ const FixedPhoneLayer = () => {
     const finalHeight = clamp(Math.min(freeSpace, targetVisualHeight * bufferRatio), width <= 380 ? 300 : 330, tablet ? 620 : 500);
     const yOffset = width >= 768 ? 18 : 0;
     const top = clamp(textBottom + gap + yOffset, gap, height - bottomSafe - finalHeight);
-    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.92, 1.18) * (tablet ? 0.78 : 0.96);
+    const fluidZoom = (targetVisualHeight / finalHeight) * clamp(width / 390, 0.92, 1.18) * (tablet ? 0.56 : 0.62);
     const metrics = {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.68, tablet ? 0.82 : 0.9),
+      zoom: clamp(fluidZoom, 0.42, tablet ? 0.58 : 0.62),
       yOffset,
     };
     lastHeroMetricsRef.current = metrics;
@@ -251,9 +251,9 @@ const FixedPhoneLayer = () => {
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
           }
         >
-          <PhoneCanvas
+          <SplinePhone
             className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[13/19.5]" : "h-full w-auto min-w-[168px] max-w-[min(84vw,340px)] aspect-[13/19.5]"}
-            fit={phoneMetrics.zoom}
+            zoom={phoneMetrics.zoom}
             active={active}
             instantFallback={!phoneMetrics.isDesktop}
           />
