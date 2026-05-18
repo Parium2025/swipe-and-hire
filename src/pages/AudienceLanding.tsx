@@ -53,17 +53,17 @@ const FixedPhoneLayer = () => {
 
     if (width >= 1024) {
       const isCompactLaptop = height <= 820;
-      const desktopTopPadding = width >= 1280 ? (isCompactLaptop ? 96 : 112) : 92;
-      const desktopBottomPadding = width >= 1280 ? (isCompactLaptop ? 56 : 72) : 52;
-      const edgeSafety = isCompactLaptop ? 78 : 58;
-      const safeCanvasHeight = Math.max(330, height - desktopTopPadding - desktopBottomPadding - edgeSafety);
-      const visualHeight = clamp(height * (isCompactLaptop ? 0.50 : 0.58), 340, 610);
-      const safeHeight = Math.min(safeCanvasHeight, visualHeight * (isCompactLaptop ? 1.72 : 1.58));
+      const desktopTopPadding = width >= 1280 ? (isCompactLaptop ? 128 : 132) : 124;
+      const desktopBottomPadding = width >= 1280 ? (isCompactLaptop ? 64 : 76) : 60;
+      const edgeSafety = isCompactLaptop ? 96 : 72;
+      const safeCanvasHeight = Math.max(320, height - desktopTopPadding - desktopBottomPadding - edgeSafety);
+      const visualHeight = clamp(height * (isCompactLaptop ? 0.44 : 0.52), 300, 560);
+      const safeHeight = Math.min(safeCanvasHeight, visualHeight * (isCompactLaptop ? 1.92 : 1.74));
       const metrics = {
         isDesktop: true,
         top: 0,
         height: safeHeight,
-        zoom: clamp((visualHeight / safeHeight) * (isCompactLaptop ? 0.42 : 0.54), 0.26, 0.50),
+        zoom: clamp((visualHeight / safeHeight) * (isCompactLaptop ? 0.38 : 0.48), 0.22, 0.46),
       };
       lastHeroMetricsRef.current = metrics;
       return metrics;
