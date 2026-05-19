@@ -119,16 +119,22 @@ const PinnedHorizontalGallery = () => {
     // uppdateras varje frame — då tävlar den med GSAP-exit-tweenen på de 8 korten
     // och browserns smooth-scroll, och kan ge synligt hack på svagare GPU:er.
     let frozen = false;
+    let sectionTop = 0;
+    let distance = 1;
+    let startPx = 0;
+    let endPx = 0;
+
+    const refreshMetrics = () => {
+      const rootRectTop = root.getBoundingClientRect().top;
+      sectionTop = root.scrollTop + section.getBoundingClientRect().top - rootRectTop;
+      distance = Math.max(1, section.offsetHeight - root.clientHeight);
+      const viewport = window.innerWidth || document.documentElement.clientWidth;
+      startPx = viewport * 0.07;
+      endPx = Math.min(startPx, viewport - strip.scrollWidth - startPx);
+    };
 
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
-      // Mät faktisk overflow så att alla kort alltid exponeras oavsett viewport.
-      // Slutposition = visa sista kortet med samma marginal som första kortet får i start.
-      const stripWidth = strip.scrollWidth;
-      const viewport = window.innerWidth || document.documentElement.clientWidth;
-      const startPx = viewport * 0.07; // 7vw inledande marginal (matchar gammal start)
-      // Sluta så att sista kortet är helt synligt med samma 7vw marginal till höger
-      const endPx = Math.min(startPx, viewport - stripWidth - startPx);
       const xPx = startPx + (endPx - startPx) * p;
       strip.style.setProperty('--phg-x', `${xPx}px`);
       section.style.setProperty('--phg-progress', `${p}`);
@@ -136,9 +142,7 @@ const PinnedHorizontalGallery = () => {
 
     const measure = () => {
       if (frozen) return;
-      const rect = section.getBoundingClientRect();
-      const distance = Math.max(1, section.offsetHeight - root.clientHeight);
-      targetProgressRef.current = Math.min(1, Math.max(0, -rect.top / distance));
+      targetProgressRef.current = Math.min(1, Math.max(0, (root.scrollTop - sectionTop) / distance));
       if (rafRef.current === null) rafRef.current = window.requestAnimationFrame(tick);
     };
 
@@ -167,18 +171,22 @@ const PinnedHorizontalGallery = () => {
     const thaw = () => {
       if (!frozen) return;
       frozen = false;
+      refreshMetrics();
       measure();
     };
 
+    refreshMetrics();
     applyProgress(0);
     measure();
     root.addEventListener('scroll', measure, { passive: true });
-    window.addEventListener('resize', measure);
+    window.addEventListener('resize', refreshMetrics);
+    window.addEventListener('parium:lenis-resize', refreshMetrics);
     window.addEventListener('parium:gallery-leave', freeze);
     window.addEventListener('parium:gallery-enter', thaw);
     return () => {
       root.removeEventListener('scroll', measure);
-      window.removeEventListener('resize', measure);
+      window.removeEventListener('resize', refreshMetrics);
+      window.removeEventListener('parium:lenis-resize', refreshMetrics);
       window.removeEventListener('parium:gallery-leave', freeze);
       window.removeEventListener('parium:gallery-enter', thaw);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
