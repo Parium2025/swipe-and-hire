@@ -39,7 +39,6 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     if (el) {
       setActiveId(id);
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setMobileMenuOpen(false);
     }
   };
 
