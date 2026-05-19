@@ -357,8 +357,8 @@ const PinnedHorizontalGallery = () => {
           will-change: transform, opacity;
         }
         .phg-title {
-          /* Något mindre rubriker: 2.25rem → 2.75rem → 3.25rem → 4rem → 5rem */
-          font-size: 2.25rem;
+          /* Matchar hero-rubriken "Hitta jobb" för enhetlig storlek + glow */
+          font-size: 3.25rem;
           font-weight: 900;
           line-height: 1.04;
           letter-spacing: -0.025em;
@@ -366,16 +366,17 @@ const PinnedHorizontalGallery = () => {
           max-width: 18ch;
           margin: 0 auto;
           padding-bottom: 0.12em;
+          filter: drop-shadow(0 4px 24px hsl(var(--background) / 0.6));
         }
         .phg-title em {
           font-style: normal;
           color: #ffffff;
           font-weight: 900;
         }
-        @media (min-width: 640px)  { .phg-title { font-size: 2.75rem; } }
-        @media (min-width: 768px)  { .phg-title { font-size: 3.25rem; } }
-        @media (min-width: 1024px) { .phg-title { font-size: 4rem; } }
-        @media (min-width: 1536px) { .phg-title { font-size: 5rem; } }
+        @media (min-width: 640px)  { .phg-title { font-size: 4rem; } }
+        @media (min-width: 768px)  { .phg-title { font-size: 5rem; } }
+        @media (min-width: 1024px) { .phg-title { font-size: 6rem; } }
+        @media (min-width: 1536px) { .phg-title { font-size: 7rem; } }
         .phg-sub {
           margin: 22px auto 0;
           font-size: clamp(1rem, 1.2vw, 1.125rem);
