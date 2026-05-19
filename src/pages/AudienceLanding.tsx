@@ -576,14 +576,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // KRITISKT: blockera ALL native scroll-input under hela returen så att
         // user-momentum (särskilt iOS-touch) inte tävlar mot GSAP-scrolltween.
         // Total tid = scroll-fas (0.55s) + intro-entry (0.62s + stagger ~0.7s) ≈ 1.3s.
-        transitionBlockUntil = performance.now() + 1400;
-        restoreScrollBehavior?.();
-        const previousScrollBehavior = scrollRoot.style.scrollBehavior;
-        // 'auto' = browsern lämnar scrollTop ifred så GSAP äger den ensam.
-        scrollRoot.style.scrollBehavior = 'auto';
-        restoreScrollBehavior = () => {
-          scrollRoot.style.scrollBehavior = previousScrollBehavior;
-        };
+        lockNativeInput(1400);
+        withScrollBehaviorAuto();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
         const finishReturn = () => {
