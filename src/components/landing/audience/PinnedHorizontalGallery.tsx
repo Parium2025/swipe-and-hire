@@ -217,6 +217,10 @@ const PinnedHorizontalGallery = () => {
     const playSafe = (v: HTMLVideoElement) => {
       v.muted = true;
       v.playsInline = true;
+      try {
+        if (v.preload !== 'auto') v.preload = 'auto';
+        if (v.readyState < 2) v.load();
+      } catch {}
       const p = v.play();
       if (p && typeof p.catch === 'function') p.catch(() => {});
     };
@@ -267,7 +271,7 @@ const PinnedHorizontalGallery = () => {
       warmed = true;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       const profile = getNetworkProfile();
-      const initialBatch = profile === 'slim' ? videos.slice(0, 4) : videos;
+      const initialBatch = profile === 'slim' ? videos.slice(0, 3) : videos.slice(0, 4);
       initialBatch.forEach((v, index) => {
         warmTimers.push(window.setTimeout(() => {
           try {
