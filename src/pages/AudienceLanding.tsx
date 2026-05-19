@@ -9,6 +9,7 @@ import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
+import { useLenisOnElement } from '@/hooks/useLenisOnElement';
 
 type AudienceLandingProps = {
   audience: AudienceRole;
@@ -825,6 +826,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
+  useLenisOnElement('[data-landing-scroll-root]');
 
   // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
   // åt gången — annars initieras Spline-runtime två gånger på desktop.
@@ -916,7 +918,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         // att Android Chrome och Firefox använder samma native easing som
         // Safari för scrollTo(..., {behavior: 'smooth'}).
         WebkitOverflowScrolling: 'touch',
-        scrollBehavior: 'smooth',
+        scrollBehavior: 'auto',
         backgroundImage:
           'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
         backgroundAttachment: 'scroll',
@@ -927,7 +929,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     >
       <AnimatedBackground />
       <FixedPhoneLayer />
-      <div className="relative z-10 min-h-full">
+      <div data-lenis-content className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
 
