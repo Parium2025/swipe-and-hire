@@ -473,26 +473,55 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // återkomst-fade hanteras visuellt via layerns yPercent-slide.
       };
 
-      // 2↔3 = NATURLIG scroll. Inget GSAP-driv av scrollTop, inga
-      // programstyrda transitions. Anledningen: 1↔2 är smooth eftersom
-      // det är en ren CSS-transform utan scroll inblandat. När vi i 2↔3
-      // körde GSAP som skrev scrollTop varje frame SAMTIDIGT som galleriet
-      // läste scrollTop för att rita kortens transform fick vi två källor
-      // till sanning per frame → synligt skak/hopp. Lösning: släpp scrollen
-      // helt till browsern, så följer både intro-lagret (i normalt flöde)
-      // och galleriets sticky-progress samma scroll-position automatiskt.
-      // Kort wheel/touch-block (~700ms) under 2→3 smooth-scroll så att
-      // användarens kvarvarande wheel-momentum inte konkurrerar med
-      // browserns native smooth-scroll → annars syns "hack" vid hård scroll.
+      // 2↔3 måste vara en låst premium-transition, inte native momentum-scroll.
+      // På touch kunde iOS/Chrome annars fortsätta scrolla mellan sektionerna
+      // innan returen hann trigga. Därför äger GSAP scrollTop under själva
+      // tröskelpassagen, medan galleriets egen progress är fryst tills landning.
       let transitionBlockUntil = 0;
+      let galleryTouchY: number | null = null;
       const blockNativeInput = (e: Event) => {
         if (performance.now() < transitionBlockUntil) {
           e.preventDefault();
           e.stopPropagation();
+          return;
+        }
+
+        if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
+          const stageBottom = stage.getBoundingClientRect().bottom;
+          const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
+          const touch = e instanceof TouchEvent ? e.touches[0] : null;
+          const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
+          if (touch) galleryTouchY = touch.clientY;
+
+          if (stageBottom >= -2 && (wheelBack || touchBack)) {
+            e.preventDefault();
+            e.stopPropagation();
+            returnFromGalleryToIntro();
+          }
         }
       };
+      const trackTouchStart = (e: TouchEvent) => {
+        galleryTouchY = e.touches[0]?.clientY ?? null;
+      };
+      const clearTouchTrack = () => {
+        galleryTouchY = null;
+      };
+      const lockNativeInput = (ms: number) => {
+        transitionBlockUntil = performance.now() + ms;
+      };
+      const withScrollBehaviorAuto = () => {
+        if (!scrollRoot) return;
+        restoreScrollBehavior?.();
+        const previousScrollBehavior = scrollRoot.style.scrollBehavior;
+        scrollRoot.style.scrollBehavior = 'auto';
+        restoreScrollBehavior = () => {
+          scrollRoot.style.scrollBehavior = previousScrollBehavior;
+        };
+      };
       scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
+      scrollRoot?.addEventListener('touchstart', trackTouchStart, { passive: true, capture: true });
       scrollRoot?.addEventListener('touchmove', blockNativeInput, { passive: false, capture: true });
+      scrollRoot?.addEventListener('touchend', clearTouchTrack, { passive: true, capture: true });
 
       const isStageDocked = () => {
         const rect = stage.getBoundingClientRect();
@@ -509,8 +538,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (animatingRef.current) return;
         releasedToGallery = true;
         programmaticReturn = true;
+        animatingRef.current = true;
         setObserverActive(false);
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
+        window.dispatchEvent(new Event('parium:gallery-leave'));
         const startScroll = root.scrollTop;
         const targetScroll = startScroll + next.getBoundingClientRect().top;
         gsap.killTweensOf([introText, ...introTextItems].filter(Boolean));
@@ -523,23 +554,31 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           );
         }
         prevScrollTop = startScroll;
-        transitionBlockUntil = performance.now() + 700;
-        root.scrollTo({ top: targetScroll, behavior: 'smooth' });
-        window.dispatchEvent(new Event('parium:gallery-enter'));
-        forwardTimer = window.setTimeout(() => {
+        lockNativeInput(1250);
+        withScrollBehaviorAuto();
+
+        const finishForward = () => {
+          root.scrollTop = targetScroll;
+          restoreScrollBehavior?.();
+          restoreScrollBehavior = null;
+          transitionBlockUntil = 0;
           programmaticReturn = false;
-          const moved = Math.abs(root.scrollTop - startScroll);
-          if (moved < 24) {
-            root.scrollTo({ top: targetScroll, behavior: 'auto' });
-          }
+          animatingRef.current = false;
           prevScrollTop = root.scrollTop;
-          // Säkerhetsnät: släpp ALLTID releaseLockedRef efter att 2→3 är klart,
-          // även om scroll-positionen inte hann triggra normalisering. Annars
-          // kunde låset bli "kvar i true" om användaren scrollar snabbt 20-30
-          // gånger och en gest kapas av nästa innan onScrollWatch hann reagera.
           releaseLockedRef.current = false;
           forwardTimer = null;
-        }, 900);
+          window.dispatchEvent(new Event('parium:gallery-enter'));
+        };
+
+        gsap.killTweensOf(root);
+        gsap.to(root, {
+          scrollTop: targetScroll,
+          duration: 0.58,
+          ease: 'power3.inOut',
+          overwrite: true,
+          onComplete: finishForward,
+          onInterrupt: finishForward,
+        });
       };
 
       const returnFromGalleryToIntro = () => {
@@ -561,14 +600,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // KRITISKT: blockera ALL native scroll-input under hela returen så att
         // user-momentum (särskilt iOS-touch) inte tävlar mot GSAP-scrolltween.
         // Total tid = scroll-fas (0.55s) + intro-entry (0.62s + stagger ~0.7s) ≈ 1.3s.
-        transitionBlockUntil = performance.now() + 1400;
-        restoreScrollBehavior?.();
-        const previousScrollBehavior = scrollRoot.style.scrollBehavior;
-        // 'auto' = browsern lämnar scrollTop ifred så GSAP äger den ensam.
-        scrollRoot.style.scrollBehavior = 'auto';
-        restoreScrollBehavior = () => {
-          scrollRoot.style.scrollBehavior = previousScrollBehavior;
-        };
+        lockNativeInput(1400);
+        withScrollBehaviorAuto();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
         const finishReturn = () => {
@@ -691,7 +724,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         clearReturnWork();
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
         scrollRoot?.removeEventListener('wheel', blockNativeInput, true);
+        scrollRoot?.removeEventListener('touchstart', trackTouchStart, true);
         scrollRoot?.removeEventListener('touchmove', blockNativeInput, true);
+        scrollRoot?.removeEventListener('touchend', clearTouchTrack, true);
       };
     };
 
