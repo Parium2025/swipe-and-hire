@@ -103,6 +103,17 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     return () => observer.disconnect();
   }, [links]);
 
+  // Auto-centrera aktiv chip i pillen när scroll ändrar aktiv sektion
+  useEffect(() => {
+    const scroller = pillScrollerRef.current;
+    if (!scroller || !activeId) return;
+    const chip = scroller.querySelector<HTMLElement>(`a[href="#${activeId}"]`);
+    if (!chip) return;
+    const target =
+      chip.offsetLeft - scroller.clientWidth / 2 + chip.offsetWidth / 2;
+    scroller.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+  }, [activeId]);
+
 
   return (
     <>
