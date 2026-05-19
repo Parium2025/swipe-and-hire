@@ -34,7 +34,7 @@ const TopChromeStrip = () => {
         left: 0,
         right: 0,
         top: 0,
-        height: 'calc(env(safe-area-inset-top, 0px) + 6px)',
+        height: 'calc(env(safe-area-inset-top, 0px) + 10px)',
         backgroundColor: color,
         zIndex: 2147483647,
         pointerEvents: 'none',
