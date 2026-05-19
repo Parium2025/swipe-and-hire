@@ -81,6 +81,7 @@ import { OfflineQueueRunner } from "@/components/OfflineQueueRunner";
 import { AppFailureMonitor } from "@/components/AppFailureMonitor";
 import { syncBrowserChrome, mountChromePopstateGuard, noteChromePath } from "@/lib/browserChrome";
 import BottomChromeStrip from "@/components/BottomChromeStrip";
+import TopChromeStrip from "@/components/TopChromeStrip";
 
 // Run draft cleanup once on app load (removes drafts older than 1 day)
 // Defer to idle time to avoid blocking first paint
@@ -199,6 +200,7 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
 
   return (
     <>
+      <TopChromeStrip />
       <BottomChromeStrip />
       <OfflineIndicator />
       {!isLightweightRoute && <SystemHealthPanel />}
