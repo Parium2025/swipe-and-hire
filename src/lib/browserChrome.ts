@@ -1,7 +1,8 @@
-const LANDING_CHROME_COLOR = '#626262';
+const LANDING_CHROME_COLOR = '#2a2a2a';
 const PARIUM_CHROME_COLOR = '#001935';
-const AUDIENCE_LANDING_CHROME_COLOR = '#0B3D84';
+const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
+let themeColorVersion = 0;
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 const isAudienceLandingPath = (pathname: string) =>
@@ -14,7 +15,17 @@ const removeLegacySentinels = () => {
   });
 };
 
-const setThemeColor = (color: string) => {
+export const getBrowserChromeColor = (pathname = window.location.pathname) => {
+  const isLandingVideo = isLandingVideoPath(pathname);
+  const isAudienceLanding = isAudienceLandingPath(pathname);
+  return isLandingVideo
+    ? LANDING_CHROME_COLOR
+    : isAudienceLanding
+      ? AUDIENCE_LANDING_CHROME_COLOR
+      : PARIUM_CHROME_COLOR;
+};
+
+const applyThemeColor = (color: string) => {
   // Ta bort ALLA befintliga theme-color-meta-tags. Safari cache:ar värdet
   // aggressivt och uppdaterar inte URL-baren när man bara ändrar `content`
   // (särskilt vid back-navigation via bfcache). Att fysiskt remova + återskapa
@@ -30,6 +41,22 @@ const setThemeColor = (color: string) => {
   });
 };
 
+const setThemeColor = (color: string) => {
+  themeColorVersion += 1;
+  const version = themeColorVersion;
+  applyThemeColor(color);
+
+  // iOS Safari kan ignorera första dynamiska meta-bytet vid SPA-navigation från
+  // videolandningen. Re-appliera samma färg kort efter paint, men avbryt om en
+  // ny route redan hunnit sätta en annan färg.
+  requestAnimationFrame(() => {
+    if (version === themeColorVersion) applyThemeColor(color);
+  });
+  window.setTimeout(() => {
+    if (version === themeColorVersion) applyThemeColor(color);
+  }, 140);
+};
+
 /**
  * Synkar browser-chrome (URL-bar topp + body-bakgrund).
  *
@@ -40,12 +67,7 @@ const setThemeColor = (color: string) => {
  */
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
-  const isAudienceLanding = isAudienceLandingPath(pathname);
-  const color = isLandingVideo
-    ? LANDING_CHROME_COLOR
-    : isAudienceLanding
-      ? AUDIENCE_LANDING_CHROME_COLOR
-      : PARIUM_CHROME_COLOR;
+  const color = getBrowserChromeColor(pathname);
 
   removeLegacySentinels();
 
@@ -56,6 +78,8 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
 
   document.documentElement.style.setProperty('background-color', color, 'important');
   document.body.style.setProperty('background-color', color, 'important');
+  document.documentElement.style.setProperty('--browser-chrome-color', color);
+  document.body.style.setProperty('--browser-chrome-color', color);
 
   setThemeColor(color);
 };
