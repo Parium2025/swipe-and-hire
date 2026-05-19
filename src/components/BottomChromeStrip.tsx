@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
 
 const LANDING_COLOR = '#2a2a2a';
 const PARIUM_COLOR = '#001935';
@@ -20,6 +21,7 @@ const isAudienceLandingPath = (pathname: string) =>
 const BottomChromeStrip = () => {
   const location = useLocation();
   const [isTouch, setIsTouch] = useState(false);
+  const [forcedColor, setForcedColor] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -37,8 +39,24 @@ const BottomChromeStrip = () => {
       : PARIUM_COLOR;
 
   useEffect(() => {
-    console.log('[BottomChromeStrip]', { path: location.pathname, color });
-  }, [location.pathname, color]);
+    setForcedColor(null);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onChromeColor = (event: Event) => {
+      const detail = (event as CustomEvent<{ color?: string }>).detail;
+      if (detail?.color) setForcedColor(detail.color);
+    };
+    window.addEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
+    return () => window.removeEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
+  }, []);
+
+  const displayColor = forcedColor ?? color;
+
+  useEffect(() => {
+    console.log('[BottomChromeStrip]', { path: location.pathname, color: displayColor });
+  }, [location.pathname, displayColor]);
 
   // Sync CSS variable so scroll containers always reserve space
   // matching the strip — independent of @media (pointer: coarse).
@@ -69,7 +87,7 @@ const BottomChromeStrip = () => {
         right: 0,
         bottom: 0,
         height: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
-        backgroundColor: color,
+        backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',
         transition: 'background-color 200ms ease-out',
