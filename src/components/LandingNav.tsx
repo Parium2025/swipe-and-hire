@@ -17,7 +17,7 @@ interface LandingNavProps {
 const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pillScrollerRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
 
