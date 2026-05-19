@@ -9,7 +9,6 @@ import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
-import { useLenisOnElement } from '@/hooks/useLenisOnElement';
 
 type AudienceLandingProps = {
   audience: AudienceRole;
@@ -338,13 +337,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       const setObserverActive = (active: boolean) => {
         if (!observer || active === observerActive) return;
         observerActive = active;
-        if (active) {
-          window.dispatchEvent(new Event('parium:lenis-stop'));
-          observer.enable?.();
-        } else {
-          observer.disable?.();
-          window.dispatchEvent(new Event('parium:lenis-start'));
-        }
+        if (active) observer.enable?.();
+        else observer.disable?.();
       };
 
       const clearReturnWork = () => {
