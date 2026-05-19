@@ -127,6 +127,11 @@ const PinnedHorizontalGallery = () => {
       const xPx = startPx + (endPx - startPx) * p;
       strip.style.setProperty('--phg-x', `${xPx}px`);
       section.style.setProperty('--phg-progress', `${p}`);
+      // Smooth fade-in/out av progressbaren: synlig endast när man faktiskt
+      // befinner sig i kort-zonen, fade:as in när man landar och ut innan nästa sektion.
+      const fadeIn = Math.min(1, Math.max(0, (p - 0.02) / 0.05));
+      const fadeOut = Math.min(1, Math.max(0, (0.97 - p) / 0.05));
+      section.style.setProperty('--phg-bar-opacity', String(Math.min(fadeIn, fadeOut)));
     };
 
     const measure = () => {
@@ -523,6 +528,8 @@ const PinnedHorizontalGallery = () => {
           background: rgba(255,255,255,0.1);
           border-radius: 999px;
           overflow: hidden;
+          opacity: var(--phg-bar-opacity, 0);
+          transition: opacity 0.32s ease;
         }
         .phg-progress > span {
           display: block;
@@ -544,6 +551,7 @@ const PinnedHorizontalGallery = () => {
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
           .phg-strip { padding: 0 18vw 0 8vw; }
+          .phg-footer { padding: 8px 24px 12px; gap: 8px; }
         }
       `}</style>
 
