@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { getBrowserChromeColor } from '@/lib/browserChrome';
+
+const LANDING_COLOR = '#2a2a2a';
+const PARIUM_COLOR = '#001935';
+const AUDIENCE_LANDING_COLOR = '#001F3D';
+
+const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
+const isAudienceLandingPath = (pathname: string) =>
+  pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 
 /**
  * Tunn färgremsa längst ner — endast på mobil/touch.
@@ -23,7 +30,15 @@ const BottomChromeStrip = () => {
     return () => mq.removeEventListener?.('change', apply);
   }, []);
 
-  const color = getBrowserChromeColor(location.pathname);
+  const color = isLandingVideoPath(location.pathname)
+    ? LANDING_COLOR
+    : isAudienceLandingPath(location.pathname)
+      ? AUDIENCE_LANDING_COLOR
+      : PARIUM_COLOR;
+
+  useEffect(() => {
+    console.log('[BottomChromeStrip]', { path: location.pathname, color });
+  }, [location.pathname, color]);
 
   // Sync CSS variable so scroll containers always reserve space
   // matching the strip — independent of @media (pointer: coarse).
