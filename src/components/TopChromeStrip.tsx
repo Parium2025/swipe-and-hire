@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
 
 const LANDING_COLOR = '#2a2a2a';
 const PARIUM_COLOR = '#001935';
@@ -17,6 +18,7 @@ const isAudienceLandingPath = (pathname: string) =>
 const TopChromeStrip = () => {
   const location = useLocation();
   const [isTouch, setIsTouch] = useState(false);
+  const [forcedColor, setForcedColor] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -34,8 +36,24 @@ const TopChromeStrip = () => {
       : PARIUM_COLOR;
 
   useEffect(() => {
-    console.log('[TopChromeStrip]', { path: location.pathname, color });
-  }, [location.pathname, color]);
+    setForcedColor(null);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onChromeColor = (event: Event) => {
+      const detail = (event as CustomEvent<{ color?: string }>).detail;
+      if (detail?.color) setForcedColor(detail.color);
+    };
+    window.addEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
+    return () => window.removeEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
+  }, []);
+
+  const displayColor = forcedColor ?? color;
+
+  useEffect(() => {
+    console.log('[TopChromeStrip]', { path: location.pathname, color: displayColor });
+  }, [location.pathname, displayColor]);
 
   if (!isTouch) return null;
 
@@ -48,7 +66,7 @@ const TopChromeStrip = () => {
         right: 0,
         top: 0,
         height: 'env(safe-area-inset-top, 0px)',
-        backgroundColor: color,
+        backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',
         transition: 'background-color 200ms ease-out',
