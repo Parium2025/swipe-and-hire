@@ -272,19 +272,16 @@ const PinnedHorizontalGallery = () => {
     const leave = () => {
       if (!entered) return;
       entered = false;
-      // VIKTIGT: vi togglar INTE phg-leaving här. CSS-regeln
-      // .phg-strip.phg-leaving .phg-card-enter snäpper korten direkt till
-      // opacity:0 + translateY(44px) → synligt "blink" precis innan scrollen
-      // hinner starta. Behåll phg-entered och frys korten i synligt sluttillstånd
-      // med inline-style så de bara åker med scrollen utan visuella hopp.
+      strip.classList.remove('phg-entered');
+      strip.classList.add('phg-leaving');
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
       const header = headerRef.current;
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
-        gsapInstance.set(cards, { opacity: 1, y: 0, clearProps: 'transform' });
+        gsapInstance.to(cards, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in', force3D: true });
         if (header) {
           gsapInstance.killTweensOf(header);
-          gsapInstance.set(header, { opacity: 1, y: 0, clearProps: 'transform' });
+          gsapInstance.to(header, { y: 44, opacity: 0, duration: 0.42, ease: 'power2.in', force3D: true });
         }
       }
       // Pausa inte videorna vid 3→2 — de är redan varma och ska kännas levande

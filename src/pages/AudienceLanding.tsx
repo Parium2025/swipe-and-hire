@@ -486,19 +486,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           return;
         }
 
-        if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot && gallerySection) {
+        if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
+          const stageBottom = stage.getBoundingClientRect().bottom;
           const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
           const touch = e instanceof TouchEvent ? e.touches[0] : null;
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          // Trigga returen så snart användaren swipar uppåt nära toppen av
-          // galleriet — INNAN native scroll hinner röra sig. Annars känns
-          // 3→2 hackigt på touch (native momentum scrollar tillbaka först,
-          // sedan triggas snap = synlig stagger).
-          const galleryTop = gallerySection.getBoundingClientRect().top;
-          const atGalleryTop = galleryTop > -8; // toppen av galleriet är vid/under viewport-top
-          if (atGalleryTop && (wheelBack || touchBack)) {
+          if (stageBottom >= -2 && (wheelBack || touchBack)) {
             e.preventDefault();
             e.stopPropagation();
             returnFromGalleryToIntro();
