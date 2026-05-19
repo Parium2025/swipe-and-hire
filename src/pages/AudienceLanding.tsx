@@ -724,7 +724,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         clearReturnWork();
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
         scrollRoot?.removeEventListener('wheel', blockNativeInput, true);
+        scrollRoot?.removeEventListener('touchstart', trackTouchStart, true);
         scrollRoot?.removeEventListener('touchmove', blockNativeInput, true);
+        scrollRoot?.removeEventListener('touchend', clearTouchTrack, true);
       };
     };
 
