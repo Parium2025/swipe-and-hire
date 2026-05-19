@@ -15,17 +15,19 @@
           var isLandingVideoRoute = path === '/' || path === '';
           var isAudienceLandingRoute = path === '/arbetsgivare' || path === '/jobbsokare';
           var chromeColor = isLandingVideoRoute
-            ? '#626262'
-            : (isAudienceLandingRoute ? '#0B3D84' : '#001935');
+            ? '#2a2a2a'
+            : (isAudienceLandingRoute ? '#001F3D' : '#001935');
           document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
           document.documentElement.style.backgroundColor = chromeColor;
+          document.documentElement.style.setProperty('--browser-chrome-color', chromeColor);
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: light)">');
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: dark)">');
           document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.toggle('landing-video-chrome', isLandingVideoRoute);
             document.body.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
             document.body.style.backgroundColor = chromeColor;
+            document.body.style.setProperty('--browser-chrome-color', chromeColor);
           }, { once: true });
         } catch (e) {
           document.write('<meta name="theme-color" content="#001935">');
