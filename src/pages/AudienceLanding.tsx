@@ -619,7 +619,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           prevScrollTop = scrollRoot.scrollTop;
           setObserverActive(true);
           window.dispatchEvent(new Event('parium:lenis-resize'));
-          window.dispatchEvent(new Event('parium:lenis-start'));
         };
 
         gsap.killTweensOf(scrollRoot);
