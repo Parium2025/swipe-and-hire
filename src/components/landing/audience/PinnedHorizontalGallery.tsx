@@ -194,6 +194,7 @@ const PinnedHorizontalGallery = () => {
     let disposed = false;
     let warmed = false;
     let entered = false;
+    let hasEnteredOnce = false;
     let gsapInstance: typeof import('gsap').default | null = null;
 
     import('gsap').then(({ default: gsap }) => {
@@ -246,7 +247,9 @@ const PinnedHorizontalGallery = () => {
 
     const enter = () => {
       if (entered) return;
+      const shouldAnimateIn = !hasEnteredOnce;
       entered = true;
+      hasEnteredOnce = true;
       strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
       warmVideos();
@@ -254,10 +257,18 @@ const PinnedHorizontalGallery = () => {
       const header = headerRef.current;
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
-        gsapInstance.fromTo(cards, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out', force3D: true });
+        if (shouldAnimateIn) {
+          gsapInstance.fromTo(cards, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out', force3D: true });
+        } else {
+          gsapInstance.set(cards, { y: 0, opacity: 1, force3D: true });
+        }
         if (header) {
           gsapInstance.killTweensOf(header);
-          gsapInstance.fromTo(header, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, ease: 'power2.out', force3D: true });
+          if (shouldAnimateIn) {
+            gsapInstance.fromTo(header, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, ease: 'power2.out', force3D: true });
+          } else {
+            gsapInstance.set(header, { y: 0, opacity: 1, force3D: true });
+          }
         }
       }
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
@@ -272,16 +283,19 @@ const PinnedHorizontalGallery = () => {
     const leave = () => {
       if (!entered) return;
       entered = false;
-      strip.classList.remove('phg-entered');
-      strip.classList.add('phg-leaving');
+      // Viktigt för 3→2: detta event används även för att frysa galleriets
+      // scroll-progress. Korten får därför INTE fade:a ut/resetta här — annars
+      // ser de ut att "laddas om" precis innan sidan går tillbaka till intro.
+      strip.classList.remove('phg-leaving');
+      strip.classList.add('phg-entered');
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
       const header = headerRef.current;
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
-        gsapInstance.to(cards, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in', force3D: true });
+        gsapInstance.set(cards, { y: 0, opacity: 1, force3D: true });
         if (header) {
           gsapInstance.killTweensOf(header);
-          gsapInstance.to(header, { y: 44, opacity: 0, duration: 0.42, ease: 'power2.in', force3D: true });
+          gsapInstance.set(header, { y: 0, opacity: 1, force3D: true });
         }
       }
       // Pausa inte videorna vid 3→2 — de är redan varma och ska kännas levande
