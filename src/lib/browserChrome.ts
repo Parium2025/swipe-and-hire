@@ -1,17 +1,25 @@
-const LANDING_CHROME_COLOR = '#626262';
-// Matcha body-bakgrunden exakt (hsl(215 100% 12%) ≈ #00193D) så att den övre
-// URL-baren får samma färg som iOS Safaris bottenverktygsfält samplar från
-// body. På så vis "följer toppen med" precis som bottens färg gör.
-const PARIUM_CHROME_COLOR = '#00193D';
-const AUDIENCE_LANDING_CHROME_COLOR = '#00193D';
+const LANDING_CHROME_COLOR = '#2a2a2a';
+const PARIUM_CHROME_COLOR = '#001935';
+const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 
+const ensureTopChromeStrip = () => {
+  let strip = document.getElementById('parium-browser-chrome-top') as HTMLDivElement | null;
+  if (!strip) {
+    strip = document.createElement('div');
+    strip.id = 'parium-browser-chrome-top';
+    strip.setAttribute('aria-hidden', 'true');
+    document.body.prepend(strip);
+  }
+  return strip;
+};
+
 const removeLegacySentinels = () => {
-  ['parium-browser-chrome-top', 'parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
+  ['parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.remove();
   });
@@ -59,6 +67,19 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
 
   document.documentElement.style.setProperty('background-color', color, 'important');
   document.body.style.setProperty('background-color', color, 'important');
+
+  const topStrip = ensureTopChromeStrip();
+  Object.assign(topStrip.style, {
+    position: 'fixed',
+    left: '0',
+    right: '0',
+    top: '0',
+    height: 'env(safe-area-inset-top, 0px)',
+    backgroundColor: color,
+    zIndex: '2147483647',
+    pointerEvents: 'none',
+    transition: 'background-color 200ms ease-out',
+  });
 
   setThemeColor(color);
 
