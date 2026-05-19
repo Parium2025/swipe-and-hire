@@ -51,21 +51,16 @@ const CardItem = ({ item, index }: CardItemProps) => {
   return (
     <div
       className="phg-card phg-card-enter"
-      data-phg-card
-      data-phg-index={index}
       style={{ ['--enter-delay' as string]: `${index * 80}ms`, ['--leave-delay' as string]: `${index * 55}ms` }}
     >
       {item.type === 'video' && !failed ? (
         <video
-          data-phg-video
-          data-phg-index={index}
           src={item.src}
           poster={item.poster}
           muted
           loop
           playsInline
-          preload="none"
-          disablePictureInPicture
+          preload="metadata"
           onError={() => setFailed(true)}
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
@@ -119,6 +114,7 @@ const PinnedHorizontalGallery = () => {
     // uppdateras varje frame — då tävlar den med GSAP-exit-tweenen på de 8 korten
     // och browserns smooth-scroll, och kan ge synligt hack på svagare GPU:er.
     let frozen = false;
+    let touching = false;
     let sectionTop = 0;
     let distance = 1;
     let startPx = 0;
@@ -146,12 +142,19 @@ const PinnedHorizontalGallery = () => {
       if (rafRef.current === null) rafRef.current = window.requestAnimationFrame(tick);
     };
 
+    const onTouchStart = () => { touching = true; };
+    const onTouchEnd = () => {
+      touching = false;
+      measure();
+    };
+
     const tick = () => {
       rafRef.current = null;
       if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
-      const next = Math.abs(target - current) < 0.001 ? target : current + (target - current) * 0.32;
+      const smoothing = touching ? 0.58 : 0.32;
+      const next = Math.abs(target - current) < 0.001 ? target : current + (target - current) * smoothing;
       renderedProgressRef.current = next;
       applyProgress(next);
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
@@ -179,14 +182,18 @@ const PinnedHorizontalGallery = () => {
     applyProgress(0);
     measure();
     root.addEventListener('scroll', measure, { passive: true });
+    root.addEventListener('touchstart', onTouchStart, { passive: true });
+    root.addEventListener('touchend', onTouchEnd, { passive: true });
+    root.addEventListener('touchcancel', onTouchEnd, { passive: true });
     window.addEventListener('resize', refreshMetrics);
-    window.addEventListener('parium:lenis-resize', refreshMetrics);
     window.addEventListener('parium:gallery-leave', freeze);
     window.addEventListener('parium:gallery-enter', thaw);
     return () => {
       root.removeEventListener('scroll', measure);
+      root.removeEventListener('touchstart', onTouchStart);
+      root.removeEventListener('touchend', onTouchEnd);
+      root.removeEventListener('touchcancel', onTouchEnd);
       window.removeEventListener('resize', refreshMetrics);
-      window.removeEventListener('parium:lenis-resize', refreshMetrics);
       window.removeEventListener('parium:gallery-leave', freeze);
       window.removeEventListener('parium:gallery-enter', thaw);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);

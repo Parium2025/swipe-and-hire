@@ -9,7 +9,6 @@ import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
-import { useLenisOnElement } from '@/hooks/useLenisOnElement';
 
 type AudienceLandingProps = {
   audience: AudienceRole;
@@ -338,13 +337,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       const setObserverActive = (active: boolean) => {
         if (!observer || active === observerActive) return;
         observerActive = active;
-        if (active) {
-          window.dispatchEvent(new Event('parium:lenis-stop'));
-          observer.enable?.();
-        } else {
-          observer.disable?.();
-          window.dispatchEvent(new Event('parium:lenis-start'));
-        }
+        if (active) observer.enable?.();
+        else observer.disable?.();
       };
 
       const clearReturnWork = () => {
@@ -555,7 +549,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         programmaticReturn = true;
         animatingRef.current = true;
         setObserverActive(false);
-        window.dispatchEvent(new Event('parium:lenis-stop'));
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
         window.dispatchEvent(new Event('parium:gallery-leave'));
         const startScroll = root.scrollTop;
@@ -575,8 +568,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           releaseLockedRef.current = false;
           forwardTimer = null;
           window.dispatchEvent(new Event('parium:gallery-enter'));
-          window.dispatchEvent(new Event('parium:lenis-resize'));
-          window.dispatchEvent(new Event('parium:lenis-start'));
         };
 
         gsap.killTweensOf(root);
@@ -597,7 +588,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
-        window.dispatchEvent(new Event('parium:lenis-stop'));
         // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
         // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
         // hela tiden och bara åker med layern.
@@ -618,7 +608,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           animatingRef.current = false;
           prevScrollTop = scrollRoot.scrollTop;
           setObserverActive(true);
-          window.dispatchEvent(new Event('parium:lenis-resize'));
         };
 
         gsap.killTweensOf(scrollRoot);
@@ -836,7 +825,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
-  useLenisOnElement('[data-landing-scroll-root]');
 
   // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
   // åt gången — annars initieras Spline-runtime två gånger på desktop.
@@ -922,10 +910,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
-        // Lenis äger smooth-scrollen; native smooth är avstängt för att undvika
-        // dubbel easing/momentum under de låsta premium-övergångarna.
+        // -webkit-overflow-scrolling: touch ger iOS Safari momentum-scroll
+        // i fixed-containrar; utan denna känns 2↔3-overgången "stelare" på
+        // iPhone/iPad jämfört med desktop. scrollBehavior: 'smooth' säkrar
+        // att Android Chrome och Firefox använder samma native easing som
+        // Safari för scrollTo(..., {behavior: 'smooth'}).
         WebkitOverflowScrolling: 'touch',
-        scrollBehavior: 'auto',
+        scrollBehavior: 'smooth',
         backgroundImage:
           'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
         backgroundAttachment: 'scroll',
@@ -936,7 +927,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     >
       <AnimatedBackground />
       <FixedPhoneLayer />
-      <div data-lenis-content className="relative z-10 min-h-full">
+      <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
 
