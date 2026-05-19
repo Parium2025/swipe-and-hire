@@ -51,21 +51,16 @@ const CardItem = ({ item, index }: CardItemProps) => {
   return (
     <div
       className="phg-card phg-card-enter"
-      data-phg-card
-      data-phg-index={index}
       style={{ ['--enter-delay' as string]: `${index * 80}ms`, ['--leave-delay' as string]: `${index * 55}ms` }}
     >
       {item.type === 'video' && !failed ? (
         <video
-          data-phg-video
-          data-phg-index={index}
           src={item.src}
           poster={item.poster}
           muted
           loop
           playsInline
-          preload="none"
-          disablePictureInPicture
+          preload="metadata"
           onError={() => setFailed(true)}
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
