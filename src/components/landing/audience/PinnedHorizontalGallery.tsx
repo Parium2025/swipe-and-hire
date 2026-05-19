@@ -114,23 +114,16 @@ const PinnedHorizontalGallery = () => {
     // uppdateras varje frame — då tävlar den med GSAP-exit-tweenen på de 8 korten
     // och browserns smooth-scroll, och kan ge synligt hack på svagare GPU:er.
     let frozen = false;
-    let touching = false;
-    let sectionTop = 0;
-    let distance = 1;
-    let startPx = 0;
-    let endPx = 0;
-
-    const refreshMetrics = () => {
-      const rootRectTop = root.getBoundingClientRect().top;
-      sectionTop = root.scrollTop + section.getBoundingClientRect().top - rootRectTop;
-      distance = Math.max(1, section.offsetHeight - root.clientHeight);
-      const viewport = window.innerWidth || document.documentElement.clientWidth;
-      startPx = viewport * 0.07;
-      endPx = Math.min(startPx, viewport - strip.scrollWidth - startPx);
-    };
 
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
+      // Mät faktisk overflow så att alla kort alltid exponeras oavsett viewport.
+      // Slutposition = visa sista kortet med samma marginal som första kortet får i start.
+      const stripWidth = strip.scrollWidth;
+      const viewport = window.innerWidth || document.documentElement.clientWidth;
+      const startPx = viewport * 0.07; // 7vw inledande marginal (matchar gammal start)
+      // Sluta så att sista kortet är helt synligt med samma 7vw marginal till höger
+      const endPx = Math.min(startPx, viewport - stripWidth - startPx);
       const xPx = startPx + (endPx - startPx) * p;
       strip.style.setProperty('--phg-x', `${xPx}px`);
       section.style.setProperty('--phg-progress', `${p}`);
@@ -138,14 +131,10 @@ const PinnedHorizontalGallery = () => {
 
     const measure = () => {
       if (frozen) return;
-      targetProgressRef.current = Math.min(1, Math.max(0, (root.scrollTop - sectionTop) / distance));
+      const rect = section.getBoundingClientRect();
+      const distance = Math.max(1, section.offsetHeight - root.clientHeight);
+      targetProgressRef.current = Math.min(1, Math.max(0, -rect.top / distance));
       if (rafRef.current === null) rafRef.current = window.requestAnimationFrame(tick);
-    };
-
-    const onTouchStart = () => { touching = true; };
-    const onTouchEnd = () => {
-      touching = false;
-      measure();
     };
 
     const tick = () => {
@@ -153,8 +142,7 @@ const PinnedHorizontalGallery = () => {
       if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
-      const smoothing = touching ? 0.58 : 0.32;
-      const next = Math.abs(target - current) < 0.001 ? target : current + (target - current) * smoothing;
+      const next = Math.abs(target - current) < 0.001 ? target : current + (target - current) * 0.32;
       renderedProgressRef.current = next;
       applyProgress(next);
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
@@ -174,26 +162,18 @@ const PinnedHorizontalGallery = () => {
     const thaw = () => {
       if (!frozen) return;
       frozen = false;
-      refreshMetrics();
       measure();
     };
 
-    refreshMetrics();
     applyProgress(0);
     measure();
     root.addEventListener('scroll', measure, { passive: true });
-    root.addEventListener('touchstart', onTouchStart, { passive: true });
-    root.addEventListener('touchend', onTouchEnd, { passive: true });
-    root.addEventListener('touchcancel', onTouchEnd, { passive: true });
-    window.addEventListener('resize', refreshMetrics);
+    window.addEventListener('resize', measure);
     window.addEventListener('parium:gallery-leave', freeze);
     window.addEventListener('parium:gallery-enter', thaw);
     return () => {
       root.removeEventListener('scroll', measure);
-      root.removeEventListener('touchstart', onTouchStart);
-      root.removeEventListener('touchend', onTouchEnd);
-      root.removeEventListener('touchcancel', onTouchEnd);
-      window.removeEventListener('resize', refreshMetrics);
+      window.removeEventListener('resize', measure);
       window.removeEventListener('parium:gallery-leave', freeze);
       window.removeEventListener('parium:gallery-enter', thaw);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
@@ -210,7 +190,6 @@ const PinnedHorizontalGallery = () => {
     if (!strip) return;
 
     let playTimer: number | null = null;
-    let activeWindowFrame: number | null = null;
     const warmTimers: number[] = [];
     let disposed = false;
     let warmed = false;
@@ -224,34 +203,8 @@ const PinnedHorizontalGallery = () => {
     const playSafe = (v: HTMLVideoElement) => {
       v.muted = true;
       v.playsInline = true;
-      try {
-        if (v.preload !== 'auto') v.preload = 'auto';
-        if (v.readyState < 2) v.load();
-      } catch {}
       const p = v.play();
       if (p && typeof p.catch === 'function') p.catch(() => {});
-    };
-
-    const pauseSafe = (v: HTMLVideoElement) => {
-      try { v.pause(); } catch {}
-    };
-
-    const syncActiveVideoWindow = () => {
-      activeWindowFrame = null;
-      if (!entered || !sectionRef.current) return;
-      const progress = Math.min(1, Math.max(0, renderedProgressRef.current));
-      const activeIndex = Math.round(progress * (items.length - 1));
-      const videos = Array.from(strip.querySelectorAll<HTMLVideoElement>('video[data-phg-video]'));
-      videos.forEach((video) => {
-        const index = Number(video.dataset.phgIndex ?? 0);
-        if (Math.abs(index - activeIndex) <= 1) playSafe(video);
-        else pauseSafe(video);
-      });
-    };
-
-    const requestActiveVideoWindow = () => {
-      if (activeWindowFrame !== null) return;
-      activeWindowFrame = window.requestAnimationFrame(syncActiveVideoWindow);
     };
 
     // Adaptiv warmup: på data-saver eller långsamma nät (2G/3G) warm:ar vi
@@ -278,7 +231,7 @@ const PinnedHorizontalGallery = () => {
       warmed = true;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       const profile = getNetworkProfile();
-      const initialBatch = profile === 'slim' ? videos.slice(0, 3) : videos.slice(0, 4);
+      const initialBatch = profile === 'slim' ? videos.slice(0, 4) : videos;
       initialBatch.forEach((v, index) => {
         warmTimers.push(window.setTimeout(() => {
           try {
@@ -307,10 +260,14 @@ const PinnedHorizontalGallery = () => {
           gsapInstance.fromTo(header, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, ease: 'power2.out', force3D: true });
         }
       }
+      const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       // Vänta tills slide-in-tween (0.62s) + sista stagger (~640ms) är klar
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
       if (playTimer) window.clearTimeout(playTimer);
-      playTimer = window.setTimeout(requestActiveVideoWindow, 800);
+      playTimer = window.setTimeout(() => {
+        videos.slice(0, 3).forEach(playSafe);
+        window.setTimeout(() => videos.slice(3).forEach(playSafe), 600);
+      }, 800);
     };
     const leave = () => {
       if (!entered) return;
@@ -327,8 +284,8 @@ const PinnedHorizontalGallery = () => {
           gsapInstance.to(header, { y: 44, opacity: 0, duration: 0.42, ease: 'power2.in', force3D: true });
         }
       }
-      const videos = Array.from(strip.querySelectorAll<HTMLVideoElement>('video[data-phg-video]'));
-      videos.forEach(pauseSafe);
+      // Pausa inte videorna vid 3→2 — de är redan varma och ska kännas levande
+      // när användaren går tillbaka igen. Vi stoppar bara eventuell start-timer.
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
     };
 
@@ -348,20 +305,17 @@ const PinnedHorizontalGallery = () => {
     window.addEventListener('parium:gallery-leave', onLeave);
     const root = containerRef.current ?? document.querySelector('[data-landing-scroll-root]');
     root?.addEventListener('scroll', syncVisibleState, { passive: true });
-    root?.addEventListener('scroll', requestActiveVideoWindow, { passive: true });
     window.addEventListener('resize', syncVisibleState);
     syncVisibleState();
 
     return () => {
       disposed = true;
       if (playTimer) window.clearTimeout(playTimer);
-      if (activeWindowFrame !== null) window.cancelAnimationFrame(activeWindowFrame);
       warmTimers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener('parium:gallery-warm', onWarm);
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
       root?.removeEventListener('scroll', syncVisibleState);
-      root?.removeEventListener('scroll', requestActiveVideoWindow);
       window.removeEventListener('resize', syncVisibleState);
     };
   }, []);
