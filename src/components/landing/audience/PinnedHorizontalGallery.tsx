@@ -195,6 +195,7 @@ const PinnedHorizontalGallery = () => {
     if (!strip) return;
 
     let playTimer: number | null = null;
+    let activeWindowFrame: number | null = null;
     const warmTimers: number[] = [];
     let disposed = false;
     let warmed = false;
@@ -210,6 +211,28 @@ const PinnedHorizontalGallery = () => {
       v.playsInline = true;
       const p = v.play();
       if (p && typeof p.catch === 'function') p.catch(() => {});
+    };
+
+    const pauseSafe = (v: HTMLVideoElement) => {
+      try { v.pause(); } catch {}
+    };
+
+    const syncActiveVideoWindow = () => {
+      activeWindowFrame = null;
+      if (!entered || !sectionRef.current) return;
+      const progress = Math.min(1, Math.max(0, renderedProgressRef.current));
+      const activeIndex = Math.round(progress * (items.length - 1));
+      const videos = Array.from(strip.querySelectorAll<HTMLVideoElement>('video[data-phg-video]'));
+      videos.forEach((video) => {
+        const index = Number(video.dataset.phgIndex ?? 0);
+        if (Math.abs(index - activeIndex) <= 1) playSafe(video);
+        else pauseSafe(video);
+      });
+    };
+
+    const requestActiveVideoWindow = () => {
+      if (activeWindowFrame !== null) return;
+      activeWindowFrame = window.requestAnimationFrame(syncActiveVideoWindow);
     };
 
     // Adaptiv warmup: på data-saver eller långsamma nät (2G/3G) warm:ar vi
@@ -269,10 +292,7 @@ const PinnedHorizontalGallery = () => {
       // Vänta tills slide-in-tween (0.62s) + sista stagger (~640ms) är klar
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
       if (playTimer) window.clearTimeout(playTimer);
-      playTimer = window.setTimeout(() => {
-        videos.slice(0, 3).forEach(playSafe);
-        window.setTimeout(() => videos.slice(3).forEach(playSafe), 600);
-      }, 800);
+      playTimer = window.setTimeout(requestActiveVideoWindow, 800);
     };
     const leave = () => {
       if (!entered) return;
@@ -289,8 +309,7 @@ const PinnedHorizontalGallery = () => {
           gsapInstance.to(header, { y: 44, opacity: 0, duration: 0.42, ease: 'power2.in', force3D: true });
         }
       }
-      // Pausa inte videorna vid 3→2 — de är redan varma och ska kännas levande
-      // när användaren går tillbaka igen. Vi stoppar bara eventuell start-timer.
+      videosForPause.forEach(pauseSafe);
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
     };
 
@@ -310,17 +329,20 @@ const PinnedHorizontalGallery = () => {
     window.addEventListener('parium:gallery-leave', onLeave);
     const root = containerRef.current ?? document.querySelector('[data-landing-scroll-root]');
     root?.addEventListener('scroll', syncVisibleState, { passive: true });
+    root?.addEventListener('scroll', requestActiveVideoWindow, { passive: true });
     window.addEventListener('resize', syncVisibleState);
     syncVisibleState();
 
     return () => {
       disposed = true;
       if (playTimer) window.clearTimeout(playTimer);
+      if (activeWindowFrame !== null) window.cancelAnimationFrame(activeWindowFrame);
       warmTimers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener('parium:gallery-warm', onWarm);
       window.removeEventListener('parium:gallery-enter', onEnter);
       window.removeEventListener('parium:gallery-leave', onLeave);
       root?.removeEventListener('scroll', syncVisibleState);
+      root?.removeEventListener('scroll', requestActiveVideoWindow);
       window.removeEventListener('resize', syncVisibleState);
     };
   }, []);
