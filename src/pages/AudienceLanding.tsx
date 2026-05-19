@@ -514,8 +514,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (animatingRef.current) return;
         releasedToGallery = true;
         programmaticReturn = true;
+        animatingRef.current = true;
         setObserverActive(false);
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
+        window.dispatchEvent(new Event('parium:gallery-leave'));
         const startScroll = root.scrollTop;
         const targetScroll = startScroll + next.getBoundingClientRect().top;
         gsap.killTweensOf([introText, ...introTextItems].filter(Boolean));
@@ -528,23 +530,31 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           );
         }
         prevScrollTop = startScroll;
-        transitionBlockUntil = performance.now() + 700;
-        root.scrollTo({ top: targetScroll, behavior: 'smooth' });
-        window.dispatchEvent(new Event('parium:gallery-enter'));
-        forwardTimer = window.setTimeout(() => {
+        lockNativeInput(1250);
+        withScrollBehaviorAuto();
+
+        const finishForward = () => {
+          root.scrollTop = targetScroll;
+          restoreScrollBehavior?.();
+          restoreScrollBehavior = null;
+          transitionBlockUntil = 0;
           programmaticReturn = false;
-          const moved = Math.abs(root.scrollTop - startScroll);
-          if (moved < 24) {
-            root.scrollTo({ top: targetScroll, behavior: 'auto' });
-          }
+          animatingRef.current = false;
           prevScrollTop = root.scrollTop;
-          // Säkerhetsnät: släpp ALLTID releaseLockedRef efter att 2→3 är klart,
-          // även om scroll-positionen inte hann triggra normalisering. Annars
-          // kunde låset bli "kvar i true" om användaren scrollar snabbt 20-30
-          // gånger och en gest kapas av nästa innan onScrollWatch hann reagera.
           releaseLockedRef.current = false;
           forwardTimer = null;
-        }, 900);
+          window.dispatchEvent(new Event('parium:gallery-enter'));
+        };
+
+        gsap.killTweensOf(root);
+        gsap.to(root, {
+          scrollTop: targetScroll,
+          duration: 0.58,
+          ease: 'power3.inOut',
+          overwrite: true,
+          onComplete: finishForward,
+          onInterrupt: finishForward,
+        });
       };
 
       const returnFromGalleryToIntro = () => {
