@@ -272,18 +272,20 @@ const PinnedHorizontalGallery = () => {
     const leave = () => {
       if (!entered) return;
       entered = false;
-      strip.classList.remove('phg-entered');
-      strip.classList.add('phg-leaving');
-      // INGEN fade-out-tween på 3→2 — korten åker ändå ur viewport via
-      // den programstyrda scroll-tween:en. Att samtidigt fade:a opacity
-      // + translateY orsakade ett synligt "blink" precis innan scrollen
-      // hann starta. Vi killar bara eventuella aktiva tweens så de inte
-      // ligger kvar och stör nästa enter().
+      // VIKTIGT: vi togglar INTE phg-leaving här. CSS-regeln
+      // .phg-strip.phg-leaving .phg-card-enter snäpper korten direkt till
+      // opacity:0 + translateY(44px) → synligt "blink" precis innan scrollen
+      // hinner starta. Behåll phg-entered och frys korten i synligt sluttillstånd
+      // med inline-style så de bara åker med scrollen utan visuella hopp.
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
       const header = headerRef.current;
       if (gsapInstance) {
         gsapInstance.killTweensOf(cards);
-        if (header) gsapInstance.killTweensOf(header);
+        gsapInstance.set(cards, { opacity: 1, y: 0, clearProps: 'transform' });
+        if (header) {
+          gsapInstance.killTweensOf(header);
+          gsapInstance.set(header, { opacity: 1, y: 0, clearProps: 'transform' });
+        }
       }
       // Pausa inte videorna vid 3→2 — de är redan varma och ska kännas levande
       // när användaren går tillbaka igen. Vi stoppar bara eventuell start-timer.
