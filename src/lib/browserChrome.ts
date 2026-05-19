@@ -2,6 +2,7 @@ const LANDING_CHROME_COLOR = '#2a2a2a';
 const PARIUM_CHROME_COLOR = '#001935';
 const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
+export const BROWSER_CHROME_COLOR_EVENT = 'parium:browser-chrome-color';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 const isAudienceLandingPath = (pathname: string) =>
@@ -28,6 +29,14 @@ const setThemeColor = (color: string) => {
     meta.setAttribute('content', color);
     document.head.insertBefore(meta, document.head.firstChild);
   });
+};
+
+const notifyChromeStrips = (pathname: string, color: string) => {
+  window.dispatchEvent(
+    new CustomEvent(BROWSER_CHROME_COLOR_EVENT, {
+      detail: { pathname, color },
+    })
+  );
 };
 
 /**
@@ -62,6 +71,7 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   // här — det racear mot React re-renders.
 
   setThemeColor(color);
+  notifyChromeStrips(pathname, color);
 
   // iOS Safari samplar body-färgen för bottenverktygsfältet vid first paint och
   // uppdaterar inte vid SPA-nav. Trigga en forcerad re-sampling:
