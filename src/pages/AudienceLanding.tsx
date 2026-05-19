@@ -478,11 +478,33 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       // innan returen hann trigga. Därför äger GSAP scrollTop under själva
       // tröskelpassagen, medan galleriets egen progress är fryst tills landning.
       let transitionBlockUntil = 0;
+      let galleryTouchY: number | null = null;
       const blockNativeInput = (e: Event) => {
         if (performance.now() < transitionBlockUntil) {
           e.preventDefault();
           e.stopPropagation();
+          return;
         }
+
+        if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
+          const stageBottom = stage.getBoundingClientRect().bottom;
+          const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
+          const touch = e instanceof TouchEvent ? e.touches[0] : null;
+          const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
+          if (touch) galleryTouchY = touch.clientY;
+
+          if (stageBottom >= -2 && (wheelBack || touchBack)) {
+            e.preventDefault();
+            e.stopPropagation();
+            returnFromGalleryToIntro();
+          }
+        }
+      };
+      const trackTouchStart = (e: TouchEvent) => {
+        galleryTouchY = e.touches[0]?.clientY ?? null;
+      };
+      const clearTouchTrack = () => {
+        galleryTouchY = null;
       };
       const lockNativeInput = (ms: number) => {
         transitionBlockUntil = performance.now() + ms;
@@ -497,7 +519,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         };
       };
       scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
+      scrollRoot?.addEventListener('touchstart', trackTouchStart, { passive: true, capture: true });
       scrollRoot?.addEventListener('touchmove', blockNativeInput, { passive: false, capture: true });
+      scrollRoot?.addEventListener('touchend', clearTouchTrack, { passive: true, capture: true });
 
       const isStageDocked = () => {
         const rect = stage.getBoundingClientRect();
