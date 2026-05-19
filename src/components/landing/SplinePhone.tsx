@@ -145,39 +145,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'pan-y', overscrollBehavior: 'contain', ...style }}
     >
-      {/* Premium fallback: direkt på mobil, fördröjd på desktop. */}
-      {showFallback && !isReady && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-300"
-        >
-          <div
-            className="relative aspect-[9/19] h-[82%] max-h-[360px] min-h-[190px] overflow-hidden rounded-[2.25rem] border border-white/15 backdrop-blur-sm"
-            style={{
-              background:
-                'linear-gradient(180deg, hsl(var(--primary-foreground) / 0.13) 0%, hsl(var(--primary-foreground) / 0.035) 100%)',
-              boxShadow: '0 26px 86px hsl(var(--background) / 0.45), inset 0 1px 0 hsl(var(--primary-foreground) / 0.16)',
-            }}
-          >
-            <div className="absolute left-1/2 top-3 h-1.5 w-14 -translate-x-1/2 rounded-full bg-white/18" />
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  'linear-gradient(110deg, transparent 30%, hsl(var(--secondary) / 0.10) 50%, transparent 70%)',
-                backgroundSize: '220% 100%',
-                animation: 'parium-skeleton-shimmer 2.4s ease-in-out infinite',
-              }}
-            />
-          </div>
-          <style>{`
-            @keyframes parium-skeleton-shimmer {
-              0% { background-position: 200% 0; }
-              100% { background-position: -120% 0; }
-            }
-          `}</style>
-        </div>
-      )}
+      {/* Ingen synlig laddnings-placeholder — hellre tomt än en ful platshållartelefon. */}
       <canvas
         ref={canvasRef}
         role="img"
