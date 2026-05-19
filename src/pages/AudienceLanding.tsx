@@ -944,7 +944,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* ──────────────── 3. STATEMENT ──────────────── */}
-          <section className="relative overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+          <section className="relative overflow-hidden px-5 py-12 sm:px-6 sm:py-20 md:px-12 md:py-28 lg:px-24">
             <div className="mx-auto grid max-w-[1180px] gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
               <motion.h2
                 initial={{ opacity: 0, x: -80 }}
