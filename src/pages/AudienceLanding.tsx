@@ -473,17 +473,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // återkomst-fade hanteras visuellt via layerns yPercent-slide.
       };
 
-      // 2↔3 = NATURLIG scroll. Inget GSAP-driv av scrollTop, inga
-      // programstyrda transitions. Anledningen: 1↔2 är smooth eftersom
-      // det är en ren CSS-transform utan scroll inblandat. När vi i 2↔3
-      // körde GSAP som skrev scrollTop varje frame SAMTIDIGT som galleriet
-      // läste scrollTop för att rita kortens transform fick vi två källor
-      // till sanning per frame → synligt skak/hopp. Lösning: släpp scrollen
-      // helt till browsern, så följer både intro-lagret (i normalt flöde)
-      // och galleriets sticky-progress samma scroll-position automatiskt.
-      // Kort wheel/touch-block (~700ms) under 2→3 smooth-scroll så att
-      // användarens kvarvarande wheel-momentum inte konkurrerar med
-      // browserns native smooth-scroll → annars syns "hack" vid hård scroll.
+      // 2↔3 måste vara en låst premium-transition, inte native momentum-scroll.
+      // På touch kunde iOS/Chrome annars fortsätta scrolla mellan sektionerna
+      // innan returen hann trigga. Därför äger GSAP scrollTop under själva
+      // tröskelpassagen, medan galleriets egen progress är fryst tills landning.
       let transitionBlockUntil = 0;
       const blockNativeInput = (e: Event) => {
         if (performance.now() < transitionBlockUntil) {
@@ -491,8 +484,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           e.stopPropagation();
         }
       };
-      scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
-      scrollRoot?.addEventListener('touchmove', blockNativeInput, { passive: false, capture: true });
 
       const isStageDocked = () => {
         const rect = stage.getBoundingClientRect();
