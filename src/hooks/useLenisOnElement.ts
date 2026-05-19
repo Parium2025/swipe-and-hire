@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import Lenis from 'lenis';
 
 /**
  * Attaches a Lenis smooth-scroll instance to a custom scrollable element
@@ -19,30 +18,40 @@ export function useLenisOnElement(selector: string, enabled = true) {
     const content = wrapper.firstElementChild as HTMLElement | null;
     if (!content) return;
 
-    const lenis = new Lenis({
-      wrapper,
-      content,
-      // Längre duration + lägre lerp = tyngre, mer "premium" scrollkänsla
-      // som matchar pinned-galleriets tempo och tar bort plötsliga växlingar.
-      duration: 1.6,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      // Dämpar snabba scroll-utbrott så även "blixtscroll" känns kontrollerad
-      wheelMultiplier: 0.85,
-      touchMultiplier: 1.0,
-      lerp: 0.07,
-    });
-
     let rafId = 0;
-    const raf = (time: number) => {
-      lenis.raf(time);
+    let lenis: { raf: (time: number) => void; destroy: () => void } | null = null;
+    let cancelled = false;
+
+    const setup = async () => {
+      const moduleName = 'lenis';
+      const mod = await import(/* @vite-ignore */ moduleName).catch(() => null) as { default?: new (options: Record<string, unknown>) => { raf: (time: number) => void; destroy: () => void } } | null;
+      if (cancelled || !mod?.default) return;
+      const Lenis = mod.default;
+      lenis = new Lenis({
+        wrapper,
+        content,
+        // Längre duration + lägre lerp = tyngre, mer "premium" scrollkänsla
+        // som matchar pinned-galleriets tempo och tar bort plötsliga växlingar.
+        duration: 1.6,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        // Dämpar snabba scroll-utbrott så även "blixtscroll" känns kontrollerad
+        wheelMultiplier: 0.85,
+        touchMultiplier: 1.0,
+        lerp: 0.07,
+      });
+      const raf = (time: number) => {
+        lenis?.raf(time);
+        rafId = requestAnimationFrame(raf);
+      };
       rafId = requestAnimationFrame(raf);
     };
-    rafId = requestAnimationFrame(raf);
+    setup();
 
     return () => {
+      cancelled = true;
       cancelAnimationFrame(rafId);
-      lenis.destroy();
+      lenis?.destroy();
     };
   }, [selector, enabled]);
 }
