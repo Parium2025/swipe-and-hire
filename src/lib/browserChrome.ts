@@ -68,8 +68,13 @@ export const mountChromePopstateGuard = () => {
   if (pageshowMounted || typeof window === 'undefined') return;
   pageshowMounted = true;
   const resync = () => syncBrowserChrome(window.location.pathname);
+  const resyncVisible = () => {
+    if (document.visibilityState === 'visible') resync();
+  };
   window.addEventListener('pageshow', resync);
   window.addEventListener('popstate', resync);
+  window.addEventListener('focus', resync);
+  document.addEventListener('visibilitychange', resyncVisible);
 };
 
 export const noteChromePath = (_pathname: string) => {
