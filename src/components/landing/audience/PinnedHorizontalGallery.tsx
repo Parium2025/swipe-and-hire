@@ -127,11 +127,11 @@ const PinnedHorizontalGallery = () => {
       const xPx = startPx + (endPx - startPx) * p;
       strip.style.setProperty('--phg-x', `${xPx}px`);
       section.style.setProperty('--phg-progress', `${p}`);
-      // Smooth fade-in/out av progressbaren: synlig endast när man faktiskt
-      // befinner sig i kort-zonen, fade:as in när man landar och ut innan nästa sektion.
-      const fadeIn = Math.min(1, Math.max(0, (p - 0.02) / 0.05));
-      const fadeOut = Math.min(1, Math.max(0, (0.97 - p) / 0.05));
-      section.style.setProperty('--phg-bar-opacity', String(Math.min(fadeIn, fadeOut)));
+      // Baren ska vara på plats redan vid första kortet (p=0) och hela vägen
+      // till sista kortet (p=1). Den fade:as endast ut precis när vi börjar
+      // lämna kort-sektionen nedåt, så den följer med smooth åt båda hållen.
+      const fadeOut = Math.min(1, Math.max(0, (0.985 - p) / 0.025));
+      section.style.setProperty('--phg-bar-opacity', String(fadeOut));
     };
 
     const measure = () => {
