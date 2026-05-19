@@ -531,6 +531,15 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
       const isPastStage = () => stage.getBoundingClientRect().bottom <= 4;
 
+      // 2↔3 ska kännas EXAKT som 1↔2 (goToIntro/goToHero):
+      // - Samma duration (1.08s) och ease (power2.inOut)
+      // - INGEN konkurrerande text-fade — intro-texten åker bara med via
+      //   layer-translateY (samma princip som hero-texten i 1↔2).
+      // - Komplett input-lock under HELA transition-fönstret så att varken
+      //   wheel-momentum eller iOS touch-momentum kan rubba scrollen.
+      const TRANSITION_DURATION = 1.08;
+      const TRANSITION_LOCK_MS = 1200; // 1.08s + buffer för momentum
+
       const releaseAndScrollNext = () => {
         const root = scrollRoot;
         const next = gallerySection;
@@ -544,17 +553,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         window.dispatchEvent(new Event('parium:gallery-leave'));
         const startScroll = root.scrollTop;
         const targetScroll = startScroll + next.getBoundingClientRect().top;
-        gsap.killTweensOf([introText, ...introTextItems].filter(Boolean));
-        gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
-        if (introText) {
-          gsap.fromTo(
-            introText,
-            { y: 0, opacity: 1 },
-            { y: -24, opacity: 0, duration: 0.42, ease: 'power2.out', force3D: true },
-          );
-        }
         prevScrollTop = startScroll;
-        lockNativeInput(1250);
+        lockNativeInput(TRANSITION_LOCK_MS);
         withScrollBehaviorAuto();
 
         const finishForward = () => {
@@ -573,8 +573,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         gsap.killTweensOf(root);
         gsap.to(root, {
           scrollTop: targetScroll,
-          duration: 0.58,
-          ease: 'power3.inOut',
+          duration: TRANSITION_DURATION,
+          ease: 'power2.inOut',
           overwrite: true,
           onComplete: finishForward,
           onInterrupt: finishForward,
@@ -588,19 +588,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
+        // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
+        // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
+        // hela tiden och bara åker med layern.
         setIntroResting();
-        // Dölj intro-innehåll INNAN scroll börjar — annars syns det "blinka in"
-        // bakom strip:en när scroll närmar sig target.
-        if (introHeadingEl) gsap.set(introHeadingEl, { opacity: 0 });
-        gsap.set(introTextItems, { y: 44, opacity: 0 });
-        if (introCtaEl) gsap.set(introCtaEl, { opacity: 0 });
         window.dispatchEvent(new Event('parium:gallery-leave'));
         const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
 
-        // KRITISKT: blockera ALL native scroll-input under hela returen så att
-        // user-momentum (särskilt iOS-touch) inte tävlar mot GSAP-scrolltween.
-        // Total tid = scroll-fas (0.55s) + intro-entry (0.62s + stagger ~0.7s) ≈ 1.3s.
-        lockNativeInput(1400);
+        lockNativeInput(TRANSITION_LOCK_MS);
         withScrollBehaviorAuto();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
@@ -616,41 +611,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         };
 
         gsap.killTweensOf(scrollRoot);
-        gsap.killTweensOf([introTextItems, introCtaEl, introHeadingEl].filter(Boolean));
-
-        // SEKVENTIELL återgång — matchar 1→2 (goToIntro)-känslan så nära som möjligt:
-        // Fas 1: snabb deterministic scroll-snap (galleri-strippen är fryst → 0 transform-
-        //        konflikter, ingen text fadar samtidigt → 0 GPU-konkurrens).
-        // Fas 2: EXAKT samma intro-text/heading-entry-tween som goToIntro kör vid 1→2.
-        //        Detta är nyckeln till "samma känsla" — slutfasen är bokstavligen
-        //        samma CSS-transform-tween, utan scroll inblandat.
-        const returnTl = gsap.timeline({ onComplete: finishReturn, onInterrupt: finishReturn });
-        returnTl.to(scrollRoot, {
+        gsap.to(scrollRoot, {
           scrollTop: target,
-          duration: 0.55,
-          ease: 'power3.inOut',
+          duration: TRANSITION_DURATION,
+          ease: 'power2.inOut',
           overwrite: true,
-        }, 0);
-        // Intro-entry startar EFTER scroll har landat (gap på 0.05s för en
-        // ren frame mellan faserna). Tweens nedan = exakt kopia av goToIntro-
-        // raderna 436/438/441 — samma duration, ease, stagger, ordning.
-        if (introHeadingEl) {
-          returnTl.fromTo(introHeadingEl, { opacity: 0 }, { opacity: 1, duration: 1.2, ease: 'power3.out' }, 0.6);
-        }
-        returnTl.fromTo(
-          introTextItems,
-          { y: 44, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' },
-          0.6,
-        );
-        if (introCtaEl) {
-          returnTl.fromTo(
-            introCtaEl,
-            { opacity: 0 },
-            { opacity: 1, duration: 0.62, ease: 'power2.out' },
-            0.6 + introTextItems.length * 0.08,
-          );
-        }
+          onComplete: finishReturn,
+          onInterrupt: finishReturn,
+        });
       };
 
       observer = Observer.create({
