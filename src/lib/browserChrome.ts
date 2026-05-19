@@ -61,6 +61,22 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   document.body.style.setProperty('background-color', color, 'important');
 
   setThemeColor(color);
+
+  // iOS Safari samplar body-färgen för bottenverktygsfältet vid first paint och
+  // uppdaterar inte vid SPA-nav. Trigga en forcerad re-sampling:
+  //   1) Forcera reflow via offsetHeight read
+  //   2) Mikro-scroll-nudge (1px ner och tillbaka) i nästa frame — det är det
+  //      som faktiskt får Safari att om-sampla URL-bar och bottenfält.
+  // Detta påverkar inget visuellt och berör inte layout/spacing.
+  void document.body.offsetHeight;
+  if (typeof window !== 'undefined' && 'requestAnimationFrame' in window) {
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      window.scrollTo(0, y + 1);
+      requestAnimationFrame(() => window.scrollTo(0, y));
+    });
+  }
+
 };
 
 // Mountar en pageshow/popstate-listener som re-syncar chrome när Safari
