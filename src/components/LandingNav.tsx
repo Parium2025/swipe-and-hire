@@ -130,6 +130,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               />
             </a>
 
+            {/* Desktop / större skärmar: pill centrerad mellan logo och login */}
             {links.length > 0 && (
               <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
                 {links.map((l) => {
@@ -147,7 +148,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                     >
                       {isActive && (
                         <motion.span
-                          layoutId="nav-bubble"
+                          layoutId="nav-bubble-lg"
                           className="absolute inset-0 -z-0 rounded-full bg-white/[0.10] border border-white/[0.10] shadow-[0_4px_20px_rgba(0,0,0,0.25)]"
                           transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
                         />
@@ -159,56 +160,62 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               </div>
             )}
 
-            <div className="hidden lg:block ml-auto shrink-0">
+            {/* Logga in-knapp — alltid synlig (kompakt på mobil) */}
+            <div className="ml-auto shrink-0">
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-6 bg-white/[0.04] border border-white/[0.08] text-white text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
+                className="rounded-full px-4 sm:px-6 h-9 sm:h-9 bg-white/[0.04] border border-white/[0.08] text-white text-[12px] sm:text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
               >
                 Logga in
               </Button>
             </div>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden ml-auto p-2 rounded-full text-white/50 hover:bg-white/[0.04] transition-colors"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
           </div>
-        </div>
-      </nav>
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div className="fixed inset-0 bg-[hsl(220_20%_4%/0.98)] backdrop-blur-2xl pt-24 px-6">
-            <div className="flex flex-col gap-1">
-              {links.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  onClick={(e) => handleAnchor(e, l.href)}
-                  className="px-4 py-4 rounded-2xl text-white/85 hover:bg-white/[0.06] text-lg font-medium transition-colors"
-                >
-                  {l.label}
-                </a>
-              ))}
-              <div className="pt-8">
-                <Button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    sessionStorage.setItem('parium-skip-splash', '1');
-                    onLoginClick();
-                  }}
-                  className="w-full rounded-full bg-white text-[hsl(220_40%_10%)] hover:bg-white/90 font-bold"
-                  size="lg"
-                >
-                  Logga in
-                </Button>
+
+          {/* Mobil/tablet: nav-pill som andra rad — horisontellt scrollbar om den inte får plats */}
+          {links.length > 0 && (
+            <div className="lg:hidden pb-2 -mt-1">
+              <div
+                ref={pillScrollerRef}
+                className="mx-auto flex w-full max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
+                {links.map((l) => {
+                  const id = l.href.replace('#', '');
+                  const isActive = activeId === id;
+                  return (
+                    <a
+                      key={l.href}
+                      href={l.href}
+                      onClick={(e) => {
+                        handleAnchor(e, l.href);
+                        // Auto-scrolla pillen så aktiv chip syns
+                        requestAnimationFrame(() => {
+                          const target = e.currentTarget as HTMLElement | null;
+                          target?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        });
+                      }}
+                      aria-current={isActive ? 'true' : undefined}
+                      className={`relative whitespace-nowrap rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                        isActive ? 'text-white' : 'text-white/65 hover:text-white'
+                      }`}
+                    >
+                      {isActive && (
+                        <motion.span
+                          layoutId="nav-bubble-sm"
+                          className="absolute inset-0 -z-0 rounded-full bg-white/[0.10] border border-white/[0.10] shadow-[0_4px_20px_rgba(0,0,0,0.25)]"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
+                        />
+                      )}
+                      <span className="relative z-10">{l.label}</span>
+                    </a>
+                  );
+                })}
               </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </nav>
     </>
   );
 };
