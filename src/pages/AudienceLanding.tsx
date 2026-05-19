@@ -549,7 +549,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         programmaticReturn = true;
         animatingRef.current = true;
         setObserverActive(false);
-        window.dispatchEvent(new Event('parium:lenis-stop'));
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
         window.dispatchEvent(new Event('parium:gallery-leave'));
         const startScroll = root.scrollTop;
@@ -569,8 +568,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           releaseLockedRef.current = false;
           forwardTimer = null;
           window.dispatchEvent(new Event('parium:gallery-enter'));
-          window.dispatchEvent(new Event('parium:lenis-resize'));
-          window.dispatchEvent(new Event('parium:lenis-start'));
         };
 
         gsap.killTweensOf(root);
@@ -591,7 +588,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
-        window.dispatchEvent(new Event('parium:lenis-stop'));
         // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
         // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
         // hela tiden och bara åker med layern.
@@ -612,7 +608,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           animatingRef.current = false;
           prevScrollTop = scrollRoot.scrollTop;
           setObserverActive(true);
-          window.dispatchEvent(new Event('parium:lenis-resize'));
         };
 
         gsap.killTweensOf(scrollRoot);
