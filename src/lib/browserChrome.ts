@@ -68,6 +68,19 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   document.documentElement.style.setProperty('background-color', color, 'important');
   document.body.style.setProperty('background-color', color, 'important');
 
+  const topStrip = ensureTopChromeStrip();
+  Object.assign(topStrip.style, {
+    position: 'fixed',
+    left: '0',
+    right: '0',
+    top: '0',
+    height: 'env(safe-area-inset-top, 0px)',
+    backgroundColor: color,
+    zIndex: '2147483647',
+    pointerEvents: 'none',
+    transition: 'background-color 200ms ease-out',
+  });
+
   setThemeColor(color);
 
   // iOS Safari samplar body-färgen för bottenverktygsfältet vid first paint och
