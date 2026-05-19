@@ -338,8 +338,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       const setObserverActive = (active: boolean) => {
         if (!observer || active === observerActive) return;
         observerActive = active;
-        if (active) observer.enable?.();
-        else observer.disable?.();
+        if (active) {
+          window.dispatchEvent(new Event('parium:lenis-stop'));
+          observer.enable?.();
+        } else {
+          observer.disable?.();
+          window.dispatchEvent(new Event('parium:lenis-start'));
+        }
       };
 
       const clearReturnWork = () => {
