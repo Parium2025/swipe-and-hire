@@ -648,8 +648,13 @@ All colors MUST be HSL.
      Klassen sätts av syncBrowserChrome() + index.html init-script. */
   html.landing-video-chrome,
   body.landing-video-chrome {
-    background-color: #626262 !important;
+    background-color: var(--browser-chrome-color, #2a2a2a) !important;
     background-image: none !important;
+  }
+
+  html.parium-app-chrome,
+  body.parium-app-chrome {
+    background-color: var(--browser-chrome-color, #001935) !important;
   }
 
   /* Browser chrome (Safari/Chrome URL-bar) sköts uteslutande av
