@@ -40,7 +40,11 @@ export function useLenisOnElement(selector: string, enabled = true) {
     });
 
     const onStop = () => lenis.stop();
-    const onStart = () => lenis.start();
+    const onStart = () => {
+      lenis.resize();
+      lenis.scrollTo(wrapper.scrollTop, { immediate: true, force: true });
+      lenis.start();
+    };
     const onResize = () => lenis.resize();
     window.addEventListener('parium:lenis-stop', onStop);
     window.addEventListener('parium:lenis-start', onStart);
