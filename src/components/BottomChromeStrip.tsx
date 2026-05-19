@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-
-const LANDING_COLOR = '#2a2a2a';
-const PARIUM_COLOR = '#001935';
-const AUDIENCE_LANDING_COLOR = '#001F3D';
-
-const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
-const isAudienceLandingPath = (pathname: string) =>
-  pathname === '/arbetsgivare' || pathname === '/jobbsokare';
+import { getBrowserChromeColor } from '@/lib/browserChrome';
 
 /**
  * Tunn färgremsa längst ner — endast på mobil/touch.
@@ -30,11 +23,7 @@ const BottomChromeStrip = () => {
     return () => mq.removeEventListener?.('change', apply);
   }, []);
 
-  const color = isLandingVideoPath(location.pathname)
-    ? LANDING_COLOR
-    : isAudienceLandingPath(location.pathname)
-      ? AUDIENCE_LANDING_COLOR
-      : PARIUM_COLOR;
+  const color = getBrowserChromeColor(location.pathname);
 
   useEffect(() => {
     console.log('[BottomChromeStrip]', { path: location.pathname, color });
