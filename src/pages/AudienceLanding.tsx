@@ -545,51 +545,78 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       const returnFromGalleryToIntro = () => {
         if (!scrollRoot || programmaticReturn || animatingRef.current) return;
         programmaticReturn = true;
+        animatingRef.current = true;
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
         setIntroResting();
+        // Dölj intro-innehåll INNAN scroll börjar — annars syns det "blinka in"
+        // bakom strip:en när scroll närmar sig target.
         if (introHeadingEl) gsap.set(introHeadingEl, { opacity: 0 });
         gsap.set(introTextItems, { y: 44, opacity: 0 });
         if (introCtaEl) gsap.set(introCtaEl, { opacity: 0 });
         window.dispatchEvent(new Event('parium:gallery-leave'));
         const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
-        // 3→2 ska vara lika deterministic som 1↔2: native smooth-scroll på iOS
-        // kan avbrytas/variera med momentum och lämna användaren halvvägs mellan
-        // intro + galleri. Här tweenar vi scrollTop själva medan galleriets strip
-        // är fryst, så bara en tidslinje äger returen.
-        transitionBlockUntil = performance.now() + 1100;
+
+        // KRITISKT: blockera ALL native scroll-input under hela returen så att
+        // user-momentum (särskilt iOS-touch) inte tävlar mot GSAP-scrolltween.
+        // Total tid = scroll-fas (0.55s) + intro-entry (0.62s + stagger ~0.7s) ≈ 1.3s.
+        transitionBlockUntil = performance.now() + 1400;
         restoreScrollBehavior?.();
         const previousScrollBehavior = scrollRoot.style.scrollBehavior;
+        // 'auto' = browsern lämnar scrollTop ifred så GSAP äger den ensam.
         scrollRoot.style.scrollBehavior = 'auto';
         restoreScrollBehavior = () => {
           scrollRoot.style.scrollBehavior = previousScrollBehavior;
         };
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
+
         const finishReturn = () => {
           scrollRoot.scrollTop = target;
           restoreScrollBehavior?.();
           restoreScrollBehavior = null;
           transitionBlockUntil = 0;
           programmaticReturn = false;
+          animatingRef.current = false;
           prevScrollTop = scrollRoot.scrollTop;
           setObserverActive(true);
         };
+
         gsap.killTweensOf(scrollRoot);
         gsap.killTweensOf([introTextItems, introCtaEl, introHeadingEl].filter(Boolean));
+
+        // SEKVENTIELL återgång — matchar 1→2 (goToIntro)-känslan så nära som möjligt:
+        // Fas 1: snabb deterministic scroll-snap (galleri-strippen är fryst → 0 transform-
+        //        konflikter, ingen text fadar samtidigt → 0 GPU-konkurrens).
+        // Fas 2: EXAKT samma intro-text/heading-entry-tween som goToIntro kör vid 1→2.
+        //        Detta är nyckeln till "samma känsla" — slutfasen är bokstavligen
+        //        samma CSS-transform-tween, utan scroll inblandat.
         const returnTl = gsap.timeline({ onComplete: finishReturn, onInterrupt: finishReturn });
         returnTl.to(scrollRoot, {
           scrollTop: target,
-          duration: 0.92,
-          ease: 'power2.inOut',
+          duration: 0.55,
+          ease: 'power3.inOut',
           overwrite: true,
         }, 0);
+        // Intro-entry startar EFTER scroll har landat (gap på 0.05s för en
+        // ren frame mellan faserna). Tweens nedan = exakt kopia av goToIntro-
+        // raderna 436/438/441 — samma duration, ease, stagger, ordning.
         if (introHeadingEl) {
-          returnTl.to(introHeadingEl, { opacity: 1, duration: 0.62, ease: 'power2.out' }, 0.3);
+          returnTl.fromTo(introHeadingEl, { opacity: 0 }, { opacity: 1, duration: 1.2, ease: 'power3.out' }, 0.6);
         }
-        returnTl.to(introTextItems, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.42);
+        returnTl.fromTo(
+          introTextItems,
+          { y: 44, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' },
+          0.6,
+        );
         if (introCtaEl) {
-          returnTl.to(introCtaEl, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 0.42 + introTextItems.length * 0.08);
+          returnTl.fromTo(
+            introCtaEl,
+            { opacity: 0 },
+            { opacity: 1, duration: 0.62, ease: 'power2.out' },
+            0.6 + introTextItems.length * 0.08,
+          );
         }
       };
 
