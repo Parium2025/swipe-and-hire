@@ -484,6 +484,20 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           e.stopPropagation();
         }
       };
+      const lockNativeInput = (ms: number) => {
+        transitionBlockUntil = performance.now() + ms;
+      };
+      const withScrollBehaviorAuto = () => {
+        if (!scrollRoot) return;
+        restoreScrollBehavior?.();
+        const previousScrollBehavior = scrollRoot.style.scrollBehavior;
+        scrollRoot.style.scrollBehavior = 'auto';
+        restoreScrollBehavior = () => {
+          scrollRoot.style.scrollBehavior = previousScrollBehavior;
+        };
+      };
+      scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
+      scrollRoot?.addEventListener('touchmove', blockNativeInput, { passive: false, capture: true });
 
       const isStageDocked = () => {
         const rect = stage.getBoundingClientRect();
