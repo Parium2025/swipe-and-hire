@@ -114,6 +114,7 @@ const PinnedHorizontalGallery = () => {
     // uppdateras varje frame — då tävlar den med GSAP-exit-tweenen på de 8 korten
     // och browserns smooth-scroll, och kan ge synligt hack på svagare GPU:er.
     let frozen = false;
+    let touching = false;
     let sectionTop = 0;
     let distance = 1;
     let startPx = 0;
@@ -146,7 +147,8 @@ const PinnedHorizontalGallery = () => {
       if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
-      const next = Math.abs(target - current) < 0.001 ? target : current + (target - current) * 0.32;
+      const smoothing = touching ? 0.58 : 0.32;
+      const next = Math.abs(target - current) < 0.001 ? target : current + (target - current) * smoothing;
       renderedProgressRef.current = next;
       applyProgress(next);
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
@@ -174,14 +176,18 @@ const PinnedHorizontalGallery = () => {
     applyProgress(0);
     measure();
     root.addEventListener('scroll', measure, { passive: true });
+    root.addEventListener('touchstart', () => { touching = true; }, { passive: true });
+    root.addEventListener('touchend', () => { touching = false; measure(); }, { passive: true });
+    root.addEventListener('touchcancel', () => { touching = false; measure(); }, { passive: true });
     window.addEventListener('resize', refreshMetrics);
-    window.addEventListener('parium:lenis-resize', refreshMetrics);
     window.addEventListener('parium:gallery-leave', freeze);
     window.addEventListener('parium:gallery-enter', thaw);
     return () => {
       root.removeEventListener('scroll', measure);
+      root.removeEventListener('touchstart', () => { touching = true; });
+      root.removeEventListener('touchend', () => { touching = false; measure(); });
+      root.removeEventListener('touchcancel', () => { touching = false; measure(); });
       window.removeEventListener('resize', refreshMetrics);
-      window.removeEventListener('parium:lenis-resize', refreshMetrics);
       window.removeEventListener('parium:gallery-leave', freeze);
       window.removeEventListener('parium:gallery-enter', thaw);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
