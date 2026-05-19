@@ -7,19 +7,8 @@ const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname ==
 const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 
-const ensureTopChromeStrip = () => {
-  let strip = document.getElementById('parium-browser-chrome-top') as HTMLDivElement | null;
-  if (!strip) {
-    strip = document.createElement('div');
-    strip.id = 'parium-browser-chrome-top';
-    strip.setAttribute('aria-hidden', 'true');
-    document.body.prepend(strip);
-  }
-  return strip;
-};
-
 const removeLegacySentinels = () => {
-  ['parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
+  ['parium-browser-chrome-top', 'parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.remove();
   });
@@ -68,18 +57,9 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   document.documentElement.style.setProperty('background-color', color, 'important');
   document.body.style.setProperty('background-color', color, 'important');
 
-  const topStrip = ensureTopChromeStrip();
-  Object.assign(topStrip.style, {
-    position: 'fixed',
-    left: '0',
-    right: '0',
-    top: '0',
-    height: 'env(safe-area-inset-top, 0px)',
-    backgroundColor: color,
-    zIndex: '2147483647',
-    pointerEvents: 'none',
-    transition: 'background-color 200ms ease-out',
-  });
+  // Top-strip hanteras av <TopChromeStrip /> (React-komponent som lyssnar på
+  // route-byten, samma mönster som BottomChromeStrip). Ingen imperative DOM
+  // här — det racear mot React re-renders.
 
   setThemeColor(color);
 
