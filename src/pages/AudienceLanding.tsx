@@ -922,11 +922,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
-        // -webkit-overflow-scrolling: touch ger iOS Safari momentum-scroll
-        // i fixed-containrar; utan denna känns 2↔3-overgången "stelare" på
-        // iPhone/iPad jämfört med desktop. scrollBehavior: 'smooth' säkrar
-        // att Android Chrome och Firefox använder samma native easing som
-        // Safari för scrollTo(..., {behavior: 'smooth'}).
+        // Lenis äger smooth-scrollen; native smooth är avstängt för att undvika
+        // dubbel easing/momentum under de låsta premium-övergångarna.
         WebkitOverflowScrolling: 'touch',
         scrollBehavior: 'auto',
         backgroundImage:
