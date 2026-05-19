@@ -789,6 +789,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
               backgroundColor: 'hsl(var(--primary))',
             }}
           >
+            {/* Samma bubblor som hero — så de inte "försvinner" när intro-lagret täcker bakgrunden */}
+            <AnimatedBackground variant="card" />
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center text-center will-change-transform">
               <h2
                 data-intro-heading
