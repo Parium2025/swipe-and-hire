@@ -288,7 +288,6 @@ const PinnedHorizontalGallery = () => {
           gsapInstance.fromTo(header, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, ease: 'power2.out', force3D: true });
         }
       }
-      const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
       // Vänta tills slide-in-tween (0.62s) + sista stagger (~640ms) är klar
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
       if (playTimer) window.clearTimeout(playTimer);
@@ -309,7 +308,8 @@ const PinnedHorizontalGallery = () => {
           gsapInstance.to(header, { y: 44, opacity: 0, duration: 0.42, ease: 'power2.in', force3D: true });
         }
       }
-      videosForPause.forEach(pauseSafe);
+      const videos = Array.from(strip.querySelectorAll<HTMLVideoElement>('video[data-phg-video]'));
+      videos.forEach(pauseSafe);
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
     };
 
