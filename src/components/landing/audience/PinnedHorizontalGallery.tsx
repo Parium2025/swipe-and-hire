@@ -142,6 +142,12 @@ const PinnedHorizontalGallery = () => {
       if (rafRef.current === null) rafRef.current = window.requestAnimationFrame(tick);
     };
 
+    const onTouchStart = () => { touching = true; };
+    const onTouchEnd = () => {
+      touching = false;
+      measure();
+    };
+
     const tick = () => {
       rafRef.current = null;
       if (frozen) return;
@@ -176,17 +182,17 @@ const PinnedHorizontalGallery = () => {
     applyProgress(0);
     measure();
     root.addEventListener('scroll', measure, { passive: true });
-    root.addEventListener('touchstart', () => { touching = true; }, { passive: true });
-    root.addEventListener('touchend', () => { touching = false; measure(); }, { passive: true });
-    root.addEventListener('touchcancel', () => { touching = false; measure(); }, { passive: true });
+    root.addEventListener('touchstart', onTouchStart, { passive: true });
+    root.addEventListener('touchend', onTouchEnd, { passive: true });
+    root.addEventListener('touchcancel', onTouchEnd, { passive: true });
     window.addEventListener('resize', refreshMetrics);
     window.addEventListener('parium:gallery-leave', freeze);
     window.addEventListener('parium:gallery-enter', thaw);
     return () => {
       root.removeEventListener('scroll', measure);
-      root.removeEventListener('touchstart', () => { touching = true; });
-      root.removeEventListener('touchend', () => { touching = false; measure(); });
-      root.removeEventListener('touchcancel', () => { touching = false; measure(); });
+      root.removeEventListener('touchstart', onTouchStart);
+      root.removeEventListener('touchend', onTouchEnd);
+      root.removeEventListener('touchcancel', onTouchEnd);
       window.removeEventListener('resize', refreshMetrics);
       window.removeEventListener('parium:gallery-leave', freeze);
       window.removeEventListener('parium:gallery-enter', thaw);
