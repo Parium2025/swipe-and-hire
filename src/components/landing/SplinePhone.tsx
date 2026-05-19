@@ -127,16 +127,8 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   }, [reducedMotion]);
 
   if (hasError) {
-    return (
-      <div
-        ref={wrapperRef}
-        className={`relative flex items-center justify-center ${className ?? ''}`}
-        role="img"
-        aria-label="Parium 3D-telefon (statisk vy)"
-      >
-        <div className="aspect-[9/19] w-[58%] max-w-[260px] rounded-[2.25rem] border border-white/15 bg-gradient-to-b from-white/10 to-white/[0.03] shadow-[0_30px_90px_hsl(var(--background)/0.5)] backdrop-blur-sm" />
-      </div>
-    );
+    // Offline / WebGL-fail: rendera ingenting hellre än en ful platshållartelefon.
+    return <div ref={wrapperRef} aria-hidden="true" className={className} style={style} />;
   }
 
   return (
