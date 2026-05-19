@@ -110,8 +110,8 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
         className="fixed top-0 left-0 right-0 z-50 bg-transparent"
         aria-label="Huvudnavigation"
       >
-        <div className="max-w-[1400px] mx-auto px-5 sm:px-6 md:px-12 lg:px-24">
-          <div className="flex items-center justify-between h-16 sm:h-[72px] gap-6">
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-5 md:px-12 lg:px-24">
+          <div className="flex items-center h-16 sm:h-[72px] gap-2 sm:gap-4 md:gap-6">
             <a
               href="/"
               onPointerDown={goHome}
@@ -126,94 +126,64 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                 width={224}
                 height={224}
                 draggable={false}
-                className="h-auto w-24 md:w-28 pointer-events-none"
+                className="h-auto w-16 sm:w-20 md:w-28 pointer-events-none"
               />
             </a>
 
-            {/* Desktop / större skärmar: pill centrerad mellan logo och login */}
+            {/* Nav-pill — alltid inline. Krymper på mobil, växer på större skärmar.
+                Scrollar horisontellt om innehållet ändå inte får plats. */}
             {links.length > 0 && (
-              <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
-                {links.map((l) => {
-                  const id = l.href.replace('#', '');
-                  const isActive = activeId === id;
-                  return (
-                    <a
-                      key={l.href}
-                      href={l.href}
-                      onClick={(e) => handleAnchor(e, l.href)}
-                      aria-current={isActive ? 'true' : undefined}
-                      className={`relative whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-medium transition-colors ${
-                        isActive ? 'text-white' : 'text-white/65 hover:text-white'
-                      }`}
-                    >
-                      {isActive && (
-                        <motion.span
-                          layoutId="nav-bubble-lg"
-                          className="absolute inset-0 -z-0 rounded-full bg-white/[0.10] border border-white/[0.10] shadow-[0_4px_20px_rgba(0,0,0,0.25)]"
-                          transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
-                        />
-                      )}
-                      <span className="relative z-10">{l.label}</span>
-                    </a>
-                  );
-                })}
+              <div className="flex-1 min-w-0 flex justify-center">
+                <div
+                  ref={pillScrollerRef}
+                  className="flex max-w-full items-center gap-0.5 sm:gap-1 overflow-x-auto rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1 py-1 sm:px-1.5 sm:py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                  style={{ WebkitOverflowScrolling: 'touch' }}
+                >
+                  {links.map((l) => {
+                    const id = l.href.replace('#', '');
+                    const isActive = activeId === id;
+                    return (
+                      <a
+                        key={l.href}
+                        href={l.href}
+                        onClick={(e) => {
+                          handleAnchor(e, l.href);
+                          requestAnimationFrame(() => {
+                            const target = e.currentTarget as HTMLElement | null;
+                            target?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                          });
+                        }}
+                        aria-current={isActive ? 'true' : undefined}
+                        className={`relative whitespace-nowrap rounded-full px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 text-[10.5px] sm:text-[12px] md:text-[13px] font-medium transition-colors ${
+                          isActive ? 'text-white' : 'text-white/65 hover:text-white'
+                        }`}
+                      >
+                        {isActive && (
+                          <motion.span
+                            layoutId="nav-bubble"
+                            className="absolute inset-0 -z-0 rounded-full bg-white/[0.10] border border-white/[0.10] shadow-[0_4px_20px_rgba(0,0,0,0.25)]"
+                            transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
+                          />
+                        )}
+                        <span className="relative z-10">{l.label}</span>
+                      </a>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
-            {/* Logga in-knapp — alltid synlig (kompakt på mobil) */}
-            <div className="ml-auto shrink-0">
+            {/* Logga in — alltid synlig, kompakt på mobil */}
+            <div className="shrink-0">
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-4 sm:px-6 h-9 sm:h-9 bg-white/[0.04] border border-white/[0.08] text-white text-[12px] sm:text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
+                className="rounded-full px-3 sm:px-5 md:px-6 h-8 sm:h-9 bg-white/[0.04] border border-white/[0.08] text-white text-[11px] sm:text-[12px] md:text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
               >
                 Logga in
               </Button>
             </div>
           </div>
-
-          {/* Mobil/tablet: nav-pill som andra rad — horisontellt scrollbar om den inte får plats */}
-          {links.length > 0 && (
-            <div className="lg:hidden pb-2 -mt-1">
-              <div
-                ref={pillScrollerRef}
-                className="mx-auto flex w-full max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-                style={{ WebkitOverflowScrolling: 'touch' }}
-              >
-                {links.map((l) => {
-                  const id = l.href.replace('#', '');
-                  const isActive = activeId === id;
-                  return (
-                    <a
-                      key={l.href}
-                      href={l.href}
-                      onClick={(e) => {
-                        handleAnchor(e, l.href);
-                        // Auto-scrolla pillen så aktiv chip syns
-                        requestAnimationFrame(() => {
-                          const target = e.currentTarget as HTMLElement | null;
-                          target?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                        });
-                      }}
-                      aria-current={isActive ? 'true' : undefined}
-                      className={`relative whitespace-nowrap rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
-                        isActive ? 'text-white' : 'text-white/65 hover:text-white'
-                      }`}
-                    >
-                      {isActive && (
-                        <motion.span
-                          layoutId="nav-bubble-sm"
-                          className="absolute inset-0 -z-0 rounded-full bg-white/[0.10] border border-white/[0.10] shadow-[0_4px_20px_rgba(0,0,0,0.25)]"
-                          transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
-                        />
-                      )}
-                      <span className="relative z-10">{l.label}</span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </nav>
     </>
