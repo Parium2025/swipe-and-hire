@@ -1,9 +1,6 @@
-const LANDING_CHROME_COLOR = '#626262';
-// Matcha body-bakgrunden exakt (hsl(215 100% 12%) ≈ #00193D) så att den övre
-// URL-baren får samma färg som iOS Safaris bottenverktygsfält samplar från
-// body. På så vis "följer toppen med" precis som bottens färg gör.
-const PARIUM_CHROME_COLOR = '#00193D';
-const AUDIENCE_LANDING_CHROME_COLOR = '#00193D';
+const LANDING_CHROME_COLOR = '#2a2a2a';
+const PARIUM_CHROME_COLOR = '#001935';
+const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
