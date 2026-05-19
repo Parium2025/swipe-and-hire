@@ -7,8 +7,19 @@ const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname ==
 const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 
+const ensureTopChromeStrip = () => {
+  let strip = document.getElementById('parium-browser-chrome-top') as HTMLDivElement | null;
+  if (!strip) {
+    strip = document.createElement('div');
+    strip.id = 'parium-browser-chrome-top';
+    strip.setAttribute('aria-hidden', 'true');
+    document.body.prepend(strip);
+  }
+  return strip;
+};
+
 const removeLegacySentinels = () => {
-  ['parium-browser-chrome-top', 'parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
+  ['parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.remove();
   });
