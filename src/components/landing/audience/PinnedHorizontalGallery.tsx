@@ -225,6 +225,8 @@ const PinnedHorizontalGallery = () => {
       if (p && typeof p.catch === 'function') p.catch(() => {});
     };
 
+    const shouldUseVideo = () => !window.matchMedia('(max-width: 767px), (hover: none), (pointer: coarse)').matches;
+
     // Adaptiv warmup: på data-saver eller långsamma nät (2G/3G) warm:ar vi
     // bara de första 4 videorna direkt — resten warm:as först när användaren
     // faktiskt scrollar nära dem. Sparar 50% bandbredd på mobil/sparsam data
@@ -245,6 +247,7 @@ const PinnedHorizontalGallery = () => {
     };
 
     const warmVideos = () => {
+      if (!shouldUseVideo()) return;
       if (warmed) return;
       warmed = true;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
@@ -300,8 +303,11 @@ const PinnedHorizontalGallery = () => {
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
       if (playTimer) window.clearTimeout(playTimer);
       playTimer = window.setTimeout(() => {
+        if (!shouldUseVideo()) return;
         videos.slice(0, 3).forEach(playSafe);
-        window.setTimeout(() => videos.slice(3).forEach(playSafe), 600);
+        window.setTimeout(() => {
+          if (shouldUseVideo()) videos.slice(3).forEach(playSafe);
+        }, 600);
       }, 800);
     };
     const leave = () => {
