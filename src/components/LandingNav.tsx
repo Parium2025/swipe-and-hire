@@ -42,21 +42,43 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
   // Hjälpare: gemensam smooth-scroll som spelar rent med AudienceLanding-
   // orchestreringen (Observer + scroll-jacking mellan hero ↔ intro ↔ galleri).
-  // Utan detta lås-släpp kan pinned-galleriet kännas låst efter ett hopp.
+  // Använder en egen rAF-tween med ease-in-out så det känns lugnare/premium
+  // än webbläsarens default `behavior: 'smooth'` (som ofta är megasnabb).
+  const smoothScrollTo = (
+    target: HTMLElement | Window,
+    top: number,
+    duration = 900,
+  ) => {
+    const isWin = target === window;
+    const getY = () => (isWin ? window.scrollY : (target as HTMLElement).scrollTop);
+    const setY = (y: number) =>
+      isWin ? window.scrollTo({ top: y, behavior: 'auto' }) : ((target as HTMLElement).scrollTop = y);
+    const startY = getY();
+    const delta = top - startY;
+    if (Math.abs(delta) < 2) return;
+    const startT = performance.now();
+    // easeInOutCubic – mjuk i båda ändar
+    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const step = (now: number) => {
+      const t = Math.min(1, (now - startT) / duration);
+      setY(startY + delta * ease(t));
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
     setActiveId(id);
-    // Säg åt orchestreringen att vi gör ett programmatiskt hopp förbi
-    // hero/intro så att Observer släpper wheel/touch och pinned-galleriet
-    // tinas (ingen effekt på vanliga landing-sidan utan orchestrering).
     window.dispatchEvent(new Event('parium:nav-jump'));
     const scroller = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
     if (scroller) {
       const top = scroller.scrollTop + el.getBoundingClientRect().top;
-      scroller.scrollTo({ top, behavior: 'smooth' });
+      smoothScrollTo(scroller, top, 950);
     } else {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const top = window.scrollY + el.getBoundingClientRect().top;
+      smoothScrollTo(window, top, 950);
     }
   };
 
