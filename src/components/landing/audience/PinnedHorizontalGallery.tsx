@@ -125,9 +125,12 @@ const PinnedHorizontalGallery = () => {
       // Sluta så att sista kortet är helt synligt med samma 7vw marginal till höger
       const endPx = Math.min(startPx, viewport - stripWidth - startPx);
       const xPx = startPx + (endPx - startPx) * p;
-      // Runda till hela pixlar — sub-pixel-värden får browsern att re-rastera
-      // varje frame vilket ger den "skakiga" känslan på tunga videokort.
-      strip.style.setProperty('--phg-x', `${Math.round(xPx)}px`);
+      // INGEN Math.round här. Strippen är composited (translate3d på GPU) så
+      // sub-pixel-värden re-rastrerar inte. Avrundning gav istället synligt
+      // hack på touch där momentum-scroll ger många små deltas — då stannar
+      // korten 1px i taget istället för att glida mjukt. Mus märks inte lika
+      // mycket eftersom wheel-deltan är större per event.
+      strip.style.setProperty('--phg-x', `${xPx.toFixed(2)}px`);
       section.style.setProperty('--phg-progress', `${p}`);
       // Baren ska vara på plats redan vid första kortet (p=0) och hela vägen
       // till sista kortet (p=1). Den fade:as endast ut precis när vi börjar
