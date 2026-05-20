@@ -19,11 +19,21 @@ const TopChromeStrip = () => {
   const location = useLocation();
   const [isTouch, setIsTouch] = useState(false);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const mq = window.matchMedia('(pointer: coarse)');
     const apply = () => setIsTouch(mq.matches);
+    apply();
+    mq.addEventListener?.('change', apply);
+    return () => mq.removeEventListener?.('change', apply);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(display-mode: standalone)');
+    const apply = () => setIsStandalone(mq.matches);
     apply();
     mq.addEventListener?.('change', apply);
     return () => mq.removeEventListener?.('change', apply);
@@ -60,11 +70,15 @@ const TopChromeStrip = () => {
         position: 'fixed',
         left: 0,
         right: 0,
-        top: 0,
-        // Håll den tunnare än botten så mobilens toppinnehåll inte kapas,
-        // men låt den fortfarande synas även när safe-area rapporteras som 0px.
-        height: 'calc(env(safe-area-inset-top, 0px) + 6px)',
+        top: isStandalone ? 0 : 'calc(-1 * env(safe-area-inset-top, 0px))',
+        // Extra top-remsa som täcker hela statusområdet + en tunn kant under.
+        // I browser-läge behöver den sticka upp över safe-area eftersom sidan
+        // själv har negativ safe-area offset; i PWA-läge räcker vanlig top: 0.
+        height: isStandalone
+          ? 'calc(env(safe-area-inset-top, 0px) + 4px)'
+          : 'calc(env(safe-area-inset-top, 0px) + 10px)',
         backgroundColor: displayColor,
+        background: 'var(--active-browser-chrome-color)',
         zIndex: 2147483647,
         pointerEvents: 'none',
         transition: 'background-color 200ms ease-out',

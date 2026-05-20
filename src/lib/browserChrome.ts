@@ -39,6 +39,11 @@ const notifyChromeStrips = (pathname: string, color: string) => {
   );
 };
 
+const setChromeCssColor = (color: string) => {
+  document.documentElement.style.setProperty('--active-browser-chrome-color', color);
+  document.documentElement.style.setProperty('--browser-chrome-color', color);
+};
+
 /**
  * Synkar browser-chrome (URL-bar topp + body-bakgrund).
  *
@@ -65,13 +70,24 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
 
   document.documentElement.style.setProperty('background-color', color, 'important');
   document.body.style.setProperty('background-color', color, 'important');
+  setChromeCssColor(color);
 
-  // Top-strip hanteras av <TopChromeStrip /> (React-komponent som lyssnar på
-  // route-byten, samma mönster som BottomChromeStrip). Ingen imperative DOM
-  // här — det racear mot React re-renders.
+  // Top-/bottomremsorna läser CSS-variabeln direkt. Det gör att toppremsan
+  // byter färg samtidigt som route-syncen, utan att vara beroende av att
+  // Safari uppdaterar sin native theme-color direkt.
 
   setThemeColor(color);
   notifyChromeStrips(pathname, color);
+
+  // iOS Safari kan ignorera första dynamiska theme-color-uppdateringen under
+  // SPA-nav. Re-applicera efter att målsidan har landat visuellt.
+  [80, 260, 640].forEach((delay) => {
+    window.setTimeout(() => {
+      setChromeCssColor(color);
+      setThemeColor(color);
+      notifyChromeStrips(pathname, color);
+    }, delay);
+  });
 
   // iOS Safari samplar body-färgen för bottenverktygsfältet vid first paint och
   // uppdaterar inte vid SPA-nav. Trigga en forcerad re-sampling:
