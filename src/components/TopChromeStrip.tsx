@@ -70,7 +70,7 @@ const TopChromeStrip = () => {
         position: 'fixed',
         left: 0,
         right: 0,
-        top: 'calc(-1 * env(safe-area-inset-top, 0px))',
+        top: isStandalone ? 0 : 'calc(-1 * env(safe-area-inset-top, 0px))',
         // Extra top-remsa som täcker hela statusområdet + en tunn kant under.
         // I browser-läge behöver den sticka upp över safe-area eftersom sidan
         // själv har negativ safe-area offset; i PWA-läge räcker vanlig top: 0.
