@@ -629,10 +629,15 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         };
 
         gsap.killTweensOf(scrollRoot);
+        // Returen (3→2) använder power3.out istället för power2.inOut: snabb
+        // start gör att gesten omedelbart översätts till rörelse (ingen "trög
+        // halvsekund"), och en något kortare duration gör att landningen
+        // möter användarens swipe-tempo. Forward (2→3) håller power2.inOut
+        // för att kännas premium från en lugn intro.
         gsap.to(scrollRoot, {
           scrollTop: target,
-          duration: TRANSITION_DURATION,
-          ease: 'power2.inOut',
+          duration: 0.82,
+          ease: 'power3.out',
           overwrite: true,
           onComplete: finishReturn,
           onInterrupt: finishReturn,
