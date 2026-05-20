@@ -61,9 +61,9 @@ const TopChromeStrip = () => {
         left: 0,
         right: 0,
         top: 0,
-        // Spegla botten: env(safe-area-inset-top) kan vara 0px i Safari/preview,
-        // så en ren safe-area-remsa blir osynlig och kan inte visa färgbytet.
-        height: 'calc(env(safe-area-inset-top, 0px) + 14px)',
+        // Håll den tunnare än botten så mobilens toppinnehåll inte kapas,
+        // men låt den fortfarande synas även när safe-area rapporteras som 0px.
+        height: 'calc(env(safe-area-inset-top, 0px) + 6px)',
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',
