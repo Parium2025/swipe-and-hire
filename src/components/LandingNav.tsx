@@ -195,10 +195,10 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               <img
                 src={pariumLogo}
                 alt="Parium"
-                width={224}
-                height={224}
+                width={256}
+                height={256}
                 draggable={false}
-                className="h-auto w-32 sm:w-28 md:w-32 pointer-events-none"
+                className="h-auto w-36 sm:w-32 md:w-40 pointer-events-none"
               />
             </a>
 
