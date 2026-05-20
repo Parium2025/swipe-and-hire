@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
@@ -20,10 +20,9 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const pillScrollerRef = useRef<HTMLDivElement | null>(null);
+  const mobileScrollerRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [rotIndex, setRotIndex] = useState(0);
-  const [rotPaused, setRotPaused] = useState(false);
 
   const goHome = (e?: React.SyntheticEvent) => {
     e?.preventDefault();
@@ -118,19 +117,6 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     scroller.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
   }, [activeId]);
 
-  // Rotera mobillänkar var 2.8s, pausa när användaren tryckt
-  useEffect(() => {
-    if (!isMobile || !links.length || rotPaused) return;
-    const t = window.setInterval(() => {
-      setRotIndex((i) => (i + 1) % links.length);
-    }, 2800);
-    return () => window.clearInterval(t);
-  }, [isMobile, links.length, rotPaused]);
-
-  const currentRotLink = links[rotIndex % Math.max(1, links.length)];
-
-
-
   return (
     <>
       <nav
@@ -154,36 +140,34 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                 width={224}
                 height={224}
                 draggable={false}
-                className="h-auto w-24 sm:w-24 md:w-28 pointer-events-none"
+                className="h-auto w-32 sm:w-28 md:w-32 pointer-events-none"
               />
             </a>
 
-            {/* Mobil: en enda roterande pill. Desktop (sm+): hela list-pillen. */}
+            {/* Mobil: swipa-bar pill med snap. Desktop (sm+): hela list-pillen. */}
             {links.length > 0 && isMobile && (
               <div className="flex-1 min-w-0 flex justify-center">
-                <a
-                  href={currentRotLink?.href ?? '#'}
-                  onClick={(e) => currentRotLink && handleAnchor(e, currentRotLink.href)}
-                  onPointerDown={() => setRotPaused(true)}
-                  onPointerUp={() => window.setTimeout(() => setRotPaused(false), 1500)}
-                  className="relative inline-flex h-9 min-w-[120px] max-w-full items-center justify-center overflow-hidden rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 text-[13px] font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-colors hover:bg-white/[0.08]"
-                  aria-label={`Gå till ${currentRotLink?.label ?? ''}`}
+                <div
+                  ref={mobileScrollerRef}
+                  className="relative h-10 w-[140px] max-w-full overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.25)] snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                  style={{ WebkitOverflowScrolling: 'touch' }}
                 >
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={currentRotLink?.href ?? 'empty'}
-                      initial={{ y: 12, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -12, opacity: 0 }}
-                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                      className="whitespace-nowrap"
-                    >
-                      {currentRotLink?.label}
-                    </motion.span>
-                  </AnimatePresence>
-                </a>
+                  <div className="flex h-full">
+                    {links.map((l) => (
+                      <a
+                        key={l.href}
+                        href={l.href}
+                        onClick={(e) => handleAnchor(e, l.href)}
+                        className="snap-center shrink-0 w-[140px] h-full inline-flex items-center justify-center px-4 text-[13px] font-medium text-white whitespace-nowrap"
+                      >
+                        {l.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
+
 
             {links.length > 0 && !isMobile && (
               <div className="flex-1 min-w-0 flex justify-center">
@@ -231,7 +215,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-5 sm:px-5 md:px-6 h-9 sm:h-9 bg-white/[0.04] border border-white/[0.08] text-white text-[13px] sm:text-[12px] md:text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
+                className="rounded-full px-6 sm:px-5 md:px-6 h-10 sm:h-9 bg-white/[0.04] border border-white/[0.08] text-white text-[14px] sm:text-[12px] md:text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
               >
                 Logga in
               </Button>
