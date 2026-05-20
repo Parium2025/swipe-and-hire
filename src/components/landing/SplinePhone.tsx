@@ -11,11 +11,44 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
+// Avgör om enheten är för svag/uppkopplingen för dålig för att köra Spline.
+// När detta är true visar vi enbart den statiska premium-ramen (samma fallback
+// som redan används medan WebGL bootar) — inget försvinner visuellt.
+const shouldSkipSpline = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  try {
+    const nav = navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+      deviceMemory?: number;
+      hardwareConcurrency?: number;
+    };
+    const conn = nav.connection;
+    if (conn?.saveData) return true;
+    if (conn?.effectiveType && /(^|-)(2g|slow-2g|3g)$/i.test(conn.effectiveType)) return true;
+    if (typeof nav.deviceMemory === 'number' && nav.deviceMemory > 0 && nav.deviceMemory <= 2) return true;
+    if (typeof nav.hardwareConcurrency === 'number' && nav.hardwareConcurrency > 0 && nav.hardwareConcurrency <= 4) {
+      // Endast på touch/mobil — desktop med 4 kärnor klarar Spline fint.
+      const isTouch = window.matchMedia?.('(hover: none) and (pointer: coarse)').matches;
+      if (isTouch) return true;
+    }
+  } catch {
+    /* no-op */
+  }
+  return false;
+};
+
 export const SplinePhone = ({ className, style, zoom = 0.78, active = true, instantFallback = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
+
+  // Beslutas en gång vid mount så vi inte flippar mellan WebGL ↔ fallback om
+  // användaren råkar växla nätverk under sessionen.
+  const skipSpline = useRef<boolean>(false);
+  if (skipSpline.current === false && typeof window !== 'undefined') {
+    skipSpline.current = shouldSkipSpline();
+  }
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -26,7 +59,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
 
   useEffect(() => {
     if (isReady || hasError) return;
-    if (instantFallback) {
+    if (instantFallback || skipSpline.current) {
       setShowFallback(true);
       return undefined;
     }
@@ -42,6 +75,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
     if (!reducedMotion && !hasError && !showFallback) return;
     window.dispatchEvent(new Event('parium:spline-ready'));
   }, [reducedMotion, hasError, showFallback]);
+
 
   useEffect(() => {
     activeRef.current = active;
@@ -64,11 +98,16 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (reducedMotion || skipSpline.current) return;
 
     let cancelled = false;
     let app: SplineApplication | null = null;
+    let observer: IntersectionObserver | null = null;
+    let started = false;
 
-    (async () => {
+    const start = async () => {
+      if (started || cancelled) return;
+      started = true;
       try {
         const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
@@ -117,14 +156,38 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
         console.error('Kunde inte ladda Spline-telefonen:', error);
         if (!cancelled) setHasError(true);
       }
-    })();
+    };
+
+    // Lazy-load: börja inte ladda runtime förrän canvasen är nära viewport.
+    // På entry-points där hero är direkt synlig (t.ex. /jobbsokare) triggar
+    // observern omedelbart, så ingen fördröjning för normala användare.
+    if (typeof IntersectionObserver === 'function') {
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              observer?.disconnect();
+              observer = null;
+              start();
+              break;
+            }
+          }
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(canvas);
+    } else {
+      start();
+    }
 
     return () => {
       cancelled = true;
+      observer?.disconnect();
       app?.dispose();
       appRef.current = null;
     };
   }, [reducedMotion]);
+
 
   if (hasError) {
     // Offline / WebGL-fail: rendera ingenting hellre än en ful platshållartelefon.
