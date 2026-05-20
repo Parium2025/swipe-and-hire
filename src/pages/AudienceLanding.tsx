@@ -510,22 +510,27 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       const lockNativeInput = (ms: number) => {
         transitionBlockUntil = performance.now() + ms;
       };
-      const withScrollBehaviorAuto = () => {
+      const isTouchDevice = () => {
+        if (typeof window === 'undefined') return false;
+        return ('ontouchstart' in window) || (navigator.maxTouchPoints ?? 0) > 0;
+      };
+      const withScrollBehaviorAuto = ({ pulseOverflow = isTouchDevice() } = {}) => {
         if (!scrollRoot) return;
         restoreScrollBehavior?.();
         const previousScrollBehavior = scrollRoot.style.scrollBehavior;
         const previousOverflowY = scrollRoot.style.overflowY;
         scrollRoot.style.scrollBehavior = 'auto';
-        // iOS-momentum kan annars fortsätta tävla med GSAP:s scrollTop-tween
-        // och få sidan att "glida förbi" 2↔3-låsningen. Vi pulsar overflow-y:
-        // hidden en frame för att tvinga browsern att släppa hardware-momentum
-        // innan tween:en tar över.
-        scrollRoot.style.overflowY = 'hidden';
-        requestAnimationFrame(() => {
-          if (scrollRoot.style.overflowY === 'hidden') {
-            scrollRoot.style.overflowY = previousOverflowY;
-          }
-        });
+        // iOS-momentum tävlar annars med GSAP:s scrollTop-tween. Vi pulsar
+        // overflow-y: hidden EN frame ENBART på touch — på desktop ger samma
+        // puls ett synligt 1-frame-hack precis när tweenen startar.
+        if (pulseOverflow) {
+          scrollRoot.style.overflowY = 'hidden';
+          requestAnimationFrame(() => {
+            if (scrollRoot.style.overflowY === 'hidden') {
+              scrollRoot.style.overflowY = previousOverflowY;
+            }
+          });
+        }
         restoreScrollBehavior = () => {
           scrollRoot.style.scrollBehavior = previousScrollBehavior;
           scrollRoot.style.overflowY = previousOverflowY;
