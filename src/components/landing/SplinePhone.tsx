@@ -11,7 +11,6 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-
 export const SplinePhone = ({ className, style, zoom = 0.78, active = true, instantFallback = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -20,6 +19,9 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
+  // På mobil/surfplatta visar vi en premiumram direkt under laddning så hero aldrig
+  // upplevs tom om WebGL/Spline är långsamt eller stoppas av mobilbrowsern.
+  // På desktop väntar vi fortfarande några sekunder för att undvika skeleton-flash.
   const [showFallback, setShowFallback] = useState(false);
 
   useEffect(() => {
@@ -40,7 +42,6 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
     if (!reducedMotion && !hasError && !showFallback) return;
     window.dispatchEvent(new Event('parium:spline-ready'));
   }, [reducedMotion, hasError, showFallback]);
-
 
   useEffect(() => {
     activeRef.current = active;
@@ -63,12 +64,11 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    if (reducedMotion) return;
 
     let cancelled = false;
     let app: SplineApplication | null = null;
 
-    const start = async () => {
+    (async () => {
       try {
         const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
@@ -87,6 +87,8 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
         app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
         await app.load(SCENE_URL);
+        // Spline-scenen kan ha en egen background-color som annars syns som
+        // en vit ram innan WebGL fyller canvasen. Tvinga transparent.
         try {
           (app as unknown as { setBackgroundColor?: (c: string) => void })
             .setBackgroundColor?.('rgba(0,0,0,0)');
@@ -94,6 +96,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
         app.setZoom(zoom);
         requestAnimationFrame(() => app?.setZoom(zoom));
         if (!activeRef.current) app.stop();
+        // Vänta 3 rAF så Spline garanterat hunnit rita sin första WebGL-frame
+        // innan vi fade:ar in canvasen. På throttlade enheter (Lovable preview-
+        // iframe, äldre Androids) räcker inte 2 rAF — då syns scenens
+        // default-bakgrund i en frame som "vit ram" runt telefonen.
         await new Promise<void>((resolve) => {
           requestAnimationFrame(() =>
             requestAnimationFrame(() =>
@@ -103,15 +109,15 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
         });
         if (!cancelled) {
           setIsReady(true);
+          // Signal till FixedPhoneLayer att vi får visa wrappern utan att
+          // det blir ett synligt tomt/vitt lager innan WebGL ritar första frame.
           window.dispatchEvent(new Event('parium:spline-ready'));
         }
       } catch (error) {
         console.error('Kunde inte ladda Spline-telefonen:', error);
         if (!cancelled) setHasError(true);
       }
-    };
-
-    start();
+    })();
 
     return () => {
       cancelled = true;
@@ -119,7 +125,6 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
       appRef.current = null;
     };
   }, [reducedMotion]);
-
 
   if (hasError) {
     // Offline / WebGL-fail: rendera ingenting hellre än en ful platshållartelefon.
