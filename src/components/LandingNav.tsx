@@ -212,14 +212,8 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                           onSelect={(e) => {
                             e.preventDefault();
                             setMenuOpen(false);
-                            const el = document.getElementById(id);
-                            if (el) {
-                              setActiveId(id);
-                              // Vänta tills menyn stängts så scroll inte avbryts av focus-return
-                              window.setTimeout(() => {
-                                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                              }, 60);
-                            }
+                            // Vänta tills menyn stängts så scroll inte avbryts av focus-return
+                            window.setTimeout(() => scrollToSection(id), 60);
                           }}
                           className={isActive ? 'bg-accent/60 font-semibold' : ''}
                         >
