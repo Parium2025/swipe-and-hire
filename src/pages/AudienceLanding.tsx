@@ -605,10 +605,24 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // hela tiden och bara åker med layern.
         setIntroResting();
         window.dispatchEvent(new Event('parium:gallery-leave'));
-        const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
 
         lockNativeInput(TRANSITION_LOCK_MS);
         withScrollBehaviorAuto();
+
+        // FÖRST: snäpp scroll-positionen till galleriets topp (= stage bottom).
+        // På snabb uppåt-swipe har användaren annars redan scrollat förbi den
+        // punkten innan triggern fyrar — då blir GSAP-tween:ens visuella sträcka
+        // för kort och animationen "flyger upp" istället för att åka jämnt.
+        // Genom att alltid starta tween:en från galleri-toppen får vi exakt
+        // samma 1.08s-distans varje gång, oavsett scroll-hastighet.
+        const galleryTop = gallerySection
+          ? scrollRoot.scrollTop + gallerySection.getBoundingClientRect().top
+          : scrollRoot.scrollTop;
+        if (galleryTop > 0 && Math.abs(scrollRoot.scrollTop - galleryTop) > 1) {
+          scrollRoot.scrollTop = galleryTop;
+        }
+        const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
+
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
         const finishReturn = () => {
