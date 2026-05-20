@@ -167,61 +167,58 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               />
             </a>
 
-            {/* Mobil: dropdown-meny. Desktop (sm+): hela list-pillen. */}
+            {/* Mobil: dropdown-meny (standard shadcn). Desktop (sm+): hela list-pillen. */}
             {links.length > 0 && isMobile && (
               <div className="flex-1 min-w-0 flex justify-center">
-                <div ref={mobileMenuRef} className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setMenuOpen((v) => !v)}
-                    aria-haspopup="menu"
-                    aria-expanded={menuOpen}
-                    className="inline-flex h-10 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 text-[13px] font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-colors hover:bg-white/[0.08] active:bg-white/[0.10]"
-                  >
-                    <span className="whitespace-nowrap">
-                      {links.find((l) => l.href.replace('#', '') === activeId)?.label ?? 'Meny'}
-                    </span>
-                    <svg
-                      width="12" height="12" viewBox="0 0 12 12" fill="none"
-                      className={`transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`}
-                      aria-hidden="true"
+                <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Öppna sektionsmeny"
+                      className="inline-flex h-10 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 text-[13px] font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-colors hover:bg-white/[0.08] active:bg-white/[0.10] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
-                      <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-
-                  {menuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -6, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                      role="menu"
-                      className="absolute left-1/2 top-full mt-2 -translate-x-1/2 min-w-[200px] rounded-2xl border border-white/[0.10] bg-black/70 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden z-50"
-                    >
-                      <div className="flex flex-col p-1.5">
-                        {links.map((l) => {
-                          const id = l.href.replace('#', '');
-                          const isActive = activeId === id;
-                          return (
-                            <a
-                              key={l.href}
-                              href={l.href}
-                              role="menuitem"
-                              onClick={(e) => { handleAnchor(e, l.href); setMenuOpen(false); }}
-                              className={`rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors ${
-                                isActive ? 'text-white bg-white/[0.10]' : 'text-white/80 hover:text-white hover:bg-white/[0.06]'
-                              }`}
-                            >
-                              {l.label}
-                            </a>
-                          );
-                        })}
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
+                      <span className="whitespace-nowrap max-w-[160px] truncate">
+                        {links.find((l) => l.href.replace('#', '') === activeId)?.label ?? 'Meny'}
+                      </span>
+                      <svg
+                        width="12" height="12" viewBox="0 0 12 12" fill="none"
+                        className={`shrink-0 transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`}
+                        aria-hidden="true"
+                      >
+                        <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" sideOffset={8} className="min-w-[200px]">
+                    {links.map((l) => {
+                      const id = l.href.replace('#', '');
+                      const isActive = activeId === id;
+                      return (
+                        <DropdownMenuItem
+                          key={l.href}
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            setMenuOpen(false);
+                            const el = document.getElementById(id);
+                            if (el) {
+                              setActiveId(id);
+                              // Vänta tills menyn stängts så scroll inte avbryts av focus-return
+                              window.setTimeout(() => {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }, 60);
+                            }
+                          }}
+                          className={isActive ? 'bg-accent/60 font-semibold' : ''}
+                        >
+                          {l.label}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
+
 
 
 
