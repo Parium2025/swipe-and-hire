@@ -507,6 +507,10 @@ const PinnedHorizontalGallery = () => {
           100% { transform: scale(1.04) translate3d(0,0,0); }
         }
         .phg-card img { animation: phg-kenburns 24s ease-in-out infinite; }
+        /* Pausa kenburns under 3→2-exiten så bilden inte oscillerar synligt
+           precis innan layern flyger upp. Vi pausar i nuvarande frame så
+           ingen "snap" syns; animationen återupptas när galleriet entras igen. */
+        .phg-strip.phg-pause-kenburns .phg-card img { animation-play-state: paused; }
         @media (prefers-reduced-motion: reduce) {
           .phg-card img { animation: none; }
         }
