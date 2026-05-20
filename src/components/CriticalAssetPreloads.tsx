@@ -33,6 +33,27 @@ export function CriticalAssetPreloads() {
         }}
       />
 
+      {/* Hidden img to keep landing-nav logo decoded (used by LandingNav) */}
+      <img
+        src={landingNavLogo}
+        alt=""
+        aria-hidden="true"
+        loading="eager"
+        decoding="sync"
+        fetchPriority="high"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: 1,
+          height: 1,
+          opacity: 0,
+          pointerEvents: "none",
+          zIndex: -1,
+        }}
+      />
+
+
       {/* Hidden img to keep auth logo (data-URI) decoded for AuthSplashScreen */}
       <img
         src={authLogoDataUri}
