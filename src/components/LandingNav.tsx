@@ -118,6 +118,18 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     scroller.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
   }, [activeId]);
 
+  // Rotera mobillänkar var 2.8s, pausa när användaren tryckt
+  useEffect(() => {
+    if (!isMobile || !links.length || rotPaused) return;
+    const t = window.setInterval(() => {
+      setRotIndex((i) => (i + 1) % links.length);
+    }, 2800);
+    return () => window.clearInterval(t);
+  }, [isMobile, links.length, rotPaused]);
+
+  const currentRotLink = links[rotIndex % Math.max(1, links.length)];
+
+
 
   return (
     <>
