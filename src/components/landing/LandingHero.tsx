@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroVideo from './HeroVideo';
-import { syncBrowserChrome } from '@/lib/browserChrome';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
 
@@ -117,13 +116,9 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
     setSelectedRole(role);
     const target = role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare';
     sessionStorage.setItem('parium-skip-splash', '1');
-    // Sätt målets färg INNAN navigation så Safaris topp-bar samplar blått direkt.
-    syncBrowserChrome(target);
     window.setTimeout(() => {
-      // SPA-nav (ingen hard reload) — back-knappen ska fungera och videon ska
-      // inte tvångsladdas om. iOS Safaris bottenfält kan behålla grå sampling
-      // tills nästa hard refresh; det är ett acceptabelt visuellt trade-off
-      // jämfört med vit/trasig sida som hard reloads orsakade.
+      // SPA-nav: chrome-färgen synkas centralt först efter route-bytet,
+      // så toppremsan byter färg när målsidan faktiskt har landat.
       navigate(target);
     }, 860);
   };
