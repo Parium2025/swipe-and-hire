@@ -168,7 +168,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
             {/* Mobil: dropdown-meny (standard shadcn). Desktop (sm+): hela list-pillen. */}
             {links.length > 0 && isMobile && (
               <div className="flex-1 min-w-0 flex justify-center">
-                <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
