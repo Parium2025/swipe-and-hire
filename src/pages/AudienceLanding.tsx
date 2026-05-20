@@ -704,6 +704,11 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (programmaticReturn || animatingRef.current) return;
 
         const cur = scrollRoot.scrollTop;
+        const direction = cur < prevScrollTop ? 'up' : 'down';
+        prevScrollTop = cur;
+        const rect = stage.getBoundingClientRect();
+        const vh = window.innerHeight;
+
         if (releasedToGallery) {
           setObserverActive(false);
           // Backup-trigger: bara om galleri-sektionen fortfarande är pinnad i topp.
@@ -716,11 +721,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           return;
         }
 
-          if (direction === 'up') {
-            returnFromGalleryToIntro();
-          }
-          return;
-        }
 
         const stageIsDocked = Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
         if (stageIsDocked) {
