@@ -70,15 +70,13 @@ const TopChromeStrip = () => {
         position: 'fixed',
         left: 0,
         right: 0,
-        top: isStandalone ? 0 : 'calc(-1 * env(safe-area-inset-top, 0px))',
-        // Extra top-remsa som täcker hela statusområdet + en tunn kant under.
-        // I browser-läge behöver den sticka upp över safe-area eftersom sidan
-        // själv har negativ safe-area offset; i PWA-läge räcker vanlig top: 0.
+        top: 0,
+        // Mer synlig top-remsa. Den ligger inne i viewporten (inte uppflyttad
+        // med negativ safe-area) så den faktiskt syns och byter färg som botten.
         height: isStandalone
-          ? 'calc(env(safe-area-inset-top, 0px) + 4px)'
-          : 'calc(env(safe-area-inset-top, 0px) + 10px)',
+          ? 'calc(env(safe-area-inset-top, 0px) + 8px)'
+          : 'calc(env(safe-area-inset-top, 0px) + 18px)',
         backgroundColor: displayColor,
-        background: 'var(--active-browser-chrome-color)',
         zIndex: 2147483647,
         pointerEvents: 'none',
         transition: 'background-color 200ms ease-out',
