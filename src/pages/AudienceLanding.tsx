@@ -487,25 +487,18 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         }
 
         if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
+          const stageBottom = stage.getBoundingClientRect().bottom;
           const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
           const touch = e instanceof TouchEvent ? e.touches[0] : null;
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          // VIKTIGT: Endast intercepta upp-gesten när galleri-sektionen fortfarande
-          // är pinnad (top nära 0). Om användaren har scrollat förbi galleriet och
-          // är på t.ex. "Priser" ska native scroll få ta dem tillbaka in i galleriet
-          // utan att kastas hela vägen till intro.
-          const galleryTop = gallerySection ? gallerySection.getBoundingClientRect().top : 0;
-          const galleryIsAtStart = galleryTop >= -4;
-
-          if ((wheelBack || touchBack) && galleryIsAtStart) {
+          if (stageBottom >= -2 && (wheelBack || touchBack)) {
             e.preventDefault();
             e.stopPropagation();
             returnFromGalleryToIntro();
           }
         }
-
       };
       const trackTouchStart = (e: TouchEvent) => {
         galleryTouchY = e.touches[0]?.clientY ?? null;
@@ -520,9 +513,21 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (!scrollRoot) return;
         restoreScrollBehavior?.();
         const previousScrollBehavior = scrollRoot.style.scrollBehavior;
+        const previousOverflowY = scrollRoot.style.overflowY;
         scrollRoot.style.scrollBehavior = 'auto';
+        // iOS-momentum kan annars fortsätta tävla med GSAP:s scrollTop-tween
+        // och få sidan att "glida förbi" 2↔3-låsningen. Vi pulsar overflow-y:
+        // hidden en frame för att tvinga browsern att släppa hardware-momentum
+        // innan tween:en tar över.
+        scrollRoot.style.overflowY = 'hidden';
+        requestAnimationFrame(() => {
+          if (scrollRoot.style.overflowY === 'hidden') {
+            scrollRoot.style.overflowY = previousOverflowY;
+          }
+        });
         restoreScrollBehavior = () => {
           scrollRoot.style.scrollBehavior = previousScrollBehavior;
+          scrollRoot.style.overflowY = previousOverflowY;
         };
       };
       scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
@@ -546,8 +551,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       //   wheel-momentum eller iOS touch-momentum kan rubba scrollen.
       const TRANSITION_DURATION = 1.08;
       const TRANSITION_LOCK_MS = 1200; // 1.08s + buffer för momentum
-      const GALLERY_REWIND_MIN_DURATION = 0.34;
-      const GALLERY_REWIND_MAX_DURATION = 0.72;
 
       const releaseAndScrollNext = () => {
         const root = scrollRoot;
@@ -592,83 +595,42 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
       const returnFromGalleryToIntro = () => {
         if (!scrollRoot || programmaticReturn || animatingRef.current) return;
-        const root = scrollRoot;
         programmaticReturn = true;
         animatingRef.current = true;
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
-        // Pausa kort-bildernas kenburns-animation OMEDELBART vid exit-start.
-        // Annars syns en "zoom in/back"-blink på Träning-kortet under rewind
-        // precis innan layern flyger upp.
-        window.dispatchEvent(new Event('parium:gallery-exit-start'));
-        // Mississippi-finessen: om användaren vänder mitt i kortresan får den
-        // INTE hoppa direkt upp till intro. Först låser vi input och låter
-        // galleriets scroll-position gå hela vägen tillbaka till vänster
-        // (Träning). Först därefter fryser vi galleriet och kör 3→2-returen.
-        const galleryTop = gallerySection
-          ? Math.max(0, root.scrollTop + gallerySection.getBoundingClientRect().top)
-          : root.scrollTop;
-        const target = Math.max(0, root.scrollTop + stage.getBoundingClientRect().top);
-        const rewindDistance = Math.max(0, root.scrollTop - galleryTop);
-        const galleryDistance = gallerySection ? Math.max(1, gallerySection.offsetHeight - root.clientHeight) : Math.max(1, rewindDistance);
-        const rewindProgress = Math.min(1, rewindDistance / galleryDistance);
-        const rewindDuration = rewindDistance > 2
-          ? GALLERY_REWIND_MIN_DURATION + (GALLERY_REWIND_MAX_DURATION - GALLERY_REWIND_MIN_DURATION) * rewindProgress
-          : 0;
-
         // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
         // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
         // hela tiden och bara åker med layern.
         setIntroResting();
+        window.dispatchEvent(new Event('parium:gallery-leave'));
+        const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
 
-        lockNativeInput(TRANSITION_LOCK_MS + Math.ceil(rewindDuration * 1000));
+        lockNativeInput(TRANSITION_LOCK_MS);
         withScrollBehaviorAuto();
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
         const finishReturn = () => {
-          root.scrollTop = target;
+          scrollRoot.scrollTop = target;
           restoreScrollBehavior?.();
           restoreScrollBehavior = null;
           transitionBlockUntil = 0;
           programmaticReturn = false;
           animatingRef.current = false;
-          prevScrollTop = root.scrollTop;
+          prevScrollTop = scrollRoot.scrollTop;
           setObserverActive(true);
         };
 
-        const startIntroReturn = () => {
-          root.scrollTop = galleryTop;
-          // Vänta en frame efter scrollTop-landningen så galleriets scroll-
-          // drivna transform hinner applicera startläget. Då slipper vi den
-          // synliga micro-snäppen/blinken precis innan layern går upp.
-          window.requestAnimationFrame(() => window.dispatchEvent(new Event('parium:gallery-reset-start')));
-          window.dispatchEvent(new Event('parium:gallery-leave'));
-          window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
-
-          gsap.killTweensOf(root);
-          gsap.to(root, {
-            scrollTop: target,
-            duration: TRANSITION_DURATION,
-            ease: 'power2.inOut',
-            overwrite: true,
-            onComplete: finishReturn,
-            onInterrupt: finishReturn,
-          });
-        };
-
-        gsap.killTweensOf(root);
-        if (rewindDuration > 0) {
-          gsap.to(root, {
-            scrollTop: galleryTop,
-            duration: rewindDuration,
-            ease: 'power2.out',
-            overwrite: true,
-            onComplete: startIntroReturn,
-            onInterrupt: startIntroReturn,
-          });
-        } else {
-          startIntroReturn();
-        }
+        gsap.killTweensOf(scrollRoot);
+        gsap.to(scrollRoot, {
+          scrollTop: target,
+          duration: TRANSITION_DURATION,
+          ease: 'power2.inOut',
+          overwrite: true,
+          onComplete: finishReturn,
+          onInterrupt: finishReturn,
+        });
       };
 
       observer = Observer.create({
@@ -717,16 +679,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
         if (releasedToGallery) {
           setObserverActive(false);
-          // Backup-trigger: bara om galleri-sektionen fortfarande är pinnad i topp.
-          // När användaren är förbi galleriet (på Priser etc) ska upp-scroll få
-          // gå naturligt tillbaka in i galleriet utan att kastas till intro.
-          const galleryTop = gallerySection ? gallerySection.getBoundingClientRect().top : 0;
-          if (direction === 'up' && galleryTop >= -4) {
+          // Trigga direkt när stagens nederkant precis börjar tittas fram
+          // underifrån — då ska 3→2-animationen sätta igång omedelbart och
+          // användaren ska inte kunna scrolla vidare upp i galleriet manuellt.
+          if (direction === 'up' && rect.bottom > 0) {
             returnFromGalleryToIntro();
           }
           return;
         }
-
 
         const stageIsDocked = Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
         if (stageIsDocked) {
