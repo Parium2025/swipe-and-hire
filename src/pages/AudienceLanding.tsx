@@ -613,8 +613,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
         // hela tiden och bara åker med layern.
         setIntroResting();
-        window.dispatchEvent(new Event('parium:gallery-reset-start'));
-        window.dispatchEvent(new Event('parium:gallery-leave'));
 
         lockNativeInput(TRANSITION_LOCK_MS + Math.ceil(rewindDuration * 1000));
         withScrollBehaviorAuto();
