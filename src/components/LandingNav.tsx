@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
 export interface LandingNavLink {
@@ -17,9 +18,12 @@ interface LandingNavProps {
 const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const pillScrollerRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [rotIndex, setRotIndex] = useState(0);
+  const [rotPaused, setRotPaused] = useState(false);
 
   const goHome = (e?: React.SyntheticEvent) => {
     e?.preventDefault();
@@ -114,6 +118,18 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     scroller.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
   }, [activeId]);
 
+  // Rotera mobillänkar var 2.8s, pausa när användaren tryckt
+  useEffect(() => {
+    if (!isMobile || !links.length || rotPaused) return;
+    const t = window.setInterval(() => {
+      setRotIndex((i) => (i + 1) % links.length);
+    }, 2800);
+    return () => window.clearInterval(t);
+  }, [isMobile, links.length, rotPaused]);
+
+  const currentRotLink = links[rotIndex % Math.max(1, links.length)];
+
+
 
   return (
     <>
@@ -138,17 +154,42 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                 width={224}
                 height={224}
                 draggable={false}
-                className="h-auto w-16 sm:w-20 md:w-28 pointer-events-none"
+                className="h-auto w-24 sm:w-24 md:w-28 pointer-events-none"
               />
             </a>
 
-            {/* Nav-pill — alltid inline. Krymper på mobil, växer på större skärmar.
-                Scrollar horisontellt om innehållet ändå inte får plats. */}
-            {links.length > 0 && (
+            {/* Mobil: en enda roterande pill. Desktop (sm+): hela list-pillen. */}
+            {links.length > 0 && isMobile && (
+              <div className="flex-1 min-w-0 flex justify-center">
+                <a
+                  href={currentRotLink?.href ?? '#'}
+                  onClick={(e) => currentRotLink && handleAnchor(e, currentRotLink.href)}
+                  onPointerDown={() => setRotPaused(true)}
+                  onPointerUp={() => window.setTimeout(() => setRotPaused(false), 1500)}
+                  className="relative inline-flex h-9 min-w-[120px] max-w-full items-center justify-center overflow-hidden rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 text-[13px] font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-colors hover:bg-white/[0.08]"
+                  aria-label={`Gå till ${currentRotLink?.label ?? ''}`}
+                >
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={currentRotLink?.href ?? 'empty'}
+                      initial={{ y: 12, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: -12, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      className="whitespace-nowrap"
+                    >
+                      {currentRotLink?.label}
+                    </motion.span>
+                  </AnimatePresence>
+                </a>
+              </div>
+            )}
+
+            {links.length > 0 && !isMobile && (
               <div className="flex-1 min-w-0 flex justify-center">
                 <div
                   ref={pillScrollerRef}
-                  className="flex max-w-full items-center gap-0.5 sm:gap-1 overflow-x-auto rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1 py-1 sm:px-1.5 sm:py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                  className="flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                   style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                   {links.map((l) => {
@@ -166,7 +207,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                           });
                         }}
                         aria-current={isActive ? 'true' : undefined}
-                        className={`relative whitespace-nowrap rounded-full px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 text-[10.5px] sm:text-[12px] md:text-[13px] font-medium transition-colors ${
+                        className={`relative whitespace-nowrap rounded-full px-3 py-1.5 md:px-4 md:py-2 text-[12px] md:text-[13px] font-medium transition-colors ${
                           isActive ? 'text-white' : 'text-white/65 hover:text-white'
                         }`}
                       >
@@ -185,12 +226,12 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               </div>
             )}
 
-            {/* Logga in — alltid synlig, kompakt på mobil */}
+            {/* Logga in — större på mobil nu när pillen tar mindre plats */}
             <div className="shrink-0">
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-3 sm:px-5 md:px-6 h-8 sm:h-9 bg-white/[0.04] border border-white/[0.08] text-white text-[11px] sm:text-[12px] md:text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
+                className="rounded-full px-5 sm:px-5 md:px-6 h-9 sm:h-9 bg-white/[0.04] border border-white/[0.08] text-white text-[13px] sm:text-[12px] md:text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
               >
                 Logga in
               </Button>
