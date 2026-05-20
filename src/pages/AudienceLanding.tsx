@@ -614,7 +614,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // hela tiden och bara åker med layern.
         setIntroResting();
         window.dispatchEvent(new Event('parium:gallery-leave'));
-        const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
+        // Absolut offset till intro-stagen — så vi alltid landar pixel-exakt
+        // vid intro-toppen, vilket i sin tur gör nästa 2→3 till sectionTop.
+        const target = Math.max(0, (stage as HTMLElement).offsetTop);
 
         lockNativeInput(950); // matchar return-tween (0.82s) + liten momentum-buffer
         withScrollBehaviorAuto();
