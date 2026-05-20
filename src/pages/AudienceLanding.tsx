@@ -613,7 +613,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         window.dispatchEvent(new Event('parium:gallery-leave'));
         const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
 
-        lockNativeInput(TRANSITION_LOCK_MS);
+        lockNativeInput(950); // matchar return-tween (0.82s) + liten momentum-buffer
         withScrollBehaviorAuto();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
