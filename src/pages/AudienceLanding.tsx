@@ -513,11 +513,22 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (!scrollRoot) return;
         restoreScrollBehavior?.();
         const previousScrollBehavior = scrollRoot.style.scrollBehavior;
+        const previousOverflow = scrollRoot.style.overflowY;
         scrollRoot.style.scrollBehavior = 'auto';
+        // 🛑 Döda eventuell pågående iOS-momentum-scroll innan GSAP börjar
+        // tween:a scrollTop. Utan detta tävlar hardware-momentum med GSAP
+        // och kan ge synligt hack eller att sidan "scrollar förbi" istället
+        // för att låsa in i den smooth 2↔3-animationen. En enda frame med
+        // overflow:hidden räcker — momentum dödas men scrollTop bevaras.
+        scrollRoot.style.overflowY = 'hidden';
+        // Tvinga reflow så browsern faktiskt kapar momentum innan vi släpper.
+        void scrollRoot.offsetHeight;
+        scrollRoot.style.overflowY = previousOverflow;
         restoreScrollBehavior = () => {
           scrollRoot.style.scrollBehavior = previousScrollBehavior;
         };
       };
+
       scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
       scrollRoot?.addEventListener('touchstart', trackTouchStart, { passive: true, capture: true });
       scrollRoot?.addEventListener('touchmove', blockNativeInput, { passive: false, capture: true });
