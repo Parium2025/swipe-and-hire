@@ -51,10 +51,6 @@ const TopChromeStrip = () => {
 
   const displayColor = forcedColor ?? color;
 
-  useEffect(() => {
-    console.log('[TopChromeStrip]', { path: location.pathname, color: displayColor });
-  }, [location.pathname, displayColor]);
-
   if (!isTouch) return null;
 
   return (
