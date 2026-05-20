@@ -67,12 +67,8 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
 
     let cancelled = false;
     let app: SplineApplication | null = null;
-    let observer: IntersectionObserver | null = null;
-    let started = false;
 
     const start = async () => {
-      if (started || cancelled) return;
-      started = true;
       try {
         const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
@@ -91,8 +87,6 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
         app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
         await app.load(SCENE_URL);
-        // Spline-scenen kan ha en egen background-color som annars syns som
-        // en vit ram innan WebGL fyller canvasen. Tvinga transparent.
         try {
           (app as unknown as { setBackgroundColor?: (c: string) => void })
             .setBackgroundColor?.('rgba(0,0,0,0)');
@@ -100,10 +94,6 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
         app.setZoom(zoom);
         requestAnimationFrame(() => app?.setZoom(zoom));
         if (!activeRef.current) app.stop();
-        // Vänta 3 rAF så Spline garanterat hunnit rita sin första WebGL-frame
-        // innan vi fade:ar in canvasen. På throttlade enheter (Lovable preview-
-        // iframe, äldre Androids) räcker inte 2 rAF — då syns scenens
-        // default-bakgrund i en frame som "vit ram" runt telefonen.
         await new Promise<void>((resolve) => {
           requestAnimationFrame(() =>
             requestAnimationFrame(() =>
@@ -113,8 +103,6 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
         });
         if (!cancelled) {
           setIsReady(true);
-          // Signal till FixedPhoneLayer att vi får visa wrappern utan att
-          // det blir ett synligt tomt/vitt lager innan WebGL ritar första frame.
           window.dispatchEvent(new Event('parium:spline-ready'));
         }
       } catch (error) {
@@ -123,31 +111,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
       }
     };
 
-    // Lazy-load: börja inte ladda runtime förrän canvasen är nära viewport.
-    // På entry-points där hero är direkt synlig (t.ex. /jobbsokare) triggar
-    // observern omedelbart, så ingen fördröjning för normala användare.
-    if (typeof IntersectionObserver === 'function') {
-      observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              observer?.disconnect();
-              observer = null;
-              start();
-              break;
-            }
-          }
-        },
-        { rootMargin: '200px' },
-      );
-      observer.observe(canvas);
-    } else {
-      start();
-    }
+    start();
 
     return () => {
       cancelled = true;
-      observer?.disconnect();
       app?.dispose();
       appRef.current = null;
     };
