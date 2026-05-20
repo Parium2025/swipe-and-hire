@@ -11,31 +11,6 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-// Avgör om enheten är för svag/uppkopplingen för dålig för att köra Spline.
-// När detta är true visar vi enbart den statiska premium-ramen (samma fallback
-// som redan används medan WebGL bootar) — inget försvinner visuellt.
-const shouldSkipSpline = (): boolean => {
-  if (typeof navigator === 'undefined') return false;
-  try {
-    const nav = navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
-      deviceMemory?: number;
-      hardwareConcurrency?: number;
-    };
-    const conn = nav.connection;
-    if (conn?.saveData) return true;
-    if (conn?.effectiveType && /(^|-)(2g|slow-2g|3g)$/i.test(conn.effectiveType)) return true;
-    if (typeof nav.deviceMemory === 'number' && nav.deviceMemory > 0 && nav.deviceMemory <= 2) return true;
-    if (typeof nav.hardwareConcurrency === 'number' && nav.hardwareConcurrency > 0 && nav.hardwareConcurrency <= 4) {
-      // Endast på touch/mobil — desktop med 4 kärnor klarar Spline fint.
-      const isTouch = window.matchMedia?.('(hover: none) and (pointer: coarse)').matches;
-      if (isTouch) return true;
-    }
-  } catch {
-    /* no-op */
-  }
-  return false;
-};
 
 export const SplinePhone = ({ className, style, zoom = 0.78, active = true, instantFallback = false }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -43,23 +18,13 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
 
-  // Beslutas en gång vid mount så vi inte flippar mellan WebGL ↔ fallback om
-  // användaren råkar växla nätverk under sessionen.
-  const skipSpline = useRef<boolean>(false);
-  if (skipSpline.current === false && typeof window !== 'undefined') {
-    skipSpline.current = shouldSkipSpline();
-  }
-
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
-  // På mobil/surfplatta visar vi en premiumram direkt under laddning så hero aldrig
-  // upplevs tom om WebGL/Spline är långsamt eller stoppas av mobilbrowsern.
-  // På desktop väntar vi fortfarande några sekunder för att undvika skeleton-flash.
   const [showFallback, setShowFallback] = useState(false);
 
   useEffect(() => {
     if (isReady || hasError) return;
-    if (instantFallback || skipSpline.current) {
+    if (instantFallback) {
       setShowFallback(true);
       return undefined;
     }
@@ -98,7 +63,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    if (reducedMotion || skipSpline.current) return;
+    if (reducedMotion) return;
 
     let cancelled = false;
     let app: SplineApplication | null = null;
