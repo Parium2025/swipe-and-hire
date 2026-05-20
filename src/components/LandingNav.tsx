@@ -42,12 +42,12 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
   // Hjälpare: gemensam smooth-scroll som spelar rent med AudienceLanding-
   // orchestreringen (Observer + scroll-jacking mellan hero ↔ intro ↔ galleri).
-  // Använder en egen rAF-tween med ease-in-out så det känns lugnare/premium
-  // än webbläsarens default `behavior: 'smooth'` (som ofta är megasnabb).
+  // Använder en egen rAF-tween med ease-out så det känns lugnt men snappy
+  // (snabbare än webbläsarens default men inte megasnabbt).
   const smoothScrollTo = (
     target: HTMLElement | Window,
     top: number,
-    duration = 900,
+    duration = 620,
   ) => {
     const isWin = target === window;
     const getY = () => (isWin ? window.scrollY : (target as HTMLElement).scrollTop);
@@ -56,11 +56,14 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     const startY = getY();
     const delta = top - startY;
     if (Math.abs(delta) < 2) return;
+    // Skala duration efter avstånd så korta hopp inte känns sega
+    const dist = Math.abs(delta);
+    const adjusted = Math.max(380, Math.min(duration, 300 + dist * 0.35));
     const startT = performance.now();
-    // easeInOutCubic – mjuk i båda ändar
-    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    // easeOutCubic – snabb start, mjuk landning
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3);
     const step = (now: number) => {
-      const t = Math.min(1, (now - startT) / duration);
+      const t = Math.min(1, (now - startT) / adjusted);
       setY(startY + delta * ease(t));
       if (t < 1) requestAnimationFrame(step);
     };
@@ -75,10 +78,10 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     const scroller = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
     if (scroller) {
       const top = scroller.scrollTop + el.getBoundingClientRect().top;
-      smoothScrollTo(scroller, top, 950);
+      smoothScrollTo(scroller, top);
     } else {
       const top = window.scrollY + el.getBoundingClientRect().top;
-      smoothScrollTo(window, top, 950);
+      smoothScrollTo(window, top);
     }
   };
 
