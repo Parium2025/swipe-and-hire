@@ -1845,3 +1845,18 @@ All colors MUST be HSL.
   @apply absolute z-50 glass-panel rounded-md mt-1;
 }
 
+
+/* Dölj iOS Safaris native play-knapp på hero-videon (Low Power Mode visar
+   annars en stor play-glyph över hela videon även om autoplay är aktiverad).
+   Videon startar ändå vid första touch via befintliga listeners i HeroVideo. */
+video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+video::-webkit-media-controls-overlay-play-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+video::-webkit-media-controls {
+  display: none !important;
+}
