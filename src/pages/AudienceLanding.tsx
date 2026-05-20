@@ -513,9 +513,21 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (!scrollRoot) return;
         restoreScrollBehavior?.();
         const previousScrollBehavior = scrollRoot.style.scrollBehavior;
+        const previousOverflowY = scrollRoot.style.overflowY;
         scrollRoot.style.scrollBehavior = 'auto';
+        // iOS-momentum kan annars fortsätta tävla med GSAP:s scrollTop-tween
+        // och få sidan att "glida förbi" 2↔3-låsningen. Vi pulsar overflow-y:
+        // hidden en frame för att tvinga browsern att släppa hardware-momentum
+        // innan tween:en tar över.
+        scrollRoot.style.overflowY = 'hidden';
+        requestAnimationFrame(() => {
+          if (scrollRoot.style.overflowY === 'hidden') {
+            scrollRoot.style.overflowY = previousOverflowY;
+          }
+        });
         restoreScrollBehavior = () => {
           scrollRoot.style.scrollBehavior = previousScrollBehavior;
+          scrollRoot.style.overflowY = previousOverflowY;
         };
       };
       scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
