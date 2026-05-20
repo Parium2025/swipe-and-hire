@@ -487,16 +487,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         }
 
         if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
-          const atGalleryStart = gallerySection ? gallerySection.getBoundingClientRect().top >= -8 : false;
-          if (!atGalleryStart) return;
-
           const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
           const touch = e instanceof TouchEvent ? e.touches[0] : null;
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          // Returen får bara triggas vid galleriets start. Annars kapar vi den
-          // horisontella kortresan mitt i 3:an och sidan flyger upp för tidigt.
+          // Första upp-gesten var som helst i galleriet ska ta över direkt.
+          // returnFromGalleryToIntro() snappar först strippen till Träning/start,
+          // så användaren kan aldrig manuellt scrolla uppåt mitt i kortresan.
           if (wheelBack || touchBack) {
             e.preventDefault();
             e.stopPropagation();
@@ -546,10 +544,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       };
 
       const isPastStage = () => stage.getBoundingClientRect().bottom <= 4;
-      const isAtGalleryStart = () => {
-        if (!gallerySection) return false;
-        return gallerySection.getBoundingClientRect().top >= -8;
-      };
 
       // 2↔3 ska kännas EXAKT som 1↔2 (goToIntro/goToHero):
       // - Samma duration (1.08s) och ease (power2.inOut)
@@ -703,9 +697,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
         if (releasedToGallery) {
           setObserverActive(false);
-          // Backup-trigger: bara när användaren faktiskt är tillbaka vid
-          // galleriets topp — inte mitt i den horisontella kortresan.
-          if (direction === 'up' && isAtGalleryStart()) {
+          // Backup-trigger: om native scroll hann ske före input-capture ska
+          // första uppåtrörelsen ändå direkt tas över och börja från Träning.
+          if (direction === 'up') {
             returnFromGalleryToIntro();
           }
           return;
