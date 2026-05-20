@@ -238,7 +238,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                             e.preventDefault();
                             setMenuOpen(false);
                             // Vänta tills menyn stängts så scroll inte avbryts av focus-return
-                            window.setTimeout(() => scrollToSection(id), 60);
+                            requestAnimationFrame(() => scrollToSection(id));
                           }}
                           className={isActive ? 'bg-accent/60 font-semibold' : ''}
                         >
