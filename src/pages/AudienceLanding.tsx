@@ -492,15 +492,20 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          // Första upp-gesten var som helst i galleriet ska ta över direkt.
-          // returnFromGalleryToIntro() snappar först strippen till Träning/start,
-          // så användaren kan aldrig manuellt scrolla uppåt mitt i kortresan.
-          if (wheelBack || touchBack) {
+          // VIKTIGT: Endast intercepta upp-gesten när galleri-sektionen fortfarande
+          // är pinnad (top nära 0). Om användaren har scrollat förbi galleriet och
+          // är på t.ex. "Priser" ska native scroll få ta dem tillbaka in i galleriet
+          // utan att kastas hela vägen till intro.
+          const galleryTop = gallerySection ? gallerySection.getBoundingClientRect().top : 0;
+          const galleryIsAtStart = galleryTop >= -4;
+
+          if ((wheelBack || touchBack) && galleryIsAtStart) {
             e.preventDefault();
             e.stopPropagation();
             returnFromGalleryToIntro();
           }
         }
+
       };
       const trackTouchStart = (e: TouchEvent) => {
         galleryTouchY = e.touches[0]?.clientY ?? null;
@@ -706,13 +711,16 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
         if (releasedToGallery) {
           setObserverActive(false);
-          // Backup-trigger: om native scroll hann ske före input-capture ska
-          // första uppåtrörelsen ändå direkt tas över och börja från Träning.
-          if (direction === 'up') {
+          // Backup-trigger: bara om galleri-sektionen fortfarande är pinnad i topp.
+          // När användaren är förbi galleriet (på Priser etc) ska upp-scroll få
+          // gå naturligt tillbaka in i galleriet utan att kastas till intro.
+          const galleryTop = gallerySection ? gallerySection.getBoundingClientRect().top : 0;
+          if (direction === 'up' && galleryTop >= -4) {
             returnFromGalleryToIntro();
           }
           return;
         }
+
 
         const stageIsDocked = Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
         if (stageIsDocked) {
