@@ -648,7 +648,7 @@ All colors MUST be HSL.
      Klassen sätts av syncBrowserChrome() + index.html init-script. */
   html.landing-video-chrome,
   body.landing-video-chrome {
-    background-color: #626262 !important;
+    background-color: #2a2a2a !important;
     background-image: none !important;
   }
 
