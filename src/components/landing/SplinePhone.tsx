@@ -18,23 +18,13 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
 
-  // Beslutas en gång vid mount så vi inte flippar mellan WebGL ↔ fallback om
-  // användaren råkar växla nätverk under sessionen.
-  const skipSpline = useRef<boolean>(false);
-  if (skipSpline.current === false && typeof window !== 'undefined') {
-    skipSpline.current = shouldSkipSpline();
-  }
-
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
-  // På mobil/surfplatta visar vi en premiumram direkt under laddning så hero aldrig
-  // upplevs tom om WebGL/Spline är långsamt eller stoppas av mobilbrowsern.
-  // På desktop väntar vi fortfarande några sekunder för att undvika skeleton-flash.
   const [showFallback, setShowFallback] = useState(false);
 
   useEffect(() => {
     if (isReady || hasError) return;
-    if (instantFallback || skipSpline.current) {
+    if (instantFallback) {
       setShowFallback(true);
       return undefined;
     }
