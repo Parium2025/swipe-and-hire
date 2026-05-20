@@ -161,29 +161,62 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               />
             </a>
 
-            {/* Mobil: swipa-bar pill med snap. Desktop (sm+): hela list-pillen. */}
+            {/* Mobil: dropdown-meny. Desktop (sm+): hela list-pillen. */}
             {links.length > 0 && isMobile && (
               <div className="flex-1 min-w-0 flex justify-center">
-                <div
-                  ref={mobileScrollerRef}
-                  className="relative h-10 w-[140px] max-w-full overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.25)] snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-                  style={{ WebkitOverflowScrolling: 'touch' }}
-                >
-                  <div className="flex h-full">
-                    {links.map((l) => (
-                      <a
-                        key={l.href}
-                        href={l.href}
-                        onClick={(e) => handleAnchor(e, l.href)}
-                        className="snap-center shrink-0 w-[140px] h-full inline-flex items-center justify-center px-4 text-[13px] font-medium text-white whitespace-nowrap"
-                      >
-                        {l.label}
-                      </a>
-                    ))}
-                  </div>
+                <div ref={mobileMenuRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setMenuOpen((v) => !v)}
+                    aria-haspopup="menu"
+                    aria-expanded={menuOpen}
+                    className="inline-flex h-10 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 text-[13px] font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-colors hover:bg-white/[0.08] active:bg-white/[0.10]"
+                  >
+                    <span className="whitespace-nowrap">
+                      {links.find((l) => l.href.replace('#', '') === activeId)?.label ?? 'Meny'}
+                    </span>
+                    <svg
+                      width="12" height="12" viewBox="0 0 12 12" fill="none"
+                      className={`transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`}
+                      aria-hidden="true"
+                    >
+                      <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+
+                  {menuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                      role="menu"
+                      className="absolute left-1/2 top-full mt-2 -translate-x-1/2 min-w-[200px] rounded-2xl border border-white/[0.10] bg-black/70 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden z-50"
+                    >
+                      <div className="flex flex-col p-1.5">
+                        {links.map((l) => {
+                          const id = l.href.replace('#', '');
+                          const isActive = activeId === id;
+                          return (
+                            <a
+                              key={l.href}
+                              href={l.href}
+                              role="menuitem"
+                              onClick={(e) => { handleAnchor(e, l.href); setMenuOpen(false); }}
+                              className={`rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors ${
+                                isActive ? 'text-white bg-white/[0.10]' : 'text-white/80 hover:text-white hover:bg-white/[0.06]'
+                              }`}
+                            >
+                              {l.label}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               </div>
             )}
+
 
 
             {links.length > 0 && !isMobile && (
