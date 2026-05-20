@@ -1,4 +1,5 @@
 import pariumLogoRings from "@/assets/parium-logo-rings.png";
+import landingNavLogo from "/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png";
 import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
 
 /**
