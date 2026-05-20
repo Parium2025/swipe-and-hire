@@ -570,7 +570,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
         window.dispatchEvent(new Event('parium:gallery-leave'));
         const startScroll = root.scrollTop;
-        const targetScroll = startScroll + next.getBoundingClientRect().top;
+        // 🔑 Absolut offset — inte rect-delta. Garanterar att vi ALLTID
+        // landar på galleriets exakta topp (progress=0 → första kortet)
+        // oavsett om scrollroot har drift från tidigare programstyrda tweens.
+        const targetScroll = (next as HTMLElement).offsetTop;
         prevScrollTop = startScroll;
         lockNativeInput(TRANSITION_LOCK_MS);
         withScrollBehaviorAuto();
