@@ -22,15 +22,15 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
   const isMobile = variant === 'mobile';
 
   const eyebrowClass = isMobile
-    ? 'text-xs font-bold uppercase tracking-[0.28em] text-secondary'
+    ? 'text-xs font-bold uppercase tracking-[0.28em] text-secondary drop-shadow-[0_2px_8px_hsl(var(--background)/0.6)]'
     : 'text-xs font-bold uppercase tracking-[0.28em] text-secondary/80';
 
   const headlineClass = isMobile
-    ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-[4rem] md:text-[5rem]'
+    ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-[4rem] md:text-[5rem]'
     : 'mt-6 max-w-4xl text-[5rem] font-black leading-[1.04] tracking-[-0.025em] text-white lg:text-[6rem] 2xl:text-[7rem]';
 
   const subtitleClass = isMobile
-    ? 'mt-7 max-w-xl text-base leading-8 text-white'
+    ? 'mt-7 max-w-xl text-base leading-8 text-white drop-shadow-[0_2px_12px_hsl(var(--background)/0.55)]'
     : 'mt-7 max-w-xl text-lg leading-8 text-white';
 
   // Premium-entré: enbart opacity. Ingen blur, ingen skugga, ingen translate.
