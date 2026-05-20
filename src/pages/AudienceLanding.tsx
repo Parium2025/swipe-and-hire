@@ -125,8 +125,10 @@ const FixedPhoneLayer = () => {
     const anchor = document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
     const observer = anchor ? new ResizeObserver(syncPhoneMetrics) : null;
     if (anchor) observer?.observe(anchor);
-    const mutationObserver = new MutationObserver(syncPhoneMetrics);
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    // (Borttagen) MutationObserver på document.body — den fyrade på varje
+    // DOM-mutation i hela appen vilket var en reell perf-läcka. ResizeObserver
+    // på phone-anchorn + visualViewport + font-ready täcker alla relevanta
+    // omkalibreringar utan att lyssna globalt.
     document.fonts?.ready.then(syncPhoneMetrics).catch(() => undefined);
     window.addEventListener('resize', syncPhoneMetrics, { passive: true });
     window.visualViewport?.addEventListener('resize', syncPhoneMetrics, { passive: true });
