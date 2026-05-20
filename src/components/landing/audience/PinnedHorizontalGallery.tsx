@@ -152,10 +152,10 @@ const PinnedHorizontalGallery = () => {
       if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
-      // Lerp-faktor: 0.55 ger snabb respons men nog med dämpning att tunga
-      // videokort inte hinner re-dekoda varje frame (vilket gav "skakigt").
+      // Lerp 0.35 ger silkeslen följning på touch (momentum-scroll får många
+      // små deltas — låg faktor jämnar ut dem) utan att kännas trög på mus.
       const diff = target - current;
-      const next = Math.abs(diff) < 0.0005 ? target : current + diff * 0.55;
+      const next = Math.abs(diff) < 0.00005 ? target : current + diff * 0.35;
       renderedProgressRef.current = next;
       applyProgress(next);
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
