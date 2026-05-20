@@ -254,7 +254,7 @@ const PinnedHorizontalGallery = () => {
       const shouldAnimateIn = !hasEnteredOnce;
       entered = true;
       hasEnteredOnce = true;
-      strip.classList.remove('phg-leaving', 'phg-settled');
+      strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
       warmVideos();
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
@@ -269,14 +269,9 @@ const PinnedHorizontalGallery = () => {
             stagger: 0.08,
             ease: 'power2.out',
             force3D: true,
-            onComplete: () => {
-              strip.classList.add('phg-settled');
-              gsapInstance?.set(cards, { clearProps: 'transform' });
-            },
           });
         } else {
-          gsapInstance.set(cards, { y: 0, opacity: 1, force3D: false, clearProps: 'transform' });
-          strip.classList.add('phg-settled');
+          gsapInstance.set(cards, { y: 0, opacity: 1, force3D: true });
         }
         if (header) {
           gsapInstance.killTweensOf(header);
