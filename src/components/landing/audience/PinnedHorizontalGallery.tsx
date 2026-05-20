@@ -40,9 +40,10 @@ const items: MediaItem[] = [
 type CardItemProps = {
   item: MediaItem;
   index: number;
+  posterOnly?: boolean;
 };
 
-const CardItem = ({ item, index }: CardItemProps) => {
+const CardItem = ({ item, index, posterOnly = false }: CardItemProps) => {
   // failed=true → byt ut <video> mot poster-bild som fallback. Triggas vid
   // network error, 404, codec-fel eller om användaren är offline när videon
   // ska laddas. Användaren ser alltid en relevant bild istället för svart ruta.
@@ -53,7 +54,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
       className="phg-card phg-card-enter"
       style={{ ['--enter-delay' as string]: `${index * 80}ms`, ['--leave-delay' as string]: `${index * 55}ms` }}
     >
-      {item.type === 'video' && !failed ? (
+      {item.type === 'video' && !failed && !posterOnly ? (
         <video
           src={item.src}
           poster={item.poster}
@@ -89,7 +90,19 @@ const PinnedHorizontalGallery = () => {
   const targetProgressRef = useRef(0);
   const renderedProgressRef = useRef(0);
   const rafRef = useRef<number | null>(null);
+  const [posterOnly, setPosterOnly] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 767px), (hover: none), (pointer: coarse)').matches;
+  });
   const [, setReady] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px), (hover: none), (pointer: coarse)');
+    const update = () => setPosterOnly(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
   useEffect(() => {
     const el = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
@@ -212,6 +225,8 @@ const PinnedHorizontalGallery = () => {
       if (p && typeof p.catch === 'function') p.catch(() => {});
     };
 
+    const shouldUseVideo = () => !window.matchMedia('(max-width: 767px), (hover: none), (pointer: coarse)').matches;
+
     // Adaptiv warmup: på data-saver eller långsamma nät (2G/3G) warm:ar vi
     // bara de första 4 videorna direkt — resten warm:as först när användaren
     // faktiskt scrollar nära dem. Sparar 50% bandbredd på mobil/sparsam data
@@ -232,6 +247,7 @@ const PinnedHorizontalGallery = () => {
     };
 
     const warmVideos = () => {
+      if (!shouldUseVideo()) return;
       if (warmed) return;
       warmed = true;
       const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
@@ -287,8 +303,11 @@ const PinnedHorizontalGallery = () => {
       // innan videos börjar dekoda — då är allt på plats och ingen jitter.
       if (playTimer) window.clearTimeout(playTimer);
       playTimer = window.setTimeout(() => {
+        if (!shouldUseVideo()) return;
         videos.slice(0, 3).forEach(playSafe);
-        window.setTimeout(() => videos.slice(3).forEach(playSafe), 600);
+        window.setTimeout(() => {
+          if (shouldUseVideo()) videos.slice(3).forEach(playSafe);
+        }, 600);
       }, 800);
     };
     const leave = () => {
@@ -480,6 +499,8 @@ const PinnedHorizontalGallery = () => {
           display: block;
           pointer-events: none;
           user-select: none;
+          backface-visibility: hidden;
+          transform: translateZ(0);
         }
         @keyframes phg-kenburns {
           0%   { transform: scale(1.04) translate3d(0,0,0); }
@@ -488,6 +509,9 @@ const PinnedHorizontalGallery = () => {
         }
         .phg-card img { animation: phg-kenburns 24s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) {
+          .phg-card img { animation: none; }
+        }
+        @media (max-width: 767px), (hover: none), (pointer: coarse) {
           .phg-card img { animation: none; }
         }
         .phg-card::after {
@@ -571,7 +595,7 @@ const PinnedHorizontalGallery = () => {
           <div className="phg-strip-wrap">
             <div ref={stripRef} className="phg-strip">
               {items.map((item, i) => (
-                <CardItem key={i} item={item} index={i} />
+                <CardItem key={i} item={item} index={i} posterOnly={posterOnly} />
               ))}
             </div>
           </div>
