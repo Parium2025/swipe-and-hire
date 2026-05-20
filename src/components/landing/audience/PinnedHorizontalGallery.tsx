@@ -125,12 +125,7 @@ const PinnedHorizontalGallery = () => {
       // Sluta så att sista kortet är helt synligt med samma 7vw marginal till höger
       const endPx = Math.min(startPx, viewport - stripWidth - startPx);
       const xPx = startPx + (endPx - startPx) * p;
-      // Runda till fysisk device-pixel istället för CSS-helpx. Det håller
-      // videokorten raster-stabila men undviker den hackiga 1px-steppingen
-      // som syns extra tydligt vid långsam touch-scroll på retina-skärmar.
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-      const stableXPx = Math.round(xPx * dpr) / dpr;
-      strip.style.setProperty('--phg-x', `${stableXPx}px`);
+      strip.style.transform = `translate3d(${xPx.toFixed(3)}px, 0, 0)`;
       section.style.setProperty('--phg-progress', `${p}`);
       // Baren ska vara på plats redan vid första kortet (p=0) och hela vägen
       // till sista kortet (p=1). Den fade:as endast ut precis när vi börjar
@@ -152,14 +147,9 @@ const PinnedHorizontalGallery = () => {
       if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
-      const diff = target - current;
-      // Adaptiv dämpning: långsam scroll får mer smoothing (mindre skak),
-      // snabba svep får högre respons så strippen inte känns tung.
-      const lerp = 0.38 + Math.min(0.24, Math.abs(diff) * 18);
-      const next = Math.abs(diff) < 0.00035 ? target : current + diff * lerp;
+      const next = target;
       renderedProgressRef.current = next;
       applyProgress(next);
-      if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
     };
 
     // Frys vid 3→2 (gallery-leave) och tina vid 2→3 (gallery-enter). Under frysen
