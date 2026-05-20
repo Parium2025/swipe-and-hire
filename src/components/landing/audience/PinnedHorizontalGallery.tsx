@@ -125,12 +125,7 @@ const PinnedHorizontalGallery = () => {
       // Sluta så att sista kortet är helt synligt med samma 7vw marginal till höger
       const endPx = Math.min(startPx, viewport - stripWidth - startPx);
       const xPx = startPx + (endPx - startPx) * p;
-      // Runda till fysisk device-pixel istället för CSS-helpx. Det håller
-      // videokorten raster-stabila men undviker den hackiga 1px-steppingen
-      // som syns extra tydligt vid långsam touch-scroll på retina-skärmar.
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-      const stableXPx = Math.round(xPx * dpr) / dpr;
-      strip.style.setProperty('--phg-x', `${stableXPx}px`);
+      strip.style.transform = `translate3d(${xPx.toFixed(3)}px, 0, 0)`;
       section.style.setProperty('--phg-progress', `${p}`);
       // Baren ska vara på plats redan vid första kortet (p=0) och hela vägen
       // till sista kortet (p=1). Den fade:as endast ut precis när vi börjar
@@ -152,14 +147,9 @@ const PinnedHorizontalGallery = () => {
       if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
-      const diff = target - current;
-      // Adaptiv dämpning: långsam scroll får mer smoothing (mindre skak),
-      // snabba svep får högre respons så strippen inte känns tung.
-      const lerp = 0.38 + Math.min(0.24, Math.abs(diff) * 18);
-      const next = Math.abs(diff) < 0.00035 ? target : current + diff * lerp;
+      const next = target;
       renderedProgressRef.current = next;
       applyProgress(next);
-      if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
     };
 
     // Frys vid 3→2 (gallery-leave) och tina vid 2→3 (gallery-enter). Under frysen
@@ -264,7 +254,7 @@ const PinnedHorizontalGallery = () => {
       const shouldAnimateIn = !hasEnteredOnce;
       entered = true;
       hasEnteredOnce = true;
-      strip.classList.remove('phg-leaving', 'phg-settled');
+      strip.classList.remove('phg-leaving');
       strip.classList.add('phg-entered');
       warmVideos();
       const cards = Array.from(strip.querySelectorAll('.phg-card-enter')) as HTMLElement[];
@@ -279,14 +269,9 @@ const PinnedHorizontalGallery = () => {
             stagger: 0.08,
             ease: 'power2.out',
             force3D: true,
-            onComplete: () => {
-              strip.classList.add('phg-settled');
-              gsapInstance?.set(cards, { clearProps: 'transform' });
-            },
           });
         } else {
-          gsapInstance.set(cards, { y: 0, opacity: 1, force3D: false, clearProps: 'transform' });
-          strip.classList.add('phg-settled');
+          gsapInstance.set(cards, { y: 0, opacity: 1, force3D: true });
         }
         if (header) {
           gsapInstance.killTweensOf(header);
@@ -425,7 +410,8 @@ const PinnedHorizontalGallery = () => {
           gap: clamp(14px, 1.6vw, 22px);
           padding: clamp(8px, 1.5vh, 20px) 6vw clamp(8px, 1vh, 18px);
           will-change: transform, opacity;
-          transform: translate3d(var(--phg-x, 7vw), 0, 0);
+          transform: translate3d(7vw, 0, 0);
+          backface-visibility: hidden;
         }
         .phg-card {
           flex: 0 0 auto;
@@ -454,10 +440,6 @@ const PinnedHorizontalGallery = () => {
         .phg-strip.phg-entered .phg-card-enter {
           opacity: 1;
           transform: translate3d(0, 0, 0);
-        }
-        .phg-strip.phg-settled .phg-card-enter {
-          transform: none;
-          will-change: auto;
         }
         /* Exit — kopia av introTextItems-tween i goToHero (2→1):
            duration 0.42s, ease power2.in, stagger 0.055s (55ms via --leave-delay). */
