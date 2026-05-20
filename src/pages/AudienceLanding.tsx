@@ -688,6 +688,26 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       scrollRoot?.addEventListener('scroll', onScrollWatch, { passive: true });
       onScrollWatch();
 
+      // När navigationen (dropdown/pill) hoppar till en sektion bortom
+      // hero/intro behöver vi släppa orchestreringens lås — annars fortsätter
+      // Observer + blockNativeInput att äga wheel/touch och scroll genom
+      // pinned-galleriet känns "låst". Vi sätter intro till sitt resting state
+      // så att 3→2-returen fortfarande ser korrekt ut, och tinar galleriets
+      // frysta scroll-progress.
+      const handleNavJump = () => {
+        clearReturnWork();
+        releasedToGallery = true;
+        programmaticReturn = false;
+        animatingRef.current = false;
+        releaseLockedRef.current = false;
+        transitionBlockUntil = 0;
+        setObserverActive(false);
+        setIntroResting();
+        window.dispatchEvent(new Event('parium:gallery-enter'));
+        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
+      };
+      window.addEventListener('parium:nav-jump', handleNavJump);
+
       setupTeardown = () => {
         clearReturnWork();
         scrollRoot?.removeEventListener('scroll', onScrollWatch);
@@ -695,6 +715,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         scrollRoot?.removeEventListener('touchstart', trackTouchStart, true);
         scrollRoot?.removeEventListener('touchmove', blockNativeInput, true);
         scrollRoot?.removeEventListener('touchend', clearTouchTrack, true);
+        window.removeEventListener('parium:nav-jump', handleNavJump);
       };
     };
 
