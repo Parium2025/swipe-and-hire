@@ -40,15 +40,30 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     }
   };
 
+  // Hjälpare: gemensam smooth-scroll som spelar rent med AudienceLanding-
+  // orchestreringen (Observer + scroll-jacking mellan hero ↔ intro ↔ galleri).
+  // Utan detta lås-släpp kan pinned-galleriet kännas låst efter ett hopp.
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    setActiveId(id);
+    // Säg åt orchestreringen att vi gör ett programmatiskt hopp förbi
+    // hero/intro så att Observer släpper wheel/touch och pinned-galleriet
+    // tinas (ingen effekt på vanliga landing-sidan utan orchestrering).
+    window.dispatchEvent(new Event('parium:nav-jump'));
+    const scroller = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
+    if (scroller) {
+      const top = scroller.scrollTop + el.getBoundingClientRect().top;
+      scroller.scrollTo({ top, behavior: 'smooth' });
+    } else {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const handleAnchor = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (!href.startsWith('#')) return;
     e.preventDefault();
-    const id = href.slice(1);
-    const el = document.getElementById(id);
-    if (el) {
-      setActiveId(id);
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    scrollToSection(href.slice(1));
   };
 
 
