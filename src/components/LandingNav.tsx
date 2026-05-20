@@ -292,12 +292,12 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               </div>
             )}
 
-            {/* Logga in — större på mobil nu när pillen tar mindre plats */}
-            <div className="shrink-0">
+            {/* Logga in — alltid längst till höger */}
+            <div className="shrink-0 ml-auto">
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-6 sm:px-5 md:px-6 h-10 sm:h-9 bg-white/[0.04] border border-white/[0.08] text-white text-[14px] sm:text-[12px] md:text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
+                className="rounded-full px-7 sm:px-6 md:px-7 h-11 sm:h-10 md:h-11 bg-white/[0.04] border border-white/[0.08] text-white text-[15px] sm:text-[13px] md:text-[14px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
               >
                 Logga in
               </Button>
