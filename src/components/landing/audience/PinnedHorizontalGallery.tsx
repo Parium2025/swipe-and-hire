@@ -455,6 +455,10 @@ const PinnedHorizontalGallery = () => {
           opacity: 1;
           transform: translate3d(0, 0, 0);
         }
+        .phg-strip.phg-settled .phg-card-enter {
+          transform: none;
+          will-change: auto;
+        }
         /* Exit — kopia av introTextItems-tween i goToHero (2→1):
            duration 0.42s, ease power2.in, stagger 0.055s (55ms via --leave-delay). */
         .phg-strip.phg-leaving .phg-card-enter {
