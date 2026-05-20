@@ -40,9 +40,10 @@ const items: MediaItem[] = [
 type CardItemProps = {
   item: MediaItem;
   index: number;
+  posterOnly?: boolean;
 };
 
-const CardItem = ({ item, index }: CardItemProps) => {
+const CardItem = ({ item, index, posterOnly = false }: CardItemProps) => {
   // failed=true → byt ut <video> mot poster-bild som fallback. Triggas vid
   // network error, 404, codec-fel eller om användaren är offline när videon
   // ska laddas. Användaren ser alltid en relevant bild istället för svart ruta.
@@ -53,7 +54,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
       className="phg-card phg-card-enter"
       style={{ ['--enter-delay' as string]: `${index * 80}ms`, ['--leave-delay' as string]: `${index * 55}ms` }}
     >
-      {item.type === 'video' && !failed ? (
+      {item.type === 'video' && !failed && !posterOnly ? (
         <video
           src={item.src}
           poster={item.poster}
@@ -89,7 +90,19 @@ const PinnedHorizontalGallery = () => {
   const targetProgressRef = useRef(0);
   const renderedProgressRef = useRef(0);
   const rafRef = useRef<number | null>(null);
+  const [posterOnly, setPosterOnly] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 767px), (hover: none), (pointer: coarse)').matches;
+  });
   const [, setReady] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px), (hover: none), (pointer: coarse)');
+    const update = () => setPosterOnly(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
   useEffect(() => {
     const el = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
