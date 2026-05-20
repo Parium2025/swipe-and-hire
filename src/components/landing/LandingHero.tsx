@@ -156,7 +156,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 1.4, ease, delay: 0.4 }}
-          className="max-w-4xl text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white drop-shadow-[0_4px_24px_hsl(var(--background)/0.6)] sm:text-5xl md:text-6xl lg:text-7xl"
+          className="max-w-4xl text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
         >
           Välkommen till Parium
         </motion.h1>
