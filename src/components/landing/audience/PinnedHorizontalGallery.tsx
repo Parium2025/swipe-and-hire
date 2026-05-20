@@ -371,7 +371,6 @@ const PinnedHorizontalGallery = () => {
           max-width: 18ch;
           margin: 0 auto;
           padding-bottom: 0.12em;
-          filter: drop-shadow(0 4px 24px hsl(var(--background) / 0.6));
         }
         .phg-title em {
           font-style: normal;
