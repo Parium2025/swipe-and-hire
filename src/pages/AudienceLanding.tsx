@@ -608,21 +608,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
-        // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
-        // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
-        // hela tiden och bara åker med layern.
-        setIntroResting();
-        window.dispatchEvent(new Event('parium:gallery-leave'));
-
-        lockNativeInput(TRANSITION_LOCK_MS);
-        withScrollBehaviorAuto();
 
         // FÖRST: snäpp scroll-positionen till galleriets topp (= stage bottom).
         // På snabb uppåt-swipe har användaren annars redan scrollat förbi den
         // punkten innan triggern fyrar — då blir GSAP-tween:ens visuella sträcka
         // för kort och animationen "flyger upp" istället för att åka jämnt.
-        // Genom att alltid starta tween:en från galleri-toppen får vi exakt
-        // samma 1.08s-distans varje gång, oavsett scroll-hastighet.
+        // Vi gör detta INNAN gallery-leave/freeze så den horisontella strippen
+        // hinner tvångslanda på första kortet (Träning) och aldrig fryses mitt i.
         const galleryTop = gallerySection
           ? scrollRoot.scrollTop + gallerySection.getBoundingClientRect().top
           : scrollRoot.scrollTop;
@@ -630,6 +622,16 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           scrollRoot.scrollTop = galleryTop;
         }
         const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
+
+        // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
+        // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
+        // hela tiden och bara åker med layern.
+        setIntroResting();
+        window.dispatchEvent(new Event('parium:gallery-reset-start'));
+        window.dispatchEvent(new Event('parium:gallery-leave'));
+
+        lockNativeInput(TRANSITION_LOCK_MS);
+        withScrollBehaviorAuto();
 
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
