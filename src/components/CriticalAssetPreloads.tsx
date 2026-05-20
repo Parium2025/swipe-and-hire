@@ -1,4 +1,5 @@
 import pariumLogoRings from "@/assets/parium-logo-rings.png";
+import landingNavLogo from "/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png";
 import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
 
 /**
@@ -31,6 +32,27 @@ export function CriticalAssetPreloads() {
           zIndex: -1,
         }}
       />
+
+      {/* Hidden img to keep landing-nav logo decoded (used by LandingNav) */}
+      <img
+        src={landingNavLogo}
+        alt=""
+        aria-hidden="true"
+        loading="eager"
+        decoding="sync"
+        fetchPriority="high"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: 1,
+          height: 1,
+          opacity: 0,
+          pointerEvents: "none",
+          zIndex: -1,
+        }}
+      />
+
 
       {/* Hidden img to keep auth logo (data-URI) decoded for AuthSplashScreen */}
       <img
