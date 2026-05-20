@@ -487,13 +487,16 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         }
 
         if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
-          const stageBottom = stage.getBoundingClientRect().bottom;
           const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
           const touch = e instanceof TouchEvent ? e.touches[0] : null;
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          if (stageBottom >= -2 && (wheelBack || touchBack)) {
+          // Trigga returen på FÖRSTA uppåt-rörelsen i galleriet, oavsett var
+          // stagens kant befinner sig. På snabb swipe hinner annars browsern
+          // scrolla förbi gränsen mellan events och returen aktiveras för sent
+          // (eller inte alls — loophole).
+          if (wheelBack || touchBack) {
             e.preventDefault();
             e.stopPropagation();
             returnFromGalleryToIntro();
