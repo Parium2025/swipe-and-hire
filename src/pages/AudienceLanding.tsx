@@ -515,21 +515,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (!scrollRoot) return;
         restoreScrollBehavior?.();
         const previousScrollBehavior = scrollRoot.style.scrollBehavior;
-        const previousOverflowY = scrollRoot.style.overflowY;
         scrollRoot.style.scrollBehavior = 'auto';
-        // iOS-momentum kan annars fortsätta tävla med GSAP:s scrollTop-tween
-        // och få sidan att "glida förbi" 2↔3-låsningen. Vi pulsar overflow-y:
-        // hidden en frame för att tvinga browsern att släppa hardware-momentum
-        // innan tween:en tar över.
-        scrollRoot.style.overflowY = 'hidden';
-        requestAnimationFrame(() => {
-          if (scrollRoot.style.overflowY === 'hidden') {
-            scrollRoot.style.overflowY = previousOverflowY;
-          }
-        });
         restoreScrollBehavior = () => {
           scrollRoot.style.scrollBehavior = previousScrollBehavior;
-          scrollRoot.style.overflowY = previousOverflowY;
         };
       };
       scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
@@ -553,6 +541,8 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       //   wheel-momentum eller iOS touch-momentum kan rubba scrollen.
       const TRANSITION_DURATION = 1.08;
       const TRANSITION_LOCK_MS = 1200; // 1.08s + buffer för momentum
+      const GALLERY_REWIND_MIN_DURATION = 0.34;
+      const GALLERY_REWIND_MAX_DURATION = 0.72;
 
       const releaseAndScrollNext = () => {
         const root = scrollRoot;
@@ -597,25 +587,27 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
       const returnFromGalleryToIntro = () => {
         if (!scrollRoot || programmaticReturn || animatingRef.current) return;
+        const root = scrollRoot;
         programmaticReturn = true;
         animatingRef.current = true;
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
 
-        // FÖRST: snäpp scroll-positionen till galleriets topp (= stage bottom).
-        // På snabb uppåt-swipe har användaren annars redan scrollat förbi den
-        // punkten innan triggern fyrar — då blir GSAP-tween:ens visuella sträcka
-        // för kort och animationen "flyger upp" istället för att åka jämnt.
-        // Vi gör detta INNAN gallery-leave/freeze så den horisontella strippen
-        // hinner tvångslanda på första kortet (Träning) och aldrig fryses mitt i.
+        // Mississippi-finessen: om användaren vänder mitt i kortresan får den
+        // INTE hoppa direkt upp till intro. Först låser vi input och låter
+        // galleriets egen scroll-progress åka hela vägen tillbaka till vänster
+        // (Träning). Först därefter fryser vi galleriet och kör 3→2-returen.
         const galleryTop = gallerySection
-          ? scrollRoot.scrollTop + gallerySection.getBoundingClientRect().top
-          : scrollRoot.scrollTop;
-        if (galleryTop > 0 && Math.abs(scrollRoot.scrollTop - galleryTop) > 1) {
-          scrollRoot.scrollTop = galleryTop;
-        }
-        const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
+          ? Math.max(0, root.scrollTop + gallerySection.getBoundingClientRect().top)
+          : root.scrollTop;
+        const target = Math.max(0, root.scrollTop + stage.getBoundingClientRect().top);
+        const rewindDistance = Math.max(0, root.scrollTop - galleryTop);
+        const galleryDistance = gallerySection ? Math.max(1, gallerySection.offsetHeight - root.clientHeight) : Math.max(1, rewindDistance);
+        const rewindProgress = Math.min(1, rewindDistance / galleryDistance);
+        const rewindDuration = rewindDistance > 2
+          ? GALLERY_REWIND_MIN_DURATION + (GALLERY_REWIND_MAX_DURATION - GALLERY_REWIND_MIN_DURATION) * rewindProgress
+          : 0;
 
         // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
         // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
@@ -624,31 +616,50 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         window.dispatchEvent(new Event('parium:gallery-reset-start'));
         window.dispatchEvent(new Event('parium:gallery-leave'));
 
-        lockNativeInput(TRANSITION_LOCK_MS);
+        lockNativeInput(TRANSITION_LOCK_MS + Math.ceil(rewindDuration * 1000));
         withScrollBehaviorAuto();
 
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
-
         const finishReturn = () => {
-          scrollRoot.scrollTop = target;
+          root.scrollTop = target;
           restoreScrollBehavior?.();
           restoreScrollBehavior = null;
           transitionBlockUntil = 0;
           programmaticReturn = false;
           animatingRef.current = false;
-          prevScrollTop = scrollRoot.scrollTop;
+          prevScrollTop = root.scrollTop;
           setObserverActive(true);
         };
 
-        gsap.killTweensOf(scrollRoot);
-        gsap.to(scrollRoot, {
-          scrollTop: target,
-          duration: TRANSITION_DURATION,
-          ease: 'power2.inOut',
-          overwrite: true,
-          onComplete: finishReturn,
-          onInterrupt: finishReturn,
-        });
+        const startIntroReturn = () => {
+          root.scrollTop = galleryTop;
+          window.dispatchEvent(new Event('parium:gallery-reset-start'));
+          window.dispatchEvent(new Event('parium:gallery-leave'));
+          window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
+
+          gsap.killTweensOf(root);
+          gsap.to(root, {
+            scrollTop: target,
+            duration: TRANSITION_DURATION,
+            ease: 'power2.inOut',
+            overwrite: true,
+            onComplete: finishReturn,
+            onInterrupt: finishReturn,
+          });
+        };
+
+        gsap.killTweensOf(root);
+        if (rewindDuration > 0) {
+          gsap.to(root, {
+            scrollTop: galleryTop,
+            duration: rewindDuration,
+            ease: 'power2.out',
+            overwrite: true,
+            onComplete: startIntroReturn,
+            onInterrupt: startIntroReturn,
+          });
+        } else {
+          startIntroReturn();
+        }
       };
 
       observer = Observer.create({
