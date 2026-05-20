@@ -598,7 +598,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
-
+        // Pausa kort-bildernas kenburns-animation OMEDELBART vid exit-start.
+        // Annars syns en "zoom in/back"-blink på Träning-kortet under rewind
+        // precis innan layern flyger upp.
+        window.dispatchEvent(new Event('parium:gallery-exit-start'));
         // Mississippi-finessen: om användaren vänder mitt i kortresan får den
         // INTE hoppa direkt upp till intro. Först låser vi input och låter
         // galleriets egen scroll-progress åka hela vägen tillbaka till vänster
