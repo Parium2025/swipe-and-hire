@@ -98,11 +98,16 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (reducedMotion || skipSpline.current) return;
 
     let cancelled = false;
     let app: SplineApplication | null = null;
+    let observer: IntersectionObserver | null = null;
+    let started = false;
 
-    (async () => {
+    const start = async () => {
+      if (started || cancelled) return;
+      started = true;
       try {
         const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
@@ -151,14 +156,38 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
         console.error('Kunde inte ladda Spline-telefonen:', error);
         if (!cancelled) setHasError(true);
       }
-    })();
+    };
+
+    // Lazy-load: börja inte ladda runtime förrän canvasen är nära viewport.
+    // På entry-points där hero är direkt synlig (t.ex. /jobbsokare) triggar
+    // observern omedelbart, så ingen fördröjning för normala användare.
+    if (typeof IntersectionObserver === 'function') {
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              observer?.disconnect();
+              observer = null;
+              start();
+              break;
+            }
+          }
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(canvas);
+    } else {
+      start();
+    }
 
     return () => {
       cancelled = true;
+      observer?.disconnect();
       app?.dispose();
       appRef.current = null;
     };
   }, [reducedMotion]);
+
 
   if (hasError) {
     // Offline / WebGL-fail: rendera ingenting hellre än en ful platshållartelefon.
