@@ -175,6 +175,14 @@ const PinnedHorizontalGallery = () => {
     const thaw = () => {
       if (!frozen) return;
       frozen = false;
+      // 🔑 Återinträde till galleriet ska ALLTID börja på första kortet.
+      // Vi nollar både target och renderad progress samt skriver direkt
+      // till DOM:en så att första frame visar p=0 — annars kan en gammal
+      // mid-gallery-progress (från föregående besök) blinka till innan
+      // measure() hinner läsa om från ny scrollposition.
+      targetProgressRef.current = 0;
+      renderedProgressRef.current = 0;
+      applyProgress(0);
       measure();
     };
 
