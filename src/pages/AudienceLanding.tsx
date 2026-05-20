@@ -487,15 +487,16 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         }
 
         if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
+          const atGalleryStart = gallerySection ? gallerySection.getBoundingClientRect().top >= -8 : false;
+          if (!atGalleryStart) return;
+
           const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
           const touch = e instanceof TouchEvent ? e.touches[0] : null;
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          // Trigga returen på FÖRSTA uppåt-rörelsen i galleriet, oavsett var
-          // stagens kant befinner sig. På snabb swipe hinner annars browsern
-          // scrolla förbi gränsen mellan events och returen aktiveras för sent
-          // (eller inte alls — loophole).
+          // Returen får bara triggas vid galleriets start. Annars kapar vi den
+          // horisontella kortresan mitt i 3:an och sidan flyger upp för tidigt.
           if (wheelBack || touchBack) {
             e.preventDefault();
             e.stopPropagation();
@@ -545,6 +546,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       };
 
       const isPastStage = () => stage.getBoundingClientRect().bottom <= 4;
+      const isAtGalleryStart = () => {
+        if (!gallerySection) return false;
+        return gallerySection.getBoundingClientRect().top >= -8;
+      };
 
       // 2↔3 ska kännas EXAKT som 1↔2 (goToIntro/goToHero):
       // - Samma duration (1.08s) och ease (power2.inOut)
@@ -696,10 +701,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
         if (releasedToGallery) {
           setObserverActive(false);
-          // Trigga direkt när stagens nederkant precis börjar tittas fram
-          // underifrån — då ska 3→2-animationen sätta igång omedelbart och
-          // användaren ska inte kunna scrolla vidare upp i galleriet manuellt.
-          if (direction === 'up' && rect.bottom > 0) {
+          // Backup-trigger: bara när användaren faktiskt är tillbaka vid
+          // galleriets topp — inte mitt i den horisontella kortresan.
+          if (direction === 'up' && isAtGalleryStart()) {
             returnFromGalleryToIntro();
           }
           return;
