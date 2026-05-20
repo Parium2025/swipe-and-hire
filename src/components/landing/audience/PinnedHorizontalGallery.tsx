@@ -125,7 +125,9 @@ const PinnedHorizontalGallery = () => {
       // Sluta så att sista kortet är helt synligt med samma 7vw marginal till höger
       const endPx = Math.min(startPx, viewport - stripWidth - startPx);
       const xPx = startPx + (endPx - startPx) * p;
-      strip.style.setProperty('--phg-x', `${xPx}px`);
+      // Runda till hela pixlar — sub-pixel-värden får browsern att re-rastera
+      // varje frame vilket ger den "skakiga" känslan på tunga videokort.
+      strip.style.setProperty('--phg-x', `${Math.round(xPx)}px`);
       section.style.setProperty('--phg-progress', `${p}`);
       // Baren ska vara på plats redan vid första kortet (p=0) och hela vägen
       // till sista kortet (p=1). Den fade:as endast ut precis när vi börjar
@@ -147,11 +149,10 @@ const PinnedHorizontalGallery = () => {
       if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
-      // Högre lerp-faktor = strippen följer fingret direkt istället för att
-      // släpa efter. 0.32 kändes "tungt" på touch; 0.85 ger nästan 1:1-känsla
-      // men behåller en mikroglidning som mjukar av sub-pixel-jitter.
+      // Lerp-faktor: 0.55 ger snabb respons men nog med dämpning att tunga
+      // videokort inte hinner re-dekoda varje frame (vilket gav "skakigt").
       const diff = target - current;
-      const next = Math.abs(diff) < 0.0005 ? target : current + diff * 0.85;
+      const next = Math.abs(diff) < 0.0005 ? target : current + diff * 0.55;
       renderedProgressRef.current = next;
       applyProgress(next);
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
