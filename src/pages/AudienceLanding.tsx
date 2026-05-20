@@ -136,7 +136,6 @@ const FixedPhoneLayer = () => {
       window.cancelAnimationFrame(frame);
       timers.forEach((timer) => window.clearTimeout(timer));
       observer?.disconnect();
-      mutationObserver.disconnect();
       window.removeEventListener('resize', syncPhoneMetrics);
       window.visualViewport?.removeEventListener('resize', syncPhoneMetrics);
     };
