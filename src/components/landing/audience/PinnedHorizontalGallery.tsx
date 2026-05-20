@@ -150,15 +150,13 @@ const PinnedHorizontalGallery = () => {
     const tick = () => {
       rafRef.current = null;
       if (frozen) return;
-      const current = renderedProgressRef.current;
+      // Progress får aldrig ligga efter scrollpositionen. Den tidigare lerp:en
+      // gjorde att kortstrippen kunde “byxa/hoppa” när en snabb scroll vände
+      // från 3→2: scrollTop hann till start, men korten låg visuellt kvar en
+      // bit in och snäppte sedan till vänster när reset/freeze kördes.
       const target = targetProgressRef.current;
-      // Lerp 0.35 ger silkeslen följning på touch (momentum-scroll får många
-      // små deltas — låg faktor jämnar ut dem) utan att kännas trög på mus.
-      const diff = target - current;
-      const next = Math.abs(diff) < 0.00005 ? target : current + diff * 0.35;
-      renderedProgressRef.current = next;
-      applyProgress(next);
-      if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
+      renderedProgressRef.current = target;
+      applyProgress(target);
     };
 
     // Frys vid 3→2 (gallery-leave) och tina vid 2→3 (gallery-enter). Under frysen

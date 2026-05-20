@@ -604,7 +604,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         window.dispatchEvent(new Event('parium:gallery-exit-start'));
         // Mississippi-finessen: om användaren vänder mitt i kortresan får den
         // INTE hoppa direkt upp till intro. Först låser vi input och låter
-        // galleriets egen scroll-progress åka hela vägen tillbaka till vänster
+        // galleriets scroll-position gå hela vägen tillbaka till vänster
         // (Träning). Först därefter fryser vi galleriet och kör 3→2-returen.
         const galleryTop = gallerySection
           ? Math.max(0, root.scrollTop + gallerySection.getBoundingClientRect().top)
@@ -638,7 +638,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
         const startIntroReturn = () => {
           root.scrollTop = galleryTop;
-          window.dispatchEvent(new Event('parium:gallery-reset-start'));
+          // Vänta en frame efter scrollTop-landningen så galleriets scroll-
+          // drivna transform hinner applicera startläget. Då slipper vi den
+          // synliga micro-snäppen/blinken precis innan layern går upp.
+          window.requestAnimationFrame(() => window.dispatchEvent(new Event('parium:gallery-reset-start')));
           window.dispatchEvent(new Event('parium:gallery-leave'));
           window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
