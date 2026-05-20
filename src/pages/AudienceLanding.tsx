@@ -487,16 +487,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         }
 
         if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
-          const atGalleryStart = gallerySection ? gallerySection.getBoundingClientRect().top >= -8 : false;
-          if (!atGalleryStart) return;
-
           const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
           const touch = e instanceof TouchEvent ? e.touches[0] : null;
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          // Returen får bara triggas vid galleriets start. Annars kapar vi den
-          // horisontella kortresan mitt i 3:an och sidan flyger upp för tidigt.
+          // Första upp-gesten var som helst i galleriet ska ta över direkt.
+          // returnFromGalleryToIntro() snappar först strippen till Träning/start,
+          // så användaren kan aldrig manuellt scrolla uppåt mitt i kortresan.
           if (wheelBack || touchBack) {
             e.preventDefault();
             e.stopPropagation();
@@ -546,10 +544,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       };
 
       const isPastStage = () => stage.getBoundingClientRect().bottom <= 4;
-      const isAtGalleryStart = () => {
-        if (!gallerySection) return false;
-        return gallerySection.getBoundingClientRect().top >= -8;
-      };
 
       // 2↔3 ska kännas EXAKT som 1↔2 (goToIntro/goToHero):
       // - Samma duration (1.08s) och ease (power2.inOut)
@@ -608,21 +602,13 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
-        // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
-        // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
-        // hela tiden och bara åker med layern.
-        setIntroResting();
-        window.dispatchEvent(new Event('parium:gallery-leave'));
-
-        lockNativeInput(TRANSITION_LOCK_MS);
-        withScrollBehaviorAuto();
 
         // FÖRST: snäpp scroll-positionen till galleriets topp (= stage bottom).
         // På snabb uppåt-swipe har användaren annars redan scrollat förbi den
         // punkten innan triggern fyrar — då blir GSAP-tween:ens visuella sträcka
         // för kort och animationen "flyger upp" istället för att åka jämnt.
-        // Genom att alltid starta tween:en från galleri-toppen får vi exakt
-        // samma 1.08s-distans varje gång, oavsett scroll-hastighet.
+        // Vi gör detta INNAN gallery-leave/freeze så den horisontella strippen
+        // hinner tvångslanda på första kortet (Träning) och aldrig fryses mitt i.
         const galleryTop = gallerySection
           ? scrollRoot.scrollTop + gallerySection.getBoundingClientRect().top
           : scrollRoot.scrollTop;
@@ -630,6 +616,16 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           scrollRoot.scrollTop = galleryTop;
         }
         const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
+
+        // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
+        // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
+        // hela tiden och bara åker med layern.
+        setIntroResting();
+        window.dispatchEvent(new Event('parium:gallery-reset-start'));
+        window.dispatchEvent(new Event('parium:gallery-leave'));
+
+        lockNativeInput(TRANSITION_LOCK_MS);
+        withScrollBehaviorAuto();
 
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
@@ -701,9 +697,9 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
         if (releasedToGallery) {
           setObserverActive(false);
-          // Backup-trigger: bara när användaren faktiskt är tillbaka vid
-          // galleriets topp — inte mitt i den horisontella kortresan.
-          if (direction === 'up' && isAtGalleryStart()) {
+          // Backup-trigger: om native scroll hann ske före input-capture ska
+          // första uppåtrörelsen ändå direkt tas över och börja från Träning.
+          if (direction === 'up') {
             returnFromGalleryToIntro();
           }
           return;

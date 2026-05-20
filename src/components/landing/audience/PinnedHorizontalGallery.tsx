@@ -177,16 +177,23 @@ const PinnedHorizontalGallery = () => {
       frozen = false;
       measure();
     };
+    const resetToStart = () => {
+      targetProgressRef.current = 0;
+      renderedProgressRef.current = 0;
+      applyProgress(0);
+    };
 
     applyProgress(0);
     measure();
     root.addEventListener('scroll', measure, { passive: true });
     window.addEventListener('resize', measure);
+    window.addEventListener('parium:gallery-reset-start', resetToStart);
     window.addEventListener('parium:gallery-leave', freeze);
     window.addEventListener('parium:gallery-enter', thaw);
     return () => {
       root.removeEventListener('scroll', measure);
       window.removeEventListener('resize', measure);
+      window.removeEventListener('parium:gallery-reset-start', resetToStart);
       window.removeEventListener('parium:gallery-leave', freeze);
       window.removeEventListener('parium:gallery-enter', thaw);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
