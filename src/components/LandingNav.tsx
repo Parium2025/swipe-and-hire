@@ -201,6 +201,10 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                 width={256}
                 height={256}
                 draggable={false}
+                loading="eager"
+                decoding="sync"
+                // @ts-expect-error - fetchpriority is a valid HTML attribute
+                fetchpriority="high"
                 className="h-auto w-36 sm:w-32 md:w-40 pointer-events-none"
               />
             </a>
