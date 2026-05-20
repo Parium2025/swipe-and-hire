@@ -147,7 +147,11 @@ const PinnedHorizontalGallery = () => {
       if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
-      const next = Math.abs(target - current) < 0.001 ? target : current + (target - current) * 0.32;
+      // Högre lerp-faktor = strippen följer fingret direkt istället för att
+      // släpa efter. 0.32 kändes "tungt" på touch; 0.85 ger nästan 1:1-känsla
+      // men behåller en mikroglidning som mjukar av sub-pixel-jitter.
+      const diff = target - current;
+      const next = Math.abs(diff) < 0.0005 ? target : current + diff * 0.85;
       renderedProgressRef.current = next;
       applyProgress(next);
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
