@@ -487,13 +487,16 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         }
 
         if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
-          const stageBottom = stage.getBoundingClientRect().bottom;
           const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
           const touch = e instanceof TouchEvent ? e.touches[0] : null;
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          if (stageBottom >= -2 && (wheelBack || touchBack)) {
+          // Trigga returen på FÖRSTA uppåt-rörelsen i galleriet, oavsett var
+          // stagens kant befinner sig. På snabb swipe hinner annars browsern
+          // scrolla förbi gränsen mellan events och returen aktiveras för sent
+          // (eller inte alls — loophole).
+          if (wheelBack || touchBack) {
             e.preventDefault();
             e.stopPropagation();
             returnFromGalleryToIntro();
@@ -605,10 +608,24 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         // hela tiden och bara åker med layern.
         setIntroResting();
         window.dispatchEvent(new Event('parium:gallery-leave'));
-        const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
 
         lockNativeInput(TRANSITION_LOCK_MS);
         withScrollBehaviorAuto();
+
+        // FÖRST: snäpp scroll-positionen till galleriets topp (= stage bottom).
+        // På snabb uppåt-swipe har användaren annars redan scrollat förbi den
+        // punkten innan triggern fyrar — då blir GSAP-tween:ens visuella sträcka
+        // för kort och animationen "flyger upp" istället för att åka jämnt.
+        // Genom att alltid starta tween:en från galleri-toppen får vi exakt
+        // samma 1.08s-distans varje gång, oavsett scroll-hastighet.
+        const galleryTop = gallerySection
+          ? scrollRoot.scrollTop + gallerySection.getBoundingClientRect().top
+          : scrollRoot.scrollTop;
+        if (galleryTop > 0 && Math.abs(scrollRoot.scrollTop - galleryTop) > 1) {
+          scrollRoot.scrollTop = galleryTop;
+        }
+        const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
+
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
         const finishReturn = () => {
