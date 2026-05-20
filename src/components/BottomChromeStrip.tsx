@@ -54,10 +54,6 @@ const BottomChromeStrip = () => {
 
   const displayColor = forcedColor ?? color;
 
-  useEffect(() => {
-    console.log('[BottomChromeStrip]', { path: location.pathname, color: displayColor });
-  }, [location.pathname, displayColor]);
-
   // Sync CSS variable so scroll containers always reserve space
   // matching the strip — independent of @media (pointer: coarse).
   useEffect(() => {
