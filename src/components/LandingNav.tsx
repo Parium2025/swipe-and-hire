@@ -51,21 +51,6 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     }
   };
 
-  // Stäng meny vid klick utanför / Escape
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onDown = (e: PointerEvent) => {
-      const el = mobileMenuRef.current;
-      if (el && !el.contains(e.target as Node)) setMenuOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
-    document.addEventListener('pointerdown', onDown, true);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('pointerdown', onDown, true);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [menuOpen]);
 
   useEffect(() => {
     // Hitta faktisk scroll-container (fixed inset-0 overflow-y-auto används på audience-sidor)
