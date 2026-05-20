@@ -683,9 +683,23 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           // användaren ska inte kunna scrolla vidare upp i galleriet manuellt.
           if (direction === 'up' && rect.bottom > 0) {
             returnFromGalleryToIntro();
+            return;
+          }
+          // Säkerhetsnät: om en mycket snabb swipe + iOS-momentum hann ta sig
+          // hela vägen förbi stage-gränsen innan vår tween fångade upp,
+          // återställ orchestreringen utan att hänga kvar i "released"-läge.
+          // Snäpp till intro-resting och ge tillbaka observer-kontroll så
+          // användaren inte fastnar i ett halvfunget mellanläge.
+          if (rect.top >= 0 && rect.bottom >= vh * 0.9) {
+            releasedToGallery = false;
+            setIntroResting();
+            window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
+            window.dispatchEvent(new Event('parium:gallery-leave'));
+            setObserverActive(true);
           }
           return;
         }
+
 
         const stageIsDocked = Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
         if (stageIsDocked) {
