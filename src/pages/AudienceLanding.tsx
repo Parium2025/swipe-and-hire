@@ -492,15 +492,20 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          // Första upp-gesten var som helst i galleriet ska ta över direkt.
-          // returnFromGalleryToIntro() snappar först strippen till Träning/start,
-          // så användaren kan aldrig manuellt scrolla uppåt mitt i kortresan.
-          if (wheelBack || touchBack) {
+          // VIKTIGT: Endast intercepta upp-gesten när galleri-sektionen fortfarande
+          // är pinnad (top nära 0). Om användaren har scrollat förbi galleriet och
+          // är på t.ex. "Priser" ska native scroll få ta dem tillbaka in i galleriet
+          // utan att kastas hela vägen till intro.
+          const galleryTop = gallerySection ? gallerySection.getBoundingClientRect().top : 0;
+          const galleryIsAtStart = galleryTop >= -4;
+
+          if ((wheelBack || touchBack) && galleryIsAtStart) {
             e.preventDefault();
             e.stopPropagation();
             returnFromGalleryToIntro();
           }
         }
+
       };
       const trackTouchStart = (e: TouchEvent) => {
         galleryTouchY = e.touches[0]?.clientY ?? null;
