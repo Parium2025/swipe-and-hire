@@ -20,10 +20,9 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const pillScrollerRef = useRef<HTMLDivElement | null>(null);
+  const mobileScrollerRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [rotIndex, setRotIndex] = useState(0);
-  const [rotPaused, setRotPaused] = useState(false);
 
   const goHome = (e?: React.SyntheticEvent) => {
     e?.preventDefault();
