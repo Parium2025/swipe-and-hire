@@ -77,40 +77,54 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     return () => scroller.removeEventListener('scroll', onScroll as any);
   }, [location.pathname]);
 
-  // Tracka aktiv sektion baserat på vilken som är synligast
+  // Tracka aktiv sektion via scroll-position (mer robust än IntersectionObserver
+  // när scroll-containern är fixed inset-0 och sektionerna är höga).
   useEffect(() => {
     if (!links.length) return;
     const ids = links.map((l) => l.href.replace('#', '')).filter(Boolean);
-    const elements = ids
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => Boolean(el));
-    if (!elements.length) return;
 
-    const visibility = new Map<string, number>();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          visibility.set(e.target.id, e.intersectionRatio);
+    const findScroller = (): HTMLElement | Window => {
+      const candidates = Array.from(document.querySelectorAll<HTMLElement>('div'));
+      for (const el of candidates) {
+        const cs = getComputedStyle(el);
+        if (
+          (cs.overflowY === 'auto' || cs.overflowY === 'scroll') &&
+          cs.position === 'fixed' &&
+          el.scrollHeight > el.clientHeight
+        ) {
+          return el;
         }
-        let bestId: string | null = null;
-        let bestRatio = 0;
-        visibility.forEach((ratio, id) => {
-          if (ratio > bestRatio) {
-            bestRatio = ratio;
-            bestId = id;
-          }
-        });
-        if (bestRatio > 0.15) setActiveId(bestId);
-        else setActiveId(null);
-      },
-      {
-        // Lite offset från toppen så aktiv sektion byts när rubriken är under naven
-        rootMargin: '-20% 0px -55% 0px',
-        threshold: [0, 0.15, 0.3, 0.5, 0.75, 1],
       }
-    );
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+      return window;
+    };
+    const scroller = findScroller();
+    const isWin = scroller === window;
+
+    const compute = () => {
+      const elements = ids
+        .map((id) => document.getElementById(id))
+        .filter((el): el is HTMLElement => Boolean(el));
+      if (!elements.length) return;
+
+      // "Linje" 140px från toppen — det är där aktuell sektion ska bytas
+      const threshold = 140;
+      let currentId: string | null = null;
+      for (const el of elements) {
+        const top = el.getBoundingClientRect().top;
+        if (top - threshold <= 0) currentId = el.id;
+        else break;
+      }
+      setActiveId(currentId);
+    };
+
+    compute();
+    const onScroll = () => compute();
+    scroller.addEventListener('scroll', onScroll, { passive: true } as any);
+    window.addEventListener('resize', onScroll);
+    return () => {
+      scroller.removeEventListener('scroll', onScroll as any);
+      window.removeEventListener('resize', onScroll);
+    };
   }, [links]);
 
   // Auto-centrera aktiv chip i pillen när scroll ändrar aktiv sektion
@@ -154,7 +168,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
             {/* Mobil: dropdown-meny (standard shadcn). Desktop (sm+): hela list-pillen. */}
             {links.length > 0 && isMobile && (
               <div className="flex-1 min-w-0 flex justify-center">
-                <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
