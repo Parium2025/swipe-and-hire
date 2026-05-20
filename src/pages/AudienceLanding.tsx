@@ -704,15 +704,18 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (programmaticReturn || animatingRef.current) return;
 
         const cur = scrollRoot.scrollTop;
-        const direction = cur < prevScrollTop ? 'up' : 'down';
-        prevScrollTop = cur;
-        const rect = stage.getBoundingClientRect();
-        const vh = window.innerHeight;
-
         if (releasedToGallery) {
           setObserverActive(false);
-          // Backup-trigger: om native scroll hann ske före input-capture ska
-          // första uppåtrörelsen ändå direkt tas över och börja från Träning.
+          // Backup-trigger: bara om galleri-sektionen fortfarande är pinnad i topp.
+          // När användaren är förbi galleriet (på Priser etc) ska upp-scroll få
+          // gå naturligt tillbaka in i galleriet utan att kastas till intro.
+          const galleryTop = gallerySection ? gallerySection.getBoundingClientRect().top : 0;
+          if (direction === 'up' && galleryTop >= -4) {
+            returnFromGalleryToIntro();
+          }
+          return;
+        }
+
           if (direction === 'up') {
             returnFromGalleryToIntro();
           }
