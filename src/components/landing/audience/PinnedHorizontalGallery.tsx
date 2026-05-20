@@ -410,7 +410,8 @@ const PinnedHorizontalGallery = () => {
           gap: clamp(14px, 1.6vw, 22px);
           padding: clamp(8px, 1.5vh, 20px) 6vw clamp(8px, 1vh, 18px);
           will-change: transform, opacity;
-          transform: translate3d(var(--phg-x, 7vw), 0, 0);
+          transform: translate3d(7vw, 0, 0);
+          backface-visibility: hidden;
         }
         .phg-card {
           flex: 0 0 auto;
@@ -439,10 +440,6 @@ const PinnedHorizontalGallery = () => {
         .phg-strip.phg-entered .phg-card-enter {
           opacity: 1;
           transform: translate3d(0, 0, 0);
-        }
-        .phg-strip.phg-settled .phg-card-enter {
-          transform: none;
-          will-change: auto;
         }
         /* Exit — kopia av introTextItems-tween i goToHero (2→1):
            duration 0.42s, ease power2.in, stagger 0.055s (55ms via --leave-delay). */
