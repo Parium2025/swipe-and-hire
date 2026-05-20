@@ -182,6 +182,14 @@ const PinnedHorizontalGallery = () => {
       renderedProgressRef.current = 0;
       applyProgress(0);
     };
+    // Pausa kenburns-animationen på kortbilderna under hela 3→2-exiten så att
+    // ingen bild "zoomar in och tillbaka" precis innan sidan flyger upp.
+    const pauseKenburns = () => {
+      strip.classList.add('phg-pause-kenburns');
+    };
+    const resumeKenburns = () => {
+      strip.classList.remove('phg-pause-kenburns');
+    };
 
     applyProgress(0);
     measure();
@@ -190,12 +198,16 @@ const PinnedHorizontalGallery = () => {
     window.addEventListener('parium:gallery-reset-start', resetToStart);
     window.addEventListener('parium:gallery-leave', freeze);
     window.addEventListener('parium:gallery-enter', thaw);
+    window.addEventListener('parium:gallery-exit-start', pauseKenburns);
+    window.addEventListener('parium:gallery-enter', resumeKenburns);
     return () => {
       root.removeEventListener('scroll', measure);
       window.removeEventListener('resize', measure);
       window.removeEventListener('parium:gallery-reset-start', resetToStart);
       window.removeEventListener('parium:gallery-leave', freeze);
       window.removeEventListener('parium:gallery-enter', thaw);
+      window.removeEventListener('parium:gallery-exit-start', pauseKenburns);
+      window.removeEventListener('parium:gallery-enter', resumeKenburns);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
     };
   }, []);
@@ -495,6 +507,10 @@ const PinnedHorizontalGallery = () => {
           100% { transform: scale(1.04) translate3d(0,0,0); }
         }
         .phg-card img { animation: phg-kenburns 24s ease-in-out infinite; }
+        /* Pausa kenburns under 3→2-exiten så bilden inte oscillerar synligt
+           precis innan layern flyger upp. Vi pausar i nuvarande frame så
+           ingen "snap" syns; animationen återupptas när galleriet entras igen. */
+        .phg-strip.phg-pause-kenburns .phg-card img { animation-play-state: paused; }
         @media (prefers-reduced-motion: reduce) {
           .phg-card img { animation: none; }
         }
