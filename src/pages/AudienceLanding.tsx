@@ -125,8 +125,10 @@ const FixedPhoneLayer = () => {
     const anchor = document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
     const observer = anchor ? new ResizeObserver(syncPhoneMetrics) : null;
     if (anchor) observer?.observe(anchor);
-    const mutationObserver = new MutationObserver(syncPhoneMetrics);
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    // (Borttagen) MutationObserver på document.body — den fyrade på varje
+    // DOM-mutation i hela appen vilket var en reell perf-läcka. ResizeObserver
+    // på phone-anchorn + visualViewport + font-ready täcker alla relevanta
+    // omkalibreringar utan att lyssna globalt.
     document.fonts?.ready.then(syncPhoneMetrics).catch(() => undefined);
     window.addEventListener('resize', syncPhoneMetrics, { passive: true });
     window.visualViewport?.addEventListener('resize', syncPhoneMetrics, { passive: true });
@@ -134,7 +136,6 @@ const FixedPhoneLayer = () => {
       window.cancelAnimationFrame(frame);
       timers.forEach((timer) => window.clearTimeout(timer));
       observer?.disconnect();
-      mutationObserver.disconnect();
       window.removeEventListener('resize', syncPhoneMetrics);
       window.visualViewport?.removeEventListener('resize', syncPhoneMetrics);
     };
@@ -509,22 +510,27 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       const lockNativeInput = (ms: number) => {
         transitionBlockUntil = performance.now() + ms;
       };
-      const withScrollBehaviorAuto = () => {
+      const isTouchDevice = () => {
+        if (typeof window === 'undefined') return false;
+        return ('ontouchstart' in window) || (navigator.maxTouchPoints ?? 0) > 0;
+      };
+      const withScrollBehaviorAuto = ({ pulseOverflow = isTouchDevice() } = {}) => {
         if (!scrollRoot) return;
         restoreScrollBehavior?.();
         const previousScrollBehavior = scrollRoot.style.scrollBehavior;
         const previousOverflowY = scrollRoot.style.overflowY;
         scrollRoot.style.scrollBehavior = 'auto';
-        // iOS-momentum kan annars fortsätta tävla med GSAP:s scrollTop-tween
-        // och få sidan att "glida förbi" 2↔3-låsningen. Vi pulsar overflow-y:
-        // hidden en frame för att tvinga browsern att släppa hardware-momentum
-        // innan tween:en tar över.
-        scrollRoot.style.overflowY = 'hidden';
-        requestAnimationFrame(() => {
-          if (scrollRoot.style.overflowY === 'hidden') {
-            scrollRoot.style.overflowY = previousOverflowY;
-          }
-        });
+        // iOS-momentum tävlar annars med GSAP:s scrollTop-tween. Vi pulsar
+        // overflow-y: hidden EN frame ENBART på touch — på desktop ger samma
+        // puls ett synligt 1-frame-hack precis när tweenen startar.
+        if (pulseOverflow) {
+          scrollRoot.style.overflowY = 'hidden';
+          requestAnimationFrame(() => {
+            if (scrollRoot.style.overflowY === 'hidden') {
+              scrollRoot.style.overflowY = previousOverflowY;
+            }
+          });
+        }
         restoreScrollBehavior = () => {
           scrollRoot.style.scrollBehavior = previousScrollBehavior;
           scrollRoot.style.overflowY = previousOverflowY;
@@ -607,7 +613,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         window.dispatchEvent(new Event('parium:gallery-leave'));
         const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
 
-        lockNativeInput(TRANSITION_LOCK_MS);
+        lockNativeInput(950); // matchar return-tween (0.82s) + liten momentum-buffer
         withScrollBehaviorAuto();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
 
@@ -623,10 +629,15 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         };
 
         gsap.killTweensOf(scrollRoot);
+        // Returen (3→2) använder power3.out istället för power2.inOut: snabb
+        // start gör att gesten omedelbart översätts till rörelse (ingen "trög
+        // halvsekund"), och en något kortare duration gör att landningen
+        // möter användarens swipe-tempo. Forward (2→3) håller power2.inOut
+        // för att kännas premium från en lugn intro.
         gsap.to(scrollRoot, {
           scrollTop: target,
-          duration: TRANSITION_DURATION,
-          ease: 'power2.inOut',
+          duration: 0.82,
+          ease: 'power3.out',
           overwrite: true,
           onComplete: finishReturn,
           onInterrupt: finishReturn,
