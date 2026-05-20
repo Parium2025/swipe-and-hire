@@ -684,6 +684,17 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           // användaren ska inte kunna scrolla vidare upp i galleriet manuellt.
           if (direction === 'up' && rect.bottom > 0) {
             returnFromGalleryToIntro();
+            return;
+          }
+          // Säkerhetsnät: om en extremt snabb swipe hann passera stage-gränsen
+          // innan returen triggade (rect.bottom <= 0 men vi är fortfarande
+          // flaggade som releasedToGallery), släpp Observer-kontrollen och
+          // snäpp in i intro-resting så vi inte fastnar i ett tillstånd där
+          // varken Observer eller scroll-watch tar över.
+          if (rect.top >= vh || rect.bottom <= 0) {
+            releasedToGallery = false;
+            releaseLockedRef.current = false;
+            setIntroResting();
           }
           return;
         }
