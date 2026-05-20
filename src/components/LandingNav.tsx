@@ -42,21 +42,43 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
   // Hjälpare: gemensam smooth-scroll som spelar rent med AudienceLanding-
   // orchestreringen (Observer + scroll-jacking mellan hero ↔ intro ↔ galleri).
-  // Utan detta lås-släpp kan pinned-galleriet kännas låst efter ett hopp.
+  // Använder en egen rAF-tween med ease-in-out så det känns lugnare/premium
+  // än webbläsarens default `behavior: 'smooth'` (som ofta är megasnabb).
+  const smoothScrollTo = (
+    target: HTMLElement | Window,
+    top: number,
+    duration = 900,
+  ) => {
+    const isWin = target === window;
+    const getY = () => (isWin ? window.scrollY : (target as HTMLElement).scrollTop);
+    const setY = (y: number) =>
+      isWin ? window.scrollTo({ top: y, behavior: 'auto' }) : ((target as HTMLElement).scrollTop = y);
+    const startY = getY();
+    const delta = top - startY;
+    if (Math.abs(delta) < 2) return;
+    const startT = performance.now();
+    // easeInOutCubic – mjuk i båda ändar
+    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const step = (now: number) => {
+      const t = Math.min(1, (now - startT) / duration);
+      setY(startY + delta * ease(t));
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
     setActiveId(id);
-    // Säg åt orchestreringen att vi gör ett programmatiskt hopp förbi
-    // hero/intro så att Observer släpper wheel/touch och pinned-galleriet
-    // tinas (ingen effekt på vanliga landing-sidan utan orchestrering).
     window.dispatchEvent(new Event('parium:nav-jump'));
     const scroller = document.querySelector<HTMLElement>('[data-landing-scroll-root]');
     if (scroller) {
       const top = scroller.scrollTop + el.getBoundingClientRect().top;
-      scroller.scrollTo({ top, behavior: 'smooth' });
+      smoothScrollTo(scroller, top, 950);
     } else {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const top = window.scrollY + el.getBoundingClientRect().top;
+      smoothScrollTo(window, top, 950);
     }
   };
 
@@ -173,10 +195,10 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               <img
                 src={pariumLogo}
                 alt="Parium"
-                width={224}
-                height={224}
+                width={256}
+                height={256}
                 draggable={false}
-                className="h-auto w-32 sm:w-28 md:w-32 pointer-events-none"
+                className="h-auto w-36 sm:w-32 md:w-40 pointer-events-none"
               />
             </a>
 
@@ -270,12 +292,12 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               </div>
             )}
 
-            {/* Logga in — större på mobil nu när pillen tar mindre plats */}
-            <div className="shrink-0">
+            {/* Logga in — alltid längst till höger */}
+            <div className="shrink-0 ml-auto">
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-6 sm:px-5 md:px-6 h-10 sm:h-9 bg-white/[0.04] border border-white/[0.08] text-white text-[14px] sm:text-[12px] md:text-[13px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
+                className="rounded-full px-7 sm:px-6 md:px-7 h-11 sm:h-10 md:h-11 bg-white/[0.04] border border-white/[0.08] text-white text-[15px] sm:text-[13px] md:text-[14px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
               >
                 Logga in
               </Button>
