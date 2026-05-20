@@ -119,6 +119,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
     <>
       <nav
         className="fixed top-0 left-0 right-0 z-50 bg-transparent"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 18px)' }}
         aria-label="Huvudnavigation"
       >
         <div className="max-w-[1400px] mx-auto px-3 sm:px-5 md:px-12 lg:px-24">
