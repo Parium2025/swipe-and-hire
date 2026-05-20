@@ -499,6 +499,8 @@ const PinnedHorizontalGallery = () => {
           display: block;
           pointer-events: none;
           user-select: none;
+          backface-visibility: hidden;
+          transform: translateZ(0);
         }
         @keyframes phg-kenburns {
           0%   { transform: scale(1.04) translate3d(0,0,0); }
@@ -507,6 +509,9 @@ const PinnedHorizontalGallery = () => {
         }
         .phg-card img { animation: phg-kenburns 24s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) {
+          .phg-card img { animation: none; }
+        }
+        @media (max-width: 767px), (hover: none), (pointer: coarse) {
           .phg-card img { animation: none; }
         }
         .phg-card::after {
@@ -590,7 +595,7 @@ const PinnedHorizontalGallery = () => {
           <div className="phg-strip-wrap">
             <div ref={stripRef} className="phg-strip">
               {items.map((item, i) => (
-                <CardItem key={i} item={item} index={i} />
+                <CardItem key={i} item={item} index={i} posterOnly={posterOnly} />
               ))}
             </div>
           </div>
