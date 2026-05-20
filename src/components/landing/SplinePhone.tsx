@@ -63,7 +63,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    if (reducedMotion || skipSpline.current) return;
+    if (reducedMotion) return;
 
     let cancelled = false;
     let app: SplineApplication | null = null;
