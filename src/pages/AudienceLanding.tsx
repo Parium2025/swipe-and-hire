@@ -673,14 +673,16 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
         if (releasedToGallery) {
           setObserverActive(false);
-          // Trigga direkt när stagens nederkant precis börjar tittas fram
-          // underifrån — då ska 3→2-animationen sätta igång omedelbart och
-          // användaren ska inte kunna scrolla vidare upp i galleriet manuellt.
-          if (direction === 'up' && rect.bottom > 0) {
+          // Tidigare: rect.bottom > 0 → triggade FÖRST när stage redan börjat
+          // synas (efter att native scroll exponerat intro = synlig "blink").
+          // Nu: trigga så snart vi närmar oss kanten (–40px) på väg upp, så
+          // GSAP äger hela returen och användaren ser en enda smooth animation.
+          if (direction === 'up' && rect.bottom > -40) {
             returnFromGalleryToIntro();
           }
           return;
         }
+
 
         const stageIsDocked = Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
         if (stageIsDocked) {
