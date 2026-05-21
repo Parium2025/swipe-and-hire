@@ -591,6 +591,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
+        void hapticLight();
         // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
         // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
         // hela tiden och bara åker med layern.
