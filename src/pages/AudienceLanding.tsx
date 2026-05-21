@@ -318,6 +318,14 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
+      // Respektera systeminställningen "Minska rörelse" (iOS/macOS/Android).
+      // Vi behåller alla transitions visuellt identiska men korta — premium-
+      // detalj som stora bolag (Apple, Spotify) alltid har. Ingen UI-påverkan
+      // för användare utan flaggan.
+      const reducedMotion = typeof window !== 'undefined'
+        && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+      const DURATION_SCALE = reducedMotion ? 0.35 : 1;
+
       // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
       // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
       const gallerySection = document.getElementById('sa-funkar-det');
@@ -399,7 +407,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
         const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power2.inOut' },
+          defaults: { duration: 1.08 * DURATION_SCALE, ease: 'power2.inOut' },
           onComplete: () => {
             setIntroResting();
             animatingRef.current = false;
@@ -418,12 +426,12 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
         if (introHeadingEl) {
           // Rubriken matchar hero-h1: opacity-only premium fade, lugn och lång.
-          tl.fromTo(introHeadingEl, { opacity: 0 }, { opacity: 1, duration: 1.2, ease: 'power3.out' }, 0.3);
+          tl.fromTo(introHeadingEl, { opacity: 0 }, { opacity: 1, duration: 1.2 * DURATION_SCALE, ease: 'power3.out' }, 0.3 * DURATION_SCALE);
         }
-        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.62);
+        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62 * DURATION_SCALE, stagger: 0.08 * DURATION_SCALE, ease: 'power2.out' }, 0.62 * DURATION_SCALE);
         if (introCtaEl) {
           // CTA fadar bara in (ingen y-translate) så den inte "sticker upp" i slutet.
-          tl.fromTo(introCtaEl, { opacity: 0 }, { opacity: 1, duration: 0.62, ease: 'power2.out' }, 0.62 + introTextItems.length * 0.08);
+          tl.fromTo(introCtaEl, { opacity: 0 }, { opacity: 1, duration: 0.62 * DURATION_SCALE, ease: 'power2.out' }, (0.62 + introTextItems.length * 0.08) * DURATION_SCALE);
         }
       };
 
@@ -439,7 +447,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
         const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power2.inOut' },
+          defaults: { duration: 1.08 * DURATION_SCALE, ease: 'power2.inOut' },
           onComplete: () => {
             setHeroStart();
             animatingRef.current = false;
@@ -447,9 +455,9 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             setObserverActive(true);
           },
         });
-        tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in' }, 0);
-        if (introCtaEl) tl.to(introCtaEl, { opacity: 0, duration: 0.32, ease: 'power2.in' }, 0);
-        if (introHeadingEl) tl.to(introHeadingEl, { opacity: 0, duration: 0.42, ease: 'power2.in' }, 0);
+        tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42 * DURATION_SCALE, stagger: 0.055 * DURATION_SCALE, ease: 'power2.in' }, 0);
+        if (introCtaEl) tl.to(introCtaEl, { opacity: 0, duration: 0.32 * DURATION_SCALE, ease: 'power2.in' }, 0);
+        if (introHeadingEl) tl.to(introHeadingEl, { opacity: 0, duration: 0.42 * DURATION_SCALE, ease: 'power2.in' }, 0);
         tl.to(introOuter, { yPercent: 100 }, 0);
         tl.to(introInner, { yPercent: -100 }, 0);
         tl.set(introOuter, { autoAlpha: 0 });
@@ -539,8 +547,8 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       //   layer-translateY (samma princip som hero-texten i 1↔2).
       // - Komplett input-lock under HELA transition-fönstret så att varken
       //   wheel-momentum eller iOS touch-momentum kan rubba scrollen.
-      const TRANSITION_DURATION = 1.08;
-      const TRANSITION_LOCK_MS = 1200; // 1.08s + buffer för momentum
+      const TRANSITION_DURATION = 1.08 * DURATION_SCALE;
+      const TRANSITION_LOCK_MS = Math.round(1200 * DURATION_SCALE); // duration + buffer för momentum
 
       const releaseAndScrollNext = () => {
         const root = scrollRoot;
