@@ -721,9 +721,6 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
 
     return () => {
       cancelled = true;
-      if (returnFrame) { window.cancelAnimationFrame(returnFrame); returnFrame = null; }
-      if (returnTimer) { window.clearTimeout(returnTimer); returnTimer = null; }
-      if (forwardTimer) { window.clearTimeout(forwardTimer); forwardTimer = null; }
       observer?.kill();
       setupTeardown?.();
     };
