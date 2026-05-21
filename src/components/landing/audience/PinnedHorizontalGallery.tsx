@@ -61,6 +61,8 @@ const CardItem = ({ item, index }: CardItemProps) => {
           loop
           playsInline
           preload="metadata"
+          disablePictureInPicture
+          disableRemotePlayback
           onError={() => setFailed(true)}
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
@@ -70,6 +72,11 @@ const CardItem = ({ item, index }: CardItemProps) => {
           alt={item.title}
           loading={index < 3 ? 'eager' : 'lazy'}
           decoding="async"
+          {...(index < 2
+            ? { fetchPriority: 'high' as const }
+            : index >= 4
+              ? { fetchPriority: 'low' as const }
+              : {})}
           draggable={false}
           style={{ objectPosition: item.position ?? '50% 50%' }}
         />
@@ -452,6 +459,10 @@ const PinnedHorizontalGallery = () => {
           transition: box-shadow 0.6s ease;
           will-change: transform, opacity;
           transform: translateZ(0);
+          /* Premium perf: låt browsern skippa layout/paint för kort som är utanför viewport.
+             contain-intrinsic-size håller scroll-höjden stabil så inget hoppar. */
+          content-visibility: auto;
+          contain-intrinsic-size: 500px 400px;
         }
         /* Initial state — exakt match med introTextItems i goToIntro (1→2):
            y: 44, opacity: 0. Inga scales eller andra extra transforms. */
