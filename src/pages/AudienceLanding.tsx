@@ -324,7 +324,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       // för användare utan flaggan.
       const reducedMotion = typeof window !== 'undefined'
         && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
-      const DURATION_SCALE = reducedMotion ? 0.35 : 1;
+      const DURATION_SCALE = reducedMotion ? 0.7 : 1;
 
       // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
       // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
