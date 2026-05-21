@@ -33,19 +33,6 @@ type HeroIntroStageProps = {
   introCtaLabel?: string;
 };
 
-// Detektera batterisparläge / extremt långsamt internet. I så fall hoppar vi
-// Spline-3D-scenen (~2 MB WebGL-bundle) och visar SplinePhones inbyggda
-// statiska fallback direkt. Sparar batteri + data utan att ändra UX.
-const shouldSkipSpline = (): boolean => {
-  if (typeof navigator === 'undefined') return false;
-  const conn = (navigator as { connection?: { effectiveType?: string; saveData?: boolean; downlink?: number } }).connection;
-  if (!conn) return false;
-  if (conn.saveData) return true;
-  if (conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g') return true;
-  if (typeof conn.downlink === 'number' && conn.downlink > 0 && conn.downlink < 0.7) return true;
-  return false;
-};
-
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   const heroIndexRef = useRef(0);
@@ -126,10 +113,6 @@ const FixedPhoneLayer = () => {
   const [phoneMetrics, setPhoneMetrics] = useState(calculatePhoneMetrics);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
-  // Datasparläge / 2G: hoppa Spline helt och visa statisk fallback direkt.
-  // Räknas en gång på mount — om användaren byter nätverk under sessionen
-  // är det inte värt att riva ner en redan laddad scen.
-  const skipSplineRef = useRef(shouldSkipSpline());
 
   useEffect(() => {
     const syncPhoneMetrics = () => {
@@ -287,7 +270,7 @@ const FixedPhoneLayer = () => {
             style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
             zoom={phoneMetrics.zoom}
             active={active}
-            instantFallback={!phoneMetrics.isDesktop || skipSplineRef.current}
+            instantFallback={!phoneMetrics.isDesktop}
           />
         </div>
       </div>
@@ -336,12 +319,12 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
       // Respektera systeminställningen "Minska rörelse" (iOS/macOS/Android).
-      // Vi behåller alla transitions visuellt identiska men något kortare —
-      // mellanting mellan vanlig (1.0) och aggressiv reducering (0.35) så att
-      // den fortfarande känns premium, inte hackig.
+      // Vi behåller alla transitions visuellt identiska men korta — premium-
+      // detalj som stora bolag (Apple, Spotify) alltid har. Ingen UI-påverkan
+      // för användare utan flaggan.
       const reducedMotion = typeof window !== 'undefined'
         && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
-      const DURATION_SCALE = reducedMotion ? 0.7 : 1;
+      const DURATION_SCALE = reducedMotion ? 0.35 : 1;
 
       // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
       // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
