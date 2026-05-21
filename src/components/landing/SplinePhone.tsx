@@ -140,7 +140,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
       app?.dispose();
       appRef.current = null;
     };
-  }, [reducedMotion]);
+  }, [skipWebgl]);
 
   if (hasError || skipWebgl) {
     // Offline/save-data/reduced-motion: rendera tomt hellre än en ful platshållare.
