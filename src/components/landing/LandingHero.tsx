@@ -165,7 +165,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease, delay: 0.9 }}
-          className="mt-6 max-w-xl text-base text-white sm:text-lg"
+          className="mt-2 max-w-xl text-base text-white sm:mt-6 sm:text-lg"
         >
           Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
         </motion.p>
