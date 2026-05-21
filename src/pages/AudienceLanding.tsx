@@ -126,6 +126,10 @@ const FixedPhoneLayer = () => {
   const [phoneMetrics, setPhoneMetrics] = useState(calculatePhoneMetrics);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
+  // Datasparläge / 2G: hoppa Spline helt och visa statisk fallback direkt.
+  // Räknas en gång på mount — om användaren byter nätverk under sessionen
+  // är det inte värt att riva ner en redan laddad scen.
+  const skipSplineRef = useRef(shouldSkipSpline());
 
   useEffect(() => {
     const syncPhoneMetrics = () => {
