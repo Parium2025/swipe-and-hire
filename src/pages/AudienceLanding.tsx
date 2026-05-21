@@ -493,12 +493,18 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          if (stageBottom >= -2 && (wheelBack || touchBack)) {
+          // Trigga returen lite TIDIGARE än kanten (–24px in i galleriet) så
+          // GSAP äger transitionen innan native momentum hinner exponera
+          // intro-lagret. Tidigare väntade vi tills stage.bottom var ≥ -2,
+          // vilket gav touch-momentum tid att slippa förbi och visa en
+          // "extra-blink" av intro innan animationen tog över.
+          if (stageBottom >= -24 && (wheelBack || touchBack)) {
             e.preventDefault();
             e.stopPropagation();
             returnFromGalleryToIntro();
           }
         }
+
       };
       const trackTouchStart = (e: TouchEvent) => {
         galleryTouchY = e.touches[0]?.clientY ?? null;
@@ -667,14 +673,16 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
         if (releasedToGallery) {
           setObserverActive(false);
-          // Trigga direkt när stagens nederkant precis börjar tittas fram
-          // underifrån — då ska 3→2-animationen sätta igång omedelbart och
-          // användaren ska inte kunna scrolla vidare upp i galleriet manuellt.
-          if (direction === 'up' && rect.bottom > 0) {
+          // Tidigare: rect.bottom > 0 → triggade FÖRST när stage redan börjat
+          // synas (efter att native scroll exponerat intro = synlig "blink").
+          // Nu: trigga så snart vi närmar oss kanten (–40px) på väg upp, så
+          // GSAP äger hela returen och användaren ser en enda smooth animation.
+          if (direction === 'up' && rect.bottom > -40) {
             returnFromGalleryToIntro();
           }
           return;
         }
+
 
         const stageIsDocked = Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
         if (stageIsDocked) {

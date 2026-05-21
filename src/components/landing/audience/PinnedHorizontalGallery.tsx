@@ -175,8 +175,19 @@ const PinnedHorizontalGallery = () => {
     const thaw = () => {
       if (!frozen) return;
       frozen = false;
-      measure();
+      // Snap rendered progress direkt till faktisk scroll-position så att
+      // galleriet inte "lerpar ikapp" från ett gammalt värde (t.ex. 1 från
+      // ett tidigare djupt scroll-läge). Utan detta tar det ~0.5s innan
+      // strippen står på rätt plats efter 2→3, vilket känns som att kort 3
+      // "korrigerar sig" efteråt.
+      const rect = section.getBoundingClientRect();
+      const distance = Math.max(1, section.offsetHeight - root.clientHeight);
+      const p = Math.min(1, Math.max(0, -rect.top / distance));
+      targetProgressRef.current = p;
+      renderedProgressRef.current = p;
+      applyProgress(p);
     };
+
 
     applyProgress(0);
     measure();
