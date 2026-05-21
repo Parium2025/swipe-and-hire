@@ -298,9 +298,6 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
   useEffect(() => {
     let cancelled = false;
     let observer: { kill: () => void; enable?: () => void; disable?: () => void; isEnabled?: boolean } | null = null;
-    let returnFrame: number | null = null;
-    let returnTimer: number | null = null;
-    let forwardTimer: number | null = null;
     let setupTeardown: (() => void) | undefined;
 
     const setup = async () => {
