@@ -84,7 +84,7 @@ const Auth = () => {
       const hashParams = new URLSearchParams(hash);
       
       if (AUTH_DEBUG) {
-        if (AUTH_DEBUG) console.log('🔍 AUTH FLOW DEBUG:', {
+        console.log('🔍 AUTH FLOW DEBUG:', {
           isReset,
           url: window.location.href,
           searchParams: Array.from(searchParams.entries()),
@@ -97,7 +97,7 @@ const Auth = () => {
       
       // FÖRSTA KONTROLLEN: Är det en reset-länk?
       if (isReset) {
-        if (AUTH_DEBUG) console.log('✅ Reset-länk detekterad');
+        console.log('✅ Reset-länk detekterad');
         
         // ANDRA KONTROLLEN: Kontrollera expired/used parameter från redirect-funktionen
         const isExpired = searchParams.get('expired') === 'true';
@@ -105,17 +105,17 @@ const Auth = () => {
         const isTokenUsed = searchParams.get('token_used') === 'true';
         
         if (isExpired) {
-          if (AUTH_DEBUG) console.log('❌ EXPIRED parameter - Visar expired sida');
+          console.log('❌ EXPIRED parameter - Visar expired sida');
           setRecoveryStatus('expired');
           return;
         }
         if (isUsed) {
-          if (AUTH_DEBUG) console.log('❌ USED parameter - Visar used sida');
+          console.log('❌ USED parameter - Visar used sida');
           setRecoveryStatus('used');
           return;
         }
         if (isTokenUsed) {
-          if (AUTH_DEBUG) console.log('❌ TOKEN_USED parameter - Token redan använd');
+          console.log('❌ TOKEN_USED parameter - Token redan använd');
           setRecoveryStatus('consumed');
           return;
         }
@@ -125,10 +125,10 @@ const Auth = () => {
         const tokenParam = searchParams.get('token') || hashParams.get('token');
         
         if (tokenHashParam || tokenParam) {
-          if (AUTH_DEBUG) console.log('✅ Reset-token detekterad - visar formulär (verifiering sker vid password submission)');
+          console.log('✅ Reset-token detekterad - visar formulär (verifiering sker vid password submission)');
           setIsPasswordReset(true);
         } else {
-          if (AUTH_DEBUG) console.log('✅ Reset utan token - visar formulär');
+          console.log('✅ Reset utan token - visar formulär');
           setIsPasswordReset(true);
         }
       }
@@ -163,7 +163,7 @@ const Auth = () => {
       const issuedMs = issued ? parseInt(issued, 10) : undefined;
       
       if (AUTH_DEBUG) {
-        if (AUTH_DEBUG) console.log('🔍 DETALJERAD TOKEN-DEBUG:', {
+        console.log('🔍 DETALJERAD TOKEN-DEBUG:', {
           issuedQP,
           issuedHash,
           issued,
@@ -174,7 +174,7 @@ const Auth = () => {
       }
       
       if (AUTH_DEBUG) {
-        if (AUTH_DEBUG) console.log('Auth useEffect - URL params:', { 
+        console.log('Auth useEffect - URL params:', { 
           isReset, 
           confirmed, 
           currentUrl: window.location.href,
@@ -257,34 +257,34 @@ const Auth = () => {
     const confirmToken = searchParams.get('confirm');
 
     if (confirmToken && confirmationStatus === 'none') {
-      if (AUTH_DEBUG) console.log('🔐 Auth: confirm token detected in URL, starting confirmation flow', confirmToken);
+      console.log('🔐 Auth: confirm token detected in URL, starting confirmation flow', confirmToken);
       handleEmailConfirmation(confirmToken);
     }
   }, [searchParams, confirmationStatus]);
 
   const handleEmailConfirmation = async (token: string) => {
-    if (AUTH_DEBUG) console.log('Starting email confirmation with token:', token);
+    console.log('Starting email confirmation with token:', token);
     
     try {
       const result = await confirmEmail(token);
-      if (AUTH_DEBUG) console.log('Email confirmation successful:', result);
+      console.log('Email confirmation successful:', result);
       setConfirmationStatus('success');
       setConfirmationMessage(result.message);
     } catch (error: any) {
-      if (AUTH_DEBUG) console.log('Email confirmation error:', error);
+      console.log('Email confirmation error:', error);
       const errorMessage = error.message || 'Ett fel inträffade vid bekräftelse av e-post';
       
       // Kolla om det är "redan bekräftad" felet
       if (errorMessage.includes('redan bekräftad') || errorMessage.includes('already')) {
-        if (AUTH_DEBUG) console.log('Account already confirmed');
+        console.log('Account already confirmed');
         setConfirmationStatus('already-confirmed');
         setConfirmationMessage('Ditt konto är redan aktiverat. Du kan logga in direkt.');
       } else if (errorMessage.includes('utgången') || errorMessage.includes('expired')) {
-        if (AUTH_DEBUG) console.log('Confirmation link expired');
+        console.log('Confirmation link expired');
         setConfirmationStatus('error');
         setConfirmationMessage('Bekräftelselänken har gått ut. Du kan registrera dig igen med samma e-postadress.');
       } else {
-        if (AUTH_DEBUG) console.log('Other confirmation error');
+        console.log('Other confirmation error');
         setConfirmationStatus('error');
         setConfirmationMessage('Denna bekräftelselänk är inte längre giltig. Kontakta support om problemet kvarstår.');
       }
@@ -294,7 +294,7 @@ const Auth = () => {
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.delete('confirm');
     const newUrl = `/auth?${newSearchParams.toString()}`;
-    if (AUTH_DEBUG) console.log('Navigating to:', newUrl);
+    console.log('Navigating to:', newUrl);
     navigate(newUrl, { replace: true });
   };
 
@@ -304,15 +304,15 @@ const Auth = () => {
     setResending(true);
     try {
       if (!emailForReset) return;
-      if (AUTH_DEBUG) console.log('🔄 AUTH.TSX - SENDING RESET från Auth.tsx för:', emailForReset);
+      console.log('🔄 AUTH.TSX - SENDING RESET från Auth.tsx för:', emailForReset);
       const { error } = await supabase.functions.invoke('send-reset-password', {
         body: { email: emailForReset }
       });
-      if (AUTH_DEBUG) console.log('📩 AUTH.TSX - RESET RESPONSE:', { error });
+      console.log('📩 AUTH.TSX - RESET RESPONSE:', { error });
       if (error) throw error;
       setResendMessage('Ny återställningslänk skickad! Kolla din e‑post.\nHittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.');
     } catch (err: any) {
-      if (AUTH_DEBUG) console.error('Resend reset error:', err);
+      console.error('Resend reset error:', err);
       setResendMessage('Kunde inte skicka länk. Kontrollera e‑postadressen och försök igen.');
     } finally {
       setResending(false);
@@ -329,7 +329,7 @@ const Auth = () => {
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (AUTH_DEBUG) console.log('🔄 Starting handlePasswordReset');
+    console.log('🔄 Starting handlePasswordReset');
     
     if (newPassword !== confirmPassword) {
       toast({
@@ -350,15 +350,15 @@ const Auth = () => {
     }
 
     try {
-      if (AUTH_DEBUG) console.log('🔍 Attempting to update password...');
+      console.log('🔍 Attempting to update password...');
       
       // Säkerställ session (om tokens finns i URL)
       const { data: sessionData } = await supabase.auth.getSession();
       let hasSession = !!sessionData.session;
-      if (AUTH_DEBUG) console.log('📊 Has active session:', hasSession);
+      console.log('📊 Has active session:', hasSession);
 
       if (!hasSession) {
-        if (AUTH_DEBUG) console.log('🗂️ No active session, attempting to establish session from URL tokens...');
+        console.log('🗂️ No active session, attempting to establish session from URL tokens...');
         
         const accessTokenQP = searchParams.get('access_token');
         const refreshTokenQP = searchParams.get('refresh_token');
@@ -378,7 +378,7 @@ const Auth = () => {
         const urlTokenHashParam = tokenHashParamHash || tokenHashParamQP;
         
         if (urlAccessToken && urlRefreshToken) {
-          if (AUTH_DEBUG) console.log('✅ Using access/refresh tokens from URL');
+          console.log('✅ Using access/refresh tokens from URL');
           const { error } = await supabase.auth.setSession({
             access_token: urlAccessToken,
             refresh_token: urlRefreshToken,
@@ -386,7 +386,7 @@ const Auth = () => {
           if (error) throw error;
           hasSession = true;
         } else if (urlTokenHashParam || urlTokenParam) {
-          if (AUTH_DEBUG) console.log('✅ Using token/token_hash from URL');
+          console.log('✅ Using token/token_hash from URL');
           // VIKTIGT: Använd ANTINGEN token_hash ELLER token, aldrig båda samtidigt
           const verifyOptions: any = { type: 'recovery' };
           if (urlTokenHashParam) {
@@ -399,7 +399,7 @@ const Auth = () => {
           if (error) throw error;
           hasSession = true;
         } else {
-          if (AUTH_DEBUG) console.log('⚠️ No tokens found - cannot establish session');
+          console.log('⚠️ No tokens found - cannot establish session');
           setRecoveryStatus('consumed');
           return;
         }
@@ -431,7 +431,7 @@ const Auth = () => {
         window.location.href = '/';
       }, 1500);
     } catch (err: any) {
-      if (AUTH_DEBUG) console.error('Återställning misslyckades:', err);
+      console.error('Återställning misslyckades:', err);
       const msg = (err?.message || '').toLowerCase();
       
       // Kolla om det är specifika lösenordsfel som användaren kan fixa
@@ -447,7 +447,7 @@ const Auth = () => {
       // För fel som kommer när länken redan är använd (one-time-use)
       // Detta händer när någon klickar länken ANDRA gången efter att ha använt den
       if (msg.includes('expired') || msg.includes('invalid') || msg.includes('session')) {
-        if (AUTH_DEBUG) console.log('❌ Token already used or expired');
+        console.log('❌ Token already used or expired');
         setRecoveryStatus('consumed');
       } else {
         // Andra fel - visa generiskt felmeddelande men stanna på formuläret

@@ -65,10 +65,11 @@ const Landing = () => {
     }
     script.textContent = JSON.stringify(jsonLd);
 
-    // Avsiktligt ingen cleanup: SEO-taggar ska finnas kvar tills nästa route
-    // sätter sina egna, annars blinkar de bort under navigation.
+    return () => {
+      script?.remove();
+      canonical?.remove();
+    };
   }, []);
-
 
   // Browser chrome synkas centralt i App.tsx via route-effekten.
   // Ingen lokal cleanup här — den racear annars med App.tsx vid navigation.
