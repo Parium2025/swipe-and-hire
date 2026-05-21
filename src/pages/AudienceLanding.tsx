@@ -535,7 +535,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         return Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
       };
 
-      const isPastStage = () => stage.getBoundingClientRect().bottom <= 4;
+      const isPastStage = () => stage.getBoundingClientRect().bottom <= 0;
 
       // 2↔3 ska kännas EXAKT som 1↔2 (goToIntro/goToHero):
       // - Samma duration (1.08s) och ease (power2.inOut)
@@ -556,12 +556,12 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         animatingRef.current = true;
         setObserverActive(false);
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
-        window.dispatchEvent(new Event('parium:gallery-leave'));
         const startScroll = root.scrollTop;
         const targetScroll = startScroll + next.getBoundingClientRect().top;
         prevScrollTop = startScroll;
         lockNativeInput(TRANSITION_LOCK_MS);
         withScrollBehaviorAuto();
+        window.dispatchEvent(new Event('parium:gallery-reset-start'));
 
         const finishForward = () => {
           root.scrollTop = targetScroll;
@@ -573,6 +573,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           prevScrollTop = root.scrollTop;
           releaseLockedRef.current = false;
           forwardTimer = null;
+          releasedToGallery = true;
           window.dispatchEvent(new Event('parium:gallery-enter'));
         };
 
