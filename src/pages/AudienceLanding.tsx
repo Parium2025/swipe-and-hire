@@ -493,12 +493,18 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          if (stageBottom >= -2 && (wheelBack || touchBack)) {
+          // Trigga returen lite TIDIGARE än kanten (–24px in i galleriet) så
+          // GSAP äger transitionen innan native momentum hinner exponera
+          // intro-lagret. Tidigare väntade vi tills stage.bottom var ≥ -2,
+          // vilket gav touch-momentum tid att slippa förbi och visa en
+          // "extra-blink" av intro innan animationen tog över.
+          if (stageBottom >= -24 && (wheelBack || touchBack)) {
             e.preventDefault();
             e.stopPropagation();
             returnFromGalleryToIntro();
           }
         }
+
       };
       const trackTouchStart = (e: TouchEvent) => {
         galleryTouchY = e.touches[0]?.clientY ?? null;
