@@ -487,18 +487,18 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         }
 
         if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
-          const stageBottom = stage.getBoundingClientRect().bottom;
           const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
           const touch = e instanceof TouchEvent ? e.touches[0] : null;
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          // Trigga returen lite TIDIGARE än kanten (–24px in i galleriet) så
-          // GSAP äger transitionen innan native momentum hinner exponera
-          // intro-lagret. Tidigare väntade vi tills stage.bottom var ≥ -2,
-          // vilket gav touch-momentum tid att slippa förbi och visa en
-          // "extra-blink" av intro innan animationen tog över.
-          if (stageBottom >= -24 && (wheelBack || touchBack)) {
+          // Retur får bara starta när galleriets egen strip är tillbaka på
+          // absolut start. Annars lämnar vi native scroll i fred så korten kan
+          // nå vänsterkanten först — ingen tidig uppåkning mitt i sektionen.
+          const galleryAtStart = gallerySection
+            ? gallerySection.getBoundingClientRect().top >= -2
+            : false;
+          if (galleryAtStart && (wheelBack || touchBack)) {
             e.preventDefault();
             e.stopPropagation();
             returnFromGalleryToIntro();
@@ -674,11 +674,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
         if (releasedToGallery) {
           setObserverActive(false);
-          // Tidigare: rect.bottom > 0 → triggade FÖRST när stage redan börjat
-          // synas (efter att native scroll exponerat intro = synlig "blink").
-          // Nu: trigga så snart vi närmar oss kanten (–40px) på väg upp, så
-          // GSAP äger hela returen och användaren ser en enda smooth animation.
-          if (direction === 'up' && rect.bottom > -40) {
+          const galleryAtStart = gallerySection
+            ? gallerySection.getBoundingClientRect().top >= -2
+            : rect.bottom >= 0;
+          if (direction === 'up' && galleryAtStart) {
             returnFromGalleryToIntro();
           }
           return;
