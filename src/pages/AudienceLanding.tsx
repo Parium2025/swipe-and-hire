@@ -318,6 +318,14 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
       if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
 
+      // Respektera systeminställningen "Minska rörelse" (iOS/macOS/Android).
+      // Vi behåller alla transitions visuellt identiska men korta — premium-
+      // detalj som stora bolag (Apple, Spotify) alltid har. Ingen UI-påverkan
+      // för användare utan flaggan.
+      const reducedMotion = typeof window !== 'undefined'
+        && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+      const DURATION_SCALE = reducedMotion ? 0.35 : 1;
+
       // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
       // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
       const gallerySection = document.getElementById('sa-funkar-det');
