@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
-// Pick a lighter source on smaller screens for faster first-frame on slower
-// desktops. Visual parity preserved (video is heavily darkened by overlays).
-const pickSrc = () => {
-  if (typeof window === 'undefined') return '/hero-video-720.mp4';
-  const w = window.innerWidth * (window.devicePixelRatio || 1);
-  return w >= 1400 ? '/hero-video.mp4' : '/hero-video-720.mp4';
-};
+// Always serve the full-quality video (1080p) on every device.
+const pickSrc = () => '/hero-video.mp4';
 
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
