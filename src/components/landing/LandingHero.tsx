@@ -165,7 +165,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease, delay: 0.9 }}
-          className="mt-6 max-w-[min(88vw,42rem)] font-normal leading-[1.32] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)]"
+          className="mt-6 max-w-[min(92vw,80rem)] font-normal leading-[1.32] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] sm:whitespace-nowrap"
           style={{ color: '#ffffff', fontSize: 'clamp(1.25rem, 0.45vw + 1.1rem, 1.625rem)' }}
         >
           Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
