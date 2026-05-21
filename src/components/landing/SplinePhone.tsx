@@ -76,8 +76,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   }, [zoom, isReady]);
 
   useEffect(() => {
+    if (skipWebgl) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
+
 
     let cancelled = false;
     let app: SplineApplication | null = null;
