@@ -565,7 +565,6 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           animatingRef.current = false;
           prevScrollTop = root.scrollTop;
           releaseLockedRef.current = false;
-          forwardTimer = null;
           releasedToGallery = true;
           window.dispatchEvent(new Event('parium:gallery-enter'));
         };
