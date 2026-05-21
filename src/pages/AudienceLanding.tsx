@@ -684,10 +684,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
         if (releasedToGallery) {
           setObserverActive(false);
-          const galleryAtStart = gallerySection
-            ? gallerySection.getBoundingClientRect().top >= -2
-            : rect.bottom >= 0;
-          if (direction === 'up' && galleryAtStart) {
+          if (direction === 'up' && getGalleryAtStart()) {
             returnFromGalleryToIntro();
           }
           return;
@@ -733,6 +730,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         scrollRoot?.removeEventListener('touchstart', trackTouchStart, true);
         scrollRoot?.removeEventListener('touchmove', blockNativeInput, true);
         scrollRoot?.removeEventListener('touchend', clearTouchTrack, true);
+        window.removeEventListener('parium:gallery-progress', onGalleryProgress);
         window.removeEventListener('parium:nav-jump', handleNavJump);
       };
     };
