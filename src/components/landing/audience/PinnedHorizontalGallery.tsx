@@ -161,10 +161,9 @@ const PinnedHorizontalGallery = () => {
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
     };
 
-    // Frys vid 3→2 (gallery-leave) och tina vid 2→3 (gallery-enter). Under frysen
-    // står strippen still — den ena synliga rörelsen blir kortens GSAP-fade-out
-    // samtidigt som intro-lagret slidar in över, vilket är vad designen redan
-    // visar. När galleriet återinträder mäter vi om från scrollposition direkt.
+    // Frys enbart vid 3→2 (gallery-leave). Vid 2→3 återställer vi först till
+    // startpositionen, annars kan ett gammalt p=1-läge ligga kvar fryst från
+    // förra besöket och korten behöver "korrigera sig" efter landningen.
     const freeze = () => {
       frozen = true;
       if (rafRef.current !== null) {
@@ -187,6 +186,16 @@ const PinnedHorizontalGallery = () => {
       renderedProgressRef.current = p;
       applyProgress(p);
     };
+    const resetToStart = () => {
+      frozen = false;
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      targetProgressRef.current = 0;
+      renderedProgressRef.current = 0;
+      applyProgress(0);
+    };
 
 
     applyProgress(0);
@@ -195,11 +204,13 @@ const PinnedHorizontalGallery = () => {
     window.addEventListener('resize', measure);
     window.addEventListener('parium:gallery-leave', freeze);
     window.addEventListener('parium:gallery-enter', thaw);
+    window.addEventListener('parium:gallery-reset-start', resetToStart);
     return () => {
       root.removeEventListener('scroll', measure);
       window.removeEventListener('resize', measure);
       window.removeEventListener('parium:gallery-leave', freeze);
       window.removeEventListener('parium:gallery-enter', thaw);
+      window.removeEventListener('parium:gallery-reset-start', resetToStart);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
     };
   }, []);
