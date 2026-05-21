@@ -762,7 +762,7 @@ export const useEagerRatingsPreload = () => {
     document.addEventListener('mousemove', handleFirstInteraction, { once: true });
     document.addEventListener('click', handleFirstInteraction, { once: true });
     document.addEventListener('keydown', handleFirstInteraction, { once: true });
-    document.addEventListener('touchstart', handleFirstInteraction, { once: true });
+    document.addEventListener('touchstart', handleFirstInteraction, { once: true, passive: true });
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
