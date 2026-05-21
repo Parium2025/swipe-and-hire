@@ -287,7 +287,7 @@ const FixedPhoneLayer = () => {
             style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
             zoom={phoneMetrics.zoom}
             active={active}
-            instantFallback={!phoneMetrics.isDesktop}
+            instantFallback={!phoneMetrics.isDesktop || skipSplineRef.current}
           />
         </div>
       </div>
