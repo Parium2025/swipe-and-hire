@@ -290,7 +290,6 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
   const heroInnerRef = useRef<HTMLDivElement | null>(null);
   const introOuterRef = useRef<HTMLDivElement | null>(null);
   const introInnerRef = useRef<HTMLDivElement | null>(null);
-  const heroTextRef = useRef<HTMLDivElement | null>(null);
   const introTextRef = useRef<HTMLDivElement | null>(null);
   const indexRef = useRef(0); // 0 = hero, 1 = intro
   const animatingRef = useRef(false);
