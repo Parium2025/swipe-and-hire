@@ -435,6 +435,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         animatingRef.current = true;
         indexRef.current = 0;
         snapStageToTop();
+        void hapticLight();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
         const tl = gsap.timeline({
