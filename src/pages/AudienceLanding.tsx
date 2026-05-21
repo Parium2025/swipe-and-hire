@@ -28,7 +28,6 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 
 type HeroIntroStageProps = {
   c: (typeof audienceContent)[AudienceRole];
-  isDesktopHero: boolean;
   onIntroCta?: () => void;
   introCtaLabel?: string;
 };
@@ -285,13 +284,12 @@ const FixedPhoneLayer = () => {
 // och scrollar nedåt igen släpps kontrollen och sidan scrollar vidare normalt.
 // Inga scroll-snap, ingen sticky, inga konkurrerande wheel-locks.
 // ─────────────────────────────────────────────────────────────────────────────
-const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
+const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   const stageRef = useRef<HTMLElement | null>(null);
   const heroOuterRef = useRef<HTMLDivElement | null>(null);
   const heroInnerRef = useRef<HTMLDivElement | null>(null);
   const introOuterRef = useRef<HTMLDivElement | null>(null);
   const introInnerRef = useRef<HTMLDivElement | null>(null);
-  const heroTextRef = useRef<HTMLDivElement | null>(null);
   const introTextRef = useRef<HTMLDivElement | null>(null);
   const indexRef = useRef(0); // 0 = hero, 1 = intro
   const animatingRef = useRef(false);
@@ -300,9 +298,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
   useEffect(() => {
     let cancelled = false;
     let observer: { kill: () => void; enable?: () => void; disable?: () => void; isEnabled?: boolean } | null = null;
-    let returnFrame: number | null = null;
-    let returnTimer: number | null = null;
-    let forwardTimer: number | null = null;
     let setupTeardown: (() => void) | undefined;
 
     const setup = async () => {
@@ -345,18 +340,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
         if (scrollRoot) gsap.killTweensOf(scrollRoot);
         restoreScrollBehavior?.();
         restoreScrollBehavior = null;
-        if (returnFrame) {
-          window.cancelAnimationFrame(returnFrame);
-          returnFrame = null;
-        }
-        if (returnTimer) {
-          window.clearTimeout(returnTimer);
-          returnTimer = null;
-        }
-        if (forwardTimer) {
-          window.clearTimeout(forwardTimer);
-          forwardTimer = null;
-        }
       };
 
       const snapStageToTop = () => {
@@ -582,7 +565,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           animatingRef.current = false;
           prevScrollTop = root.scrollTop;
           releaseLockedRef.current = false;
-          forwardTimer = null;
           releasedToGallery = true;
           window.dispatchEvent(new Event('parium:gallery-enter'));
         };
@@ -739,9 +721,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
 
     return () => {
       cancelled = true;
-      if (returnFrame) { window.cancelAnimationFrame(returnFrame); returnFrame = null; }
-      if (returnTimer) { window.clearTimeout(returnTimer); returnTimer = null; }
-      if (forwardTimer) { window.clearTimeout(forwardTimer); forwardTimer = null; }
       observer?.kill();
       setupTeardown?.();
     };
@@ -789,7 +768,6 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
             />
             <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
               <motion.div
-                ref={heroTextRef}
                 className="-translate-y-16 pt-8 text-left xl:pt-10"
                 initial="hidden"
                 animate="visible"
@@ -865,24 +843,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
 
-  // Matchar Tailwinds `md`-breakpoint (768px) så vi monterar bara EN SplinePhone
-  // åt gången — annars initieras Spline-runtime två gånger på desktop.
-  // Mobil-hero används för telefon OCH surfplattor (< 1024px) så iPad/Android-tabs
-  // får samma full-bleed-Spline-upplevelse som telefon. Desktop-split tar över ≥ 1024px.
-  const [isDesktopHero, setIsDesktopHero] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return window.matchMedia('(min-width: 1024px)').matches;
-  });
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)');
-    const onChange = (e: MediaQueryListEvent) => setIsDesktopHero(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-
   // (Tidigare scroll-jack med IntersectionObserver + tvingad scrollTop togs bort —
   // den slogs mot CSS scroll-snap och orsakade lagg/jitter. CSS scroll-snap
   // (scrollSnapType: 'y mandatory' + scrollSnapStop: 'always') sköter snappet.)
+
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
@@ -971,7 +935,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
         <main>
-          <HeroIntroStage c={c} isDesktopHero={isDesktopHero} onIntroCta={handleStart} introCtaLabel="Skapa min profil idag" />
+          <HeroIntroStage c={c} onIntroCta={handleStart} introCtaLabel="Skapa min profil idag" />
 
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
