@@ -142,8 +142,9 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
     };
   }, [reducedMotion]);
 
-  if (hasError) {
-    // Offline / WebGL-fail: rendera ingenting hellre än en ful platshållartelefon.
+  if (hasError || skipWebgl) {
+    // Offline/save-data/reduced-motion: rendera tomt hellre än en ful platshållare.
+
     return <div ref={wrapperRef} aria-hidden="true" className={className} style={style} />;
   }
 
