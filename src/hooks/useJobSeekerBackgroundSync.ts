@@ -386,7 +386,7 @@ export const useJobSeekerBackgroundSync = () => {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('mousemove', handleFirstInteraction, { once: true });
     document.addEventListener('click', handleFirstInteraction, { once: true });
-    document.addEventListener('touchstart', handleFirstInteraction, { once: true, passive: true });
+    document.addEventListener('touchstart', handleFirstInteraction, { once: true });
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
