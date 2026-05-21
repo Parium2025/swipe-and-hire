@@ -11,6 +11,7 @@ import { audienceContent, type AudienceRole } from '@/components/landing/audienc
 import { HeroText } from '@/components/landing/audience/HeroText';
 import FixedPhoneLayer from '@/components/landing/audience/FixedPhoneLayer';
 import { IntroText } from '@/components/landing/audience/IntroText';
+import HeroIntroStage from '@/components/landing/audience/HeroIntroStage';
 
 type AudienceLandingProps = {
   audience: AudienceRole;
