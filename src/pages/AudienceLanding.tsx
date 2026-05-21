@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
+import { hapticLight } from '@/lib/haptics';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
@@ -394,6 +395,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         animatingRef.current = true;
         indexRef.current = 1;
         if (snap) snapStageToTop();
+        void hapticLight();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
         const tl = gsap.timeline({
@@ -433,6 +435,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         animatingRef.current = true;
         indexRef.current = 0;
         snapStageToTop();
+        void hapticLight();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
         const tl = gsap.timeline({
@@ -548,6 +551,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         programmaticReturn = true;
         animatingRef.current = true;
         setObserverActive(false);
+        void hapticLight();
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
         const startScroll = root.scrollTop;
         const targetScroll = startScroll + next.getBoundingClientRect().top;
@@ -587,6 +591,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         releasedToGallery = false;
         releaseLockedRef.current = false;
         setObserverActive(false);
+        void hapticLight();
         // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
         // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
         // hela tiden och bara åker med layern.
