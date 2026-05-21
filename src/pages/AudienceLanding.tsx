@@ -407,7 +407,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
 
         const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power2.inOut' },
+          defaults: { duration: 1.08 * DURATION_SCALE, ease: 'power2.inOut' },
           onComplete: () => {
             setIntroResting();
             animatingRef.current = false;
