@@ -426,12 +426,12 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
         if (introHeadingEl) {
           // Rubriken matchar hero-h1: opacity-only premium fade, lugn och lång.
-          tl.fromTo(introHeadingEl, { opacity: 0 }, { opacity: 1, duration: 1.2, ease: 'power3.out' }, 0.3);
+          tl.fromTo(introHeadingEl, { opacity: 0 }, { opacity: 1, duration: 1.2 * DURATION_SCALE, ease: 'power3.out' }, 0.3 * DURATION_SCALE);
         }
-        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62, stagger: 0.08, ease: 'power2.out' }, 0.62);
+        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62 * DURATION_SCALE, stagger: 0.08 * DURATION_SCALE, ease: 'power2.out' }, 0.62 * DURATION_SCALE);
         if (introCtaEl) {
           // CTA fadar bara in (ingen y-translate) så den inte "sticker upp" i slutet.
-          tl.fromTo(introCtaEl, { opacity: 0 }, { opacity: 1, duration: 0.62, ease: 'power2.out' }, 0.62 + introTextItems.length * 0.08);
+          tl.fromTo(introCtaEl, { opacity: 0 }, { opacity: 1, duration: 0.62 * DURATION_SCALE, ease: 'power2.out' }, (0.62 + introTextItems.length * 0.08) * DURATION_SCALE);
         }
       };
 
