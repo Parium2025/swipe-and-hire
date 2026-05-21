@@ -861,6 +861,25 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // (scrollSnapType: 'y mandatory' + scrollSnapStop: 'always') sköter snappet.)
 
 
+  // Premium-prefetch: när användaren landat och tråden är ledig, ladda
+  // /auth-route-chunken i bakgrunden så att "Skapa min profil"-CTA känns instant.
+  // Helt osynligt — bara modul-prefetch, ingen render, ingen state-mutation.
+  useEffect(() => {
+    const w = window as any;
+    const idle: (cb: () => void) => number =
+      typeof w.requestIdleCallback === 'function'
+        ? (cb) => w.requestIdleCallback(cb, { timeout: 2500 })
+        : (cb) => window.setTimeout(cb, 1800);
+    const cancel: (id: number) => void =
+      typeof w.cancelIdleCallback === 'function' ? w.cancelIdleCallback : window.clearTimeout;
+
+    const handle = idle(() => {
+      // Prefetcha /auth-chunken tyst. Fel slukas — det är ren optimering.
+      import('@/pages/Auth').catch(() => {});
+    });
+    return () => { try { cancel(handle); } catch {} };
+  }, []);
+
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
 
