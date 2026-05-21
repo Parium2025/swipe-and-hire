@@ -33,6 +33,19 @@ type HeroIntroStageProps = {
   introCtaLabel?: string;
 };
 
+// Detektera batterisparläge / extremt långsamt internet. I så fall hoppar vi
+// Spline-3D-scenen (~2 MB WebGL-bundle) och visar SplinePhones inbyggda
+// statiska fallback direkt. Sparar batteri + data utan att ändra UX.
+const shouldSkipSpline = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  const conn = (navigator as { connection?: { effectiveType?: string; saveData?: boolean; downlink?: number } }).connection;
+  if (!conn) return false;
+  if (conn.saveData) return true;
+  if (conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g') return true;
+  if (typeof conn.downlink === 'number' && conn.downlink > 0 && conn.downlink < 0.7) return true;
+  return false;
+};
+
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   const heroIndexRef = useRef(0);
