@@ -132,6 +132,8 @@ const PinnedHorizontalGallery = () => {
       // mycket eftersom wheel-deltan är större per event.
       strip.style.setProperty('--phg-x', `${xPx.toFixed(2)}px`);
       section.style.setProperty('--phg-progress', `${p}`);
+      section.dataset.phgProgress = p.toFixed(4);
+      window.dispatchEvent(new CustomEvent('parium:gallery-progress', { detail: { progress: p } }));
       // Baren ska vara på plats redan vid första kortet (p=0) och hela vägen
       // till sista kortet (p=1). Den fade:as endast ut precis när vi börjar
       // lämna kort-sektionen nedåt, så den följer med smooth åt båda hållen.
@@ -584,7 +586,7 @@ const PinnedHorizontalGallery = () => {
         }
       `}</style>
 
-      <div ref={sectionRef} className="phg-section" style={{ height: `${SCROLL_VH}vh` }}>
+      <div ref={sectionRef} data-phg-section className="phg-section" style={{ height: `${SCROLL_VH}vh` }}>
         <div className="phg-sticky">
 
           <div ref={headerRef} className="phg-header" style={{ opacity: 0, transform: 'translate3d(0, 44px, 0)' }}>
