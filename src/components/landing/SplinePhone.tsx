@@ -38,24 +38,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-  // Spara data / långsamt nätverk → hoppa över WebGL helt (sparar ~2MB + batteri).
-  const lowBandwidth = (() => {
-    if (typeof navigator === 'undefined') return false;
-    const conn = (navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
-    }).connection;
-    if (!conn) return false;
-    if (conn.saveData) return true;
-    return conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g';
-  })();
-
-  const skipWebgl = reducedMotion || lowBandwidth;
-
   useEffect(() => {
-    if (!skipWebgl && !hasError && !showFallback) return;
+    if (!reducedMotion && !hasError && !showFallback) return;
     window.dispatchEvent(new Event('parium:spline-ready'));
-  }, [skipWebgl, hasError, showFallback]);
-
+  }, [reducedMotion, hasError, showFallback]);
 
   useEffect(() => {
     activeRef.current = active;
@@ -76,10 +62,8 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   }, [zoom, isReady]);
 
   useEffect(() => {
-    if (skipWebgl) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-
 
     let cancelled = false;
     let app: SplineApplication | null = null;
@@ -140,11 +124,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
       app?.dispose();
       appRef.current = null;
     };
-  }, [skipWebgl]);
+  }, [reducedMotion]);
 
-  if (hasError || skipWebgl) {
-    // Offline/save-data/reduced-motion: rendera tomt hellre än en ful platshållare.
-
+  if (hasError) {
+    // Offline / WebGL-fail: rendera ingenting hellre än en ful platshållartelefon.
     return <div ref={wrapperRef} aria-hidden="true" className={className} style={style} />;
   }
 
