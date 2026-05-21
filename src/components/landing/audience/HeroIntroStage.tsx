@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { IntroText } from '@/components/landing/audience/IntroText';
