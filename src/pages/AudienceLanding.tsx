@@ -340,18 +340,6 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         if (scrollRoot) gsap.killTweensOf(scrollRoot);
         restoreScrollBehavior?.();
         restoreScrollBehavior = null;
-        if (returnFrame) {
-          window.cancelAnimationFrame(returnFrame);
-          returnFrame = null;
-        }
-        if (returnTimer) {
-          window.clearTimeout(returnTimer);
-          returnTimer = null;
-        }
-        if (forwardTimer) {
-          window.clearTimeout(forwardTimer);
-          forwardTimer = null;
-        }
       };
 
       const snapStageToTop = () => {
