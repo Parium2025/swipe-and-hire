@@ -153,7 +153,8 @@ const HeroVideo = () => {
           playsInline
           preload="auto"
           disablePictureInPicture
-          className="absolute top-0 bottom-0 left-0 h-full w-full object-cover md:w-[130%] lg:w-[135%] xl:w-[140%]"
+          style={{ objectPosition: 'left center' }}
+          className="absolute top-0 bottom-0 left-0 h-full w-full object-cover md:w-[160%] lg:w-[155%] xl:w-[150%] 2xl:w-[145%]"
         />
       </motion.div>
       <div className="absolute inset-0 bg-black/45 md:bg-black/20 pointer-events-none" />
