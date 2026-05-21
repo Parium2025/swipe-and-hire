@@ -7,7 +7,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
-import { SplinePhone } from '@/components/landing/SplinePhone';
+
 import { HeroText } from '@/components/landing/audience/HeroText';
 import FixedPhoneLayer from '@/components/landing/audience/FixedPhoneLayer';
 import { IntroText } from '@/components/landing/audience/IntroText';
