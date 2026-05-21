@@ -452,7 +452,9 @@ const PinnedHorizontalGallery = () => {
           border-radius: 26px;
           overflow: hidden;
           position: relative;
-          background: rgba(0,0,0,0.4);
+          background:
+            linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 100%),
+            rgba(0,0,0,0.4);
           box-shadow:
             0 30px 70px -28px rgba(0,0,0,0.7),
             0 0 0 1px rgba(255,255,255,0.07);
