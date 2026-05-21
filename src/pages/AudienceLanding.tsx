@@ -479,6 +479,14 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       // tröskelpassagen, medan galleriets egen progress är fryst tills landning.
       let transitionBlockUntil = 0;
       let galleryTouchY: number | null = null;
+      let galleryProgress = 0;
+      const galleryStartThreshold = 0.0015;
+      const getGalleryAtStart = () => {
+        const progressSource = gallerySection?.querySelector('[data-phg-section]') as HTMLElement | null;
+        const progress = progressSource?.dataset.phgProgress;
+        if (progress !== undefined) galleryProgress = Number(progress) || 0;
+        return galleryProgress <= galleryStartThreshold;
+      };
       const blockNativeInput = (e: Event) => {
         if (performance.now() < transitionBlockUntil) {
           e.preventDefault();
@@ -492,13 +500,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
           const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
           if (touch) galleryTouchY = touch.clientY;
 
-          // Retur får bara starta när galleriets egen strip är tillbaka på
-          // absolut start. Annars lämnar vi native scroll i fred så korten kan
-          // nå vänsterkanten först — ingen tidig uppåkning mitt i sektionen.
-          const galleryAtStart = gallerySection
-            ? gallerySection.getBoundingClientRect().top >= -2
-            : false;
-          if (galleryAtStart && (wheelBack || touchBack)) {
+          // Retur får bara starta när kortens faktiska progress är 0. Att läsa
+          // section.top var för grovt på snabb touch: native momentum kunde ge
+          // top≈0 medan kort-strippen fortfarande låg en bit från vänsterkanten.
+          if (getGalleryAtStart() && (wheelBack || touchBack)) {
             e.preventDefault();
             e.stopPropagation();
             returnFromGalleryToIntro();
@@ -511,6 +516,10 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       };
       const clearTouchTrack = () => {
         galleryTouchY = null;
+      };
+      const onGalleryProgress = (e: Event) => {
+        const detail = (e as CustomEvent<{ progress: number }>).detail;
+        galleryProgress = Number(detail?.progress) || 0;
       };
       const lockNativeInput = (ms: number) => {
         transitionBlockUntil = performance.now() + ms;
@@ -528,6 +537,7 @@ const HeroIntroStage = ({ c, isDesktopHero, onIntroCta, introCtaLabel }: HeroInt
       scrollRoot?.addEventListener('touchstart', trackTouchStart, { passive: true, capture: true });
       scrollRoot?.addEventListener('touchmove', blockNativeInput, { passive: false, capture: true });
       scrollRoot?.addEventListener('touchend', clearTouchTrack, { passive: true, capture: true });
+      window.addEventListener('parium:gallery-progress', onGalleryProgress);
 
       const isStageDocked = () => {
         const rect = stage.getBoundingClientRect();
