@@ -547,8 +547,8 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       //   layer-translateY (samma princip som hero-texten i 1↔2).
       // - Komplett input-lock under HELA transition-fönstret så att varken
       //   wheel-momentum eller iOS touch-momentum kan rubba scrollen.
-      const TRANSITION_DURATION = 1.08;
-      const TRANSITION_LOCK_MS = 1200; // 1.08s + buffer för momentum
+      const TRANSITION_DURATION = 1.08 * DURATION_SCALE;
+      const TRANSITION_LOCK_MS = Math.round(1200 * DURATION_SCALE); // duration + buffer för momentum
 
       const releaseAndScrollNext = () => {
         const root = scrollRoot;
