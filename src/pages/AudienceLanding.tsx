@@ -447,7 +447,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
 
         const tl = gsap.timeline({
-          defaults: { duration: 1.08, ease: 'power2.inOut' },
+          defaults: { duration: 1.08 * DURATION_SCALE, ease: 'power2.inOut' },
           onComplete: () => {
             setHeroStart();
             animatingRef.current = false;
@@ -455,9 +455,9 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             setObserverActive(true);
           },
         });
-        tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42, stagger: 0.055, ease: 'power2.in' }, 0);
-        if (introCtaEl) tl.to(introCtaEl, { opacity: 0, duration: 0.32, ease: 'power2.in' }, 0);
-        if (introHeadingEl) tl.to(introHeadingEl, { opacity: 0, duration: 0.42, ease: 'power2.in' }, 0);
+        tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42 * DURATION_SCALE, stagger: 0.055 * DURATION_SCALE, ease: 'power2.in' }, 0);
+        if (introCtaEl) tl.to(introCtaEl, { opacity: 0, duration: 0.32 * DURATION_SCALE, ease: 'power2.in' }, 0);
+        if (introHeadingEl) tl.to(introHeadingEl, { opacity: 0, duration: 0.42 * DURATION_SCALE, ease: 'power2.in' }, 0);
         tl.to(introOuter, { yPercent: 100 }, 0);
         tl.to(introInner, { yPercent: -100 }, 0);
         tl.set(introOuter, { autoAlpha: 0 });
