@@ -824,8 +824,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center text-center will-change-transform">
               <h2
                 data-intro-heading
-                className="mb-8 max-w-[min(92vw,52rem)] font-black leading-[1.04] tracking-[-0.025em] text-white"
-                style={{ fontSize: 'clamp(2.75rem, 4.4vw, 4.75rem)' }}
+                className="mb-8 max-w-[min(92vw,52rem)] text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-[clamp(2.75rem,4.4vw,4.75rem)]"
               >
                 Vi har gjort det enkelt för alla!
               </h2>
