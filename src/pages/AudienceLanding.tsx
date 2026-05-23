@@ -53,18 +53,19 @@ const FixedPhoneLayer = () => {
 
     if (width >= 900) {
       const isCompactLaptop = height <= 820;
-      const desktopTopPadding = isCompactLaptop ? 132 : 142;
-      const desktopBottomPadding = isCompactLaptop ? 84 : 96;
-      const safeCanvasHeight = Math.max(340, height - desktopTopPadding - desktopBottomPadding);
-      const widthFitHeight = (Math.min(width * 0.28, 390) * 19.5) / 9;
-      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), isCompactLaptop ? 340 : 390, isCompactLaptop ? 500 : 570);
-      const viewportScale = clamp(width / 1440, 0.82, 1);
-      const yOffset = isCompactLaptop ? 30 : 26;
+      const desktopTopPadding = isCompactLaptop ? 148 : 142;
+      const desktopBottomPadding = isCompactLaptop ? 104 : 96;
+      const safeCanvasHeight = Math.max(300, height - desktopTopPadding - desktopBottomPadding);
+      const phoneColumnWidth = width >= 1280 ? width * 0.28 : width * 0.22;
+      const widthFitHeight = (Math.min(phoneColumnWidth, 390) * 19.5) / 9;
+      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), isCompactLaptop ? 300 : 390, isCompactLaptop ? 430 : 570);
+      const viewportScale = clamp(width / 1440, 0.72, 1);
+      const yOffset = isCompactLaptop ? 12 : 26;
       const metrics = {
         isDesktop: true,
         top: 0,
         height: safeHeight,
-        zoom: clamp((height / safeHeight) * (isCompactLaptop ? 0.38 : 0.42) * viewportScale, 0.36, isCompactLaptop ? 0.5 : 0.56),
+        zoom: clamp((height / safeHeight) * (isCompactLaptop ? 0.35 : 0.42) * viewportScale, 0.32, isCompactLaptop ? 0.43 : 0.56),
         yOffset,
       };
       lastHeroMetricsRef.current = metrics;
@@ -252,14 +253,14 @@ const FixedPhoneLayer = () => {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:px-12 lg:items-center lg:px-24 lg:pb-16 lg:pt-28"
+      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:px-12 min-[900px]:items-center min-[900px]:pb-16 min-[900px]:pt-28 lg:px-24"
       aria-hidden="true"
     >
-      <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center lg:grid lg:h-auto lg:grid-cols-2 lg:items-start lg:gap-16 2xl:max-w-[1440px]">
-        <div aria-hidden className="hidden lg:block" />
+      <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center min-[900px]:grid min-[900px]:h-auto min-[900px]:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] min-[900px]:items-start min-[900px]:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+        <div aria-hidden className="hidden min-[900px]:block" />
         <div
           data-phone-scroll-forward
-          className={`${shouldShowPhone ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative mx-auto flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-300 ease-out'}`}
+          className={`${shouldShowPhone ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-300 ease-out'}`}
           style={phoneMetrics.isDesktop
             ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
@@ -779,9 +780,9 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
               animate={{ opacity: [0.5, 0.75, 0.5] }}
               transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
             />
-            <div className="relative z-10 mx-auto grid w-full max-w-[1280px] items-start gap-12 md:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+            <div className="relative z-10 mx-auto grid w-full max-w-[1280px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
               <motion.div
-                className="-translate-y-16 pt-8 text-left xl:pt-10"
+                className="-translate-y-8 pt-8 text-left min-[1100px]:-translate-y-16 xl:pt-10"
                 initial="hidden"
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
