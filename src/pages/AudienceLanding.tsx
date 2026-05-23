@@ -782,7 +782,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             />
             <div className="relative z-10 mx-auto grid w-full max-w-[1400px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 lg:grid-cols-2 lg:gap-16">
               <motion.div
-                className="-translate-y-8 pl-8 pt-8 text-left sm:pl-8 md:pl-12 lg:pl-0 min-[1100px]:-translate-y-16 xl:pt-10"
+                className="-translate-y-8 pt-8 text-left md:pl-[22px] lg:pl-[138px] min-[1100px]:-translate-y-16 xl:pt-10"
                 initial="hidden"
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
