@@ -825,7 +825,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
               <h2
                 data-intro-heading
                 className="mb-8 max-w-[min(92vw,52rem)] font-black leading-[1.04] tracking-[-0.025em] text-white"
-                style={{ fontSize: 'clamp(1.75rem, 4.4vw, 4.75rem)' }}
+                style={{ fontSize: 'clamp(2.75rem, 4.4vw, 4.75rem)' }}
               >
                 Vi har gjort det enkelt för alla!
               </h2>
