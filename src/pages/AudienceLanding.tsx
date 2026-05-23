@@ -751,7 +751,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
           {/* Mobile hero — endast text. Telefonen renderas i FixedPhoneLayer (samma som desktop) så den aldrig kan scrollas iväg eller klippas. */}
           <section
-            className="relative h-full w-screen overflow-hidden min-[900px]:hidden"
+            className="relative h-full w-screen overflow-hidden md:hidden"
             style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
             aria-labelledby="audience-hero-heading-mobile"
           >
@@ -773,7 +773,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           </section>
 
           {/* Desktop hero — aktiveras redan vid 900px så telefonen alltid får plats till höger och inte klipps vid mindre laptop-bredder. */}
-          <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 min-[900px]:flex min-[900px]:px-12 lg:px-24">
+          <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:flex md:px-12 lg:px-24">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
