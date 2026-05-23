@@ -51,7 +51,7 @@ const FixedPhoneLayer = () => {
     const width = window.visualViewport?.width ?? window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
 
-    if (width >= 1024) {
+    if (width >= 900) {
       const isCompactLaptop = height <= 820;
       const desktopTopPadding = isCompactLaptop ? 132 : 142;
       const desktopBottomPadding = isCompactLaptop ? 84 : 96;
