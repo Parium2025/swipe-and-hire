@@ -51,14 +51,14 @@ const FixedPhoneLayer = () => {
     const width = window.visualViewport?.width ?? window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
 
-    if (width >= 900) {
+    if (width >= 768) {
       const isCompactLaptop = height <= 820;
       const desktopTopPadding = isCompactLaptop ? 148 : 142;
       const desktopBottomPadding = isCompactLaptop ? 104 : 96;
       const safeCanvasHeight = Math.max(300, height - desktopTopPadding - desktopBottomPadding);
       const phoneColumnWidth = width >= 1280 ? width * 0.28 : width * 0.22;
       const widthFitHeight = (Math.min(phoneColumnWidth, 390) * 19.5) / 9;
-      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), isCompactLaptop ? 300 : 390, isCompactLaptop ? 430 : 570);
+      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), width < 900 ? 330 : isCompactLaptop ? 300 : 390, width < 900 ? 420 : isCompactLaptop ? 430 : 570);
       const viewportScale = clamp(width / 1440, 0.72, 1);
       const yOffset = isCompactLaptop ? 12 : 26;
       const metrics = {
