@@ -600,6 +600,9 @@ const PinnedHorizontalGallery = () => {
         }
 
         @media (max-width: 767px) {
+          /* Centrera rubriken vertikalt mellan nav och kort-stripen på mobil
+             så det inte blir död yta ovanför titeln. */
+          .phg-header { padding: clamp(180px, 26vh, 240px) 24px clamp(28px, 4vh, 48px); }
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
           .phg-strip { padding: 0 18vw 0 8vw; }
