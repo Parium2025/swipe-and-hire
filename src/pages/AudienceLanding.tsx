@@ -51,14 +51,14 @@ const FixedPhoneLayer = () => {
     const width = window.visualViewport?.width ?? window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
 
-    if (width >= 900) {
+    if (width >= 768) {
       const isCompactLaptop = height <= 820;
       const desktopTopPadding = isCompactLaptop ? 148 : 142;
       const desktopBottomPadding = isCompactLaptop ? 104 : 96;
       const safeCanvasHeight = Math.max(300, height - desktopTopPadding - desktopBottomPadding);
       const phoneColumnWidth = width >= 1280 ? width * 0.28 : width * 0.22;
       const widthFitHeight = (Math.min(phoneColumnWidth, 390) * 19.5) / 9;
-      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), isCompactLaptop ? 300 : 390, isCompactLaptop ? 430 : 570);
+      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), width < 900 ? 330 : isCompactLaptop ? 300 : 390, width < 900 ? 420 : isCompactLaptop ? 430 : 570);
       const viewportScale = clamp(width / 1440, 0.72, 1);
       const yOffset = isCompactLaptop ? 12 : 26;
       const metrics = {
@@ -253,11 +253,11 @@ const FixedPhoneLayer = () => {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:px-12 min-[900px]:items-center min-[900px]:pb-16 min-[900px]:pt-28 lg:px-24"
+      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:items-center md:px-12 md:pb-16 md:pt-28 lg:px-24"
       aria-hidden="true"
     >
-      <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center min-[900px]:grid min-[900px]:h-auto min-[900px]:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] min-[900px]:items-start min-[900px]:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
-        <div aria-hidden className="hidden min-[900px]:block" />
+      <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center md:grid md:h-auto md:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] md:items-start md:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+        <div aria-hidden className="hidden md:block" />
         <div
           data-phone-scroll-forward
           className={`${shouldShowPhone ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-300 ease-out'}`}
@@ -751,7 +751,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
           {/* Mobile hero — endast text. Telefonen renderas i FixedPhoneLayer (samma som desktop) så den aldrig kan scrollas iväg eller klippas. */}
           <section
-            className="relative h-full w-screen overflow-hidden min-[900px]:hidden"
+            className="relative h-full w-screen overflow-hidden md:hidden"
             style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
             aria-labelledby="audience-hero-heading-mobile"
           >
@@ -773,7 +773,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           </section>
 
           {/* Desktop hero — aktiveras redan vid 900px så telefonen alltid får plats till höger och inte klipps vid mindre laptop-bredder. */}
-          <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:px-12 min-[900px]:flex min-[900px]:px-12 lg:px-24">
+          <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:flex md:px-12 lg:px-24">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
@@ -782,7 +782,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             />
             <div className="relative z-10 mx-auto grid w-full max-w-[1280px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
               <motion.div
-                className="-translate-y-8 pt-8 text-left min-[1100px]:-translate-y-16 xl:pt-10"
+                className="-translate-y-8 pl-11 pt-8 text-left min-[1100px]:-translate-y-16 xl:pt-10"
                 initial="hidden"
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
