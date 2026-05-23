@@ -600,9 +600,9 @@ const PinnedHorizontalGallery = () => {
         }
 
         @media (max-width: 767px) {
-          /* Flytta upp rubriken på mobil så den hamnar centrerad mellan
-             top-nav och kort-stripen (mindre död yta ovanför). */
-          .phg-header { padding: clamp(40px, 6vh, 70px) 24px clamp(28px, 4vh, 48px); }
+          /* Mobil: korten ligger kvar; jämna ut rubrikens egna andrum så
+             avståndet ovanför och under titeln känns lika mot nav/kort. */
+          .phg-header { padding: clamp(52px, 8vh, 82px) 24px clamp(52px, 8vh, 82px); }
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
           .phg-strip { padding: 0 18vw 0 8vw; }
