@@ -808,7 +808,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         <div ref={introInnerRef} className="absolute inset-0 overflow-hidden">
           <section
             aria-label="Introduktion"
-            className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 py-24 sm:px-6 md:px-12 lg:px-24"
+            className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 pb-24 pt-32 sm:px-6 md:px-12 md:pt-36 lg:px-24"
             style={{
               backgroundImage:
                 'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
@@ -823,8 +823,8 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center text-center will-change-transform">
               <h2
                 data-intro-heading
-                className="mb-8 max-w-[min(92vw,60rem)] font-black leading-[1.04] tracking-[-0.025em] text-white"
-                style={{ fontSize: 'clamp(2rem, 5.4vw, 5.75rem)' }}
+                className="mb-8 max-w-[min(92vw,52rem)] font-black leading-[1.04] tracking-[-0.025em] text-white"
+                style={{ fontSize: 'clamp(1.75rem, 4.4vw, 4.75rem)' }}
               >
                 Vi har gjort det enkelt för alla!
               </h2>
