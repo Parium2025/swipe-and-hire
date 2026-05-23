@@ -159,6 +159,12 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Logo ring alignment: avstånd från loggans visuella vänsterkant till mitten
+       av första ringen. Används för att rubrik-texten i hero ska starta exakt
+       under första ringen, oavsett om loggans PNG har transparent marginal. */
+    --logo-ring-offset: 26px;
+    --logo-ring-offset-lg: 29px;
+
     /* Parium Brand Colors - från logotypen */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
