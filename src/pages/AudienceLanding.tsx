@@ -772,8 +772,8 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             </motion.div>
           </section>
 
-          {/* Desktop hero — aktiveras redan vid 900px så telefonen alltid får plats till höger och inte klipps vid mindre laptop-bredder. */}
-          <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:flex md:px-12 lg:px-24">
+          {/* Desktop hero — aktiveras redan vid tablet-bredd så telefonen alltid får plats till höger och inte klipps vid mindre laptop-bredder. */}
+          <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:flex md:px-6 lg:px-24">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
@@ -782,7 +782,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             />
             <div className="relative z-10 mx-auto grid w-full max-w-[1400px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 lg:grid-cols-2 lg:gap-16">
               <motion.div
-                className="-translate-y-8 pt-8 text-left min-[1100px]:-translate-y-16 xl:pt-10"
+                className="-translate-y-8 pl-8 pt-8 text-left sm:pl-8 md:pl-12 lg:pl-0 min-[1100px]:-translate-y-16 xl:pt-10"
                 initial="hidden"
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
