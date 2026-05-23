@@ -42,7 +42,10 @@ const AudienceHero = ({ role }: { role: AudienceRole }) => {
           {c.eyebrow}
         </motion.span>
 
-        <h1 className="mt-6 max-w-4xl text-[3.25rem] font-black leading-[0.94] tracking-[-0.03em] text-white sm:text-[5rem] lg:text-[6.25rem]">
+        <h1
+          className="mt-6 max-w-[min(92vw,60rem)] font-black leading-[0.96] tracking-[-0.03em] text-white"
+          style={{ fontSize: 'clamp(2rem, 5.4vw, 5.75rem)' }}
+        >
           {c.hero.headline.map((line, i) => (
             <motion.span
               key={i}
