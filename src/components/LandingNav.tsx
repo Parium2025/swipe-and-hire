@@ -215,7 +215,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                     <button
                       type="button"
                       aria-label="Öppna sektionsmeny"
-                      className="inline-flex h-10 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 text-[13px] font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-colors hover:bg-white/[0.08] active:bg-white/[0.10] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      className="inline-flex h-11 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 text-[15px] font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-colors hover:bg-white/[0.08] active:bg-white/[0.10] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                       <span className="whitespace-nowrap max-w-[160px] truncate">
                         {links.find((l) => l.href.replace('#', '') === activeId)?.label ?? 'Meny'}
@@ -302,7 +302,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-7 sm:px-6 md:px-5 lg:px-7 h-11 sm:h-10 md:h-11 bg-white/[0.04] border border-white/[0.08] text-white text-[15px] sm:text-[13px] lg:text-[14px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
+                className="rounded-full px-7 h-11 bg-white/[0.04] border border-white/[0.08] text-white text-[15px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
               >
                 Logga in
               </Button>
