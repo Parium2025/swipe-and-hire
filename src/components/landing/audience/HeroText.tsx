@@ -22,7 +22,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
   const isMobile = variant === 'mobile';
 
   const eyebrowClass = isMobile
-    ? 'text-xs font-bold uppercase tracking-[0.28em] text-secondary'
+    ? 'text-xs font-bold uppercase tracking-[0.28em] text-secondary [text-indent:0.28em]'
     : 'text-xs font-bold uppercase tracking-[0.28em] text-secondary/80';
 
   const headlineClass = isMobile
