@@ -8,7 +8,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import { useIsMobile } from '@/hooks/use-mobile';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
 export interface LandingNavLink {
@@ -24,7 +23,6 @@ interface LandingNavProps {
 const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useIsMobile();
   const pillScrollerRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -185,8 +183,8 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 18px)' }}
         aria-label="Huvudnavigation"
       >
-        <div className="max-w-[1400px] mx-auto px-3 sm:px-5 md:px-12 lg:px-24">
-          <div className="flex items-center h-16 sm:h-[72px] gap-2 sm:gap-4 md:gap-6">
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-5 md:px-6 lg:px-24">
+          <div className="flex items-center h-16 sm:h-[72px] gap-2 sm:gap-4 md:gap-3 lg:gap-6">
             <a
               href="/"
               onPointerDown={goHome}
@@ -205,13 +203,13 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                 decoding="sync"
                 // @ts-expect-error - fetchpriority is a valid HTML attribute
                 fetchpriority="high"
-                className="h-auto w-36 sm:w-32 md:w-40 pointer-events-none"
+                className="h-auto w-36 sm:w-32 md:w-36 lg:w-40 pointer-events-none"
               />
             </a>
 
-            {/* Mobil: dropdown-meny (standard shadcn). Desktop (sm+): hela list-pillen. */}
-            {links.length > 0 && isMobile && (
-              <div className="flex-1 min-w-0 flex justify-center">
+            {/* Mobil: dropdown-meny. Från tablet-bredd visas hela list-pillen så layout styrs av tillgänglig bredd, inte enhetsnamn. */}
+            {links.length > 0 && (
+              <div className="flex-1 min-w-0 flex justify-center md:hidden">
                 <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button
@@ -258,8 +256,8 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
 
 
-            {links.length > 0 && !isMobile && (
-              <div className="flex-1 min-w-0 flex justify-center">
+            {links.length > 0 && (
+              <div className="hidden flex-1 min-w-0 justify-center md:flex">
                 <div
                   ref={pillScrollerRef}
                   className="flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
@@ -280,7 +278,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                           });
                         }}
                         aria-current={isActive ? 'true' : undefined}
-                        className={`relative whitespace-nowrap rounded-full px-3 py-1.5 md:px-4 md:py-2 text-[12px] md:text-[13px] font-medium transition-colors ${
+                        className={`relative whitespace-nowrap rounded-full px-3 py-1.5 md:px-2.5 md:py-2 lg:px-4 text-[12px] lg:text-[13px] font-medium transition-colors ${
                           isActive ? 'text-white' : 'text-white/65 hover:text-white'
                         }`}
                       >
@@ -304,7 +302,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-7 sm:px-6 md:px-7 h-11 sm:h-10 md:h-11 bg-white/[0.04] border border-white/[0.08] text-white text-[15px] sm:text-[13px] md:text-[14px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
+                className="rounded-full px-7 sm:px-6 md:px-5 lg:px-7 h-11 sm:h-10 md:h-11 bg-white/[0.04] border border-white/[0.08] text-white text-[15px] sm:text-[13px] lg:text-[14px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
               >
                 Logga in
               </Button>
