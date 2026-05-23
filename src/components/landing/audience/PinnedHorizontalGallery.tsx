@@ -398,7 +398,7 @@ const PinnedHorizontalGallery = () => {
           /* Mer luftigt avstånd ovan/under rubriken på alla skärmar — håller
              professionellt andrum mellan topp-nav (Parium-logo) och titel,
              samt mellan titel och kortrad. */
-          padding: clamp(40px, 7vh, 80px) 24px clamp(36px, 6vh, 72px);
+          padding: clamp(110px, 14vh, 150px) 24px clamp(36px, 6vh, 72px);
           text-align: center;
           z-index: 3;
           will-change: transform, opacity;
@@ -406,7 +406,7 @@ const PinnedHorizontalGallery = () => {
         .phg-title {
           /* Något lägre tak så rubriken känns balanserad mot korten på laptop.
              Skalar fortfarande fluid utan breakpoint-hopp. */
-          font-size: clamp(2rem, 5.4vw, 5.75rem);
+          font-size: clamp(1.75rem, 4.4vw, 4.75rem);
           font-weight: 900;
           line-height: 1.04;
           letter-spacing: -0.025em;
@@ -421,7 +421,7 @@ const PinnedHorizontalGallery = () => {
           color: #ffffff;
           font-weight: 900;
         }
-        @media (min-width: 1536px) { .phg-title { font-size: clamp(4.5rem, 4.6vw, 6.5rem); } }
+        @media (min-width: 1536px) { .phg-title { font-size: clamp(3.75rem, 4vw, 5.5rem); } }
         .phg-sub {
           margin: 22px auto 0;
           font-size: clamp(1rem, 1.2vw, 1.125rem);
