@@ -26,8 +26,8 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     : 'text-xs font-bold uppercase tracking-[0.28em] text-secondary/80';
 
   const headlineClass = isMobile
-    ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-[4rem] md:text-[5rem]'
-    : 'mt-6 max-w-4xl text-[5rem] font-black leading-[1.04] tracking-[-0.025em] text-white lg:text-[6rem] 2xl:text-[7rem]';
+    ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[0] text-white sm:text-[4rem] md:text-[5rem]'
+    : 'mt-6 max-w-[min(92vw,60rem)] text-[clamp(3rem,5.4vw,7rem)] font-black leading-[1.04] tracking-[0] text-white';
 
   const subtitleClass = isMobile
     ? 'mt-7 max-w-xl text-base leading-8 text-white'
@@ -58,7 +58,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
             animate={{ opacity: 1 }}
             transition={{ duration: 1.6, ease: premiumEase, delay: 0.5 + i * 0.32 }}
             style={fadeStyle}
-            className="block"
+            className={isMobile ? 'block' : 'block whitespace-nowrap'}
           >
             {line}
           </motion.span>
