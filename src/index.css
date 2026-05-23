@@ -163,9 +163,15 @@ All colors MUST be HSL.
        av första ringen. Används för att rubrik-texten i hero ska starta exakt
        under första ringen, oavsett om loggans PNG har transparent marginal. */
     --logo-ring-offset: 26px;
-    --logo-ring-offset-lg: 29px;
+  }
 
-    /* Parium Brand Colors - från logotypen */
+  @media (min-width: 1024px) {
+    :root {
+      --logo-ring-offset: 29px;
+    }
+  }
+
+  :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
