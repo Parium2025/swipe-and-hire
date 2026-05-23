@@ -27,7 +27,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
 
   const headlineClass = isMobile
     ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[0] text-white sm:text-[4rem] md:text-[5rem]'
-    : 'mt-6 max-w-[min(92vw,60rem)] text-[clamp(3rem,5.4vw,7rem)] font-black leading-[1.04] tracking-[0] text-white';
+    : 'mt-6 max-w-[min(92vw,60rem)] text-[clamp(2.75rem,5.2vw,7rem)] font-black leading-[1.04] tracking-[0] text-white';
 
   const subtitleClass = isMobile
     ? 'mt-7 max-w-xl text-base leading-8 text-white'
