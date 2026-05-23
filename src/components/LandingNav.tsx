@@ -215,7 +215,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                     <button
                       type="button"
                       aria-label="Öppna sektionsmeny"
-                      className="inline-flex h-10 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 text-[13px] font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-colors hover:bg-white/[0.08] active:bg-white/[0.10] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      className="inline-flex h-11 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 text-[15px] font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-colors hover:bg-white/[0.08] active:bg-white/[0.10] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                       <span className="whitespace-nowrap max-w-[160px] truncate">
                         {links.find((l) => l.href.replace('#', '') === activeId)?.label ?? 'Meny'}
