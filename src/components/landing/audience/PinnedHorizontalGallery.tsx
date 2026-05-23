@@ -435,7 +435,9 @@ const PinnedHorizontalGallery = () => {
           align-items: center;
           overflow: hidden;
           z-index: 2;
-          transform: translate3d(0, -8vh, 0);
+          /* Mindre pullup på laptop-höjder så korten inte krockar med rubriken.
+             Skalar med viewport: max 8vh, men aldrig mer än 56px. */
+          transform: translate3d(0, clamp(-56px, -6vh, -16px), 0);
         }
         .phg-strip {
           display: flex;
