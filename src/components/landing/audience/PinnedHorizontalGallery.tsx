@@ -395,20 +395,23 @@ const PinnedHorizontalGallery = () => {
           contain: layout paint;
         }
         .phg-header {
-          padding: clamp(24px, 4vh, 48px) 24px clamp(28px, 4.5vh, 56px);
+          /* Mer luftigt avstånd ovan/under rubriken på alla skärmar — håller
+             professionellt andrum mellan topp-nav (Parium-logo) och titel,
+             samt mellan titel och kortrad. */
+          padding: clamp(40px, 7vh, 80px) 24px clamp(36px, 6vh, 72px);
           text-align: center;
           z-index: 3;
           will-change: transform, opacity;
         }
         .phg-title {
-          /* Fluid storlek som skalar smidigt mellan alla skärmstorlekar
-             utan hopp vid breakpoints — håller sig alltid inom viewport. */
-          font-size: clamp(2.25rem, 6.2vw, 6.5rem);
+          /* Något lägre tak så rubriken känns balanserad mot korten på laptop.
+             Skalar fortfarande fluid utan breakpoint-hopp. */
+          font-size: clamp(2rem, 5.4vw, 5.75rem);
           font-weight: 900;
           line-height: 1.04;
           letter-spacing: -0.025em;
           color: #ffffff;
-          max-width: min(92vw, 20ch);
+          max-width: min(90vw, 20ch);
           margin: 0 auto;
           padding-bottom: 0.12em;
           overflow-wrap: break-word;
@@ -418,7 +421,7 @@ const PinnedHorizontalGallery = () => {
           color: #ffffff;
           font-weight: 900;
         }
-        @media (min-width: 1536px) { .phg-title { font-size: clamp(5rem, 5vw, 7rem); } }
+        @media (min-width: 1536px) { .phg-title { font-size: clamp(4.5rem, 4.6vw, 6.5rem); } }
         .phg-sub {
           margin: 22px auto 0;
           font-size: clamp(1rem, 1.2vw, 1.125rem);
@@ -430,14 +433,14 @@ const PinnedHorizontalGallery = () => {
         .phg-strip-wrap {
           position: relative;
           width: 100%;
-          min-height: clamp(360px, 58vh, 620px);
+          min-height: clamp(320px, 52vh, 580px);
           display: flex;
           align-items: center;
           overflow: hidden;
           z-index: 2;
-          /* Mindre pullup på laptop-höjder så korten inte krockar med rubriken.
-             Skalar med viewport: max 8vh, men aldrig mer än 56px. */
-          transform: translate3d(0, clamp(-56px, -6vh, -16px), 0);
+          /* Ingen negativ pullup längre — header-paddingen styr avståndet,
+             så korten ligger alltid tryggt under rubriken oavsett höjd. */
+          transform: translate3d(0, 0, 0);
         }
         .phg-strip {
           display: flex;
@@ -448,7 +451,9 @@ const PinnedHorizontalGallery = () => {
         }
         .phg-card {
           flex: 0 0 auto;
-          width: clamp(280px, 27vw, 400px);
+          /* Något mindre kort på laptop-bredder (1000–1400) så helheten
+             känns mer luftig och proportionerlig mot rubrik + chrome. */
+          width: clamp(240px, 22vw, 360px);
           aspect-ratio: 4 / 5;
           border-radius: 26px;
           overflow: hidden;
