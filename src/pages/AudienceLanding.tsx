@@ -773,7 +773,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           </section>
 
           {/* Desktop hero — aktiveras redan vid tablet-bredd så telefonen alltid får plats till höger och inte klipps vid mindre laptop-bredder. */}
-          <section className="relative hidden h-full items-center justify-center overflow-hidden px-5 pb-16 pt-28 sm:px-6 md:flex md:px-6 lg:px-24">
+          <section className="relative hidden h-full items-center justify-center overflow-hidden pb-16 pt-28 md:flex">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
