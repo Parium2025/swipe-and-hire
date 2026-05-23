@@ -405,8 +405,10 @@ const PinnedHorizontalGallery = () => {
         }
         .phg-title {
           /* Något lägre tak så rubriken känns balanserad mot korten på laptop.
-             Skalar fortfarande fluid utan breakpoint-hopp. */
-          font-size: clamp(1.75rem, 4.4vw, 4.75rem);
+             Skalar fortfarande fluid utan breakpoint-hopp.
+             Höjt min från 1.75rem → 2.75rem så rubriken har samma tyngd som
+             hero-rubriken på mobil (annars blir det mycket död yta). */
+          font-size: clamp(2.75rem, 4.4vw, 4.75rem);
           font-weight: 900;
           line-height: 1.04;
           letter-spacing: -0.025em;
