@@ -40,7 +40,7 @@ const EmployerMobileShell = ({
         <AnimatedBackground showBubbles={false} />
         <EmployerSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">
-          <header className="shrink-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
+          <header className="shrink-0 z-40 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3 [padding-top:var(--top-chrome-content-offset,0px)]" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
             <div className="flex items-center">
               <EmployerLogoSidebarTrigger />
             </div>
@@ -76,7 +76,7 @@ const EmployerMobileShell = ({
             />
           </div>
 
-          <div className="absolute left-0 right-0 top-14 pointer-events-none z-20" style={{ height: 'calc(100vh - 3.5rem)' }}>
+          <div className="absolute left-0 right-0 pointer-events-none z-20 [top:calc(3.5rem+var(--top-chrome-content-offset,0px))]" style={{ height: 'calc(100vh - 3.5rem)' }}>
             <FloatingBubbles />
           </div>
 
