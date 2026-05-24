@@ -6,7 +6,6 @@ interface SplinePhoneProps {
   style?: CSSProperties;
   zoom?: number;
   active?: boolean;
-  instantFallback?: boolean;
 }
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
