@@ -27,11 +27,11 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
 
   const headlineClass = isMobile
     ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[0] text-white sm:text-[4rem] md:text-[5rem]'
-    : 'mt-6 max-w-[min(92vw,60rem)] text-[clamp(2.75rem,5.2vw,7rem)] font-black leading-[1.04] tracking-[0] text-white';
+    : 'mt-6 max-w-[min(92vw,60rem)] text-[clamp(2.75rem,5.2vw,7rem)] font-black leading-[1.04] tracking-[0] text-white md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(88vw,48rem)] md:[@media_(orientation:portrait)]:text-[clamp(3.1rem,5.8vw,4.75rem)]';
 
   const subtitleClass = isMobile
     ? 'mt-7 max-w-xl text-base leading-8 text-white'
-    : 'mt-7 max-w-xl text-lg leading-8 text-white';
+    : 'mt-7 max-w-xl text-lg leading-8 text-white md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)]';
 
   // Premium-entré: enbart opacity. Ingen blur, ingen skugga, ingen translate.
   // Långsam, lugn ease (Apple-style) med en mjuk stagger rad-för-rad.
