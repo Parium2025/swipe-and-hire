@@ -33,6 +33,14 @@ type HeroIntroStageProps = {
   introCtaLabel?: string;
 };
 
+const isTouchOnlyDevice = () => {
+  if (typeof window === 'undefined') return false;
+  const nav = window.navigator;
+  const isApple = /iPad|iPhone|iPod/.test(nav.userAgent) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
+  const hoverNone = window.matchMedia?.('(hover: none)').matches ?? false;
+  return isApple || hoverNone;
+};
+
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   const heroIndexRef = useRef(0);
