@@ -152,18 +152,27 @@ const PinnedHorizontalGallery = () => {
       if (rafRef.current === null) rafRef.current = window.requestAnimationFrame(tick);
     };
 
+    // Cacha tablet-detekteringen EN gång — matchMedia + innerWidth varje frame
+    // (60ggr/s) kostade onödig CPU och gjorde rörelsen ojämn på iPad.
+    const coarseMq = typeof window !== 'undefined' ? window.matchMedia?.('(pointer: coarse)') : null;
+    let isCoarseTablet =
+      !!coarseMq?.matches && window.innerWidth >= 768 && window.innerWidth <= 1366;
+    const updateTabletFlag = () => {
+      isCoarseTablet =
+        !!coarseMq?.matches && window.innerWidth >= 768 && window.innerWidth <= 1366;
+    };
+    coarseMq?.addEventListener?.('change', updateTabletFlag);
+
     const tick = () => {
       rafRef.current = null;
       if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
       const diff = target - current;
-      const isCoarseTablet = window.matchMedia?.('(pointer: coarse)').matches === true
-        && window.innerWidth >= 768
-        && window.innerWidth <= 1366;
-      // iPad behöver följa fingret snabbare. Annars känns baren/korten som att
-      // de "släpar", särskilt i landscape där korten är större och scrollen mer dämpad.
-      const follow = isCoarseTablet ? 0.78 : 0.35;
+      // iPad behöver följa fingret snabbare än mus (0.35), men 0.78 var för
+      // aggressivt — rörelsen "catchade upp" på 1-2 frames vilket gav stegvis
+      // hackig känsla. 0.55 ger snabb respons utan att tappa flytet.
+      const follow = isCoarseTablet ? 0.55 : 0.35;
       const next = Math.abs(diff) < 0.00005 ? target : current + diff * follow;
       renderedProgressRef.current = next;
       applyProgress(next);
@@ -220,6 +229,7 @@ const PinnedHorizontalGallery = () => {
       window.removeEventListener('parium:gallery-leave', freeze);
       window.removeEventListener('parium:gallery-enter', thaw);
       window.removeEventListener('parium:gallery-reset-start', resetToStart);
+      coarseMq?.removeEventListener?.('change', updateTabletFlag);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
     };
   }, []);
