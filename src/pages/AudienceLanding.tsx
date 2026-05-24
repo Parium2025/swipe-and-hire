@@ -271,7 +271,7 @@ const FixedPhoneLayer = () => {
         <div aria-hidden className="hidden md:block" />
         <div
           data-phone-scroll-forward
-          className={`${shouldEnablePhoneInteraction ? 'pointer-events-auto' : 'pointer-events-none'} ${shouldRenderPhoneLayer ? 'opacity-100' : 'opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-300 ease-out'}`}
+          className={`${shouldEnablePhoneInteraction ? 'pointer-events-auto' : 'pointer-events-none'} ${shouldRenderPhoneLayer ? 'opacity-100 visible' : 'opacity-0 invisible'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-300 ease-out'}`}
           style={phoneMetrics.isDesktop
             ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
