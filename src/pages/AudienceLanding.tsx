@@ -38,7 +38,7 @@ const PHONE_ASPECT = 9 / 19.5;
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   const heroIndexRef = useRef(0);
-  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; top: number; height: number; zoom: number; yOffset: number } | null>(null);
+  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; isPortraitTablet?: boolean; top: number; height: number; zoom: number; yOffset: number } | null>(null);
   const getVisibleAnchor = () => {
     const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const anchors = Array.from(document.querySelectorAll('[data-hero-phone-anchor]')) as HTMLElement[];
@@ -53,23 +53,40 @@ const FixedPhoneLayer = () => {
     const width = window.visualViewport?.width ?? window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
 
+    const isPortraitTablet = width >= 768 && width < 1024 && height > width;
+
+    if (isPortraitTablet) {
+      const anchor = getVisibleAnchor();
+      const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.52;
+      const gap = clamp(height * 0.032, 30, 44);
+      const bottomSafe = clamp(height * 0.065, 72, 98);
+      const top = Math.min(textBottom + gap, height - bottomSafe - 260);
+      const availableHeight = Math.max(240, height - top - bottomSafe);
+      const safeHeight = Math.min(availableHeight, 480);
+      const metrics = {
+        isDesktop: false,
+        isPortraitTablet: true,
+        top,
+        height: safeHeight,
+        zoom: clamp((safeHeight / 460) * 0.39, 0.30, 0.42),
+        yOffset: 0,
+      };
+      lastHeroMetricsRef.current = metrics;
+      return metrics;
+    }
+
     if (width >= 768) {
       const isCompactLaptop = height <= 820;
-      // iPad portrait (768–1023px bred, höjd > bredd): krymp telefonen så att
-      // den inte krockar med hero-rubriken. Liggande iPad funkar redan bra.
-      const isPortraitTablet = width < 1024 && height > width;
       const desktopTopPadding = isCompactLaptop ? 148 : 142;
       const desktopBottomPadding = isCompactLaptop ? 104 : 96;
       const safeCanvasHeight = Math.max(300, height - desktopTopPadding - desktopBottomPadding);
-      const phoneColumnWidth = isPortraitTablet
-        ? width * 0.17
-        : width >= 1280 ? width * 0.28 : width * 0.22;
+      const phoneColumnWidth = width >= 1280 ? width * 0.28 : width * 0.22;
       const widthFitHeight = (Math.min(phoneColumnWidth, 390) * 19.5) / 9;
-      const minH = isPortraitTablet ? 260 : width < 900 ? 330 : isCompactLaptop ? 300 : 390;
-      const maxH = isPortraitTablet ? 340 : width < 900 ? 420 : isCompactLaptop ? 430 : 570;
+      const minH = width < 900 ? 330 : isCompactLaptop ? 300 : 390;
+      const maxH = width < 900 ? 420 : isCompactLaptop ? 430 : 570;
       const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), minH, maxH);
       const viewportScale = clamp(width / 1440, 0.72, 1);
-      const yOffset = isPortraitTablet ? 8 : isCompactLaptop ? 12 : 26;
+      const yOffset = isCompactLaptop ? 12 : 26;
       const metrics = {
         isDesktop: true,
         top: 0,
