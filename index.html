@@ -11,8 +11,12 @@
       // innan Safari låser browser-UI:t. Ingen dubblering senare.
       (function() {
         try {
-          var isLandingVideoRoute = window.location.pathname === '/' || window.location.pathname === '';
-          var chromeColor = isLandingVideoRoute ? '#2a2a2a' : '#001935';
+          var path = window.location.pathname;
+          var isLandingVideoRoute = path === '/' || path === '';
+          var isAudienceLandingRoute = path === '/jobbsokare' || path === '/arbetsgivare';
+          var chromeColor = isLandingVideoRoute
+            ? '#2a2a2a'
+            : (isAudienceLandingRoute ? '#001F3D' : '#001935');
           document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
           // Inline body/html-färg så iOS Safari samplar rätt färg vid first paint.
