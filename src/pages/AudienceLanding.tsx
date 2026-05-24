@@ -33,14 +33,6 @@ type HeroIntroStageProps = {
   introCtaLabel?: string;
 };
 
-const isTouchOnlyDevice = () => {
-  if (typeof window === 'undefined') return false;
-  const nav = window.navigator;
-  const isApple = /iPad|iPhone|iPod/.test(nav.userAgent) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
-  const hoverNone = window.matchMedia?.('(hover: none)').matches ?? false;
-  return isApple || hoverNone || nav.maxTouchPoints > 0;
-};
-
 const PHONE_ASPECT = 9 / 19.5;
 
 const FixedPhoneLayer = () => {
@@ -120,7 +112,7 @@ const FixedPhoneLayer = () => {
   };
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
-  const [phoneReady, setPhoneReady] = useState<boolean>(() => isTouchOnlyDevice());
+  const [phoneReady, setPhoneReady] = useState(false);
   const [phoneMetrics, setPhoneMetrics] = useState(calculatePhoneMetrics);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
@@ -259,7 +251,8 @@ const FixedPhoneLayer = () => {
     };
   }, []);
 
-  const shouldShowPhone = visible && (phoneReady || !phoneMetrics.isDesktop);
+  const shouldRenderPhoneLayer = visible;
+  const shouldEnablePhoneInteraction = visible && phoneReady;
   const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
 
   return (
@@ -271,7 +264,7 @@ const FixedPhoneLayer = () => {
         <div aria-hidden className="hidden md:block" />
         <div
           data-phone-scroll-forward
-          className={`${shouldShowPhone ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-300 ease-out'}`}
+          className={`${shouldEnablePhoneInteraction ? 'pointer-events-auto' : 'pointer-events-none'} ${shouldRenderPhoneLayer ? 'opacity-100' : 'opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-300 ease-out'}`}
           style={phoneMetrics.isDesktop
             ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
@@ -282,7 +275,6 @@ const FixedPhoneLayer = () => {
             style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
             zoom={phoneMetrics.zoom}
             active={active}
-            instantFallback={!phoneMetrics.isDesktop}
           />
         </div>
       </div>
