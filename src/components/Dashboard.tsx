@@ -198,7 +198,10 @@ const Dashboard = memo(() => {
 
   const statsCards = useMemo(() => {
     // Föredra server-counts/stats (exakta även vid 10k+ jobb).
-    const totalJobs = serverCounts?.total ?? filteredStats.totalJobs;
+    // Dashboard (företagsvy): exkludera utkast — visa endast publicerade (Aktiva + Utgångna)
+    const activeFromServer = serverCounts?.active ?? filteredStats.activeJobs;
+    const expiredFromServer = serverCounts?.expired ?? expiredJobs.length;
+    const totalJobs = activeFromServer + expiredFromServer;
     const activeCount = serverCounts?.active ?? filteredStats.activeJobs;
     const expiredCount = serverCounts?.expired ?? expiredJobs.length;
     const totalViews = serverStats?.total_views ?? filteredStats.totalViews;
