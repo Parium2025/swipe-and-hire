@@ -33,14 +33,6 @@ type HeroIntroStageProps = {
   introCtaLabel?: string;
 };
 
-const isTouchOnlyDevice = () => {
-  if (typeof window === 'undefined') return false;
-  const nav = window.navigator;
-  const isApple = /iPad|iPhone|iPod/.test(nav.userAgent) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
-  const hoverNone = window.matchMedia?.('(hover: none)').matches ?? false;
-  return isApple || hoverNone || nav.maxTouchPoints > 0;
-};
-
 const PHONE_ASPECT = 9 / 19.5;
 
 const FixedPhoneLayer = () => {
@@ -120,7 +112,7 @@ const FixedPhoneLayer = () => {
   };
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
-  const [phoneReady, setPhoneReady] = useState<boolean>(() => isTouchOnlyDevice());
+  const [phoneReady, setPhoneReady] = useState(false);
   const [phoneMetrics, setPhoneMetrics] = useState(calculatePhoneMetrics);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
@@ -282,7 +274,6 @@ const FixedPhoneLayer = () => {
             style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
             zoom={phoneMetrics.zoom}
             active={active}
-            instantFallback={!phoneMetrics.isDesktop}
           />
         </div>
       </div>
