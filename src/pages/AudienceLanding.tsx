@@ -847,8 +847,8 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
               backgroundColor: 'hsl(var(--primary))',
             }}
           >
-            {/* Samma bubblor som hero — så de inte "försvinner" när intro-lagret täcker bakgrunden */}
-            <AnimatedBackground variant="card" />
+            {/* Samma bubblor som hero — utan extra blur-glöd, eftersom iPad Safari kan kompositera den som en svag rektangel under swipe. */}
+            <AnimatedBackground variant="card" showGlow={false} />
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center text-center will-change-transform">
               <h2
                 data-intro-heading
@@ -990,7 +990,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         backgroundColor: 'hsl(var(--primary))',
       }}
     >
-      <AnimatedBackground />
+      <AnimatedBackground showGlow={false} />
       <FixedPhoneLayer />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
