@@ -151,9 +151,14 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   }, [reducedMotion, forceStaticFallback]);
 
   if (hasError) {
-    // Offline / WebGL-fail: rendera ingenting hellre än en ful platshållartelefon.
-    return <div ref={wrapperRef} aria-hidden="true" className={className} style={style} />;
+    return (
+      <div ref={wrapperRef} aria-hidden="true" className={`relative select-none overflow-visible ${className ?? ''}`} style={style}>
+        <StaticPhoneFallback visible />
+      </div>
+    );
   }
+
+  const showStaticFallback = forceStaticFallback || (!isReady && (instantFallback || showFallback));
 
   return (
     <div
@@ -161,7 +166,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
       className={`relative select-none overflow-visible ${className ?? ''}`}
       style={{ touchAction: 'pan-y', overscrollBehavior: 'contain', ...style }}
     >
-      <StaticPhoneFallback visible={forceStaticFallback || showFallback || !isReady} />
+      <StaticPhoneFallback visible={showStaticFallback} />
       <canvas
         ref={canvasRef}
         role="img"
