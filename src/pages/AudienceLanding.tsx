@@ -38,8 +38,10 @@ const isTouchOnlyDevice = () => {
   const nav = window.navigator;
   const isApple = /iPad|iPhone|iPod/.test(nav.userAgent) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
   const hoverNone = window.matchMedia?.('(hover: none)').matches ?? false;
-  return isApple || hoverNone;
+  return isApple || hoverNone || nav.maxTouchPoints > 0;
 };
+
+const PHONE_ASPECT = 9 / 19.5;
 
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
@@ -258,6 +260,7 @@ const FixedPhoneLayer = () => {
   }, []);
 
   const shouldShowPhone = visible && (phoneReady || !phoneMetrics.isDesktop);
+  const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
 
   return (
     <div
@@ -270,12 +273,12 @@ const FixedPhoneLayer = () => {
           data-phone-scroll-forward
           className={`${shouldShowPhone ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-300 ease-out'}`}
           style={phoneMetrics.isDesktop
-            ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
-            : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px` }
+            ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
+            : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
           }
         >
           <SplinePhone
-            className={phoneMetrics.isDesktop ? "h-full w-auto aspect-[9/19.5]" : "h-full w-auto min-w-[140px] max-w-[min(72vw,270px)] aspect-[9/19.5]"}
+            className="h-full w-full"
             style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
             zoom={phoneMetrics.zoom}
             active={active}
