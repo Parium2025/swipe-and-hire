@@ -1,4 +1,4 @@
-import { type PointerEvent, type RefObject, useState } from 'react';
+import { type PointerEvent, type RefObject, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
@@ -139,6 +139,27 @@ const AudienceCard = ({
 const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<AudienceRole | null>(null);
+
+  // Premium-prefetch: när huvudtråden är ledig, ladda tunga audience-assets
+  // (Spline-scen + runtime + gallery-modul + content) för BÅDA rollerna i
+  // bakgrunden. Påverkar inte hero-animationen, ingen render, ingen state.
+  // Helt idempotent — om användaren hovrar/klickar tidigare körs det bara en gång.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const idle = (cb: () => void) => {
+      const w = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number };
+      if (typeof w.requestIdleCallback === 'function') {
+        w.requestIdleCallback(cb, { timeout: 2500 });
+      } else {
+        window.setTimeout(cb, 1800);
+      }
+    };
+    idle(() => {
+      preloadAudienceAssets('job_seeker');
+      preloadAudienceAssets('employer');
+    });
+  }, []);
+
 
   const handleChoice = (role: AudienceRole) => {
     if (selectedRole) return;
