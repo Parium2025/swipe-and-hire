@@ -55,14 +55,21 @@ const FixedPhoneLayer = () => {
 
     if (width >= 768) {
       const isCompactLaptop = height <= 820;
+      // iPad portrait (768–1023px bred, höjd > bredd): krymp telefonen så att
+      // den inte krockar med hero-rubriken. Liggande iPad funkar redan bra.
+      const isPortraitTablet = width < 1024 && height > width;
       const desktopTopPadding = isCompactLaptop ? 148 : 142;
       const desktopBottomPadding = isCompactLaptop ? 104 : 96;
       const safeCanvasHeight = Math.max(300, height - desktopTopPadding - desktopBottomPadding);
-      const phoneColumnWidth = width >= 1280 ? width * 0.28 : width * 0.22;
+      const phoneColumnWidth = isPortraitTablet
+        ? width * 0.17
+        : width >= 1280 ? width * 0.28 : width * 0.22;
       const widthFitHeight = (Math.min(phoneColumnWidth, 390) * 19.5) / 9;
-      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), width < 900 ? 330 : isCompactLaptop ? 300 : 390, width < 900 ? 420 : isCompactLaptop ? 430 : 570);
+      const minH = isPortraitTablet ? 260 : width < 900 ? 330 : isCompactLaptop ? 300 : 390;
+      const maxH = isPortraitTablet ? 340 : width < 900 ? 420 : isCompactLaptop ? 430 : 570;
+      const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), minH, maxH);
       const viewportScale = clamp(width / 1440, 0.72, 1);
-      const yOffset = isCompactLaptop ? 12 : 26;
+      const yOffset = isPortraitTablet ? 8 : isCompactLaptop ? 12 : 26;
       const metrics = {
         isDesktop: true,
         top: 0,
