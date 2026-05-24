@@ -96,8 +96,11 @@ const AudienceCard = ({
     <motion.button
       type="button"
       onPointerDown={() => onChoose(role)}
+      onPointerEnter={() => preloadAudienceAssets(role)}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetTilt}
+      onFocus={() => preloadAudienceAssets(role)}
+      onTouchStart={() => preloadAudienceAssets(role)}
       variants={{
         hidden: { opacity: 0, y: 34, scale: 0.96, filter: 'blur(12px)' },
         show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
