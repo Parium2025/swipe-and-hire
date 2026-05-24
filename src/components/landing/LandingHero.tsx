@@ -81,6 +81,7 @@ const AudienceCard = ({
   const isOtherSelected = selectedRole && selectedRole !== role;
 
   const handlePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
+    preloadAudienceAssets(role);
     if (selectedRole) return;
     const bounds = event.currentTarget.getBoundingClientRect();
     pointerX.set((event.clientX - bounds.left) / bounds.width);
@@ -141,6 +142,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
 
   const handleChoice = (role: AudienceRole) => {
     if (selectedRole) return;
+    preloadAudienceAssets(role);
     setSelectedRole(role);
     const target = role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare';
     sessionStorage.setItem('parium-skip-splash', '1');
