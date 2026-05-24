@@ -104,10 +104,6 @@ const PinnedHorizontalGallery = () => {
     setReady(true);
   }, []);
 
-  // Längre pin-distans = man MÅSTE scrolla igenom hela strippen, kan inte "fuska förbi".
-  // Extra intro-yta inuti samma sticky sektion låter korten glida in utan en hård skarv.
-  const SCROLL_VH = 520;
-
   // Egen RAF-driven progress istället för Framer useScroll. Då läser och skriver
   // galleriet i exakt samma animation-frame som GSAP-scrollen vid 2↔3, utan
   // dubbel scroll-prenumeration som kan ge en frame av skak/jitter.
@@ -161,10 +157,14 @@ const PinnedHorizontalGallery = () => {
       if (frozen) return;
       const current = renderedProgressRef.current;
       const target = targetProgressRef.current;
-      // Lerp 0.35 ger silkeslen följning på touch (momentum-scroll får många
-      // små deltas — låg faktor jämnar ut dem) utan att kännas trög på mus.
       const diff = target - current;
-      const next = Math.abs(diff) < 0.00005 ? target : current + diff * 0.35;
+      const isCoarseTablet = window.matchMedia?.('(pointer: coarse)').matches === true
+        && window.innerWidth >= 768
+        && window.innerWidth <= 1366;
+      // iPad behöver följa fingret snabbare. Annars känns baren/korten som att
+      // de "släpar", särskilt i landscape där korten är större och scrollen mer dämpad.
+      const follow = isCoarseTablet ? 0.78 : 0.35;
+      const next = Math.abs(diff) < 0.00005 ? target : current + diff * follow;
       renderedProgressRef.current = next;
       applyProgress(next);
       if (next !== target) rafRef.current = window.requestAnimationFrame(tick);
@@ -381,7 +381,12 @@ const PinnedHorizontalGallery = () => {
   return (
     <>
       <style>{`
-        .phg-section { position: relative; width: 100%; }
+        .phg-section {
+          position: relative;
+          width: 100%;
+          /* Basdistans för desktop/mobil där scrollen redan känns rätt. */
+          height: 520vh;
+        }
         .phg-sticky {
           position: sticky;
           top: 0;
@@ -611,9 +616,14 @@ const PinnedHorizontalGallery = () => {
           .phg-strip { padding: 0 18vw 0 8vw; }
           .phg-footer { padding: 8px 24px 12px; gap: 8px; }
         }
+
+        @media (pointer: coarse) and (min-width: 768px) and (max-width: 1366px) {
+          /* iPad/tablet: kortare pin-distans = mindre fingerarbete och snabbare progressbar. */
+          .phg-section { height: 360vh; }
+        }
       `}</style>
 
-      <div ref={sectionRef} data-phg-section className="phg-section" style={{ height: `${SCROLL_VH}vh` }}>
+      <div ref={sectionRef} data-phg-section className="phg-section">
         <div className="phg-sticky">
 
           <div ref={headerRef} className="phg-header" style={{ opacity: 0, transform: 'translate3d(0, 44px, 0)' }}>
