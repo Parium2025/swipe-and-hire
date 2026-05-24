@@ -251,7 +251,7 @@ const FixedPhoneLayer = () => {
     };
   }, []);
 
-  const shouldShowPhone = visible && (phoneReady || !phoneMetrics.isDesktop);
+  const shouldShowPhone = visible && phoneReady;
   const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
 
   return (
