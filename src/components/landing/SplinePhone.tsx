@@ -63,12 +63,19 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
+    // Defer event-dispatch ett par frames så att FixedPhoneLayer (eller andra
+    // föräldrar) hinner registrera sin lyssnare innan vi signalerar "ready".
+    // Barn-effekter körs annars synkront FÖRE föräldereffekter, vilket på
+    // iPad/Apple touch ledde till att eventet missades och telefonen aldrig
+    // visades (man såg bara en tunn linje där canvas-kanten låg).
+    const fire = () => window.dispatchEvent(new Event('parium:spline-ready'));
     if (forceStaticFallback) {
-      window.dispatchEvent(new Event('parium:spline-ready'));
-      return;
+      const id = requestAnimationFrame(() => requestAnimationFrame(fire));
+      return () => cancelAnimationFrame(id);
     }
     if (!reducedMotion && !hasError && !showFallback) return;
-    window.dispatchEvent(new Event('parium:spline-ready'));
+    const id = requestAnimationFrame(() => requestAnimationFrame(fire));
+    return () => cancelAnimationFrame(id);
   }, [forceStaticFallback, reducedMotion, hasError, showFallback]);
 
   useEffect(() => {
