@@ -74,7 +74,7 @@ const TopChromeStrip = () => {
 
   const displayColor = forcedColor ?? color;
   const shouldShowStrip = isTouch && !(isTablet && !isStandalone);
-  const contentOffset = isStandalone ? '8px' : '18px';
+  const contentOffset = isStandalone ? '8px' : '34px';
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
