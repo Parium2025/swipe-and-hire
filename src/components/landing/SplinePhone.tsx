@@ -41,7 +41,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [forceStaticFallback] = useState(() => instantFallback && isAppleTouchDevice());
+  const [forceStaticFallback] = useState(isAppleTouchDevice);
   // På mobil/surfplatta visar vi en premiumram direkt under laddning så hero aldrig
   // upplevs tom om WebGL/Spline är långsamt eller stoppas av mobilbrowsern.
   // På desktop väntar vi fortfarande några sekunder för att undvika skeleton-flash.
@@ -62,9 +62,13 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
+    if (forceStaticFallback) {
+      window.dispatchEvent(new Event('parium:spline-ready'));
+      return;
+    }
     if (!reducedMotion && !hasError && !showFallback) return;
     window.dispatchEvent(new Event('parium:spline-ready'));
-  }, [reducedMotion, hasError, showFallback]);
+  }, [forceStaticFallback, reducedMotion, hasError, showFallback]);
 
   useEffect(() => {
     activeRef.current = active;
@@ -117,8 +121,8 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
           (app as unknown as { setBackgroundColor?: (c: string) => void })
             .setBackgroundColor?.('rgba(0,0,0,0)');
         } catch { /* no-op */ }
-        app.setZoom(zoom);
-        requestAnimationFrame(() => app?.setZoom(zoom));
+        app.setZoom(zoomRef.current);
+        requestAnimationFrame(() => app?.setZoom(zoomRef.current));
         if (!activeRef.current) app.stop();
         // Vänta 3 rAF så Spline garanterat hunnit rita sin första WebGL-frame
         // innan vi fade:ar in canvasen. På throttlade enheter (Lovable preview-
