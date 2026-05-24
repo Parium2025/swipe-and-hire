@@ -38,6 +38,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const appRef = useRef<SplineApplication | null>(null);
   const activeRef = useRef(active);
+  const zoomRef = useRef(zoom);
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -82,6 +83,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   }, [active, isReady]);
 
   useEffect(() => {
+    zoomRef.current = zoom;
     const app = appRef.current;
     if (!app || !isReady) return;
     app.setZoom(zoom);
