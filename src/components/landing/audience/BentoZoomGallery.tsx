@@ -97,7 +97,8 @@ const BentoZoomGallery = () => {
       if (snapTimerRef.current) window.clearTimeout(snapTimerRef.current);
       snapTimerRef.current = window.setTimeout(() => {
         if (interactingRef.current) return;
-        // find nearest slide to center and softly scroll there
+        // Native CSS scroll-snap handles the actual snapping — only nudge if
+        // we're noticeably off-center (e.g. after a programmatic scroll).
         const center = track.scrollLeft + track.clientWidth / 2;
         let nearest = 0;
         let nd = Infinity;
@@ -107,8 +108,8 @@ const BentoZoomGallery = () => {
           const d = Math.abs(mid - center);
           if (d < nd) { nd = d; nearest = i; }
         });
-        scrollToIndex(nearest);
-      }, 120);
+        if (nd > 8) scrollToIndex(nearest);
+      }, 140);
     };
 
     const onScroll = () => {
@@ -217,6 +218,8 @@ const BentoZoomGallery = () => {
           overflow-x: auto;
           scroll-behavior: smooth;
           -webkit-overflow-scrolling: touch;
+          scroll-snap-type: x mandatory;
+          overscroll-behavior-x: contain;
           padding: clamp(20px, 4vw, 40px) max(16px, calc((100% - min(720px, 88vw)) / 2));
           scrollbar-width: none;
         }
@@ -224,6 +227,8 @@ const BentoZoomGallery = () => {
 
         .pcar-slide {
           flex: 0 0 min(720px, 88vw);
+          scroll-snap-align: center;
+          scroll-snap-stop: always;
           aspect-ratio: 4 / 5;
           position: relative;
           border-radius: clamp(20px, 2.4vw, 32px);
