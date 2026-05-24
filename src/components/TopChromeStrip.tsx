@@ -20,6 +20,7 @@ const TopChromeStrip = () => {
   const [isTouch, setIsTouch] = useState(false);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -34,6 +35,18 @@ const TopChromeStrip = () => {
     if (typeof window === 'undefined') return;
     const mq = window.matchMedia('(display-mode: standalone)');
     const apply = () => setIsStandalone(mq.matches);
+    apply();
+    mq.addEventListener?.('change', apply);
+    return () => mq.removeEventListener?.('change', apply);
+  }, []);
+
+  // iPad / tablet detection — coarse pointer + 768–1366px width.
+  // iPad Safari uppdaterar inte theme-color pålitligt vid SPA-nav, så vi
+  // täcker glipan med en tjockare remsa så färgen alltid matchar sidan.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(pointer: coarse) and (min-width: 768px) and (max-width: 1366px)');
+    const apply = () => setIsTablet(mq.matches);
     apply();
     mq.addEventListener?.('change', apply);
     return () => mq.removeEventListener?.('change', apply);
@@ -63,6 +76,17 @@ const TopChromeStrip = () => {
 
   if (!isTouch) return null;
 
+  // Höjd på toppremsan:
+  // - Standalone PWA: tunn (8px), status-bar färgas av apple-mobile-web-app-status-bar-style.
+  // - iPad/tablet i browser: tjock (48px) — täcker glipan mellan viewport och Safaris URL-bar
+  //   eftersom iPad Safari ofta ignorerar theme-color-uppdateringar vid SPA-nav.
+  // - Mobil i browser: 18px räcker — theme-color funkar pålitligt på iPhone Safari.
+  const stripHeight = isStandalone
+    ? 'calc(env(safe-area-inset-top, 0px) + 8px)'
+    : isTablet
+      ? 'calc(env(safe-area-inset-top, 0px) + 48px)'
+      : 'calc(env(safe-area-inset-top, 0px) + 18px)';
+
   return (
     <div
       aria-hidden="true"
@@ -71,11 +95,7 @@ const TopChromeStrip = () => {
         left: 0,
         right: 0,
         top: 0,
-        // Mer synlig top-remsa. Den ligger inne i viewporten (inte uppflyttad
-        // med negativ safe-area) så den faktiskt syns och byter färg som botten.
-        height: isStandalone
-          ? 'calc(env(safe-area-inset-top, 0px) + 8px)'
-          : 'calc(env(safe-area-inset-top, 0px) + 18px)',
+        height: stripHeight,
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',
