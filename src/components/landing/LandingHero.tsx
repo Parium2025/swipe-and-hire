@@ -29,6 +29,31 @@ const audienceOptions = [
 
 type AudienceRole = (typeof audienceOptions)[number]['role'];
 
+// Preload tunga assets för audience-sidan i bakgrunden så att navigering
+// från landing → /jobbsokare eller /arbetsgivare blir ögonblicklig.
+// Triggas på pointerenter/focus/touchstart över valkorten. Idempotent.
+const preloadedRoles = new Set<AudienceRole>();
+const preloadAudienceAssets = (role: AudienceRole) => {
+  if (typeof window === 'undefined') return;
+  if (preloadedRoles.has(role)) return;
+  preloadedRoles.add(role);
+  // Spline-scenen (samma url för båda rollerna)
+  try {
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.as = 'fetch';
+    link.href = '/spline/parium-phone-scene.splinecode';
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  } catch { /* no-op */ }
+  // Warm up gallery-bilder + spline-runtime + audience-data
+  Promise.all([
+    import('@splinetool/runtime').catch(() => null),
+    import('@/components/landing/audience/PinnedHorizontalGallery').catch(() => null),
+    import('@/components/landing/audience/content').catch(() => null),
+  ]).catch(() => undefined);
+};
+
 const AudienceCard = ({
   label,
   sublabel,
