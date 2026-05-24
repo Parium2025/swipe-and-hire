@@ -12,10 +12,12 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-const isAppleTouchDevice = () => {
+const isTouchOrHybridDevice = () => {
   if (typeof window === 'undefined') return false;
   const nav = window.navigator;
-  return /iPad|iPhone|iPod/.test(nav.userAgent) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
+  const isAppleTouch = /iPad|iPhone|iPod/.test(nav.userAgent) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
+  const hoverNone = window.matchMedia?.('(hover: none)').matches ?? false;
+  return isAppleTouch || hoverNone || nav.maxTouchPoints > 0;
 };
 
 const StaticPhoneFallback = ({ visible }: { visible: boolean }) => (
@@ -42,7 +44,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [forceStaticFallback] = useState(isAppleTouchDevice);
+  const [forceStaticFallback] = useState(isTouchOrHybridDevice);
   // På mobil/surfplatta visar vi en premiumram direkt under laddning så hero aldrig
   // upplevs tom om WebGL/Spline är långsamt eller stoppas av mobilbrowsern.
   // På desktop väntar vi fortfarande några sekunder för att undvika skeleton-flash.
