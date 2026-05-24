@@ -38,7 +38,7 @@ const PHONE_ASPECT = 9 / 19.5;
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   const heroIndexRef = useRef(0);
-  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; top: number; height: number; zoom: number; yOffset: number } | null>(null);
+  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; isPortraitTablet?: boolean; top: number; height: number; zoom: number; yOffset: number } | null>(null);
   const getVisibleAnchor = () => {
     const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const anchors = Array.from(document.querySelectorAll('[data-hero-phone-anchor]')) as HTMLElement[];
@@ -53,23 +53,40 @@ const FixedPhoneLayer = () => {
     const width = window.visualViewport?.width ?? window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
 
+    const isPortraitTablet = width >= 768 && width < 1180 && height > width;
+
+    if (isPortraitTablet) {
+      const anchor = getVisibleAnchor();
+      const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.52;
+      const gap = clamp(height * 0.032, 30, 44);
+      const bottomSafe = clamp(height * 0.065, 72, 98);
+      const top = Math.min(textBottom + gap, height - bottomSafe - 260);
+      const availableHeight = Math.max(240, height - top - bottomSafe);
+      const safeHeight = Math.min(availableHeight, 480);
+      const metrics = {
+        isDesktop: false,
+        isPortraitTablet: true,
+        top,
+        height: safeHeight,
+        zoom: clamp((safeHeight / 460) * 0.39, 0.30, 0.42),
+        yOffset: 0,
+      };
+      lastHeroMetricsRef.current = metrics;
+      return metrics;
+    }
+
     if (width >= 768) {
       const isCompactLaptop = height <= 820;
-      // iPad portrait (768–1023px bred, höjd > bredd): krymp telefonen så att
-      // den inte krockar med hero-rubriken. Liggande iPad funkar redan bra.
-      const isPortraitTablet = width < 1024 && height > width;
       const desktopTopPadding = isCompactLaptop ? 148 : 142;
       const desktopBottomPadding = isCompactLaptop ? 104 : 96;
       const safeCanvasHeight = Math.max(300, height - desktopTopPadding - desktopBottomPadding);
-      const phoneColumnWidth = isPortraitTablet
-        ? width * 0.17
-        : width >= 1280 ? width * 0.28 : width * 0.22;
+      const phoneColumnWidth = width >= 1280 ? width * 0.28 : width * 0.22;
       const widthFitHeight = (Math.min(phoneColumnWidth, 390) * 19.5) / 9;
-      const minH = isPortraitTablet ? 260 : width < 900 ? 330 : isCompactLaptop ? 300 : 390;
-      const maxH = isPortraitTablet ? 340 : width < 900 ? 420 : isCompactLaptop ? 430 : 570;
+      const minH = width < 900 ? 330 : isCompactLaptop ? 300 : 390;
+      const maxH = width < 900 ? 420 : isCompactLaptop ? 430 : 570;
       const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), minH, maxH);
       const viewportScale = clamp(width / 1440, 0.72, 1);
-      const yOffset = isPortraitTablet ? 8 : isCompactLaptop ? 12 : 26;
+      const yOffset = isCompactLaptop ? 12 : 26;
       const metrics = {
         isDesktop: true,
         top: 0,
@@ -267,11 +284,11 @@ const FixedPhoneLayer = () => {
       className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:items-center md:px-12 md:pb-16 md:pt-28 lg:px-24"
       aria-hidden="true"
     >
-      <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center md:grid md:h-auto md:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] md:items-start md:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+      <div className={`relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center ${phoneMetrics.isPortraitTablet ? '' : 'md:grid md:h-auto md:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] md:items-start md:gap-10 lg:grid-cols-2 lg:gap-16'} 2xl:max-w-[1440px]`}>
         <div aria-hidden className="hidden md:block" />
         <div
           data-phone-scroll-forward
-          className={`${shouldEnablePhoneInteraction ? 'pointer-events-auto' : 'pointer-events-none'} ${shouldRenderPhoneLayer ? 'opacity-100 visible' : 'opacity-0 invisible'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center transition-opacity duration-500 ease-out' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center transition-opacity duration-300 ease-out'}`}
+          className={`${shouldEnablePhoneInteraction ? 'pointer-events-auto' : 'pointer-events-none'} ${shouldRenderPhoneLayer ? 'visible opacity-100 transition-opacity duration-500 ease-out' : 'invisible opacity-0 transition-none'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center'}`}
           style={phoneMetrics.isDesktop
             ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
             : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
@@ -782,17 +799,18 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             </motion.div>
           </section>
 
-          {/* Desktop hero — aktiveras redan vid tablet-bredd så telefonen alltid får plats till höger och inte klipps vid mindre laptop-bredder. */}
-          <section className="relative hidden h-full items-center justify-center overflow-hidden pb-16 pt-28 md:flex">
+          {/* Desktop/tablet hero — portrait-tablet staplas så texten inte pressar/klipper Spline-telefonen. */}
+          <section className="relative hidden h-full items-center justify-center overflow-hidden pb-16 pt-28 md:flex md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28">
             <motion.div
               aria-hidden
               className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
               animate={{ opacity: [0.5, 0.75, 0.5] }}
               transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
             />
-            <div className="relative z-10 mx-auto grid w-full max-w-[1400px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 px-3 sm:px-5 md:px-6 lg:grid-cols-2 lg:gap-16 lg:px-24">
+            <div className="relative z-10 mx-auto grid w-full max-w-[1400px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 px-3 sm:px-5 md:px-6 md:[@media_(orientation:portrait)]:block lg:grid-cols-2 lg:gap-16 lg:px-24 lg:[@media_(orientation:portrait)]:grid">
               <motion.div
-                className="-translate-y-8 pt-8 text-left min-[1100px]:-translate-y-16 xl:pt-10"
+                data-hero-phone-anchor
+                className="-translate-y-8 pt-8 text-left md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-3xl md:[@media_(orientation:portrait)]:translate-y-0 md:[@media_(orientation:portrait)]:pt-0 md:[@media_(orientation:portrait)]:text-center min-[1100px]:-translate-y-16 xl:pt-10 lg:[@media_(orientation:portrait)]:mx-0 lg:[@media_(orientation:portrait)]:max-w-none lg:[@media_(orientation:portrait)]:-translate-y-8 lg:[@media_(orientation:portrait)]:pt-8 lg:[@media_(orientation:portrait)]:text-left"
                 style={{ paddingLeft: 'var(--logo-ring-offset, 26px)' }}
                 initial="hidden"
                 animate="visible"
