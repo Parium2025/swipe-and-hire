@@ -73,15 +73,28 @@ const TopChromeStrip = () => {
   }, []);
 
   const displayColor = forcedColor ?? color;
+  const shouldShowStrip = isTouch && !(isTablet && !isStandalone);
+  const contentOffset = isStandalone ? '8px' : '18px';
 
-  if (!isTouch || (isTablet && !isStandalone)) return null;
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    if (shouldShowStrip) {
+      root.style.setProperty('--top-chrome-content-offset', contentOffset);
+    } else {
+      root.style.removeProperty('--top-chrome-content-offset');
+    }
+    return () => {
+      root.style.removeProperty('--top-chrome-content-offset');
+    };
+  }, [shouldShowStrip, contentOffset]);
+
+  if (!shouldShowStrip) return null;
 
   // Höjd på toppremsan:
   // - Standalone PWA: tunn (8px), status-bar färgas av apple-mobile-web-app-status-bar-style.
   // - Mobil i browser: 18px räcker — theme-color funkar pålitligt på iPhone Safari.
-  const stripHeight = isStandalone
-    ? 'calc(env(safe-area-inset-top, 0px) + 8px)'
-    : 'calc(env(safe-area-inset-top, 0px) + 18px)';
+  const stripHeight = `calc(env(safe-area-inset-top, 0px) + ${contentOffset})`;
 
   return (
     <div
