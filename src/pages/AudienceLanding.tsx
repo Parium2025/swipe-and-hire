@@ -284,7 +284,7 @@ const FixedPhoneLayer = () => {
       className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:items-center md:px-12 md:pb-16 md:pt-28 lg:px-24"
       aria-hidden="true"
     >
-      <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center md:grid md:h-auto md:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] md:items-start md:gap-10 lg:grid-cols-2 lg:gap-16 2xl:max-w-[1440px]">
+      <div className={`relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center ${phoneMetrics.isPortraitTablet ? '' : 'md:grid md:h-auto md:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] md:items-start md:gap-10 lg:grid-cols-2 lg:gap-16'} 2xl:max-w-[1440px]`}>
         <div aria-hidden className="hidden md:block" />
         <div
           data-phone-scroll-forward
