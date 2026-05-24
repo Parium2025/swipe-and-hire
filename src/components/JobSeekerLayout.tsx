@@ -174,8 +174,8 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
       <div className="h-[100dvh] flex w-full overflow-hidden relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">
-          <header className="shrink-0 z-40 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3 [padding-top:var(--top-chrome-content-offset,0px)]" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10 [padding-top:var(--top-chrome-content-offset,0px)]">
+          <header className="shrink-0 z-40 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
             <div className="flex items-center">
               <LogoSidebarTrigger />
             </div>
@@ -210,7 +210,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
           </header>
           
           {/* Static decorative dots — no animations to avoid GPU contention with sidebar transition */}
-          <div className="absolute left-0 right-0 pointer-events-none z-20 [top:calc(3.5rem+var(--top-chrome-content-offset,0px))]" style={{ height: 'calc(100vh - 3.5rem)' }}>
+          <div className="absolute left-0 right-0 pointer-events-none z-20 top-14" style={{ height: 'calc(100vh - 3.5rem)' }}>
             <div className="absolute top-12 left-10 w-4 h-4 bg-secondary/30 rounded-full"></div>
             <div className="absolute top-24 left-16 w-2 h-2 bg-accent/40 rounded-full"></div>
             <div className="absolute top-16 left-20 w-3 h-3 bg-secondary/20 rounded-full"></div>
