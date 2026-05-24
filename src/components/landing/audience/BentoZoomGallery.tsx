@@ -217,6 +217,8 @@ const BentoZoomGallery = () => {
           overflow-x: auto;
           scroll-behavior: smooth;
           -webkit-overflow-scrolling: touch;
+          scroll-snap-type: x mandatory;
+          overscroll-behavior-x: contain;
           padding: clamp(20px, 4vw, 40px) max(16px, calc((100% - min(720px, 88vw)) / 2));
           scrollbar-width: none;
         }
@@ -224,6 +226,8 @@ const BentoZoomGallery = () => {
 
         .pcar-slide {
           flex: 0 0 min(720px, 88vw);
+          scroll-snap-align: center;
+          scroll-snap-stop: always;
           aspect-ratio: 4 / 5;
           position: relative;
           border-radius: clamp(20px, 2.4vw, 32px);
