@@ -12,14 +12,6 @@ interface SplinePhoneProps {
 
 const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
-const isTouchOrHybridDevice = () => {
-  if (typeof window === 'undefined') return false;
-  const nav = window.navigator;
-  const isAppleTouch = /iPad|iPhone|iPod/.test(nav.userAgent) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
-  const hoverNone = window.matchMedia?.('(hover: none)').matches ?? false;
-  return isAppleTouch || hoverNone || nav.maxTouchPoints > 0;
-};
-
 const StaticPhoneFallback = ({ visible }: { visible: boolean }) => (
   <div
     aria-hidden="true"
@@ -44,10 +36,6 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
 
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [forceStaticFallback] = useState(isTouchOrHybridDevice);
-  // På mobil/surfplatta visar vi en premiumram direkt under laddning så hero aldrig
-  // upplevs tom om WebGL/Spline är långsamt eller stoppas av mobilbrowsern.
-  // På desktop väntar vi fortfarande några sekunder för att undvika skeleton-flash.
   const [showFallback, setShowFallback] = useState(false);
 
   useEffect(() => {
@@ -65,20 +53,11 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
-    // Defer event-dispatch ett par frames så att FixedPhoneLayer (eller andra
-    // föräldrar) hinner registrera sin lyssnare innan vi signalerar "ready".
-    // Barn-effekter körs annars synkront FÖRE föräldereffekter, vilket på
-    // iPad/Apple touch ledde till att eventet missades och telefonen aldrig
-    // visades (man såg bara en tunn linje där canvas-kanten låg).
     const fire = () => window.dispatchEvent(new Event('parium:spline-ready'));
-    if (forceStaticFallback) {
-      const id = requestAnimationFrame(() => requestAnimationFrame(fire));
-      return () => cancelAnimationFrame(id);
-    }
     if (!reducedMotion && !hasError && !showFallback) return;
     const id = requestAnimationFrame(() => requestAnimationFrame(fire));
     return () => cancelAnimationFrame(id);
-  }, [forceStaticFallback, reducedMotion, hasError, showFallback]);
+  }, [reducedMotion, hasError, showFallback]);
 
   useEffect(() => {
     activeRef.current = active;
@@ -100,7 +79,6 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
   }, [zoom, isReady]);
 
   useEffect(() => {
-    if (forceStaticFallback) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -163,7 +141,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
       app?.dispose();
       appRef.current = null;
     };
-  }, [reducedMotion, forceStaticFallback]);
+  }, [reducedMotion]);
 
   if (hasError) {
     return (
@@ -173,7 +151,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
     );
   }
 
-  const showStaticFallback = forceStaticFallback || (!isReady && (instantFallback || showFallback));
+  const showStaticFallback = !isReady && (instantFallback || showFallback);
 
   return (
     <div
@@ -189,7 +167,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true, inst
         tabIndex={-1}
         className="relative h-full w-full cursor-grab bg-transparent outline-none transition-opacity duration-500 active:cursor-grabbing"
         draggable={false}
-        style={{ colorScheme: 'normal', opacity: isReady && !forceStaticFallback ? 1 : 0, touchAction: 'none' }}
+        style={{ colorScheme: 'normal', opacity: isReady ? 1 : 0, touchAction: 'none' }}
       />
     </div>
   );
