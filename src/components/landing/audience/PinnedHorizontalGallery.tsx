@@ -229,6 +229,7 @@ const PinnedHorizontalGallery = () => {
       window.removeEventListener('parium:gallery-leave', freeze);
       window.removeEventListener('parium:gallery-enter', thaw);
       window.removeEventListener('parium:gallery-reset-start', resetToStart);
+      coarseMq?.removeEventListener?.('change', updateTabletFlag);
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
     };
   }, []);
