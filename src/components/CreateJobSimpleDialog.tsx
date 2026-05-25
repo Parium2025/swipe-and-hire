@@ -493,7 +493,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
               </Button>
             </div>
 
-            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-5">
+            <div className="min-h-0 overflow-y-auto px-5 pt-5 pb-4 space-y-5">
               <p className="text-white text-center text-sm leading-relaxed px-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </p>
@@ -617,7 +617,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           </div>
                         )}
 
-                        <div className="flex-1 pb-2">
+                        <div className="flex-1">
                           <DropdownMenuItem
                             onSelect={() => {
                               setTemplateMenuOpen(false);
@@ -637,7 +637,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           {filteredTemplates.map((template) => (
                             <DropdownMenuItem
                               key={template.id}
-                              className="flex-col items-stretch p-0 border-b border-white/20 last:border-b-0 relative cursor-pointer transition-colors [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white rounded-none"
+                              className="flex-col items-stretch p-0 border-b border-white/20 relative cursor-pointer transition-colors [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white rounded-none"
                               onSelect={(e) => {
                                 const textEl = templateTextRefs.current[template.id] ?? null;
                                 const isTruncated = textEl
@@ -762,7 +762,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
               </div>
             </div>
 
-            <div className="flex gap-3 p-5 border-t border-white/20 flex-shrink-0 bg-background/10">
+            <div className="flex gap-3 px-5 py-4 border-t border-white/20 flex-shrink-0 bg-background/10">
               <Button 
                 onMouseDown={(e) => {
                   e.currentTarget.blur();
