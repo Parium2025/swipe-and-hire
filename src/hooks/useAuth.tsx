@@ -1350,8 +1350,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserRole(null);
       setOrganization(null);
       
-      // Vänta resterande tid för smooth övergång
-      await new Promise(resolve => setTimeout(resolve, 550));
+      // Rensa klart — ingen extra väntetid, splash-screent har redan visats
     } catch (error: any) {
       console.error('Sign out error:', error);
       // Även vid oväntat fel: rensa lokalt så användaren inte fastnar
