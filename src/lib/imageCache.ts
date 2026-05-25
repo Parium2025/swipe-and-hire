@@ -26,9 +26,11 @@ class ImageCache {
   private loading = new Map<string, Promise<CachedImage>>();
   private readonly CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 dagar
   // LRU-tak: håll minnesförbrukning under kontroll på low-end devices.
-  // Höjt från 200 → 500 för att skydda logos (5–20 KB styck) från att evictas
-  // mellan jobbilder (200–800 KB styck) i swipe-läget.
-  private readonly MAX_ENTRIES = 500;
+  // Höjt 500 → 1500 för att skala med employer-listor (500+ kandidater + jobb-
+  // bilder). Små assets (≤50 KB, t.ex. logos & thumbnails) skyddas separat
+  // av enforceLimit() så de aldrig evictas av stora jobb-/profilbilder.
+  // Worst case ~1500 × 30 KB ≈ 45 MB → tryggt på mobil.
+  private readonly MAX_ENTRIES = 1500;
   // Logos och små bilder skyddas från LRU-eviction så länge de är under denna gräns
   private readonly SMALL_ASSET_THRESHOLD_BYTES = 50 * 1024; // 50 KB
   
