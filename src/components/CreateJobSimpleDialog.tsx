@@ -628,7 +628,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                             }}
                             className="px-4 py-2.5 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
                           >
-                            <div className="flex flex-col min-w-0 w-full">
+                            <div className="flex flex-col items-center text-center min-w-0 w-full">
                               <span className="font-medium text-white">+ Skapa en ny mall</span>
                               <span className="text-sm text-white">Skapa en återanvändbar jobbmall</span>
                             </div>
@@ -746,7 +746,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
 
                 {/* Clear template selection */}
                 {selectedTemplate && (
-                  <div className="flex justify-center mt-1">
+                  <div className="flex justify-center mt-6 mb-4">
                     <button
                       type="button"
                       onClick={() => {
