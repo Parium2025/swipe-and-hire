@@ -1458,37 +1458,13 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      // 🔥 Hantera media-borttagning från storage innan vi uppdaterar DB
-      // Om media har raderats (state är tom men originalValues hade värde), radera från storage
-      if (originalValues.profileFileName && !profileImageUrl && !videoUrl) {
-        try {
-          await supabase.storage
-            .from('job-applications')
-            .remove([originalValues.profileFileName]);
-        } catch (error) {
-          console.error('Failed to delete profile file from storage:', error);
-        }
-      }
-      
-      if (originalValues.videoUrl && !videoUrl) {
-        try {
-          await supabase.storage
-            .from('job-applications')
-            .remove([originalValues.videoUrl]);
-        } catch (error) {
-          console.error('Failed to delete video from storage:', error);
-        }
-      }
-      
-      if (originalValues.coverFileName && !coverImageUrl) {
-        try {
-          await supabase.storage
-            .from('job-applications')
-            .remove([originalValues.coverFileName]);
-        } catch (error) {
-          console.error('Failed to delete cover image from storage:', error);
-        }
-      }
+      // 🔒 SNAPSHOT-SKYDD: När kandidaten tar bort sin profilbild/video/omslag
+      // från sin egen profil ska filen ligga kvar i storage så att tidigare
+      // ansökningar (snapshot vid ansökningstillfället) fortfarande visar
+      // rätt media för arbetsgivaren. Filen frånkopplas bara från profiles-
+      // tabellen (sätts till null nedan). Faktisk fil-radering sker endast
+      // vid total kontoradering (cascade via delete-user edge function).
+
 
       const updates: any = {
         first_name: firstName.trim() || null,
