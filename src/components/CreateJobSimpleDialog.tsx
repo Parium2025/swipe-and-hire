@@ -746,7 +746,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
 
                 {/* Clear template selection */}
                 {selectedTemplate && (
-                  <div className="flex justify-center mt-1">
+                  <div className="flex justify-center mt-6 mb-4">
                     <button
                       type="button"
                       onClick={() => {
