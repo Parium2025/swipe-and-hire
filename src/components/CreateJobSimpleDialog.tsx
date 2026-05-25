@@ -468,7 +468,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           hideClose
           forceMount
           overlayHidden={!open || !isWarmedUp}
-          className={"parium-panel max-w-none w-[min(92vw,440px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
+          className={"parium-panel max-w-none w-[min(92vw,440px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 !flex !flex-col !gap-0 border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
           style={{ display: (!open || !isWarmedUp) ? 'none' : undefined }}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
@@ -478,7 +478,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           </DialogHeader>
           <AnimatedBackground showBubbles={false} />
 
-          <div className="relative z-10 flex flex-col max-h-[75vh] sm:max-h-[80vh]">
+          <div className="relative z-10 flex min-h-0 flex-col h-auto">
             <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
               <h2 className="text-white text-lg font-semibold">Skapa jobb</h2>
               <Button
@@ -493,7 +493,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
               </Button>
             </div>
 
-            <div className="min-h-0 overflow-y-auto px-5 pt-5 pb-4 space-y-5">
+            <div className="min-h-0 overflow-y-auto px-5 pt-5 pb-3 space-y-5">
               <p className="text-white text-center text-sm leading-relaxed px-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </p>
@@ -617,7 +617,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           </div>
                         )}
 
-                        <div className="flex-1">
+                        <div>
                           <DropdownMenuItem
                             onSelect={() => {
                               setTemplateMenuOpen(false);
