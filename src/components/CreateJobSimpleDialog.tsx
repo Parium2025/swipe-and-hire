@@ -478,7 +478,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           </DialogHeader>
           <AnimatedBackground showBubbles={false} />
 
-          <div className="relative z-10 flex min-h-0 flex-col h-auto">
+          <div className="relative z-10 flex flex-col max-h-[75vh] sm:max-h-[80vh]">
             <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
               <h2 className="text-white text-lg font-semibold">Skapa jobb</h2>
               <Button
