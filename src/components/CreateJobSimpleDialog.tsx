@@ -617,7 +617,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           </div>
                         )}
 
-                        <div className="flex-1 pb-2">
+                        <div className="flex-1">
                           <DropdownMenuItem
                             onSelect={() => {
                               setTemplateMenuOpen(false);
