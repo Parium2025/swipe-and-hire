@@ -493,7 +493,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
               </Button>
             </div>
 
-            <div className="min-h-0 overflow-y-auto px-5 pt-5 pb-3 space-y-5">
+            <div className="min-h-0 overflow-y-auto px-5 pt-5 pb-4 space-y-5">
               <p className="text-white text-center text-sm leading-relaxed px-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </p>
