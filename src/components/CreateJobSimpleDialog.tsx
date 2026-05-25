@@ -762,7 +762,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
               </div>
             </div>
 
-            <div className="flex gap-3 p-5 border-t border-white/20 flex-shrink-0 bg-background/10">
+            <div className="flex gap-3 px-5 py-4 border-t border-white/20 flex-shrink-0 bg-background/10">
               <Button 
                 onMouseDown={(e) => {
                   e.currentTarget.blur();
