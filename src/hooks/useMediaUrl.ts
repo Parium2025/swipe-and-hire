@@ -16,12 +16,16 @@ const transformSig = (t?: ImageTransformOptions) =>
 const getCacheKey = (storagePath: string, mediaType: MediaType, transform?: ImageTransformOptions) => 
   `media_url_${mediaType}${transformSig(transform)}_${storagePath}`;
 
+// OBS: 'profile-video' utesluts medvetet. Videofiler är 5–50 MB styck och
+// att blob-cacha dem i bulk (25 kandidater + rolling window) skulle förbruka
+// hundratals MB och tränga ut profilbilder ur LRU-cachen. Videon streamas
+// istället via signed URL direkt i <video>-elementet (samma beteende för
+// användaren — ingen UI- eller funktionell skillnad).
 const shouldWarmBlobCache = (mediaType: MediaType) =>
   mediaType === 'profile-image' ||
   mediaType === 'cover-image' ||
   mediaType === 'company-logo' ||
-  mediaType === 'job-image' ||
-  mediaType === 'profile-video';
+  mediaType === 'job-image';
 
 function storeSignedUrlCache(
   cacheKey: string,
