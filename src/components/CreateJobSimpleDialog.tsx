@@ -637,7 +637,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                           {filteredTemplates.map((template) => (
                             <DropdownMenuItem
                               key={template.id}
-                              className="flex-col items-stretch p-0 border-b border-white/20 last:border-b-0 relative cursor-pointer transition-colors [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white rounded-none"
+                              className="flex-col items-stretch p-0 border-b border-white/20 relative cursor-pointer transition-colors [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white rounded-none"
                               onSelect={(e) => {
                                 const textEl = templateTextRefs.current[template.id] ?? null;
                                 const isTruncated = textEl
