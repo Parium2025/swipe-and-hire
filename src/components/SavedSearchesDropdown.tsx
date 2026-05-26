@@ -138,7 +138,7 @@ export function SavedSearchesDropdown({
           </div>
           
           <TooltipProvider delayDuration={0} skipDelayDuration={0}>
-          <div className="max-h-[50vh] overflow-y-auto overscroll-contain">
+          <div className="max-h-[50vh] overflow-y-auto overscroll-contain"  style={{ height: 'auto' }}>
             {savedSearches.map((search) => {
               const showingPreview = isPreview(search.id);
               const tooltipOpen = isTouch 
