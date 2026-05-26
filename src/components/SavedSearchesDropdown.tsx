@@ -142,10 +142,10 @@ export function SavedSearchesDropdown({
           <TooltipProvider delayDuration={0} skipDelayDuration={0}>
           <div
             className={cn(
-              "h-auto overflow-y-auto overscroll-contain",
-              shouldScrollSavedSearches && "max-h-[50vh]"
+              shouldScrollSavedSearches
+                ? "max-h-[50vh] overflow-y-auto overscroll-contain"
+                : ""
             )}
-            style={{ maxHeight: shouldScrollSavedSearches ? undefined : 'none' }}
           >
             {savedSearches.map((search) => {
               const showingPreview = isPreview(search.id);
