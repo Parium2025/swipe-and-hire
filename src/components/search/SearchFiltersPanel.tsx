@@ -180,7 +180,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                 <ChevronDown className="h-3.5 w-3.5" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" side="bottom" avoidCollisions={false} className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[160px] max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch]">
+            <DropdownMenuContent align="center" side="bottom" avoidCollisions={false} className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[160px]">
               {([
                 { value: '12h' as TimeFilter, label: '12 timmar' },
                 { value: '24h' as TimeFilter, label: '24 timmar' },
