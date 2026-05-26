@@ -14,7 +14,7 @@ export const JobViewBenefits = memo(function JobViewBenefits({ benefits }: JobVi
       <h2 className="text-section-title mb-3">Förmåner</h2>
       <div className="flex flex-wrap gap-2">
         {benefits.map((benefit, index) => (
-          <Badge key={index} variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
+          <Badge key={index} variant="secondary" className="text-[13px] sm:text-xs bg-white/20 text-white border-white/30">
             {getBenefitLabel(benefit)}
           </Badge>
         ))}

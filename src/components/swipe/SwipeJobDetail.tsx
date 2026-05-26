@@ -61,14 +61,14 @@ function DescriptionSection({ text }: { text: string }) {
 
   return (
     <div className="bg-white/10 rounded-lg p-4">
-      <h3 className="text-white font-semibold text-base mb-3">Om tjänsten</h3>
-      <p className={`text-white text-sm leading-relaxed whitespace-pre-wrap ${!expanded && needsTruncation ? 'line-clamp-6' : ''}`}>
+      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Om tjänsten</h3>
+      <p className={`text-white text-[15px] sm:text-sm leading-[1.6] sm:leading-relaxed whitespace-pre-wrap ${!expanded && needsTruncation ? 'line-clamp-6' : ''}`}>
         {text}
       </p>
       {needsTruncation && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-2 text-sm font-medium text-white hover:text-white/80 transition-colors"
+          className="mt-2 text-[15px] sm:text-sm font-medium text-white hover:text-white/80 transition-colors"
         >
           {expanded ? 'Visa mindre' : 'Visa mer'}
         </button>
@@ -346,7 +346,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
               onTouchCancel={handleTouchEnd}
             >
               <div className="px-1 pr-12 pb-1">
-                <div className="flex items-start gap-2 mt-1 text-white text-sm min-w-0">
+                <div className="flex items-start gap-2 mt-1 text-white text-[15px] sm:text-sm min-w-0">
                   <TruncatedText
                     text={displayCompanyName}
                     className="font-medium min-w-0 max-w-full"
@@ -395,32 +395,32 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
 
                   {/* 2. Detaljer om tjänsten */}
                   <div className="bg-white/10 rounded-lg p-4 overflow-hidden">
-                    <h3 className="text-white font-semibold text-base mb-3">Detaljer om tjänsten</h3>
+                    <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Detaljer om tjänsten</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
                       {detail.employment_type && (
-                        <div className="flex text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Anställning:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Anställning:</span>
                           <span className="font-medium">{getEmploymentTypeLabel(detail.employment_type)}</span>
                         </div>
                       )}
 
                       {detail.work_schedule && (
-                        <div className="flex text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Schema:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Schema:</span>
                           <span className="font-medium">{cap(detail.work_schedule)}</span>
                         </div>
                       )}
 
                       {job.location && (
-                        <div className="flex text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Ort:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Ort:</span>
                           <span className="font-medium">{cap(job.location)}</span>
                         </div>
                       )}
 
                       {displayCompanyName && (
-                        <div className="flex text-white text-sm min-w-0">
-                          <span className="shrink-0 w-[110px]">Bolagsnamn:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm min-w-0">
+                          <span className="shrink-0 w-[110px] text-white/75">Bolagsnamn:</span>
                           <TruncatedText
                             text={cap(displayCompanyName)}
                             className="font-medium min-w-0 flex-1 [overflow-wrap:anywhere]"
@@ -436,8 +436,8 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                       )}
 
                       {detail.workplace_address && (
-                        <div className="flex text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Adress:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Adress:</span>
                           <span className="font-medium">
                             {detail.workplace_address}
                             {detail.workplace_postal_code && `, ${detail.workplace_postal_code}`}
@@ -448,8 +448,8 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                       )}
 
                       {detail.workplace_city && detail.workplace_city !== job.location && !detail.workplace_address && (
-                        <div className="flex text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Stad:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Stad:</span>
                           <span className="font-medium">
                             {detail.workplace_city}
                             {detail.workplace_municipality && detail.workplace_municipality !== detail.workplace_city ? `, ${detail.workplace_municipality}` : ''}
@@ -459,62 +459,62 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                       )}
 
                       {detail.workplace_municipality && !detail.workplace_address && (!detail.workplace_city || detail.workplace_city === job.location) && (
-                        <div className="flex text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Kommun:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Kommun:</span>
                           <span className="font-medium">{detail.workplace_municipality}</span>
                         </div>
                       )}
 
                       {detail.work_location_type && (
-                        <div className="flex text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Platstyp:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Platstyp:</span>
                           <span className="font-medium">{getWorkLocationLabel(detail.work_location_type)}</span>
                         </div>
                       )}
 
                       {detail.remote_work_possible && detail.remote_work_possible !== 'no' && (
-                        <div className="flex text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Distans:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Distans:</span>
                           <span className="font-medium">{getRemoteWorkLabel(detail.remote_work_possible)}</span>
                         </div>
                       )}
 
                       {(detail.work_start_time || detail.work_end_time) && (
-                        <div className="flex items-center text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Arbetstid:</span>
+                        <div className="flex items-center text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Arbetstid:</span>
                           <span className="font-medium">{detail.work_start_time} – {detail.work_end_time}</span>
                         </div>
                       )}
 
                       {detail.positions_count && detail.positions_count > 1 && (
-                        <div className="flex text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Antal tjänster:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Antal tjänster:</span>
                           <span className="font-medium">{detail.positions_count} st</span>
                         </div>
                       )}
 
                       {detail.occupation && (
-                        <div className="flex text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Yrke:</span>
+                        <div className="flex text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Yrke:</span>
                           <span className="font-medium">{cap(detail.occupation)}</span>
                         </div>
                       )}
 
                       {formatSalary(detail.salary_min, detail.salary_max, detail.salary_type) && (
-                        <div className="flex items-center text-white text-sm sm:col-span-2 pt-1">
-                          <span className="shrink-0 w-[110px]">Lön:</span>
+                        <div className="flex items-center text-white text-[15px] sm:text-sm sm:col-span-2 pt-1">
+                          <span className="shrink-0 w-[110px] text-white/75">Lön:</span>
                           <span className="font-semibold">
                             {formatSalary(detail.salary_min, detail.salary_max, detail.salary_type)}
                             {detail.salary_type && (
-                              <span className="text-white/70 ml-1.5 text-xs">({getSalaryTypeLabel(detail.salary_type)})</span>
+                              <span className="text-white/70 ml-1.5 text-[13px] sm:text-xs">({getSalaryTypeLabel(detail.salary_type)})</span>
                             )}
                           </span>
                         </div>
                       )}
 
                       {!formatSalary(detail.salary_min, detail.salary_max, detail.salary_type) && detail.salary_transparency && (
-                        <div className="flex items-center text-white text-sm">
-                          <span className="shrink-0 w-[110px]">Lön:</span>
+                        <div className="flex items-center text-white text-[15px] sm:text-sm">
+                          <span className="shrink-0 w-[110px] text-white/75">Lön:</span>
                           <span className="font-medium">{getSalaryTransparencyLabel(detail.salary_transparency)}</span>
                         </div>
                       )}
@@ -525,10 +525,10 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   {/* 3. Förmåner */}
                   {detail.benefits && detail.benefits.length > 0 && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-base mb-3">Förmåner</h3>
+                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Förmåner</h3>
                       <div className="flex flex-wrap gap-2">
                         {detail.benefits.map((benefit, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
+                          <Badge key={index} variant="secondary" className="text-[13px] sm:text-xs bg-white/20 text-white border-white/30">
                             {getBenefitLabel(benefit)}
                           </Badge>
                         ))}
@@ -539,28 +539,28 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   {/* 4. Pitch */}
                   {detail.pitch && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-base mb-3">Varför jobba hos oss?</h3>
-                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">{detail.pitch}</p>
+                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Varför jobba hos oss?</h3>
+                      <p className="text-white text-[15px] sm:text-sm leading-[1.6] sm:leading-relaxed whitespace-pre-wrap">{detail.pitch}</p>
                     </div>
                   )}
 
                   {/* 5. Krav */}
                   {detail.requirements && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-base mb-3">Krav & kvalifikationer</h3>
-                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">{detail.requirements}</p>
+                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Krav & kvalifikationer</h3>
+                      <p className="text-white text-[15px] sm:text-sm leading-[1.6] sm:leading-relaxed whitespace-pre-wrap">{detail.requirements}</p>
                     </div>
                   )}
 
                   {/* 6. Ansökningsfrågor */}
                   {questions.length > 0 && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-base mb-3">Ansökningsfrågor</h3>
+                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Ansökningsfrågor</h3>
                       {!hasApplied && (
-                        <p className="text-white text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
+                        <p className="text-white text-[13px] sm:text-xs mb-3">Dessa frågor besvaras när du ansöker</p>
                       )}
                       {hasApplied && myAnswers && (
-                        <p className="text-white text-xs mb-3">Dina svar</p>
+                        <p className="text-white text-[13px] sm:text-xs mb-3">Dina svar</p>
                       )}
                       <div className="space-y-3">
                         {questions.map((q, i) => {
@@ -572,14 +572,14 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                           
                           return (
                             <div key={q.id} className="flex items-start gap-2">
-                              <span className="text-white text-sm font-medium shrink-0">{i + 1}.</span>
+                              <span className="text-white text-[15px] sm:text-sm font-medium shrink-0">{i + 1}.</span>
                               <div className="min-w-0 flex-1">
-                                <p className="text-white text-sm font-medium break-words">{q.question_text}</p>
+                                <p className="text-white text-[15px] sm:text-sm font-medium break-words">{q.question_text}</p>
                                 {hasApplied && displayAnswer ? (
-                                  <p className="text-white text-sm mt-1 break-words">{String(displayAnswer)}</p>
+                                  <p className="text-white text-[15px] sm:text-sm mt-1 break-words">{String(displayAnswer)}</p>
                                 ) : (
                                   q.is_required && (
-                                    <span className="text-white text-xs">Obligatorisk</span>
+                                    <span className="text-white/75 text-[13px] sm:text-xs">Obligatorisk</span>
                                   )
                                 )}
                               </div>
@@ -593,16 +593,16 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   {/* 7. Ansökningsinstruktioner */}
                   {detail.application_instructions && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-base mb-3">Ansökningsinstruktioner</h3>
-                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">{detail.application_instructions}</p>
+                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Ansökningsinstruktioner</h3>
+                      <p className="text-white text-[15px] sm:text-sm leading-[1.6] sm:leading-relaxed whitespace-pre-wrap">{detail.application_instructions}</p>
                     </div>
                   )}
 
                   {/* 8. Kontakt */}
                   {detail.contact_email && (
                     <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-base mb-3">Kontakt</h3>
-                      <p className="text-white text-sm break-all">{detail.contact_email}</p>
+                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Kontakt</h3>
+                      <p className="text-white text-[15px] sm:text-sm break-all">{detail.contact_email}</p>
                     </div>
                   )}
                 </>

@@ -50,26 +50,26 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
       <h2 className="text-section-title mb-3">Detaljer om tjänsten</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
         {employmentType && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Anställning:</span>
+          <div className="flex text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Anställning:</span>
             <span className="font-medium">{getEmploymentTypeLabel(employmentType)}</span>
           </div>
         )}
         {workSchedule && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Schema:</span>
+          <div className="flex text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Schema:</span>
             <span className="font-medium">{cap(workSchedule)}</span>
           </div>
         )}
         {location && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Ort:</span>
+          <div className="flex text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Ort:</span>
             <span className="font-medium">{cap(location)}</span>
           </div>
         )}
         {workplaceName && (
-          <div className="flex text-white text-sm min-w-0">
-            <span className="shrink-0 w-[110px]">Bolagsnamn:</span>
+          <div className="flex text-white text-[15px] sm:text-sm min-w-0">
+            <span className="shrink-0 w-[110px] text-white/75">Bolagsnamn:</span>
             <TruncatedText
               text={cap(workplaceName)}
               className="font-medium min-w-0 flex-1 [overflow-wrap:anywhere]"
@@ -83,8 +83,8 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
           </div>
         )}
         {workplaceAddress && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Adress:</span>
+          <div className="flex text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Adress:</span>
             <span className="font-medium">
               {workplaceAddress}
               {workplacePostalCode && `, ${workplacePostalCode}`}
@@ -94,8 +94,8 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
           </div>
         )}
         {workplaceCity && workplaceCity !== location && !workplaceAddress && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Stad:</span>
+          <div className="flex text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Stad:</span>
             <span className="font-medium">
               {workplaceCity}
               {workplaceMunicipality && workplaceMunicipality !== workplaceCity ? `, ${workplaceMunicipality}` : ''}
@@ -104,59 +104,59 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
           </div>
         )}
         {workplaceMunicipality && !workplaceAddress && (!workplaceCity || workplaceCity === location) && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Kommun:</span>
+          <div className="flex text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Kommun:</span>
             <span className="font-medium">{workplaceMunicipality}</span>
           </div>
         )}
         {workLocationType && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Platstyp:</span>
+          <div className="flex text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Platstyp:</span>
             <span className="font-medium">{getWorkLocationLabel(workLocationType)}</span>
           </div>
         )}
         {remoteWorkPossible && remoteWorkPossible !== 'no' && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Distans:</span>
+          <div className="flex text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Distans:</span>
             <span className="font-medium">{getRemoteWorkLabel(remoteWorkPossible)}</span>
           </div>
         )}
         {(workStartTime || workEndTime) && (
-          <div className="flex items-center text-white text-sm">
-            <span className="shrink-0 w-[110px]">Arbetstid:</span>
+          <div className="flex items-center text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Arbetstid:</span>
             <span className="font-medium">{workStartTime} – {workEndTime}</span>
           </div>
         )}
-        <div className="flex text-white text-sm">
-          <span className="shrink-0 w-[110px]">Antal tjänster:</span>
+        <div className="flex text-white text-[15px] sm:text-sm">
+          <span className="shrink-0 w-[110px] text-white/75">Antal tjänster:</span>
           <span className="font-medium">{(positionsCount || 1)} st</span>
         </div>
         {occupation && (
-          <div className="flex text-white text-sm">
-            <span className="shrink-0 w-[110px]">Yrke:</span>
+          <div className="flex text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Yrke:</span>
             <span className="font-medium">{cap(occupation)}</span>
           </div>
         )}
         {formatSalary(salaryMin, salaryMax, salaryType) && (
-          <div className="flex items-center text-white text-sm sm:col-span-2 pt-1">
-            <span className="shrink-0 w-[110px]">Lön:</span>
+          <div className="flex items-center text-white text-[15px] sm:text-sm sm:col-span-2 pt-1">
+            <span className="shrink-0 w-[110px] text-white/75">Lön:</span>
             <span className="font-semibold">
               {formatSalary(salaryMin, salaryMax, salaryType)}
               {salaryType && (
-                <span className="text-white/70 ml-1.5 text-xs">({getSalaryTypeLabel(salaryType)})</span>
+                <span className="text-white/70 ml-1.5 text-[13px] sm:text-xs">({getSalaryTypeLabel(salaryType)})</span>
               )}
             </span>
           </div>
         )}
         {!formatSalary(salaryMin, salaryMax, salaryType) && salaryTransparency && (
-          <div className="flex items-center text-white text-sm">
-            <span className="shrink-0 w-[110px]">Lön:</span>
+          <div className="flex items-center text-white text-[15px] sm:text-sm">
+            <span className="shrink-0 w-[110px] text-white/75">Lön:</span>
             <span className="font-medium">{getSalaryTransparencyLabel(salaryTransparency)}</span>
           </div>
         )}
         {contactEmail && (
-          <div className="flex text-white text-sm sm:col-span-2 pt-1">
-            <span className="shrink-0 w-[110px]">Kontakt:</span>
+          <div className="flex text-white text-[15px] sm:text-sm sm:col-span-2 pt-1">
+            <span className="shrink-0 w-[110px] text-white/75">Kontakt:</span>
             <a 
               href={`mailto:${contactEmail}?subject=Fråga om tjänsten: ${jobTitle}`}
               className="font-medium underline underline-offset-2 hover:text-white/80 transition-colors"
