@@ -19,8 +19,10 @@ html {
   scrollbar-gutter: stable both-edges;
   overflow-x: hidden !important;
   max-width: 100vw !important;
-  /* Fluid base font-size: scales continuously from 14px (320px) → 16px (768px) → 18px (1440px+) */
-  font-size: clamp(0.875rem, 0.8rem + 0.25vw, 1.125rem);
+  /* Fluid base font-size: scales continuously from 15.5px (320px) → 16px (768px) → 18px (1440px+)
+     Mobile-min höjt från 14px → 15.5px för premium läsbarhet (Spotify/Apple-nivå).
+     Alla rem-baserade Tailwind-storlekar (text-xs, text-sm, text-base...) lyfts proportionellt på små skärmar. */
+  font-size: clamp(0.96875rem, 0.93rem + 0.18vw, 1.125rem);
   /* Smooth scrolling för hela sidan */
   scroll-behavior: smooth;
   /* iOS momentum scrolling */
