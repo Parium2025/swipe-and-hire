@@ -346,7 +346,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
               onTouchCancel={handleTouchEnd}
             >
               <div className="px-1 pr-12 pb-1">
-                <div className="flex items-start gap-2 mt-1 text-white text-sm min-w-0">
+                <div className="flex items-start gap-2 mt-1 text-white text-[15px] sm:text-sm min-w-0">
                   <TruncatedText
                     text={displayCompanyName}
                     className="font-medium min-w-0 max-w-full"
