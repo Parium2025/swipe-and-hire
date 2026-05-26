@@ -1,4 +1,5 @@
 import { memo, useMemo, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 
 interface WeatherEffectsProps {
