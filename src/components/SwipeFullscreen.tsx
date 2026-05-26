@@ -237,7 +237,8 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
       if (scrollEndTimerRef.current) clearTimeout(scrollEndTimerRef.current);
 
       scrollEndTimerRef.current = setTimeout(() => {
-        const st = scrollRef.current?.scrollTop;
+        const container = scrollRef.current;
+        const st = container?.scrollTop;
         if (st == null || jobs.length === 0) return;
 
         const endTop = getEndStateScrollTop();
@@ -248,6 +249,16 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
 
         if (hasScrolledIntoEnd) {
           triggerEndBounce();
+        } else {
+          // Snap recovery: iOS Safari occasionally lets users settle between
+          // slides despite snap-mandatory. Force-align to the nearest slide.
+          const nearestEl = slideRefs.current[currentIndexRef.current];
+          if (container && nearestEl) {
+            const targetTop = nearestEl.offsetTop;
+            if (Math.abs(targetTop - st) > 2) {
+              container.scrollTo({ top: targetTop, behavior: 'smooth' });
+            }
+          }
         }
 
         scrollEndTimerRef.current = null;
