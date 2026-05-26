@@ -37,11 +37,11 @@ export const JobSeekerNotesCard = memo(() => {
 
         <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-1">
-              <div className="p-2 rounded-xl bg-white/10">
-                <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
-              </div>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="p-2 rounded-xl bg-white/10 flex-shrink-0">
+              <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
+            </div>
+            <div className="flex-1 flex items-center justify-center gap-1 min-w-0">
               <button
                 onClick={() => setIsExpanded(true)}
                 className="p-1 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
