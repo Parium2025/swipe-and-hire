@@ -84,7 +84,7 @@ const ToolbarButton = memo(({
             className={cn(
               "flex-shrink-0 flex items-center justify-center rounded-xl caret-transparent",
               "transition-[background-color,box-shadow,transform] duration-150",
-              large ? "w-11 h-11" : compact ? "p-1" : "w-8 h-8",
+              large ? "w-9 h-9" : compact ? "p-1" : "w-8 h-8",
               "bg-transparent md:hover:bg-white/20",
               "active:scale-90",
               "disabled:opacity-30 disabled:cursor-not-allowed",
@@ -163,7 +163,7 @@ export const NotesToolbar = ({ editor, className, compact = false, large = false
   if (!editor) return null;
 
   return (
-    <div className={cn("flex items-center flex-nowrap", compact ? "gap-0" : "gap-1", className)}>
+    <div className={cn("flex items-center flex-nowrap min-w-0 overflow-hidden", compact ? "gap-0" : "gap-0.5 sm:gap-1", className)}>
       <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} large={large} buttonId="bold" {...tapProps} />
       <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} large={large} buttonId="italic" {...tapProps} />
       <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} large={large} buttonId="strike" {...tapProps} />
