@@ -39,14 +39,14 @@ export const JobSeekerNotesCard = memo(() => {
           {/* Header */}
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-1">
-              <div className="p-1.5 sm:p-2 rounded-xl bg-white/10">
-                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-white" strokeWidth={1.5} />
+              <div className="p-2 rounded-xl bg-white/10">
+                <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
               </div>
               <button
                 onClick={() => setIsExpanded(true)}
-                className="p-1.5 sm:p-2 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
+                className="p-1 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
               >
-                <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                <Maximize2 className="h-4 w-4 text-white" />
               </button>
               <div className="border-l border-white/15 h-5 mx-px" />
               <NotesToolbar editor={notesEditor} compact />
