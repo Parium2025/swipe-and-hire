@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import * as Sentry from '@sentry/react'
+
 import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
@@ -43,21 +43,6 @@ const preloadAndDecodeImage = async (src: string, id: string) => {
   }
 };
 
-// Initialize Sentry for error tracking in production
-if (import.meta.env.PROD) {
-  Sentry.init({
-    dsn: "https://bc7456823e992b35ceb78455f6b6ff24@o4510693219237888.ingest.de.sentry.io/4510693244207184",
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration(),
-    ],
-    // Performance monitoring - capture 10% of transactions
-    tracesSampleRate: 0.1,
-    // Session replay - capture 10% of sessions, 100% on error
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
-  });
-}
 
 function redirectAuthTokensIfNeeded() {
   if (typeof window === 'undefined') return false;

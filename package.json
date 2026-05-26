@@ -57,7 +57,6 @@
     "@radix-ui/react-visually-hidden": "^1.2.4",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18",
-    "@sentry/react": "^10.32.1",
     "@splinetool/react-spline": "^4.1.0",
     "@splinetool/runtime": "^1.12.90",
     "@supabase/supabase-js": "^2.83.0",
