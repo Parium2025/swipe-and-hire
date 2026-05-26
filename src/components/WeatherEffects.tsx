@@ -1,5 +1,4 @@
 import { memo, useMemo, useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 
 interface WeatherEffectsProps {
@@ -22,15 +21,14 @@ const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: Weat
 
   const showStars = isEvening && (weatherCode === 0 || weatherCode === 1 || weatherCode === 2);
 
-  return createPortal(
+  return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {showStars && <StarsEffect />}
       {effectType === 'cloudy' && <CloudyEffect />}
       {effectType === 'rain' && <RainEffect />}
       {effectType === 'snow' && <SnowEffect />}
       {effectType === 'thunder' && <ThunderEffect />}
-    </div>,
-    document.body
+    </div>
   );
 });
 
