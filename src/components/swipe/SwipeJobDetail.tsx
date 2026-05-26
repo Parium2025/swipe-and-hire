@@ -394,36 +394,36 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   )}
 
                   {/* 2. Detaljer om tjänsten */}
-                  <div className="bg-white/10 rounded-lg p-4">
+                  <div className="bg-white/10 rounded-lg p-4 overflow-hidden">
                     <h3 className="text-white font-semibold text-base mb-3">Detaljer om tjänsten</h3>
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
                       {detail.employment_type && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Anställning:</span>
+                        <div className="flex text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Anställning:</span>
                           <span className="font-medium">{getEmploymentTypeLabel(detail.employment_type)}</span>
                         </div>
                       )}
 
                       {detail.work_schedule && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Schema:</span>
+                        <div className="flex text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Schema:</span>
                           <span className="font-medium">{cap(detail.work_schedule)}</span>
                         </div>
                       )}
 
                       {job.location && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Ort:</span>
+                        <div className="flex text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Ort:</span>
                           <span className="font-medium">{cap(job.location)}</span>
                         </div>
                       )}
 
                       {displayCompanyName && (
-                        <div className="text-white text-sm min-w-0">
-                          <span className="mr-1.5">Bolagsnamn:</span>
+                        <div className="flex text-white text-sm min-w-0">
+                          <span className="shrink-0 w-[110px]">Bolagsnamn:</span>
                           <TruncatedText
                             text={cap(displayCompanyName)}
-                            className="font-medium inline-block align-bottom min-w-0 max-w-full"
+                            className="font-medium min-w-0 flex-1 [overflow-wrap:anywhere]"
                             tooltipSide="top"
                             style={{
                               display: '-webkit-box',
@@ -436,8 +436,8 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                       )}
 
                       {detail.workplace_address && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Adress:</span>
+                        <div className="flex text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Adress:</span>
                           <span className="font-medium">
                             {detail.workplace_address}
                             {detail.workplace_postal_code && `, ${detail.workplace_postal_code}`}
@@ -448,8 +448,8 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                       )}
 
                       {detail.workplace_city && detail.workplace_city !== job.location && !detail.workplace_address && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Stad:</span>
+                        <div className="flex text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Stad:</span>
                           <span className="font-medium">
                             {detail.workplace_city}
                             {detail.workplace_municipality && detail.workplace_municipality !== detail.workplace_city ? `, ${detail.workplace_municipality}` : ''}
@@ -459,65 +459,68 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                       )}
 
                       {detail.workplace_municipality && !detail.workplace_address && (!detail.workplace_city || detail.workplace_city === job.location) && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Kommun:</span>
+                        <div className="flex text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Kommun:</span>
                           <span className="font-medium">{detail.workplace_municipality}</span>
                         </div>
                       )}
 
                       {detail.work_location_type && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Platstyp:</span>
+                        <div className="flex text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Platstyp:</span>
                           <span className="font-medium">{getWorkLocationLabel(detail.work_location_type)}</span>
                         </div>
                       )}
 
                       {detail.remote_work_possible && detail.remote_work_possible !== 'no' && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Distans:</span>
+                        <div className="flex text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Distans:</span>
                           <span className="font-medium">{getRemoteWorkLabel(detail.remote_work_possible)}</span>
                         </div>
                       )}
 
                       {(detail.work_start_time || detail.work_end_time) && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Arbetstid:</span>
+                        <div className="flex items-center text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Arbetstid:</span>
                           <span className="font-medium">{detail.work_start_time} – {detail.work_end_time}</span>
                         </div>
                       )}
 
                       {detail.positions_count && detail.positions_count > 1 && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Antal tjänster:</span>
+                        <div className="flex text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Antal tjänster:</span>
                           <span className="font-medium">{detail.positions_count} st</span>
                         </div>
                       )}
 
                       {detail.occupation && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Yrke:</span>
+                        <div className="flex text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Yrke:</span>
                           <span className="font-medium">{cap(detail.occupation)}</span>
                         </div>
                       )}
 
                       {formatSalary(detail.salary_min, detail.salary_max, detail.salary_type) && (
-                        <div className="text-white text-sm col-span-2 pt-1">
-                          <span className="mr-1.5">Lön:</span>
-                          <span className="font-semibold">{formatSalary(detail.salary_min, detail.salary_max, detail.salary_type)}</span>
-                          {detail.salary_type && (
-                            <span className="text-white ml-1.5 text-xs">({getSalaryTypeLabel(detail.salary_type)})</span>
-                          )}
+                        <div className="flex items-center text-white text-sm sm:col-span-2 pt-1">
+                          <span className="shrink-0 w-[110px]">Lön:</span>
+                          <span className="font-semibold">
+                            {formatSalary(detail.salary_min, detail.salary_max, detail.salary_type)}
+                            {detail.salary_type && (
+                              <span className="text-white/70 ml-1.5 text-xs">({getSalaryTypeLabel(detail.salary_type)})</span>
+                            )}
+                          </span>
                         </div>
                       )}
 
                       {!formatSalary(detail.salary_min, detail.salary_max, detail.salary_type) && detail.salary_transparency && (
-                        <div className="text-white text-sm">
-                          <span className="mr-1.5">Lön:</span>
+                        <div className="flex items-center text-white text-sm">
+                          <span className="shrink-0 w-[110px]">Lön:</span>
                           <span className="font-medium">{getSalaryTransparencyLabel(detail.salary_transparency)}</span>
                         </div>
                       )}
                     </div>
                   </div>
+
 
                   {/* 3. Förmåner */}
                   {detail.benefits && detail.benefits.length > 0 && (
