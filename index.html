@@ -181,7 +181,7 @@
     <link rel="preload" as="image" href="/parium-auth-logo.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
     <!-- Preload NASA Earth day image for Globe component -->
-    <link rel="preload" as="image" href="/images/earth-day.jpg" type="image/jpeg" fetchpriority="low" />
+    <link rel="preload" as="image" href="/images/earth-day.webp" type="image/webp" fetchpriority="low" />
     <!-- 🎯 Route-scoped preloads: undviker att slösa bandbredd genom att ladda
          landing-videon på /jobbsokare eller Spline-scenen på /. Detta gör att
          varje rutt får just ihjäl-snabb LCP utan att betala för andras assets. -->
@@ -197,7 +197,7 @@
           };
           if (path === '/' || path === '') {
             add({ rel: 'preload', as: 'image', href: '/hero-video-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
-            add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
             var isLarge = window.matchMedia && window.matchMedia('(min-width: 1800px)').matches;
             add({ rel: 'preload', as: 'video', href: isLarge ? '/hero-video.mp4' : '/hero-video-720.mp4', type: 'video/mp4', fetchpriority: 'high' });
           } else if (path === '/jobbsokare' || path === '/arbetsgivare') {
@@ -484,7 +484,7 @@
     
     
     <!-- Hidden hero preloader for Safari/iOS -->
-    <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
+    <img src="/assets/hero-woman-left-hand-verified.webp" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
     <div id="root"></div>
     <script>
       (function() {
