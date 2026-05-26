@@ -65,5 +65,5 @@ export function useLenisOnElement(selector: string, enabled = true, contentSelec
       cancelAnimationFrame(rafId);
       lenis?.destroy();
     };
-  }, [selector, enabled]);
+  }, [selector, enabled, contentSelector]);
 }
