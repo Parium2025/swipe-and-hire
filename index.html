@@ -174,7 +174,9 @@
     <!-- Preconnect to Spline CDN (3D scene assets) -->
     <link rel="preconnect" href="https://prod.spline.design" crossorigin>
     <link rel="dns-prefetch" href="https://prod.spline.design">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Preload den vanligaste vikten (400) som WOFF2 så LCP-texten renderas utan FOIT-flimmer -->
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2" crossorigin />
     <!-- Preload Parium logos for instant rendering (logo-rings preloadas via main.tsx med hashad asset-URL) -->
     <link rel="preload" as="image" href="/parium-auth-logo.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
