@@ -175,21 +175,36 @@
     <link rel="preconnect" href="https://prod.spline.design" crossorigin>
     <link rel="dns-prefetch" href="https://prod.spline.design">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Preload Parium logos for instant rendering -->
-    <link rel="preload" as="image" href="/src/assets/parium-logo-rings.png" fetchpriority="high" />
+    <!-- Preload Parium logos for instant rendering (logo-rings preloadas via main.tsx med hashad asset-URL) -->
     <link rel="preload" as="image" href="/parium-auth-logo.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
-    <!-- Preload hero image used on Landing -->
-    <link rel="preload" as="image" href="/assets/hero-woman-left-hand-verified.jpg" type="image/jpeg" fetchpriority="high" />
     <!-- Preload NASA Earth day image for Globe component -->
     <link rel="preload" as="image" href="/images/earth-day.jpg" type="image/jpeg" fetchpriority="low" />
-    <!-- Preload hero video poster for instant first paint -->
-    <link rel="preload" as="image" href="/hero-video-poster.jpg" type="image/jpeg" fetchpriority="high" />
-    <!-- Preload hero video (720p for <1800px screens, full for larger) -->
-    <link rel="preload" as="video" href="/hero-video-720.mp4" type="video/mp4" media="(max-width: 1799px)" fetchpriority="high" />
-    <link rel="preload" as="video" href="/hero-video.mp4" type="video/mp4" media="(min-width: 1800px)" fetchpriority="high" />
-    <!-- Preload Spline 3D-scene used in audience landing hero -->
-    <link rel="preload" as="fetch" href="/spline/parium-phone-scene.splinecode" crossorigin="anonymous" fetchpriority="high" />
+    <!-- 🎯 Route-scoped preloads: undviker att slösa bandbredd genom att ladda
+         landing-videon på /jobbsokare eller Spline-scenen på /. Detta gör att
+         varje rutt får just ihjäl-snabb LCP utan att betala för andras assets. -->
+    <script>
+      (function() {
+        try {
+          var path = window.location.pathname;
+          var head = document.head;
+          var add = function(attrs) {
+            var l = document.createElement('link');
+            for (var k in attrs) l.setAttribute(k, attrs[k]);
+            head.appendChild(l);
+          };
+          if (path === '/' || path === '') {
+            add({ rel: 'preload', as: 'image', href: '/hero-video-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            var isLarge = window.matchMedia && window.matchMedia('(min-width: 1800px)').matches;
+            add({ rel: 'preload', as: 'video', href: isLarge ? '/hero-video.mp4' : '/hero-video-720.mp4', type: 'video/mp4', fetchpriority: 'high' });
+          } else if (path === '/jobbsokare' || path === '/arbetsgivare') {
+            add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'high' });
+          }
+        } catch (e) { /* never block paint */ }
+      })();
+    </script>
+
  
       
     
