@@ -19,7 +19,7 @@ const GLOBE_STAGE_SIZE = 'min(88vw, 88vh)';
 
 function EarthSphere({ isDay }: { isDay: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null!);
-  const texturePath = isDay ? '/images/earth-day.jpg' : '/images/earth-night.jpg';
+  const texturePath = isDay ? '/images/earth-day.webp' : '/images/earth-night.jpg';
   const texture = useTexture(texturePath);
 
   // Texture settings for crisp rendering
