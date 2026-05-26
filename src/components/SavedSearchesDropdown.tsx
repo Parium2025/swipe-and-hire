@@ -107,6 +107,8 @@ export function SavedSearchesDropdown({
     return parts.length > 0 ? parts.join(' • ') : 'Alla jobb';
   };
 
+  const shouldScrollSavedSearches = savedSearches.length > 4;
+
   return (
     <>
       <Popover open={open} onOpenChange={handleOpenChange}>
@@ -138,7 +140,13 @@ export function SavedSearchesDropdown({
           </div>
           
           <TooltipProvider delayDuration={0} skipDelayDuration={0}>
-          <div className="max-h-[50vh] overflow-y-auto overscroll-contain">
+          <div
+            className={cn(
+              "h-auto overflow-y-auto overscroll-contain",
+              shouldScrollSavedSearches && "max-h-[50vh]"
+            )}
+            style={{ maxHeight: shouldScrollSavedSearches ? undefined : 'none' }}
+          >
             {savedSearches.map((search) => {
               const showingPreview = isPreview(search.id);
               const tooltipOpen = isTouch 
@@ -245,6 +253,10 @@ export function SavedSearchesDropdown({
                 Rensa alla notifikationer
               </button>
             </div>
+          )}
+
+          {totalNewMatches === 0 && (
+            <div className="h-2 border-t border-white/10 bg-white/[0.03]" aria-hidden="true" />
           )}
         </PopoverContent>
       </Popover>
