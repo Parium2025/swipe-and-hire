@@ -5,17 +5,29 @@ import { useEffect } from 'react';
  * (the landing-page scroll root). Free, open-source alternative to
  * GSAP ScrollSmoother — gives the same buttery, premium scroll feel.
  */
-export function useLenisOnElement(selector: string, enabled = true) {
+export function useLenisOnElement(selector: string, enabled = true, contentSelector?: string) {
   useEffect(() => {
     if (!enabled) return;
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+    // Touch-only devices get free OS-level momentum scroll — Lenis here would
+    // fight iOS/Android native inertia and feel WORSE. Only activate on
+    // pointing devices (mouse / trackpad). This is exactly the Windows-vs-Mac
+    // gap the user reported.
+    const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+    if (!hasFinePointer) return;
+
     const wrapper = document.querySelector(selector) as HTMLElement | null;
     if (!wrapper) return;
 
-    // Lenis needs a content element inside the wrapper
-    const content = wrapper.firstElementChild as HTMLElement | null;
+    // Prefer an explicit content selector (e.g. [data-lenis-content]) so
+    // wrappers with multiple top-level children (fixed background layers etc.)
+    // still pick the real scrollable content, not the first sibling.
+    const content =
+      (contentSelector ? (wrapper.querySelector(contentSelector) as HTMLElement | null) : null) ??
+      (wrapper.querySelector('[data-lenis-content]') as HTMLElement | null) ??
+      (wrapper.firstElementChild as HTMLElement | null);
     if (!content) return;
 
     let rafId = 0;
@@ -53,5 +65,5 @@ export function useLenisOnElement(selector: string, enabled = true) {
       cancelAnimationFrame(rafId);
       lenis?.destroy();
     };
-  }, [selector, enabled]);
+  }, [selector, enabled, contentSelector]);
 }

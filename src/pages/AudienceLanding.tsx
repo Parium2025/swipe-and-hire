@@ -10,6 +10,7 @@ import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
+import { useLenisOnElement } from '@/hooks/useLenisOnElement';
 
 type AudienceLandingProps = {
   audience: AudienceRole;
@@ -886,6 +887,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
 
+  // 🎢 Premium smooth-scroll på mus/trackpad (Windows får samma silkeslena
+  // inertia som macOS får gratis från OS). Hooken är no-op på touch och vid
+  // prefers-reduced-motion. GSAP-wheel-locken runt pinned-galleriet använder
+  // capture+stopPropagation så Lenis aldrig kapar pinned-övergången.
+  useLenisOnElement('[data-landing-scroll-root]', true, '[data-lenis-content]');
+
+
   // (Tidigare scroll-jack med IntersectionObserver + tvingad scrollTop togs bort —
   // den slogs mot CSS scroll-snap och orsakade lagg/jitter. CSS scroll-snap
   // (scrollSnapType: 'y mandatory' + scrollSnapStop: 'always') sköter snappet.)
@@ -992,7 +1000,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     >
       <AnimatedBackground showGlow={false} />
       <FixedPhoneLayer />
-      <div className="relative z-10 min-h-full">
+      <div data-lenis-content className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
 
