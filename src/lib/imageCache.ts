@@ -144,10 +144,17 @@ class ImageCache {
         typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
       );
       const isStorageObject = parsed.pathname.includes('/storage/v1/object/');
+      const isCompanyLogo = parsed.pathname.includes('/company-logos/');
       const version = parsed.searchParams.get('v') || parsed.searchParams.get('version') || parsed.searchParams.get('t');
 
       // För storage-bilder ignorerar vi query/hash så samma fil får samma cache-nyckel
       if (isStorageObject) {
+        // Company logos already carry a timestamped filename in normal flows.
+        // Query params (?t=...) otherwise create parallel cache entries between
+        // search cards, JobView header and background warmers → visible logo repaint.
+        if (isCompanyLogo) {
+          return `${parsed.origin}${parsed.pathname}`;
+        }
         return version
           ? `${parsed.origin}${parsed.pathname}?v=${version}`
           : `${parsed.origin}${parsed.pathname}`;
