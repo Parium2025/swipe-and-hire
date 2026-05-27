@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
-import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { ArrowLeft, ArrowRight, Send, CheckCircle, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TruncatedText } from '@/components/TruncatedText';
