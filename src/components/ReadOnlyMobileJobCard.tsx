@@ -1,4 +1,4 @@
-import { memo, useMemo, type ReactNode } from 'react';
+import { memo, useMemo, useCallback, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,9 @@ import { useCardImage } from '@/hooks/useCardImage';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
+import { imageCache } from '@/lib/imageCache';
+import { supabase } from '@/integrations/supabase/client';
+
 
 interface ReadOnlyMobileJobCardProps {
   job: {
