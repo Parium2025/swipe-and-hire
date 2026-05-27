@@ -291,9 +291,9 @@ export function ApplicationQuestionsWizard({
           type="button"
           onClick={() => setCurrentStep(questions.length)}
           aria-label="Tillbaka till granskning"
-          className="absolute -top-11 right-0 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
+          className="absolute -top-11 right-0 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-[18px] h-[18px]" />
         </button>
       )}
 
