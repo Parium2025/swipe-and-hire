@@ -129,18 +129,25 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   // Warm imageCache with the full-size JobView hero on pointerdown so it's
   // instantly available when the JobView page mounts (no right-to-left load).
   const warmJobViewImage = useCallback(() => {
-    const raw = (job as any).job_image_desktop_url || job.job_image_url;
-    if (!raw) return;
-    try {
-      const resolved = raw.startsWith('http')
-        ? raw
-        : supabase.storage.from('job-images').getPublicUrl(raw, {
-            transform: { width: 1200, height: 800, quality: 75, resize: 'cover' },
-          }).data.publicUrl;
-      if (resolved && !imageCache.isCached(resolved)) {
-        imageCache.loadImage(resolved).catch(() => {});
-      }
-    } catch {}
+    // Warm BOTH mobile- and desktop-source hero URLs with the SAME transform JobView
+    // applies (contain, 1200x800, q75). Any mismatch creates a parallel cache entry
+    // and triggers the visible "right-to-left" reload on navigation.
+    const candidates = [
+      job.job_image_url,
+      (job as any).job_image_desktop_url,
+    ].filter(Boolean) as string[];
+    for (const raw of candidates) {
+      try {
+        const resolved = raw.startsWith('http')
+          ? raw
+          : supabase.storage.from('job-images').getPublicUrl(raw, {
+              transform: { width: 1200, height: 800, quality: 75, resize: 'contain' },
+            }).data.publicUrl;
+        if (resolved && !imageCache.isCached(resolved)) {
+          imageCache.loadImage(resolved).catch(() => {});
+        }
+      } catch {}
+    }
   }, [job.id, job.job_image_url, (job as any).job_image_desktop_url]);
 
   return (

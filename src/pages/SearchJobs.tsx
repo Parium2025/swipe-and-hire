@@ -83,12 +83,24 @@ interface Job {
 
 const SEARCH_JOBS_DISPLAY_COUNT_KEY = 'parium-search-display-count';
 const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
-const JOB_CARD_IMAGE_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
+// Card thumbnail transform (smaller — used in list)
+const JOB_CARD_IMAGE_TRANSFORM = { width: 600, height: 400, quality: 75, resize: 'cover' as const };
+// JobView hero transform — MUST stay byte-for-byte identical to JOB_VIEW_IMAGE_TRANSFORM
+// in JobView.tsx, otherwise the warmed cache key won't match the hero <img> src and
+// the image will visibly re-load (right-to-left) on every navigation.
+const JOB_VIEW_HERO_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'contain' as const };
+
+interface ImageTransform {
+  width: number;
+  height: number;
+  quality: number;
+  resize: 'cover' | 'contain' | 'fill';
+}
 
 const resolveStorageImageUrl = (
   raw: string | null | undefined,
   bucket: 'job-images' | 'company-logos',
-  transform?: typeof JOB_CARD_IMAGE_TRANSFORM,
+  transform?: ImageTransform,
 ) => {
   if (!raw || typeof raw !== 'string') return null;
   const trimmed = raw.trim();
@@ -406,8 +418,8 @@ const SearchJobs = memo(() => {
   const jobViewImageUrls = useMemo(() => {
     return jobs
       .flatMap(job => [
-        resolveStorageImageUrl(job.job_image_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM),
-        resolveStorageImageUrl(job.job_image_desktop_url || job.job_image_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM),
+        resolveStorageImageUrl(job.job_image_url, 'job-images', JOB_VIEW_HERO_TRANSFORM),
+        resolveStorageImageUrl(job.job_image_desktop_url || job.job_image_url, 'job-images', JOB_VIEW_HERO_TRANSFORM),
       ])
       .filter(Boolean) as string[];
   }, [jobs]);
