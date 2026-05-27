@@ -68,13 +68,18 @@ export function useSwipeImagePreloader(
     logoUrls.forEach(u => { imageCache.loadImage(u).catch(() => {}); });
 
     // ── 2. JOB-IMAGES: kör via idle callback i batchar ──
+    // Connection-aware: på 2G/Save-Data skippa bulk-preload helt — vi förlitar
+    // oss då bara på rolling window kring currentIndex för att spara data.
+    const slow = isSlowOrMeteredConnection();
     const imgUrls: string[] = [];
-    const upper = Math.min(initialBulk, jobs.length);
-    for (let i = 0; i < upper; i++) {
-      const imgUrl = appendVersionToUrl(resolveUrl(jobs[i].job_image_url, 'job-images'), jobs[i].updated_at);
-      if (imgUrl && !loadedRef.current.has(imgUrl)) {
-        loadedRef.current.add(imgUrl);
-        imgUrls.push(imgUrl);
+    if (!slow) {
+      const upper = Math.min(initialBulk, jobs.length);
+      for (let i = 0; i < upper; i++) {
+        const imgUrl = appendVersionToUrl(resolveUrl(jobs[i].job_image_url, 'job-images'), jobs[i].updated_at);
+        if (imgUrl && !loadedRef.current.has(imgUrl)) {
+          loadedRef.current.add(imgUrl);
+          imgUrls.push(imgUrl);
+        }
       }
     }
 
