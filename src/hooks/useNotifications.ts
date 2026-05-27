@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { safeReadArrayCache } from '@/lib/safeStorage';
 
 export interface AppNotification {
   id: string;
@@ -16,13 +17,9 @@ export interface AppNotification {
 const CACHE_KEY = 'parium_notifications_cache';
 
 const getCached = (userId: string): AppNotification[] | null => {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    const { userId: cid, items, ts } = JSON.parse(raw);
-    if (cid !== userId || Date.now() - ts > 60 * 60 * 1000) return null;
-    return items;
-  } catch { return null; }
+  return safeReadArrayCache<AppNotification>(CACHE_KEY, 'items', (env) => {
+    return env.userId === userId && typeof env.ts === 'number' && Date.now() - env.ts < 60 * 60 * 1000;
+  });
 };
 
 const setCache = (userId: string, items: AppNotification[]) => {
@@ -37,7 +34,10 @@ export function useNotifications() {
     if (user) return getCached(user.id) || [];
     return [];
   });
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(() => {
+    if (!user) return 0;
+    return (getCached(user.id) || []).filter(n => !n.is_read).length;
+  });
 
   // Hydrate from cache on user change
   useEffect(() => {
