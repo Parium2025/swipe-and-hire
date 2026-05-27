@@ -2,17 +2,13 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
+import { JOB_VIEW_HERO_TRANSFORM, isSlowOrMeteredConnection } from '@/lib/imageTransforms';
 
 interface PreloadableJob {
   job_image_url?: string;
   company_logo_url?: string;
   updated_at?: string;
 }
-
-// MUST match JOB_VIEW_IMAGE_TRANSFORM in JobView.tsx so the cache key
-// matches what the hero <img> requests — that way tapping a swipe card
-// opens JobView with the hero already painted from blob cache.
-const JOB_VIEW_HERO_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
 
 function resolveUrl(url: string | undefined, bucket: string): string | null {
   if (!url) return null;
