@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
+import { JOB_VIEW_HERO_TRANSFORM as JOB_VIEW_IMAGE_TRANSFORM, COMPANY_LOGO_TRANSFORM } from '@/lib/imageTransforms';
 import { useJobViewTracker } from '@/hooks/useJobViewTracker';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { Button } from '@/components/ui/button';
