@@ -12,6 +12,7 @@ import {
   persistBlob,
   PERSIST_MAX_BYTES,
 } from './imageCachePersistence';
+import { getRecommendedCacheEntries } from './imageTransforms';
 
 interface CachedImage {
   url: string;
