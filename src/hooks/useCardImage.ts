@@ -32,6 +32,20 @@ export function useCardImage(
   version?: string | null | undefined,
   transform?: CardImageTransform,
 ) {
+  const normalizedRawPath = useMemo(() => {
+    if (!rawPath || typeof rawPath !== 'string') return null;
+    const trimmed = rawPath.trim();
+    if (!trimmed) return null;
+    if (!trimmed.startsWith('http')) return trimmed;
+    try {
+      const parsed = new URL(trimmed);
+      const match = parsed.pathname.match(/\/storage\/v1\/(?:object|render\/image)\/(?:public|sign)\/[^/]+\/(.+)$/);
+      return match?.[1] ? decodeURIComponent(match[1]) : trimmed;
+    } catch {
+      return trimmed;
+    }
+  }, [rawPath]);
+
   // Stabil signatur för transform — undviker onödig URL-rebuild
   const transformSig = transform
     ? `${transform.width ?? ''}x${transform.height ?? ''}q${transform.quality ?? 75}r${transform.resize ?? 'cover'}`
@@ -39,8 +53,8 @@ export function useCardImage(
 
   // Steg 1: Lös ut publik URL (rent useMemo, ingen render-kostnad efter mount)
   const resolvedUrl = useMemo(() => {
-    if (!rawPath) return null;
-    if (rawPath.startsWith('http')) return rawPath;
+    if (!normalizedRawPath) return null;
+    if (normalizedRawPath.startsWith('http')) return normalizedRawPath;
 
     // Bygg transform-payload (retina-aware: 2× för crisp rendering på Apple/Android-skärmar)
     const transformPayload = transform
@@ -54,10 +68,10 @@ export function useCardImage(
 
     const { data } = supabase.storage
       .from(bucket)
-      .getPublicUrl(rawPath, transformPayload ? { transform: transformPayload } : undefined);
+      .getPublicUrl(normalizedRawPath, transformPayload ? { transform: transformPayload } : undefined);
     return appendVersionToUrl(data?.publicUrl || null, version);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rawPath, bucket, version, transformSig]);
+  }, [normalizedRawPath, bucket, version, transformSig]);
 
   // Steg 2: Synkron cache-läsning (ingen blink, ingen useEffect)
   const cachedBlobUrl = useMemo(
