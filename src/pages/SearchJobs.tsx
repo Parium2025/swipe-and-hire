@@ -82,19 +82,26 @@ interface Job {
 
 const SEARCH_JOBS_DISPLAY_COUNT_KEY = 'parium-search-display-count';
 
+// Module-level flag: once the search page has fully loaded once in this tab session,
+// subsequent re-mounts (e.g. coming back from JobView) skip the fade + skeleton overlay
+// so the back-navigation feels instant.
+let __searchJobsHasMountedOnce = false;
+
 const SearchJobs = memo(() => {
   const navigate = useNavigate();
   // toast and blurHandlers removed — no longer needed after filter extraction
   const queryClient = useQueryClient();
 
-  // Delayed fade-in (employer-side parity)
-  const [showContent, setShowContent] = useState(false);
-  // Full-screen skeleton overlay: visible until first data load completes
-  const [initialLoadDone, setInitialLoadDone] = useState(false);
+  // Delayed fade-in (employer-side parity) — skipped on re-mounts
+  const [showContent, setShowContent] = useState(__searchJobsHasMountedOnce);
+  // Full-screen skeleton overlay: visible until first data load completes — skipped on re-mounts
+  const [initialLoadDone, setInitialLoadDone] = useState(__searchJobsHasMountedOnce);
   useEffect(() => {
+    if (__searchJobsHasMountedOnce) return;
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob, unsaveJob } = useSavedJobs();
   const { skippedJobIds, recordAction: recordSwipeAction, undoAction: undoSwipeAction } = useSwipeActions();
