@@ -108,9 +108,14 @@ export function useSwipeImagePreloader(
   useEffect(() => {
     if (!jobs || jobs.length === 0) return;
 
+    // På 2G/Save-Data: snäva in fönstret kraftigt
+    const slow = isSlowOrMeteredConnection();
+    const effLookahead = slow ? 2 : lookahead;
+    const effLookbehind = slow ? 1 : lookbehind;
+
     const urls: string[] = [];
-    const start = Math.max(0, currentIndex - lookbehind);
-    const end = Math.min(currentIndex + lookahead, jobs.length - 1);
+    const start = Math.max(0, currentIndex - effLookbehind);
+    const end = Math.min(currentIndex + effLookahead, jobs.length - 1);
 
     for (let i = start; i <= end; i++) {
       if (i === currentIndex) continue; // current is already loaded
