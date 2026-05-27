@@ -98,6 +98,10 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
           if (tasks.length > 0) await Promise.allSettled(tasks);
         }
 
+        // Connection-aware: skippa bakgrundsvärmning på 2G / Save-Data
+        // för att inte bränna mobildata för de användarna.
+        if (isSlowOrMeteredConnection()) return;
+
         // 🟢 PRIORITET 2: Idle warm-up av topp aktiva jobb i bakgrunden.
         // Körs alltid medan användaren är inloggad — så listor, swipe och
         // JobView öppnas instant utan att blockera UI.
