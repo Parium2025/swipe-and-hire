@@ -231,7 +231,7 @@ export const JobViewHero = memo(function JobViewHero({
       <ResilientImage
         src={imageUrl}
         alt={`${title} hos ${companyName}`}
-        className="w-full h-full object-contain bg-black/20"
+        className="w-full h-full object-cover"
         loading="eager"
         fetchPriority="high"
         decoding="sync"

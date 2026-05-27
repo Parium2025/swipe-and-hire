@@ -141,7 +141,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         const resolved = raw.startsWith('http')
           ? raw
           : supabase.storage.from('job-images').getPublicUrl(raw, {
-              transform: { width: 1200, height: 800, quality: 75, resize: 'contain' },
+              transform: { width: 1200, height: 800, quality: 75, resize: 'cover' },
             }).data.publicUrl;
         if (resolved && !imageCache.isCached(resolved)) {
           imageCache.loadImage(resolved).catch(() => {});
