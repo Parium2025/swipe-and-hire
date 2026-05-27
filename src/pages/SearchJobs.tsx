@@ -67,6 +67,7 @@ interface Job {
   views_count: number;
   applications_count: number;
   job_image_url?: string;
+  job_image_desktop_url?: string;
   image_focus_position?: string;
   employer_id?: string;
   employer_profile?: {
@@ -81,6 +82,51 @@ interface Job {
 // formatSalary is centralized in @/lib/jobViewHelpers — no local copy needed.
 
 const SEARCH_JOBS_DISPLAY_COUNT_KEY = 'parium-search-display-count';
+const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
+const JOB_CARD_IMAGE_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
+
+const resolveStorageImageUrl = (
+  raw: string | null | undefined,
+  bucket: 'job-images' | 'company-logos',
+  transform?: typeof JOB_CARD_IMAGE_TRANSFORM,
+) => {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  try {
+    const { data } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(trimmed, transform ? { transform } : undefined);
+    return data?.publicUrl || null;
+  } catch {
+    return null;
+  }
+};
+
+const warmImageCacheBatch = (urls: string[], batchSize = 4) => {
+  const unique = [...new Set(urls.filter(Boolean))];
+  if (unique.length === 0) return;
+  let i = 0;
+  const next = () => {
+    const batch = unique.slice(i, i + batchSize);
+    i += batchSize;
+    if (batch.length === 0) return;
+    Promise.allSettled(batch.map((url) => imageCache.loadImage(url))).finally(next);
+  };
+  next();
+};
+
+const shouldSkipSearchEnterEffects = () => {
+  if (__searchJobsHasMountedOnce) return true;
+  try {
+    const skip = sessionStorage.getItem(SKIP_SEARCH_ENTER_EFFECTS_KEY) === '1';
+    if (skip) sessionStorage.removeItem(SKIP_SEARCH_ENTER_EFFECTS_KEY);
+    return skip;
+  } catch {
+    return false;
+  }
+};
 
 // Module-level flag: once the search page has fully loaded once in this tab session,
 // subsequent re-mounts (e.g. coming back from JobView) skip the fade + skeleton overlay
