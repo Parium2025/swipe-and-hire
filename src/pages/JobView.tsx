@@ -263,14 +263,16 @@ const JobView = () => {
         const resolved = resolveJobImageUrl(rawImageUrl);
         if (resolved) {
           const cachedBlob = imageCache.getCachedUrl(resolved);
-          setImageUrl(cachedBlob || resolved);
+          // Only set if we don't already display a valid URL (prevents src swap → reflow flash)
+          setImageUrl(prev => prev || cachedBlob || resolved);
           if (!cachedBlob) {
+            // Warm the cache in background — do NOT swap src after; let the browser keep its loaded bitmap
             imageCache.loadImage(resolved).catch(() => {});
           }
         } else if (rawImageUrl) {
           convertToSignedUrl(rawImageUrl, 'job-applications', 3600).then(signed => {
             if (signed) {
-              setImageUrl(signed);
+              setImageUrl(prev => prev || signed);
               imageCache.loadImage(signed).catch(() => {});
             }
           }).catch(() => {});
@@ -280,10 +282,13 @@ const JobView = () => {
       // Prefetch company logo (from job_postings — single tunnel)
       const rawLogo = (data as any).company_logo_url;
       if (rawLogo) {
-        setCompanyLogoUrl(imageCache.getCachedUrl(rawLogo) || rawLogo);
-        imageCache.loadImage(rawLogo).then(blobUrl => {
-          setCompanyLogoUrl(blobUrl);
-        }).catch(() => {});
+        const cachedLogoBlob = imageCache.getCachedUrl(rawLogo);
+        // Only set src if not yet rendered — prevents the logo from flashing/re-fetching on revisit
+        setCompanyLogoUrl(prev => prev || cachedLogoBlob || rawLogo);
+        if (!cachedLogoBlob) {
+          // Warm cache silently; do NOT swap to blob URL afterwards (would trigger <img> reload)
+          imageCache.loadImage(rawLogo).catch(() => {});
+        }
       }
     } catch (error: any) {
       console.error('JobView fetch error:', error);
