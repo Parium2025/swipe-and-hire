@@ -9,10 +9,23 @@ interface PreloadableJob {
   updated_at?: string;
 }
 
+// MUST match JOB_VIEW_IMAGE_TRANSFORM in JobView.tsx so the cache key
+// matches what the hero <img> requests — that way tapping a swipe card
+// opens JobView with the hero already painted from blob cache.
+const JOB_VIEW_HERO_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
+
 function resolveUrl(url: string | undefined, bucket: string): string | null {
   if (!url) return null;
   if (url.startsWith('http')) return url;
   const { data } = supabase.storage.from(bucket).getPublicUrl(url);
+  return data?.publicUrl || null;
+}
+
+function resolveJobViewVariant(url: string | undefined): string | null {
+  if (!url) return null;
+  // Already a remote URL → use as-is (swipe doesn't transform foreign URLs)
+  if (url.startsWith('http')) return null;
+  const { data } = supabase.storage.from('job-images').getPublicUrl(url, { transform: JOB_VIEW_HERO_TRANSFORM });
   return data?.publicUrl || null;
 }
 
