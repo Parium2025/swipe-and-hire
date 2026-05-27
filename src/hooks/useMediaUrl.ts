@@ -14,7 +14,19 @@ const transformSig = (t?: ImageTransformOptions) =>
 
 // LocalStorage cache key (transform ingår så samma bild i olika storlekar inte krockar)
 const getCacheKey = (storagePath: string, mediaType: MediaType, transform?: ImageTransformOptions) => 
-  `media_url_${mediaType}${transformSig(transform)}_${storagePath}`;
+  `media_url_${mediaType}${transformSig(transform)}_${normalizeStoragePath(storagePath)}`;
+
+function normalizeStoragePath(storagePath: string): string {
+  const trimmed = storagePath.trim();
+  if (!trimmed.startsWith('http')) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    const match = parsed.pathname.match(/\/storage\/v1\/(?:object|render\/image)\/(?:public|sign)\/[^/]+\/(.+)$/);
+    return match?.[1] ? decodeURIComponent(match[1]) : trimmed;
+  } catch {
+    return trimmed;
+  }
+}
 
 // OBS: 'profile-video' utesluts medvetet. Videofiler är 5–50 MB styck och
 // att blob-cacha dem i bulk (25 kandidater + rolling window) skulle förbruka
@@ -127,10 +139,11 @@ export function clearMediaUrlCache(
   mediaType?: MediaType
 ) {
   if (!storagePath) return;
+  const normalizedStoragePath = normalizeStoragePath(storagePath);
 
   const mediaPrefix = mediaType ? `media_url_${mediaType}` : 'media_url_';
   const matchesStoragePath = (key: string) =>
-    key.startsWith(mediaPrefix) && key.endsWith(`_${storagePath}`);
+    key.startsWith(mediaPrefix) && key.endsWith(`_${normalizedStoragePath}`);
 
   for (const [key, cached] of signedUrlMemoryCache.entries()) {
     if (!matchesStoragePath(key)) continue;
@@ -141,7 +154,7 @@ export function clearMediaUrlCache(
   // Extra safety: evict blob-cache entries by the actual storage path too.
   // This covers overwritten files where the signed URL may no longer be present
   // in our signed-url caches but the old blob still uses the same object path.
-  imageCache.evictByPattern(storagePath);
+  imageCache.evictByPattern(normalizedStoragePath);
 
   for (const key of Array.from(ongoingLoads.keys())) {
     if (matchesStoragePath(key)) ongoingLoads.delete(key);

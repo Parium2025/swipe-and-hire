@@ -143,21 +143,26 @@ class ImageCache {
         url,
         typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
       );
-      const isStorageObject = parsed.pathname.includes('/storage/v1/object/');
+      const isStorageObject = parsed.pathname.includes('/storage/v1/object/') || parsed.pathname.includes('/storage/v1/render/image/');
       const isCompanyLogo = parsed.pathname.includes('/company-logos/');
       const version = parsed.searchParams.get('v') || parsed.searchParams.get('version') || parsed.searchParams.get('t');
 
       // För storage-bilder ignorerar vi query/hash så samma fil får samma cache-nyckel
       if (isStorageObject) {
-        // Company logos already carry a timestamped filename in normal flows.
-        // Query params (?t=...) otherwise create parallel cache entries between
-        // search cards, JobView header and background warmers → visible logo repaint.
-        if (isCompanyLogo) {
-          return `${parsed.origin}${parsed.pathname}`;
+        const stableParams = new URLSearchParams();
+        for (const key of ['width', 'height', 'quality', 'resize', 'format']) {
+          const value = parsed.searchParams.get(key);
+          if (value) stableParams.set(key, value);
         }
-        return version
-          ? `${parsed.origin}${parsed.pathname}?v=${version}`
-          : `${parsed.origin}${parsed.pathname}`;
+        // Company logos already carry a timestamped filename in normal flows.
+        // Ignore only volatile cache-busters/tokens, but KEEP transform params.
+        if (isCompanyLogo) {
+          const qs = stableParams.toString();
+          return qs ? `${parsed.origin}${parsed.pathname}?${qs}` : `${parsed.origin}${parsed.pathname}`;
+        }
+        if (version) stableParams.set('v', version);
+        const qs = stableParams.toString();
+        return qs ? `${parsed.origin}${parsed.pathname}?${qs}` : `${parsed.origin}${parsed.pathname}`;
       }
 
       // För andra URL:er behåll full URL (inkl query) för säkerhet

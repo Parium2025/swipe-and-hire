@@ -74,6 +74,7 @@ const getDisplayCompanyName = (job: JobPosting | null) => {
 const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean }>();
 const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
 const JOB_VIEW_IMAGE_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'contain' as const };
+const COMPANY_LOGO_TRANSFORM = { width: 128, height: 128, quality: 80, resize: 'contain' as const };
 
 const resolveJobImageUrl = (raw: string | null | undefined) => {
   if (!raw || typeof raw !== 'string') return null;
@@ -87,6 +88,23 @@ const resolveJobImageUrl = (raw: string | null | undefined) => {
     return pub && pub.includes('/storage/') ? pub : null;
   } catch {
     return null;
+  }
+};
+
+const resolveCompanyLogoUrl = (raw: string | null | undefined) => {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  try {
+    const path = trimmed.startsWith('http')
+      ? new URL(trimmed).pathname.match(/\/storage\/v1\/(?:object|render\/image)\/(?:public|sign)\/company-logos\/(.+)$/)?.[1]
+      : trimmed;
+    if (!path) return trimmed;
+    return supabase.storage.from('company-logos').getPublicUrl(decodeURIComponent(path), {
+      transform: COMPANY_LOGO_TRANSFORM,
+    }).data.publicUrl;
+  } catch {
+    return trimmed;
   }
 };
 
@@ -164,7 +182,8 @@ const JobView = () => {
   });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
     const rawLogo = initialJob?.company_logo_url || initialJob?.profiles?.company_logo_url;
-    return rawLogo ? (imageCache.getCachedUrl(rawLogo) || rawLogo) : null;
+    const resolvedLogo = resolveCompanyLogoUrl(rawLogo);
+    return resolvedLogo ? (imageCache.getCachedUrl(resolvedLogo) || resolvedLogo) : null;
   });
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -284,12 +303,13 @@ const JobView = () => {
         ? (data as any).company_logo_url.trim().split('?')[0]
         : null;
       if (rawLogo) {
-        const cachedLogoBlob = imageCache.getCachedUrl(rawLogo);
+        const resolvedLogo = resolveCompanyLogoUrl(rawLogo) || rawLogo;
+        const cachedLogoBlob = imageCache.getCachedUrl(resolvedLogo);
         // Only set src if not yet rendered — prevents the logo from flashing/re-fetching on revisit
-        setCompanyLogoUrl(prev => prev || cachedLogoBlob || rawLogo);
+        setCompanyLogoUrl(prev => prev || cachedLogoBlob || resolvedLogo);
         if (!cachedLogoBlob) {
           // Warm cache silently; do NOT swap to blob URL afterwards (would trigger <img> reload)
-          imageCache.loadImage(rawLogo).catch(() => {});
+          imageCache.loadImage(resolvedLogo).catch(() => {});
         }
       }
     } catch (error: any) {
