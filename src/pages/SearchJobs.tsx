@@ -90,10 +90,17 @@ const JOB_CARD_IMAGE_TRANSFORM = { width: 600, height: 400, quality: 75, resize:
 // the image will visibly re-load (right-to-left) on every navigation.
 const JOB_VIEW_HERO_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'contain' as const };
 
+interface ImageTransform {
+  width: number;
+  height: number;
+  quality: number;
+  resize: 'cover' | 'contain' | 'fill';
+}
+
 const resolveStorageImageUrl = (
   raw: string | null | undefined,
   bucket: 'job-images' | 'company-logos',
-  transform?: typeof JOB_CARD_IMAGE_TRANSFORM,
+  transform?: ImageTransform,
 ) => {
   if (!raw || typeof raw !== 'string') return null;
   const trimmed = raw.trim();
