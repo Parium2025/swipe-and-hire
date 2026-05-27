@@ -72,6 +72,23 @@ const getDisplayCompanyName = (job: JobPosting | null) => {
 
 // Module-level cache: survives component remounts during viewport resizes
 const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean }>();
+const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
+const JOB_VIEW_IMAGE_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
+
+const resolveJobImageUrl = (raw: string | null | undefined) => {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  try {
+    const pub = supabase.storage.from('job-images').getPublicUrl(trimmed, {
+      transform: JOB_VIEW_IMAGE_TRANSFORM,
+    }).data.publicUrl;
+    return pub && pub.includes('/storage/') ? pub : null;
+  } catch {
+    return null;
+  }
+};
 
 const JobView = () => {
   const { jobId } = useParams<{ jobId: string }>();
