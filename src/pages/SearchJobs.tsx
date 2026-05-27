@@ -17,6 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, Briefcase, Building } from 'lucide-react';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
