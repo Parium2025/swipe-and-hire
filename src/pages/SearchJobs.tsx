@@ -18,6 +18,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
+import {
+  JOB_CARD_TRANSFORM as JOB_CARD_IMAGE_TRANSFORM,
+  JOB_VIEW_HERO_TRANSFORM,
+  COMPANY_LOGO_TRANSFORM,
+  isSlowOrMeteredConnection,
+  type ImageTransform,
+} from '@/lib/imageTransforms';
 import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, Briefcase, Building } from 'lucide-react';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
