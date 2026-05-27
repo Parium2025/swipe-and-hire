@@ -313,10 +313,14 @@ const SearchJobs = memo(() => {
   // Mark initial load as done once jobs finish loading for the first time
   useEffect(() => {
     if (!isSearchResultsLoading && !initialLoadDone) {
-      const t = setTimeout(() => setInitialLoadDone(true), 150);
+      const t = setTimeout(() => {
+        setInitialLoadDone(true);
+        __searchJobsHasMountedOnce = true;
+      }, 150);
       return () => clearTimeout(t);
     }
   }, [isSearchResultsLoading, initialLoadDone]);
+
 
   // Prefetch reviews and company profiles for all companies in results for instant dialog load
   const prefetchReviews = useBatchPrefetchReviews();
