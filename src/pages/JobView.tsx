@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { useJobViewTracker } from '@/hooks/useJobViewTracker';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { Button } from '@/components/ui/button';
@@ -176,7 +177,7 @@ const JobView = () => {
     const rawImg = isDesktopInit
       ? (initialJob?.job_image_desktop_url || initialJob?.job_image_url)
       : (initialJob?.job_image_url || initialJob?.job_image_desktop_url);
-    const resolved = resolveJobImageUrl(rawImg);
+    const resolved = appendVersionToUrl(resolveJobImageUrl(rawImg), (initialJob as any)?.updated_at);
     if (!resolved) return null;
     return imageCache.getCachedUrl(resolved) || resolved;
   });
@@ -279,7 +280,7 @@ const JobView = () => {
         ? (data.job_image_desktop_url || data.job_image_url)
         : (data.job_image_url || data.job_image_desktop_url);
       if (rawImageUrl) {
-        const resolved = resolveJobImageUrl(rawImageUrl);
+        const resolved = appendVersionToUrl(resolveJobImageUrl(rawImageUrl), (data as any)?.updated_at);
         if (resolved) {
           const cachedBlob = imageCache.getCachedUrl(resolved);
           // Only set if we don't already display a valid URL (prevents src swap → reflow flash)

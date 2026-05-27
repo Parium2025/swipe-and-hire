@@ -17,6 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, Briefcase, Building } from 'lucide-react';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
@@ -412,16 +413,22 @@ const SearchJobs = memo(() => {
   // en annan transformerad URL än detaljsidan.
   const jobImageUrls = useMemo(() => {
     return jobs
-      .map(job => resolveStorageImageUrl(job.job_image_url || job.job_image_desktop_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM))
+      .map(job => {
+        const url = resolveStorageImageUrl(job.job_image_url || job.job_image_desktop_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM);
+        return appendVersionToUrl(url, (job as any).updated_at);
+      })
       .filter(Boolean) as string[];
   }, [jobs]);
 
   const jobViewImageUrls = useMemo(() => {
     return jobs
-      .flatMap(job => [
-        resolveStorageImageUrl(job.job_image_url, 'job-images', JOB_VIEW_HERO_TRANSFORM),
-        resolveStorageImageUrl(job.job_image_desktop_url || job.job_image_url, 'job-images', JOB_VIEW_HERO_TRANSFORM),
-      ])
+      .flatMap(job => {
+        const v = (job as any).updated_at;
+        return [
+          appendVersionToUrl(resolveStorageImageUrl(job.job_image_url, 'job-images', JOB_VIEW_HERO_TRANSFORM), v),
+          appendVersionToUrl(resolveStorageImageUrl(job.job_image_desktop_url || job.job_image_url, 'job-images', JOB_VIEW_HERO_TRANSFORM), v),
+        ];
+      })
       .filter(Boolean) as string[];
   }, [jobs]);
 

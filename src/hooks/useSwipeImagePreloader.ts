@@ -9,10 +9,23 @@ interface PreloadableJob {
   updated_at?: string;
 }
 
+// MUST match JOB_VIEW_IMAGE_TRANSFORM in JobView.tsx so the cache key
+// matches what the hero <img> requests — that way tapping a swipe card
+// opens JobView with the hero already painted from blob cache.
+const JOB_VIEW_HERO_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
+
 function resolveUrl(url: string | undefined, bucket: string): string | null {
   if (!url) return null;
   if (url.startsWith('http')) return url;
   const { data } = supabase.storage.from(bucket).getPublicUrl(url);
+  return data?.publicUrl || null;
+}
+
+function resolveJobViewVariant(url: string | undefined): string | null {
+  if (!url) return null;
+  // Already a remote URL → use as-is (swipe doesn't transform foreign URLs)
+  if (url.startsWith('http')) return null;
+  const { data } = supabase.storage.from('job-images').getPublicUrl(url, { transform: JOB_VIEW_HERO_TRANSFORM });
   return data?.publicUrl || null;
 }
 
@@ -103,8 +116,11 @@ export function useSwipeImagePreloader(
       const job = jobs[i];
       const imgUrl = appendVersionToUrl(resolveUrl(job.job_image_url, 'job-images'), job.updated_at);
       const logoUrl = appendVersionToUrl(resolveUrl(job.company_logo_url, 'company-logos'), job.updated_at);
+      // Also warm the JobView-transform variant so tapping the card lands instantly
+      const jobViewUrl = appendVersionToUrl(resolveJobViewVariant(job.job_image_url), job.updated_at);
       if (imgUrl && !loadedRef.current.has(imgUrl)) urls.push(imgUrl);
       if (logoUrl && !loadedRef.current.has(logoUrl)) urls.push(logoUrl);
+      if (jobViewUrl && !loadedRef.current.has(jobViewUrl)) urls.push(jobViewUrl);
     }
 
     urls.forEach(url => {
