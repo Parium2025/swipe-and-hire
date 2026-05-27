@@ -82,19 +82,26 @@ interface Job {
 
 const SEARCH_JOBS_DISPLAY_COUNT_KEY = 'parium-search-display-count';
 
+// Module-level flag: once the search page has fully loaded once in this tab session,
+// subsequent re-mounts (e.g. coming back from JobView) skip the fade + skeleton overlay
+// so the back-navigation feels instant.
+let __searchJobsHasMountedOnce = false;
+
 const SearchJobs = memo(() => {
   const navigate = useNavigate();
   // toast and blurHandlers removed — no longer needed after filter extraction
   const queryClient = useQueryClient();
 
-  // Delayed fade-in (employer-side parity)
-  const [showContent, setShowContent] = useState(false);
-  // Full-screen skeleton overlay: visible until first data load completes
-  const [initialLoadDone, setInitialLoadDone] = useState(false);
+  // Delayed fade-in (employer-side parity) — skipped on re-mounts
+  const [showContent, setShowContent] = useState(__searchJobsHasMountedOnce);
+  // Full-screen skeleton overlay: visible until first data load completes — skipped on re-mounts
+  const [initialLoadDone, setInitialLoadDone] = useState(__searchJobsHasMountedOnce);
   useEffect(() => {
+    if (__searchJobsHasMountedOnce) return;
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob, unsaveJob } = useSavedJobs();
   const { skippedJobIds, recordAction: recordSwipeAction, undoAction: undoSwipeAction } = useSwipeActions();
@@ -306,10 +313,14 @@ const SearchJobs = memo(() => {
   // Mark initial load as done once jobs finish loading for the first time
   useEffect(() => {
     if (!isSearchResultsLoading && !initialLoadDone) {
-      const t = setTimeout(() => setInitialLoadDone(true), 150);
+      const t = setTimeout(() => {
+        setInitialLoadDone(true);
+        __searchJobsHasMountedOnce = true;
+      }, 150);
       return () => clearTimeout(t);
     }
   }, [isSearchResultsLoading, initialLoadDone]);
+
 
   // Prefetch reviews and company profiles for all companies in results for instant dialog load
   const prefetchReviews = useBatchPrefetchReviews();
@@ -628,7 +639,7 @@ const SearchJobs = memo(() => {
   }
 
    return (
-     <div className="space-y-3 md:space-y-4 responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+     <div className="space-y-3 md:space-y-4 responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       {/* Compact header: title centered + stats inline on mobile */}
       <div className="flex items-center justify-center mb-1 md:mb-4">
         <h1 className="text-lg md:text-2xl font-semibold text-white tracking-tight text-center">Sök Jobb</h1>
