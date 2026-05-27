@@ -67,6 +67,7 @@ interface Job {
   views_count: number;
   applications_count: number;
   job_image_url?: string;
+  job_image_desktop_url?: string;
   image_focus_position?: string;
   employer_id?: string;
   employer_profile?: {
@@ -81,6 +82,51 @@ interface Job {
 // formatSalary is centralized in @/lib/jobViewHelpers — no local copy needed.
 
 const SEARCH_JOBS_DISPLAY_COUNT_KEY = 'parium-search-display-count';
+const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
+const JOB_CARD_IMAGE_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
+
+const resolveStorageImageUrl = (
+  raw: string | null | undefined,
+  bucket: 'job-images' | 'company-logos',
+  transform?: typeof JOB_CARD_IMAGE_TRANSFORM,
+) => {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  try {
+    const { data } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(trimmed, transform ? { transform } : undefined);
+    return data?.publicUrl || null;
+  } catch {
+    return null;
+  }
+};
+
+const warmImageCacheBatch = (urls: string[], batchSize = 4) => {
+  const unique = [...new Set(urls.filter(Boolean))];
+  if (unique.length === 0) return;
+  let i = 0;
+  const next = () => {
+    const batch = unique.slice(i, i + batchSize);
+    i += batchSize;
+    if (batch.length === 0) return;
+    Promise.allSettled(batch.map((url) => imageCache.loadImage(url))).finally(next);
+  };
+  next();
+};
+
+const shouldSkipSearchEnterEffects = () => {
+  if (__searchJobsHasMountedOnce) return true;
+  try {
+    const skip = sessionStorage.getItem(SKIP_SEARCH_ENTER_EFFECTS_KEY) === '1';
+    if (skip) sessionStorage.removeItem(SKIP_SEARCH_ENTER_EFFECTS_KEY);
+    return skip;
+  } catch {
+    return false;
+  }
+};
 
 // Module-level flag: once the search page has fully loaded once in this tab session,
 // subsequent re-mounts (e.g. coming back from JobView) skip the fade + skeleton overlay
@@ -92,15 +138,16 @@ const SearchJobs = memo(() => {
   // toast and blurHandlers removed — no longer needed after filter extraction
   const queryClient = useQueryClient();
 
+  const skipInitialEffects = useMemo(shouldSkipSearchEnterEffects, []);
   // Delayed fade-in (employer-side parity) — skipped on re-mounts
-  const [showContent, setShowContent] = useState(__searchJobsHasMountedOnce);
+  const [showContent, setShowContent] = useState(skipInitialEffects);
   // Full-screen skeleton overlay: visible until first data load completes — skipped on re-mounts
-  const [initialLoadDone, setInitialLoadDone] = useState(__searchJobsHasMountedOnce);
+  const [initialLoadDone, setInitialLoadDone] = useState(skipInitialEffects);
   useEffect(() => {
-    if (__searchJobsHasMountedOnce) return;
+    if (skipInitialEffects) return;
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [skipInitialEffects]);
 
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob, unsaveJob } = useSavedJobs();
@@ -347,9 +394,22 @@ const SearchJobs = memo(() => {
     return () => { cancelled = true; clearTimeout(t); };
   }, [companyIds, prefetchReviews, prefetchProfiles]);
 
-  // Förladdda alla jobbbilder via Service Worker för persistent cache
+  // Förladdda samma bildvariant som både korten och JobView använder.
+  // Detta tar bort "höger-till-vänster"-laddningen som uppstod när korten visade
+  // en annan transformerad URL än detaljsidan.
   const jobImageUrls = useMemo(() => {
-    return jobs.map(job => job.job_image_url).filter(Boolean) as string[];
+    return jobs
+      .map(job => resolveStorageImageUrl(job.job_image_url || job.job_image_desktop_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM))
+      .filter(Boolean) as string[];
+  }, [jobs]);
+
+  const jobViewImageUrls = useMemo(() => {
+    return jobs
+      .flatMap(job => [
+        resolveStorageImageUrl(job.job_image_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM),
+        resolveStorageImageUrl(job.job_image_desktop_url || job.job_image_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM),
+      ])
+      .filter(Boolean) as string[];
   }, [jobs]);
 
   // Premium: preload BOTH job images and company logos into both SW + blob cache.
@@ -376,19 +436,19 @@ const SearchJobs = memo(() => {
     if (jobImageUrls.length > 0) {
       preloadImages(jobImageUrls);
     }
+    if (jobViewImageUrls.length > 0) {
+      const runJobs = () => warmImageCacheBatch(jobViewImageUrls, 3);
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(runJobs, { timeout: 700 });
+      } else {
+        setTimeout(runJobs, 50);
+      }
+    }
     if (companyLogoUrls.length > 0) {
       preloadImages(companyLogoUrls);
       // Also seed the in-memory blob cache so logos render synchronously
       const run = () => {
-        const batchSize = 8;
-        let i = 0;
-        const next = () => {
-          if (i >= companyLogoUrls.length) return;
-          const batch = companyLogoUrls.slice(i, i + batchSize);
-          i += batchSize;
-          Promise.allSettled(batch.map(u => imageCache.loadImage(u))).finally(next);
-        };
-        next();
+        warmImageCacheBatch(companyLogoUrls, 8);
       };
       if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
         (window as any).requestIdleCallback(run, { timeout: 500 });
@@ -396,7 +456,7 @@ const SearchJobs = memo(() => {
         setTimeout(run, 100);
       }
     }
-  }, [jobImageUrls, companyLogoUrls]);
+  }, [jobImageUrls, jobViewImageUrls, companyLogoUrls]);
 
   // Seed job data into React Query cache for instant JobView rendering
   useEffect(() => {
@@ -639,7 +699,7 @@ const SearchJobs = memo(() => {
   }
 
    return (
-     <div className="space-y-3 md:space-y-4 responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+     <div className={cn("space-y-3 md:space-y-4 responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]", !skipInitialEffects && "animate-fade-in")}>
       {/* Compact header: title centered + stats inline on mobile */}
       <div className="flex items-center justify-center mb-1 md:mb-4">
         <h1 className="text-lg md:text-2xl font-semibold text-white tracking-tight text-center">Sök Jobb</h1>
@@ -816,6 +876,7 @@ const SearchJobs = memo(() => {
                       created_at: job.created_at,
                       expires_at: job.expires_at,
                       job_image_url: job.job_image_url,
+                      job_image_desktop_url: job.job_image_desktop_url,
                       image_focus_position: job.image_focus_position,
                       company_name: job.company_name,
                       workplace_name: job.workplace_name,

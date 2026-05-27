@@ -72,6 +72,23 @@ const getDisplayCompanyName = (job: JobPosting | null) => {
 
 // Module-level cache: survives component remounts during viewport resizes
 const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean }>();
+const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
+const JOB_VIEW_IMAGE_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
+
+const resolveJobImageUrl = (raw: string | null | undefined) => {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  try {
+    const pub = supabase.storage.from('job-images').getPublicUrl(trimmed, {
+      transform: JOB_VIEW_IMAGE_TRANSFORM,
+    }).data.publicUrl;
+    return pub && pub.includes('/storage/') ? pub : null;
+  } catch {
+    return null;
+  }
+};
 
 const JobView = () => {
   const { jobId } = useParams<{ jobId: string }>();
@@ -141,12 +158,8 @@ const JobView = () => {
     const rawImg = isDesktopInit
       ? (initialJob?.job_image_desktop_url || initialJob?.job_image_url)
       : (initialJob?.job_image_url || initialJob?.job_image_desktop_url);
-    if (!rawImg) return null;
-    let resolved = rawImg;
-    if (!rawImg.startsWith('http')) {
-      const pub = supabase.storage.from('job-images').getPublicUrl(rawImg).data.publicUrl;
-      resolved = pub && pub.includes('/storage/') ? pub : rawImg;
-    }
+    const resolved = resolveJobImageUrl(rawImg);
+    if (!resolved) return null;
     return imageCache.getCachedUrl(resolved) || resolved;
   });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
@@ -247,17 +260,7 @@ const JobView = () => {
         ? (data.job_image_desktop_url || data.job_image_url)
         : (data.job_image_url || data.job_image_desktop_url);
       if (rawImageUrl) {
-        let resolved: string | null = null;
-        if (typeof rawImageUrl === 'string' && rawImageUrl.startsWith('http')) {
-          resolved = rawImageUrl;
-        } else {
-          const pub = supabase.storage
-            .from('job-images')
-            .getPublicUrl(rawImageUrl).data.publicUrl;
-          if (pub && pub.includes('/storage/')) {
-            resolved = pub;
-          }
-        }
+        const resolved = resolveJobImageUrl(rawImageUrl);
         if (resolved) {
           const cachedBlob = imageCache.getCachedUrl(resolved);
           setImageUrl(cachedBlob || resolved);
