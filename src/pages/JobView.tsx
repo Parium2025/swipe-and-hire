@@ -73,7 +73,7 @@ const getDisplayCompanyName = (job: JobPosting | null) => {
 // Module-level cache: survives component remounts during viewport resizes
 const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean }>();
 const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
-const JOB_VIEW_IMAGE_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
+const JOB_VIEW_IMAGE_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'contain' as const };
 
 const resolveJobImageUrl = (raw: string | null | undefined) => {
   if (!raw || typeof raw !== 'string') return null;
@@ -280,7 +280,9 @@ const JobView = () => {
       }
 
       // Prefetch company logo (from job_postings — single tunnel)
-      const rawLogo = (data as any).company_logo_url;
+      const rawLogo = typeof (data as any).company_logo_url === 'string'
+        ? (data as any).company_logo_url.trim().split('?')[0]
+        : null;
       if (rawLogo) {
         const cachedLogoBlob = imageCache.getCachedUrl(rawLogo);
         // Only set src if not yet rendered — prevents the logo from flashing/re-fetching on revisit
