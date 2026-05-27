@@ -53,6 +53,11 @@ export function ApplicationQuestionsWizard({
   const isCurrentAnswered = currentQuestion 
     ? (currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== '')
     : true;
+  const allRequiredQuestionsAnswered = questions.every((question) => {
+    if (!question.is_required) return true;
+    const answer = answers[question.id];
+    return answer !== undefined && answer !== null && answer !== '';
+  });
 
   // Track if user has reached the review step — enables quick-return X button
   useEffect(() => {
@@ -291,9 +296,9 @@ export function ApplicationQuestionsWizard({
           type="button"
           onClick={() => setCurrentStep(questions.length)}
           aria-label="Tillbaka till granskning"
-          className="absolute -top-11 right-0 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
+          className="absolute -top-12 right-0 w-11 h-11 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white inline-grid place-items-center leading-none transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
         >
-          <X className="w-[18px] h-[18px]" />
+          <X className="block w-5 h-5" />
         </button>
       )}
 
@@ -387,7 +392,11 @@ export function ApplicationQuestionsWizard({
                     <button
                       key={q.id}
                       type="button"
-                      onClick={() => setCurrentStep(idx)}
+                      onClick={() => {
+                        setHasReachedReview(true);
+                        setNavigatedBack(true);
+                        setCurrentStep(idx);
+                      }}
                       className="w-full text-left p-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.14] transition-all duration-150 group active:scale-[0.99]"
                     >
                       <p className="text-[11px] uppercase tracking-wider text-white mb-1">
@@ -462,7 +471,7 @@ export function ApplicationQuestionsWizard({
           disabled={currentQuestion?.is_required && !isCurrentAnswered}
           className={
             nextButtonClasses + ' disabled:opacity-50 disabled:pointer-events-none' +
-            (isSubmitStep || (hasAlreadyApplied && !previewMode) || (currentQuestion?.question_type === 'yes_no' && !((navigatedBack || hasReachedReview) && isCurrentAnswered)) ? ' hidden' : ' inline-flex items-center justify-center')
+            (isSubmitStep || (hasAlreadyApplied && !previewMode) || (currentQuestion?.question_type === 'yes_no' && !((navigatedBack || hasReachedReview || allRequiredQuestionsAnswered) && isCurrentAnswered)) ? ' hidden' : ' inline-flex items-center justify-center')
           }
         >
           {isLastQuestion ? 'Granska' : 'Nästa'}
