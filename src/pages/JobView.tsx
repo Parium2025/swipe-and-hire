@@ -75,8 +75,7 @@ const getDisplayCompanyName = (job: JobPosting | null) => {
 // Module-level cache: survives component remounts during viewport resizes
 const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean }>();
 const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
-const JOB_VIEW_IMAGE_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
-const COMPANY_LOGO_TRANSFORM = { width: 128, height: 128, quality: 80, resize: 'contain' as const };
+// Transforms imported from @/lib/imageTransforms — single source of truth.
 
 const resolveJobImageUrl = (raw: string | null | undefined) => {
   if (!raw || typeof raw !== 'string') return null;
