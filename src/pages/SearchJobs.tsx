@@ -394,9 +394,22 @@ const SearchJobs = memo(() => {
     return () => { cancelled = true; clearTimeout(t); };
   }, [companyIds, prefetchReviews, prefetchProfiles]);
 
-  // Förladdda alla jobbbilder via Service Worker för persistent cache
+  // Förladdda samma bildvariant som både korten och JobView använder.
+  // Detta tar bort "höger-till-vänster"-laddningen som uppstod när korten visade
+  // en annan transformerad URL än detaljsidan.
   const jobImageUrls = useMemo(() => {
-    return jobs.map(job => job.job_image_url).filter(Boolean) as string[];
+    return jobs
+      .map(job => resolveStorageImageUrl(job.job_image_url || job.job_image_desktop_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM))
+      .filter(Boolean) as string[];
+  }, [jobs]);
+
+  const jobViewImageUrls = useMemo(() => {
+    return jobs
+      .flatMap(job => [
+        resolveStorageImageUrl(job.job_image_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM),
+        resolveStorageImageUrl(job.job_image_desktop_url || job.job_image_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM),
+      ])
+      .filter(Boolean) as string[];
   }, [jobs]);
 
   // Premium: preload BOTH job images and company logos into both SW + blob cache.
@@ -423,19 +436,19 @@ const SearchJobs = memo(() => {
     if (jobImageUrls.length > 0) {
       preloadImages(jobImageUrls);
     }
+    if (jobViewImageUrls.length > 0) {
+      const runJobs = () => warmImageCacheBatch(jobViewImageUrls, 3);
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(runJobs, { timeout: 700 });
+      } else {
+        setTimeout(runJobs, 50);
+      }
+    }
     if (companyLogoUrls.length > 0) {
       preloadImages(companyLogoUrls);
       // Also seed the in-memory blob cache so logos render synchronously
       const run = () => {
-        const batchSize = 8;
-        let i = 0;
-        const next = () => {
-          if (i >= companyLogoUrls.length) return;
-          const batch = companyLogoUrls.slice(i, i + batchSize);
-          i += batchSize;
-          Promise.allSettled(batch.map(u => imageCache.loadImage(u))).finally(next);
-        };
-        next();
+        warmImageCacheBatch(companyLogoUrls, 8);
       };
       if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
         (window as any).requestIdleCallback(run, { timeout: 500 });
@@ -443,7 +456,7 @@ const SearchJobs = memo(() => {
         setTimeout(run, 100);
       }
     }
-  }, [jobImageUrls, companyLogoUrls]);
+  }, [jobImageUrls, jobViewImageUrls, companyLogoUrls]);
 
   // Seed job data into React Query cache for instant JobView rendering
   useEffect(() => {
