@@ -89,6 +89,7 @@ const JOB_CARD_IMAGE_TRANSFORM = { width: 600, height: 400, quality: 75, resize:
 // in JobView.tsx, otherwise the warmed cache key won't match the hero <img> src and
 // the image will visibly re-load (right-to-left) on every navigation.
 const JOB_VIEW_HERO_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'contain' as const };
+const COMPANY_LOGO_TRANSFORM = { width: 128, height: 128, quality: 80, resize: 'contain' as const };
 
 interface ImageTransform {
   width: number;
@@ -434,9 +435,10 @@ const SearchJobs = memo(() => {
       if (!raw || seen.has(raw)) continue;
       seen.add(raw);
       if (raw.startsWith('http')) {
-        out.push(raw);
+        const resolved = resolveStorageImageUrl(raw, 'company-logos', COMPANY_LOGO_TRANSFORM);
+        if (resolved) out.push(resolved);
       } else {
-        const { data } = supabase.storage.from('company-logos').getPublicUrl(raw);
+        const { data } = supabase.storage.from('company-logos').getPublicUrl(raw, { transform: COMPANY_LOGO_TRANSFORM });
         if (data?.publicUrl) out.push(data.publicUrl);
       }
     }
