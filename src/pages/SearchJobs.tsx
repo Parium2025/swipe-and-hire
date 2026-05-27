@@ -409,17 +409,30 @@ const SearchJobs = memo(() => {
   // Förladdda samma bildvariant som både korten och JobView använder.
   // Detta tar bort "höger-till-vänster"-laddningen som uppstod när korten visade
   // en annan transformerad URL än detaljsidan.
+  //
+  // 🚀 SCALE-FIX: Warm bara synligt fönster + 10 jobb framåt — INTE hela `jobs`-arrayen.
+  // När användaren har scrollat långt kan `jobs` innehålla 200-500 entries; att warma
+  // alla 3 URL:er per jobb = upp till 1500 onödiga storage-anrop per session. Vi vill
+  // bara att nästa skärmfull är klar, resten warmas när användaren scrollar dit.
+  const warmWindowSize = useMemo(() => {
+    // Snäva in på 2G/Save-Data — annars är 10 framåt premium-default.
+    const ahead = isSlowOrMeteredConnection() ? 4 : 10;
+    return displayCount + ahead;
+  }, [displayCount]);
+
   const jobImageUrls = useMemo(() => {
     return jobs
+      .slice(0, warmWindowSize)
       .map(job => {
         const url = resolveStorageImageUrl(job.job_image_url || job.job_image_desktop_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM);
         return appendVersionToUrl(url, (job as any).updated_at);
       })
       .filter(Boolean) as string[];
-  }, [jobs]);
+  }, [jobs, warmWindowSize]);
 
   const jobViewImageUrls = useMemo(() => {
     return jobs
+      .slice(0, warmWindowSize)
       .flatMap(job => {
         const v = (job as any).updated_at;
         return [
@@ -428,14 +441,14 @@ const SearchJobs = memo(() => {
         ];
       })
       .filter(Boolean) as string[];
-  }, [jobs]);
+  }, [jobs, warmWindowSize]);
 
   // Premium: preload BOTH job images and company logos into both SW + blob cache.
-  // Logos are aggressively warmed so they appear instantly on every card.
+  // Logos are aggressively warmed så de visas direkt på varje kort.
   const companyLogoUrls = useMemo(() => {
     const seen = new Set<string>();
     const out: string[] = [];
-    for (const job of jobs) {
+    for (const job of jobs.slice(0, warmWindowSize)) {
       const raw = (job as any).company_logo_url as string | undefined;
       if (!raw || seen.has(raw)) continue;
       seen.add(raw);
@@ -448,7 +461,7 @@ const SearchJobs = memo(() => {
       }
     }
     return out;
-  }, [jobs]);
+  }, [jobs, warmWindowSize]);
 
   // Preload via Service Worker när bilder laddas
   useEffect(() => {
