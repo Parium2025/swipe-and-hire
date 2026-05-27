@@ -158,12 +158,8 @@ const JobView = () => {
     const rawImg = isDesktopInit
       ? (initialJob?.job_image_desktop_url || initialJob?.job_image_url)
       : (initialJob?.job_image_url || initialJob?.job_image_desktop_url);
-    if (!rawImg) return null;
-    let resolved = rawImg;
-    if (!rawImg.startsWith('http')) {
-      const pub = supabase.storage.from('job-images').getPublicUrl(rawImg).data.publicUrl;
-      resolved = pub && pub.includes('/storage/') ? pub : rawImg;
-    }
+    const resolved = resolveJobImageUrl(rawImg);
+    if (!resolved) return null;
     return imageCache.getCachedUrl(resolved) || resolved;
   });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
@@ -264,17 +260,7 @@ const JobView = () => {
         ? (data.job_image_desktop_url || data.job_image_url)
         : (data.job_image_url || data.job_image_desktop_url);
       if (rawImageUrl) {
-        let resolved: string | null = null;
-        if (typeof rawImageUrl === 'string' && rawImageUrl.startsWith('http')) {
-          resolved = rawImageUrl;
-        } else {
-          const pub = supabase.storage
-            .from('job-images')
-            .getPublicUrl(rawImageUrl).data.publicUrl;
-          if (pub && pub.includes('/storage/')) {
-            resolved = pub;
-          }
-        }
+        const resolved = resolveJobImageUrl(rawImageUrl);
         if (resolved) {
           const cachedBlob = imageCache.getCachedUrl(resolved);
           setImageUrl(cachedBlob || resolved);
