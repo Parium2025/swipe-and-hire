@@ -231,9 +231,10 @@ export const JobViewHero = memo(function JobViewHero({
       <ResilientImage
         src={imageUrl}
         alt={`${title} hos ${companyName}`}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain bg-black/20"
         loading="eager"
         fetchPriority="high"
+        decoding="sync"
         fallbackClassName="w-full h-full"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
