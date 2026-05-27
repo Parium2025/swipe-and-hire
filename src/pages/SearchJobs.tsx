@@ -138,15 +138,16 @@ const SearchJobs = memo(() => {
   // toast and blurHandlers removed — no longer needed after filter extraction
   const queryClient = useQueryClient();
 
+  const skipInitialEffects = useMemo(shouldSkipSearchEnterEffects, []);
   // Delayed fade-in (employer-side parity) — skipped on re-mounts
-  const [showContent, setShowContent] = useState(__searchJobsHasMountedOnce);
+  const [showContent, setShowContent] = useState(skipInitialEffects);
   // Full-screen skeleton overlay: visible until first data load completes — skipped on re-mounts
-  const [initialLoadDone, setInitialLoadDone] = useState(__searchJobsHasMountedOnce);
+  const [initialLoadDone, setInitialLoadDone] = useState(skipInitialEffects);
   useEffect(() => {
-    if (__searchJobsHasMountedOnce) return;
+    if (skipInitialEffects) return;
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [skipInitialEffects]);
 
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob, unsaveJob } = useSavedJobs();
