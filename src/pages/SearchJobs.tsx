@@ -88,7 +88,7 @@ const JOB_CARD_IMAGE_TRANSFORM = { width: 600, height: 400, quality: 75, resize:
 // JobView hero transform — MUST stay byte-for-byte identical to JOB_VIEW_IMAGE_TRANSFORM
 // in JobView.tsx, otherwise the warmed cache key won't match the hero <img> src and
 // the image will visibly re-load (right-to-left) on every navigation.
-const JOB_VIEW_HERO_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'contain' as const };
+const JOB_VIEW_HERO_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
 const COMPANY_LOGO_TRANSFORM = { width: 128, height: 128, quality: 80, resize: 'contain' as const };
 
 interface ImageTransform {
