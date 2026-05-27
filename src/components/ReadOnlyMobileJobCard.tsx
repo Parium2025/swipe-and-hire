@@ -26,6 +26,7 @@ interface ReadOnlyMobileJobCardProps {
     created_at: string;
     expires_at?: string;
     job_image_url?: string;
+    job_image_desktop_url?: string;
     image_focus_position?: string;
     company_name?: string;
     workplace_name?: string;
@@ -133,7 +134,9 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
     try {
       const resolved = raw.startsWith('http')
         ? raw
-        : supabase.storage.from('job-images').getPublicUrl(raw).data.publicUrl;
+        : supabase.storage.from('job-images').getPublicUrl(raw, {
+            transform: { width: 1200, height: 800, quality: 75, resize: 'cover' },
+          }).data.publicUrl;
       if (resolved && !imageCache.isCached(resolved)) {
         imageCache.loadImage(resolved).catch(() => {});
       }
