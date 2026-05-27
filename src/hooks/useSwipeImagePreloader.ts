@@ -116,8 +116,11 @@ export function useSwipeImagePreloader(
       const job = jobs[i];
       const imgUrl = appendVersionToUrl(resolveUrl(job.job_image_url, 'job-images'), job.updated_at);
       const logoUrl = appendVersionToUrl(resolveUrl(job.company_logo_url, 'company-logos'), job.updated_at);
+      // Also warm the JobView-transform variant so tapping the card lands instantly
+      const jobViewUrl = appendVersionToUrl(resolveJobViewVariant(job.job_image_url), job.updated_at);
       if (imgUrl && !loadedRef.current.has(imgUrl)) urls.push(imgUrl);
       if (logoUrl && !loadedRef.current.has(logoUrl)) urls.push(logoUrl);
+      if (jobViewUrl && !loadedRef.current.has(jobViewUrl)) urls.push(jobViewUrl);
     }
 
     urls.forEach(url => {
