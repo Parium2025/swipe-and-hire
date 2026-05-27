@@ -284,7 +284,19 @@ export function ApplicationQuestionsWizard({
   const navRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="flex flex-col h-full min-h-[60dvh]">
+    <div className="relative flex flex-col h-full min-h-[60dvh]">
+      {/* Quick-return to review — positioned top-right of parent card, aligned with section title */}
+      {hasReachedReview && !previewMode && !hasAlreadyApplied && !isSubmitStep && (
+        <button
+          type="button"
+          onClick={() => setCurrentStep(questions.length)}
+          aria-label="Tillbaka till granskning"
+          className="absolute -top-11 right-0 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      )}
+
       {/* Step dots progress indicator - hidden when already applied (locked view) */}
       <div className={'flex items-center justify-center gap-1.5 py-1 shrink-0' + (hasAlreadyApplied ? ' hidden' : '')}>
         {Array.from({ length: totalSteps }).map((_, i) => (
@@ -317,17 +329,8 @@ export function ApplicationQuestionsWizard({
               key={currentQuestion.id}
               className="flex-1 flex flex-col justify-center transition-opacity duration-100 relative"
             >
-              {/* Quick-return to review — only visible after user has reached the review step */}
-              {hasReachedReview && !previewMode && !hasAlreadyApplied && (
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(questions.length)}
-                  aria-label="Tillbaka till granskning"
-                  className="absolute top-0 right-0 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
+
+
 
               {/* Question number */}
               <div className="text-center mb-2">
@@ -387,11 +390,11 @@ export function ApplicationQuestionsWizard({
                       onClick={() => setCurrentStep(idx)}
                       className="w-full text-left p-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.14] transition-all duration-150 group active:scale-[0.99]"
                     >
+                      <p className="text-[11px] uppercase tracking-wider text-white mb-1">
+                        Fråga {idx + 1}
+                      </p>
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[11px] uppercase tracking-wider text-white mb-0.5">
-                             Fråga {idx + 1}
-                          </p>
                           <TruncatedText
                             text={q.question_text}
                             className="text-sm text-white truncate"
@@ -407,6 +410,7 @@ export function ApplicationQuestionsWizard({
                           <ArrowRight className="w-3.5 h-3.5 text-white" />
                         </div>
                       </div>
+
                     </button>
                   );
                 })}
