@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
-import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { ArrowLeft, ArrowRight, Send, CheckCircle, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -39,6 +39,7 @@ export function ApplicationQuestionsWizard({
   // If already applied, start directly on the review step
   const [currentStep, setCurrentStep] = useState(hasAlreadyApplied && !previewMode ? questions.length : 0);
   const [navigatedBack, setNavigatedBack] = useState(false);
+  const [hasReachedReview, setHasReachedReview] = useState(hasAlreadyApplied && !previewMode);
   const totalSteps = previewMode ? questions.length : questions.length + 1;
   
   const isLastQuestion = currentStep === questions.length - 1;
@@ -52,6 +53,11 @@ export function ApplicationQuestionsWizard({
   const isCurrentAnswered = currentQuestion 
     ? (currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== '')
     : true;
+
+  // Track if user has reached the review step — enables quick-return X button
+  useEffect(() => {
+    if (isSubmitStep) setHasReachedReview(true);
+  }, [isSubmitStep]);
 
   const handleNext = useCallback(() => {
     if (currentStep < totalSteps - 1) {
@@ -309,8 +315,20 @@ export function ApplicationQuestionsWizard({
         {!isSubmitStep && currentQuestion ? (
             <div
               key={currentQuestion.id}
-              className="flex-1 flex flex-col justify-center transition-opacity duration-100"
+              className="flex-1 flex flex-col justify-center transition-opacity duration-100 relative"
             >
+              {/* Quick-return to review — only visible after user has reached the review step */}
+              {hasReachedReview && !previewMode && !hasAlreadyApplied && (
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(questions.length)}
+                  aria-label="Tillbaka till granskning"
+                  className="absolute top-0 right-0 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+
               {/* Question number */}
               <div className="text-center mb-2">
                 <span className="text-[10px] uppercase tracking-[0.28em] text-white">
