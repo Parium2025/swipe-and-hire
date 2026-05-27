@@ -54,6 +54,11 @@ export function ApplicationQuestionsWizard({
     ? (currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== '')
     : true;
 
+  // Track if user has reached the review step — enables quick-return X button
+  useEffect(() => {
+    if (isSubmitStep) setHasReachedReview(true);
+  }, [isSubmitStep]);
+
   const handleNext = useCallback(() => {
     if (currentStep < totalSteps - 1) {
       (document.activeElement as HTMLElement)?.blur();
