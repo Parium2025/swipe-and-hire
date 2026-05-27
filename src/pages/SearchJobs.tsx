@@ -699,7 +699,7 @@ const SearchJobs = memo(() => {
   }
 
    return (
-     <div className="space-y-3 md:space-y-4 responsive-container-wide animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+     <div className={cn("space-y-3 md:space-y-4 responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]", !skipInitialEffects && "animate-fade-in")}>
       {/* Compact header: title centered + stats inline on mobile */}
       <div className="flex items-center justify-center mb-1 md:mb-4">
         <h1 className="text-lg md:text-2xl font-semibold text-white tracking-tight text-center">Sök Jobb</h1>
@@ -876,6 +876,7 @@ const SearchJobs = memo(() => {
                       created_at: job.created_at,
                       expires_at: job.expires_at,
                       job_image_url: job.job_image_url,
+                      job_image_desktop_url: job.job_image_desktop_url,
                       image_focus_position: job.image_focus_position,
                       company_name: job.company_name,
                       workplace_name: job.workplace_name,
