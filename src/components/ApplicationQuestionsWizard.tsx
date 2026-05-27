@@ -390,11 +390,11 @@ export function ApplicationQuestionsWizard({
                       onClick={() => setCurrentStep(idx)}
                       className="w-full text-left p-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.14] transition-all duration-150 group active:scale-[0.99]"
                     >
+                      <p className="text-[11px] uppercase tracking-wider text-white mb-1">
+                        Fråga {idx + 1}
+                      </p>
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[11px] uppercase tracking-wider text-white mb-0.5">
-                             Fråga {idx + 1}
-                          </p>
                           <TruncatedText
                             text={q.question_text}
                             className="text-sm text-white truncate"
@@ -410,6 +410,7 @@ export function ApplicationQuestionsWizard({
                           <ArrowRight className="w-3.5 h-3.5 text-white" />
                         </div>
                       </div>
+
                     </button>
                   );
                 })}
