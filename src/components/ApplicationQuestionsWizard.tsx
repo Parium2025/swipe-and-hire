@@ -39,6 +39,7 @@ export function ApplicationQuestionsWizard({
   // If already applied, start directly on the review step
   const [currentStep, setCurrentStep] = useState(hasAlreadyApplied && !previewMode ? questions.length : 0);
   const [navigatedBack, setNavigatedBack] = useState(false);
+  const [hasReachedReview, setHasReachedReview] = useState(hasAlreadyApplied && !previewMode);
   const totalSteps = previewMode ? questions.length : questions.length + 1;
   
   const isLastQuestion = currentStep === questions.length - 1;
