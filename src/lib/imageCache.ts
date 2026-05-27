@@ -12,6 +12,7 @@ import {
   persistBlob,
   PERSIST_MAX_BYTES,
 } from './imageCachePersistence';
+import { getRecommendedCacheEntries } from './imageTransforms';
 
 interface CachedImage {
   url: string;
@@ -26,11 +27,12 @@ class ImageCache {
   private loading = new Map<string, Promise<CachedImage>>();
   private readonly CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 dagar
   // LRU-tak: håll minnesförbrukning under kontroll på low-end devices.
-  // Höjt 500 → 1500 för att skala med employer-listor (500+ kandidater + jobb-
-  // bilder). Små assets (≤50 KB, t.ex. logos & thumbnails) skyddas separat
-  // av enforceLimit() så de aldrig evictas av stora jobb-/profilbilder.
-  // Worst case ~1500 × 30 KB ≈ 45 MB → tryggt på mobil.
-  private readonly MAX_ENTRIES = 1500;
+  // Dynamiskt baserat på navigator.deviceMemory:
+  //   ≤3 GB RAM (iPhone SE/8, äldre Android) → 500 entries
+  //   ≥4 GB RAM                              → 1500 entries
+  // Små assets (≤50 KB, t.ex. logos & thumbnails) skyddas separat av
+  // enforceLimit() så de aldrig evictas av stora jobb-/profilbilder.
+  private readonly MAX_ENTRIES = getRecommendedCacheEntries();
   // Logos och små bilder skyddas från LRU-eviction så länge de är under denna gräns
   private readonly SMALL_ASSET_THRESHOLD_BYTES = 50 * 1024; // 50 KB
   

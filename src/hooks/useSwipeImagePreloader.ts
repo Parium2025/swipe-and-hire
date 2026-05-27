@@ -2,17 +2,13 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
+import { JOB_VIEW_HERO_TRANSFORM, isSlowOrMeteredConnection } from '@/lib/imageTransforms';
 
 interface PreloadableJob {
   job_image_url?: string;
   company_logo_url?: string;
   updated_at?: string;
 }
-
-// MUST match JOB_VIEW_IMAGE_TRANSFORM in JobView.tsx so the cache key
-// matches what the hero <img> requests — that way tapping a swipe card
-// opens JobView with the hero already painted from blob cache.
-const JOB_VIEW_HERO_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
 
 function resolveUrl(url: string | undefined, bucket: string): string | null {
   if (!url) return null;
@@ -72,13 +68,18 @@ export function useSwipeImagePreloader(
     logoUrls.forEach(u => { imageCache.loadImage(u).catch(() => {}); });
 
     // ── 2. JOB-IMAGES: kör via idle callback i batchar ──
+    // Connection-aware: på 2G/Save-Data skippa bulk-preload helt — vi förlitar
+    // oss då bara på rolling window kring currentIndex för att spara data.
+    const slow = isSlowOrMeteredConnection();
     const imgUrls: string[] = [];
-    const upper = Math.min(initialBulk, jobs.length);
-    for (let i = 0; i < upper; i++) {
-      const imgUrl = appendVersionToUrl(resolveUrl(jobs[i].job_image_url, 'job-images'), jobs[i].updated_at);
-      if (imgUrl && !loadedRef.current.has(imgUrl)) {
-        loadedRef.current.add(imgUrl);
-        imgUrls.push(imgUrl);
+    if (!slow) {
+      const upper = Math.min(initialBulk, jobs.length);
+      for (let i = 0; i < upper; i++) {
+        const imgUrl = appendVersionToUrl(resolveUrl(jobs[i].job_image_url, 'job-images'), jobs[i].updated_at);
+        if (imgUrl && !loadedRef.current.has(imgUrl)) {
+          loadedRef.current.add(imgUrl);
+          imgUrls.push(imgUrl);
+        }
       }
     }
 
@@ -107,9 +108,14 @@ export function useSwipeImagePreloader(
   useEffect(() => {
     if (!jobs || jobs.length === 0) return;
 
+    // På 2G/Save-Data: snäva in fönstret kraftigt
+    const slow = isSlowOrMeteredConnection();
+    const effLookahead = slow ? 2 : lookahead;
+    const effLookbehind = slow ? 1 : lookbehind;
+
     const urls: string[] = [];
-    const start = Math.max(0, currentIndex - lookbehind);
-    const end = Math.min(currentIndex + lookahead, jobs.length - 1);
+    const start = Math.max(0, currentIndex - effLookbehind);
+    const end = Math.min(currentIndex + effLookahead, jobs.length - 1);
 
     for (let i = start; i <= end; i++) {
       if (i === currentIndex) continue; // current is already loaded

@@ -3,6 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { imageCache } from '@/lib/imageCache';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
+import {
+  JOB_CARD_TRANSFORM,
+  JOB_VIEW_HERO_TRANSFORM,
+  COMPANY_LOGO_TRANSFORM,
+  isSlowOrMeteredConnection,
+} from '@/lib/imageTransforms';
 // Import logo directly so it's bundled and we get the hashed URL
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
@@ -18,11 +24,6 @@ const preloadImageNative = (src: string): Promise<void> => {
     img.src = src;
   });
 };
-
-// MUST match the transforms in SearchJobs.tsx / JobView.tsx so cache keys align.
-const JOB_CARD_TRANSFORM = { width: 600, height: 400, quality: 75, resize: 'cover' as const };
-const JOB_VIEW_HERO_TRANSFORM = { width: 1200, height: 800, quality: 75, resize: 'cover' as const };
-const COMPANY_LOGO_TRANSFORM = { width: 128, height: 128, quality: 80, resize: 'contain' as const };
 
 const IDLE_WARM_JOB_COUNT = 20; // upper bound — kept conservative for mobile data
 const IDLE_BATCH_SIZE = 4;
@@ -96,6 +97,10 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
           if (currentProfile.video_url) tasks.push(prefetchMediaUrl(currentProfile.video_url, 'profile-video'));
           if (tasks.length > 0) await Promise.allSettled(tasks);
         }
+
+        // Connection-aware: skippa bakgrundsvärmning på 2G / Save-Data
+        // för att inte bränna mobildata för de användarna.
+        if (isSlowOrMeteredConnection()) return;
 
         // 🟢 PRIORITET 2: Idle warm-up av topp aktiva jobb i bakgrunden.
         // Körs alltid medan användaren är inloggad — så listor, swipe och
