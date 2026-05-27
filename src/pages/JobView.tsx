@@ -472,7 +472,7 @@ const JobView = () => {
   };
 
   return (
-    <div ref={contentRef} className="h-[100dvh] overflow-y-auto animate-fade-in">
+    <div ref={contentRef} className="h-[100dvh] overflow-y-auto">
        <div className="jobview-container py-4">
         {/* Combined header */}
         <div className={`flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg ${user ? 'justify-between' : 'justify-center gap-3'}`}>
