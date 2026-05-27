@@ -1,4 +1,4 @@
-import { memo, useMemo, type ReactNode } from 'react';
+import { memo, useMemo, useCallback, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,9 @@ import { useCardImage } from '@/hooks/useCardImage';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
+import { imageCache } from '@/lib/imageCache';
+import { supabase } from '@/integrations/supabase/client';
+
 
 interface ReadOnlyMobileJobCardProps {
   job: {
@@ -122,11 +125,27 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const showSaveButton = !hideSaveButton && !showDeleteButton;
   const canUseExternalSaveOnly = isSavedExternal !== undefined && !!onToggleSave;
 
+  // Warm imageCache with the full-size JobView hero on pointerdown so it's
+  // instantly available when the JobView page mounts (no right-to-left load).
+  const warmJobViewImage = useCallback(() => {
+    const raw = (job as any).job_image_desktop_url || job.job_image_url;
+    if (!raw) return;
+    try {
+      const resolved = raw.startsWith('http')
+        ? raw
+        : supabase.storage.from('job-images').getPublicUrl(raw).data.publicUrl;
+      if (resolved && !imageCache.isCached(resolved)) {
+        imageCache.loadImage(resolved).catch(() => {});
+      }
+    } catch {}
+  }, [job.id, job.job_image_url, (job as any).job_image_desktop_url]);
+
   return (
     <Card 
       data-scroll-anchor-id={job.id}
       className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color] duration-150"
       style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 420px' } as React.CSSProperties}
+      onPointerDown={warmJobViewImage}
       onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`)}
     >
       {/* Visual header — image or gradient placeholder */}
