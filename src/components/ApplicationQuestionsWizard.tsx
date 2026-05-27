@@ -284,7 +284,19 @@ export function ApplicationQuestionsWizard({
   const navRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="flex flex-col h-full min-h-[60dvh]">
+    <div className="relative flex flex-col h-full min-h-[60dvh]">
+      {/* Quick-return to review — positioned top-right of parent card, aligned with section title */}
+      {hasReachedReview && !previewMode && !hasAlreadyApplied && !isSubmitStep && (
+        <button
+          type="button"
+          onClick={() => setCurrentStep(questions.length)}
+          aria-label="Tillbaka till granskning"
+          className="absolute -top-11 right-0 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      )}
+
       {/* Step dots progress indicator - hidden when already applied (locked view) */}
       <div className={'flex items-center justify-center gap-1.5 py-1 shrink-0' + (hasAlreadyApplied ? ' hidden' : '')}>
         {Array.from({ length: totalSteps }).map((_, i) => (
