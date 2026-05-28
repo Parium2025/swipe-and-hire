@@ -110,7 +110,7 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
             try {
               const { data: jobs } = await supabase
                 .from('job_postings')
-                .select('id, job_image_url, job_image_desktop_url, company_logo_url, updated_at')
+                .select('id, job_image_url, job_image_desktop_url, company_logo_url, image_updated_at, updated_at')
                 .eq('is_active', true)
                 .is('deleted_at', null)
                 .order('created_at', { ascending: false })
