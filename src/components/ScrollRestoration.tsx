@@ -7,7 +7,6 @@ import {
   getAnchorSnapshot,
   getAnchorDelta,
   RESTORE_TOLERANCE_PX,
-  REQUIRED_STABLE_FRAMES,
   SCROLL_HEIGHT_TOLERANCE_PX,
   MAX_WAIT_MS,
 } from '@/lib/scrollRestoration';
@@ -113,29 +112,13 @@ export function ScrollRestoration() {
       };
     }
 
-    // For restoring a saved position we use an EVENT-DRIVEN approach instead
-    // of hammering scrollTo() every frame:
-    //   1. Try once immediately.
-    //   2. If content isn't tall enough / anchor missing → observe the DOM
-    //      (MutationObserver + ResizeObserver) and re-try only when something
-    //      actually changes.
-    //   3. ANY user gesture aborts immediately and we never snap again.
-    //
-    // This eliminates two bugs:
-    //   - First-visit "lands at top": old loop kept clamping to 0 while DOM
-    //     was empty; user touched the empty page → gesture cancelled before
-    //     content loaded → stuck at top. Now we wait passively for content.
-    //   - "Jump/blink when scrolling after back": old loop's scrollTo() ran
-    //     in the same frame as the user's finger → fight → snap-back. Now
-    //     we never call scrollTo() after the user has touched the screen.
+    // For saved positions: wait until the target anchor/height exists, then do
+    // ONE instant scroll. No observers, no smooth behavior, no repeated scrollTo
+    // loop that can fight touch input or image decoding while the user scrolls.
     const startTime = performance.now();
     let userInterrupted = false;
     let restored = false;
     let boundContainer: HTMLElement | null = null;
-    let mutationObserver: MutationObserver | null = null;
-    let resizeObserver: ResizeObserver | null = null;
-    let timeoutId: number | null = null;
-    let retryRafId = 0;
 
     const detachGestureListeners = () => {
       if (!boundContainer) return;
@@ -147,12 +130,6 @@ export function ScrollRestoration() {
 
     const cleanup = () => {
       if (rafId) cancelAnimationFrame(rafId);
-      if (retryRafId) cancelAnimationFrame(retryRafId);
-      if (timeoutId !== null) window.clearTimeout(timeoutId);
-      mutationObserver?.disconnect();
-      resizeObserver?.disconnect();
-      mutationObserver = null;
-      resizeObserver = null;
       detachGestureListeners();
     };
 
@@ -190,22 +167,25 @@ export function ScrollRestoration() {
         storedPosition?.anchorOffset,
       );
 
-      // Check height-readiness BEFORE scrolling so we don't clamp-to-0
-      // when the list is still empty.
+      // Check height-readiness BEFORE scrolling so we don't clamp-to-0 when the
+      // list is still empty or fewer cards have rendered than the clicked card.
       const heightReady = !storedPosition?.scrollHeight
         || scrollContainer.scrollHeight >= storedPosition.scrollHeight - SCROLL_HEIGHT_TOLERANCE_PX;
+      const targetTopReady = scrollContainer.scrollHeight - scrollContainer.clientHeight >= targetTop - SCROLL_HEIGHT_TOLERANCE_PX;
 
-      if (anchorDelta === null && !heightReady) {
-        // Content not ready — wait for DOM/size to change instead of
-        // hammering scrollTo every frame.
+      if (anchorDelta === null && !heightReady && !targetTopReady) {
         return false;
       }
 
+      isRestoringRef.current = true;
+      const previousBehavior = scrollContainer.style.scrollBehavior;
+      scrollContainer.style.scrollBehavior = 'auto';
       if (anchorDelta !== null) {
-        scrollContainer.scrollTo({ top: scrollContainer.scrollTop + anchorDelta, behavior: 'auto' });
+        scrollContainer.scrollTop = scrollContainer.scrollTop + anchorDelta;
       } else {
-        scrollContainer.scrollTo({ top: targetTop, behavior: 'auto' });
+        scrollContainer.scrollTop = targetTop;
       }
+      scrollContainer.style.scrollBehavior = previousBehavior;
 
       const verifyDelta = getAnchorDelta(
         scrollContainer,
@@ -227,31 +207,22 @@ export function ScrollRestoration() {
 
     const scheduleRetry = () => {
       if (cancelled || userInterrupted || restored) return;
-      if (retryRafId) return; // coalesce a burst of mutations into one rAF
-      retryRafId = requestAnimationFrame(() => {
-        retryRafId = 0;
-        if (attemptRestore()) return;
-        if (performance.now() - startTime >= MAX_WAIT_MS) finish();
-      });
-    };
-
-    const startObservers = (container: HTMLElement) => {
-      mutationObserver = new MutationObserver(scheduleRetry);
-      mutationObserver.observe(container, { childList: true, subtree: true });
-      if (typeof ResizeObserver !== 'undefined') {
-        resizeObserver = new ResizeObserver(scheduleRetry);
-        resizeObserver.observe(container);
+      if (performance.now() - startTime >= MAX_WAIT_MS) {
+        finish();
+        return;
       }
-      timeoutId = window.setTimeout(finish, MAX_WAIT_MS);
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        if (attemptRestore()) return;
+        scheduleRetry();
+      });
     };
 
     // Initial attempt — wait one frame so the new route has mounted.
     rafId = requestAnimationFrame(() => {
       if (cancelled || userInterrupted) return;
       if (attemptRestore()) return;
-      const container = getManagedScrollContainer();
-      if (container) startObservers(container);
-      else finish();
+      scheduleRetry();
     });
 
     return () => {
