@@ -615,14 +615,16 @@ const Index = () => {
       }
     };
 
+    const employerKeepKey = isJobViewOverlay ? lastEmployerPathRef.current : location.pathname;
     return (
       <EmployerLayout developerView={developerView} onViewChange={setDeveloperView} isOrgAdmin={isAdmin}>
         <KeepAlive
-          activeKey={location.pathname}
+          activeKey={employerKeepKey}
           render={(key) => renderEmployerContent(key)}
           keepKeys={EMPLOYER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
         />
+        {isJobViewOverlay && <JobView asOverlay />}
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
         )}
