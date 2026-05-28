@@ -499,7 +499,7 @@ export const JobSlide = memo(function JobSlide({
             {/* Category badge */}
             {nextJob.occupation && (
               <div className="absolute top-5 left-5 z-10">
-                <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md">
+                <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md transform-gpu [will-change:transform]">
                   <span className="text-xs font-semibold tracking-wide text-white">{nextJob.occupation}</span>
                 </div>
               </div>
@@ -515,7 +515,7 @@ export const JobSlide = memo(function JobSlide({
                 {(!nextImageUrl || nextJob.company_logo_url) && nextDisplayCompanyName && (
                   <div className="flex justify-center mb-4">
                     {nextJob.company_logo_url ? (
-                      <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg">
+                      <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg">
                         <img
                             src={nextLogoUrl || ''}
                           alt=""
@@ -730,7 +730,7 @@ export const JobSlide = memo(function JobSlide({
             {(logoUrl || !imageUrl) && displayCompanyName && (
               <div className="flex justify-center mb-4">
                 {logoUrl ? (
-                  <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg">
+                  <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg">
                     <img
                       src={logoUrl}
                       alt={displayCompanyName}
