@@ -7,6 +7,7 @@ import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { GRADIENTS } from './dashboardConstants';
+import { DashboardCarouselDots } from './DashboardCarouselDots';
 
 export type StatData = {
   icon: React.ElementType;
@@ -102,21 +103,7 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
           </AnimatePresence>
         </div>
 
-        <div className="h-6 flex items-center justify-center mt-auto shrink-0">
-          <div className="flex items-center gap-1.5 leading-none">
-            {stats.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={cn(
-                  "block flex-none p-0 m-0 border-0 appearance-none w-2.5 h-2.5 rounded-full touch-manipulation transition-none align-middle",
-                  i === currentIndex ? "bg-white" : "bg-white/30"
-                )}
-                aria-label={`Gå till statistik ${i + 1}`}
-              />
-            ))}
-          </div>
-        </div>
+        <DashboardCarouselDots count={stats.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till statistik" alwaysRender />
       </CardContent>
     </Card>
   );
