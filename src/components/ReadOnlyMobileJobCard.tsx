@@ -144,17 +144,20 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
     ].filter(Boolean) as string[];
     for (const raw of candidates) {
       try {
-        const resolved = raw.startsWith('http')
+        const base = raw.startsWith('http')
           ? raw
           : supabase.storage.from('job-images').getPublicUrl(raw, {
               transform: { width: 1200, height: 800, quality: 75, resize: 'cover' },
             }).data.publicUrl;
+        // VIKTIGT: append samma v=-version som SearchJobs och JobView använder,
+        // annars hamnar varmningen i en separat cache-slot och JobView missar träffen.
+        const resolved = appendVersionToUrl(base, imageVersion);
         if (resolved && !imageCache.isCached(resolved)) {
           imageCache.loadImage(resolved).catch(() => {});
         }
       } catch {}
     }
-  }, [job.id, job.job_image_url, (job as any).job_image_desktop_url]);
+  }, [job.id, job.job_image_url, (job as any).job_image_desktop_url, imageVersion]);
 
   return (
     <Card 
