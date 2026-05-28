@@ -78,6 +78,25 @@ export const writePositions = (positions: Record<string, ScrollPosition>) => {
   }
 };
 
+/**
+ * Synchronously snapshot the current scroll position for `pathname`.
+ * Use this on pointerdown of links/cards so we never lose the exact
+ * position to a missed rAF when the user clicks fast.
+ */
+export const saveScrollNow = (pathname: string) => {
+  const container = getManagedScrollContainer();
+  if (!container) return;
+  const positions = readPositions();
+  const anchor = getAnchorSnapshot(container);
+  positions[pathname] = {
+    top: container.scrollTop,
+    anchorId: anchor?.anchorId,
+    anchorOffset: anchor?.anchorOffset,
+    scrollHeight: container.scrollHeight,
+  };
+  writePositions(positions);
+};
+
 // ---------------------------------------------------------------------------
 // Anchor helpers — find the element closest to the container viewport top
 // ---------------------------------------------------------------------------

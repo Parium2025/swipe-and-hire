@@ -13,6 +13,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { imageCache } from '@/lib/imageCache';
 import { supabase } from '@/integrations/supabase/client';
+import { saveScrollNow } from '@/lib/scrollRestoration';
 
 
 interface ReadOnlyMobileJobCardProps {
@@ -158,7 +159,12 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       data-scroll-anchor-id={job.id}
       className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color] duration-150"
       style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 420px' } as React.CSSProperties}
-      onPointerDown={warmJobViewImage}
+      onPointerDown={() => {
+        warmJobViewImage();
+        // Snapshota exakt scroll-position synkront innan navigation,
+        // så tillbaka-knappen alltid landar på exakt rätt kort.
+        try { saveScrollNow(window.location.pathname); } catch {}
+      }}
       onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`)}
     >
       {/* Visual header — image or gradient placeholder */}
