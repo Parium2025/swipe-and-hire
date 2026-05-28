@@ -33,6 +33,7 @@ interface ReadOnlyMobileJobCardProps {
     company_logo_url?: string;
     overlay_text_color?: string | null;
     updated_at?: string;
+    image_updated_at?: string | null;
     positions_count?: number;
     salary_min?: number | null;
     salary_max?: number | null;
