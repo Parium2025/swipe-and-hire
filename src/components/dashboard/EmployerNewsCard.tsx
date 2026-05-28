@@ -134,7 +134,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
           </AnimatePresence>
         </div>
 
-        <DashboardCarouselDots count={newsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" />
+        <DashboardCarouselDots count={newsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" lockedToCardBottom />
       </CardContent>
     </Card>
   );
