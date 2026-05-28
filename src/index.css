@@ -23,8 +23,8 @@ html {
      Mobile-min höjt från 14px → 15.5px för premium läsbarhet (Spotify/Apple-nivå).
      Alla rem-baserade Tailwind-storlekar (text-xs, text-sm, text-base...) lyfts proportionellt på små skärmar. */
   font-size: clamp(0.96875rem, 0.93rem + 0.18vw, 1.125rem);
-  /* Smooth scrolling för hela sidan */
-  scroll-behavior: smooth;
+  /* 1:1 touch — smooth scroll på html orsakar lagg/jumps på iOS */
+  scroll-behavior: auto;
   /* iOS momentum scrolling */
   -webkit-overflow-scrolling: touch;
   /* Se till att bakgrunden alltid fyller viewporten även vid iOS rubber-band */
@@ -1570,7 +1570,7 @@ All colors MUST be HSL.
 @media (max-width: 768px) {
   /* Scroll containers with native momentum */
   .scroll-container {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
   }
