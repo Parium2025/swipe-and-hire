@@ -113,10 +113,14 @@ const JobSeekerHome = memo(() => {
   }, []);
   
   // Fetch weather if GPS granted
+  const backgroundLocationEnabled = Boolean(
+    (profile as { background_location_enabled?: boolean | null } | null | undefined)?.background_location_enabled
+  );
+
   const weather = useWeather({
     fallbackCity: gpsGranted ? (profile?.location || profile?.home_location || profile?.address || 'Stockholm') : undefined,
     enabled: gpsGranted === true,
-    backgroundLocationEnabled: (profile as any)?.background_location_enabled ?? false,
+    backgroundLocationEnabled,
   });
   // 🎯 KRITISKT: Förhindra att gammal cachad vädereffekt visas vid login
   const [mountedLongEnough, setMountedLongEnough] = useState(false);
@@ -195,8 +199,8 @@ const JobSeekerHome = memo(() => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              {weather.city ? `${weather.city}, ` : ''}
-              {weather.city ? (
+              {weather.city && weather.temperatureAvailable ? `${weather.city}, ` : ''}
+              {weather.city && weather.temperatureAvailable ? (
                 <>
                   {weather.temperature}°
                   {weather.feelsLike !== weather.temperature && (
