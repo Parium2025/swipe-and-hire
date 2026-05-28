@@ -118,9 +118,40 @@ export function ScrollRestoration() {
     // 2. The container has enough content to scroll to the target position
     const startTime = performance.now();
     let stableFrames = 0;
+    let userInterrupted = false;
+    let boundContainer: HTMLElement | null = null;
+
+    // 🔑 KRITISKT: Avbryt rAF-loopen omedelbart om användaren rör skärmen.
+    // Annars slåss programmatiska scrollTo()-anrop (16ms intervall) mot
+    // fingrets touch → känns "klistrigt" första 200-500ms efter back-nav.
+    const handleUserGesture = () => {
+      userInterrupted = true;
+      cancelled = true;
+      if (rafId) cancelAnimationFrame(rafId);
+      releaseRestoreLock();
+      detachGestureListeners();
+    };
+
+    const detachGestureListeners = () => {
+      if (!boundContainer) return;
+      boundContainer.removeEventListener('touchstart', handleUserGesture);
+      boundContainer.removeEventListener('wheel', handleUserGesture);
+      boundContainer.removeEventListener('pointerdown', handleUserGesture);
+      boundContainer = null;
+    };
+
+    const attachGestureListeners = (container: HTMLElement) => {
+      if (boundContainer === container) return;
+      detachGestureListeners();
+      boundContainer = container;
+      // passive: true → vi avbryter bara loopen, vi preventDefault inte scrollen
+      container.addEventListener('touchstart', handleUserGesture, { passive: true });
+      container.addEventListener('wheel', handleUserGesture, { passive: true });
+      container.addEventListener('pointerdown', handleUserGesture, { passive: true });
+    };
 
     const tryRestore = () => {
-      if (cancelled) return;
+      if (cancelled || userInterrupted) return;
 
       const scrollContainer = getManagedScrollContainer();
       if (!scrollContainer) {
@@ -131,6 +162,8 @@ export function ScrollRestoration() {
         }
         return;
       }
+
+      attachGestureListeners(scrollContainer);
 
       const anchorDelta = getAnchorDelta(
         scrollContainer,
@@ -164,6 +197,7 @@ export function ScrollRestoration() {
       }
 
       if (stableFrames >= REQUIRED_STABLE_FRAMES) {
+        detachGestureListeners();
         releaseRestoreLock();
         return;
       }
@@ -171,6 +205,7 @@ export function ScrollRestoration() {
       if (performance.now() - startTime < MAX_WAIT_MS) {
         rafId = requestAnimationFrame(tryRestore);
       } else {
+        detachGestureListeners();
         releaseRestoreLock();
       }
     };
@@ -180,6 +215,7 @@ export function ScrollRestoration() {
     return () => {
       cancelled = true;
       cancelAnimationFrame(rafId);
+      detachGestureListeners();
     };
   }, [location.pathname, navigationType]);
 
