@@ -8,7 +8,11 @@ interface PreloadableJob {
   job_image_url?: string;
   company_logo_url?: string;
   updated_at?: string;
+  image_updated_at?: string | null;
 }
+
+const jobVersion = (j: PreloadableJob) => j.image_updated_at ?? j.updated_at;
+
 
 function resolveUrl(url: string | undefined, bucket: string): string | null {
   if (!url) return null;
