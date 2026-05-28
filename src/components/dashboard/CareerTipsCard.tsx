@@ -109,7 +109,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
         </div>
         
         {/* News content */}
-        <div className="flex-1 min-h-0 flex flex-col justify-center py-2 overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col justify-center overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
             {currentTip ? (
               <motion.div
@@ -121,20 +121,20 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
                 className={`h-[104px] w-full flex flex-col justify-center overflow-hidden ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
               >
-                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
+                <h3 className="h-[39px] text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
                   {currentTip.title}
                 </h3>
-                <p className="text-sm text-white line-clamp-1 mb-1">
+                <p className="h-[18px] text-sm leading-[18px] text-white truncate mb-1">
                   {currentTip.summary || currentTip.title}
                 </p>
                 {currentTip.published_at && (
-                  <div className="flex items-center gap-1.5 text-white text-[10px] mb-1">
-                    <Clock className="h-3 w-3" />
+                  <div className="h-[14px] flex items-center gap-1.5 text-white text-[10px] leading-none mb-1">
+                    <Clock className="h-3 w-3 shrink-0" />
                     <span>{formatTipPublishedTime(currentTip.published_at)}</span>
                   </div>
                 )}
                 {currentTip.source_url && (
-                  <div className="flex items-center gap-1.5 text-white transition-colors min-w-0 overflow-hidden whitespace-nowrap">
+                  <div className="h-4 flex items-center gap-1.5 text-white transition-colors min-w-0 overflow-hidden whitespace-nowrap">
                     <span className="text-xs shrink-0">Läs mer</span>
                     <span className="text-[10px] text-white truncate">· {currentTip.source}</span>
                     <ExternalLink className="h-3 w-3 shrink-0" />
