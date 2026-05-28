@@ -492,20 +492,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     return null;
   }
 
-  if (!job && hasLoadedOnce.current) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-6">
-        <div className="text-white text-lg font-medium">Jobbet hittades inte</div>
-        <p className="text-white/60 text-sm text-center max-w-sm">
-          Jobbet kan ha tagits bort eller så är länken felaktig.
-        </p>
-        <Button variant="glass" onClick={() => navigate('/search-jobs', { replace: true })}>
-          Sök andra jobb
-        </Button>
-      </div>
-    );
-  }
-
   const handleBack = () => {
     if (asOverlay) {
       const fallbackPath = (location.state as any)?.background?.pathname || '/search-jobs';
@@ -527,6 +513,41 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       navigate('/search-jobs', { replace: true });
     }
   };
+
+  if (!job && hasLoadedOnce.current) {
+    return (
+      <div
+        className={
+          asOverlay
+            ? 'fixed inset-0 z-50 h-[100dvh] overflow-y-auto overscroll-contain bg-[hsl(215_100%_12%)] bg-parium-gradient no-chrome-pad'
+            : 'min-h-[100dvh] overflow-y-auto bg-[hsl(215_100%_12%)] bg-parium-gradient'
+        }
+        style={{ isolation: 'isolate' }}
+      >
+        <div className="jobview-container py-4">
+          <div className="flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 active:bg-white/15 active:scale-[0.97] transition-all text-white text-sm font-medium backdrop-blur-sm border border-white/15 touch-manipulation"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Tillbaka
+            </button>
+          </div>
+          <div className="flex flex-col items-center justify-center gap-4 px-6 py-24 text-center">
+            <div className="text-white text-lg font-semibold">Jobbet hittades inte</div>
+            <p className="text-white text-sm max-w-sm">
+              Jobbet kan ha tagits bort eller så är länken felaktig.
+            </p>
+            <Button variant="glass" onClick={() => navigate('/search-jobs', { replace: true })}>
+              Sök andra jobb
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
