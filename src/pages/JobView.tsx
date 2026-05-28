@@ -599,8 +599,13 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     pullStartXRef.current = null;
     pullActiveRef.current = false;
     if (wasActive && finalY > 110) {
-      setPullY(0);
-      handleBack();
+      // Slide the whole view down off-screen before navigating back
+      setIsDismissing(true);
+      const target = typeof window !== 'undefined' ? window.innerHeight : 900;
+      setPullY(target);
+      setTimeout(() => {
+        handleBack();
+      }, 320);
     } else {
       setPullY(0);
     }
@@ -622,7 +627,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         isolation: 'isolate',
         contain: 'layout paint style',
         transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
-        transition: pullActiveRef.current ? 'none' : 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1)',
+        transition: pullActiveRef.current
+          ? 'none'
+          : isDismissing
+            ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
+            : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
       }}
     >
 
