@@ -487,11 +487,15 @@ const SearchJobs = memo(() => {
       }
     }
     if (jobViewImageUrls.length > 0) {
-      const runJobs = () => warmImageCacheBatch(jobViewImageUrls, 2);
+      // Hero-bilder warmas med HÖGRE prioritet än tidigare (var 900ms idle-timeout).
+      // Anledning: när användaren klickar snabbt på ett kort hann inte hero-warmen
+      // bli klar → cache-miss i JobView → synlig blink. Nu körs den direkt efter
+      // korten med kort idle-fönster så hero alltid är på plats vid navigation.
+      const runJobs = () => warmImageCacheBatch(jobViewImageUrls, 3);
       if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(runJobs, { timeout: 900 });
+        (window as any).requestIdleCallback(runJobs, { timeout: 150 });
       } else {
-        setTimeout(runJobs, 120);
+        setTimeout(runJobs, 30);
       }
     }
     if (companyLogoUrls.length > 0) {
