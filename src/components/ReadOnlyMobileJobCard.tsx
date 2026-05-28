@@ -7,6 +7,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useCardImage } from '@/hooks/useCardImage';
+import { getImageVersion } from '@/lib/imageTransforms';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
@@ -33,6 +34,7 @@ interface ReadOnlyMobileJobCardProps {
     company_logo_url?: string;
     overlay_text_color?: string | null;
     updated_at?: string;
+    image_updated_at?: string | null;
     positions_count?: number;
     salary_min?: number | null;
     salary_max?: number | null;
@@ -107,8 +109,9 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   // Centraliserad bild-hantering — eliminerar 12 hooks per kort.
   // Använder samma hook som MobileJobCard så båda korten har identisk render-kostnad.
   // 🚀 Transform: kortbild ~600x400 (5-10× mindre), logo ~64px
-  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url ?? null, 'job-images', undefined, { width: 600, height: 400, quality: 75, resize: 'cover' });
-  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', undefined, { width: 64, height: 64, quality: 80, resize: 'contain' });
+  const imageVersion = getImageVersion(job);
+  const { displayUrl, handleError: handleImageError } = useCardImage(job.job_image_url ?? null, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
 
   const companyName = job.workplace_name || job.company_name || 'Okänt företag';
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
