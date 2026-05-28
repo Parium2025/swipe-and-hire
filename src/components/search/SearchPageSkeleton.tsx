@@ -9,11 +9,14 @@ import { motion } from 'framer-motion';
 
 const fullscreenSkeletonStyle: CSSProperties = {
   position: 'fixed',
-  inset: 0,
+  top: 'calc(-1 * env(safe-area-inset-top, 0px))',
+  right: 0,
+  bottom: 'calc(-1 * env(safe-area-inset-bottom, 0px) - 96px)',
+  left: 0,
   width: '100vw',
   maxWidth: '100vw',
-  height: '100dvh',
-  minHeight: '100svh',
+  height: 'auto',
+  minHeight: 'calc(100dvh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 96px)',
   zIndex: 2147483647,
   background: 'var(--gradient-parium)',
   backgroundColor: 'hsl(var(--background))',
