@@ -13,32 +13,31 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="fixed inset-0 z-[9998] bg-parium-gradient flex flex-col overflow-hidden"
-      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+      className="absolute inset-0 z-[9998] bg-parium-gradient flex flex-col overflow-hidden p-3 space-y-3 md:space-y-4"
     >
-      {/* Title area */}
-      <div className="flex items-center justify-center pt-4 pb-2">
-        <div className="h-5 w-24 bg-white/10 rounded animate-pulse" />
+      {/* Title area — matches h1 "Sök Jobb" (text-lg, mb-1) */}
+      <div className="flex items-center justify-center mb-1 md:mb-4">
+        <div className="h-7 w-28 bg-white/10 rounded animate-pulse" />
       </div>
 
       {/* Search bar skeleton */}
-      <div className="px-4 pb-3">
+      <div>
         <div className="h-11 w-full bg-white/5 border border-white/10 rounded-xl animate-pulse" />
       </div>
 
       {/* Stats row */}
-      <div className="flex items-center justify-center gap-3 px-4 pb-3">
+      <div className="flex items-center justify-center gap-3">
         <div className="h-8 w-20 bg-white/5 border border-white/10 rounded-full animate-pulse" />
         <div className="h-8 w-24 bg-white/5 border border-white/10 rounded-full animate-pulse" />
       </div>
 
       {/* Section title */}
-      <div className="flex items-center justify-center pb-3">
+      <div className="flex items-center justify-center">
         <div className="h-4 w-32 bg-white/10 rounded animate-pulse" />
       </div>
 
       {/* Job card skeletons */}
-      <div className="flex-1 px-4 space-y-4 overflow-hidden">
+      <div className="flex-1 space-y-4 overflow-hidden">
         {[1, 2, 3, 4].map(i => (
           <div key={i} className="rounded-xl bg-white/5 border border-white/10 overflow-hidden animate-pulse">
             {/* Image area */}
