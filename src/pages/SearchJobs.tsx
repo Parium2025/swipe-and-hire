@@ -832,7 +832,7 @@ const SearchJobs = memo(() => {
                 <span className="truncate">{selectedCompanies.length > 0 ? `${selectedCompanies.length} företag` : `${uniqueCompanyCount} företag`}</span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" side="bottom" className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[200px] max-w-[280px] max-h-64 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain">
+            <DropdownMenuContent align="center" side="bottom" avoidCollisions={false} className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[200px] max-w-[280px]">
               {[...new Set(jobs.map(j => j.company_name).filter(Boolean))].sort().map((name, index, arr) => (
                 <React.Fragment key={name}>
                   <div className="relative">
