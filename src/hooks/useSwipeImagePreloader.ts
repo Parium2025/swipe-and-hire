@@ -62,7 +62,7 @@ export function useSwipeImagePreloader(
     // ── 1. LOGOS: kör DIREKT (high priority, parallellt) ──
     const logoUrls: string[] = [];
     for (let i = 0; i < jobs.length; i++) {
-      const logoUrl = appendVersionToUrl(resolveUrl(jobs[i].company_logo_url, 'company-logos'), jobs[i].updated_at);
+      const logoUrl = appendVersionToUrl(resolveUrl(jobs[i].company_logo_url, 'company-logos'), jobVersion(jobs[i]));
       if (logoUrl && !loadedRef.current.has(logoUrl)) {
         loadedRef.current.add(logoUrl);
         logoUrls.push(logoUrl);
@@ -79,7 +79,7 @@ export function useSwipeImagePreloader(
     if (!slow) {
       const upper = Math.min(initialBulk, jobs.length);
       for (let i = 0; i < upper; i++) {
-        const imgUrl = appendVersionToUrl(resolveUrl(jobs[i].job_image_url, 'job-images'), jobs[i].updated_at);
+        const imgUrl = appendVersionToUrl(resolveUrl(jobs[i].job_image_url, 'job-images'), jobVersion(jobs[i]));
         if (imgUrl && !loadedRef.current.has(imgUrl)) {
           loadedRef.current.add(imgUrl);
           imgUrls.push(imgUrl);
@@ -124,10 +124,10 @@ export function useSwipeImagePreloader(
     for (let i = start; i <= end; i++) {
       if (i === currentIndex) continue; // current is already loaded
       const job = jobs[i];
-      const imgUrl = appendVersionToUrl(resolveUrl(job.job_image_url, 'job-images'), job.updated_at);
-      const logoUrl = appendVersionToUrl(resolveUrl(job.company_logo_url, 'company-logos'), job.updated_at);
+      const imgUrl = appendVersionToUrl(resolveUrl(job.job_image_url, 'job-images'), jobVersion(job));
+      const logoUrl = appendVersionToUrl(resolveUrl(job.company_logo_url, 'company-logos'), jobVersion(job));
       // Also warm the JobView-transform variant so tapping the card lands instantly
-      const jobViewUrl = appendVersionToUrl(resolveJobViewVariant(job.job_image_url), job.updated_at);
+      const jobViewUrl = appendVersionToUrl(resolveJobViewVariant(job.job_image_url), jobVersion(job));
       if (imgUrl && !loadedRef.current.has(imgUrl)) urls.push(imgUrl);
       if (logoUrl && !loadedRef.current.has(logoUrl)) urls.push(logoUrl);
       if (jobViewUrl && !loadedRef.current.has(jobViewUrl)) urls.push(jobViewUrl);
