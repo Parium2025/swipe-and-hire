@@ -12,6 +12,7 @@ import { getTimeRemaining } from '@/lib/date';
 import type { JobQuestion } from '@/types/jobWizard';
 import { ArrowLeft, Send, Users, CheckCircle, Share2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ResilientImage } from '@/components/ui/ResilientImage';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { convertToSignedUrl } from '@/utils/storageUtils';
