@@ -4,11 +4,11 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Newspaper, Clock, ExternalLink } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useHrNews } from '@/hooks/useHrNews';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS } from './dashboardConstants';
+import { DashboardCarouselDots } from './DashboardCarouselDots';
 
 // Format relative time for news
 const formatNewsTime = (publishedAt: string | null): string => {
@@ -134,23 +134,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
           </AnimatePresence>
         </div>
 
-        <div className="h-6 flex items-center justify-center mt-auto shrink-0">
-          {newsItems.length > 1 && (
-            <div className="flex items-center gap-1.5 leading-none">
-              {newsItems.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentIndex(i)}
-                  className={cn(
-                    "block flex-none p-0 m-0 border-0 appearance-none w-2.5 h-2.5 rounded-full touch-manipulation transition-none align-middle",
-                    i === currentIndex ? "bg-white" : "bg-white/30"
-                  )}
-                  aria-label={`Gå till nyhet ${i + 1}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <DashboardCarouselDots count={newsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" />
       </CardContent>
     </Card>
   );

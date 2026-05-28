@@ -4,11 +4,11 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Lightbulb, Newspaper, Clock, ExternalLink } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useCareerTips } from '@/hooks/useCareerTips';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS, formatTipPublishedTime } from './dashboardConstants';
+import { DashboardCarouselDots } from './DashboardCarouselDots';
 
 interface CareerTipsCardProps {
   isPaused: boolean;
@@ -148,23 +148,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
         </div>
         
         {/* Footer with dots - centered */}
-        <div className="h-6 flex items-center justify-center mt-auto shrink-0">
-          {tipsItems.length > 1 && (
-            <div className="flex items-center gap-1.5 leading-none">
-              {tipsItems.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentIndex(i)}
-                  className={cn(
-                    "block flex-none p-0 m-0 border-0 appearance-none w-2.5 h-2.5 rounded-full touch-manipulation transition-none align-middle",
-                    i === currentIndex ? "bg-white" : "bg-white/30"
-                  )}
-                  aria-label={`Gå till nyhet ${i + 1}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <DashboardCarouselDots count={tipsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" />
       </CardContent>
     </Card>
   );
