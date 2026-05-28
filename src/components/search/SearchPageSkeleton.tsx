@@ -13,7 +13,7 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="absolute inset-0 z-[9998] bg-parium-gradient flex flex-col overflow-hidden p-3 space-y-3 md:space-y-4"
+      className="fixed inset-0 z-[9998] bg-parium-gradient flex flex-col overflow-hidden p-3 space-y-3 md:space-y-4"
     >
       {/* Title area — matches h1 "Sök Jobb" (text-lg, mb-1) */}
       <div className="flex items-center justify-center mb-1 md:mb-4">
