@@ -538,14 +538,17 @@ const Index = () => {
     };
 
     return (
-      <JobSeekerLayout developerView={developerView} onViewChange={setDeveloperView}>
+      <JobSeekerLayout
+        developerView={developerView}
+        onViewChange={setDeveloperView}
+        overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}
+      >
         <KeepAlive
           activeKey={activeKeepKey}
           render={(key) => renderSidebarContent(key)}
           keepKeys={JOB_SEEKER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
         />
-        {isJobViewOverlay && <JobView asOverlay />}
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
         )}
