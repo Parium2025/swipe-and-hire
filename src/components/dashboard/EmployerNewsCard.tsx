@@ -92,7 +92,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
 
-      <CardContent className="relative p-4 sm:p-4 h-full flex flex-col">
+      <CardContent className="relative p-4 sm:p-4 h-full flex flex-col overflow-hidden">
         <div className="flex items-center justify-between">
           <div className="p-2 rounded-xl bg-white/10">
             <Newspaper className="h-5 w-5 text-white" strokeWidth={1.5} />
@@ -100,7 +100,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
           <span className="text-[10px] text-white uppercase tracking-wider font-medium">NYHETER</span>
         </div>
 
-        <div className="flex-1 flex flex-col justify-center py-2">
+        <div className="flex-1 min-h-0 flex flex-col justify-center py-2 overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
             {currentNews ? (
               <motion.div
@@ -110,7 +110,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
-                className={currentNews.source_url ? 'cursor-pointer group' : ''}
+                className={`h-[104px] w-full flex flex-col justify-center overflow-hidden ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
               >
                 <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">{currentNews.title}</h3>
                 <p className="text-sm text-white line-clamp-1 mb-1">{currentNews.summary || currentNews.title}</p>
@@ -121,10 +121,10 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                   </div>
                 )}
                 {currentNews.source_url && (
-                  <div className="flex items-center gap-1.5 text-white transition-colors">
-                    <span className="text-xs">Läs mer</span>
-                    <span className="text-[10px] text-white">· {currentNews.source}</span>
-                    <ExternalLink className="h-3 w-3" />
+                  <div className="flex items-center gap-1.5 text-white transition-colors min-w-0 overflow-hidden whitespace-nowrap">
+                    <span className="text-xs shrink-0">Läs mer</span>
+                    <span className="text-[10px] text-white truncate">· {currentNews.source}</span>
+                    <ExternalLink className="h-3 w-3 shrink-0" />
                   </div>
                 )}
               </motion.div>
@@ -134,7 +134,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
           </AnimatePresence>
         </div>
 
-        <DashboardCarouselDots count={newsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" lockedToCardBottom />
+        <DashboardCarouselDots count={newsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" />
       </CardContent>
     </Card>
   );
