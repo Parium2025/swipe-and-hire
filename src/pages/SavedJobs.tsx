@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ type TabValue = 'saved' | 'skipped';
 const SavedJobs = () => {
   const { refreshSidebarCounts } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab: TabValue = (searchParams.get('tab') === 'skipped' ? 'skipped' : 'saved');
   const setActiveTab = useCallback((tab: TabValue) => {
@@ -347,7 +348,7 @@ const SavedJobs = () => {
                         isSavedExternal={true}
                         onToggleSave={toggleSavedJob}
                         onUnsaveClick={handleUnsaveClick}
-                        onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
+                        onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true, background: location } })}
                       />
                     </CardErrorBoundary>
                   );
@@ -420,7 +421,7 @@ const SavedJobs = () => {
                             toast.error('Kunde inte spara jobbet');
                           });
                         }}
-                        onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true } })}
+                        onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true, background: location } })}
                       />
                       {/* Restore button overlay */}
                       <button
