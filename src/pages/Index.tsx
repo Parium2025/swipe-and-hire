@@ -1,5 +1,6 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import JobView from '@/pages/JobView';
 // smartSearchCandidates is applied inside useApplicationsData — not needed here
 import JobDetails from '@/pages/JobDetails';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
