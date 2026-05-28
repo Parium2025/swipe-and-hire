@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
@@ -118,6 +118,7 @@ interface JobViewProps {
 const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isCompanyUser, userRole } = useAuth();
   const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || userRole?.role === 'employer');
   const { getPrefetchedJob } = useJobPrefetchCache();
@@ -499,6 +500,18 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   }
 
   const handleBack = () => {
+    if (asOverlay) {
+      const fallbackPath = (location.state as any)?.background?.pathname || '/search-jobs';
+      const state = window.history.state as any;
+      const idx = typeof state?.idx === 'number' ? state.idx : undefined;
+      if (typeof idx === 'number' && idx > 0) {
+        navigate(-1);
+      } else {
+        navigate(fallbackPath, { replace: true });
+      }
+      return;
+    }
+
     const state = window.history.state as any;
     const idx = typeof state?.idx === 'number' ? state.idx : undefined;
     if (typeof idx === 'number' && idx > 0) {
@@ -513,9 +526,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       ref={contentRef}
       className={
         asOverlay
-          ? 'fixed inset-0 z-50 h-[100dvh] overflow-y-auto bg-[hsl(215_100%_12%)] bg-parium-gradient'
-          : 'h-[100dvh] overflow-y-auto'
+          ? 'fixed inset-0 z-50 h-[100dvh] overflow-x-hidden overflow-y-auto overscroll-contain bg-[hsl(215_100%_12%)] bg-parium-gradient [touch-action:pan-y_pinch-zoom] [scroll-behavior:auto] [-webkit-overflow-scrolling:touch] no-chrome-pad'
+          : 'h-[100dvh] overflow-x-hidden overflow-y-auto overscroll-contain [touch-action:pan-y_pinch-zoom] [scroll-behavior:auto] [-webkit-overflow-scrolling:touch] no-chrome-pad'
       }
+      style={{ isolation: 'isolate', contain: 'layout paint style' }}
     >
        <div className="jobview-container py-4">
         {/* Combined header */}
