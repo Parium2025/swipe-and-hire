@@ -1,5 +1,5 @@
 import { memo, useMemo, useCallback, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2, Gift, Banknote } from 'lucide-react';
@@ -106,6 +106,7 @@ function getCompanyInitials(name: string): string {
 
 export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, onDeleteClick, isSavedExternal, onToggleSave, statusBadge, hideSaveButton = false, onCardClick, footer, cardIndex = 0 }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Centraliserad bild-hantering — eliminerar 12 hooks per kort.
   // Använder samma hook som MobileJobCard så båda korten har identisk render-kostnad.
@@ -165,7 +166,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         // så tillbaka-knappen alltid landar på exakt rätt kort.
         try { saveScrollNow(window.location.pathname); } catch {}
       }}
-      onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`)}
+      onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`, { state: { background: location } })}
     >
       {/* Visual header — image or gradient placeholder */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">
