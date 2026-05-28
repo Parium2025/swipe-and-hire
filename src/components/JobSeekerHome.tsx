@@ -113,10 +113,14 @@ const JobSeekerHome = memo(() => {
   }, []);
   
   // Fetch weather if GPS granted
+  const backgroundLocationEnabled = Boolean(
+    (profile as { background_location_enabled?: boolean | null } | null | undefined)?.background_location_enabled
+  );
+
   const weather = useWeather({
     fallbackCity: gpsGranted ? (profile?.location || profile?.home_location || profile?.address || 'Stockholm') : undefined,
     enabled: gpsGranted === true,
-    backgroundLocationEnabled: (profile as any)?.background_location_enabled ?? false,
+    backgroundLocationEnabled,
   });
   // 🎯 KRITISKT: Förhindra att gammal cachad vädereffekt visas vid login
   const [mountedLongEnough, setMountedLongEnough] = useState(false);
