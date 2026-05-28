@@ -113,24 +113,29 @@ export function ScrollRestoration() {
       };
     }
 
-    // For restoring a saved position, we need to wait until:
-    // 1. The scroll container exists
-    // 2. The container has enough content to scroll to the target position
+    // For restoring a saved position we use an EVENT-DRIVEN approach instead
+    // of hammering scrollTo() every frame:
+    //   1. Try once immediately.
+    //   2. If content isn't tall enough / anchor missing → observe the DOM
+    //      (MutationObserver + ResizeObserver) and re-try only when something
+    //      actually changes.
+    //   3. ANY user gesture aborts immediately and we never snap again.
+    //
+    // This eliminates two bugs:
+    //   - First-visit "lands at top": old loop kept clamping to 0 while DOM
+    //     was empty; user touched the empty page → gesture cancelled before
+    //     content loaded → stuck at top. Now we wait passively for content.
+    //   - "Jump/blink when scrolling after back": old loop's scrollTo() ran
+    //     in the same frame as the user's finger → fight → snap-back. Now
+    //     we never call scrollTo() after the user has touched the screen.
     const startTime = performance.now();
-    let stableFrames = 0;
     let userInterrupted = false;
+    let restored = false;
     let boundContainer: HTMLElement | null = null;
-
-    // 🔑 KRITISKT: Avbryt rAF-loopen omedelbart om användaren rör skärmen.
-    // Annars slåss programmatiska scrollTo()-anrop (16ms intervall) mot
-    // fingrets touch → känns "klistrigt" första 200-500ms efter back-nav.
-    const handleUserGesture = () => {
-      userInterrupted = true;
-      cancelled = true;
-      if (rafId) cancelAnimationFrame(rafId);
-      releaseRestoreLock();
-      detachGestureListeners();
-    };
+    let mutationObserver: MutationObserver | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    let timeoutId: number | null = null;
+    let retryRafId = 0;
 
     const detachGestureListeners = () => {
       if (!boundContainer) return;
@@ -140,28 +145,42 @@ export function ScrollRestoration() {
       boundContainer = null;
     };
 
+    const cleanup = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (retryRafId) cancelAnimationFrame(retryRafId);
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+      mutationObserver?.disconnect();
+      resizeObserver?.disconnect();
+      mutationObserver = null;
+      resizeObserver = null;
+      detachGestureListeners();
+    };
+
+    const finish = () => {
+      cleanup();
+      releaseRestoreLock();
+    };
+
+    function handleUserGesture() {
+      userInterrupted = true;
+      cancelled = true;
+      finish();
+    }
+
     const attachGestureListeners = (container: HTMLElement) => {
       if (boundContainer === container) return;
       detachGestureListeners();
       boundContainer = container;
-      // passive: true → vi avbryter bara loopen, vi preventDefault inte scrollen
       container.addEventListener('touchstart', handleUserGesture, { passive: true });
       container.addEventListener('wheel', handleUserGesture, { passive: true });
       container.addEventListener('pointerdown', handleUserGesture, { passive: true });
     };
 
-    const tryRestore = () => {
-      if (cancelled || userInterrupted) return;
+    const attemptRestore = (): boolean => {
+      if (cancelled || userInterrupted || restored) return restored;
 
       const scrollContainer = getManagedScrollContainer();
-      if (!scrollContainer) {
-        if (performance.now() - startTime < MAX_WAIT_MS) {
-          rafId = requestAnimationFrame(tryRestore);
-        } else {
-          releaseRestoreLock();
-        }
-        return;
-      }
+      if (!scrollContainer) return false;
 
       attachGestureListeners(scrollContainer);
 
@@ -171,51 +190,73 @@ export function ScrollRestoration() {
         storedPosition?.anchorOffset,
       );
 
+      // Check height-readiness BEFORE scrolling so we don't clamp-to-0
+      // when the list is still empty.
+      const heightReady = !storedPosition?.scrollHeight
+        || scrollContainer.scrollHeight >= storedPosition.scrollHeight - SCROLL_HEIGHT_TOLERANCE_PX;
+
+      if (anchorDelta === null && !heightReady) {
+        // Content not ready — wait for DOM/size to change instead of
+        // hammering scrollTo every frame.
+        return false;
+      }
+
       if (anchorDelta !== null) {
         scrollContainer.scrollTo({ top: scrollContainer.scrollTop + anchorDelta, behavior: 'auto' });
       } else {
         scrollContainer.scrollTo({ top: targetTop, behavior: 'auto' });
       }
 
-      // Check if we're close enough & content has loaded
-      const actualTop = scrollContainer.scrollTop;
-      const nextAnchorDelta = getAnchorDelta(
+      const verifyDelta = getAnchorDelta(
         scrollContainer,
         storedPosition?.anchorId,
         storedPosition?.anchorOffset,
       );
-      const closeEnough = nextAnchorDelta !== null
-        ? Math.abs(nextAnchorDelta) <= RESTORE_TOLERANCE_PX
-        : Math.abs(actualTop - targetTop) <= RESTORE_TOLERANCE_PX;
-      const heightReady = !storedPosition?.scrollHeight
-        || scrollContainer.scrollHeight >= storedPosition.scrollHeight - SCROLL_HEIGHT_TOLERANCE_PX;
+      const closeEnough = verifyDelta !== null
+        ? Math.abs(verifyDelta) <= RESTORE_TOLERANCE_PX
+        : Math.abs(scrollContainer.scrollTop - targetTop) <= RESTORE_TOLERANCE_PX;
 
-      if (closeEnough && heightReady) {
-        stableFrames += 1;
-      } else {
-        stableFrames = 0;
+      if (closeEnough) {
+        restored = true;
+        finish();
+        return true;
       }
 
-      if (stableFrames >= REQUIRED_STABLE_FRAMES) {
-        detachGestureListeners();
-        releaseRestoreLock();
-        return;
-      }
-
-      if (performance.now() - startTime < MAX_WAIT_MS) {
-        rafId = requestAnimationFrame(tryRestore);
-      } else {
-        detachGestureListeners();
-        releaseRestoreLock();
-      }
+      return false;
     };
 
-    rafId = requestAnimationFrame(tryRestore);
+    const scheduleRetry = () => {
+      if (cancelled || userInterrupted || restored) return;
+      if (retryRafId) return; // coalesce a burst of mutations into one rAF
+      retryRafId = requestAnimationFrame(() => {
+        retryRafId = 0;
+        if (attemptRestore()) return;
+        if (performance.now() - startTime >= MAX_WAIT_MS) finish();
+      });
+    };
+
+    const startObservers = (container: HTMLElement) => {
+      mutationObserver = new MutationObserver(scheduleRetry);
+      mutationObserver.observe(container, { childList: true, subtree: true });
+      if (typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(scheduleRetry);
+        resizeObserver.observe(container);
+      }
+      timeoutId = window.setTimeout(finish, MAX_WAIT_MS);
+    };
+
+    // Initial attempt — wait one frame so the new route has mounted.
+    rafId = requestAnimationFrame(() => {
+      if (cancelled || userInterrupted) return;
+      if (attemptRestore()) return;
+      const container = getManagedScrollContainer();
+      if (container) startObservers(container);
+      else finish();
+    });
 
     return () => {
       cancelled = true;
-      cancelAnimationFrame(rafId);
-      detachGestureListeners();
+      cleanup();
     };
   }, [location.pathname, navigationType]);
 
