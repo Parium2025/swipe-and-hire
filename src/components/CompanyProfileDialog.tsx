@@ -261,7 +261,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus className="max-w-2xl max-h-[90vh] p-0 bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20">
+      <DialogContentNoFocus className="max-w-2xl max-h-[90vh] p-0 bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20 [&>button.absolute]:h-7 [&>button.absolute]:w-7 [&>button.absolute]:right-3 [&>button.absolute]:top-3 [&>button.absolute_svg]:h-3 [&>button.absolute_svg]:w-3">
         <ScrollArea className="max-h-[90vh] [&>div>div]:!overflow-y-scroll [&>div>div]:scrollbar-hide">
           <div className="p-6 text-white">
             <DialogHeader className="mb-6">
