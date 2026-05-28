@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
 import { initConnectivityManager } from "@/lib/connectivityManager";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, type Location } from "react-router-dom";
 
 // 🚀 CRITICAL: Keep auth + main app shell synchronous to avoid production chunk-mismatch
 // lockouts after deploys when an old cached bundle still points to stale lazy chunks.
@@ -136,6 +136,18 @@ const LIGHTWEIGHT_ROUTES = ['/', '/auth', '/jobbsokare', '/arbetsgivare'];
 const AnimatedRoutes = () => {
   const location = useLocation();
 
+  // Background-location pattern: when navigating to /job-view/:id from
+  // inside the app, the caller passes `state.background = location`. We then
+  // render the background route underneath and overlay JobView on top —
+  // so Index/KeepAlive NEVER unmounts. Tillbaka-knappen blir 0ms och inga
+  // kort behöver renderas om = inget blink.
+  const navState = location.state as { background?: Location } | null;
+  const backgroundLocation = navState?.background;
+  const isJobViewPath =
+    location.pathname.startsWith('/job-view/') ||
+    location.pathname.startsWith('/job/');
+  const showJobViewOverlay = !!backgroundLocation && isJobViewPath;
+
   useLayoutEffect(() => {
     mountChromePopstateGuard();
     syncBrowserChrome(location.pathname);
@@ -146,7 +158,7 @@ const AnimatedRoutes = () => {
     <>
       <ScrollRestoration />
       <Suspense fallback={<LazyFallback />}>
-        <Routes>
+        <Routes location={backgroundLocation ?? location}>
           <Route path="/" element={<Landing />} />
           <Route path="/jobbsokare" element={<AudienceLanding audience="job_seeker" />} />
           <Route path="/arbetsgivare" element={<AudienceLanding audience="employer" />} />
@@ -189,6 +201,14 @@ const AnimatedRoutes = () => {
           
           <Route path="*" element={<NotFound />} />
         </Routes>
+
+        {/* JobView overlay – renderas ovanpå bakgrundsrouten utan att avmontera den */}
+        {showJobViewOverlay && (
+          <Routes>
+            <Route path="/job-view/:jobId" element={<JobView asOverlay />} />
+            <Route path="/job/:jobId" element={<JobView asOverlay />} />
+          </Routes>
+        )}
       </Suspense>
     </>
   );
