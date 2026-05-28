@@ -206,6 +206,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const contentRef = useRef<HTMLDivElement>(null);
   // Pull-to-dismiss (mobile): drag down from top of page to close
   const [pullY, setPullY] = useState(0);
+  const [isDismissing, setIsDismissing] = useState(false);
   const pullStartYRef = useRef<number | null>(null);
   const pullStartXRef = useRef<number | null>(null);
   const pullActiveRef = useRef(false);
