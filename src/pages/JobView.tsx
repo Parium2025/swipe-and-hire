@@ -204,6 +204,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   });
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
   const contentRef = useRef<HTMLDivElement>(null);
+  // Pull-to-dismiss (mobile): drag down from top of page to close
+  const [pullY, setPullY] = useState(0);
+  const pullStartYRef = useRef<number | null>(null);
+  const pullStartXRef = useRef<number | null>(null);
+  const pullActiveRef = useRef(false);
   
   // Track job view when user reads content (lowered thresholds for accuracy)
   useJobViewTracker({
@@ -549,16 +554,77 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     );
   }
 
+  const handlePullTouchStart = (e: React.TouchEvent) => {
+    const el = contentRef.current;
+    if (!el || el.scrollTop > 0) {
+      pullStartYRef.current = null;
+      return;
+    }
+    pullStartYRef.current = e.touches[0].clientY;
+    pullStartXRef.current = e.touches[0].clientX;
+    pullActiveRef.current = false;
+  };
+
+  const handlePullTouchMove = (e: React.TouchEvent) => {
+    if (pullStartYRef.current === null) return;
+    const dy = e.touches[0].clientY - pullStartYRef.current;
+    const dx = e.touches[0].clientX - (pullStartXRef.current ?? 0);
+    if (dy <= 0) {
+      if (pullActiveRef.current) setPullY(0);
+      pullStartYRef.current = null;
+      pullActiveRef.current = false;
+      return;
+    }
+    // Require vertical dominance to avoid hijacking horizontal swipes (carousel etc.)
+    if (Math.abs(dx) > Math.abs(dy)) {
+      pullStartYRef.current = null;
+      return;
+    }
+    const el = contentRef.current;
+    if (el && el.scrollTop > 0) {
+      pullStartYRef.current = null;
+      if (pullActiveRef.current) setPullY(0);
+      pullActiveRef.current = false;
+      return;
+    }
+    pullActiveRef.current = true;
+    setPullY(Math.min(dy * 0.5, 320));
+  };
+
+  const handlePullTouchEnd = () => {
+    const wasActive = pullActiveRef.current;
+    const finalY = pullY;
+    pullStartYRef.current = null;
+    pullStartXRef.current = null;
+    pullActiveRef.current = false;
+    if (wasActive && finalY > 110) {
+      setPullY(0);
+      handleBack();
+    } else {
+      setPullY(0);
+    }
+  };
+
   return (
     <div
       ref={contentRef}
+      onTouchStart={handlePullTouchStart}
+      onTouchMove={handlePullTouchMove}
+      onTouchEnd={handlePullTouchEnd}
+      onTouchCancel={handlePullTouchEnd}
       className={
         asOverlay
           ? 'fixed inset-0 z-50 h-[100dvh] overflow-x-hidden overflow-y-auto overscroll-contain bg-[hsl(215_100%_12%)] bg-parium-gradient [touch-action:pan-y_pinch-zoom] [scroll-behavior:auto] [-webkit-overflow-scrolling:touch] no-chrome-pad'
           : 'h-[100dvh] overflow-x-hidden overflow-y-auto overscroll-contain [touch-action:pan-y_pinch-zoom] [scroll-behavior:auto] [-webkit-overflow-scrolling:touch] no-chrome-pad'
       }
-      style={{ isolation: 'isolate', contain: 'layout paint style' }}
+      style={{
+        isolation: 'isolate',
+        contain: 'layout paint style',
+        transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
+        transition: pullActiveRef.current ? 'none' : 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1)',
+      }}
     >
+
        <div className="jobview-container py-4">
         {/* Combined header */}
         <div className={`flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg ${user ? 'justify-between' : 'justify-center gap-3'}`}>
