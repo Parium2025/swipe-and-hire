@@ -148,7 +148,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
         </div>
         
         {/* Footer with dots - centered */}
-        <DashboardCarouselDots count={tipsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" />
+        <DashboardCarouselDots count={tipsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" lockedToCardBottom />
       </CardContent>
     </Card>
   );
