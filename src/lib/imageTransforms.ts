@@ -87,3 +87,24 @@ export function getRecommendedCacheEntries(): number {
   if (gb !== undefined && gb <= 3) return 500;
   return 1500;
 }
+
+/**
+ * Returnerar versionssträngen för cache-busting av jobbild/logo.
+ * Föredrar `image_updated_at` (bumpas bara när bilden faktiskt byts)
+ * och faller tillbaka på `updated_at` för bakåtkompatibilitet med data
+ * som inte ännu innehåller den nya kolumnen.
+ *
+ * Detta är hela poängen med image_updated_at-systemet — utan att gå via
+ * denna helper bustas CDN-cachen även när jobbet bara fick en titeländring.
+ */
+export function getImageVersion(
+  job:
+    | { image_updated_at?: string | null; updated_at?: string | null }
+    | null
+    | undefined
+): string | undefined {
+  if (!job) return undefined;
+  const anyJob = job as any;
+  return anyJob.image_updated_at ?? anyJob.updated_at ?? undefined;
+}
+

@@ -142,6 +142,7 @@ export interface SearchJob {
   applications_count: number;
   created_at: string;
   updated_at: string;
+  image_updated_at?: string | null;
   expires_at: string | null;
   search_rank: number;
   image_focus_position: string;

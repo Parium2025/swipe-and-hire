@@ -23,6 +23,7 @@ import {
   JOB_VIEW_HERO_TRANSFORM,
   COMPANY_LOGO_TRANSFORM,
   isSlowOrMeteredConnection,
+  getImageVersion,
   type ImageTransform,
 } from '@/lib/imageTransforms';
 import { useAuth } from '@/hooks/useAuth';
@@ -425,7 +426,7 @@ const SearchJobs = memo(() => {
       .slice(0, warmWindowSize)
       .map(job => {
         const url = resolveStorageImageUrl(job.job_image_url || job.job_image_desktop_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM);
-        return appendVersionToUrl(url, (job as any).updated_at);
+        return appendVersionToUrl(url, getImageVersion(job));
       })
       .filter(Boolean) as string[];
   }, [jobs, warmWindowSize]);
@@ -434,7 +435,7 @@ const SearchJobs = memo(() => {
     return jobs
       .slice(0, warmWindowSize)
       .flatMap(job => {
-        const v = (job as any).updated_at;
+        const v = getImageVersion(job);
         return [
           appendVersionToUrl(resolveStorageImageUrl(job.job_image_url, 'job-images', JOB_VIEW_HERO_TRANSFORM), v),
           appendVersionToUrl(resolveStorageImageUrl(job.job_image_desktop_url || job.job_image_url, 'job-images', JOB_VIEW_HERO_TRANSFORM), v),
@@ -442,6 +443,7 @@ const SearchJobs = memo(() => {
       })
       .filter(Boolean) as string[];
   }, [jobs, warmWindowSize]);
+
 
   // Premium: preload BOTH job images and company logos into both SW + blob cache.
   // Logos are aggressively warmed så de visas direkt på varje kort.
@@ -541,6 +543,7 @@ const SearchJobs = memo(() => {
       title: job.title,
       company_name: job.workplace_name || job.company_name,
       updated_at: job.updated_at,
+      image_updated_at: (job as any).image_updated_at,
       location: job.workplace_city || job.location,
       employment_type: job.employment_type,
       job_image_url: job.job_image_url,
@@ -894,7 +897,7 @@ const SearchJobs = memo(() => {
             {/* Job Cards — image cards on all screen sizes */}
             <div className={cn("job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4", displayedJobs.length === 1 && "job-card-grid-single", displayedJobs.length === 2 && "job-card-grid-double")}>
               {displayedJobs.map((job, idx) => (
-                <CardErrorBoundary key={`${job.id}-${job.updated_at ?? ''}-${job.workplace_name ?? job.company_name ?? ''}-${job.company_logo_url ?? ''}`}>
+                <CardErrorBoundary key={`${job.id}-${getImageVersion(job) ?? ''}-${job.workplace_name ?? job.company_name ?? ''}-${job.company_logo_url ?? ''}`}>
                   <ReadOnlyMobileJobCard
                     cardIndex={idx}
                     job={{
@@ -913,7 +916,7 @@ const SearchJobs = memo(() => {
                       company_name: job.company_name,
                       workplace_name: job.workplace_name,
                       company_logo_url: job.company_logo_url,
-                      updated_at: job.updated_at,
+                      updated_at: (job as any).image_updated_at ?? job.updated_at,
                       salary_min: job.salary_min,
                       salary_max: job.salary_max,
                       salary_type: job.salary_type,
