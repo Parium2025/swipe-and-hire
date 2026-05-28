@@ -748,7 +748,7 @@ const SearchJobs = memo(() => {
   };
 
   if (!showContent) {
-    return <div className="space-y-3 md:space-y-4 responsive-container-wide opacity-0 pb-[max(env(safe-area-inset-bottom),1rem)] [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-hidden="true" />;
+    return isTouchCapable && swipeModeActive ? <SwipeModeSkeleton /> : <JobListSkeleton />;
   }
 
    return (
