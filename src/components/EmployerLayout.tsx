@@ -16,13 +16,14 @@ import EmployerMobileShell from '@/components/employer/EmployerMobileShell';
 
 interface EmployerLayoutProps {
   children: ReactNode;
+  overlay?: ReactNode;
   developerView: string;
   onViewChange: (view: string) => void;
   isOrgAdmin?: boolean;
 }
 
 // Inner component that uses the KanbanLayout context
-const EmployerLayoutInner = memo(({ children, developerView, onViewChange, isOrgAdmin: isOrgAdminProp }: EmployerLayoutProps) => {
+const EmployerLayoutInner = memo(({ children, overlay, developerView, onViewChange, isOrgAdmin: isOrgAdminProp }: EmployerLayoutProps) => {
   const { isAdmin: isOrgAdminFromHook } = useIsOrgAdmin();
   const isOrgAdmin = isOrgAdminProp ?? isOrgAdminFromHook;
   const { invalidateJobs } = useJobsData();
@@ -103,7 +104,27 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange, isOrg
   // Desktop layout with top navigation
   if (isDesktop) {
     return (
-      <EmployerDesktopShell
+      <>
+        <EmployerDesktopShell
+          isOrgAdmin={isOrgAdmin}
+          developerView={developerView}
+          onViewChange={onViewChange}
+          createJobButtonRef={createJobButtonRef}
+          mainScrollRef={mainScrollRef}
+          onJobCreated={invalidateJobs}
+        >
+          {children}
+        </EmployerDesktopShell>
+        {overlay}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <EmployerMobileShell
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
         isOrgAdmin={isOrgAdmin}
         developerView={developerView}
         onViewChange={onViewChange}
@@ -112,33 +133,19 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange, isOrg
         onJobCreated={invalidateJobs}
       >
         {children}
-      </EmployerDesktopShell>
-    );
-  }
-
-  return (
-    <EmployerMobileShell
-      sidebarOpen={sidebarOpen}
-      setSidebarOpen={setSidebarOpen}
-      isOrgAdmin={isOrgAdmin}
-      developerView={developerView}
-      onViewChange={onViewChange}
-      createJobButtonRef={createJobButtonRef}
-      mainScrollRef={mainScrollRef}
-      onJobCreated={invalidateJobs}
-    >
-      {children}
-    </EmployerMobileShell>
+      </EmployerMobileShell>
+      {overlay}
+    </>
   );
 });
 
 EmployerLayoutInner.displayName = 'EmployerLayoutInner';
 
 // Wrapper component that provides the KanbanLayout context
-const EmployerLayout = memo(({ children, developerView, onViewChange, isOrgAdmin }: EmployerLayoutProps) => {
+const EmployerLayout = memo(({ children, overlay, developerView, onViewChange, isOrgAdmin }: EmployerLayoutProps) => {
   return (
     <KanbanLayoutProvider>
-      <EmployerLayoutInner developerView={developerView} onViewChange={onViewChange} isOrgAdmin={isOrgAdmin}>
+      <EmployerLayoutInner developerView={developerView} onViewChange={onViewChange} isOrgAdmin={isOrgAdmin} overlay={overlay}>
         {children}
       </EmployerLayoutInner>
     </KanbanLayoutProvider>
