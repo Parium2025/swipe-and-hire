@@ -161,8 +161,11 @@ const fallbackWeatherResponse = (lat: number, lon: number) => {
   };
 };
 
-/** Parse raw Open-Meteo response into our format */
-const parseWeatherResponse = (data: Record<string, unknown>) => {
+/**
+ * Parse raw Open-Meteo response into our normalized format.
+ * Exported for unit testing — production code should use `fetchCurrentWeather`.
+ */
+export const parseWeatherResponse = (data: Record<string, unknown>) => {
   const current = (data as { current?: Record<string, unknown> })?.current;
   if (!current) throw new Error('Missing current weather data');
   
