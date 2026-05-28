@@ -177,8 +177,10 @@ const AnimatedRoutes = () => {
           <Route path="/messages" element={<Index />} />
           <Route path="/my-candidates" element={<Index />} />
           <Route path="/job-details/:jobId" element={<Index />} />
-          <Route path="/job-view/:jobId" element={<JobView />} />
-          <Route path="/job/:jobId" element={<JobView />} />
+          {/* JobView routas genom Index så KeepAlive-cachen (SearchJobs/SavedJobs)
+              aldrig avmonteras vid in/ut-navigering = inget blink, instant back. */}
+          <Route path="/job-view/:jobId" element={<Index />} />
+          <Route path="/job/:jobId" element={<Index />} />
           <Route path="/company-profile" element={<Index />} />
           <Route path="/employer-profile" element={<Index />} />
           <Route path="/reviews" element={<Index />} />

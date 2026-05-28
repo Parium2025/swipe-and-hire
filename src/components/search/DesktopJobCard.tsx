@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Briefcase, Calendar, Building2, Users, Timer, CheckCircle, Heart } from 'lucide-react';
@@ -33,12 +33,13 @@ export const DesktopJobCard = memo(function DesktopJobCard({
   onOpenCompanyProfile,
 }: DesktopJobCardProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
 
   return (
     <Card
       data-scroll-anchor-id={job.id}
-      onClick={() => navigate(`/job-view/${job.id}`)}
+      onClick={() => navigate(`/job-view/${job.id}`, { state: { background: location } })}
       className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
     >
       <CardContent className="job-card-desktop-body p-5 relative">

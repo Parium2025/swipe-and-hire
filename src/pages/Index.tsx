@@ -1,5 +1,6 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import JobView from '@/pages/JobView';
 // smartSearchCandidates is applied inside useApplicationsData — not needed here
 import JobDetails from '@/pages/JobDetails';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
@@ -322,6 +323,16 @@ const Index = () => {
   const location = useLocation();
   const device = useDevice();
   const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
+
+  // JobView overlay-stöd: när användaren navigerar till /job-view/:id ska
+  // den underliggande KeepAlive-vyn (SearchJobs/SavedJobs/etc) stå kvar
+  // monterad och JobView renderas som fixed overlay ovanpå. Vi spårar
+  // senaste sidebar-path så KeepAlive får rätt activeKey och inte byter vy.
+  const isJobViewOverlay =
+    location.pathname.startsWith('/job-view/') ||
+    location.pathname.startsWith('/job/');
+  const lastJobSeekerPathRef = useRef<string>('/search-jobs');
+  const lastEmployerPathRef = useRef<string>('/home');
   
   // Borttagen aggressiv fallback till /auth som skapade loopar
   // Vi navigerar nu endast när auth-loading är klar (se effekten nedan)
@@ -464,12 +475,21 @@ const Index = () => {
   // Render sidebar layout for profile pages and employer routes
   const sidebarRoutes = ['/home', '/index', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/status', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
+  // Behåll senaste sidebar-path så JobView-overlay vet vilken vy som
+  // ska visas underst (utan att KeepAlive byter activeKey och fadar).
+  if (isSidebarRoute) {
+    if (role === 'employer') lastEmployerPathRef.current = location.pathname;
+    else lastJobSeekerPathRef.current = location.pathname;
+  }
+  // Behandla /job-view/:id som "fortsatt på senaste sidebar-vy + overlay".
+  const treatAsSidebar = isSidebarRoute || isJobViewOverlay;
 
-  if (isSidebarRoute && role !== 'employer') {
+  if (treatAsSidebar && role !== 'employer') {
     // Redirect job seekers from employer routes
     if (location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/company-profile')) {
       return <Navigate to="/search-jobs" replace />;
     }
+    const activeKeepKey = isJobViewOverlay ? lastJobSeekerPathRef.current : location.pathname;
 
     const renderSidebarContent = (path: string) => {
       switch (path) {
@@ -520,11 +540,12 @@ const Index = () => {
     return (
       <JobSeekerLayout developerView={developerView} onViewChange={setDeveloperView}>
         <KeepAlive
-          activeKey={location.pathname}
+          activeKey={activeKeepKey}
           render={(key) => renderSidebarContent(key)}
           keepKeys={JOB_SEEKER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
         />
+        {isJobViewOverlay && <JobView asOverlay />}
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
         )}
@@ -533,7 +554,7 @@ const Index = () => {
   }
 
   // Show employer dashboard with sidebar for employers
-  if (role === 'employer') {
+  if (role === 'employer' || (isJobViewOverlay && role === 'employer')) {
     // Redirect employer from job seeker routes
     if (location.pathname === '/search-jobs') {
       return <Navigate to="/home" replace />;
@@ -594,14 +615,16 @@ const Index = () => {
       }
     };
 
+    const employerKeepKey = isJobViewOverlay ? lastEmployerPathRef.current : location.pathname;
     return (
       <EmployerLayout developerView={developerView} onViewChange={setDeveloperView} isOrgAdmin={isAdmin}>
         <KeepAlive
-          activeKey={location.pathname}
+          activeKey={employerKeepKey}
           render={(key) => renderEmployerContent(key)}
           keepKeys={EMPLOYER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
         />
+        {isJobViewOverlay && <JobView asOverlay />}
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
         )}
