@@ -415,6 +415,15 @@ const SearchJobs = memo(() => {
   // När användaren har scrollat långt kan `jobs` innehålla 200-500 entries; att warma
   // alla 3 URL:er per jobb = upp till 1500 onödiga storage-anrop per session. Vi vill
   // bara att nästa skärmfull är klar, resten warmas när användaren scrollar dit.
+  // Premium batch-warming: ladda första 20 direkt; så snart användaren börjar
+  // närma sig slutet på warm-fönstret (inom 10 kort) skjuts nästa 20 in. Det
+  // ger "alltid på plats"-känslan utan att hamra på 200+ bilder i taget.
+  useEffect(() => {
+    if (displayCount + 10 > warmWindowEnd) {
+      setWarmWindowEnd((prev) => Math.max(prev, displayCount + 20));
+    }
+  }, [displayCount, warmWindowEnd]);
+
   const warmWindowSize = useMemo(() => {
     if (isSlowOrMeteredConnection()) return Math.min(24, Math.max(20, displayCount));
     return Math.max(20, warmWindowEnd);
