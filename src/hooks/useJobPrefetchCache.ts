@@ -11,6 +11,19 @@ import type { SearchJob } from '@/hooks/useOptimizedJobSearch';
 
 export const JOB_PREFETCH_KEY = 'job-prefetch';
 
+const hotJobPrefetchCache = new Map<string, SearchJob>();
+const MAX_HOT_PREFETCH_JOBS = 120;
+
+const rememberHotJob = (job: SearchJob) => {
+  hotJobPrefetchCache.delete(job.id);
+  hotJobPrefetchCache.set(job.id, job);
+  while (hotJobPrefetchCache.size > MAX_HOT_PREFETCH_JOBS) {
+    const oldestKey = hotJobPrefetchCache.keys().next().value;
+    if (!oldestKey) break;
+    hotJobPrefetchCache.delete(oldestKey);
+  }
+};
+
 interface PrefetchedJobBrandingUpdates {
   companyName?: string | null;
   companyLogoUrl?: string | null;
@@ -53,13 +66,14 @@ export function useJobPrefetchCache() {
   /** Seed all search-result jobs into per-job cache entries */
   const seedJobsFromSearch = useCallback((jobs: SearchJob[]) => {
     jobs.forEach(job => {
+      rememberHotJob(job);
       queryClient.setQueryData([JOB_PREFETCH_KEY, job.id], job);
     });
   }, [queryClient]);
 
   /** Read a single prefetched job (returns undefined if not cached) */
   const getPrefetchedJob = useCallback((jobId: string): SearchJob | undefined => {
-    return queryClient.getQueryData<SearchJob>([JOB_PREFETCH_KEY, jobId]);
+    return queryClient.getQueryData<SearchJob>([JOB_PREFETCH_KEY, jobId]) ?? hotJobPrefetchCache.get(jobId);
   }, [queryClient]);
 
   return { seedJobsFromSearch, getPrefetchedJob };

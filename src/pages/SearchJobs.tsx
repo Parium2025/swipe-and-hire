@@ -39,7 +39,6 @@ import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { getTimeRemaining } from '@/lib/date'; // kept for swipe jobs mapping
 import { StatsGrid } from '@/components/StatsGrid';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { preloadImages } from '@/lib/serviceWorkerManager';
 import { imageCache } from '@/lib/imageCache';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useOptimizedJobSearch } from '@/hooks/useOptimizedJobSearch';
@@ -309,6 +308,7 @@ const SearchJobs = memo(() => {
   const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
   const isLoadingMoreRef = useRef(false);
   const hasInitializedFiltersRef = useRef(false);
+  const [warmWindowEnd, setWarmWindowEnd] = useState(20);
 
   // Debounced search for better performance
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
@@ -416,10 +416,9 @@ const SearchJobs = memo(() => {
   // alla 3 URL:er per jobb = upp till 1500 onödiga storage-anrop per session. Vi vill
   // bara att nästa skärmfull är klar, resten warmas när användaren scrollar dit.
   const warmWindowSize = useMemo(() => {
-    // Snäva in på 2G/Save-Data — annars är 10 framåt premium-default.
-    const ahead = isSlowOrMeteredConnection() ? 4 : 10;
-    return displayCount + ahead;
-  }, [displayCount]);
+    if (isSlowOrMeteredConnection()) return Math.min(24, Math.max(20, displayCount));
+    return Math.max(20, warmWindowEnd);
+  }, [displayCount, warmWindowEnd]);
 
   const jobImageUrls = useMemo(() => {
     return jobs
@@ -465,29 +464,35 @@ const SearchJobs = memo(() => {
     return out;
   }, [jobs, warmWindowSize]);
 
-  // Preload via Service Worker när bilder laddas
+  // Premium batch-cache: first 20 are warmed; when card 10/30/50... approaches,
+  // the next 20 are warmed in low-concurrency idle batches. Avoid native <Image>
+  // preloads here — useCardImage/imageCache already owns the fetch path, and
+  // duplicate native preloads were the source of lag + visible card popping.
   useEffect(() => {
     if (jobImageUrls.length > 0) {
-      preloadImages(jobImageUrls);
+      const runCards = () => warmImageCacheBatch(jobImageUrls, 3);
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(runCards, { timeout: 450 });
+      } else {
+        setTimeout(runCards, 40);
+      }
     }
     if (jobViewImageUrls.length > 0) {
-      const runJobs = () => warmImageCacheBatch(jobViewImageUrls, 3);
+      const runJobs = () => warmImageCacheBatch(jobViewImageUrls, 2);
       if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(runJobs, { timeout: 700 });
+        (window as any).requestIdleCallback(runJobs, { timeout: 900 });
       } else {
-        setTimeout(runJobs, 50);
+        setTimeout(runJobs, 120);
       }
     }
     if (companyLogoUrls.length > 0) {
-      preloadImages(companyLogoUrls);
-      // Also seed the in-memory blob cache so logos render synchronously
       const run = () => {
-        warmImageCacheBatch(companyLogoUrls, 8);
+        warmImageCacheBatch(companyLogoUrls, 4);
       };
       if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(run, { timeout: 500 });
+        (window as any).requestIdleCallback(run, { timeout: 650 });
       } else {
-        setTimeout(run, 100);
+        setTimeout(run, 160);
       }
     }
   }, [jobImageUrls, jobViewImageUrls, companyLogoUrls]);
