@@ -26,6 +26,7 @@ import AppOnboardingTour from '@/components/AppOnboardingTour';
 import Profile from '@/pages/Profile';
 import Consent from '@/pages/Consent';
 import SearchJobs from '@/pages/SearchJobs';
+import { JobListSkeleton } from '@/components/search/SearchPageSkeleton';
 import Subscription from '@/pages/Subscription';
 import Billing from '@/pages/Billing';
 import Support from '@/pages/Support';
@@ -323,6 +324,7 @@ const Index = () => {
   const location = useLocation();
   const device = useDevice();
   const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
+  const shouldShowSearchBootSkeleton = location.pathname === '/search-jobs';
 
   // JobView overlay-stöd: när användaren navigerar till /job-view/:id ska
   // den underliggande KeepAlive-vyn (SearchJobs/SavedJobs/etc) stå kvar
@@ -368,6 +370,7 @@ const Index = () => {
 
   // Vid logout/inloggning hanteras övergången av AuthSplashScreen - visa bara bakgrund
   if (loading && !user && authAction !== 'logout') {
+    if (shouldShowSearchBootSkeleton) return <JobListSkeleton />;
     return <div className="min-h-screen bg-gradient-parium" />;
   }
 
@@ -378,6 +381,7 @@ const Index = () => {
 
   // Vänta på profil men visa bakgrund
   if (!profile) {
+    if (shouldShowSearchBootSkeleton) return <JobListSkeleton />;
     return (
       <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />
     );
@@ -467,6 +471,7 @@ const Index = () => {
 
   // While role is resolving, keep seamless background
   if (user && profile && !role) {
+    if (shouldShowSearchBootSkeleton) return <JobListSkeleton />;
     return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
   
