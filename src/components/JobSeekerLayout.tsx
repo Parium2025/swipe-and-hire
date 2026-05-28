@@ -24,6 +24,7 @@ import { useDevice } from '@/hooks/use-device';
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
+  overlay?: ReactNode;
   developerView?: string;
   onViewChange?: (view: string) => void;
 }
@@ -89,7 +90,7 @@ const MobileProfileAvatar = () => {
   );
 };
 
-const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
+const JobSeekerLayout = memo(({ children, overlay, developerView, onViewChange }: JobSeekerLayoutProps) => {
   const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
   const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
   const navigate = useNavigate();
@@ -155,6 +156,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
             {children}
             <div aria-hidden="true" style={{ flexShrink: 0, height: 'var(--chrome-strip-pad, calc(env(safe-area-inset-bottom, 0px) + 96px))' }} />
           </main>
+          {overlay}
         </div>
       </>
     );
@@ -228,6 +230,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
             {children}
             <div aria-hidden="true" style={{ flexShrink: 0, height: 'var(--chrome-strip-pad, calc(env(safe-area-inset-bottom, 0px) + 96px))' }} />
           </main>
+          {overlay}
         </div>
       </div>
     </SidebarProvider>
