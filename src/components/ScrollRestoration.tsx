@@ -16,11 +16,17 @@ export function ScrollRestoration() {
   const navigationType = useNavigationType();
   const isRestoringRef = useRef(false);
   const pendingSaveFrameRef = useRef<number | null>(null);
+  const isJobViewOverlayPath = location.pathname.startsWith('/job-view/') || location.pathname.startsWith('/job/');
 
   // -----------------------------------------------------------------------
   // Save scroll position on user scroll
   // -----------------------------------------------------------------------
   useEffect(() => {
+    // JobView är en overlay ovanpå den befintliga listan. Den får ALDRIG trigga
+    // global restore/save mot huvudscrollen — annars hoppar bakgrundslistan till
+    // toppen medan detaljsidan ligger ovanpå, vilket skapar blink/hack vid back.
+    if (isJobViewOverlayPath) return;
+
     let scrollContainer = getManagedScrollContainer();
 
     // If the container isn't in the DOM yet (e.g. layout still mounting),
@@ -74,12 +80,14 @@ export function ScrollRestoration() {
         }
       };
     }
-  }, [location.pathname]);
+  }, [location.pathname, isJobViewOverlayPath]);
 
   // -----------------------------------------------------------------------
   // Restore scroll position on navigation
   // -----------------------------------------------------------------------
   useLayoutEffect(() => {
+    if (isJobViewOverlayPath) return;
+
     const positions = readPositions();
     const storedPosition = navigationType === 'POP' ? positions[location.pathname] : undefined;
     const targetTop = storedPosition?.top ?? 0;
@@ -229,7 +237,7 @@ export function ScrollRestoration() {
       cancelled = true;
       cleanup();
     };
-  }, [location.pathname, navigationType]);
+  }, [location.pathname, navigationType, isJobViewOverlayPath]);
 
   // -----------------------------------------------------------------------
   // Disable native scroll restoration
