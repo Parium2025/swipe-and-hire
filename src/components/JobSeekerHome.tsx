@@ -188,14 +188,14 @@ const JobSeekerHome = memo(() => {
             </h1>
           </div>
           <DateTimeDisplay />
-          {gpsGranted && !weather.isLoading && !weather.error && weather.description ? (
+          {gpsGranted && !weather.isLoading && !weather.error && weather.description && weather.city ? (
             <motion.p 
               className="text-white text-base"
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              {weather.city ? `${weather.city}, ` : ''}{weather.temperature}°
+              {weather.city}, {weather.temperature}°
               {weather.feelsLike !== weather.temperature && (
                 <span className="text-white"> (känns som {weather.feelsLike}°)</span>
               )}
