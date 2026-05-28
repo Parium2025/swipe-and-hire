@@ -177,7 +177,7 @@ const JobView = () => {
     const rawImg = isDesktopInit
       ? (initialJob?.job_image_desktop_url || initialJob?.job_image_url)
       : (initialJob?.job_image_url || initialJob?.job_image_desktop_url);
-    const resolved = appendVersionToUrl(resolveJobImageUrl(rawImg), (initialJob as any)?.updated_at);
+    const resolved = appendVersionToUrl(resolveJobImageUrl(rawImg), (initialJob as any)?.image_updated_at ?? (initialJob as any)?.updated_at);
     if (!resolved) return null;
     return imageCache.getCachedUrl(resolved) || resolved;
   });
@@ -280,7 +280,7 @@ const JobView = () => {
         ? (data.job_image_desktop_url || data.job_image_url)
         : (data.job_image_url || data.job_image_desktop_url);
       if (rawImageUrl) {
-        const resolved = appendVersionToUrl(resolveJobImageUrl(rawImageUrl), (data as any)?.updated_at);
+        const resolved = appendVersionToUrl(resolveJobImageUrl(rawImageUrl), (data as any)?.image_updated_at ?? (data as any)?.updated_at);
         if (resolved) {
           const cachedBlob = imageCache.getCachedUrl(resolved);
           // Only set if we don't already display a valid URL (prevents src swap → reflow flash)
