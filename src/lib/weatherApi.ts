@@ -11,6 +11,7 @@ export interface CachedLocation {
 export interface CachedWeather {
   temperature: number;
   feelsLike: number;
+  temperatureAvailable: boolean;
   weatherCode: number;
   description: string;
   emoji: string;
@@ -124,7 +125,7 @@ export const getWeatherInfo = (code: number, isNight: boolean): { description: s
 // ─── Fetch current weather (server-side cache → direct fallback) ─
 
 const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-const USE_WEATHER_EDGE_CACHE = false;
+const USE_WEATHER_EDGE_CACHE = true;
 
 const fallbackWeatherResponse = (lat: number, lon: number) => {
   const today = new Date().toISOString().slice(0, 10);
@@ -142,6 +143,7 @@ const fallbackWeatherResponse = (lat: number, lon: number) => {
       sunrise: [`${today}T07:00`],
       sunset: [`${today}T17:00`],
     },
+    fallback: true,
   };
 };
 
@@ -162,10 +164,21 @@ const parseWeatherResponse = (data: Record<string, unknown>) => {
     isNight = currentTimeStr < sunrise || currentTimeStr > sunset;
   }
   
+  const rawTemperature = current.temperature_2m;
+  const rawFeelsLike = current.apparent_temperature;
+  const rawWeatherCode = current.weather_code;
+  const temperatureAvailable =
+    (data as { fallback?: boolean }).fallback !== true &&
+    typeof rawTemperature === 'number' &&
+    Number.isFinite(rawTemperature) &&
+    typeof rawFeelsLike === 'number' &&
+    Number.isFinite(rawFeelsLike);
+
   return {
-    temperature: Math.round(current.temperature_2m as number),
-    feelsLike: Math.round(current.apparent_temperature as number),
-    weatherCode: current.weather_code as number,
+    temperature: temperatureAvailable ? Math.round(rawTemperature) : 0,
+    feelsLike: temperatureAvailable ? Math.round(rawFeelsLike) : 0,
+    temperatureAvailable,
+    weatherCode: typeof rawWeatherCode === 'number' && Number.isFinite(rawWeatherCode) ? rawWeatherCode : 0,
     isNight,
   };
 };
@@ -178,6 +191,7 @@ const parseWeatherResponse = (data: Record<string, unknown>) => {
 export const fetchCurrentWeather = async (lat: number, lon: number): Promise<{
   temperature: number;
   feelsLike: number;
+  temperatureAvailable: boolean;
   weatherCode: number;
   isNight: boolean;
   cachedCity?: string;
