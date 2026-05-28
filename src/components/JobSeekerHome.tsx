@@ -1,6 +1,7 @@
 import { memo, useMemo, useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWeather } from '@/hooks/useWeather';
+import { hasConfirmedWeather } from '@/lib/weatherApi';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
@@ -199,10 +200,9 @@ const JobSeekerHome = memo(() => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              {weather.city && weather.temperatureAvailable ? `${weather.city}, ` : ''}
-              {weather.city && weather.temperatureAvailable ? (
+              {hasConfirmedWeather(weather) ? (
                 <>
-                  {weather.temperature}°
+                  {weather.city}, {weather.temperature}°
                   {weather.feelsLike !== weather.temperature && (
                     <span className="text-white"> (känns som {weather.feelsLike}°)</span>
                   )}

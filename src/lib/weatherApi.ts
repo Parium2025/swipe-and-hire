@@ -11,6 +11,12 @@ export interface CachedLocation {
 export interface CachedWeather {
   temperature: number;
   feelsLike: number;
+  /**
+   * True only when a real, finite temperature was returned from the upstream
+   * weather API (i.e. NOT the neutral fallback response). When false the UI
+   * must hide "X°" and show only the textual description / emoji to avoid
+   * displaying a misleading 0°.
+   */
   temperatureAvailable: boolean;
   weatherCode: number;
   description: string;
@@ -19,6 +25,14 @@ export interface CachedWeather {
   isNight: boolean;
   timestamp: number;
 }
+
+/**
+ * Returns true when both a confirmed city and a real temperature reading are
+ * available. Use this anywhere in the UI before rendering "City, X°".
+ */
+export const hasConfirmedWeather = (
+  w: { city?: string; temperatureAvailable?: boolean } | null | undefined
+): boolean => Boolean(w && w.city && w.temperatureAvailable);
 
 // ─── Cache keys & TTLs ──────────────────────────────────
 
@@ -147,8 +161,11 @@ const fallbackWeatherResponse = (lat: number, lon: number) => {
   };
 };
 
-/** Parse raw Open-Meteo response into our format */
-const parseWeatherResponse = (data: Record<string, unknown>) => {
+/**
+ * Parse raw Open-Meteo response into our normalized format.
+ * Exported for unit testing — production code should use `fetchCurrentWeather`.
+ */
+export const parseWeatherResponse = (data: Record<string, unknown>) => {
   const current = (data as { current?: Record<string, unknown> })?.current;
   if (!current) throw new Error('Missing current weather data');
   
