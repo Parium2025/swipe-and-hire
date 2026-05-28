@@ -11,12 +11,10 @@ import { useOnline } from '@/hooks/useOnlineStatus';
 import { getTimeRemaining } from '@/lib/date';
 import type { JobQuestion } from '@/types/jobWizard';
 import { ArrowLeft, Send, Users, CheckCircle, Share2 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { convertToSignedUrl } from '@/utils/storageUtils';
-import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { imageCache } from '@/lib/imageCache';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -123,6 +121,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const { user, isCompanyUser, userRole } = useAuth();
   const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || userRole?.role === 'employer');
   const { getPrefetchedJob } = useJobPrefetchCache();
+  const navigationImageState = (location.state ?? {}) as {
+    initialHeroImageUrl?: string;
+    initialCompanyLogoUrl?: string;
+  };
 
   // Robust employer check: also verify from profiles table directly
   useEffect(() => {
@@ -181,6 +183,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const companyTapArmedRef = useRef(false);
   const companyTapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
+    if (typeof navigationImageState.initialHeroImageUrl === 'string' && navigationImageState.initialHeroImageUrl) {
+      return navigationImageState.initialHeroImageUrl;
+    }
     const isDesktopInit = typeof window !== 'undefined' && window.innerWidth >= 1024;
     const rawImg = isDesktopInit
       ? (initialJob?.job_image_desktop_url || initialJob?.job_image_url)
@@ -190,6 +195,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     return imageCache.getCachedUrl(resolved) || resolved;
   });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
+    if (typeof navigationImageState.initialCompanyLogoUrl === 'string' && navigationImageState.initialCompanyLogoUrl) {
+      return navigationImageState.initialCompanyLogoUrl;
+    }
     const rawLogo = initialJob?.company_logo_url || initialJob?.profiles?.company_logo_url;
     const resolvedLogo = resolveCompanyLogoUrl(rawLogo);
     return resolvedLogo ? (imageCache.getCachedUrl(resolvedLogo) || resolvedLogo) : null;
@@ -206,8 +214,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     minTimeOnPage: 2000,
   });
   
-  useImagePreloader(imageUrl ? [imageUrl] : [], { priority: 'high' });
-
   useEffect(() => {
     if (jobId) {
       fetchJob();
