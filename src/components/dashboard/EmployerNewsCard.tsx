@@ -100,7 +100,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
           <span className="text-[10px] text-white uppercase tracking-wider font-medium">NYHETER</span>
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col justify-center py-2 overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col justify-center overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
             {currentNews ? (
               <motion.div
@@ -112,16 +112,16 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
                 className={`h-[104px] w-full flex flex-col justify-center overflow-hidden ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
               >
-                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">{currentNews.title}</h3>
-                <p className="text-sm text-white line-clamp-1 mb-1">{currentNews.summary || currentNews.title}</p>
+                <h3 className="h-[39px] text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">{currentNews.title}</h3>
+                <p className="h-[18px] text-sm leading-[18px] text-white truncate mb-1">{currentNews.summary || currentNews.title}</p>
                 {currentNews.published_at && (
-                  <div className="flex items-center gap-1.5 text-white text-[10px] mb-1">
-                    <Clock className="h-3 w-3" />
+                  <div className="h-[14px] flex items-center gap-1.5 text-white text-[10px] leading-none mb-1">
+                    <Clock className="h-3 w-3 shrink-0" />
                     <span>{formatNewsTime(currentNews.published_at)}</span>
                   </div>
                 )}
                 {currentNews.source_url && (
-                  <div className="flex items-center gap-1.5 text-white transition-colors min-w-0 overflow-hidden whitespace-nowrap">
+                  <div className="h-4 flex items-center gap-1.5 text-white transition-colors min-w-0 overflow-hidden whitespace-nowrap">
                     <span className="text-xs shrink-0">Läs mer</span>
                     <span className="text-[10px] text-white truncate">· {currentNews.source}</span>
                     <ExternalLink className="h-3 w-3 shrink-0" />
