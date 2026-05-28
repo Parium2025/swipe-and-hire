@@ -1,6 +1,7 @@
 import { memo, useMemo, useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWeather } from '@/hooks/useWeather';
+import { hasConfirmedWeather } from '@/lib/weatherApi';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
