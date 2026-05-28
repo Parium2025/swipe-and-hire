@@ -20,6 +20,7 @@ export { clearWeatherCache } from '@/lib/weatherApi';
 interface WeatherData {
   temperature: number;
   feelsLike: number;
+  temperatureAvailable: boolean;
   weatherCode: number;
   description: string;
   emoji: string;
@@ -50,6 +51,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const safeFallback = useCallback((city = ''): WeatherData => ({
     temperature: 0,
     feelsLike: 0,
+    temperatureAvailable: false,
     weatherCode: 0,
     description: '',
     emoji: getTimeBasedEmoji(),
@@ -64,6 +66,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       return {
         temperature: cached.temperature,
         feelsLike: cached.feelsLike,
+        temperatureAvailable: cached.temperatureAvailable === true,
         weatherCode: cached.weatherCode,
         description: cached.description,
         emoji: cached.emoji,
@@ -75,6 +78,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     return {
       temperature: 0,
       feelsLike: 0,
+      temperatureAvailable: false,
       weatherCode: 0,
       description: '',
       emoji: getTimeBasedEmoji(),
@@ -94,7 +98,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       if (showLoading) updateWeather({ isLoading: true });
       
       const result = await fetchCurrentWeather(lat, lon);
-      const { temperature, feelsLike, weatherCode, isNight } = result;
+      const { temperature, feelsLike, temperatureAvailable, weatherCode, isNight } = result;
       // Use server-cached city if we don't have one yet
       const resolvedCity = city || result.cachedCity || '';
       
@@ -109,6 +113,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       const weatherData = {
         temperature,
         feelsLike,
+        temperatureAvailable,
         weatherCode,
         description: info.description,
         emoji: info.emoji,
@@ -377,7 +382,7 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
   if (location) {
     try {
       const result = await fetchCurrentWeather(location.lat, location.lon);
-      const { temperature, feelsLike, weatherCode, isNight, cachedCity } = result;
+      const { temperature, feelsLike, temperatureAvailable, weatherCode, isNight, cachedCity } = result;
       // Use server-provided city, update location cache with resolved city
       const resolvedCity = cachedCity || location.city || '';
       if (resolvedCity && !location.city) {
@@ -388,6 +393,7 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
       setCachedWeather({
         temperature,
         feelsLike,
+        temperatureAvailable,
         weatherCode,
         description: info.description,
         emoji: info.emoji,
