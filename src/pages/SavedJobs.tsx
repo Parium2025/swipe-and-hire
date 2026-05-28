@@ -348,7 +348,7 @@ const SavedJobs = () => {
                         isSavedExternal={true}
                         onToggleSave={toggleSavedJob}
                         onUnsaveClick={handleUnsaveClick}
-                        onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true, background: location } })}
+                        onCardClick={(jobId, imageState) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true, background: location, ...imageState } })}
                       />
                     </CardErrorBoundary>
                   );
@@ -421,7 +421,7 @@ const SavedJobs = () => {
                             toast.error('Kunde inte spara jobbet');
                           });
                         }}
-                        onCardClick={(jobId) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true, background: location } })}
+                        onCardClick={(jobId, imageState) => navigate(`/job-view/${jobId}`, { state: { fromSavedJobs: true, background: location, ...imageState } })}
                       />
                       {/* Restore button overlay */}
                       <button

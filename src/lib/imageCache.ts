@@ -239,8 +239,10 @@ class ImageCache {
         }
       }
 
-      // Fetch utan credentials för cross-origin storage URLs (undviker CORS-fel)
-      const isStorageUrl = url.includes('/storage/v1/object/');
+      // Fetch utan credentials för cross-origin storage URLs (undviker CORS-fel).
+      // Viktigt: transformerade bilder använder /storage/v1/render/image/ — om de
+      // behandlas som same-origin misslyckas blob-cachen och detaljsidan får blink.
+      const isStorageUrl = url.includes('/storage/v1/object/') || url.includes('/storage/v1/render/image/');
       const response = await fetch(url, {
         cache: 'force-cache',
         credentials: isStorageUrl ? 'omit' : 'include',

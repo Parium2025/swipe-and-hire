@@ -7,7 +7,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useCardImage } from '@/hooks/useCardImage';
-import { getImageVersion } from '@/lib/imageTransforms';
+import { JOB_VIEW_HERO_TRANSFORM, getImageVersion } from '@/lib/imageTransforms';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
@@ -65,7 +65,7 @@ interface ReadOnlyMobileJobCardProps {
   /** Hide the save/heart button entirely */
   hideSaveButton?: boolean;
   /** Override default card click navigation */
-  onCardClick?: (jobId: string) => void;
+  onCardClick?: (jobId: string, imageState?: { initialHeroImageUrl?: string; initialCompanyLogoUrl?: string }) => void;
   /** Extra content rendered below the tags row (e.g. edit/delete buttons) */
   footer?: ReactNode;
   /** Card index in list — first 6 load eagerly, rest lazy */
@@ -121,6 +121,21 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
+  const getCachedJobViewHeroUrl = useCallback(() => {
+    const raw = job.job_image_url || (job as any).job_image_desktop_url;
+    if (!raw) return null;
+    try {
+      const base = raw.startsWith('http')
+        ? raw
+        : supabase.storage.from('job-images').getPublicUrl(raw, {
+            transform: JOB_VIEW_HERO_TRANSFORM,
+          }).data.publicUrl;
+      const resolved = appendVersionToUrl(base, imageVersion);
+      return resolved ? imageCache.getCachedUrl(resolved) : null;
+    } catch {
+      return null;
+    }
+  }, [job.job_image_url, (job as any).job_image_desktop_url, imageVersion]);
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -147,7 +162,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         const base = raw.startsWith('http')
           ? raw
           : supabase.storage.from('job-images').getPublicUrl(raw, {
-              transform: { width: 1200, height: 800, quality: 75, resize: 'cover' },
+              transform: JOB_VIEW_HERO_TRANSFORM,
             }).data.publicUrl;
         // VIKTIGT: append samma v=-version som SearchJobs och JobView använder,
         // annars hamnar varmningen i en separat cache-slot och JobView missar träffen.
@@ -170,7 +185,16 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         // så tillbaka-knappen alltid landar på exakt rätt kort.
         try { saveScrollNow(window.location.pathname); } catch {}
       }}
-      onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`, { state: { background: location } })}
+      onClick={() => {
+        const instantHeroUrl = getCachedJobViewHeroUrl() || displayUrl;
+        const imageState = {
+          ...(instantHeroUrl ? { initialHeroImageUrl: instantHeroUrl } : {}),
+          ...(logoUrl ? { initialCompanyLogoUrl: logoUrl } : {}),
+        };
+        onCardClick
+          ? onCardClick(job.id, imageState)
+          : navigate(`/job-view/${job.id}`, { state: { background: location, ...imageState } });
+      }}
     >
       {/* Visual header — image or gradient placeholder */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">
