@@ -20,6 +20,10 @@ export { clearWeatherCache } from '@/lib/weatherApi';
 interface WeatherData {
   temperature: number;
   feelsLike: number;
+  /**
+   * True only when the temperature reading is real (not the neutral fallback).
+   * UI must hide "X°" when this is false. See `hasConfirmedWeather` helper.
+   */
   temperatureAvailable: boolean;
   weatherCode: number;
   description: string;
