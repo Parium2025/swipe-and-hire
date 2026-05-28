@@ -109,7 +109,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
         </div>
         
         {/* News content */}
-        <div className="flex-1 flex flex-col justify-center py-2">
+        <div className="flex-1 min-h-0 flex flex-col justify-center pt-2 pb-8">
           <AnimatePresence mode="wait" initial={false}>
             {currentTip ? (
               <motion.div
@@ -148,15 +148,16 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
         </div>
         
         {/* Footer with dots - centered */}
-        <div className="h-6 flex items-center justify-center mt-auto shrink-0">
+        <div className="absolute inset-x-0 bottom-4 h-6 flex items-center justify-center shrink-0 [contain:layout_paint] [transform:translateZ(0)] [backface-visibility:hidden]">
           {tipsItems.length > 1 && (
             <div className="flex items-center gap-1.5 leading-none">
               {tipsItems.map((_, i) => (
                 <button
+                  type="button"
                   key={i}
                   onClick={() => setCurrentIndex(i)}
                   className={cn(
-                    "block flex-none p-0 m-0 border-0 appearance-none w-2.5 h-2.5 rounded-full touch-manipulation transition-none align-middle",
+                    "block flex-none p-0 m-0 border-0 appearance-none w-2.5 h-2.5 min-w-2.5 min-h-2.5 rounded-full touch-manipulation transition-none align-middle [line-height:0] [transform:translateZ(0)] [backface-visibility:hidden]",
                     i === currentIndex ? "bg-white" : "bg-white/30"
                   )}
                   aria-label={`Gå till nyhet ${i + 1}`}
