@@ -323,6 +323,16 @@ const Index = () => {
   const location = useLocation();
   const device = useDevice();
   const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
+
+  // JobView overlay-stöd: när användaren navigerar till /job-view/:id ska
+  // den underliggande KeepAlive-vyn (SearchJobs/SavedJobs/etc) stå kvar
+  // monterad och JobView renderas som fixed overlay ovanpå. Vi spårar
+  // senaste sidebar-path så KeepAlive får rätt activeKey och inte byter vy.
+  const isJobViewOverlay =
+    location.pathname.startsWith('/job-view/') ||
+    location.pathname.startsWith('/job/');
+  const lastJobSeekerPathRef = useRef<string>('/search-jobs');
+  const lastEmployerPathRef = useRef<string>('/home');
   
   // Borttagen aggressiv fallback till /auth som skapade loopar
   // Vi navigerar nu endast när auth-loading är klar (se effekten nedan)
