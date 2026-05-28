@@ -109,7 +109,13 @@ const resolveCompanyLogoUrl = (raw: string | null | undefined) => {
   }
 };
 
-const JobView = () => {
+interface JobViewProps {
+  /** When true, render as a fixed-position overlay on top of an existing route
+   *  so the background page (e.g. SearchJobs) is preserved underneath. */
+  asOverlay?: boolean;
+}
+
+const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { user, isCompanyUser, userRole } = useAuth();
@@ -503,7 +509,14 @@ const JobView = () => {
   };
 
   return (
-    <div ref={contentRef} className="h-[100dvh] overflow-y-auto">
+    <div
+      ref={contentRef}
+      className={
+        asOverlay
+          ? 'fixed inset-0 z-50 h-[100dvh] overflow-y-auto bg-[hsl(215_100%_12%)] bg-parium-gradient'
+          : 'h-[100dvh] overflow-y-auto'
+      }
+    >
        <div className="jobview-container py-4">
         {/* Combined header */}
         <div className={`flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg ${user ? 'justify-between' : 'justify-center gap-3'}`}>
