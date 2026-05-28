@@ -136,13 +136,13 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
 
         <div className="h-6 flex items-center justify-center mt-auto shrink-0">
           {newsItems.length > 1 && (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 leading-none">
               {newsItems.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrentIndex(i)}
                   className={cn(
-                    "w-2.5 h-2.5 rounded-full touch-manipulation transition-none",
+                    "block flex-none p-0 m-0 border-0 appearance-none w-2.5 h-2.5 rounded-full touch-manipulation transition-none align-middle",
                     i === currentIndex ? "bg-white" : "bg-white/30"
                   )}
                   aria-label={`Gå till nyhet ${i + 1}`}
