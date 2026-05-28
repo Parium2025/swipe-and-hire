@@ -13,6 +13,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { imageCache } from '@/lib/imageCache';
 import { supabase } from '@/integrations/supabase/client';
+import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { saveScrollNow } from '@/lib/scrollRestoration';
 
 
