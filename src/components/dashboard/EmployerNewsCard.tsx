@@ -4,11 +4,11 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Newspaper, Clock, ExternalLink } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useHrNews } from '@/hooks/useHrNews';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS } from './dashboardConstants';
+import { DashboardCarouselDots } from './DashboardCarouselDots';
 
 // Format relative time for news
 const formatNewsTime = (publishedAt: string | null): string => {
@@ -100,7 +100,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
           <span className="text-[10px] text-white uppercase tracking-wider font-medium">NYHETER</span>
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col justify-center pt-2 pb-8">
+        <div className="flex-1 flex flex-col justify-center py-2">
           <AnimatePresence mode="wait" initial={false}>
             {currentNews ? (
               <motion.div
@@ -134,24 +134,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
           </AnimatePresence>
         </div>
 
-        <div className="absolute inset-x-0 bottom-4 h-6 flex items-center justify-center shrink-0 [contain:layout_paint] [transform:translateZ(0)] [backface-visibility:hidden]">
-          {newsItems.length > 1 && (
-            <div className="flex items-center gap-1.5 leading-none">
-              {newsItems.map((_, i) => (
-                <button
-                  type="button"
-                  key={i}
-                  onClick={() => setCurrentIndex(i)}
-                  className={cn(
-                    "block flex-none p-0 m-0 border-0 appearance-none w-2.5 h-2.5 min-w-2.5 min-h-2.5 rounded-full touch-manipulation transition-none align-middle [line-height:0] [transform:translateZ(0)] [backface-visibility:hidden]",
-                    i === currentIndex ? "bg-white" : "bg-white/30"
-                  )}
-                  aria-label={`Gå till nyhet ${i + 1}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <DashboardCarouselDots count={newsItems.length} currentIndex={currentIndex} onSelect={setCurrentIndex} label="Gå till nyhet" />
       </CardContent>
     </Card>
   );
