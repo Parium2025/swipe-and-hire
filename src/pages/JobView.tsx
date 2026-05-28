@@ -12,6 +12,7 @@ import { getTimeRemaining } from '@/lib/date';
 import type { JobQuestion } from '@/types/jobWizard';
 import { ArrowLeft, Send, Users, CheckCircle, Share2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ResilientImage } from '@/components/ui/ResilientImage';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { convertToSignedUrl } from '@/utils/storageUtils';
@@ -577,17 +578,26 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               }}
               className="flex min-w-0 flex-1 items-center space-x-2 overflow-hidden hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
             >
-              <Avatar className="h-10 w-10 shrink-0">
-                <AvatarImage 
-                  src={companyLogoUrl || ''} 
-                  alt={getDisplayCompanyName(job)}
-                />
-                <AvatarFallback className="bg-white/20 text-white font-semibold text-sm" delayMs={150}>
-                  {getDisplayCompanyName(job)
-                    ? getDisplayCompanyName(job).substring(0, 2).toUpperCase()
-                    : 'FÖ'}
-                </AvatarFallback>
-              </Avatar>
+              <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden bg-white/20 flex items-center justify-center">
+                {companyLogoUrl ? (
+                  <ResilientImage
+                    src={companyLogoUrl}
+                    alt={getDisplayCompanyName(job)}
+                    className="w-full h-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="sync"
+                    draggable={false}
+                    fallbackClassName="w-full h-full"
+                  />
+                ) : (
+                  <span className="text-white font-semibold text-sm">
+                    {getDisplayCompanyName(job)
+                      ? getDisplayCompanyName(job).substring(0, 2).toUpperCase()
+                      : 'FÖ'}
+                  </span>
+                )}
+              </div>
               <div className="min-w-0 flex-1 overflow-hidden text-left">
                 <TruncatedText
                   text={getDisplayCompanyName(job)}
