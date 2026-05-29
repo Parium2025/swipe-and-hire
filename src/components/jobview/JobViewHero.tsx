@@ -103,7 +103,7 @@ export const JobViewHero = memo(function JobViewHero({
 
   // Shared overlay content for both image and gradient fallback
   const overlayContent = (
-    <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end text-center px-4 pb-4 sm:px-6 sm:pb-6">
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 py-4 sm:px-6 sm:py-6">
       <TruncatedText
         text={title}
         className="text-white text-[15px] sm:text-xl md:text-2xl lg:text-3xl font-bold leading-snug sm:leading-tight max-w-4xl w-full text-center line-clamp-2 sm:line-clamp-3"
