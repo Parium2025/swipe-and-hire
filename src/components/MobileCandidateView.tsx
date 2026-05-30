@@ -9,6 +9,7 @@ import type { JobApplication } from '@/hooks/useJobDetailsData';
 import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { formatCompactTime } from '@/lib/date';
+import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
 import { Star, Sparkles, ChevronRight, Plus, Square, CheckSquare, Check, X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
