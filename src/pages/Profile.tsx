@@ -649,35 +649,20 @@ const Profile = () => {
       clearProfileDraft();
       setLocalMediaState(null);
 
-      setFirstName(originalValues.firstName || '');
-      setLastName(originalValues.lastName || '');
-      setBio(originalValues.bio || '');
-      setUserLocation(originalValues.userLocation || '');
-      setPostalCode(originalValues.postalCode || '');
-      setPhone(originalValues.phone || '');
-      setBirthDate(originalValues.birthDate || '');
-      setProfileImageUrl(originalValues.profileImageUrl || '');
-      setCoverImageUrl(originalValues.coverImageUrl || '');
-      setCoverFileName(originalValues.coverFileName || '');
-      setProfileFileName(originalValues.profileFileName || '');
-      setCvUrl(originalValues.cvUrl || '');
-      setCompanyName(originalValues.companyName || '');
-      setOrgNumber(originalValues.orgNumber || '');
-      setEmploymentStatus(originalValues.employmentStatus || '');
-      setWorkingHours(originalValues.workingHours || '');
-      setAvailability(originalValues.availability || '');
-      setIsProfileVideo(originalValues.isProfileVideo || false);
-      setVideoUrl(originalValues.videoUrl || '');
+      resetProfileFormToValues(originalValues);
       setDeletedProfileMedia(null);
       setDeletedCoverImage(null);
       setHasUnsavedChanges(false);
       window.setTimeout(() => {
+        clearProfileDraft();
+        setLocalMediaState(null);
         isDiscardingChangesRef.current = false;
-      }, 0);
+        setHasUnsavedChanges(false);
+      }, 250);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
     return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
-  }, [originalValues, setHasUnsavedChanges]);
+  }, [originalValues, resetProfileFormToValues, setHasUnsavedChanges]);
 
   const isEmployer = userRole?.role === 'employer';
 
