@@ -60,7 +60,7 @@ const CandidateRow = memo(function CandidateRow({
   isSelected,
   onToggleSelect,
 }: CandidateRowProps) {
-  const isUnread = !app.viewed_at;
+  const isUnread = !app.viewed_at && !wasViewedInSession(app.id);
   const appliedTime = formatCompactTime(app.applied_at);
   const criterionResults = app.criterionResults || [];
   const hasResults = criterionResults.length > 0;
