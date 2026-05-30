@@ -213,6 +213,8 @@ export function useMyCandidatesData(searchQuery: string = '') {
               last_active_at: row.last_active_at || null,
             };
           });
+          // Auto-invalidera cache när kandidaten bytt profilbild/video
+          syncProfileMediaVersions(batchMediaData as any);
         }
 
         // Fetch activity data
