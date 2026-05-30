@@ -57,7 +57,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
   onPrefetch,
   onMarkAsViewed,
 }: CandidateRowProps) {
-  const isUnread = !candidate.viewed_at;
+  const isUnread = !candidate.viewed_at && !wasViewedInSession(candidate.application_id);
   const appliedTime = formatCompactTime(candidate.applied_at);
   const lastActiveTime = formatCompactTime(candidate.last_active_at);
 
