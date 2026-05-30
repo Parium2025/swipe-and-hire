@@ -1383,6 +1383,7 @@ const Profile = () => {
     if (originalProfileImageFile) {
       const imageUrl = URL.createObjectURL(originalProfileImageFile);
       setPendingImageSrc(imageUrl);
+      setIsEditingExistingProfileImage(true);
       setImageEditorOpen(true);
     } else {
       // Fallback: Hämta den signerade URL:en för den befintliga profilbilden
@@ -1390,6 +1391,7 @@ const Profile = () => {
         const signedUrl = await getMediaUrl(profileImageUrl, 'profile-image', 86400);
         if (signedUrl) {
           setPendingImageSrc(signedUrl);
+          setIsEditingExistingProfileImage(true);
           setImageEditorOpen(true);
         }
       } catch (error) {
@@ -1410,6 +1412,7 @@ const Profile = () => {
     if (originalCoverImageFile) {
       const imageUrl = URL.createObjectURL(originalCoverImageFile);
       setPendingCoverSrc(imageUrl);
+      setIsEditingExistingCoverImage(true);
       setCoverEditorOpen(true);
       return;
     }
@@ -1419,6 +1422,7 @@ const Profile = () => {
     if (isProfileVideo && originalProfileImageFile) {
       const imageUrl = URL.createObjectURL(originalProfileImageFile);
       setPendingCoverSrc(imageUrl);
+      setIsEditingExistingCoverImage(true);
       setCoverEditorOpen(true);
       return;
     }
@@ -1428,6 +1432,7 @@ const Profile = () => {
       const signedUrl = await getMediaUrl(coverImageUrl, 'cover-image', 86400);
       if (signedUrl) {
         setPendingCoverSrc(signedUrl);
+        setIsEditingExistingCoverImage(true);
         setCoverEditorOpen(true);
       }
     } catch (error) {
