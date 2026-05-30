@@ -1196,12 +1196,12 @@ const Profile = () => {
     try {
       // Save current media for undo
       setDeletedProfileMedia({
-        profileImageUrl: originalValues.profileImageUrl || profileImageUrl,
-        coverImageUrl: originalValues.coverImageUrl || coverImageUrl,
-        profileFileName: originalValues.profileFileName || profileFileName,
-        coverFileName: originalValues.coverFileName || coverFileName,
-        isProfileVideo: originalValues.isProfileVideo || isProfileVideo,
-        videoUrl: originalValues.videoUrl || videoUrl,
+        profileImageUrl: originalValues?.profileImageUrl || profileImageUrl,
+        coverImageUrl: originalValues?.coverImageUrl || coverImageUrl,
+        profileFileName: originalValues?.profileFileName || profileFileName,
+        coverFileName: originalValues?.coverFileName || coverFileName,
+        isProfileVideo: originalValues?.isProfileVideo || isProfileVideo,
+        videoUrl: originalValues?.videoUrl || videoUrl,
       });
       
       // När vi raderar video med en cover-bild, gör cover-bilden till profilbilden
