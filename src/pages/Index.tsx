@@ -126,11 +126,13 @@ const CandidatesContent = () => {
 
     return result.filter(app => {
       const customAnswers = app.custom_answers || {};
-      
+
       return questionFilters.every(filter => {
-        const matchingKey = Object.keys(customAnswers).find(key => 
-          key.toLowerCase().includes(filter.question.toLowerCase()) ||
-          filter.question.toLowerCase().includes(key.toLowerCase())
+        // Exakt (case-insensitive, trimmad) matchning — undviker false positives
+        // när olika frågor delar ord, t.ex. "Har du körkort?" vs "Har du eget körkort i Stockholm?".
+        const normalizedFilterQuestion = filter.question.trim().toLowerCase();
+        const matchingKey = Object.keys(customAnswers).find(
+          key => key.trim().toLowerCase() === normalizedFilterQuestion,
         );
 
         if (!matchingKey) return false;
