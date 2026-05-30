@@ -46,16 +46,13 @@ export function useMyCandidateApplications(
   const readCache = useCallback(
     (aid: string): ApplicationData[] | null => {
       if (!aid) return null;
-      try {
-        const raw = localStorage.getItem(getCacheKey(aid));
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed?.items?.length) return null;
-        if (parsed.cachedAt && Date.now() - parsed.cachedAt > CACHE_TTL_MS) return null;
-        return parsed.items;
-      } catch {
-        return null;
-      }
+      const env = safeReadJsonCache<CachedApplicationsEnvelope>(
+        getCacheKey(aid),
+        isValidEnvelope,
+      );
+      if (!env || env.items.length === 0) return null;
+      if (Date.now() - env.cachedAt > CACHE_TTL_MS) return null;
+      return env.items;
     },
     [getCacheKey]
   );
