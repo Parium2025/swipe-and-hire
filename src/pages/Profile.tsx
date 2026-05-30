@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Button } from '@/components/ui/button';
@@ -202,6 +202,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+  const isDiscardingChangesRef = useRef(false);
   const { enqueueProfileUpdate } = useOfflineProfileQueue(user?.id);
   const { enqueue: enqueueMediaForLater } = useOfflineMediaQueue(user?.id);
   const [loading, setLoading] = useState(false);
@@ -486,6 +487,11 @@ const Profile = () => {
   }, [preloadedCoverUrl, profile?.cover_image_url]);
 
   const checkForChanges = useCallback(() => {
+    if (isDiscardingChangesRef.current) {
+      setHasUnsavedChanges(false);
+      return false;
+    }
+
     if (!originalValues.firstName) return false; // Not loaded yet
     
     const currentValues = {
@@ -524,6 +530,7 @@ const Profile = () => {
 
   // Auto-save draft to localStorage for text fields
   useEffect(() => {
+    if (isDiscardingChangesRef.current) return;
     // Only save if there are actual changes
     if (!hasUnsavedChanges) return;
     
@@ -581,6 +588,12 @@ const Profile = () => {
   useEffect(() => {
     const onUnsavedConfirm = () => {
       if (!originalValues) return;
+      isDiscardingChangesRef.current = true;
+      // IMPORTANT: user chose to discard changes -> clear all local drafts first,
+      // before React effects can write the old unsaved state back to storage.
+      clearProfileDraft();
+      setLocalMediaState(null);
+
       setFirstName(originalValues.firstName || '');
       setLastName(originalValues.lastName || '');
       setBio(originalValues.bio || '');
@@ -602,13 +615,10 @@ const Profile = () => {
       setVideoUrl(originalValues.videoUrl || '');
       setDeletedProfileMedia(null);
       setDeletedCoverImage(null);
-      // Discard any locally cached (unsaved) media state when user chooses "Lämna utan att spara"
-      try {
-        sessionStorage.removeItem(LOCAL_MEDIA_KEY);
-      } catch {}
-      // IMPORTANT: user chose to discard changes -> clear local draft as well
-      clearProfileDraft();
       setHasUnsavedChanges(false);
+      window.setTimeout(() => {
+        isDiscardingChangesRef.current = false;
+      }, 0);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
     return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
