@@ -65,7 +65,7 @@ export const CandidateCardContent = memo(function CandidateCardContent({
   isSelected,
   onToggleSelect,
 }: KanbanCandidateCardProps) {
-  const isUnread = !candidate.viewed_at;
+  const isUnread = !candidate.viewed_at && !wasViewedInSession(candidate.application_id);
   const latestApplicationTime = formatCompactTime(candidate.latest_application_at);
   const lastActiveTime = formatCompactTime(candidate.last_active_at);
 
