@@ -1,12 +1,21 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
 import { syncBrowserChrome } from '@/lib/browserChrome';
+import { useAuth } from '@/hooks/useAuth';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Säkerhetsnät: om en redan inloggad användare hamnar på "/" (t.ex. Lovable-
+  // preview vid Cmd+Shift+R som tappar djup URL i iframen) → skicka in i appen
+  // direkt istället för att visa publika landningssidan.
+  if (!loading && user) {
+    return <Navigate to="/home" replace />;
+  }
 
   // SEO
   useEffect(() => {
