@@ -1008,6 +1008,7 @@ const Profile = () => {
       setOriginalCoverImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setPendingCoverSrc(imageUrl);
+      setIsEditingExistingCoverImage(false); // ny uppladdning
       setCoverEditorOpen(true);
     }
   };
