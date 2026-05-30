@@ -616,9 +616,9 @@ const Profile = () => {
       setDeletedProfileMedia(null);
       setDeletedCoverImage(null);
       setHasUnsavedChanges(false);
-      requestAnimationFrame(() => {
+      window.setTimeout(() => {
         isDiscardingChangesRef.current = false;
-      });
+      }, 0);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
     return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
