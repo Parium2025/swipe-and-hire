@@ -420,7 +420,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               type="button"
               onClick={handleCancelClick}
               disabled={isSaving}
-              className="flex-1 rounded-full transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
+              className="flex-1 rounded-full !transition-none !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/10 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/10 disabled:opacity-50 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
               variant="outline"
             >
               Avbryt
@@ -429,7 +429,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               type="button"
               onClick={handleSaveClick}
               disabled={isSaving}
-              className="flex-1 rounded-full transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
+              className="flex-1 rounded-full !transition-none !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/10 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/10 disabled:opacity-50 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
               variant="outline"
             >
               {isSaving ? (
