@@ -142,7 +142,29 @@ export function useMyCandidateApplications(
     };
 
     fetchAll();
-    return () => { cancelled = true; };
+
+    // 🔴 Realtime: studsa in nya/uppdaterade ansökningar för just denna kandidat
+    // direkt i öppen dialog, utan att invänta cache-TTL.
+    const channel = supabase
+      .channel(`my-candidate-apps-${applicantId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_applications',
+          filter: `applicant_id=eq.${applicantId}`,
+        },
+        () => {
+          if (!cancelled) fetchAll();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, [applicantId, user?.id, dialogOpen, readCache, writeCache, fallback?.profile_image_url, fallback?.video_url, fallback?.is_profile_video]);
 
   return { allApplications, loading, readCache };
