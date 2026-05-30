@@ -2009,6 +2009,7 @@ export type Database = {
           first_name: string | null
           home_location: string | null
           id: string
+          image_updated_at: string
           industry: string | null
           interests: string[] | null
           interview_default_message: string | null
@@ -2033,6 +2034,7 @@ export type Database = {
           social_media_links: Json | null
           updated_at: string
           user_id: string
+          video_updated_at: string
           video_url: string | null
           website: string | null
           work_schedule: string | null
@@ -2057,6 +2059,7 @@ export type Database = {
           first_name?: string | null
           home_location?: string | null
           id?: string
+          image_updated_at?: string
           industry?: string | null
           interests?: string[] | null
           interview_default_message?: string | null
@@ -2081,6 +2084,7 @@ export type Database = {
           social_media_links?: Json | null
           updated_at?: string
           user_id: string
+          video_updated_at?: string
           video_url?: string | null
           website?: string | null
           work_schedule?: string | null
@@ -2105,6 +2109,7 @@ export type Database = {
           first_name?: string | null
           home_location?: string | null
           id?: string
+          image_updated_at?: string
           industry?: string | null
           interests?: string[] | null
           interview_default_message?: string | null
@@ -2129,6 +2134,7 @@ export type Database = {
           social_media_links?: Json | null
           updated_at?: string
           user_id?: string
+          video_updated_at?: string
           video_url?: string | null
           website?: string | null
           work_schedule?: string | null
@@ -2626,9 +2632,11 @@ export type Database = {
         Returns: {
           applicant_id: string
           city: string
+          image_updated_at: string
           is_profile_video: boolean
           last_active_at: string
           profile_image_url: string
+          video_updated_at: string
           video_url: string
         }[]
       }

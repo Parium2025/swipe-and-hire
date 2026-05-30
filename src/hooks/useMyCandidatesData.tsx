@@ -8,6 +8,7 @@ import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/u
 import { getIsOnline } from '@/lib/connectivityManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
+import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
@@ -212,6 +213,8 @@ export function useMyCandidatesData(searchQuery: string = '') {
               last_active_at: row.last_active_at || null,
             };
           });
+          // Auto-invalidera cache när kandidaten bytt profilbild/video
+          syncProfileMediaVersions(batchMediaData as any);
         }
 
         // Fetch activity data
@@ -369,6 +372,8 @@ export function useMyCandidatesData(searchQuery: string = '') {
             last_active_at: row.last_active_at || null,
           };
         });
+        // Auto-invalidera cache när kandidaten bytt profilbild/video
+        syncProfileMediaVersions(batchMediaData as any);
       }
 
       // Fill in nulls for any applicants not returned
