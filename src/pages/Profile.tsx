@@ -320,8 +320,17 @@ const Profile = () => {
   const signedCvUrl = useMediaUrl(cvUrl || (profile as any)?.cv_url, 'cv');
   
   // Använd förladdade URLs från useAuth om tillgängliga, men respektera lokala borttagningar
-  const signedProfileImageUrl = effectiveProfileImagePath ? (preloadedAvatarUrl || fallbackProfileImageUrl) : null;
-  const signedCoverUrl = effectiveCoverImagePath ? (preloadedCoverUrl || fallbackCoverUrl) : null;
+  // 🔒 KRITISK FIX: Om användaren har lokala (osparade) ändringar på media-pathen,
+  // FÅR vi INTE använda preloaded URL — den pekar på den gamla DB-bilden och gör att
+  // "Anpassa din bild" / ny uppladdning inte syns i UI förrän man sparat.
+  const profileImagePathChangedLocally = !!profileImageUrl && profileImageUrl !== ((profile as any)?.profile_image_url || '');
+  const coverImagePathChangedLocally = !!coverImageUrl && coverImageUrl !== ((profile as any)?.cover_image_url || '');
+  const signedProfileImageUrl = effectiveProfileImagePath
+    ? (profileImagePathChangedLocally ? fallbackProfileImageUrl : (preloadedAvatarUrl || fallbackProfileImageUrl))
+    : null;
+  const signedCoverUrl = effectiveCoverImagePath
+    ? (coverImagePathChangedLocally ? fallbackCoverUrl : (preloadedCoverUrl || fallbackCoverUrl))
+    : null;
   
   // Cache images to prevent blinking during re-renders
   const { cachedUrl: cachedProfileImageUrl } = useCachedImage(signedProfileImageUrl);
