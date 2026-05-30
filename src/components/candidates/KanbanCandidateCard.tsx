@@ -7,6 +7,7 @@ import { formatCompactTime } from '@/lib/date';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
+import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
 
 /* ── Star Rating (read-only) ──────────────────────── */
 const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxStars?: number }) => (
@@ -64,7 +65,7 @@ export const CandidateCardContent = memo(function CandidateCardContent({
   isSelected,
   onToggleSelect,
 }: KanbanCandidateCardProps) {
-  const isUnread = !candidate.viewed_at;
+  const isUnread = !candidate.viewed_at && !wasViewedInSession(candidate.application_id);
   const latestApplicationTime = formatCompactTime(candidate.latest_application_at);
   const lastActiveTime = formatCompactTime(candidate.last_active_at);
 

@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { smartSearchCandidates } from '@/lib/smartSearch';
+import { markViewedInSession } from '@/lib/viewedApplicationsSession';
 
 export interface ApplicationData {
   id: string;
@@ -723,6 +724,9 @@ export const useApplicationsData = (searchQuery: string = '') => {
   // Mark application as viewed
   const markAsViewed = useMutation({
     mutationFn: async (applicationId: string) => {
+      // Session shadow — instant + survives any later refetch race
+      markViewedInSession(applicationId);
+
       const { error } = await supabase
         .from('job_applications')
         .update({ viewed_at: new Date().toISOString() })

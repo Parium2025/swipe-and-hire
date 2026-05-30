@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/useCandidateOperationQueue';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { markViewedInSession } from '@/lib/viewedApplicationsSession';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
@@ -1182,6 +1183,9 @@ export function useMyCandidatesData(searchQuery: string = '') {
   // Mark application as viewed
   const markAsViewed = useMutation({
     mutationFn: async (applicationId: string) => {
+      // Session shadow — instant + survives any later refetch race
+      markViewedInSession(applicationId);
+
       const { error } = await supabase
         .from('job_applications')
         .update({ viewed_at: new Date().toISOString() })

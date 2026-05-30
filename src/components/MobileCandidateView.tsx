@@ -9,6 +9,7 @@ import type { JobApplication } from '@/hooks/useJobDetailsData';
 import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { formatCompactTime } from '@/lib/date';
+import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
 import { Star, Sparkles, ChevronRight, Plus, Square, CheckSquare, Check, X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -59,7 +60,7 @@ const CandidateRow = memo(function CandidateRow({
   isSelected,
   onToggleSelect,
 }: CandidateRowProps) {
-  const isUnread = !app.viewed_at;
+  const isUnread = !app.viewed_at && !wasViewedInSession(app.id);
   const appliedTime = formatCompactTime(app.applied_at);
   const criterionResults = app.criterionResults || [];
   const hasResults = criterionResults.length > 0;
