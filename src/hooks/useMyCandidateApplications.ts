@@ -2,10 +2,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { mapRawToApplicationData } from '@/lib/candidateApplicationMapper';
+import { safeReadJsonCache } from '@/lib/safeStorage';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
-const CANDIDATE_APPLICATIONS_CACHE_PREFIX = 'candidate_apps_cache_v1_';
-const CACHE_TTL_MS = 30 * 60 * 1000;
+// v2: kortare TTL (60s) så nya ansökningar/profiluppdateringar studsar in nästan direkt.
+// Realtime invaliderar dessutom cachen vid nya rader i job_applications.
+const CANDIDATE_APPLICATIONS_CACHE_PREFIX = 'candidate_apps_cache_v2_';
+const CACHE_TTL_MS = 60 * 1000;
+
+interface CachedApplicationsEnvelope {
+  items: ApplicationData[];
+  cachedAt: number;
+}
+
+function isValidEnvelope(value: unknown): value is CachedApplicationsEnvelope {
+  if (!value || typeof value !== 'object') return false;
+  const env = value as Partial<CachedApplicationsEnvelope>;
+  return Array.isArray(env.items) && typeof env.cachedAt === 'number';
+}
 
 /**
  * Manages fetching all applications for a selected candidate in MyCandidates.
@@ -32,16 +46,13 @@ export function useMyCandidateApplications(
   const readCache = useCallback(
     (aid: string): ApplicationData[] | null => {
       if (!aid) return null;
-      try {
-        const raw = localStorage.getItem(getCacheKey(aid));
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed?.items?.length) return null;
-        if (parsed.cachedAt && Date.now() - parsed.cachedAt > CACHE_TTL_MS) return null;
-        return parsed.items;
-      } catch {
-        return null;
-      }
+      const env = safeReadJsonCache<CachedApplicationsEnvelope>(
+        getCacheKey(aid),
+        isValidEnvelope,
+      );
+      if (!env || env.items.length === 0) return null;
+      if (Date.now() - env.cachedAt > CACHE_TTL_MS) return null;
+      return env.items;
     },
     [getCacheKey]
   );
@@ -131,7 +142,29 @@ export function useMyCandidateApplications(
     };
 
     fetchAll();
-    return () => { cancelled = true; };
+
+    // 🔴 Realtime: studsa in nya/uppdaterade ansökningar för just denna kandidat
+    // direkt i öppen dialog, utan att invänta cache-TTL.
+    const channel = supabase
+      .channel(`my-candidate-apps-${applicantId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_applications',
+          filter: `applicant_id=eq.${applicantId}`,
+        },
+        () => {
+          if (!cancelled) fetchAll();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, [applicantId, user?.id, dialogOpen, readCache, writeCache, fallback?.profile_image_url, fallback?.video_url, fallback?.is_profile_video]);
 
   return { allApplications, loading, readCache };
