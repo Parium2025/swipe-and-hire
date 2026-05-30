@@ -335,7 +335,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !isSaving && !open && onClose()}>
-      <DialogContentNoFocus className="max-w-md bg-white/5 border-white/20 backdrop-blur-sm">
+      <DialogContentNoFocus className="max-w-md max-h-[92vh] overflow-y-auto bg-white/5 border-white/20 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-center text-white">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
@@ -351,7 +351,13 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
                 className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'} ${isSaving ? 'opacity-50' : ''}`}
-                style={{ backgroundColor: 'transparent' }}
+                style={{
+                  backgroundColor: 'transparent',
+                  maxWidth: '100%',
+                  maxHeight: 'min(55vh, 360px)',
+                  height: 'auto',
+                  width: 'auto',
+                }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -414,7 +420,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               type="button"
               onClick={handleCancelClick}
               disabled={isSaving}
-              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
+              className="flex-1 rounded-full transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
               variant="outline"
             >
               Avbryt
@@ -423,7 +429,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               type="button"
               onClick={handleSaveClick}
               disabled={isSaving}
-              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
+              className="flex-1 rounded-full transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
               variant="outline"
             >
               {isSaving ? (
