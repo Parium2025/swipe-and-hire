@@ -230,6 +230,7 @@ const Profile = () => {
   const location = useLocation();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const isDiscardingChangesRef = useRef(false);
+  const didInitProfileRef = useRef(false);
   const { enqueueProfileUpdate } = useOfflineProfileQueue(user?.id);
   const { enqueue: enqueueMediaForLater } = useOfflineMediaQueue(user?.id);
   const [loading, setLoading] = useState(false);
@@ -306,6 +307,28 @@ const Profile = () => {
   const [cvOpen, setCvOpen] = useState(false);
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
   const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
+
+  const resetProfileFormToValues = useCallback((values: any) => {
+    setFirstName(values.firstName || '');
+    setLastName(values.lastName || '');
+    setBio(values.bio || '');
+    setUserLocation(values.userLocation || '');
+    setPostalCode(values.postalCode || '');
+    setPhone(values.phone || '');
+    setBirthDate(values.birthDate || '');
+    setProfileImageUrl(values.profileImageUrl || '');
+    setVideoUrl(values.videoUrl || '');
+    setCvUrl(values.cvUrl || '');
+    setCompanyName(values.companyName || '');
+    setOrgNumber(values.orgNumber || '');
+    setEmploymentStatus(values.employmentStatus || '');
+    setWorkingHours(values.workingHours || '');
+    setAvailability(values.availability || '');
+    setCoverImageUrl(values.coverImageUrl || '');
+    setIsProfileVideo(values.isProfileVideo || false);
+    setProfileFileName(values.profileFileName || '');
+    setCoverFileName(values.coverFileName || '');
+  }, []);
   
   // Undo state - store deleted media for restore
   const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
