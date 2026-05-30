@@ -623,6 +623,51 @@ export const useApplicationsData = (searchQuery: string = '') => {
     };
   }, [user, queryClient, jobIdsForRealtime]);
 
+  // Real-time subscription för profilförändringar (bild, namn, video).
+  // Triggar invalidate så listan visar senaste profilbild/namn när
+  // en kandidat uppdaterar sin profil — utan att vänta på TTL eller manuell refresh.
+  // Debouncas så en burst av uppdateringar bara triggar 1 refetch.
+  const profilesInvalidateTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    if (applicantIdsKey.length === 0) return;
+
+    const channelName = `applications-profiles-rt-${user.id}`;
+    const applicantIds = applicantIdsKey.split('|').filter(Boolean);
+
+    const filterConfig: any = {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'profiles',
+    };
+    // Cap filter length — fall back till bred subscription om för många IDs (RLS skyddar).
+    if (applicantIds.length === 1) {
+      filterConfig.filter = `id=eq.${applicantIds[0]}`;
+    } else if (applicantIds.length <= MAX_REALTIME_FILTER_IDS) {
+      filterConfig.filter = `id=in.(${applicantIds.join(',')})`;
+    }
+
+    const channel = supabase
+      .channel(channelName)
+      .on('postgres_changes', filterConfig, () => {
+        if (profilesInvalidateTimerRef.current) {
+          window.clearTimeout(profilesInvalidateTimerRef.current);
+        }
+        profilesInvalidateTimerRef.current = window.setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
+        }, 400);
+      })
+      .subscribe();
+
+    return () => {
+      if (profilesInvalidateTimerRef.current) {
+        window.clearTimeout(profilesInvalidateTimerRef.current);
+        profilesInvalidateTimerRef.current = null;
+      }
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient, applicantIdsKey]);
+
   // Om vi råkar ha en gammal cache (prefetch utan media-fält) → tvinga refetch en gång.
   // Detta eliminerar behovet av manuell refresh för att avatar/video ska dyka upp.
   const fixedLegacyCacheRef = useRef(false);
