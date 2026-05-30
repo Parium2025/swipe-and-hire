@@ -1620,7 +1620,7 @@ const Profile = () => {
       
       if (!result.error) {
         // 🚀 Trigger proactive CV analysis if CV was updated
-        const cvWasUpdated = cvUrl && cvUrl !== originalValues.cvUrl;
+        const cvWasUpdated = cvUrl && cvUrl !== originalValues?.cvUrl;
         if (cvWasUpdated && user?.id) {
           console.log('CV updated, triggering proactive analysis...');
           try {
