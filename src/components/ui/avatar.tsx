@@ -115,6 +115,10 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
         onError={handleError}
         className={cn("aspect-square h-full w-full object-cover", className)}
         data-state={status}
+        loading="eager"
+        decoding="async"
+        // @ts-expect-error — fetchpriority is valid HTML, not yet in React DOM types
+        fetchpriority="high"
         {...props}
       />
     );
