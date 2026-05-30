@@ -2,10 +2,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { mapRawToApplicationData } from '@/lib/candidateApplicationMapper';
+import { safeReadJsonCache } from '@/lib/safeStorage';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
-const CANDIDATE_APPLICATIONS_CACHE_PREFIX = 'candidate_apps_cache_v1_';
-const CACHE_TTL_MS = 30 * 60 * 1000;
+// v2: kortare TTL (60s) så nya ansökningar/profiluppdateringar studsar in nästan direkt.
+// Realtime invaliderar dessutom cachen vid nya rader i job_applications.
+const CANDIDATE_APPLICATIONS_CACHE_PREFIX = 'candidate_apps_cache_v2_';
+const CACHE_TTL_MS = 60 * 1000;
+
+interface CachedApplicationsEnvelope {
+  items: ApplicationData[];
+  cachedAt: number;
+}
+
+function isValidEnvelope(value: unknown): value is CachedApplicationsEnvelope {
+  if (!value || typeof value !== 'object') return false;
+  const env = value as Partial<CachedApplicationsEnvelope>;
+  return Array.isArray(env.items) && typeof env.cachedAt === 'number';
+}
 
 /**
  * Manages fetching all applications for a selected candidate in MyCandidates.
