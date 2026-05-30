@@ -28,7 +28,7 @@ const WorkplacePostalCodeSelector = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [lastSuccessfulPostalCode, setLastSuccessfulPostalCode] = useState<string>('');
-  const userEditedPostalCodeRef = useRef(false);
+  const lastUserEditedPostalCodeRef = useRef('');
 
   // Helper to validate city name (only letters, spaces, and hyphens)
   const isValidCityName = useCallback((city: string) => {
@@ -96,7 +96,8 @@ const WorkplacePostalCodeSelector = ({
             if (location) {
               setLastSuccessfulPostalCode(cleanedCode);
               // Skicka tillbaka full info för caching
-              onLocationChange(location.city, cleanedCode, location.municipality, location.county || '', userEditedPostalCodeRef.current ? 'user' : 'auto');
+              const source = cleanedCode === lastUserEditedPostalCodeRef.current ? 'user' : 'auto';
+              onLocationChange(location.city, cleanedCode, location.municipality, location.county || '', source);
             } else {
               setLastSuccessfulPostalCode('');
             }
@@ -111,7 +112,8 @@ const WorkplacePostalCodeSelector = ({
           setFoundLocation(null);
           setLastSuccessfulPostalCode('');
           if (!postalCodeValue.trim()) {
-            onLocationChange('', undefined, undefined, undefined, userEditedPostalCodeRef.current ? 'user' : 'auto');
+            const source = lastUserEditedPostalCodeRef.current === '' ? 'user' : 'auto';
+            onLocationChange('', undefined, undefined, undefined, source);
           }
           setIsLoading(false);
         }
@@ -119,7 +121,8 @@ const WorkplacePostalCodeSelector = ({
         setFoundLocation(null);
         setIsValid(false);
         setLastSuccessfulPostalCode('');
-        onLocationChange('', undefined, undefined, undefined, userEditedPostalCodeRef.current ? 'user' : 'auto');
+        const source = lastUserEditedPostalCodeRef.current === '' ? 'user' : 'auto';
+        onLocationChange('', undefined, undefined, undefined, source);
         setIsLoading(false);
       }
     };
@@ -132,7 +135,7 @@ const WorkplacePostalCodeSelector = ({
   const handlePostalCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const formatted = formatPostalCodeInput(value);
-    userEditedPostalCodeRef.current = true;
+    lastUserEditedPostalCodeRef.current = formatted.replace(/\s+/g, '');
     onPostalCodeChange(formatted);
 
     const digits = formatted.replace(/\D/g, '');
