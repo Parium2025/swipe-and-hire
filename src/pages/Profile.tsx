@@ -592,8 +592,7 @@ const Profile = () => {
     const hasContent = firstName || lastName || bio || userLocation || postalCode || phone || birthDate;
     
     if (hasContent) {
-      try {
-        localStorage.setItem(PROFILE_DRAFT_KEY, JSON.stringify({
+      const saved = safeSetItem(PROFILE_DRAFT_KEY, JSON.stringify({
           firstName,
           lastName,
           bio,
@@ -608,8 +607,9 @@ const Profile = () => {
           orgNumber,
           savedAt: Date.now()
         }));
+      if (saved) {
         console.log('💾 Profile draft saved');
-      } catch (e) {
+      } else {
         console.warn('Failed to save profile draft');
       }
     }
