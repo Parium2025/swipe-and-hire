@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/useCandidateOperationQueue';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { markViewedInSession } from '@/lib/viewedApplicationsSession';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
