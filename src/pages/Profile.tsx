@@ -675,11 +675,13 @@ const Profile = () => {
       setDeletedProfileMedia(null);
       setDeletedCoverImage(null);
       setHasUnsavedChanges(false);
+      didInitProfileRef.current = false;
       window.setTimeout(() => {
         clearProfileDraft();
         setLocalMediaState(null);
         isDiscardingChangesRef.current = false;
         setHasUnsavedChanges(false);
+        didInitProfileRef.current = false;
       }, 250);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
