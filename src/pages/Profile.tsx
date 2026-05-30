@@ -263,7 +263,7 @@ const Profile = () => {
   const [uploadAttempt, setUploadAttempt] = useState(1);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [coverProgressInfo, setCoverProgressInfo] = useState<UploadProgressInfo | null>(null);
-  const [originalValues, setOriginalValues] = useState<any>({});
+  const [originalValues, setOriginalValues] = useState<ProfileFormValues | null>(null);
   const [cvSummaryRefreshKey, setCvSummaryRefreshKey] = useState(0);
   
   // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
@@ -299,7 +299,7 @@ const Profile = () => {
       }
       return parsed;
     } catch {
-      try { sessionStorage.removeItem(LOCAL_MEDIA_KEY); } catch {}
+      try { sessionStorage.removeItem(LOCAL_MEDIA_KEY); } catch { /* ignore */ }
       return null;
     }
   };
@@ -345,7 +345,7 @@ const Profile = () => {
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
   const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
 
-  const resetProfileFormToValues = useCallback((values: any) => {
+  const resetProfileFormToValues = useCallback((values: ProfileFormValues) => {
     setFirstName(values.firstName || '');
     setLastName(values.lastName || '');
     setBio(values.bio || '');
