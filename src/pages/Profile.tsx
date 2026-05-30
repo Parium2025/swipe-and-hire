@@ -60,6 +60,28 @@ interface ProfileDraftData {
   savedAt?: number;
 }
 
+interface ProfileFormValues {
+  firstName: string;
+  lastName: string;
+  bio: string;
+  userLocation: string;
+  postalCode: string;
+  phone: string;
+  birthDate: string;
+  profileImageUrl: string;
+  videoUrl: string;
+  cvUrl: string;
+  companyName: string;
+  orgNumber: string;
+  employmentStatus: string;
+  workingHours: string;
+  availability: string;
+  coverImageUrl: string;
+  isProfileVideo: boolean;
+  profileFileName: string;
+  coverFileName: string;
+}
+
 const isProfileDraftData = (value: unknown): value is ProfileDraftData => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const draft = value as Record<string, unknown>;
