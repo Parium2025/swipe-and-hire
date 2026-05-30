@@ -17,15 +17,28 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const showUnsavedDialogRef = useRef(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const pendingNavigationSourceRef = useRef<'app' | 'browser-pop' | null>(null);
+  const suppressDirtyAfterConfirmRef = useRef(false);
+  const suppressDirtyTimerRef = useRef<number | null>(null);
   const skipNextPopRef = useRef(false);
   const navigate = useNavigate();
   const location = useLocation();
   const currentPathRef = useRef(`${location.pathname}${location.search}`);
 
   const setHasUnsavedChanges = (value: boolean) => {
+    if (value && suppressDirtyAfterConfirmRef.current) {
+      return;
+    }
     hasUnsavedChangesRef.current = value;
     _setHasUnsavedChanges(value);
   };
+
+  useEffect(() => {
+    return () => {
+      if (suppressDirtyTimerRef.current !== null) {
+        window.clearTimeout(suppressDirtyTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     currentPathRef.current = `${location.pathname}${location.search}`;
@@ -96,6 +109,11 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     const target = pendingNavigation;
     const source = pendingNavigationSourceRef.current;
 
+    suppressDirtyAfterConfirmRef.current = true;
+    if (suppressDirtyTimerRef.current !== null) {
+      window.clearTimeout(suppressDirtyTimerRef.current);
+    }
+
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
     pendingNavigationSourceRef.current = null;
@@ -106,6 +124,11 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     if (target) {
       navigate(target, { replace: source === 'browser-pop' });
     }
+
+    suppressDirtyTimerRef.current = window.setTimeout(() => {
+      suppressDirtyAfterConfirmRef.current = false;
+      suppressDirtyTimerRef.current = null;
+    }, 800);
   };
 
   const handleCancelLeave = () => {
