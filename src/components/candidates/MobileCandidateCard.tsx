@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useRef, useState, useCallback } from 'react';
 import { Star, UserPlus, Users, ChevronRight } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -43,6 +43,20 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
   onAddCandidate,
   onAddToTeam,
 }: MobileCandidateCardProps) {
+  // Visa tooltip endast när jobbtiteln faktiskt är trunkerad
+  const jobTitleRef = useRef<HTMLParagraphElement>(null);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  const handleTooltipOpenChange = useCallback((open: boolean) => {
+    if (!open) {
+      setTooltipOpen(false);
+      return;
+    }
+    const el = jobTitleRef.current;
+    if (el && el.scrollWidth > el.clientWidth + 1) {
+      setTooltipOpen(true);
+    }
+  }, []);
   return (
     <div
       className={cn(
@@ -110,10 +124,13 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
             </div>
           )}
 
-          {/* Job title with tooltip */}
-          <Tooltip>
+          {/* Job title — tooltip visas endast när texten är trunkerad */}
+          <Tooltip open={tooltipOpen} onOpenChange={handleTooltipOpenChange}>
             <TooltipTrigger asChild>
-              <p className="text-xs text-white truncate mt-0.5 cursor-default">
+              <p
+                ref={jobTitleRef}
+                className="text-xs text-white truncate mt-0.5 cursor-default"
+              >
                 {application.job_title || 'Okänd tjänst'}
               </p>
             </TooltipTrigger>
