@@ -767,16 +767,15 @@ export const useApplicationsData = (searchQuery: string = '') => {
       // Update localStorage ratings cache for instant sync
       try {
         const cacheKey = `ratings_cache_${user.id}`;
-        const raw = localStorage.getItem(cacheKey);
-        let cache: { ratings: Record<string, number>; timestamp: number } = { ratings: {}, timestamp: Date.now() };
-        if (raw) {
-          try {
-            const parsed = JSON.parse(raw);
-            if (parsed && typeof parsed === 'object' && parsed.ratings && typeof parsed.ratings === 'object') {
-              cache = { ratings: parsed.ratings, timestamp: typeof parsed.timestamp === 'number' ? parsed.timestamp : Date.now() };
-            }
-          } catch { /* fall back to fresh cache */ }
-        }
+        const parsed = safeReadJsonCache<{ ratings: Record<string, number>; timestamp: number }>(
+          cacheKey,
+          (p): p is { ratings: Record<string, number>; timestamp: number } =>
+            typeof p === 'object' && p !== null &&
+            'ratings' in p && typeof (p as any).ratings === 'object' && (p as any).ratings !== null,
+        );
+        const cache = parsed
+          ? { ratings: parsed.ratings, timestamp: typeof parsed.timestamp === 'number' ? parsed.timestamp : Date.now() }
+          : { ratings: {} as Record<string, number>, timestamp: Date.now() };
         cache.ratings[applicantId] = rating;
         cache.timestamp = Date.now();
         safeSetItem(cacheKey, JSON.stringify(cache));
