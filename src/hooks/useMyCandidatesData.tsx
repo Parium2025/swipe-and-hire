@@ -125,6 +125,16 @@ function writeMyCandidatesCache(userId: string, items: MyCandidateData[]): void 
   }
 }
 
+function updateMyCandidatesCache(
+  userId: string | undefined,
+  updater: (items: MyCandidateData[]) => MyCandidateData[]
+): void {
+  if (!userId) return;
+  const cached = readMyCandidatesCache(userId);
+  if (!cached) return;
+  writeMyCandidatesCache(userId, updater(cached));
+}
+
 export function useMyCandidatesData(searchQuery: string = '') {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -461,9 +471,9 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: !!user,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    staleTime: 0,
     gcTime: Infinity,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     // 🔥 Instant-load from localStorage cache (only for non-search queries)
     initialData: () => {
@@ -477,8 +487,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
     initialDataUpdatedAt: () => {
       if (!user || searchQuery) return undefined;
-      const cached = readMyCandidatesCache(user.id);
-      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+      return readMyCandidatesCacheTimestamp(user.id) ?? undefined;
     },
   });
 
