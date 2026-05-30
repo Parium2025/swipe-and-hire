@@ -337,6 +337,11 @@ const Profile = () => {
   const [coverEditorOpen, setCoverEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [pendingCoverSrc, setPendingCoverSrc] = useState<string>('');
+  // Speglar arbetsgivarsidan: när användaren öppnar editorn för en redan
+  // befintlig bild ska "Spara" utan ändringar BEHÅLLA originalet istället
+  // för att re-encoda och ladda upp en identisk kopia.
+  const [isEditingExistingProfileImage, setIsEditingExistingProfileImage] = useState(false);
+  const [isEditingExistingCoverImage, setIsEditingExistingCoverImage] = useState(false);
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [coverFileName, setCoverFileName] = useState(''); // Track filename for deletion
   const [profileFileName, setProfileFileName] = useState(''); // Track profile media filename
