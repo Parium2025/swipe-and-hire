@@ -337,6 +337,11 @@ const Profile = () => {
   const [coverEditorOpen, setCoverEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [pendingCoverSrc, setPendingCoverSrc] = useState<string>('');
+  // Speglar arbetsgivarsidan: när användaren öppnar editorn för en redan
+  // befintlig bild ska "Spara" utan ändringar BEHÅLLA originalet istället
+  // för att re-encoda och ladda upp en identisk kopia.
+  const [isEditingExistingProfileImage, setIsEditingExistingProfileImage] = useState(false);
+  const [isEditingExistingCoverImage, setIsEditingExistingCoverImage] = useState(false);
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [coverFileName, setCoverFileName] = useState(''); // Track filename for deletion
   const [profileFileName, setProfileFileName] = useState(''); // Track profile media filename
@@ -989,6 +994,7 @@ const Profile = () => {
       setOriginalProfileImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setPendingImageSrc(imageUrl);
+      setIsEditingExistingProfileImage(false); // ny uppladdning, inte befintlig
       setImageEditorOpen(true);
     }
   };
@@ -1002,6 +1008,7 @@ const Profile = () => {
       setOriginalCoverImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setPendingCoverSrc(imageUrl);
+      setIsEditingExistingCoverImage(false); // ny uppladdning
       setCoverEditorOpen(true);
     }
   };
@@ -1376,6 +1383,7 @@ const Profile = () => {
     if (originalProfileImageFile) {
       const imageUrl = URL.createObjectURL(originalProfileImageFile);
       setPendingImageSrc(imageUrl);
+      setIsEditingExistingProfileImage(true);
       setImageEditorOpen(true);
     } else {
       // Fallback: Hämta den signerade URL:en för den befintliga profilbilden
@@ -1383,6 +1391,7 @@ const Profile = () => {
         const signedUrl = await getMediaUrl(profileImageUrl, 'profile-image', 86400);
         if (signedUrl) {
           setPendingImageSrc(signedUrl);
+          setIsEditingExistingProfileImage(true);
           setImageEditorOpen(true);
         }
       } catch (error) {
@@ -1403,6 +1412,7 @@ const Profile = () => {
     if (originalCoverImageFile) {
       const imageUrl = URL.createObjectURL(originalCoverImageFile);
       setPendingCoverSrc(imageUrl);
+      setIsEditingExistingCoverImage(true);
       setCoverEditorOpen(true);
       return;
     }
@@ -1412,6 +1422,7 @@ const Profile = () => {
     if (isProfileVideo && originalProfileImageFile) {
       const imageUrl = URL.createObjectURL(originalProfileImageFile);
       setPendingCoverSrc(imageUrl);
+      setIsEditingExistingCoverImage(true);
       setCoverEditorOpen(true);
       return;
     }
@@ -1421,6 +1432,7 @@ const Profile = () => {
       const signedUrl = await getMediaUrl(coverImageUrl, 'cover-image', 86400);
       if (signedUrl) {
         setPendingCoverSrc(signedUrl);
+        setIsEditingExistingCoverImage(true);
         setCoverEditorOpen(true);
       }
     } catch (error) {
@@ -2431,26 +2443,35 @@ const Profile = () => {
         <ActiveSessionsSettings />
       </div>
 
-      {/* Image Editors */}
+      {/* Image Editors — speglar arbetsgivarsidans exakta struktur:
+          aspectRatio, isCircular och onRestoreOriginal så att "Spara" utan
+          ändringar BEHÅLLER originalet istället för att re-encoda. */}
       <ImageEditor
         isOpen={imageEditorOpen}
         onClose={() => {
           setImageEditorOpen(false);
+          setIsEditingExistingProfileImage(false);
           setPendingImageSrc('');
         }}
         imageSrc={pendingImageSrc}
         onSave={handleProfileImageSave}
+        onRestoreOriginal={isEditingExistingProfileImage ? async () => { /* behåll original — ingen åtgärd */ } : undefined}
+        aspectRatio={1}
+        isCircular={true}
       />
 
       <ImageEditor
         isOpen={coverEditorOpen}
         onClose={() => {
           setCoverEditorOpen(false);
+          setIsEditingExistingCoverImage(false);
           setPendingCoverSrc('');
         }}
         imageSrc={pendingCoverSrc}
         onSave={handleCoverImageSave}
+        onRestoreOriginal={isEditingExistingCoverImage ? async () => { /* behåll original — ingen åtgärd */ } : undefined}
       />
+
 
       {/* CV Dialog */}
       <Dialog open={cvOpen} onOpenChange={setCvOpen}>
