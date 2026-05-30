@@ -116,11 +116,11 @@ export function AppSidebar() {
     ...(isOrgAdmin ? [{ title: 'Admin Panel', url: '/admin', icon: Settings }] : [])
   ];
 
-  // Listen for unsaved changes cancel event to close sidebar
+  // Listen for unsaved changes cancel/confirm events to close sidebar
+  // (samma beteende som vanlig navigering — sidebaren stängs alltid efter klick,
+  //  även när användaren bekräftar "Lämna utan att spara")
   useEffect(() => {
-    const handleUnsavedCancel = () => {
-      console.log('Unsaved cancel event received - closing sidebar');
-      // Endast stäng sidebaren på mobil/tablet (skärmar under 768px)
+    const closeSidebarIfMobile = () => {
       if (isMobile || window.innerWidth < 768) {
         if (isMobile) {
           setOpenMobile(false);
@@ -128,11 +128,14 @@ export function AppSidebar() {
           setOpen(false);
         }
       }
-      // På desktop (768px+) låt sidebaren vara öppen
     };
 
-    window.addEventListener('unsaved-cancel', handleUnsavedCancel);
-    return () => window.removeEventListener('unsaved-cancel', handleUnsavedCancel);
+    window.addEventListener('unsaved-cancel', closeSidebarIfMobile);
+    window.addEventListener('unsaved-confirm', closeSidebarIfMobile);
+    return () => {
+      window.removeEventListener('unsaved-cancel', closeSidebarIfMobile);
+      window.removeEventListener('unsaved-confirm', closeSidebarIfMobile);
+    };
   }, [isMobile, setOpenMobile, setOpen]);
 
   // Video-URL hämtas nu från AuthProvider (sessionStorage-cachad) - ingen egen fetch behövs
