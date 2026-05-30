@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
+import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
 
 /* ── Star Rating ─────────────────────────────────────── */
 const StarRating = ({ rating = 0 }: { rating?: number }) => (
