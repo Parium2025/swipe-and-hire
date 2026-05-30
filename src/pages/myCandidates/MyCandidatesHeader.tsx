@@ -188,7 +188,7 @@ export const MyCandidatesHeader = ({
             <button
               onClick={() => displayedCandidatesCount > 0 ? onToggleSelectionMode() : undefined}
               onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-full px-3 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
+              className={`rounded-full px-5 py-2 flex items-center justify-center gap-2 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
                 isSelectionMode 
                   ? 'bg-white/10 ring-1 ring-white hover:bg-white/15' 
                   : displayedCandidatesCount > 0 
@@ -196,8 +196,8 @@ export const MyCandidatesHeader = ({
                     : 'bg-white/5 opacity-40 cursor-default'
               }`}
             >
-              <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-              <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
+              <CheckSquare className="h-4 w-4 text-white flex-shrink-0" />
+              <span className="text-white text-sm font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
             </button>
           </div>
 
