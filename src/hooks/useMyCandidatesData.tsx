@@ -8,6 +8,7 @@ import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/u
 import { getIsOnline } from '@/lib/connectivityManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
+import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
