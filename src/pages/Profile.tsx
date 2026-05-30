@@ -257,12 +257,27 @@ const Profile = () => {
     coverFileName: string;
     cvUrl: string;
   }
+
+  const isLocalMediaState = (value: unknown): value is LocalMediaState => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+    const media = value as Record<string, unknown>;
+    return ['profileImageUrl', 'videoUrl', 'coverImageUrl', 'profileFileName', 'coverFileName', 'cvUrl']
+      .every((key) => typeof media[key] === 'string') &&
+      typeof media.isProfileVideo === 'boolean';
+  };
   
   const getLocalMediaState = (): LocalMediaState | null => {
     try {
       const stored = sessionStorage.getItem(LOCAL_MEDIA_KEY);
-      return stored ? JSON.parse(stored) : null;
+      if (!stored) return null;
+      const parsed: unknown = JSON.parse(stored);
+      if (!isLocalMediaState(parsed)) {
+        sessionStorage.removeItem(LOCAL_MEDIA_KEY);
+        return null;
+      }
+      return parsed;
     } catch {
+      try { sessionStorage.removeItem(LOCAL_MEDIA_KEY); } catch {}
       return null;
     }
   };
