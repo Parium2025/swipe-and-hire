@@ -19,9 +19,9 @@ type AudienceLandingProps = {
 const ease = [0.16, 1, 0.3, 1] as const;
 
 const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
-  <div className="max-w-3xl text-center text-base leading-[1.75] text-white sm:text-lg md:text-xl">
+  <div className="max-w-3xl text-center text-base leading-[1.6] text-white sm:text-lg sm:leading-[1.75] md:text-xl">
     {paragraphs.map((paragraph, pIdx) => (
-      <p key={pIdx} className={pIdx > 0 ? 'mt-6' : undefined}>
+      <p key={pIdx} className={pIdx > 0 ? 'mt-3 sm:mt-6' : undefined}>
         {paragraph}
       </p>
     ))}
@@ -838,7 +838,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         <div ref={introInnerRef} className="absolute inset-0 overflow-hidden">
           <section
             aria-label="Introduktion"
-            className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 pb-24 pt-44 sm:px-6 sm:pt-40 md:px-12 md:pt-36 lg:px-24"
+            className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 pb-16 pt-44 sm:px-6 sm:pb-24 sm:pt-40 md:px-12 md:pt-36 lg:px-24"
             style={{
               backgroundImage:
                 'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
@@ -853,7 +853,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center text-center will-change-transform">
               <h2
                 data-intro-heading
-                className="mb-8 max-w-[min(92vw,52rem)] text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-[clamp(2.75rem,4.4vw,4.75rem)]"
+                className="mb-5 max-w-[min(92vw,52rem)] text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] text-white sm:mb-8 sm:text-[clamp(2.75rem,4.4vw,4.75rem)]"
               >
                 Vi har gjort det enkelt för alla!
               </h2>
@@ -869,7 +869,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
                   type="button"
                   data-intro-anim
                   onClick={onIntroCta}
-                  className="mt-10 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white shadow-[0_10px_40px_-12px_hsl(var(--secondary)/0.6)] transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:text-lg"
+                  className="mt-6 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white shadow-[0_10px_40px_-12px_hsl(var(--secondary)/0.6)] transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:mt-10 sm:text-lg"
                 >
                   {introCtaLabel ?? 'Skapa min profil idag'}
                 </button>
