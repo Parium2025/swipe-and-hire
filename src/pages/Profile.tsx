@@ -2097,8 +2097,7 @@ const Profile = () => {
                 cityValue={userLocation}
                 onPostalCodeChange={setPostalCode}
                 onLocationChange={(city, _postalCode, _municipality, _county, source) => {
-                  if (source === 'auto' && isDiscardingChangesRef.current) return;
-                  if (source === 'auto' && originalValues && city === originalValues.userLocation) return;
+                  if (source === 'auto') return;
                   setUserLocation(city);
                 }}
                 onValidationChange={setHasValidLocation}
