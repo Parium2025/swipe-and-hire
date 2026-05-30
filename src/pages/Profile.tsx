@@ -452,7 +452,7 @@ const Profile = () => {
     if (profile) {
       const dbHasVideo = !!(profile as any)?.video_url;
 
-      const values = {
+      const values: ProfileFormValues = {
         firstName: profile.first_name || '',
         lastName: profile.last_name || '',
         bio: profile.bio || '',
@@ -569,7 +569,7 @@ const Profile = () => {
       return false;
     }
 
-    if (!originalValues.firstName) return false; // Not loaded yet
+    if (!originalValues) return false; // Not loaded yet
     
     const currentValues = {
       firstName,
@@ -592,7 +592,7 @@ const Profile = () => {
     };
 
     const hasChanges = Object.keys(currentValues).some(
-      key => currentValues[key as keyof typeof currentValues] !== originalValues[key as keyof typeof originalValues]
+      key => currentValues[key as keyof typeof currentValues] !== originalValues[key as keyof typeof currentValues]
     );
 
     setHasUnsavedChanges(hasChanges);
