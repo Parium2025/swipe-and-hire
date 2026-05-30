@@ -2443,26 +2443,35 @@ const Profile = () => {
         <ActiveSessionsSettings />
       </div>
 
-      {/* Image Editors */}
+      {/* Image Editors — speglar arbetsgivarsidans exakta struktur:
+          aspectRatio, isCircular och onRestoreOriginal så att "Spara" utan
+          ändringar BEHÅLLER originalet istället för att re-encoda. */}
       <ImageEditor
         isOpen={imageEditorOpen}
         onClose={() => {
           setImageEditorOpen(false);
+          setIsEditingExistingProfileImage(false);
           setPendingImageSrc('');
         }}
         imageSrc={pendingImageSrc}
         onSave={handleProfileImageSave}
+        onRestoreOriginal={isEditingExistingProfileImage ? async () => { /* behåll original — ingen åtgärd */ } : undefined}
+        aspectRatio={1}
+        isCircular={true}
       />
 
       <ImageEditor
         isOpen={coverEditorOpen}
         onClose={() => {
           setCoverEditorOpen(false);
+          setIsEditingExistingCoverImage(false);
           setPendingCoverSrc('');
         }}
         imageSrc={pendingCoverSrc}
         onSave={handleCoverImageSave}
+        onRestoreOriginal={isEditingExistingCoverImage ? async () => { /* behåll original — ingen åtgärd */ } : undefined}
       />
+
 
       {/* CV Dialog */}
       <Dialog open={cvOpen} onOpenChange={setCvOpen}>
