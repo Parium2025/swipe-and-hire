@@ -2096,7 +2096,7 @@ const Profile = () => {
                 postalCodeValue={postalCode}
                 cityValue={userLocation}
                 onPostalCodeChange={setPostalCode}
-                onLocationChange={(city, postalCode, municipality, county, source) => {
+                onLocationChange={(city, _postalCode, _municipality, _county, source) => {
                   if (source === 'auto' && isDiscardingChangesRef.current) return;
                   if (source === 'auto' && originalValues && city === originalValues.userLocation) return;
                   setUserLocation(city);
