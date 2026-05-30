@@ -994,6 +994,7 @@ const Profile = () => {
       setOriginalProfileImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setPendingImageSrc(imageUrl);
+      setIsEditingExistingProfileImage(false); // ny uppladdning, inte befintlig
       setImageEditorOpen(true);
     }
   };
