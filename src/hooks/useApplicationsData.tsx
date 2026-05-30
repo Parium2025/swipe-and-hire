@@ -723,6 +723,9 @@ export const useApplicationsData = (searchQuery: string = '') => {
   // Mark application as viewed
   const markAsViewed = useMutation({
     mutationFn: async (applicationId: string) => {
+      // Session shadow — instant + survives any later refetch race
+      markViewedInSession(applicationId);
+
       const { error } = await supabase
         .from('job_applications')
         .update({ viewed_at: new Date().toISOString() })
