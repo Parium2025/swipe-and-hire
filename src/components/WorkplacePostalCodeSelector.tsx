@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
@@ -9,7 +9,7 @@ interface WorkplacePostalCodeSelectorProps {
   postalCodeValue: string;
   cityValue: string;
   onPostalCodeChange: (postalCode: string) => void;
-  onLocationChange: (location: string, postalCode?: string, municipality?: string, county?: string) => void;
+  onLocationChange: (location: string, postalCode?: string, municipality?: string, county?: string, source?: 'auto' | 'user') => void;
   onValidationChange?: (isValid: boolean) => void;
   cachedInfo?: {postalCode: string, city: string, municipality: string, county: string} | null;
   className?: string;
@@ -28,6 +28,7 @@ const WorkplacePostalCodeSelector = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [lastSuccessfulPostalCode, setLastSuccessfulPostalCode] = useState<string>('');
+  const lastUserEditedPostalCodeRef = useRef('');
 
   // Helper to validate city name (only letters, spaces, and hyphens)
   const isValidCityName = useCallback((city: string) => {
@@ -95,7 +96,8 @@ const WorkplacePostalCodeSelector = ({
             if (location) {
               setLastSuccessfulPostalCode(cleanedCode);
               // Skicka tillbaka full info för caching
-              onLocationChange(location.city, cleanedCode, location.municipality, location.county || '');
+              const source = cleanedCode === lastUserEditedPostalCodeRef.current ? 'user' : 'auto';
+              onLocationChange(location.city, cleanedCode, location.municipality, location.county || '', source);
             } else {
               setLastSuccessfulPostalCode('');
             }
@@ -110,7 +112,8 @@ const WorkplacePostalCodeSelector = ({
           setFoundLocation(null);
           setLastSuccessfulPostalCode('');
           if (!postalCodeValue.trim()) {
-            onLocationChange('');
+            const source = lastUserEditedPostalCodeRef.current === '' ? 'user' : 'auto';
+            onLocationChange('', undefined, undefined, undefined, source);
           }
           setIsLoading(false);
         }
@@ -118,7 +121,8 @@ const WorkplacePostalCodeSelector = ({
         setFoundLocation(null);
         setIsValid(false);
         setLastSuccessfulPostalCode('');
-        onLocationChange('');
+        const source = lastUserEditedPostalCodeRef.current === '' ? 'user' : 'auto';
+        onLocationChange('', undefined, undefined, undefined, source);
         setIsLoading(false);
       }
     };
@@ -131,6 +135,7 @@ const WorkplacePostalCodeSelector = ({
   const handlePostalCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const formatted = formatPostalCodeInput(value);
+    lastUserEditedPostalCodeRef.current = formatted.replace(/\s+/g, '');
     onPostalCodeChange(formatted);
 
     const digits = formatted.replace(/\D/g, '');
@@ -152,7 +157,7 @@ const WorkplacePostalCodeSelector = ({
     const value = e.target.value;
     // Only allow letters (including Swedish åäöÅÄÖ), spaces, and hyphens - filter out numbers
     const filtered = value.replace(/[^a-zA-ZåäöÅÄÖ\s-]/g, '');
-    onLocationChange(filtered);
+    onLocationChange(filtered, undefined, undefined, undefined, 'user');
   }, [onLocationChange]);
 
   return (

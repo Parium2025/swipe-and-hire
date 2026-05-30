@@ -675,13 +675,11 @@ const Profile = () => {
       setDeletedProfileMedia(null);
       setDeletedCoverImage(null);
       setHasUnsavedChanges(false);
-      didInitProfileRef.current = false;
       window.setTimeout(() => {
         clearProfileDraft();
         setLocalMediaState(null);
         isDiscardingChangesRef.current = false;
         setHasUnsavedChanges(false);
-        didInitProfileRef.current = false;
       }, 250);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
@@ -2096,7 +2094,8 @@ const Profile = () => {
                 postalCodeValue={postalCode}
                 cityValue={userLocation}
                 onPostalCodeChange={setPostalCode}
-                onLocationChange={(city, postalCode, municipality, county) => {
+                onLocationChange={(city, _postalCode, _municipality, _county, source) => {
+                  if (source === 'auto') return;
                   setUserLocation(city);
                 }}
                 onValidationChange={setHasValidLocation}
