@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,6 +43,32 @@ import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 
 // Draft key for localStorage
 const PROFILE_DRAFT_KEY = 'parium_draft_profile';
+
+interface ProfileDraftData {
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
+  userLocation?: string;
+  postalCode?: string;
+  phone?: string;
+  birthDate?: string;
+  employmentStatus?: string;
+  workingHours?: string;
+  availability?: string;
+  companyName?: string;
+  orgNumber?: string;
+  savedAt?: number;
+}
+
+const isProfileDraftData = (value: unknown): value is ProfileDraftData => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const draft = value as Record<string, unknown>;
+  const stringFields = ['firstName', 'lastName', 'bio', 'userLocation', 'postalCode', 'phone', 'birthDate', 'employmentStatus', 'workingHours', 'availability', 'companyName', 'orgNumber'];
+  return stringFields.every((field) => draft[field] === undefined || typeof draft[field] === 'string') &&
+    (draft.savedAt === undefined || typeof draft.savedAt === 'number');
+};
+
+const readProfileDraft = () => safeReadJsonCache<ProfileDraftData>(PROFILE_DRAFT_KEY, isProfileDraftData);
 
 // Clear draft
 export const clearProfileDraft = () => {
