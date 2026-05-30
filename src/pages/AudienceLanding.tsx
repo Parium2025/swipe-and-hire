@@ -838,7 +838,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         <div ref={introInnerRef} className="absolute inset-0 overflow-hidden">
           <section
             aria-label="Introduktion"
-            className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 pb-16 pt-44 sm:px-6 sm:pb-24 sm:pt-40 md:px-12 md:pt-36 lg:px-24"
+            className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 pb-16 pt-36 sm:px-6 sm:pb-24 sm:pt-40 md:px-12 md:pt-36 lg:px-24"
             style={{
               backgroundImage:
                 'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
