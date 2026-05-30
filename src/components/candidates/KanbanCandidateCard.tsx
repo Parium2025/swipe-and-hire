@@ -7,6 +7,7 @@ import { formatCompactTime } from '@/lib/date';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
+import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
 
 /* ── Star Rating (read-only) ──────────────────────── */
 const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxStars?: number }) => (
