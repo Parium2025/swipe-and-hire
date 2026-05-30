@@ -1219,6 +1219,13 @@ export function useMyCandidatesData(searchQuery: string = '') {
     onMutate: async (applicationId) => {
       // Optimistic update (paginated structure)
       await queryClient.cancelQueries({ queryKey });
+      const viewedAt = new Date().toISOString();
+      markViewedInSession(applicationId);
+      updateMyCandidatesCache(user?.id, (items) =>
+        items.map((c) =>
+          c.application_id === applicationId ? { ...c, viewed_at: viewedAt } : c
+        )
+      );
       
       queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
@@ -1228,7 +1235,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
             ...page,
             items: page.items.map((c: MyCandidateData) =>
               c.application_id === applicationId 
-                ? { ...c, viewed_at: new Date().toISOString() } 
+                ? { ...c, viewed_at: viewedAt } 
                 : c
             ),
           })),
