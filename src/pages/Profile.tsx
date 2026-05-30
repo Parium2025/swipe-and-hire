@@ -1453,11 +1453,10 @@ const Profile = () => {
       setCvFileName('');
 
       // Keep originalValues in sync so this counts as already saved
-      setOriginalValues(prev => ({
+      setOriginalValues(prev => prev ? ({
         ...prev,
         cvUrl: '',
-        cvFileName: ''
-      }));
+      }) : prev);
 
       // No unsaved changes since CV is already removed in DB
       setHasUnsavedChanges(false);
