@@ -410,6 +410,8 @@ const Profile = () => {
 
   // Load profile data when profile changes
   useEffect(() => {
+    if (didInitProfileRef.current && hasUnsavedChanges && !isDiscardingChangesRef.current) return;
+
     if (profile) {
       const dbHasVideo = !!(profile as any)?.video_url;
 
@@ -436,30 +438,24 @@ const Profile = () => {
         coverFileName: '',
       };
 
-      // Try to restore localStorage draft for text fields
-      let draftData: any = null;
-      try {
-        const saved = localStorage.getItem(PROFILE_DRAFT_KEY);
-        if (saved) {
-          draftData = JSON.parse(saved);
-          console.log('💾 Profile draft found');
-        }
-      } catch (e) {
-        console.warn('Failed to restore profile draft');
-      }
+      const draftData = isDiscardingChangesRef.current ? null : readProfileDraft();
+      const draftValue = (key: keyof ProfileDraftData, fallback: string) => {
+        const value = draftData?.[key];
+        return typeof value === 'string' && value !== fallback ? value : fallback;
+      };
 
       // Use draft values if they differ from DB (means user had unsaved changes)
-      setFirstName(draftData?.firstName && draftData.firstName !== values.firstName ? draftData.firstName : values.firstName);
-      setLastName(draftData?.lastName && draftData.lastName !== values.lastName ? draftData.lastName : values.lastName);
-      setBio(draftData?.bio && draftData.bio !== values.bio ? draftData.bio : values.bio);
-      setUserLocation(draftData?.userLocation && draftData.userLocation !== values.userLocation ? draftData.userLocation : values.userLocation);
-      setPostalCode(draftData?.postalCode && draftData.postalCode !== values.postalCode ? draftData.postalCode : values.postalCode);
-      setPhone(draftData?.phone && draftData.phone !== values.phone ? draftData.phone : values.phone);
-      setBirthDate(draftData?.birthDate && draftData.birthDate !== values.birthDate ? draftData.birthDate : values.birthDate);
+      setFirstName(draftValue('firstName', values.firstName));
+      setLastName(draftValue('lastName', values.lastName));
+      setBio(draftValue('bio', values.bio));
+      setUserLocation(draftValue('userLocation', values.userLocation));
+      setPostalCode(draftValue('postalCode', values.postalCode));
+      setPhone(draftValue('phone', values.phone));
+      setBirthDate(draftValue('birthDate', values.birthDate));
       
       // 🔒 CRITICAL: Restore local media state from sessionStorage if it exists
       // This survives component remounts from tab switches or screenshot tools
-      const localMediaRaw = getLocalMediaState();
+      const localMediaRaw = isDiscardingChangesRef.current ? null : getLocalMediaState();
       const localMediaMatchesDb =
         !!localMediaRaw &&
         localMediaRaw.profileImageUrl === values.profileImageUrl &&
@@ -500,31 +496,25 @@ const Profile = () => {
       }
       
       // Restore employer fields from draft if different
-      setCompanyName(draftData?.companyName && draftData.companyName !== values.companyName ? draftData.companyName : values.companyName);
-      setOrgNumber(draftData?.orgNumber && draftData.orgNumber !== values.orgNumber ? draftData.orgNumber : values.orgNumber);
-      setEmploymentStatus(draftData?.employmentStatus && draftData.employmentStatus !== values.employmentStatus ? draftData.employmentStatus : values.employmentStatus);
-      setWorkingHours(draftData?.workingHours && draftData.workingHours !== values.workingHours ? draftData.workingHours : values.workingHours);
-      setAvailability(draftData?.availability && draftData.availability !== values.availability ? draftData.availability : values.availability);
+      setCompanyName(draftValue('companyName', values.companyName));
+      setOrgNumber(draftValue('orgNumber', values.orgNumber));
+      setEmploymentStatus(draftValue('employmentStatus', values.employmentStatus));
+      setWorkingHours(draftValue('workingHours', values.workingHours));
+      setAvailability(draftValue('availability', values.availability));
 
       // Store original values for comparison
       setOriginalValues(values);
       
       // Only reset unsaved changes flag if we don't have local media changes AND no draft was restored
-      const hasDraftChanges = draftData && (
-        (draftData.firstName && draftData.firstName !== values.firstName) ||
-        (draftData.lastName && draftData.lastName !== values.lastName) ||
-        (draftData.bio && draftData.bio !== values.bio) ||
-        (draftData.userLocation && draftData.userLocation !== values.userLocation) ||
-        (draftData.postalCode && draftData.postalCode !== values.postalCode) ||
-        (draftData.phone && draftData.phone !== values.phone) ||
-        (draftData.birthDate && draftData.birthDate !== values.birthDate)
-      );
+      const hasDraftChanges = !!draftData && (['firstName', 'lastName', 'bio', 'userLocation', 'postalCode', 'phone', 'birthDate', 'companyName', 'orgNumber', 'employmentStatus', 'workingHours', 'availability'] as const)
+        .some((key) => typeof draftData[key] === 'string' && draftData[key] !== values[key]);
       
       if (!getHasLocalMediaChanges() && !hasDraftChanges) {
         setHasUnsavedChanges(false);
       }
+      didInitProfileRef.current = true;
     }
-  }, [profile]);
+  }, [profile, hasUnsavedChanges, setHasUnsavedChanges]);
 
   // 🎯 Synkronisera med förladdade URLs från useAuth (precis som sidebaren)
   // Detta säkerställer att Profile.tsx alltid visar de redan cachade bilderna
