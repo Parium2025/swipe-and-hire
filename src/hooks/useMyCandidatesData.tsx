@@ -284,11 +284,12 @@ export function useMyCandidatesData(searchQuery: string = '') {
           .filter((path): path is string => typeof path === 'string' && path.trim() !== '')
           .slice(0, 8);
 
-        // Matcha CandidateAvatar (40px, 2x retina)
+        // Matcha CandidateAvatar (40px, 2x retina) + förladda full-size för profil-dialog (instant open, ingen FA-fallback)
         const AVATAR_TRANSFORM = { width: 40, height: 40, resize: 'cover' as const };
         setTimeout(() => {
           void Promise.allSettled([
             ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400, AVATAR_TRANSFORM)),
+            ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400)),
             ...videoPaths.map((path) => prefetchMediaUrl(path, 'profile-video')),
           ]);
         }, 0);
@@ -453,11 +454,12 @@ export function useMyCandidatesData(searchQuery: string = '') {
         .filter((path): path is string => typeof path === 'string' && path.trim() !== '')
         .slice(0, 8);
 
-      // Matcha CandidateAvatar (40px, 2x retina)
+      // Matcha CandidateAvatar (40px, 2x retina) + förladda full-size för profil-dialog (instant open, ingen FA-fallback)
       const AVATAR_TRANSFORM_2 = { width: 40, height: 40, resize: 'cover' as const };
       setTimeout(() => {
         void Promise.allSettled([
           ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400, AVATAR_TRANSFORM_2)),
+          ...imagePaths.map((path) => prefetchMediaUrl(path, 'profile-image', 86400)),
           ...videoPaths.map((path) => prefetchMediaUrl(path, 'profile-video')),
         ]);
       }, 0);

@@ -77,7 +77,7 @@ function CandidateAvatarBase({
         onError={() => setAvatarError(true)}
         onLoad={() => setImageLoaded(true)}
       />
-      <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={500}>
+      <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={1200}>
         {initials || '?'}
       </AvatarFallback>
     </Avatar>
