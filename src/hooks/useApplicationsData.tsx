@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { smartSearchCandidates } from '@/lib/smartSearch';
+import { markViewedInSession } from '@/lib/viewedApplicationsSession';
 
 export interface ApplicationData {
   id: string;
