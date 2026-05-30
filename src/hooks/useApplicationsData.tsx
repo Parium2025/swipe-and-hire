@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { safeSetItem } from '@/lib/safeStorage';
+import { safeSetItem, safeReadJsonCache } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
@@ -55,31 +55,22 @@ interface RatingsCacheData {
 }
 
 // Read cached ratings from localStorage for instant display
+// Använder safeReadJsonCache så korrupt/gammalt format aldrig kan krascha appen.
 const readCachedRatings = (userId: string): Record<string, number> => {
   const key = RATINGS_CACHE_PREFIX + userId;
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return {};
-    
-    const cache: RatingsCacheData = JSON.parse(raw);
-    if (!cache || typeof cache !== 'object') {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return {};
-    }
-    // TTL check
-    if (cache.timestamp && Date.now() - cache.timestamp > RATINGS_TTL_MS) {
-      localStorage.removeItem(key);
-      return {};
-    }
-    if (cache.ratings && typeof cache.ratings !== 'object') {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return {};
-    }
-    return cache.ratings || {};
-  } catch {
+  const cache = safeReadJsonCache<RatingsCacheData>(
+    key,
+    (p): p is RatingsCacheData =>
+      typeof p === 'object' && p !== null &&
+      'ratings' in p && typeof (p as any).ratings === 'object' && (p as any).ratings !== null,
+  );
+  if (!cache) return {};
+  // TTL check
+  if (cache.timestamp && Date.now() - cache.timestamp > RATINGS_TTL_MS) {
     try { localStorage.removeItem(key); } catch { /* ignore */ }
     return {};
   }
+  return cache.ratings || {};
 };
 
 // Save ratings to localStorage cache
@@ -99,26 +90,22 @@ const writeCachedRatings = (userId: string, ratings: Record<string, number>) => 
 // Read snapshot from localStorage - PRIORITIZE INSTANT DISPLAY
 // We accept slightly stale data to show content immediately on login/refresh
 // Now also merges cached ratings for instant rating display (no flicker)
+// Använder safeReadJsonCache så korrupt format inte kraschar via .map/.filter.
 const readSnapshot = (userId: string): ApplicationData[] => {
+  const key = SNAPSHOT_KEY_PREFIX + userId;
+  const snapshot = safeReadJsonCache<SnapshotData>(
+    key,
+    (p): p is SnapshotData =>
+      typeof p === 'object' && p !== null &&
+      'items' in p && Array.isArray((p as any).items),
+  );
+  if (!snapshot) return [];
+  // TTL check — invalidate snapshots older than 1 hour as safety net
+  if (snapshot.timestamp && Date.now() - snapshot.timestamp > SNAPSHOT_TTL_MS) {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return [];
+  }
   try {
-    const key = SNAPSHOT_KEY_PREFIX + userId;
-    const raw = localStorage.getItem(key);
-    if (!raw) return [];
-
-    const snapshot: SnapshotData = JSON.parse(raw);
-    if (!snapshot || typeof snapshot !== 'object') {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return [];
-    }
-    // TTL check — invalidate snapshots older than 1 hour as safety net
-    if (snapshot.timestamp && Date.now() - snapshot.timestamp > SNAPSHOT_TTL_MS) {
-      localStorage.removeItem(key);
-      return [];
-    }
-    if (!Array.isArray(snapshot.items)) {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return [];
-    }
 
     // Invalidate snapshot if it contains legacy profile-media URLs (old format).
     // Those URLs are no longer a reliable source of truth; we only store storage paths.
