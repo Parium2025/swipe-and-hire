@@ -1813,31 +1813,27 @@ const Profile = () => {
             {(isProfileVideo && !!videoUrl) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
-                  {/* First row: Edit existing cover button - same width as second button */}
+                  {/* First row: Edit existing cover button - matchar arbetsgivarsidans struktur */}
                   {coverImageUrl && (
-                    <div className="w-[180px]">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleEditExistingCover}
-                        className="w-full h-8 rounded-full font-normal bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
-                      >
-                        Anpassa din bild
-                      </Button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={handleEditExistingCover}
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
+                    >
+                      Anpassa din bild
+                    </button>
                   )}
-                  
+
                   {/* Second row: Change cover button and trash */}
                   <div className="relative flex items-center justify-center w-[180px]">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
+                    <button
+                      type="button"
                       onClick={() => document.getElementById('cover-image')?.click()}
                       disabled={isUploadingCover}
-                      className="w-full h-8 font-normal bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-full"
                     >
                       {coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
-                    </Button>
+                    </button>
                     {coverImageUrl && (
                       <button
                         onClick={deleteCoverImage}
