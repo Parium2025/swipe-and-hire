@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,6 +43,54 @@ import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 
 // Draft key for localStorage
 const PROFILE_DRAFT_KEY = 'parium_draft_profile';
+
+interface ProfileDraftData {
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
+  userLocation?: string;
+  postalCode?: string;
+  phone?: string;
+  birthDate?: string;
+  employmentStatus?: string;
+  workingHours?: string;
+  availability?: string;
+  companyName?: string;
+  orgNumber?: string;
+  savedAt?: number;
+}
+
+interface ProfileFormValues {
+  firstName: string;
+  lastName: string;
+  bio: string;
+  userLocation: string;
+  postalCode: string;
+  phone: string;
+  birthDate: string;
+  profileImageUrl: string;
+  videoUrl: string;
+  cvUrl: string;
+  companyName: string;
+  orgNumber: string;
+  employmentStatus: string;
+  workingHours: string;
+  availability: string;
+  coverImageUrl: string;
+  isProfileVideo: boolean;
+  profileFileName: string;
+  coverFileName: string;
+}
+
+const isProfileDraftData = (value: unknown): value is ProfileDraftData => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const draft = value as Record<string, unknown>;
+  const stringFields = ['firstName', 'lastName', 'bio', 'userLocation', 'postalCode', 'phone', 'birthDate', 'employmentStatus', 'workingHours', 'availability', 'companyName', 'orgNumber'];
+  return stringFields.every((field) => draft[field] === undefined || typeof draft[field] === 'string') &&
+    (draft.savedAt === undefined || typeof draft.savedAt === 'number');
+};
+
+const readProfileDraft = () => safeReadJsonCache<ProfileDraftData>(PROFILE_DRAFT_KEY, isProfileDraftData);
 
 // Clear draft
 export const clearProfileDraft = () => {
@@ -203,6 +252,7 @@ const Profile = () => {
   const location = useLocation();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const isDiscardingChangesRef = useRef(false);
+  const didInitProfileRef = useRef(false);
   const { enqueueProfileUpdate } = useOfflineProfileQueue(user?.id);
   const { enqueue: enqueueMediaForLater } = useOfflineMediaQueue(user?.id);
   const [loading, setLoading] = useState(false);
@@ -213,7 +263,7 @@ const Profile = () => {
   const [uploadAttempt, setUploadAttempt] = useState(1);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [coverProgressInfo, setCoverProgressInfo] = useState<UploadProgressInfo | null>(null);
-  const [originalValues, setOriginalValues] = useState<any>({});
+  const [originalValues, setOriginalValues] = useState<ProfileFormValues | null>(null);
   const [cvSummaryRefreshKey, setCvSummaryRefreshKey] = useState(0);
   
   // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
@@ -229,12 +279,27 @@ const Profile = () => {
     coverFileName: string;
     cvUrl: string;
   }
+
+  const isLocalMediaState = (value: unknown): value is LocalMediaState => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+    const media = value as Record<string, unknown>;
+    return ['profileImageUrl', 'videoUrl', 'coverImageUrl', 'profileFileName', 'coverFileName', 'cvUrl']
+      .every((key) => typeof media[key] === 'string') &&
+      typeof media.isProfileVideo === 'boolean';
+  };
   
   const getLocalMediaState = (): LocalMediaState | null => {
     try {
       const stored = sessionStorage.getItem(LOCAL_MEDIA_KEY);
-      return stored ? JSON.parse(stored) : null;
+      if (!stored) return null;
+      const parsed: unknown = JSON.parse(stored);
+      if (!isLocalMediaState(parsed)) {
+        sessionStorage.removeItem(LOCAL_MEDIA_KEY);
+        return null;
+      }
+      return parsed;
     } catch {
+      try { sessionStorage.removeItem(LOCAL_MEDIA_KEY); } catch { /* ignore */ }
       return null;
     }
   };
@@ -279,6 +344,28 @@ const Profile = () => {
   const [cvOpen, setCvOpen] = useState(false);
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
   const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
+
+  const resetProfileFormToValues = useCallback((values: ProfileFormValues) => {
+    setFirstName(values.firstName || '');
+    setLastName(values.lastName || '');
+    setBio(values.bio || '');
+    setUserLocation(values.userLocation || '');
+    setPostalCode(values.postalCode || '');
+    setPhone(values.phone || '');
+    setBirthDate(values.birthDate || '');
+    setProfileImageUrl(values.profileImageUrl || '');
+    setVideoUrl(values.videoUrl || '');
+    setCvUrl(values.cvUrl || '');
+    setCompanyName(values.companyName || '');
+    setOrgNumber(values.orgNumber || '');
+    setEmploymentStatus(values.employmentStatus || '');
+    setWorkingHours(values.workingHours || '');
+    setAvailability(values.availability || '');
+    setCoverImageUrl(values.coverImageUrl || '');
+    setIsProfileVideo(values.isProfileVideo || false);
+    setProfileFileName(values.profileFileName || '');
+    setCoverFileName(values.coverFileName || '');
+  }, []);
   
   // Undo state - store deleted media for restore
   const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
@@ -360,10 +447,12 @@ const Profile = () => {
 
   // Load profile data when profile changes
   useEffect(() => {
+    if (didInitProfileRef.current && hasUnsavedChanges && !isDiscardingChangesRef.current) return;
+
     if (profile) {
       const dbHasVideo = !!(profile as any)?.video_url;
 
-      const values = {
+      const values: ProfileFormValues = {
         firstName: profile.first_name || '',
         lastName: profile.last_name || '',
         bio: profile.bio || '',
@@ -386,30 +475,24 @@ const Profile = () => {
         coverFileName: '',
       };
 
-      // Try to restore localStorage draft for text fields
-      let draftData: any = null;
-      try {
-        const saved = localStorage.getItem(PROFILE_DRAFT_KEY);
-        if (saved) {
-          draftData = JSON.parse(saved);
-          console.log('💾 Profile draft found');
-        }
-      } catch (e) {
-        console.warn('Failed to restore profile draft');
-      }
+      const draftData = isDiscardingChangesRef.current ? null : readProfileDraft();
+      const draftValue = (key: keyof ProfileDraftData, fallback: string) => {
+        const value = draftData?.[key];
+        return typeof value === 'string' && value !== fallback ? value : fallback;
+      };
 
       // Use draft values if they differ from DB (means user had unsaved changes)
-      setFirstName(draftData?.firstName && draftData.firstName !== values.firstName ? draftData.firstName : values.firstName);
-      setLastName(draftData?.lastName && draftData.lastName !== values.lastName ? draftData.lastName : values.lastName);
-      setBio(draftData?.bio && draftData.bio !== values.bio ? draftData.bio : values.bio);
-      setUserLocation(draftData?.userLocation && draftData.userLocation !== values.userLocation ? draftData.userLocation : values.userLocation);
-      setPostalCode(draftData?.postalCode && draftData.postalCode !== values.postalCode ? draftData.postalCode : values.postalCode);
-      setPhone(draftData?.phone && draftData.phone !== values.phone ? draftData.phone : values.phone);
-      setBirthDate(draftData?.birthDate && draftData.birthDate !== values.birthDate ? draftData.birthDate : values.birthDate);
+      setFirstName(draftValue('firstName', values.firstName));
+      setLastName(draftValue('lastName', values.lastName));
+      setBio(draftValue('bio', values.bio));
+      setUserLocation(draftValue('userLocation', values.userLocation));
+      setPostalCode(draftValue('postalCode', values.postalCode));
+      setPhone(draftValue('phone', values.phone));
+      setBirthDate(draftValue('birthDate', values.birthDate));
       
       // 🔒 CRITICAL: Restore local media state from sessionStorage if it exists
       // This survives component remounts from tab switches or screenshot tools
-      const localMediaRaw = getLocalMediaState();
+      const localMediaRaw = isDiscardingChangesRef.current ? null : getLocalMediaState();
       const localMediaMatchesDb =
         !!localMediaRaw &&
         localMediaRaw.profileImageUrl === values.profileImageUrl &&
@@ -450,31 +533,25 @@ const Profile = () => {
       }
       
       // Restore employer fields from draft if different
-      setCompanyName(draftData?.companyName && draftData.companyName !== values.companyName ? draftData.companyName : values.companyName);
-      setOrgNumber(draftData?.orgNumber && draftData.orgNumber !== values.orgNumber ? draftData.orgNumber : values.orgNumber);
-      setEmploymentStatus(draftData?.employmentStatus && draftData.employmentStatus !== values.employmentStatus ? draftData.employmentStatus : values.employmentStatus);
-      setWorkingHours(draftData?.workingHours && draftData.workingHours !== values.workingHours ? draftData.workingHours : values.workingHours);
-      setAvailability(draftData?.availability && draftData.availability !== values.availability ? draftData.availability : values.availability);
+      setCompanyName(draftValue('companyName', values.companyName));
+      setOrgNumber(draftValue('orgNumber', values.orgNumber));
+      setEmploymentStatus(draftValue('employmentStatus', values.employmentStatus));
+      setWorkingHours(draftValue('workingHours', values.workingHours));
+      setAvailability(draftValue('availability', values.availability));
 
       // Store original values for comparison
       setOriginalValues(values);
       
       // Only reset unsaved changes flag if we don't have local media changes AND no draft was restored
-      const hasDraftChanges = draftData && (
-        (draftData.firstName && draftData.firstName !== values.firstName) ||
-        (draftData.lastName && draftData.lastName !== values.lastName) ||
-        (draftData.bio && draftData.bio !== values.bio) ||
-        (draftData.userLocation && draftData.userLocation !== values.userLocation) ||
-        (draftData.postalCode && draftData.postalCode !== values.postalCode) ||
-        (draftData.phone && draftData.phone !== values.phone) ||
-        (draftData.birthDate && draftData.birthDate !== values.birthDate)
-      );
+      const hasDraftChanges = !!draftData && (['firstName', 'lastName', 'bio', 'userLocation', 'postalCode', 'phone', 'birthDate', 'companyName', 'orgNumber', 'employmentStatus', 'workingHours', 'availability'] as const)
+        .some((key) => typeof draftData[key] === 'string' && draftData[key] !== values[key]);
       
       if (!getHasLocalMediaChanges() && !hasDraftChanges) {
         setHasUnsavedChanges(false);
       }
+      didInitProfileRef.current = true;
     }
-  }, [profile]);
+  }, [profile, hasUnsavedChanges, setHasUnsavedChanges]);
 
   // 🎯 Synkronisera med förladdade URLs från useAuth (precis som sidebaren)
   // Detta säkerställer att Profile.tsx alltid visar de redan cachade bilderna
@@ -492,7 +569,7 @@ const Profile = () => {
       return false;
     }
 
-    if (!originalValues.firstName) return false; // Not loaded yet
+    if (!originalValues) return false; // Not loaded yet
     
     const currentValues = {
       firstName,
@@ -515,7 +592,7 @@ const Profile = () => {
     };
 
     const hasChanges = Object.keys(currentValues).some(
-      key => currentValues[key as keyof typeof currentValues] !== originalValues[key as keyof typeof originalValues]
+      key => currentValues[key as keyof typeof currentValues] !== originalValues[key as keyof typeof currentValues]
     );
 
     setHasUnsavedChanges(hasChanges);
@@ -537,8 +614,7 @@ const Profile = () => {
     const hasContent = firstName || lastName || bio || userLocation || postalCode || phone || birthDate;
     
     if (hasContent) {
-      try {
-        localStorage.setItem(PROFILE_DRAFT_KEY, JSON.stringify({
+      const saved = safeSetItem(PROFILE_DRAFT_KEY, JSON.stringify({
           firstName,
           lastName,
           bio,
@@ -553,8 +629,9 @@ const Profile = () => {
           orgNumber,
           savedAt: Date.now()
         }));
+      if (saved) {
         console.log('💾 Profile draft saved');
-      } catch (e) {
+      } else {
         console.warn('Failed to save profile draft');
       }
     }
@@ -594,35 +671,20 @@ const Profile = () => {
       clearProfileDraft();
       setLocalMediaState(null);
 
-      setFirstName(originalValues.firstName || '');
-      setLastName(originalValues.lastName || '');
-      setBio(originalValues.bio || '');
-      setUserLocation(originalValues.userLocation || '');
-      setPostalCode(originalValues.postalCode || '');
-      setPhone(originalValues.phone || '');
-      setBirthDate(originalValues.birthDate || '');
-      setProfileImageUrl(originalValues.profileImageUrl || '');
-      setCoverImageUrl(originalValues.coverImageUrl || '');
-      setCoverFileName(originalValues.coverFileName || '');
-      setProfileFileName(originalValues.profileFileName || '');
-      setCvUrl(originalValues.cvUrl || '');
-      setCompanyName(originalValues.companyName || '');
-      setOrgNumber(originalValues.orgNumber || '');
-      setEmploymentStatus(originalValues.employmentStatus || '');
-      setWorkingHours(originalValues.workingHours || '');
-      setAvailability(originalValues.availability || '');
-      setIsProfileVideo(originalValues.isProfileVideo || false);
-      setVideoUrl(originalValues.videoUrl || '');
+      resetProfileFormToValues(originalValues);
       setDeletedProfileMedia(null);
       setDeletedCoverImage(null);
       setHasUnsavedChanges(false);
       window.setTimeout(() => {
+        clearProfileDraft();
+        setLocalMediaState(null);
         isDiscardingChangesRef.current = false;
-      }, 0);
+        setHasUnsavedChanges(false);
+      }, 250);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
     return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
-  }, [originalValues, setHasUnsavedChanges]);
+  }, [originalValues, resetProfileFormToValues, setHasUnsavedChanges]);
 
   const isEmployer = userRole?.role === 'employer';
 
@@ -1134,12 +1196,12 @@ const Profile = () => {
     try {
       // Save current media for undo
       setDeletedProfileMedia({
-        profileImageUrl: originalValues.profileImageUrl || profileImageUrl,
-        coverImageUrl: originalValues.coverImageUrl || coverImageUrl,
-        profileFileName: originalValues.profileFileName || profileFileName,
-        coverFileName: originalValues.coverFileName || coverFileName,
-        isProfileVideo: originalValues.isProfileVideo || isProfileVideo,
-        videoUrl: originalValues.videoUrl || videoUrl,
+        profileImageUrl: originalValues?.profileImageUrl || profileImageUrl,
+        coverImageUrl: originalValues?.coverImageUrl || coverImageUrl,
+        profileFileName: originalValues?.profileFileName || profileFileName,
+        coverFileName: originalValues?.coverFileName || coverFileName,
+        isProfileVideo: originalValues?.isProfileVideo || isProfileVideo,
+        videoUrl: originalValues?.videoUrl || videoUrl,
       });
       
       // När vi raderar video med en cover-bild, gör cover-bilden till profilbilden
@@ -1391,11 +1453,10 @@ const Profile = () => {
       setCvFileName('');
 
       // Keep originalValues in sync so this counts as already saved
-      setOriginalValues(prev => ({
+      setOriginalValues(prev => prev ? ({
         ...prev,
         cvUrl: '',
-        cvFileName: ''
-      }));
+      }) : prev);
 
       // No unsaved changes since CV is already removed in DB
       setHasUnsavedChanges(false);
@@ -1559,7 +1620,7 @@ const Profile = () => {
       
       if (!result.error) {
         // 🚀 Trigger proactive CV analysis if CV was updated
-        const cvWasUpdated = cvUrl && cvUrl !== originalValues.cvUrl;
+        const cvWasUpdated = cvUrl && cvUrl !== originalValues?.cvUrl;
         if (cvWasUpdated && user?.id) {
           console.log('CV updated, triggering proactive analysis...');
           try {
