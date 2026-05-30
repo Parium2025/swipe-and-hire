@@ -9,7 +9,7 @@ interface WorkplacePostalCodeSelectorProps {
   postalCodeValue: string;
   cityValue: string;
   onPostalCodeChange: (postalCode: string) => void;
-  onLocationChange: (location: string, postalCode?: string, municipality?: string, county?: string) => void;
+  onLocationChange: (location: string, postalCode?: string, municipality?: string, county?: string, source?: 'auto' | 'user') => void;
   onValidationChange?: (isValid: boolean) => void;
   cachedInfo?: {postalCode: string, city: string, municipality: string, county: string} | null;
   className?: string;
@@ -95,7 +95,7 @@ const WorkplacePostalCodeSelector = ({
             if (location) {
               setLastSuccessfulPostalCode(cleanedCode);
               // Skicka tillbaka full info för caching
-              onLocationChange(location.city, cleanedCode, location.municipality, location.county || '');
+              onLocationChange(location.city, cleanedCode, location.municipality, location.county || '', 'auto');
             } else {
               setLastSuccessfulPostalCode('');
             }
@@ -110,7 +110,7 @@ const WorkplacePostalCodeSelector = ({
           setFoundLocation(null);
           setLastSuccessfulPostalCode('');
           if (!postalCodeValue.trim()) {
-            onLocationChange('');
+            onLocationChange('', undefined, undefined, undefined, 'auto');
           }
           setIsLoading(false);
         }
@@ -118,7 +118,7 @@ const WorkplacePostalCodeSelector = ({
         setFoundLocation(null);
         setIsValid(false);
         setLastSuccessfulPostalCode('');
-        onLocationChange('');
+        onLocationChange('', undefined, undefined, undefined, 'auto');
         setIsLoading(false);
       }
     };
@@ -152,7 +152,7 @@ const WorkplacePostalCodeSelector = ({
     const value = e.target.value;
     // Only allow letters (including Swedish åäöÅÄÖ), spaces, and hyphens - filter out numbers
     const filtered = value.replace(/[^a-zA-ZåäöÅÄÖ\s-]/g, '');
-    onLocationChange(filtered);
+    onLocationChange(filtered, undefined, undefined, undefined, 'user');
   }, [onLocationChange]);
 
   return (
