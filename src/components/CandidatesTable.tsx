@@ -773,7 +773,17 @@ export function CandidatesTable({
       
       {/* Infinite scroll sentinel */}
       {hasMore && !hasReachedLimit && (
-        <InfiniteScrollSentinel onIntersect={onLoadMore} isLoading={isLoadingMore} />
+        <>
+          {/* Subtle laddat-räknare när man närmar sig 500-gränsen */}
+          {loadedCount >= 400 && (
+            <div className="flex items-center justify-center py-3 px-4">
+              <p className="text-xs text-white/50">
+                {loadedCount} av ~500 kandidater laddade
+              </p>
+            </div>
+          )}
+          <InfiniteScrollSentinel onIntersect={onLoadMore} isLoading={isLoadingMore} />
+        </>
       )}
 
       {/* "Vill du fortsätta?" banner */}

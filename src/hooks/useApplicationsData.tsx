@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { safeSetItem } from '@/lib/safeStorage';
+import { safeSetItem, safeReadJsonCache } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
@@ -55,31 +55,22 @@ interface RatingsCacheData {
 }
 
 // Read cached ratings from localStorage for instant display
+// Använder safeReadJsonCache så korrupt/gammalt format aldrig kan krascha appen.
 const readCachedRatings = (userId: string): Record<string, number> => {
   const key = RATINGS_CACHE_PREFIX + userId;
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return {};
-    
-    const cache: RatingsCacheData = JSON.parse(raw);
-    if (!cache || typeof cache !== 'object') {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return {};
-    }
-    // TTL check
-    if (cache.timestamp && Date.now() - cache.timestamp > RATINGS_TTL_MS) {
-      localStorage.removeItem(key);
-      return {};
-    }
-    if (cache.ratings && typeof cache.ratings !== 'object') {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return {};
-    }
-    return cache.ratings || {};
-  } catch {
+  const cache = safeReadJsonCache<RatingsCacheData>(
+    key,
+    (p): p is RatingsCacheData =>
+      typeof p === 'object' && p !== null &&
+      'ratings' in p && typeof (p as any).ratings === 'object' && (p as any).ratings !== null,
+  );
+  if (!cache) return {};
+  // TTL check
+  if (cache.timestamp && Date.now() - cache.timestamp > RATINGS_TTL_MS) {
     try { localStorage.removeItem(key); } catch { /* ignore */ }
     return {};
   }
+  return cache.ratings || {};
 };
 
 // Save ratings to localStorage cache
@@ -99,26 +90,22 @@ const writeCachedRatings = (userId: string, ratings: Record<string, number>) => 
 // Read snapshot from localStorage - PRIORITIZE INSTANT DISPLAY
 // We accept slightly stale data to show content immediately on login/refresh
 // Now also merges cached ratings for instant rating display (no flicker)
+// Använder safeReadJsonCache så korrupt format inte kraschar via .map/.filter.
 const readSnapshot = (userId: string): ApplicationData[] => {
+  const key = SNAPSHOT_KEY_PREFIX + userId;
+  const snapshot = safeReadJsonCache<SnapshotData>(
+    key,
+    (p): p is SnapshotData =>
+      typeof p === 'object' && p !== null &&
+      'items' in p && Array.isArray((p as any).items),
+  );
+  if (!snapshot) return [];
+  // TTL check — invalidate snapshots older than 1 hour as safety net
+  if (snapshot.timestamp && Date.now() - snapshot.timestamp > SNAPSHOT_TTL_MS) {
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return [];
+  }
   try {
-    const key = SNAPSHOT_KEY_PREFIX + userId;
-    const raw = localStorage.getItem(key);
-    if (!raw) return [];
-
-    const snapshot: SnapshotData = JSON.parse(raw);
-    if (!snapshot || typeof snapshot !== 'object') {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return [];
-    }
-    // TTL check — invalidate snapshots older than 1 hour as safety net
-    if (snapshot.timestamp && Date.now() - snapshot.timestamp > SNAPSHOT_TTL_MS) {
-      localStorage.removeItem(key);
-      return [];
-    }
-    if (!Array.isArray(snapshot.items)) {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return [];
-    }
 
     // Invalidate snapshot if it contains legacy profile-media URLs (old format).
     // Those URLs are no longer a reliable source of truth; we only store storage paths.
@@ -636,6 +623,51 @@ export const useApplicationsData = (searchQuery: string = '') => {
     };
   }, [user, queryClient, jobIdsForRealtime]);
 
+  // Real-time subscription för profilförändringar (bild, namn, video).
+  // Triggar invalidate så listan visar senaste profilbild/namn när
+  // en kandidat uppdaterar sin profil — utan att vänta på TTL eller manuell refresh.
+  // Debouncas så en burst av uppdateringar bara triggar 1 refetch.
+  const profilesInvalidateTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    if (applicantIdsKey.length === 0) return;
+
+    const channelName = `applications-profiles-rt-${user.id}`;
+    const applicantIds = applicantIdsKey.split('|').filter(Boolean);
+
+    const filterConfig: any = {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'profiles',
+    };
+    // Cap filter length — fall back till bred subscription om för många IDs (RLS skyddar).
+    if (applicantIds.length === 1) {
+      filterConfig.filter = `id=eq.${applicantIds[0]}`;
+    } else if (applicantIds.length <= MAX_REALTIME_FILTER_IDS) {
+      filterConfig.filter = `id=in.(${applicantIds.join(',')})`;
+    }
+
+    const channel = supabase
+      .channel(channelName)
+      .on('postgres_changes', filterConfig, () => {
+        if (profilesInvalidateTimerRef.current) {
+          window.clearTimeout(profilesInvalidateTimerRef.current);
+        }
+        profilesInvalidateTimerRef.current = window.setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
+        }, 400);
+      })
+      .subscribe();
+
+    return () => {
+      if (profilesInvalidateTimerRef.current) {
+        window.clearTimeout(profilesInvalidateTimerRef.current);
+        profilesInvalidateTimerRef.current = null;
+      }
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient, applicantIdsKey]);
+
   // Om vi råkar ha en gammal cache (prefetch utan media-fält) → tvinga refetch en gång.
   // Detta eliminerar behovet av manuell refresh för att avatar/video ska dyka upp.
   const fixedLegacyCacheRef = useRef(false);
@@ -780,16 +812,15 @@ export const useApplicationsData = (searchQuery: string = '') => {
       // Update localStorage ratings cache for instant sync
       try {
         const cacheKey = `ratings_cache_${user.id}`;
-        const raw = localStorage.getItem(cacheKey);
-        let cache: { ratings: Record<string, number>; timestamp: number } = { ratings: {}, timestamp: Date.now() };
-        if (raw) {
-          try {
-            const parsed = JSON.parse(raw);
-            if (parsed && typeof parsed === 'object' && parsed.ratings && typeof parsed.ratings === 'object') {
-              cache = { ratings: parsed.ratings, timestamp: typeof parsed.timestamp === 'number' ? parsed.timestamp : Date.now() };
-            }
-          } catch { /* fall back to fresh cache */ }
-        }
+        const parsed = safeReadJsonCache<{ ratings: Record<string, number>; timestamp: number }>(
+          cacheKey,
+          (p): p is { ratings: Record<string, number>; timestamp: number } =>
+            typeof p === 'object' && p !== null &&
+            'ratings' in p && typeof (p as any).ratings === 'object' && (p as any).ratings !== null,
+        );
+        const cache = parsed
+          ? { ratings: parsed.ratings, timestamp: typeof parsed.timestamp === 'number' ? parsed.timestamp : Date.now() }
+          : { ratings: {} as Record<string, number>, timestamp: Date.now() };
         cache.ratings[applicantId] = rating;
         cache.timestamp = Date.now();
         safeSetItem(cacheKey, JSON.stringify(cache));
