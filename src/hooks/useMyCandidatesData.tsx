@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { safeSetItem } from '@/lib/safeStorage';
+import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -59,7 +59,9 @@ export const STAGE_CONFIG = {
 const PAGE_SIZE = 50;
 
 // 🔥 localStorage cache for instant-load
-const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_';
+// v2 bryter gamla cacher som kunde sakna profilmedia/viewed_at och gav FA + ny-prick efter hard refresh.
+const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_v2_';
+const MY_CANDIDATES_CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
 interface CachedMyCandidates {
   items: MyCandidateData[];
@@ -69,9 +71,11 @@ interface CachedMyCandidates {
 function readMyCandidatesCache(userId: string): MyCandidateData[] | null {
   try {
     const key = MY_CANDIDATES_CACHE_KEY + userId;
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const cached: CachedMyCandidates = JSON.parse(raw);
+    const cached = safeReadJsonCache<CachedMyCandidates>(key, (value): value is CachedMyCandidates => {
+      const cache = value as Partial<CachedMyCandidates>;
+      return Array.isArray(cache.items) && typeof cache.timestamp === 'number';
+    });
+    if (!cached || Date.now() - cached.timestamp > MY_CANDIDATES_CACHE_MAX_AGE_MS) return null;
     const deduplicated = deduplicateByApplicant(cached.items || []);
 
     // Självläk gamla cacher som fortfarande innehåller dubbletter
@@ -86,6 +90,15 @@ function readMyCandidatesCache(userId: string): MyCandidateData[] | null {
   } catch {
     return null;
   }
+}
+
+function readMyCandidatesCacheTimestamp(userId: string): number | null {
+  const key = MY_CANDIDATES_CACHE_KEY + userId;
+  const cached = safeReadJsonCache<CachedMyCandidates>(key, (value): value is CachedMyCandidates => {
+    const cache = value as Partial<CachedMyCandidates>;
+    return Array.isArray(cache.items) && typeof cache.timestamp === 'number';
+  });
+  return cached ? cached.timestamp : null;
 }
 
 function deduplicateByApplicant(items: MyCandidateData[]): MyCandidateData[] {
