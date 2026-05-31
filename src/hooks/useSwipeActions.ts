@@ -1,7 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+
+// Hård övre gräns vid hydrering — vi behöver bara de senaste swiparna för att
+// filtrera bort redan-sedda jobb. Stoppar att en superanvändare med 50 000
+// historiska swipes drar hem allt vid app-start.
+const MAX_HYDRATED_ACTIONS = 5000;
 
 export type SwipeActionType = 'skipped' | 'liked' | 'applied';
 
@@ -14,7 +19,7 @@ export function useSwipeActions() {
   const { user } = useAuth();
   const [actions, setActions] = useState<Map<string, SwipeActionType>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
-  const lastUndoneRef = useRef<{ jobId: string; action: SwipeActionType } | null>(null);
+  
 
   // Fetch existing swipe actions
   useEffect(() => {
@@ -29,7 +34,9 @@ export function useSwipeActions() {
         const { data, error } = await supabase
           .from('swipe_actions')
           .select('job_id, action')
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .order('updated_at', { ascending: false })
+          .limit(MAX_HYDRATED_ACTIONS);
 
         if (error) throw error;
 
@@ -79,15 +86,19 @@ export function useSwipeActions() {
   const undoAction = useCallback(async (jobId: string) => {
     if (!user?.id) return;
 
-    // Read previous action before optimistic delete
-    const previousAction = actions.get(jobId);
-
-    // Optimistic update
+    // Snapshot previous action via functional setState — undviker stale closure
+    // om användaren swipar/undo:ar snabbt efter varandra (deps inkluderar inte
+    // `actions` med flit; setActions ger oss alltid den färska Mapen).
+    let previousAction: SwipeActionType | undefined;
     setActions(prev => {
+      previousAction = prev.get(jobId);
+      if (!previousAction) return prev;
       const next = new Map(prev);
       next.delete(jobId);
       return next;
     });
+
+    if (!previousAction) return; // inget att ångra
 
     try {
       const { error } = await supabase
@@ -99,14 +110,12 @@ export function useSwipeActions() {
       if (error) throw error;
     } catch (err) {
       console.error('Error undoing swipe action:', err);
-      // Revert
-      if (previousAction) {
-        setActions(prev => {
-          const next = new Map(prev);
-          next.set(jobId, previousAction);
-          return next;
-        });
-      }
+      // Rollback
+      setActions(prev => {
+        const next = new Map(prev);
+        next.set(jobId, previousAction!);
+        return next;
+      });
     }
   }, [user?.id]);
 
@@ -114,10 +123,14 @@ export function useSwipeActions() {
     return actions.get(jobId);
   }, [actions]);
 
-  const skippedJobIds = new Set(
-    Array.from(actions.entries())
-      .filter(([, action]) => action === 'skipped')
-      .map(([jobId]) => jobId)
+  // Memoiserad — undviker att en ny Set skapas vid varje render i parent.
+  const skippedJobIds = useMemo(
+    () => new Set(
+      Array.from(actions.entries())
+        .filter(([, action]) => action === 'skipped')
+        .map(([jobId]) => jobId),
+    ),
+    [actions],
   );
 
   return {
