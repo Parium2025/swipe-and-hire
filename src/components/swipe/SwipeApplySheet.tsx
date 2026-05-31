@@ -242,7 +242,16 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
   const handleSubmit = useCallback(async () => {
     if (!user || submitting) return;
 
+    // 🚀 Optimistic UI: visa "Skickad!" omedelbart — användaren ska aldrig
+    // vänta på networken för en så viktig handling. Vi rullar tillbaka om
+    // insert misslyckas.
     setSubmitting(true);
+    setSubmitted(true);
+
+    // Pre-flippa cachen så badges/listor visar "ansökt" direkt
+    clearMyApplicationsLocalCache();
+    queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
+
     try {
       // Fetch profile data to pre-fill application
       const { data: profile } = await supabase
@@ -302,16 +311,11 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
         }).catch(() => {});
       }
 
-      setSubmitted(true);
-      
-      // Clear localStorage cache so My Applications page shows fresh data
-      clearMyApplicationsLocalCache();
-      
-      // Invalidate queries so My Applications and search badges update
+      // Slutgiltig sync — bekräftar den optimistiska statusen
       queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
       queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
-      
+
       toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats` });
 
       setTimeout(() => {
@@ -319,6 +323,12 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
       }, 1500);
     } catch (err: any) {
       console.error('Error submitting application:', err);
+      // 🔁 Rollback optimistic state
+      setSubmitted(false);
+      // Återställ cachen så badges försvinner igen
+      clearMyApplicationsLocalCache();
+      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
       toast({
         title: 'Kunde inte skicka ansökan',
         description: err.message || 'Försök igen',
@@ -327,7 +337,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
     } finally {
       setSubmitting(false);
     }
-  }, [user, jobId, answers, submitting, companyName, onApplied]);
+  }, [user, jobId, answers, submitting, companyName, jobTitle, onApplied, queryClient]);
 
   return (
     <AnimatePresence>
