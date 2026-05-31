@@ -34,7 +34,9 @@ export function useSwipeActions() {
         const { data, error } = await supabase
           .from('swipe_actions')
           .select('job_id, action')
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .order('updated_at', { ascending: false })
+          .limit(MAX_HYDRATED_ACTIONS);
 
         if (error) throw error;
 
