@@ -134,6 +134,17 @@ export const JobSlide = memo(function JobSlide({
   const nextDisplayCompanyName = nextJob?.workplace_name || nextJob?.company_name || 'Okänt företag';
   const imageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(job.job_image_url), job.updated_at), [job.job_image_url, job.updated_at]);
   const nextImageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(nextJob?.job_image_url), nextJob?.updated_at), [nextJob?.job_image_url, nextJob?.updated_at]);
+
+  // 🐛 iOS WebKit-bugg: backdrop-filter rastreras EN gång när elementet skapas
+  // och uppdateras inte när underliggande <img> laddas in efteråt. Resultat:
+  // badgesen "fryser" mot den mörkblå placeholder-bakgrunden och blir blå tills
+  // användaren rör skärmen (drag-transform → forced repaint). Lösning: vänta
+  // med att applicera blur tills bilden faktiskt är laddad — då samplar
+  // glas-effekten rätt innehåll redan från första frame.
+  const [imageLoaded, setImageLoaded] = useState(false);
+  useEffect(() => { setImageLoaded(false); }, [imageUrl]);
+  const blurClass = !imageUrl || imageLoaded ? 'backdrop-blur-md' : '';
+
   // 🚀 Logo i swipe-card är liten (~64px) → be om optimerad version
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', job.updated_at, { width: 64, height: 64, quality: 80, resize: 'contain' });
   const { displayUrl: nextLogoUrl } = useCardImage(nextJob?.company_logo_url ?? null, 'company-logos', nextJob?.updated_at, { width: 64, height: 64, quality: 80, resize: 'contain' });
@@ -670,6 +681,7 @@ export const JobSlide = memo(function JobSlide({
               }}
               loading={isVisible ? 'eager' : 'lazy'}
               draggable={false}
+              onLoad={() => setImageLoaded(true)}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]" />
@@ -684,7 +696,7 @@ export const JobSlide = memo(function JobSlide({
         {/* Category badge at top */}
         {job.occupation && (
           <div className="absolute top-5 left-5 z-10 pointer-events-none">
-            <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 transform-gpu [will-change:transform]">
+            <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
               <span className="text-white text-xs font-semibold tracking-wide">{job.occupation}</span>
             </div>
           </div>
@@ -730,7 +742,7 @@ export const JobSlide = memo(function JobSlide({
             {(logoUrl || !imageUrl) && displayCompanyName && (
               <div className="flex justify-center mb-4">
                 {logoUrl ? (
-                  <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 backdrop-blur-md transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg">
+                  <div className={`w-14 h-14 rounded-full bg-white/10 border border-white/15 ${blurClass} transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg`}>
                     <img
                       src={logoUrl}
                       alt={displayCompanyName}
@@ -807,7 +819,7 @@ export const JobSlide = memo(function JobSlide({
 
                 if (!salaryText) return null;
                 return (
-                  <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 transform-gpu [will-change:transform]">
+                  <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
                     <span className="text-white text-xs font-semibold">{salaryText}</span>
                   </div>
                 );
@@ -821,14 +833,14 @@ export const JobSlide = memo(function JobSlide({
                   parts.push(daysLeft === 0 ? 'Sista dagen' : `${daysLeft} dagar kvar`);
                 }
                 return (
-                  <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 transform-gpu [will-change:transform]">
+                  <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
                     <span className="text-white text-xs font-semibold">{parts.join(' • ')}</span>
                   </div>
                 );
               })()}
               {/* 3. Benefits count badge */}
               {job.benefits && job.benefits.length > 0 && (
-                <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5">
+                <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5`}>
                   <Gift className="w-3 h-3 text-white" />
                   <span className="text-white text-xs font-semibold">
                     Förmåner {job.benefits.length <= 5 ? `${job.benefits.length} st` : `${Math.floor(job.benefits.length / 5) * 5}+`}
@@ -837,7 +849,7 @@ export const JobSlide = memo(function JobSlide({
               )}
               {/* 4. Applicants count badge */}
               {job.applications_count > 0 && (
-                <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5">
+                <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5`}>
                   <Users className="w-3 h-3 text-white" />
                   <span className="text-white text-xs font-semibold">
                     {job.applications_count} sökande
