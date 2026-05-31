@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { flushSync } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Loader2 } from 'lucide-react';
