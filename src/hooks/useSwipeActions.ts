@@ -123,10 +123,14 @@ export function useSwipeActions() {
     return actions.get(jobId);
   }, [actions]);
 
-  const skippedJobIds = new Set(
-    Array.from(actions.entries())
-      .filter(([, action]) => action === 'skipped')
-      .map(([jobId]) => jobId)
+  // Memoiserad — undviker att en ny Set skapas vid varje render i parent.
+  const skippedJobIds = useMemo(
+    () => new Set(
+      Array.from(actions.entries())
+        .filter(([, action]) => action === 'skipped')
+        .map(([jobId]) => jobId),
+    ),
+    [actions],
   );
 
   return {
