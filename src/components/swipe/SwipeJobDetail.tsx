@@ -17,7 +17,7 @@ import {
 } from '@/lib/jobViewHelpers';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { SwipeJob } from './SwipeCard';
+import type { SwipeJob } from './types';
 import type { JobQuestion } from '@/types/jobWizard';
 
 interface FullJobData {
@@ -87,6 +87,9 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
   const [loading, setLoading] = useState(false);
   const viewRecorded = useRef<string | null>(null);
   const openedAtRef = useRef(0);
+  // 🧹 Memory leak fix: hålla koll på pågående close-timers så de kan städas
+  // vid unmount innan callbacks anropas på en avmonterad komponent.
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Drag-to-dismiss state
   const dragY = useMotionValue(0);
@@ -104,9 +107,11 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
       y: '100%',
       transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
     });
-    setTimeout(() => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => {
       onClose();
       setDismissing(false);
+      closeTimerRef.current = null;
     }, 220);
   }, [onClose, sheetControls]);
 
@@ -161,9 +166,11 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
         y: '100%',
         transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 },
       });
-      setTimeout(() => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = setTimeout(() => {
         onClose();
         setDismissing(false);
+        closeTimerRef.current = null;
       }, 220);
     } else {
       // Snap back with a satisfying bounce
@@ -176,6 +183,13 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
       });
     }
   }, [dragY, onClose, sheetControls]);
+
+  // 🧹 Cleanup: avbryt pending close-timer om komponenten unmountas.
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   // Handle-specific drag (always draggable regardless of scroll)
   const handleHandleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
@@ -500,24 +514,31 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                         </div>
                       )}
 
-                      {formatSalary(detail.salary_min, detail.salary_max, detail.salary_type) && (
-                        <div className="flex items-center text-white text-[15px] sm:text-sm sm:col-span-2 pt-1">
-                          <span className="shrink-0 w-[110px] text-white">Lön:</span>
-                          <span className="font-semibold">
-                            {formatSalary(detail.salary_min, detail.salary_max, detail.salary_type)}
-                            {detail.salary_type && (
-                              <span className="text-white ml-1.5 text-[13px] sm:text-xs">({getSalaryTypeLabel(detail.salary_type)})</span>
-                            )}
-                          </span>
-                        </div>
-                      )}
-
-                      {!formatSalary(detail.salary_min, detail.salary_max, detail.salary_type) && detail.salary_transparency && (
-                        <div className="flex items-center text-white text-[15px] sm:text-sm">
-                          <span className="shrink-0 w-[110px] text-white">Lön:</span>
-                          <span className="font-medium">{getSalaryTransparencyLabel(detail.salary_transparency)}</span>
-                        </div>
-                      )}
+                      {(() => {
+                        const salaryStr = formatSalary(detail.salary_min, detail.salary_max, detail.salary_type);
+                        if (salaryStr) {
+                          return (
+                            <div className="flex items-center text-white text-[15px] sm:text-sm sm:col-span-2 pt-1">
+                              <span className="shrink-0 w-[110px] text-white">Lön:</span>
+                              <span className="font-semibold">
+                                {salaryStr}
+                                {detail.salary_type && (
+                                  <span className="text-white ml-1.5 text-[13px] sm:text-xs">({getSalaryTypeLabel(detail.salary_type)})</span>
+                                )}
+                              </span>
+                            </div>
+                          );
+                        }
+                        if (detail.salary_transparency) {
+                          return (
+                            <div className="flex items-center text-white text-[15px] sm:text-sm">
+                              <span className="shrink-0 w-[110px] text-white">Lön:</span>
+                              <span className="font-medium">{getSalaryTransparencyLabel(detail.salary_transparency)}</span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   </div>
 
