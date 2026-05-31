@@ -19,7 +19,7 @@ export function useSwipeActions() {
   const { user } = useAuth();
   const [actions, setActions] = useState<Map<string, SwipeActionType>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
-  const lastUndoneRef = useRef<{ jobId: string; action: SwipeActionType } | null>(null);
+  
 
   // Fetch existing swipe actions
   useEffect(() => {
