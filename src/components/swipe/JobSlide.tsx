@@ -681,6 +681,7 @@ export const JobSlide = memo(function JobSlide({
               }}
               loading={isVisible ? 'eager' : 'lazy'}
               draggable={false}
+              onLoad={() => setImageLoaded(true)}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]" />
