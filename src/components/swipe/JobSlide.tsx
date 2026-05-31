@@ -696,7 +696,7 @@ export const JobSlide = memo(function JobSlide({
         {/* Category badge at top */}
         {job.occupation && (
           <div className="absolute top-5 left-5 z-10 pointer-events-none">
-            <div className="px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]">
+            <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
               <span className="text-white text-xs font-semibold tracking-wide">{job.occupation}</span>
             </div>
           </div>
@@ -742,7 +742,7 @@ export const JobSlide = memo(function JobSlide({
             {(logoUrl || !imageUrl) && displayCompanyName && (
               <div className="flex justify-center mb-4">
                 {logoUrl ? (
-                  <div className="w-14 h-14 rounded-full bg-white/10 border border-white/15 ${blurClass} transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg">
+                  <div className={`w-14 h-14 rounded-full bg-white/10 border border-white/15 ${blurClass} transform-gpu [will-change:transform] flex items-center justify-center overflow-hidden shadow-lg`}>
                     <img
                       src={logoUrl}
                       alt={displayCompanyName}
@@ -819,7 +819,7 @@ export const JobSlide = memo(function JobSlide({
 
                 if (!salaryText) return null;
                 return (
-                  <div className="px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]">
+                  <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
                     <span className="text-white text-xs font-semibold">{salaryText}</span>
                   </div>
                 );
@@ -833,14 +833,14 @@ export const JobSlide = memo(function JobSlide({
                   parts.push(daysLeft === 0 ? 'Sista dagen' : `${daysLeft} dagar kvar`);
                 }
                 return (
-                  <div className="px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]">
+                  <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
                     <span className="text-white text-xs font-semibold">{parts.join(' • ')}</span>
                   </div>
                 );
               })()}
               {/* 3. Benefits count badge */}
               {job.benefits && job.benefits.length > 0 && (
-                <div className="px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5">
+                <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5`}>
                   <Gift className="w-3 h-3 text-white" />
                   <span className="text-white text-xs font-semibold">
                     Förmåner {job.benefits.length <= 5 ? `${job.benefits.length} st` : `${Math.floor(job.benefits.length / 5) * 5}+`}
@@ -849,7 +849,7 @@ export const JobSlide = memo(function JobSlide({
               )}
               {/* 4. Applicants count badge */}
               {job.applications_count > 0 && (
-                <div className="px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5">
+                <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform] flex items-center gap-1.5`}>
                   <Users className="w-3 h-3 text-white" />
                   <span className="text-white text-xs font-semibold">
                     {job.applications_count} sökande
