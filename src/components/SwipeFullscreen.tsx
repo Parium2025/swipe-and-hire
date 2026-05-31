@@ -389,6 +389,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     setCanUndo(true);
   }, [currentIndex, jobs, onRecordSwipeAction]);
 
+  // ♿ Refs så keyboard-handlern alltid kallar senaste callbacken utan att
+  // re-binda window.keydown vid varje state-ändring (currentIndex etc).
+  const handleSwipeRightRef = useRef(handleSwipeRight);
+  const handleSwipeLeftRef = useRef(handleSwipeLeft);
+  useEffect(() => { handleSwipeRightRef.current = handleSwipeRight; }, [handleSwipeRight]);
+  useEffect(() => { handleSwipeLeftRef.current = handleSwipeLeft; }, [handleSwipeLeft]);
+
   // Guard against tap-through: when an overlay closes, ignore taps briefly
   const overlayCooldownRef = useRef(false);
 
