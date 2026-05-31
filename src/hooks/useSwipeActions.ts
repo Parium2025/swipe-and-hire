@@ -79,15 +79,19 @@ export function useSwipeActions() {
   const undoAction = useCallback(async (jobId: string) => {
     if (!user?.id) return;
 
-    // Read previous action before optimistic delete
-    const previousAction = actions.get(jobId);
-
-    // Optimistic update
+    // Snapshot previous action via functional setState — undviker stale closure
+    // om användaren swipar/undo:ar snabbt efter varandra (deps inkluderar inte
+    // `actions` med flit; setActions ger oss alltid den färska Mapen).
+    let previousAction: SwipeActionType | undefined;
     setActions(prev => {
+      previousAction = prev.get(jobId);
+      if (!previousAction) return prev;
       const next = new Map(prev);
       next.delete(jobId);
       return next;
     });
+
+    if (!previousAction) return; // inget att ångra
 
     try {
       const { error } = await supabase
@@ -99,14 +103,12 @@ export function useSwipeActions() {
       if (error) throw error;
     } catch (err) {
       console.error('Error undoing swipe action:', err);
-      // Revert
-      if (previousAction) {
-        setActions(prev => {
-          const next = new Map(prev);
-          next.set(jobId, previousAction);
-          return next;
-        });
-      }
+      // Rollback
+      setActions(prev => {
+        const next = new Map(prev);
+        next.set(jobId, previousAction!);
+        return next;
+      });
     }
   }, [user?.id]);
 
