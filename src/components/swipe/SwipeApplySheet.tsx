@@ -11,7 +11,7 @@ import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
 import type { JobQuestion } from '@/types/jobWizard';
-import type { SwipeJob } from './SwipeCard';
+import type { SwipeJob } from './types';
 
 interface SwipeApplySheetProps {
   jobId: string;
@@ -148,8 +148,16 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
 
     const fetchData = async () => {
       setLoading(true);
+      // 🐛 Flash-bug fix: nollställ submitted vid varje öppning så att
+      // "Ansökan skickad!"-skärmen inte blixtras för nästa jobb om
+      // användaren just ansökt på föregående.
+      setSubmitted(false);
+      setHasAlreadyApplied(false);
       try {
-        // Fetch questions + extended job details + check if already applied — in parallel
+        // 🚀 N+1 fix: hämta custom_answers direkt i samma parallella batch.
+        // Tidigare gjorde vi ett extra round-trip när hasAlreadyApplied===true,
+        // vilket fördröjde apply-sheet med 200-400ms på 3G för återkommande
+        // sökande.
         const [questionsRes, jobRes, applicationRes] = await Promise.all([
           supabase
             .from('job_questions')
@@ -163,7 +171,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
             .single(),
           user ? supabase
             .from('job_applications')
-            .select('id')
+            .select('id, custom_answers')
             .eq('job_id', jobId)
             .eq('applicant_id', user.id)
             .maybeSingle() : Promise.resolve({ data: null }),
@@ -186,15 +194,10 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
         }
         if (applicationRes.data) {
           setHasAlreadyApplied(true);
-          // Pre-fill answers from existing application
-          const { data: existingApp } = await supabase
-            .from('job_applications')
-            .select('custom_answers')
-            .eq('job_id', jobId)
-            .eq('applicant_id', user!.id)
-            .single();
-          if (existingApp?.custom_answers && typeof existingApp.custom_answers === 'object') {
-            setAnswers(existingApp.custom_answers as Record<string, any>);
+          // Pre-fill answers from existing application (samma fetch som ovan)
+          const existing = (applicationRes.data as { custom_answers?: unknown }).custom_answers;
+          if (existing && typeof existing === 'object') {
+            setAnswers(existing as Record<string, any>);
           }
         }
       } catch (err) {
@@ -230,7 +233,10 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
     handleSheetClose();
   }, [handleSheetClose]);
 
-  const allRequiredAnswered = useCallback(() => {
+  // 🚀 useMemo (inte useCallback): vi vill memoa RETURVÄRDET, inte funktionen.
+  // Tidigare användes useCallback men anropades direkt i JSX → ingen memoisation
+  // i praktiken. Nu räknar vi om bara när questions/answers ändras.
+  const canSubmit = useMemo(() => {
     return questions
       .filter(q => q.is_required)
       .every(q => {
