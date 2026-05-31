@@ -1,7 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+
+// Hård övre gräns vid hydrering — vi behöver bara de senaste swiparna för att
+// filtrera bort redan-sedda jobb. Stoppar att en superanvändare med 50 000
+// historiska swipes drar hem allt vid app-start.
+const MAX_HYDRATED_ACTIONS = 5000;
 
 export type SwipeActionType = 'skipped' | 'liked' | 'applied';
 
