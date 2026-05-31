@@ -9,7 +9,8 @@ import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
-import type { SwipeJob } from './SwipeCard';
+import type { SwipeJob } from './types';
+import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 import { TruncatedText } from '@/components/TruncatedText';
 import { Badge } from '@/components/ui/badge';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
@@ -178,6 +179,15 @@ export const JobSlide = memo(function JobSlide({
   useEffect(() => {
     if (overlayOpen) clearTapHint();
   }, [overlayOpen, clearTapHint]);
+
+  // 🧹 Memory leak fix: städa tap-hint-timern vid unmount så att state
+  // inte uppdateras på en avmonterad komponent (t.ex. snabb filter-change
+  // medan timern ännu tickar).
+  useEffect(() => {
+    return () => {
+      if (tapHintTimerRef.current) clearTimeout(tapHintTimerRef.current);
+    };
+  }, []);
 
   const triggerSwipe = useCallback((direction: SwipeDirection) => {
     lastTapTimestampRef.current = 0;
@@ -570,26 +580,7 @@ export const JobSlide = memo(function JobSlide({
                 {/* Badges — salary, date, benefits, applicants */}
                 <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
                   {(() => {
-                    let salaryText: string | null = null;
-                    const typeLabel = nextJob.salary_type === 'monthly' || nextJob.salary_type === 'fast' ? 'kr/mån'
-                      : nextJob.salary_type === 'hourly' || nextJob.salary_type === 'rorlig' ? 'kr/tim'
-                      : nextJob.salary_type === 'fast-rorlig' ? 'kr/mån' : 'kr/mån';
-                    if (nextJob.salary_transparency === 'after_interview') {
-                      salaryText = 'Lön efter intervju';
-                    } else if (nextJob.salary_min || nextJob.salary_max) {
-                      if (nextJob.salary_min && nextJob.salary_max) {
-                        salaryText = `${nextJob.salary_min.toLocaleString('sv-SE')} – ${nextJob.salary_max.toLocaleString('sv-SE')} ${typeLabel}`;
-                      } else {
-                        salaryText = `Från ${(nextJob.salary_min || nextJob.salary_max)!.toLocaleString('sv-SE')} ${typeLabel}`;
-                      }
-                    } else if (nextJob.salary_transparency && /^\d/.test(nextJob.salary_transparency)) {
-                      const match = nextJob.salary_transparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
-                      if (match) {
-                        salaryText = `${parseInt(match[1], 10).toLocaleString('sv-SE')} – ${parseInt(match[2], 10).toLocaleString('sv-SE')} ${typeLabel}`;
-                      } else {
-                        salaryText = `${nextJob.salary_transparency} ${typeLabel}`;
-                      }
-                    }
+                    const salaryText = getJobBadgeSalary(nextJob);
                     if (!salaryText) return null;
                     return (
                       <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 transform-gpu [will-change:transform]">
@@ -793,30 +784,7 @@ export const JobSlide = memo(function JobSlide({
             <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
               {/* 1. Salary badge */}
               {(() => {
-                let salaryText: string | null = null;
-                const typeLabel = job.salary_type === 'monthly' || job.salary_type === 'fast' ? 'kr/mån'
-                  : job.salary_type === 'hourly' || job.salary_type === 'rorlig' ? 'kr/tim'
-                  : job.salary_type === 'fast-rorlig' ? 'kr/mån' : 'kr/mån';
-
-                if (job.salary_transparency === 'after_interview') {
-                  salaryText = 'Lön efter intervju';
-                } else if (job.salary_min || job.salary_max) {
-                  if (job.salary_min && job.salary_max) {
-                    salaryText = `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} ${typeLabel}`;
-                  } else {
-                    salaryText = `Från ${(job.salary_min || job.salary_max)!.toLocaleString('sv-SE')} ${typeLabel}`;
-                  }
-                } else if (job.salary_transparency && /^\d/.test(job.salary_transparency)) {
-                  const match = job.salary_transparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
-                  if (match) {
-                    const min = parseInt(match[1], 10);
-                    const max = parseInt(match[2], 10);
-                    salaryText = `${min.toLocaleString('sv-SE')} – ${max.toLocaleString('sv-SE')} ${typeLabel}`;
-                  } else {
-                    salaryText = `${job.salary_transparency} ${typeLabel}`;
-                  }
-                }
-
+                const salaryText = getJobBadgeSalary(job);
                 if (!salaryText) return null;
                 return (
                   <div className={`px-3 py-1.5 rounded-full bg-white/10 ${blurClass} border border-white/15 transform-gpu [will-change:transform]`}>
