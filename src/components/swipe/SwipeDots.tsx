@@ -232,6 +232,14 @@ export const SwipeDots = memo(function SwipeDots({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
+      // ♿ a11y: scrubbern är funktionellt en slider för kort-navigering.
+      role="slider"
+      aria-label="Navigera bland jobbkort"
+      aria-valuemin={1}
+      aria-valuemax={count}
+      aria-valuenow={activeIdx + 1}
+      aria-valuetext={`Kort ${activeIdx + 1} av ${count}`}
+      aria-orientation="vertical"
     >
       {isScrubbing && (
         <div

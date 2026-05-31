@@ -11,7 +11,7 @@ import { SwipeEndSection } from '@/components/swipe/SwipeEndSection';
 import { SwipeEmptyState } from '@/components/swipe/SwipeEmptyState';
 import { useSwipeImagePreloader } from '@/hooks/useSwipeImagePreloader';
 import { hapticSuccess } from '@/lib/haptics';
-import type { SwipeJob } from '@/components/swipe/SwipeCard';
+import type { SwipeJob } from '@/components/swipe/types';
 
 export type { SwipeJob };
 
@@ -69,6 +69,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const bounceReturnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bounceHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const overlayShieldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const undoEntryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const endBounceActiveRef = useRef(false);
   const currentIndexRef = useRef(0);
   const showEndBounceRef = useRef(false);
@@ -134,6 +135,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     if (bounceReturnTimerRef.current) { clearTimeout(bounceReturnTimerRef.current); bounceReturnTimerRef.current = null; }
     if (bounceHideTimerRef.current) { clearTimeout(bounceHideTimerRef.current); bounceHideTimerRef.current = null; }
     if (overlayShieldTimerRef.current) { clearTimeout(overlayShieldTimerRef.current); overlayShieldTimerRef.current = null; }
+    if (undoEntryTimerRef.current) { clearTimeout(undoEntryTimerRef.current); undoEntryTimerRef.current = null; }
     if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
   }, []);
 
@@ -346,7 +348,19 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (showDetail || showApply || showFilter) return;
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      // ♿ a11y: piltangenter för like/skip när inga overlays är öppna.
+      // Gör swipe-mode användbar med tangentbord / switch-access.
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleSwipeRightRef.current?.();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleSwipeLeftRef.current?.();
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
@@ -375,6 +389,13 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     undoStackRef.current = [...undoStackRef.current, skippedJob.id];
     setCanUndo(true);
   }, [currentIndex, jobs, onRecordSwipeAction]);
+
+  // ♿ Refs så keyboard-handlern alltid kallar senaste callbacken utan att
+  // re-binda window.keydown vid varje state-ändring (currentIndex etc).
+  const handleSwipeRightRef = useRef(handleSwipeRight);
+  const handleSwipeLeftRef = useRef(handleSwipeLeft);
+  useEffect(() => { handleSwipeRightRef.current = handleSwipeRight; }, [handleSwipeRight]);
+  useEffect(() => { handleSwipeLeftRef.current = handleSwipeLeft; }, [handleSwipeLeft]);
 
   // Guard against tap-through: when an overlay closes, ignore taps briefly
   const overlayCooldownRef = useRef(false);
@@ -428,8 +449,14 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     setCanUndo(undoStackRef.current.length > 0);
     // Haptic feedback for undo
     hapticSuccess();
-    // Clear undo entry flag after animation completes
-    setTimeout(() => setUndoEntryJobId(null), 700);
+    // 🧹 Memory leak fix: lagra timer i ref + städa i unmount-effekten.
+    // Tidigare orphaned timeout kunde sätta state på avmonterad komponent
+    // om användaren stängde swipe-mode inom 700 ms efter Ångra.
+    if (undoEntryTimerRef.current) clearTimeout(undoEntryTimerRef.current);
+    undoEntryTimerRef.current = setTimeout(() => {
+      setUndoEntryJobId(null);
+      undoEntryTimerRef.current = null;
+    }, 700);
   }, [onUndoSwipeAction]);
 
   // Stable ref setter
