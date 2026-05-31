@@ -64,6 +64,14 @@ const EMPLOYER_KEEP_KEYS = [
   '/candidates',
   '/my-candidates',
   '/messages',
+  '/profile',
+  '/employer-profile',
+  '/company-profile',
+  '/reviews',
+  '/reports',
+  '/billing',
+  '/settings',
+  '/support',
 ];
 const JOB_SEEKER_KEEP_KEYS = [
   '/home',
@@ -71,6 +79,10 @@ const JOB_SEEKER_KEEP_KEYS = [
   '/saved-jobs',
   '/my-applications',
   '/messages',
+  '/profile',
+  '/profile-preview',
+  '/subscription',
+  '/support',
 ];
 
 const CandidatesContent = () => {
