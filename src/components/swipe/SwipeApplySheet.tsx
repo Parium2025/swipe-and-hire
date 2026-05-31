@@ -467,7 +467,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
                       onAnswerChange={handleAnswerChange}
                       onSubmit={handleSubmit}
                       isSubmitting={submitting}
-                      canSubmit={allRequiredAnswered()}
+                      canSubmit={canSubmit}
                       hasAlreadyApplied={hasAlreadyApplied}
                       contactEmail={contactEmail}
                       jobTitle={jobTitle}
