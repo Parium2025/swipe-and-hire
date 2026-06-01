@@ -14,12 +14,16 @@ interface PreloadableJob {
 const jobVersion = (j: PreloadableJob) => j.image_updated_at ?? j.updated_at;
 
 
-function resolveUrl(url: string | undefined, bucket: string): string | null {
+function resolveUrl(url: string | undefined, bucket: string, transform?: typeof SWIPE_CARD_TRANSFORM): string | null {
   if (!url) return null;
   if (url.startsWith('http')) return url;
-  const { data } = supabase.storage.from(bucket).getPublicUrl(url);
+  const { data } = supabase.storage.from(bucket).getPublicUrl(url, transform ? { transform } : undefined);
   return data?.publicUrl || null;
 }
+
+// Helpers som matchar exakt vad JobSlide renderar
+const resolveSwipeImg = (u?: string) => resolveUrl(u, 'job-images', SWIPE_CARD_TRANSFORM);
+const resolveSwipeLogo = (u?: string) => resolveUrl(u, 'company-logos', COMPANY_LOGO_TRANSFORM);
 
 function resolveJobViewVariant(url: string | undefined): string | null {
   if (!url) return null;
