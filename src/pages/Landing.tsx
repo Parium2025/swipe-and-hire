@@ -10,12 +10,13 @@ const Landing = () => {
   const { user, loading } = useAuth();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Säkerhetsnät: om en redan inloggad användare hamnar på "/" (t.ex. Lovable-
-  // preview vid Cmd+Shift+R som tappar djup URL i iframen) → skicka in i appen
-  // direkt istället för att visa publika landningssidan.
-  if (!loading && user) {
-    return <Navigate to="/home" replace />;
-  }
+  // Säkerhetsnät: om en redan inloggad användare hamnar på "/" → skicka in i
+  // appen direkt istället för att visa publika landningssidan.
+  // VIKTIGT: early return görs EFTER alla hooks (se botten av komponenten) för
+  // att inte bryta hooks-ordningen (React error #300).
+  const shouldRedirectHome = !loading && !!user;
+
+
 
   // SEO
   useEffect(() => {
