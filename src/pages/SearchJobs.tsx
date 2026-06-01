@@ -588,7 +588,7 @@ const SearchJobs = memo(() => {
       benefits: job.benefits,
       company_logo_url: job.company_logo_url,
     }));
-  }, [filteredAndSortedJobs, skippedJobIds]);
+  }, [filteredAndSortedJobs, skippedJobIds, appliedJobIds]);
 
   // Find matching companies for smart search suggestion.
   // Use debouncedSearch and verify it matches searchInput to prevent
