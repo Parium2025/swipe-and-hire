@@ -296,10 +296,21 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         }
       });
     } else if (hasRestoredRef.current && jobs.length > 0) {
-      // When a job is removed (skip/undo), clamp index to valid range
+      // When jobs change (skip removes / undo re-inserts), pick the right target.
       setCurrentIndex(prev => {
-        const clamped = Math.min(prev, jobs.length - 1);
-        // Snap to the correct slide position
+        // 🎯 If an undo just happened, jump explicitly to the restored job's
+        // new position in the array — don't rely on clamping `prev`, which
+        // would leave the user on whatever card now occupies the old index.
+        let target = prev;
+        const pendingId = pendingUndoJobIdRef.current;
+        if (pendingId) {
+          const restoredIdx = jobs.findIndex(j => j.id === pendingId);
+          if (restoredIdx >= 0) target = restoredIdx;
+          pendingUndoJobIdRef.current = null;
+        }
+        const clamped = Math.min(Math.max(target, 0), jobs.length - 1);
+        // Snap to the correct slide position (instant, no smooth — avoids
+        // iOS Safari fighting the snap engine after array mutation).
         requestAnimationFrame(() => {
           const el = slideRefs.current[clamped];
           if (el && scrollRef.current) {
@@ -309,7 +320,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         return clamped;
       });
     }
-  }, [jobs.length, clearTimers, getRestoredIndex]);
+  }, [jobs, clearTimers, getRestoredIndex]);
 
   useEffect(() => () => { clearTimers(); }, [clearTimers]);
 
