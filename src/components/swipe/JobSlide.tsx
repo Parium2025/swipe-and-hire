@@ -12,6 +12,7 @@ import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 import { TruncatedText } from '@/components/TruncatedText';
 import { Badge } from '@/components/ui/badge';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
+import { getImageVersion } from '@/lib/imageTransforms';
 
 // Transform-konstant — MÅSTE matcha SWIPE_CARD_TRANSFORM i imageTransforms.ts
 // och useSwipeImagePreloader, annars hamnar preload-cachen på fel key.
