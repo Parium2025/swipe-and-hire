@@ -210,6 +210,8 @@ export const useSavedJobs = () => {
         if (error) throw error;
         toast.success('Jobbet har sparats till dina favoriter');
       }
+      // 🔗 Synka SavedJobs-sidans react-query cache
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
     } catch (err) {
       // Revert optimistic update on error
       setSavedJobIds(prev => {
