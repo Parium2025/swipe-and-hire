@@ -837,7 +837,8 @@ export const JobSlide = memo(function JobSlide({
             <button
               type="button"
               aria-label="Nej tack, hoppa över jobbet"
-              onClick={(e) => { e.stopPropagation(); triggerSwipe('left'); }}
+              onPointerDown={(e) => { e.stopPropagation(); triggerSwipe('left'); }}
+              onClick={(e) => e.preventDefault()}
               data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-destructive flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
@@ -847,7 +848,8 @@ export const JobSlide = memo(function JobSlide({
               type="button"
               aria-label={saved ? 'Ta bort från sparade jobb' : 'Spara jobbet'}
               aria-pressed={saved}
-              onClick={(e) => { e.stopPropagation(); hapticLight(); onSave(); }}
+              onPointerDown={(e) => { e.stopPropagation(); hapticLight(); onSave(); }}
+              onClick={(e) => e.preventDefault()}
               data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 active:scale-[0.93] transition-transform touch-manipulation"
             >
@@ -856,7 +858,8 @@ export const JobSlide = memo(function JobSlide({
             <button
               type="button"
               aria-label="Sök jobbet"
-              onClick={(e) => { e.stopPropagation(); triggerSwipe('right'); }}
+              onPointerDown={(e) => { e.stopPropagation(); triggerSwipe('right'); }}
+              onClick={(e) => e.preventDefault()}
               data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-success flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
@@ -866,7 +869,8 @@ export const JobSlide = memo(function JobSlide({
               <button
                 type="button"
                 aria-label="Ångra senaste åtgärd"
-                onClick={(e) => { e.stopPropagation(); onUndo(); }}
+                onPointerDown={(e) => { e.stopPropagation(); onUndo(); }}
+                onClick={(e) => e.preventDefault()}
                 data-swipe-action-button
                 className="w-[44px] h-[44px] rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
               >
