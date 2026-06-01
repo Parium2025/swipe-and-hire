@@ -138,7 +138,11 @@ export const useSavedJobs = () => {
         },
         () => {
           if (timer) clearTimeout(timer);
-          timer = setTimeout(() => fetchSavedJobs(), 400);
+          timer = setTimeout(() => {
+            fetchSavedJobs();
+            // 🔗 Håll react-query cachen (SavedJobs-sidan) i synk
+            queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+          }, 150);
         }
       )
       .subscribe();
@@ -147,7 +151,7 @@ export const useSavedJobs = () => {
       if (timer) clearTimeout(timer);
       supabase.removeChannel(channel);
     };
-  }, [user, fetchSavedJobs]);
+  }, [user, fetchSavedJobs, queryClient]);
 
   const { isOnline, showOfflineToast } = useOnline();
   const { enqueue } = useOfflineSavedJobsQueue(user?.id);
