@@ -23,7 +23,7 @@ function resolveUrl(url: string | undefined, bucket: string, transform?: typeof 
 
 // Helpers som matchar exakt vad JobSlide renderar
 const resolveSwipeImg = (u?: string) => resolveUrl(u, 'job-images', SWIPE_CARD_TRANSFORM);
-const resolveSwipeLogo = (u?: string) => resolveUrl(u, 'company-logos', COMPANY_LOGO_TRANSFORM);
+const resolveSwipeLogo = (u?: string) => resolveUrl(u, 'company-logos', { width: 64, height: 64, quality: 80, resize: 'contain' });
 
 function resolveJobViewVariant(url: string | undefined): string | null {
   if (!url) return null;
