@@ -68,8 +68,8 @@ export function useSwipeImagePreloader(
     // Mätbart snabbare första-paint på swipe-stacken (sparar 100-300 ms).
     if (typeof document !== 'undefined' && document.head) {
       const firstJob = jobs[0];
-      const firstImg = appendVersionToUrl(resolveUrl(firstJob.job_image_url, 'job-images'), jobVersion(firstJob));
-      const firstLogo = appendVersionToUrl(resolveUrl(firstJob.company_logo_url, 'company-logos'), jobVersion(firstJob));
+      const firstImg = appendVersionToUrl(resolveSwipeImg(firstJob.job_image_url), jobVersion(firstJob));
+      const firstLogo = appendVersionToUrl(resolveSwipeLogo(firstJob.company_logo_url), jobVersion(firstJob));
       const inject = (href: string | null, id: string) => {
         if (!href) return;
         if (document.querySelector(`link[data-swipe-preload="${id}"]`)) return;
