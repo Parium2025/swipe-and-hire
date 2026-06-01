@@ -126,8 +126,11 @@ export const JobSlide = memo(function JobSlide({
 
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
   const nextDisplayCompanyName = nextJob?.workplace_name || nextJob?.company_name || 'Okänt företag';
-  const { displayUrl: imageUrl, handleError: handleImageError } = useCardImage(job.job_image_url ?? null, 'job-images', job.updated_at, SWIPE_IMG_TRANSFORM);
-  const { displayUrl: nextImageUrl } = useCardImage(nextJob?.job_image_url ?? null, 'job-images', nextJob?.updated_at, SWIPE_IMG_TRANSFORM);
+  // KRITISKT: getImageVersion (image_updated_at ?? updated_at) MÅSTE matcha
+  // useSwipeImagePreloader exakt, annars warmar preloadern en URL och kortet
+  // renderar en annan → cache-miss + synlig nätverksladdning på första frame.
+  const { displayUrl: imageUrl, handleError: handleImageError } = useCardImage(job.job_image_url ?? null, 'job-images', getImageVersion(job), SWIPE_IMG_TRANSFORM);
+  const { displayUrl: nextImageUrl } = useCardImage(nextJob?.job_image_url ?? null, 'job-images', getImageVersion(nextJob), SWIPE_IMG_TRANSFORM);
 
   // 🐛 iOS WebKit-bugg: backdrop-filter rastreras EN gång när elementet skapas
   // och uppdateras inte när underliggande <img> laddas in efteråt. Resultat:
