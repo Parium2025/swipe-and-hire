@@ -552,10 +552,13 @@ const SearchJobs = memo(() => {
 
   const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
 
-  // Memoize swipe jobs – skipped jobs are completely removed from the stack
+  // Memoize swipe jobs – skipped OCH redan sökta jobb tas helt bort från stacken.
+  // Sökta jobb finns kvar i den vanliga listan (med SÖKT-badge), men i swipe-mode
+  // har de inget syfte: alla knappar (X / spara / hjärta) är meningslösa när
+  // ansökan redan är skickad. Användaren hanterar dem via Mina ansökningar.
   const swipeJobs = useMemo(() => {
     return filteredAndSortedJobs
-      .filter(job => !skippedJobIds.has(job.id))
+      .filter(job => !skippedJobIds.has(job.id) && !appliedJobIds.has(job.id))
       .map(job => ({
       id: job.id,
       title: job.title,
@@ -585,7 +588,7 @@ const SearchJobs = memo(() => {
       benefits: job.benefits,
       company_logo_url: job.company_logo_url,
     }));
-  }, [filteredAndSortedJobs, skippedJobIds]);
+  }, [filteredAndSortedJobs, skippedJobIds, appliedJobIds]);
 
   // Find matching companies for smart search suggestion.
   // Use debouncedSearch and verify it matches searchInput to prevent
