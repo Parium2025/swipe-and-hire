@@ -4,8 +4,6 @@ import { CheckCircle, X, Bookmark, Heart, Users, Gift, Undo2, Building2 } from '
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { useCardImage } from '@/hooks/useCardImage';
-import { supabase } from '@/integrations/supabase/client';
-import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
@@ -15,16 +13,10 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { Badge } from '@/components/ui/badge';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 
-function resolveImageUrl(url?: string, bucket = 'job-images'): string | null {
-  if (!url) return null;
-  if (url.startsWith('http')) return url;
-  // 🚀 Transform: swipe-bilden täcker viewporten (~400px bred på mobil) → ~800px (2× retina) räcker.
-  // Original kan vara 2-5 MB → transformerad ~80-150 KB (15-30× mindre, snabbare swipe).
-  const { data } = supabase.storage.from(bucket).getPublicUrl(url, {
-    transform: { width: 800, height: 1000, quality: 78, resize: 'cover' },
-  });
-  return data?.publicUrl || null;
-}
+// Transform-konstant — MÅSTE matcha SWIPE_CARD_TRANSFORM i imageTransforms.ts
+// och useSwipeImagePreloader, annars hamnar preload-cachen på fel key.
+const SWIPE_IMG_TRANSFORM = { width: 800, height: 1000, quality: 78, resize: 'cover' as const };
+const SWIPE_LOGO_TRANSFORM = { width: 64, height: 64, quality: 80, resize: 'contain' as const };
 
 interface JobSlideProps {
   job: SwipeJob;
@@ -133,8 +125,8 @@ export const JobSlide = memo(function JobSlide({
 
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
   const nextDisplayCompanyName = nextJob?.workplace_name || nextJob?.company_name || 'Okänt företag';
-  const imageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(job.job_image_url), job.updated_at), [job.job_image_url, job.updated_at]);
-  const nextImageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(nextJob?.job_image_url), nextJob?.updated_at), [nextJob?.job_image_url, nextJob?.updated_at]);
+  const { displayUrl: imageUrl, handleError: handleImageError } = useCardImage(job.job_image_url ?? null, 'job-images', job.updated_at, SWIPE_IMG_TRANSFORM);
+  const { displayUrl: nextImageUrl } = useCardImage(nextJob?.job_image_url ?? null, 'job-images', nextJob?.updated_at, SWIPE_IMG_TRANSFORM);
 
   // 🐛 iOS WebKit-bugg: backdrop-filter rastreras EN gång när elementet skapas
   // och uppdateras inte när underliggande <img> laddas in efteråt. Resultat:
@@ -147,8 +139,8 @@ export const JobSlide = memo(function JobSlide({
   const blurClass = !imageUrl || imageLoaded ? 'backdrop-blur-md' : '';
 
   // 🚀 Logo i swipe-card är liten (~64px) → be om optimerad version
-  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', job.updated_at, { width: 64, height: 64, quality: 80, resize: 'contain' });
-  const { displayUrl: nextLogoUrl } = useCardImage(nextJob?.company_logo_url ?? null, 'company-logos', nextJob?.updated_at, { width: 64, height: 64, quality: 80, resize: 'contain' });
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', job.updated_at, SWIPE_LOGO_TRANSFORM);
+  const { displayUrl: nextLogoUrl } = useCardImage(nextJob?.company_logo_url ?? null, 'company-logos', nextJob?.updated_at, SWIPE_LOGO_TRANSFORM);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
   const nextOverlayTextStyle = useMemo(() => getJobOverlayTextStyle(nextJob?.overlay_text_color), [nextJob?.overlay_text_color]);
 
@@ -665,6 +657,7 @@ export const JobSlide = memo(function JobSlide({
               loading={isVisible ? 'eager' : 'lazy'}
               draggable={false}
               onLoad={() => setImageLoaded(true)}
+              onError={handleImageError}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)]" />

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
-import { JOB_VIEW_HERO_TRANSFORM, isSlowOrMeteredConnection } from '@/lib/imageTransforms';
+import { JOB_VIEW_HERO_TRANSFORM, SWIPE_CARD_TRANSFORM, isSlowOrMeteredConnection } from '@/lib/imageTransforms';
 
 interface PreloadableJob {
   job_image_url?: string;
@@ -14,12 +14,16 @@ interface PreloadableJob {
 const jobVersion = (j: PreloadableJob) => j.image_updated_at ?? j.updated_at;
 
 
-function resolveUrl(url: string | undefined, bucket: string): string | null {
+function resolveUrl(url: string | undefined, bucket: string, transform?: typeof SWIPE_CARD_TRANSFORM): string | null {
   if (!url) return null;
   if (url.startsWith('http')) return url;
-  const { data } = supabase.storage.from(bucket).getPublicUrl(url);
+  const { data } = supabase.storage.from(bucket).getPublicUrl(url, transform ? { transform } : undefined);
   return data?.publicUrl || null;
 }
+
+// Helpers som matchar exakt vad JobSlide renderar
+const resolveSwipeImg = (u?: string) => resolveUrl(u, 'job-images', SWIPE_CARD_TRANSFORM);
+const resolveSwipeLogo = (u?: string) => resolveUrl(u, 'company-logos', { width: 64, height: 64, quality: 80, resize: 'contain' });
 
 function resolveJobViewVariant(url: string | undefined): string | null {
   if (!url) return null;
@@ -64,8 +68,8 @@ export function useSwipeImagePreloader(
     // Mätbart snabbare första-paint på swipe-stacken (sparar 100-300 ms).
     if (typeof document !== 'undefined' && document.head) {
       const firstJob = jobs[0];
-      const firstImg = appendVersionToUrl(resolveUrl(firstJob.job_image_url, 'job-images'), jobVersion(firstJob));
-      const firstLogo = appendVersionToUrl(resolveUrl(firstJob.company_logo_url, 'company-logos'), jobVersion(firstJob));
+      const firstImg = appendVersionToUrl(resolveSwipeImg(firstJob.job_image_url), jobVersion(firstJob));
+      const firstLogo = appendVersionToUrl(resolveSwipeLogo(firstJob.company_logo_url), jobVersion(firstJob));
       const inject = (href: string | null, id: string) => {
         if (!href) return;
         if (document.querySelector(`link[data-swipe-preload="${id}"]`)) return;
@@ -84,7 +88,7 @@ export function useSwipeImagePreloader(
     // ── 1. LOGOS: kör DIREKT (high priority, parallellt) ──
     const logoUrls: string[] = [];
     for (let i = 0; i < jobs.length; i++) {
-      const logoUrl = appendVersionToUrl(resolveUrl(jobs[i].company_logo_url, 'company-logos'), jobVersion(jobs[i]));
+      const logoUrl = appendVersionToUrl(resolveSwipeLogo(jobs[i].company_logo_url), jobVersion(jobs[i]));
       if (logoUrl && !loadedRef.current.has(logoUrl)) {
         loadedRef.current.add(logoUrl);
         logoUrls.push(logoUrl);
@@ -102,7 +106,7 @@ export function useSwipeImagePreloader(
     if (!slow) {
       const upper = Math.min(initialBulk, jobs.length);
       for (let i = 0; i < upper; i++) {
-        const imgUrl = appendVersionToUrl(resolveUrl(jobs[i].job_image_url, 'job-images'), jobVersion(jobs[i]));
+        const imgUrl = appendVersionToUrl(resolveSwipeImg(jobs[i].job_image_url), jobVersion(jobs[i]));
         if (imgUrl && !loadedRef.current.has(imgUrl)) {
           loadedRef.current.add(imgUrl);
           imgUrls.push(imgUrl);
@@ -147,8 +151,8 @@ export function useSwipeImagePreloader(
     for (let i = start; i <= end; i++) {
       if (i === currentIndex) continue; // current is already loaded
       const job = jobs[i];
-      const imgUrl = appendVersionToUrl(resolveUrl(job.job_image_url, 'job-images'), jobVersion(job));
-      const logoUrl = appendVersionToUrl(resolveUrl(job.company_logo_url, 'company-logos'), jobVersion(job));
+      const imgUrl = appendVersionToUrl(resolveSwipeImg(job.job_image_url), jobVersion(job));
+      const logoUrl = appendVersionToUrl(resolveSwipeLogo(job.company_logo_url), jobVersion(job));
       // Also warm the JobView-transform variant so tapping the card lands instantly
       const jobViewUrl = appendVersionToUrl(resolveJobViewVariant(job.job_image_url), jobVersion(job));
       if (imgUrl && !loadedRef.current.has(imgUrl)) urls.push(imgUrl);

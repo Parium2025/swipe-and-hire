@@ -33,6 +33,15 @@ export const JOB_VIEW_HERO_TRANSFORM: ImageTransform = {
   resize: 'cover',
 };
 
+// Swipe-kortet — täcker viewporten (~400px bred på mobil), ~800px räcker för 2× retina.
+// MÅSTE matcha exakt det som useSwipeImagePreloader warmar, annars cache-miss.
+export const SWIPE_CARD_TRANSFORM: ImageTransform = {
+  width: 800,
+  height: 1000,
+  quality: 78,
+  resize: 'cover',
+};
+
 // Företagslogo (alla ytor)
 export const COMPANY_LOGO_TRANSFORM: ImageTransform = {
   width: 128,
