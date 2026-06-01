@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { imageCache } from '@/lib/imageCache';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
-import { JOB_VIEW_HERO_TRANSFORM, isSlowOrMeteredConnection } from '@/lib/imageTransforms';
+import { JOB_VIEW_HERO_TRANSFORM, SWIPE_CARD_TRANSFORM, COMPANY_LOGO_TRANSFORM, isSlowOrMeteredConnection } from '@/lib/imageTransforms';
 
 interface PreloadableJob {
   job_image_url?: string;
