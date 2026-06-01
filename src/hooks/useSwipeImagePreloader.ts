@@ -151,8 +151,8 @@ export function useSwipeImagePreloader(
     for (let i = start; i <= end; i++) {
       if (i === currentIndex) continue; // current is already loaded
       const job = jobs[i];
-      const imgUrl = appendVersionToUrl(resolveUrl(job.job_image_url, 'job-images'), jobVersion(job));
-      const logoUrl = appendVersionToUrl(resolveUrl(job.company_logo_url, 'company-logos'), jobVersion(job));
+      const imgUrl = appendVersionToUrl(resolveSwipeImg(job.job_image_url), jobVersion(job));
+      const logoUrl = appendVersionToUrl(resolveSwipeLogo(job.company_logo_url), jobVersion(job));
       // Also warm the JobView-transform variant so tapping the card lands instantly
       const jobViewUrl = appendVersionToUrl(resolveJobViewVariant(job.job_image_url), jobVersion(job));
       if (imgUrl && !loadedRef.current.has(imgUrl)) urls.push(imgUrl);
