@@ -88,7 +88,7 @@ export function useSwipeImagePreloader(
     // ── 1. LOGOS: kör DIREKT (high priority, parallellt) ──
     const logoUrls: string[] = [];
     for (let i = 0; i < jobs.length; i++) {
-      const logoUrl = appendVersionToUrl(resolveUrl(jobs[i].company_logo_url, 'company-logos'), jobVersion(jobs[i]));
+      const logoUrl = appendVersionToUrl(resolveSwipeLogo(jobs[i].company_logo_url), jobVersion(jobs[i]));
       if (logoUrl && !loadedRef.current.has(logoUrl)) {
         loadedRef.current.add(logoUrl);
         logoUrls.push(logoUrl);
