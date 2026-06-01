@@ -103,6 +103,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const undoStackRef = useRef<string[]>([]);
   const [canUndo, setCanUndo] = useState(false);
   const [undoEntryJobId, setUndoEntryJobId] = useState<string | null>(null);
+  // 🎯 Pending undo target: the jobs[] effect uses this to snap back to the
+  // restored card after parent re-inserts it (instead of just clamping prev).
+  const pendingUndoJobIdRef = useRef<string | null>(null);
 
   /* ── Premium image preloading: 10 ahead, 2 back, bulk-25 on mount ── */
   useSwipeImagePreloader(jobs, currentIndex, 10, 2, 25);
@@ -293,10 +296,21 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         }
       });
     } else if (hasRestoredRef.current && jobs.length > 0) {
-      // When a job is removed (skip/undo), clamp index to valid range
+      // When jobs change (skip removes / undo re-inserts), pick the right target.
       setCurrentIndex(prev => {
-        const clamped = Math.min(prev, jobs.length - 1);
-        // Snap to the correct slide position
+        // 🎯 If an undo just happened, jump explicitly to the restored job's
+        // new position in the array — don't rely on clamping `prev`, which
+        // would leave the user on whatever card now occupies the old index.
+        let target = prev;
+        const pendingId = pendingUndoJobIdRef.current;
+        if (pendingId) {
+          const restoredIdx = jobs.findIndex(j => j.id === pendingId);
+          if (restoredIdx >= 0) target = restoredIdx;
+          pendingUndoJobIdRef.current = null;
+        }
+        const clamped = Math.min(Math.max(target, 0), jobs.length - 1);
+        // Snap to the correct slide position (instant, no smooth — avoids
+        // iOS Safari fighting the snap engine after array mutation).
         requestAnimationFrame(() => {
           const el = slideRefs.current[clamped];
           if (el && scrollRef.current) {
@@ -306,7 +320,7 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
         return clamped;
       });
     }
-  }, [jobs.length, clearTimers, getRestoredIndex]);
+  }, [jobs, clearTimers, getRestoredIndex]);
 
   useEffect(() => () => { clearTimers(); }, [clearTimers]);
 
@@ -448,6 +462,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     const stack = undoStackRef.current;
     if (stack.length === 0 || !onUndoSwipeAction) return;
     const lastId = stack[stack.length - 1];
+    // 🎯 Mark the restored job so the jobs-effect can snap back to it,
+    // not just clamp the previous currentIndex (which would leave the
+    // user on the card that took the skipped one's place).
+    pendingUndoJobIdRef.current = lastId;
     setUndoEntryJobId(lastId);
     onUndoSwipeAction(lastId);
     undoStackRef.current = stack.slice(0, -1);
