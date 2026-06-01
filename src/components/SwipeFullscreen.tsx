@@ -462,6 +462,10 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
     const stack = undoStackRef.current;
     if (stack.length === 0 || !onUndoSwipeAction) return;
     const lastId = stack[stack.length - 1];
+    // 🎯 Mark the restored job so the jobs-effect can snap back to it,
+    // not just clamp the previous currentIndex (which would leave the
+    // user on the card that took the skipped one's place).
+    pendingUndoJobIdRef.current = lastId;
     setUndoEntryJobId(lastId);
     onUndoSwipeAction(lastId);
     undoStackRef.current = stack.slice(0, -1);
