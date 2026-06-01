@@ -15,16 +15,10 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { Badge } from '@/components/ui/badge';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 
-function resolveImageUrl(url?: string, bucket = 'job-images'): string | null {
-  if (!url) return null;
-  if (url.startsWith('http')) return url;
-  // 🚀 Transform: swipe-bilden täcker viewporten (~400px bred på mobil) → ~800px (2× retina) räcker.
-  // Original kan vara 2-5 MB → transformerad ~80-150 KB (15-30× mindre, snabbare swipe).
-  const { data } = supabase.storage.from(bucket).getPublicUrl(url, {
-    transform: { width: 800, height: 1000, quality: 78, resize: 'cover' },
-  });
-  return data?.publicUrl || null;
-}
+// Transform-konstant — MÅSTE matcha SWIPE_CARD_TRANSFORM i imageTransforms.ts
+// och useSwipeImagePreloader, annars hamnar preload-cachen på fel key.
+const SWIPE_IMG_TRANSFORM = { width: 800, height: 1000, quality: 78, resize: 'cover' as const };
+const SWIPE_LOGO_TRANSFORM = { width: 64, height: 64, quality: 80, resize: 'contain' as const };
 
 interface JobSlideProps {
   job: SwipeJob;
