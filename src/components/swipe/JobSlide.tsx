@@ -451,28 +451,25 @@ export const JobSlide = memo(function JobSlide({
     }
   }, [clearTapHint, x]);
 
-  // Track when card becomes active to trigger fade-in
-  const prevActiveRef = useRef(isActive);
-
-  useEffect(() => {
-    if (isActive && !prevActiveRef.current) {
-      entryScale.set(1);
-    }
-    prevActiveRef.current = isActive;
-  }, [entryScale, isActive]);
-
   // ✨ Ångra: mjuk premium "catch"-animation. Kortet glider in med en kort
   // spring i scale + opacity så det känns ihopkopplat med resten av Spotify-
   // känslan istället för att bara poppa fram.
+  //
+  // VIKTIGT: Animationen får ENDAST triggas när isUndoEntry går från false→true
+  // (dvs precis efter ett klick på Ångra). Annars kunde animationen "läcka"
+  // till nästa kort efter en dislike, eller spelas om när användaren scrollade
+  // mellan kort inom 700 ms-fönstret (isActive ändras → effekt re-fyrade).
+  const prevIsUndoEntryRef = useRef(false);
   useEffect(() => {
-    if (isUndoEntry && isActive) {
+    if (isUndoEntry && !prevIsUndoEntryRef.current) {
       x.set(0);
       exitOpacity.set(0.4);
       entryScale.set(0.92);
       animate(exitOpacity, 1, { duration: 0.32, ease: [0.22, 1, 0.36, 1] });
       animate(entryScale, 1, { type: 'spring', stiffness: 320, damping: 26, mass: 0.7 });
     }
-  }, [isUndoEntry, isActive, x, exitOpacity, entryScale]);
+    prevIsUndoEntryRef.current = isUndoEntry ?? false;
+  }, [isUndoEntry, x, exitOpacity, entryScale]);
 
   return (
     <div
