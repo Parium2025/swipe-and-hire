@@ -705,16 +705,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profileLoadedRef.current = true; // 🔧 Still mark as "loaded" so login can proceed
         return;
       } else {
-        // Convert JSONB interests to string array
+        // Convert JSONB interests to string array (safe parse — corrupt JSON must never block login)
+        const parseInterestsSafe = (value: unknown): string[] => {
+          if (!value) return [];
+          if (Array.isArray(value)) return value as string[];
+          if (typeof value === 'string') {
+            try {
+              const parsed = JSON.parse(value);
+              return Array.isArray(parsed) ? parsed : [];
+            } catch {
+              return [];
+            }
+          }
+          return [];
+        };
         const processedProfile = {
           ...profileData,
-          interests: profileData.interests 
-            ? (Array.isArray(profileData.interests) 
-                ? profileData.interests 
-                : typeof profileData.interests === 'string' 
-                  ? JSON.parse(profileData.interests) 
-                  : [])
-            : []
+          interests: parseInterestsSafe(profileData.interests),
         };
         setProfile(processedProfile);
         profileLoadedRef.current = true; // 🔧 Mark profile as loaded for login flow
