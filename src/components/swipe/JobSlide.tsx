@@ -836,6 +836,7 @@ export const JobSlide = memo(function JobSlide({
           <div className="mt-4 flex items-center justify-center gap-4">
             <button
               type="button"
+              aria-label="Nej tack, hoppa över jobbet"
               onClick={(e) => { e.stopPropagation(); triggerSwipe('left'); }}
               data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-destructive flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
@@ -844,23 +845,27 @@ export const JobSlide = memo(function JobSlide({
             </button>
             <button
               type="button"
+              aria-label={saved ? 'Ta bort från sparade jobb' : 'Spara jobbet'}
+              aria-pressed={saved}
               onClick={(e) => { e.stopPropagation(); hapticLight(); onSave(); }}
               data-swipe-action-button
               className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 active:scale-[0.93] transition-transform touch-manipulation"
             >
-              <Bookmark className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`} />
+              <Heart className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`} strokeWidth={saved ? 2 : 2.25} />
             </button>
             <button
               type="button"
+              aria-label="Sök jobbet"
               onClick={(e) => { e.stopPropagation(); triggerSwipe('right'); }}
               data-swipe-action-button
-              className="w-[52px] h-[52px] rounded-full bg-green-500 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+              className="w-[52px] h-[52px] rounded-full bg-success flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
             >
               <Heart className="w-6 h-6 text-white fill-white" />
             </button>
             {canUndo && onUndo && (
               <button
                 type="button"
+                aria-label="Ångra senaste åtgärd"
                 onClick={(e) => { e.stopPropagation(); onUndo(); }}
                 data-swipe-action-button
                 className="w-[44px] h-[44px] rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
