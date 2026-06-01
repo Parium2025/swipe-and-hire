@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -55,6 +56,7 @@ function saveToCache(userId: string, jobIds: Set<string>): void {
 
 export const useSavedJobs = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const hasInitialized = useRef(false);
   
   // Initialize from cache immediately to prevent "fill-in" effect
@@ -136,7 +138,11 @@ export const useSavedJobs = () => {
         },
         () => {
           if (timer) clearTimeout(timer);
-          timer = setTimeout(() => fetchSavedJobs(), 400);
+          timer = setTimeout(() => {
+            fetchSavedJobs();
+            // 🔗 Håll react-query cachen (SavedJobs-sidan) i synk
+            queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
+          }, 150);
         }
       )
       .subscribe();
@@ -145,7 +151,7 @@ export const useSavedJobs = () => {
       if (timer) clearTimeout(timer);
       supabase.removeChannel(channel);
     };
-  }, [user, fetchSavedJobs]);
+  }, [user, fetchSavedJobs, queryClient]);
 
   const { isOnline, showOfflineToast } = useOnline();
   const { enqueue } = useOfflineSavedJobsQueue(user?.id);
@@ -204,6 +210,8 @@ export const useSavedJobs = () => {
         if (error) throw error;
         toast.success('Jobbet har sparats till dina favoriter');
       }
+      // 🔗 Synka SavedJobs-sidans react-query cache
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
     } catch (err) {
       // Revert optimistic update on error
       setSavedJobIds(prev => {
@@ -220,7 +228,7 @@ export const useSavedJobs = () => {
       console.error('Error toggling saved job:', err);
       toast.error(isSaved ? 'Kunde inte ta bort jobbet' : 'Kunde inte spara jobbet');
     }
-  }, [user, savedJobIds, isOnline, enqueue]);
+  }, [user, savedJobIds, isOnline, enqueue, queryClient]);
 
   // Explicit unsave - always deletes, no toggle logic
   const unsaveJob = useCallback(async (jobId: string) => {
@@ -244,6 +252,8 @@ export const useSavedJobs = () => {
 
       if (error) throw error;
       toast.success('Jobb borttaget från sparade');
+      // 🔗 Synka SavedJobs-sidans react-query cache
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
     } catch (err) {
       // Revert
       setSavedJobIds(prev => {
@@ -255,7 +265,7 @@ export const useSavedJobs = () => {
       console.error('Error unsaving job:', err);
       toast.error('Kunde inte ta bort jobbet');
     }
-  }, [user, isOnline, showOfflineToast]);
+  }, [user, isOnline, showOfflineToast, queryClient]);
 
   const isJobSaved = useCallback((jobId: string) => {
     return savedJobIds.has(jobId);
