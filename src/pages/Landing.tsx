@@ -92,7 +92,12 @@ const Landing = () => {
     navigate('/auth');
   };
 
+  if (shouldRedirectHome) {
+    return <Navigate to="/home" replace />;
+  }
+
   return (
+
     <div
       ref={scrollContainerRef}
       className="fixed inset-0 z-0 overflow-hidden text-foreground"
