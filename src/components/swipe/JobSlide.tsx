@@ -143,8 +143,8 @@ export const JobSlide = memo(function JobSlide({
   const blurClass = !imageUrl || imageLoaded ? 'backdrop-blur-md' : '';
 
   // 🚀 Logo i swipe-card är liten (~64px) → be om optimerad version
-  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', job.updated_at, SWIPE_LOGO_TRANSFORM);
-  const { displayUrl: nextLogoUrl } = useCardImage(nextJob?.company_logo_url ?? null, 'company-logos', nextJob?.updated_at, SWIPE_LOGO_TRANSFORM);
+  const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', getImageVersion(job), SWIPE_LOGO_TRANSFORM);
+  const { displayUrl: nextLogoUrl } = useCardImage(nextJob?.company_logo_url ?? null, 'company-logos', getImageVersion(nextJob), SWIPE_LOGO_TRANSFORM);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
   const nextOverlayTextStyle = useMemo(() => getJobOverlayTextStyle(nextJob?.overlay_text_color), [nextJob?.overlay_text_color]);
 
