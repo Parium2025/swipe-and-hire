@@ -94,7 +94,12 @@ const ToolbarButton = memo(({
             <Icon className={cn(large ? "h-5 w-5" : compact ? "h-4 w-4" : "h-4 w-4", "text-pure-white")} />
           </button>
         </TooltipTrigger>
-        <TooltipContent side="top" sideOffset={4}>
+        <TooltipContent
+          side="top"
+          sideOffset={6}
+          collisionPadding={8}
+          className="px-2 py-1 text-xs leading-none max-h-none overflow-visible"
+        >
           <p>{title}</p>
         </TooltipContent>
       </Tooltip>
