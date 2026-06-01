@@ -106,7 +106,7 @@ export function useSwipeImagePreloader(
     if (!slow) {
       const upper = Math.min(initialBulk, jobs.length);
       for (let i = 0; i < upper; i++) {
-        const imgUrl = appendVersionToUrl(resolveUrl(jobs[i].job_image_url, 'job-images'), jobVersion(jobs[i]));
+        const imgUrl = appendVersionToUrl(resolveSwipeImg(jobs[i].job_image_url), jobVersion(jobs[i]));
         if (imgUrl && !loadedRef.current.has(imgUrl)) {
           loadedRef.current.add(imgUrl);
           imgUrls.push(imgUrl);
