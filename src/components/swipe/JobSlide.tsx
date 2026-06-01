@@ -4,8 +4,6 @@ import { CheckCircle, X, Bookmark, Heart, Users, Gift, Undo2, Building2 } from '
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { useCardImage } from '@/hooks/useCardImage';
-import { supabase } from '@/integrations/supabase/client';
-import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
