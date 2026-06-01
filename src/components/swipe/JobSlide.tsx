@@ -461,21 +461,13 @@ export const JobSlide = memo(function JobSlide({
     prevActiveRef.current = isActive;
   }, [entryScale, isActive]);
 
-  // Undo entry: slide card back from the left with a premium spring
+  // 🧹 Ångra: ingen slide-in-animation. Kortet visas direkt i sitt vilo-läge,
+  // precis som vid vanlig scroll. Tidigare slide-from-left upplevdes störande
+  // särskilt när användaren tryckt på X-knappen → Ångra istället för att swipa.
   useEffect(() => {
     if (isUndoEntry && isActive) {
-      x.set(-400);
-      exitOpacity.set(0.3);
-      animate(x, 0, {
-        type: 'spring',
-        stiffness: 180,
-        damping: 24,
-        mass: 0.9,
-      });
-      animate(exitOpacity, 1, {
-        duration: 0.35,
-        ease: [0.22, 1, 0.36, 1],
-      });
+      x.set(0);
+      exitOpacity.set(1);
     }
   }, [isUndoEntry, isActive, x, exitOpacity]);
 
