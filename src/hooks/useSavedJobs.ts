@@ -252,6 +252,8 @@ export const useSavedJobs = () => {
 
       if (error) throw error;
       toast.success('Jobb borttaget från sparade');
+      // 🔗 Synka SavedJobs-sidans react-query cache
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
     } catch (err) {
       // Revert
       setSavedJobIds(prev => {
@@ -263,7 +265,7 @@ export const useSavedJobs = () => {
       console.error('Error unsaving job:', err);
       toast.error('Kunde inte ta bort jobbet');
     }
-  }, [user, isOnline, showOfflineToast]);
+  }, [user, isOnline, showOfflineToast, queryClient]);
 
   const isJobSaved = useCallback((jobId: string) => {
     return savedJobIds.has(jobId);
