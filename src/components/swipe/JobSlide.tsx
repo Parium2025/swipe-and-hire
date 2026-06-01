@@ -461,15 +461,18 @@ export const JobSlide = memo(function JobSlide({
     prevActiveRef.current = isActive;
   }, [entryScale, isActive]);
 
-  // 🧹 Ångra: ingen slide-in-animation. Kortet visas direkt i sitt vilo-läge,
-  // precis som vid vanlig scroll. Tidigare slide-from-left upplevdes störande
-  // särskilt när användaren tryckt på X-knappen → Ångra istället för att swipa.
+  // ✨ Ångra: mjuk premium "catch"-animation. Kortet glider in med en kort
+  // spring i scale + opacity så det känns ihopkopplat med resten av Spotify-
+  // känslan istället för att bara poppa fram.
   useEffect(() => {
     if (isUndoEntry && isActive) {
       x.set(0);
-      exitOpacity.set(1);
+      exitOpacity.set(0.4);
+      entryScale.set(0.92);
+      animate(exitOpacity, 1, { duration: 0.32, ease: [0.22, 1, 0.36, 1] });
+      animate(entryScale, 1, { type: 'spring', stiffness: 320, damping: 26, mass: 0.7 });
     }
-  }, [isUndoEntry, isActive, x, exitOpacity]);
+  }, [isUndoEntry, isActive, x, exitOpacity, entryScale]);
 
   return (
     <div
