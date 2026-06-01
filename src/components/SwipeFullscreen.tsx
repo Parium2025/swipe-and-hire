@@ -103,6 +103,9 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   const undoStackRef = useRef<string[]>([]);
   const [canUndo, setCanUndo] = useState(false);
   const [undoEntryJobId, setUndoEntryJobId] = useState<string | null>(null);
+  // 🎯 Pending undo target: the jobs[] effect uses this to snap back to the
+  // restored card after parent re-inserts it (instead of just clamping prev).
+  const pendingUndoJobIdRef = useRef<string | null>(null);
 
   /* ── Premium image preloading: 10 ahead, 2 back, bulk-25 on mount ── */
   useSwipeImagePreloader(jobs, currentIndex, 10, 2, 25);
