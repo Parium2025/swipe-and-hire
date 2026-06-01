@@ -56,6 +56,7 @@ function saveToCache(userId: string, jobIds: Set<string>): void {
 
 export const useSavedJobs = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const hasInitialized = useRef(false);
   
   // Initialize from cache immediately to prevent "fill-in" effect
