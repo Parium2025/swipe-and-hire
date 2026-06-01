@@ -127,8 +127,8 @@ export const JobSlide = memo(function JobSlide({
 
   const displayCompanyName = job.workplace_name || job.company_name || 'Okänt företag';
   const nextDisplayCompanyName = nextJob?.workplace_name || nextJob?.company_name || 'Okänt företag';
-  const imageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(job.job_image_url), job.updated_at), [job.job_image_url, job.updated_at]);
-  const nextImageUrl = useMemo(() => appendVersionToUrl(resolveImageUrl(nextJob?.job_image_url), nextJob?.updated_at), [nextJob?.job_image_url, nextJob?.updated_at]);
+  const { displayUrl: imageUrl, handleError: handleImageError } = useCardImage(job.job_image_url ?? null, 'job-images', job.updated_at, SWIPE_IMG_TRANSFORM);
+  const { displayUrl: nextImageUrl } = useCardImage(nextJob?.job_image_url ?? null, 'job-images', nextJob?.updated_at, SWIPE_IMG_TRANSFORM);
 
   // 🐛 iOS WebKit-bugg: backdrop-filter rastreras EN gång när elementet skapas
   // och uppdateras inte när underliggande <img> laddas in efteråt. Resultat:
