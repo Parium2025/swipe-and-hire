@@ -373,9 +373,14 @@ export const SwipeFullscreen = memo(function SwipeFullscreen({
   }, [currentIndex, jobs.length, scrollToSlide]);
 
   const handleSwipeRight = useCallback(() => {
-    if (currentJob) onRecordSwipeAction?.(currentJob.id, 'liked');
+    if (!currentJob) return;
+    // 🛑 Om jobbet redan är sökt → öppna inte ansökningssheet igen.
+    // Tidigare slide-in-animation varje gång användaren råkade dra höger
+    // på ett "SÖKT"-kort upplevdes störande. Nu är högerswipe en no-op.
+    if (isApplied(currentJob.id)) return;
+    onRecordSwipeAction?.(currentJob.id, 'liked');
     setShowApply(true);
-  }, [currentJob, onRecordSwipeAction]);
+  }, [currentJob, isApplied, onRecordSwipeAction]);
 
   const handleSwipeLeft = useCallback(() => {
     const skippedJob = jobs[currentIndex];
