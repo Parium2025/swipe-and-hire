@@ -239,6 +239,9 @@ const EmployerHome = memo(() => {
   }, [weather.weatherCode, isEvening, gpsGranted, isDaytime]);
 
   if (isLoading || !showContent) {
+    if (!dataWasCached.current) {
+      return <EmployerHomeSkeleton />;
+    }
     return (
       <div className="space-y-6 responsive-container-wide py-8 opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         {/* Invisible placeholder */}
