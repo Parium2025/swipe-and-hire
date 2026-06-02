@@ -5,6 +5,7 @@ import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
+import { useSidebarRoutePrefetch } from '@/hooks/useSidebarRoutePrefetch';
 import { preloadImages } from "@/lib/serviceWorkerManager";
 import {
   Sidebar,
