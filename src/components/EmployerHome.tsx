@@ -58,7 +58,9 @@ const EmployerHome = memo(() => {
   const { isLoading } = useJobsData({ scope: 'personal' });
   const isSystemAdmin = useIsSystemAdmin();
   
-  const [showContent, setShowContent] = useState(false);
+  // Mirror job seeker pattern: instant render when data is cached, fade-in only on cold load
+  const [showContent, setShowContent] = useState(() => !isLoading);
+  const dataWasCached = useRef(!isLoading);
   const [systemHealth, setSystemHealth] = useState<{
     storagePercent: number;
     dbPercent: number;
@@ -68,11 +70,15 @@ const EmployerHome = memo(() => {
   } | null>(null);
   
   useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => setShowContent(true), 100);
-      return () => clearTimeout(timer);
+    if (!isLoading && !showContent) {
+      if (dataWasCached.current) {
+        setShowContent(true);
+      } else {
+        const timer = setTimeout(() => setShowContent(true), 100);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [isLoading]);
+  }, [isLoading, showContent]);
 
   // Fetch system health for admin
   const fetchSystemHealth = useCallback(async () => {

@@ -153,6 +153,9 @@ export function useSidebarRoutePrefetch() {
         });
         break;
       }
+      // /my-candidates och /messages varmhålls redan via
+      // useEmployerBackgroundSync + ConversationsProvider, så ingen
+      // extra hover-prefetch behövs här.
       // För /home, /messages, /profile m.fl. har vi redan
       // background-sync hooks (useJobSeekerBackgroundSync /
       // useEmployerBackgroundSync) som håller datan färsk — ingen
