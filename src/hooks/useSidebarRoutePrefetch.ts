@@ -83,11 +83,8 @@ export function useSidebarRoutePrefetch() {
         });
         break;
       }
-      case '/dashboard':
       case '/my-jobs': {
-        // Båda sidorna hämtar samma data via `useJobsData({ scope: 'personal' })`.
-        // Genom att varma upp exakt samma queryKey används resultatet 1:1 när
-        // sidan monteras — ingen skeleton-blinkning.
+        // /my-jobs → useJobsData({ scope: 'personal' }) → ['jobs', 'personal', orgId, userId]
         queryClient.prefetchQuery({
           queryKey: ['jobs', 'personal', orgId, user.id],
           queryFn: async () => {
@@ -105,6 +102,48 @@ export function useSidebarRoutePrefetch() {
               .eq('employer_id', user.id)
               .order('created_at', { ascending: false })
               .range(0, 999);
+            if (error) throw error;
+            return data ?? [];
+          },
+          staleTime: 60_000,
+        }).catch(() => {
+          prefetchedRef.current.delete(key);
+        });
+        break;
+      }
+      case '/dashboard': {
+        // /dashboard → useJobsData({ scope: 'organization' }) → ['jobs', 'organization', orgId, userId]
+        // Speglar fetchern i useJobsData: först org-medlemmar → sedan deras jobb.
+        queryClient.prefetchQuery({
+          queryKey: ['jobs', 'organization', orgId, user.id],
+          queryFn: async () => {
+            const baseSelect = `
+              *,
+              employer_profile:profiles!job_postings_employer_id_fkey (
+                first_name,
+                last_name
+              )
+            `;
+            let employerIds: string[] = [user.id];
+            if (orgId) {
+              const { data: orgUsers, error: orgError } = await supabase
+                .from('user_roles')
+                .select('user_id')
+                .eq('organization_id', orgId)
+                .eq('is_active', true);
+              if (orgError) throw orgError;
+              const ids = orgUsers?.map((u: any) => u.user_id) ?? [];
+              if (ids.length > 0) employerIds = ids;
+            }
+            const query = supabase
+              .from('job_postings')
+              .select(baseSelect)
+              .is('deleted_at', null)
+              .order('created_at', { ascending: false })
+              .range(0, 999);
+            const { data, error } = orgId && employerIds.length > 1
+              ? await query.in('employer_id', employerIds)
+              : await query.eq('employer_id', employerIds[0]);
             if (error) throw error;
             return data ?? [];
           },
