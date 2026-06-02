@@ -569,13 +569,15 @@ const JobDetails = () => {
        onTouchEnd={handlePullTouchEnd}
        onTouchCancel={handlePullTouchEnd}
        style={{
-         transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
+         transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0) scale(${Math.max(0.94, 1 - pullY / 2400)})` : undefined,
+         transformOrigin: '50% 0%',
+         opacity: isDismissing ? 0 : pullY > 0 ? Math.max(0.55, 1 - pullY / 600) : 1,
          transition: pullActiveRef.current
            ? 'none'
            : isDismissing
-             ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
-             : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
-         willChange: pullY > 0 || isDismissing ? 'transform' : undefined,
+             ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1), opacity 260ms ease-out'
+             : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease-out',
+         willChange: pullY > 0 || isDismissing ? 'transform, opacity' : undefined,
          touchAction: 'pan-y',
        }}
        className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
