@@ -503,6 +503,22 @@ const Index = () => {
     if (role === 'employer') lastEmployerPathRef.current = location.pathname;
     else lastJobSeekerPathRef.current = location.pathname;
   }
+  // Track även arbetsgivar-routes som inte är sidebarRoutes (dashboard/my-jobs)
+  // så JobDetails-overlay kan visa rätt sida bakom.
+  if (role === 'employer' && !isJobDetailsOverlay && !isJobViewOverlay) {
+    if (
+      location.pathname === '/dashboard' ||
+      location.pathname.startsWith('/my-jobs') ||
+      location.pathname === '/candidates' ||
+      location.pathname === '/my-candidates' ||
+      location.pathname === '/reports' ||
+      location.pathname === '/reviews' ||
+      location.pathname === '/company-profile' ||
+      location.pathname === '/employer-profile'
+    ) {
+      lastEmployerPathRef.current = location.pathname;
+    }
+  }
   // Behandla /job-view/:id som "fortsatt på senaste sidebar-vy + overlay".
   const treatAsSidebar = isSidebarRoute || isJobViewOverlay;
 
