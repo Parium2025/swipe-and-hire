@@ -658,13 +658,21 @@ const Index = () => {
       }
     };
 
-    const employerKeepKey = isJobViewOverlay ? lastEmployerPathRef.current : location.pathname;
+    const employerKeepKey = (isJobViewOverlay || isJobDetailsOverlay)
+      ? lastEmployerPathRef.current
+      : location.pathname;
     return (
       <EmployerLayout
         developerView={developerView}
         onViewChange={setDeveloperView}
         isOrgAdmin={isAdmin}
-        overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}
+        overlay={
+          isJobViewOverlay
+            ? <JobView asOverlay />
+            : isJobDetailsOverlay
+              ? <JobDetails asOverlay />
+              : undefined
+        }
       >
         <KeepAlive
           activeKey={employerKeepKey}
