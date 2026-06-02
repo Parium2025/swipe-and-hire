@@ -35,6 +35,7 @@ import { DashboardPagination } from '@/components/dashboard/DashboardPagination'
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
+import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
