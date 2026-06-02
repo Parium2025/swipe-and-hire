@@ -529,7 +529,7 @@ const JobDetails = () => {
       return;
     }
     // Avbryt om sidan inte längre är vid toppen (t.ex. momentum-scroll)
-    if ((window.scrollY || window.pageYOffset || 0) > 0) {
+    if (getScrollTop() > 0) {
       pullStartYRef.current = null;
       if (pullActiveRef.current) setPullY(0);
       pullActiveRef.current = false;
