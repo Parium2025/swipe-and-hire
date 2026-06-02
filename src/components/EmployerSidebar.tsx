@@ -270,6 +270,21 @@ export function EmployerSidebar() {
     return () => window.removeEventListener('unsaved-cancel', handleUnsavedCancel);
   }, [isMobile, setOpenMobile, setOpen]);
 
+  // Förladda företagslogo via Service Worker — identiskt med jobbsökarens
+  // AppSidebar. Detta håller logotypen varm i cache så att den inte "laddas
+  // om" varje gång drawern öppnas på mobil (Sheet remountas vid varje öppning).
+  const profileImages = useMemo(() => {
+    const images: string[] = [];
+    if (companyLogoUrl) images.push(companyLogoUrl);
+    return images;
+  }, [companyLogoUrl]);
+
+  useEffect(() => {
+    if (profileImages.length > 0) {
+      preloadImages(profileImages);
+    }
+  }, [profileImages]);
+
   const handleNavigation = (href: string) => {
     if (!checkBeforeNavigation(href)) return;
 
