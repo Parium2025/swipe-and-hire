@@ -54,6 +54,10 @@ const DateTimeDisplay = memo(() => {
 
 DateTimeDisplay.displayName = 'DateTimeDisplay';
 
+// Module-level flag: skeleton-overlay endast vid kall mount (browser refresh / direkt URL),
+// hoppa över vid sidebar-navigering — speglar seeker SearchJobs.
+let __employerHomeHasMountedOnce = false;
+
 const EmployerHome = memo(() => {
   const { profile } = useAuth();
   const { isLoading } = useJobsData({ scope: 'personal' });
@@ -80,6 +84,18 @@ const EmployerHome = memo(() => {
       }
     }
   }, [isLoading, showContent]);
+
+  const [initialLoadDone, setInitialLoadDone] = useState(__employerHomeHasMountedOnce);
+  useEffect(() => {
+    if (!isLoading && !initialLoadDone) {
+      const t = setTimeout(() => {
+        setInitialLoadDone(true);
+        __employerHomeHasMountedOnce = true;
+      }, 150);
+      return () => clearTimeout(t);
+    }
+  }, [isLoading, initialLoadDone]);
+
 
   // Fetch system health for admin
   const fetchSystemHealth = useCallback(async () => {
