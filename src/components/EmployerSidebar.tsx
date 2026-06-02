@@ -469,6 +469,8 @@ export function EmployerSidebar() {
                   >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
+                      onMouseEnter={() => handlePrefetch(item.url)}
+                      onTouchStart={() => handlePrefetch(item.url)}
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
@@ -504,6 +506,8 @@ export function EmployerSidebar() {
                   >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
+                      onMouseEnter={() => handlePrefetch(item.url)}
+                      onTouchStart={() => handlePrefetch(item.url)}
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
