@@ -595,17 +595,19 @@ const Index = () => {
   }
 
   // Show employer dashboard with sidebar for employers
-  if (role === 'employer' || (isJobViewOverlay && role === 'employer')) {
+  if (role === 'employer' || ((isJobViewOverlay || isJobDetailsOverlay) && role === 'employer')) {
     // Redirect employer from job seeker routes
     if (location.pathname === '/search-jobs') {
       return <Navigate to="/home" replace />;
     }
 
     const renderEmployerContent = (path: string) => {
-      // Handle job details route with dynamic ID
+      // /job-details/ renderas som overlay (se nedan) — fallback om någon
+      // ändå skickar in path till renderaren direkt.
       if (path.startsWith('/job-details/')) {
         return <JobDetails />;
       }
+      
       
       switch (path) {
         case '/home':
