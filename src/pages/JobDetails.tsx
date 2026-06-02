@@ -580,34 +580,21 @@ const JobDetails = ({ asOverlay = false }: JobDetailsProps = {}) => {
        onTouchEnd={handlePullTouchEnd}
        onTouchCancel={handlePullTouchEnd}
        style={{
-         transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0) scale(${Math.max(0.94, 1 - pullY / 2400)})` : undefined,
-         transformOrigin: '50% 0%',
-         opacity: isDismissing ? 0 : pullY > 0 ? Math.max(0.55, 1 - pullY / 600) : 1,
+         transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
          transition: pullActiveRef.current
            ? 'none'
            : isDismissing
-             ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1), opacity 260ms ease-out'
-             : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease-out',
-         willChange: pullY > 0 || isDismissing ? 'transform, opacity' : undefined,
+             ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
+             : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
+         willChange: pullY > 0 || isDismissing ? 'transform' : undefined,
          touchAction: 'pan-y',
-         boxShadow: useMobileView && (pullY > 0 || isDismissing) ? '0 -12px 40px -8px rgba(0,0,0,0.45)' : undefined,
-         borderTopLeftRadius: useMobileView ? 24 : undefined,
-         borderTopRightRadius: useMobileView ? 24 : undefined,
        }}
-       className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
-        {/* Drag handle: synlig "grabber" som signalerar att kortet kan dras bort — matchar iOS-sheet */}
-        {useMobileView && (
-          <div className="flex justify-center -mt-1 mb-1 pointer-events-none select-none">
-            <div
-              className="h-1.5 rounded-full bg-white/40 transition-all duration-200"
-              style={{
-                width: pullY > 0 ? 56 : 44,
-                backgroundColor: pullY > 110 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.4)',
-              }}
-              aria-hidden="true"
-            />
-          </div>
-        )}
+       className={
+         asOverlay
+           ? 'fixed inset-0 z-50 overflow-x-hidden overflow-y-auto overscroll-contain bg-[hsl(215_100%_12%)] bg-parium-gradient space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-[100dvh] animate-fade-in md:max-w-none md:mx-0 md:px-[clamp(0.75rem,2.5vw,2rem)] [-webkit-overflow-scrolling:touch]'
+           : 'space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]'
+       }>
+
         <JobDetailsHeader
           jobId={jobId!}
           job={job}
