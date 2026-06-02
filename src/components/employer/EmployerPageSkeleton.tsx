@@ -38,7 +38,7 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
 const SkeletonChrome = memo(function SkeletonChrome() {
   return (
     <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
-      <div className="h-10 w-40 rounded-md bg-white/10 animate-pulse" />
+      <div className="h-9 w-28 rounded-md bg-white/10 animate-pulse" />
       <div className="absolute left-1/2 -translate-x-1/2 h-5 w-16 rounded bg-white/10 animate-pulse" />
       <div className="flex items-center gap-2">
         <div className="h-9 w-9 rounded-full bg-white/10 animate-pulse" />
