@@ -35,6 +35,7 @@ import { DashboardPagination } from '@/components/dashboard/DashboardPagination'
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
+import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -387,10 +388,15 @@ const EmployerDashboard = memo(() => {
     ];
   }, [jobs.length, activeJobs, expiredJobsCount, draftJobsCount, loading, serverCounts, serverStats, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
-  // Wait for data AND minimum delay before showing content with fade
+  // Wait for data AND minimum delay before showing content with fade.
+  // Cold load (e.g. browser refresh) → full-screen skeleton overlay, mirroring job seeker side.
+  // Warm load (cache hit from sidebar navigation) → invisible placeholder, no flicker.
   if (loading || !showContent) {
+    if (!dataWasCached.current) {
+      return <EmployerDashboardSkeleton />;
+    }
     return (
-       <div className="space-y-4 responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-hidden="true">
+      <div className="space-y-4 responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-hidden="true">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );

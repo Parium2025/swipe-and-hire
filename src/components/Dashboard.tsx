@@ -13,6 +13,7 @@ import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
+import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
@@ -221,8 +222,11 @@ const Dashboard = memo(() => {
   }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
   if (isLoading || !showContent) {
+    if (!dataWasCached.current) {
+      return <EmployerDashboardSkeleton />;
+    }
     return (
-    <div className="dashboard-page-stack responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+      <div className="dashboard-page-stack responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
