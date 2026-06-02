@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useDragScroll } from '@/hooks/useDragScroll';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { usePullToDismiss } from '@/hooks/usePullToDismiss';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
@@ -50,14 +51,35 @@ import {
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isTouchDevice = useTouchCapable();
   const device = useDevice();
   const useMobileView = isTouchDevice || device === 'mobile';
-  
+
   const { setStageCount } = useKanbanLayout();
   const dragScrollRef = useDragScroll<HTMLDivElement>();
+  const pageRef = useRef<HTMLDivElement>(null);
+
+  const handleBack = useCallback(() => {
+    const navState = (location.state as { fromRoute?: '/dashboard' | '/my-jobs'; fromTab?: 'active' | 'expired' | 'draft' } | null) ?? null;
+    if (navState?.fromRoute) {
+      const tabSuffix = navState.fromTab && navState.fromTab !== 'active' ? `?tab=${navState.fromTab}` : '';
+      navigate(`${navState.fromRoute}${tabSuffix}`, { replace: true });
+    } else if (window.history.state?.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  }, [location.state, navigate]);
+
+  const { handlers: pullHandlers, style: pullStyle } = usePullToDismiss({
+    wrapperRef: pageRef,
+    onDismiss: handleBack,
+    enabled: useMobileView,
+  });
   
   const { 
     job, 
@@ -461,7 +483,12 @@ const JobDetails = () => {
   }
 
   return (
-     <div className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
+     <div
+       ref={pageRef}
+       {...pullHandlers}
+       style={pullStyle}
+       className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
+
         <JobDetailsHeader
           jobId={jobId!}
           job={job}
