@@ -71,7 +71,7 @@ export const useImagePreloader = (urls: (string | null | undefined)[], options: 
         img.onerror = null;
       });
     };
-  }, [urls, priority, onLoad, onError]);
+  }, [validUrls, priority, onLoad, onError]);
 };
 
 /**
