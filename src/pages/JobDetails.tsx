@@ -48,7 +48,11 @@ import {
   JobDetailsHeader,
 } from '@/components/jobdetails';
 
-const JobDetails = () => {
+interface JobDetailsProps {
+  asOverlay?: boolean;
+}
+
+const JobDetails = ({ asOverlay = false }: JobDetailsProps = {}) => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
