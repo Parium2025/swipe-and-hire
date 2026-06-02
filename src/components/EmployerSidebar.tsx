@@ -1,10 +1,11 @@
-import React, { useEffect, useState, memo, startTransition } from "react";
+import React, { useEffect, useState, memo, useMemo, startTransition } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsOrgAdmin } from "@/hooks/useIsOrgAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
+import { preloadImages } from "@/lib/serviceWorkerManager";
 import {
   Sidebar,
   SidebarContent,
