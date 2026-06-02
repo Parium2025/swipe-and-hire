@@ -140,6 +140,14 @@ export function EmployerSidebar() {
   const { checkBeforeNavigation } = useUnsavedChanges();
   const queryClient = useQueryClient();
   const prefetchApplications = usePrefetchApplications();
+  const prefetchRoute = useSidebarRoutePrefetch();
+
+  // Behåll hover-prefetch på desktop, men undvik touchstart-prefetch på mobil
+  // eftersom det konkurrerar med drawer-stängningen (identiskt med AppSidebar).
+  const handlePrefetch = React.useCallback((url: string) => {
+    if (isMobile) return;
+    prefetchRoute(url);
+  }, [isMobile, prefetchRoute]);
   
   // Track where user came from when viewing job details
   const [jobDetailsSource, setJobDetailsSource] = useState<string | null>(null);
