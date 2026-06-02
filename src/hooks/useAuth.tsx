@@ -61,6 +61,7 @@ interface Profile {
   cover_image_url?: string;
   cv_url?: string;
   cv_filename?: string;
+  company_logo_url?: string;
   employment_status?: string;
   working_hours?: string;
   availability?: string;
@@ -725,7 +726,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(processedProfile);
         profileLoadedRef.current = true; // 🔧 Mark profile as loaded for login flow
         
-        // 🔥 KRITISKT: Förladdda kritiska bilder (avatar + cover) INNAN vi släpper loading-state
+        // 🔥 KRITISKT: Förladdda kritiska bilder (avatar + cover + employer-logo) INNAN vi släpper loading-state
         // Video är tung – den cachas i bakgrunden men blockerar inte inloggning
         (async () => {
           try {
@@ -733,7 +734,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             mediaPreloadCompleteRef.current = false;
             
             const criticalImages: string[] = [];
-            const companyLogoUrl = (processedProfile as any).company_logo_url || null;
+            const companyLogoUrl = processedProfile.company_logo_url || null;
             let avatarUrl: string | null = null;
             let coverUrl: string | null = null;
             
