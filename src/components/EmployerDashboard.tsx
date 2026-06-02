@@ -105,6 +105,19 @@ const EmployerDashboard = memo(() => {
       }
     }
   }, [loading, showContent]);
+
+  // Full-screen skeleton overlay — visas vid kall mount (browser refresh / direkt URL),
+  // hoppar över vid in-app sidebar-navigering (mirror av seeker-sidans pattern).
+  const [initialLoadDone, setInitialLoadDone] = useState(__employerDashboardHasMountedOnce);
+  useEffect(() => {
+    if (!loading && !initialLoadDone) {
+      const t = setTimeout(() => {
+        setInitialLoadDone(true);
+        __employerDashboardHasMountedOnce = true;
+      }, 150);
+      return () => clearTimeout(t);
+    }
+  }, [loading, initialLoadDone]);
   
   const {
     searchInput,
