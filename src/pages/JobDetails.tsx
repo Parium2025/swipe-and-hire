@@ -475,9 +475,11 @@ const JobDetails = ({ asOverlay = false }: JobDetailsProps = {}) => {
     }
   }, [location.state, navigate]);
 
-  // Läs scrollTop från employer-shellens main-container (inte window — sidan
-  // scrollar i en intern <main data-main-scroll-container="true">).
+  // Scroll-källa: i overlay-läge är wrappern själv scroll-container, annars
+  // employer-shellens <main data-main-scroll-container="true">.
+  const overlayScrollRef = useRef<HTMLDivElement | null>(null);
   const getScrollTop = (): number => {
+    if (asOverlay && overlayScrollRef.current) return overlayScrollRef.current.scrollTop;
     const el = document.querySelector('[data-main-scroll-container="true"]') as HTMLElement | null;
     if (el) return el.scrollTop;
     return window.scrollY || window.pageYOffset || 0;
