@@ -169,6 +169,63 @@ export function useEmployerMediaWarmup() {
       warmJobAdImages(q.state.data);
     }
 
+    // 💬 CONVERSATION AVATARS — speglar jobbsökarens warmup-mönster
+    // (useJobSeekerMediaWarmup). Warmar motpartens profil-/logobild +
+    // application-snapshot bilder i ['conversations', userId], så att
+    // /messages visas utan "popping in" första gången.
+    const warmConversations = (items: ConversationLike[] | undefined) => {
+      if (!Array.isArray(items)) return;
+      const avatars: string[] = [];
+      const logos: string[] = [];
+      for (const conv of items) {
+        if (!conv) continue;
+
+        const snap = conv.applicationSnapshot?.profile_image_snapshot_url;
+        if (typeof snap === 'string' && snap.trim() !== '' && !warmed.has(`conv-av:${snap}`)) {
+          warmed.add(`conv-av:${snap}`);
+          avatars.push(snap);
+        }
+
+        for (const m of conv.members ?? []) {
+          if (!m || m.user_id === userId) continue;
+          const img = m.profile?.profile_image_url;
+          const logo = m.profile?.company_logo_url;
+          if (typeof img === 'string' && img.trim() !== '' && !warmed.has(`conv-av:${img}`)) {
+            warmed.add(`conv-av:${img}`);
+            avatars.push(img);
+          }
+          if (typeof logo === 'string' && logo.trim() !== '' && !warmed.has(`conv-logo:${logo}`)) {
+            warmed.add(`conv-logo:${logo}`);
+            logos.push(logo);
+          }
+        }
+        if (avatars.length + logos.length >= MAX_NEW_PER_UPDATE) break;
+      }
+
+      if (avatars.length === 0 && logos.length === 0) return;
+      queueMicrotask(() => {
+        if (avatars.length > 0) {
+          Promise.allSettled(
+            avatars.map((p) =>
+              prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}),
+            ),
+          );
+        }
+        if (logos.length > 0) {
+          const LOGO_TRANSFORM = { width: 80, height: 80, resize: 'cover' as const };
+          Promise.allSettled(
+            logos.map((p) =>
+              prefetchMediaUrl(p, 'company-logo', 86400, LOGO_TRANSFORM).catch(() => {}),
+            ),
+          );
+        }
+      });
+    };
+
+    // Initial scan av conversations-cachen
+    const conversationsData = queryClient.getQueryData<ConversationLike[]>(['conversations', userId]);
+    warmConversations(conversationsData);
+
     // Lyssna på framtida uppdateringar (när progressive pagination eller
     // background sync lägger till nya sidor)
     const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
@@ -180,6 +237,12 @@ export function useEmployerMediaWarmup() {
       // Job ad images: ['jobs', scope, orgId, userId]
       if (head === 'jobs') {
         warmJobAdImages(event.query.state.data);
+        return;
+      }
+
+      // Conversation avatars: ['conversations', userId]
+      if (head === 'conversations' && key[1] === userId) {
+        warmConversations(event.query.state.data as ConversationLike[] | undefined);
         return;
       }
 
