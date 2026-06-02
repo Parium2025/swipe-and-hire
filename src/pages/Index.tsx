@@ -347,9 +347,6 @@ const Index = () => {
   const isJobViewOverlay =
     location.pathname.startsWith('/job-view/') ||
     location.pathname.startsWith('/job/');
-  // Samma mönster för arbetsgivarens /job-details/:id — Dashboard/MyJobs
-  // står kvar monterad bakom så pull-to-dismiss avslöjar förra sidan.
-  const isJobDetailsOverlay = location.pathname.startsWith('/job-details/');
   const lastJobSeekerPathRef = useRef<string>('/search-jobs');
   const lastEmployerPathRef = useRef<string>('/home');
   
@@ -503,22 +500,6 @@ const Index = () => {
     if (role === 'employer') lastEmployerPathRef.current = location.pathname;
     else lastJobSeekerPathRef.current = location.pathname;
   }
-  // Track även arbetsgivar-routes som inte är sidebarRoutes (dashboard/my-jobs)
-  // så JobDetails-overlay kan visa rätt sida bakom.
-  if (role === 'employer' && !isJobDetailsOverlay && !isJobViewOverlay) {
-    if (
-      location.pathname === '/dashboard' ||
-      location.pathname.startsWith('/my-jobs') ||
-      location.pathname === '/candidates' ||
-      location.pathname === '/my-candidates' ||
-      location.pathname === '/reports' ||
-      location.pathname === '/reviews' ||
-      location.pathname === '/company-profile' ||
-      location.pathname === '/employer-profile'
-    ) {
-      lastEmployerPathRef.current = location.pathname;
-    }
-  }
   // Behandla /job-view/:id som "fortsatt på senaste sidebar-vy + overlay".
   const treatAsSidebar = isSidebarRoute || isJobViewOverlay;
 
@@ -595,19 +576,17 @@ const Index = () => {
   }
 
   // Show employer dashboard with sidebar for employers
-  if (role === 'employer' || ((isJobViewOverlay || isJobDetailsOverlay) && role === 'employer')) {
+  if (role === 'employer' || (isJobViewOverlay && role === 'employer')) {
     // Redirect employer from job seeker routes
     if (location.pathname === '/search-jobs') {
       return <Navigate to="/home" replace />;
     }
 
     const renderEmployerContent = (path: string) => {
-      // /job-details/ renderas som overlay (se nedan) — fallback om någon
-      // ändå skickar in path till renderaren direkt.
+      // Handle job details route with dynamic ID
       if (path.startsWith('/job-details/')) {
         return <JobDetails />;
       }
-      
       
       switch (path) {
         case '/home':
@@ -658,21 +637,13 @@ const Index = () => {
       }
     };
 
-    const employerKeepKey = (isJobViewOverlay || isJobDetailsOverlay)
-      ? lastEmployerPathRef.current
-      : location.pathname;
+    const employerKeepKey = isJobViewOverlay ? lastEmployerPathRef.current : location.pathname;
     return (
       <EmployerLayout
         developerView={developerView}
         onViewChange={setDeveloperView}
         isOrgAdmin={isAdmin}
-        overlay={
-          isJobViewOverlay
-            ? <JobView asOverlay />
-            : isJobDetailsOverlay
-              ? <JobDetails asOverlay />
-              : undefined
-        }
+        overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}
       >
         <KeepAlive
           activeKey={employerKeepKey}

@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -52,7 +52,6 @@ function getCompanyInitials(name: string): string {
 
 export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, cardIndex = 0 }: MobileJobCardProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const isDraft = isEmployerJobDraft(job);
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
@@ -74,13 +73,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
       onEditDraft(job);
       return;
     }
-    // Härled fromRoute så JobDetails kan navigera tillbaka rätt (dashboard vs my-jobs)
-    const path = location.pathname;
-    const fromRoute = path.startsWith('/dashboard') ? '/dashboard' : '/my-jobs';
-    const params = new URLSearchParams(location.search);
-    const tabParam = params.get('tab');
-    const fromTab = tabParam === 'expired' || tabParam === 'draft' ? tabParam : 'active';
-    navigate(`/job-details/${job.id}`, { state: { fromRoute, fromTab } });
+    navigate(`/job-details/${job.id}`);
   };
 
   const handleTouchStart = () => {
