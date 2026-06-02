@@ -16,7 +16,8 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export function useSidebarRoutePrefetch() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const orgId = (profile as any)?.organization_id ?? null;
   const prefetchedRef = useRef<Set<string>>(new Set());
 
   const prefetchRoute = useCallback((url: string) => {
