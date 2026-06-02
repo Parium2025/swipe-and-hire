@@ -52,6 +52,7 @@ function getCompanyInitials(name: string): string {
 
 export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, cardIndex = 0 }: MobileJobCardProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const isDraft = isEmployerJobDraft(job);
   const isExpired = isEmployerJobExpired(job);
   const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
