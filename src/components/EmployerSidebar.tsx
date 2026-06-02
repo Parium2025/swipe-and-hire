@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
 import { useSidebarRoutePrefetch } from '@/hooks/useSidebarRoutePrefetch';
 import { preloadImages } from "@/lib/serviceWorkerManager";
+import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import {
   Sidebar,
   SidebarContent,
@@ -185,15 +186,6 @@ export function EmployerSidebar() {
     sessionStorage.setItem('previousPath', currentPath);
   }, [location.pathname]);
   
-  // Normalisera utan att ändra cache-nyckeln: företagets logo sparas ofta som
-  // public URL med `?t=...`. Om den queryn kapas blir det en annan browser-cache-
-  // nyckel än den som AuthProvider redan har preloadat → tom ring vid öppning.
-  const getPublicLogoUrl = (url: string | null | undefined): string | null => {
-    if (!url || typeof url !== 'string') return null;
-    const trimmed = url.trim();
-    return trimmed || null;
-  };
-
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
     // Prioritera preloaded URL från AuthProvider
     if (preloadedCompanyLogoUrl) return preloadedCompanyLogoUrl;
@@ -207,7 +199,7 @@ export function EmployerSidebar() {
     }
     const cached = typeof window !== 'undefined' ? sessionStorage.getItem(LOGO_CACHE_KEY) : null;
     const raw = (typeof fromProfile === 'string' && fromProfile.trim() !== '') ? fromProfile : cached;
-    return getPublicLogoUrl(raw);
+    return resolveCompanyLogoUrl(raw);
   });
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [logoError, setLogoError] = useState(false);
@@ -234,7 +226,7 @@ export function EmployerSidebar() {
     const raw = (profile as any)?.company_logo_url;
     if (typeof raw === 'string' && raw.trim() !== '') {
       try {
-        const publicUrl = getPublicLogoUrl(raw);
+          const publicUrl = resolveCompanyLogoUrl(raw);
         setCompanyLogoUrl((prev) => {
           if (prev === publicUrl) return prev; // no change → avoid flicker
           setLogoLoaded(false);
