@@ -734,6 +734,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             mediaPreloadCompleteRef.current = false;
             
             const criticalImages: string[] = [];
+            const companyLogoUrl = (processedProfile as any).company_logo_url || null;
             let avatarUrl: string | null = null;
             let coverUrl: string | null = null;
             
@@ -783,6 +784,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             if (avatarUrl) criticalImages.push(avatarUrl);
             if (coverUrl) criticalImages.push(coverUrl);
+            if (companyLogoUrl) criticalImages.push(companyLogoUrl);
             
             // DOM-preload med timeout (max 500ms totalt)
             if (criticalImages.length > 0) {
@@ -800,6 +802,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Sätt URLs för sidebar + spara i sessionStorage för omedelbar visning
             setPreloadedAvatarUrl(avatarUrl || coverUrl || null);
             setPreloadedCoverUrl(coverUrl || null);
+            if (companyLogoUrl) setPreloadedCompanyLogoUrl(companyLogoUrl);
             
             // Spara till sessionStorage (som arbetsgivarsidan)
             try {
@@ -807,6 +810,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               else sessionStorage.removeItem(AVATAR_CACHE_KEY);
               if (coverUrl) sessionStorage.setItem(COVER_CACHE_KEY, coverUrl);
               else sessionStorage.removeItem(COVER_CACHE_KEY);
+              if (companyLogoUrl) sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, companyLogoUrl);
             } catch {}
             
             // Markera som klar (släpp inloggning)
@@ -833,12 +837,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
             
             // Company logo för employer sidebar (public bucket, ingen signed URL behövs)
-            if ((processedProfile as any).company_logo_url) {
-              const companyLogoUrl = (processedProfile as any).company_logo_url;
-              setPreloadedCompanyLogoUrl(companyLogoUrl);
-              try { sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, companyLogoUrl); } catch {}
-              
-              // Preload logo image
+            if (companyLogoUrl) {
+              // Blob-cache i bakgrunden också, men DOM-preloaden ovan är det
+              // viktiga för sidebarens <img> så den är decoded innan öppning.
               (async () => {
                 try {
                   const { imageCache } = await import('@/lib/imageCache');
