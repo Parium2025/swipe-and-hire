@@ -125,7 +125,7 @@ const MyCandidates = () => {
       if (dataWasCached.current) {
         setShowContent(true);
       } else {
-        const timer = setTimeout(() => setShowContent(true), 150);
+        const timer = setTimeout(() => setShowContent(true), 100);
         return () => clearTimeout(timer);
       }
     }
