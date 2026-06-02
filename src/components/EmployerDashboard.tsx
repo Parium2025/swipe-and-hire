@@ -406,13 +406,13 @@ const EmployerDashboard = memo(() => {
     ];
   }, [jobs.length, activeJobs, expiredJobsCount, draftJobsCount, loading, serverCounts, serverStats, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
-  // Wait for data AND minimum delay before showing content with fade.
-  // Cold load (e.g. browser refresh) → full-screen skeleton overlay, mirroring job seeker side.
-  // Warm load (cache hit from sidebar navigation) → invisible placeholder, no flicker.
+  // Full-screen skeleton vid kall mount i tab-sessionen — visas tills första data
+  // landar oavsett om localStorage-cachen var varm (mirror av seeker SearchJobs).
+  if (!initialLoadDone) {
+    return <EmployerDashboardSkeleton />;
+  }
+  // Sidebar-navigering (varm cache) → osynlig placeholder under fade-in delay.
   if (loading || !showContent) {
-    if (!dataWasCached.current) {
-      return <EmployerDashboardSkeleton />;
-    }
     return (
       <div className="space-y-4 responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-hidden="true">
         {/* Invisible placeholder to prevent layout shift */}
