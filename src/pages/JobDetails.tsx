@@ -471,13 +471,20 @@ const JobDetails = () => {
     }
   }, [location.state, navigate]);
 
+  // Läs scrollTop från employer-shellens main-container (inte window — sidan
+  // scrollar i en intern <main data-main-scroll-container="true">).
+  const getScrollTop = (): number => {
+    const el = document.querySelector('[data-main-scroll-container="true"]') as HTMLElement | null;
+    if (el) return el.scrollTop;
+    return window.scrollY || window.pageYOffset || 0;
+  };
+
   // Pull-to-dismiss: samma kvalitet och känsla som jobbsökarens JobView.
   // Aktivera dragstart varsomhelst på sidan – så länge sidan är scrollad till toppen
   // och dragstarten inte sker på en horisontell scroller (kanban/tabs/karusell).
   const handlePullTouchStart = (e: React.TouchEvent) => {
     if (!useMobileView) return;
-    // Endast om sidan är vid toppen (samma princip som JobView's scrollTop === 0)
-    if ((window.scrollY || window.pageYOffset || 0) > 0) {
+    if (getScrollTop() > 0) {
       pullStartYRef.current = null;
       return;
     }
