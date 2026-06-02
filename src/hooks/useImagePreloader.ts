@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 interface ImagePreloaderOptions {
   priority?: 'high' | 'low';
@@ -14,13 +14,20 @@ export const useImagePreloader = (urls: (string | null | undefined)[], options: 
   const { priority = 'low', onLoad, onError } = options;
   const loadedRef = useRef(new Set<string>());
 
-  useEffect(() => {
-    if (!urls || urls.length === 0) return;
+  // Stabilisera arrayen så effekten inte triggas av ny array-referens varje render.
+  const validUrls = useMemo(
+    () => (urls || []).filter((u): u is string => typeof u === 'string' && u.length > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [urls?.join('|')],
+  );
 
-    const validUrls = urls.filter((url): url is string => !!url);
+  useEffect(() => {
+    if (validUrls.length === 0) return;
+
     const newUrls = validUrls.filter(url => !loadedRef.current.has(url));
 
     if (newUrls.length === 0) return;
+
 
     const images: HTMLImageElement[] = [];
 
@@ -64,7 +71,7 @@ export const useImagePreloader = (urls: (string | null | undefined)[], options: 
         img.onerror = null;
       });
     };
-  }, [urls, priority, onLoad, onError]);
+  }, [validUrls, priority, onLoad, onError]);
 };
 
 /**
