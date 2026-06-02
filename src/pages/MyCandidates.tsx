@@ -117,14 +117,19 @@ const MyCandidates = () => {
 
   // updateCandidatesCache is now provided by useBulkCandidateOps hook
 
-  // Minimum delay for smooth fade-in
-  const [showContent, setShowContent] = useState(false);
+  // Mirror job seeker pattern: instant render when data is cached, fade-in only on cold load
+  const [showContent, setShowContent] = useState(() => !isLoading);
+  const dataWasCached = useRef(!isLoading);
   useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => setShowContent(true), 150);
-      return () => clearTimeout(timer);
+    if (!isLoading && !showContent) {
+      if (dataWasCached.current) {
+        setShowContent(true);
+      } else {
+        const timer = setTimeout(() => setShowContent(true), 150);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [isLoading]);
+  }, [isLoading, showContent]);
   
   // Active candidates to display (hook already deduplicates by applicant_id)
   const displayedCandidates = useMemo(() => {
