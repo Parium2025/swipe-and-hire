@@ -143,6 +143,7 @@ export function EmployerSidebar() {
   const queryClient = useQueryClient();
   const prefetchApplications = usePrefetchApplications();
   const prefetchRoute = useSidebarRoutePrefetch();
+  const profileCompanyLogoUrl = profile?.company_logo_url ?? null;
 
   // Behåll hover-prefetch på desktop, men undvik touchstart-prefetch på mobil
   // eftersom det konkurrerar med drawer-stängningen (identiskt med AppSidebar).
@@ -190,11 +191,11 @@ export function EmployerSidebar() {
     // Prioritera preloaded URL från AuthProvider
     if (preloadedCompanyLogoUrl) return preloadedCompanyLogoUrl;
     
-    const fromProfile = (profile as any)?.company_logo_url as string | undefined;
+    const fromProfile = profileCompanyLogoUrl;
     // Only use cache if profile hasn't explicitly set logo to empty
     if (fromProfile === '' || fromProfile === null) {
       // Profile explicitly has no logo - don't use cache
-      try { sessionStorage.removeItem(LOGO_CACHE_KEY); } catch {}
+      try { sessionStorage.removeItem(LOGO_CACHE_KEY); } catch { /* ignore sessionStorage failures */ }
       return null;
     }
     const cached = typeof window !== 'undefined' ? sessionStorage.getItem(LOGO_CACHE_KEY) : null;
@@ -223,7 +224,7 @@ export function EmployerSidebar() {
       return;
     }
     
-    const raw = (profile as any)?.company_logo_url;
+    const raw = profileCompanyLogoUrl;
     if (typeof raw === 'string' && raw.trim() !== '') {
       try {
           const publicUrl = resolveCompanyLogoUrl(raw);
@@ -232,7 +233,7 @@ export function EmployerSidebar() {
           setLogoLoaded(false);
           setLogoError(false);
           if (publicUrl) {
-            try { sessionStorage.setItem(LOGO_CACHE_KEY, publicUrl); } catch {}
+            try { sessionStorage.setItem(LOGO_CACHE_KEY, publicUrl); } catch { /* ignore sessionStorage failures */ }
           }
           return publicUrl;
         });
@@ -243,10 +244,10 @@ export function EmployerSidebar() {
       setCompanyLogoUrl(null);
       setLogoLoaded(false);
       setLogoError(false);
-      try { sessionStorage.removeItem(LOGO_CACHE_KEY); } catch {}
+      try { sessionStorage.removeItem(LOGO_CACHE_KEY); } catch { /* ignore sessionStorage failures */ }
     }
     // if undefined, keep previous URL while profile is re-fetching
-  }, [(profile as any)?.company_logo_url, preloadedCompanyLogoUrl]);
+  }, [profileCompanyLogoUrl, preloadedCompanyLogoUrl, companyLogoUrl]);
 
   // Listen for unsaved changes cancel event to close sidebar
   useEffect(() => {
