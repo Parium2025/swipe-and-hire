@@ -28,18 +28,26 @@ type ConversationTab = 'all' | 'candidates' | 'colleagues';
 export default function Messages() {
   const { user, userRole } = useAuth();
 
-  // Delayed fade-in (employer-side parity)
-  const [showContentFade, setShowContentFade] = useState(false);
-  useEffect(() => {
-    const timer = setTimeout(() => setShowContentFade(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
   // Läs från delad context — en enda global subscription körs i ConversationsProvider
   const conversationsCtx = useConversationsContext();
   const conversations = conversationsCtx?.conversations ?? [];
   const isLoading = conversationsCtx?.isLoading ?? false;
   const totalUnreadCount = conversationsCtx?.totalUnreadCount ?? 0;
   const refetch = conversationsCtx?.refetch ?? (() => {});
+
+  // Instant render when conversations are already cached, fade-in only on cold load
+  const [showContentFade, setShowContentFade] = useState(() => !isLoading);
+  const dataWasCached = useRef(!isLoading);
+  useEffect(() => {
+    if (!isLoading && !showContentFade) {
+      if (dataWasCached.current) {
+        setShowContentFade(true);
+      } else {
+        const timer = setTimeout(() => setShowContentFade(true), 100);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isLoading, showContentFade]);
   const { deleteConversation, isDeleting } = useDeleteConversation();
   const { hasTeam } = useTeamMembers();
   const [searchParams, setSearchParams] = useSearchParams();
