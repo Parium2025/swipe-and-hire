@@ -319,52 +319,42 @@ export function EmployerSidebar() {
       collapsible="icon"
     >
       <SidebarContent className="gap-0 overflow-x-hidden">
-        {/* User Profile Section - show avatar only when collapsed, full info when expanded */}
-        <div className="shrink-0 p-4">
-          {!profile ? (
-            /* Skeleton while profile loads */
-            collapsed ? (
-              <div className="flex justify-center">
-                <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse" />
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
+        {/* User Profile Section — identisk struktur som jobbsökarens AppSidebar:
+            blocket är alltid monterat (CompanyAvatar remountas aldrig vid resize),
+            och göms via `hidden`-klass när sidobaren är kollapsad. Detta ger en
+            mycket mjukare collapse/expand-övergång och förhindrar att logotypen
+            "laddas om" när drawern öppnas på mobil. */}
+        <div className={`shrink-0 p-4 ${collapsed ? 'hidden' : ''}`}>
+          <div className="flex items-center gap-3">
+            {!profile ? (
+              /* Skeleton while profile loads */
+              <>
                 <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse shrink-0" />
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="h-3.5 w-24 bg-white/10 rounded animate-pulse" />
                   <div className="h-3 w-16 bg-white/10 rounded animate-pulse" />
                 </div>
-              </div>
-            )
-          ) : collapsed ? (
-            /* Collapsed: Only show avatar centered */
-            <div className="flex justify-center">
-              <CompanyAvatar
-                companyLogoUrl={companyLogoUrl}
-                companyName={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
-                initials={getCompanyInitials()}
-              />
-            </div>
-          ) : (
-            /* Expanded: Show full profile info */
-            <div className="flex items-center gap-3">
-              <CompanyAvatar
-                companyLogoUrl={companyLogoUrl}
-                companyName={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
-                initials={getCompanyInitials()}
-              />
-              <div className="flex-1 min-w-0">
-                <TruncatedText
-                  text={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
-                  className="font-medium text-white text-sm truncate block"
+              </>
+            ) : (
+              <>
+                <CompanyAvatar
+                  companyLogoUrl={companyLogoUrl}
+                  companyName={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
+                  initials={getCompanyInitials()}
                 />
-                <TruncatedText
-                  text={profile?.industry || 'Admin'}
-                  className="text-sm text-white truncate block"
-                />
-              </div>
-            </div>
-          )}
+                <div className="flex-1 min-w-0">
+                  <TruncatedText
+                    text={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
+                    className="font-medium text-white text-sm truncate block"
+                  />
+                  <TruncatedText
+                    text={profile?.industry || 'Admin'}
+                    className="text-sm text-white truncate block"
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <SidebarSeparator className="bg-white/20 mx-4" />
