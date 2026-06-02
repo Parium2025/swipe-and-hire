@@ -347,6 +347,9 @@ const Index = () => {
   const isJobViewOverlay =
     location.pathname.startsWith('/job-view/') ||
     location.pathname.startsWith('/job/');
+  // Samma mönster för arbetsgivarens /job-details/:id — Dashboard/MyJobs
+  // står kvar monterad bakom så pull-to-dismiss avslöjar förra sidan.
+  const isJobDetailsOverlay = location.pathname.startsWith('/job-details/');
   const lastJobSeekerPathRef = useRef<string>('/search-jobs');
   const lastEmployerPathRef = useRef<string>('/home');
   
