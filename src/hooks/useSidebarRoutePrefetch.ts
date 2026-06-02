@@ -153,6 +153,30 @@ export function useSidebarRoutePrefetch() {
         });
         break;
       }
+      case '/my-candidates': {
+        // /my-candidates → useMyCandidatesData → ['my-candidates', userId, '']
+        queryClient.prefetchInfiniteQuery({
+          queryKey: ['my-candidates', user.id, ''],
+          initialPageParam: 0,
+          queryFn: async ({ pageParam = 0 }) => {
+            const PAGE_SIZE = 30;
+            const from = (pageParam as number) * PAGE_SIZE;
+            const to = from + PAGE_SIZE - 1;
+            const { data, error } = await supabase
+              .from('my_candidates')
+              .select('*')
+              .eq('user_id', user.id)
+              .order('updated_at', { ascending: false })
+              .range(from, to);
+            if (error) throw error;
+            return { items: data ?? [], nextPage: (data?.length ?? 0) === PAGE_SIZE ? (pageParam as number) + 1 : undefined };
+          },
+          staleTime: 60_000,
+        }).catch(() => {
+          prefetchedRef.current.delete(key);
+        });
+        break;
+      }
       // För /home, /messages, /profile m.fl. har vi redan
       // background-sync hooks (useJobSeekerBackgroundSync /
       // useEmployerBackgroundSync) som håller datan färsk — ingen
