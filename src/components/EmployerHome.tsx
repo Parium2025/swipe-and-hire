@@ -54,6 +54,10 @@ const DateTimeDisplay = memo(() => {
 
 DateTimeDisplay.displayName = 'DateTimeDisplay';
 
+// Module-level flag: skeleton-overlay endast vid kall mount (browser refresh / direkt URL),
+// hoppa över vid sidebar-navigering — speglar seeker SearchJobs.
+let __employerHomeHasMountedOnce = false;
+
 const EmployerHome = memo(() => {
   const { profile } = useAuth();
   const { isLoading } = useJobsData({ scope: 'personal' });
@@ -80,6 +84,18 @@ const EmployerHome = memo(() => {
       }
     }
   }, [isLoading, showContent]);
+
+  const [initialLoadDone, setInitialLoadDone] = useState(__employerHomeHasMountedOnce);
+  useEffect(() => {
+    if (!isLoading && !initialLoadDone) {
+      const t = setTimeout(() => {
+        setInitialLoadDone(true);
+        __employerHomeHasMountedOnce = true;
+      }, 150);
+      return () => clearTimeout(t);
+    }
+  }, [isLoading, initialLoadDone]);
+
 
   // Fetch system health for admin
   const fetchSystemHealth = useCallback(async () => {
@@ -239,10 +255,10 @@ const EmployerHome = memo(() => {
     return getEmojiForCode(weatherCode);
   }, [weather.weatherCode, isEvening, gpsGranted, isDaytime]);
 
+  if (!initialLoadDone) {
+    return <EmployerHomeSkeleton />;
+  }
   if (isLoading || !showContent) {
-    if (!dataWasCached.current) {
-      return <EmployerHomeSkeleton />;
-    }
     return (
       <div className="space-y-6 responsive-container-wide py-8 opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         {/* Invisible placeholder */}

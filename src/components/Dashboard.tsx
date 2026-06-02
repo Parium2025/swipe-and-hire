@@ -29,6 +29,10 @@ const getEmptyMessage = (searchTerm: string, activeTab: JobStatusTab): string =>
     : 'Inga utgångna jobbannonser.';
 };
 
+// Module-level flag: behåll skeleton-overlay endast vid kall mount (browser refresh / direkt URL),
+// hoppa över vid sidebar-navigering — speglar seeker SearchJobs.
+let __employerOrgDashboardHasMountedOnce = false;
+
 const Dashboard = memo(() => {
   const { jobs: allJobs, stats, recruiters, isLoading } = useJobsData({ 
     scope: 'organization',
@@ -52,6 +56,18 @@ const Dashboard = memo(() => {
       }
     }
   }, [isLoading, showContent]);
+
+  const [initialLoadDone, setInitialLoadDone] = useState(__employerOrgDashboardHasMountedOnce);
+  useEffect(() => {
+    if (!isLoading && !initialLoadDone) {
+      const t = setTimeout(() => {
+        setInitialLoadDone(true);
+        __employerOrgDashboardHasMountedOnce = true;
+      }, 150);
+      return () => clearTimeout(t);
+    }
+  }, [isLoading, initialLoadDone]);
+
 
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as JobStatusTab | null;
@@ -221,10 +237,10 @@ const Dashboard = memo(() => {
     ];
   }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
+  if (!initialLoadDone) {
+    return <EmployerDashboardSkeleton />;
+  }
   if (isLoading || !showContent) {
-    if (!dataWasCached.current) {
-      return <EmployerDashboardSkeleton />;
-    }
     return (
       <div className="dashboard-page-stack responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         {/* Invisible placeholder to prevent layout shift */}

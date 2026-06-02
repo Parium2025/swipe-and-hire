@@ -39,6 +39,11 @@ import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSke
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
+// Module-level flag: once /my-jobs har laddats färdigt en gång i tab-sessionen,
+// hoppar vi över full-screen skeleton vid sidebar-navigering — speglar
+// `__searchJobsHasMountedOnce` på job-seeker-sidan exakt.
+let __employerDashboardHasMountedOnce = false;
+
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -100,6 +105,19 @@ const EmployerDashboard = memo(() => {
       }
     }
   }, [loading, showContent]);
+
+  // Full-screen skeleton overlay — visas vid kall mount (browser refresh / direkt URL),
+  // hoppar över vid in-app sidebar-navigering (mirror av seeker-sidans pattern).
+  const [initialLoadDone, setInitialLoadDone] = useState(__employerDashboardHasMountedOnce);
+  useEffect(() => {
+    if (!loading && !initialLoadDone) {
+      const t = setTimeout(() => {
+        setInitialLoadDone(true);
+        __employerDashboardHasMountedOnce = true;
+      }, 150);
+      return () => clearTimeout(t);
+    }
+  }, [loading, initialLoadDone]);
   
   const {
     searchInput,
@@ -388,13 +406,13 @@ const EmployerDashboard = memo(() => {
     ];
   }, [jobs.length, activeJobs, expiredJobsCount, draftJobsCount, loading, serverCounts, serverStats, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
-  // Wait for data AND minimum delay before showing content with fade.
-  // Cold load (e.g. browser refresh) → full-screen skeleton overlay, mirroring job seeker side.
-  // Warm load (cache hit from sidebar navigation) → invisible placeholder, no flicker.
+  // Full-screen skeleton vid kall mount i tab-sessionen — visas tills första data
+  // landar oavsett om localStorage-cachen var varm (mirror av seeker SearchJobs).
+  if (!initialLoadDone) {
+    return <EmployerDashboardSkeleton />;
+  }
+  // Sidebar-navigering (varm cache) → osynlig placeholder under fade-in delay.
   if (loading || !showContent) {
-    if (!dataWasCached.current) {
-      return <EmployerDashboardSkeleton />;
-    }
     return (
       <div className="space-y-4 responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-hidden="true">
         {/* Invisible placeholder to prevent layout shift */}
