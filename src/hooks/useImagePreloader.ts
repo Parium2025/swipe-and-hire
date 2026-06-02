@@ -33,6 +33,16 @@ export const useImagePreloader = (urls: (string | null | undefined)[], options: 
       }
 
       img.onload = () => {
+        const markLoaded = () => {
+          loadedRef.current.add(url);
+          onLoad?.();
+        };
+
+        if (typeof img.decode === 'function') {
+          img.decode().then(markLoaded).catch(markLoaded);
+          return;
+        }
+
         loadedRef.current.add(url);
         onLoad?.();
       };
@@ -66,7 +76,13 @@ export const preloadImage = (url: string, priority: 'high' | 'low' = 'low'): Pro
     if (priority === 'high') {
       img.fetchPriority = 'high';
     }
-    img.onload = () => resolve();
+    img.onload = () => {
+      if (typeof img.decode === 'function') {
+        img.decode().then(() => resolve()).catch(() => resolve());
+        return;
+      }
+      resolve();
+    };
     img.onerror = () => reject(new Error(`Failed to load ${url}`));
     img.src = url;
   });
