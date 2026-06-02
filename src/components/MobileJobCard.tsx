@@ -74,7 +74,13 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
       onEditDraft(job);
       return;
     }
-    navigate(`/job-details/${job.id}`);
+    // Härled fromRoute så JobDetails kan navigera tillbaka rätt (dashboard vs my-jobs)
+    const path = location.pathname;
+    const fromRoute = path.startsWith('/dashboard') ? '/dashboard' : '/my-jobs';
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    const fromTab = tabParam === 'expired' || tabParam === 'draft' ? tabParam : 'active';
+    navigate(`/job-details/${job.id}`, { state: { fromRoute, fromTab } });
   };
 
   const handleTouchStart = () => {
