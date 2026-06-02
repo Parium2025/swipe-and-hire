@@ -17,7 +17,7 @@ export const EmployerLogoSidebarTrigger = memo(() => {
   const { toggleSidebar } = useSidebar();
   const { preloadedCompanyLogoUrl, profile } = useAuth();
   const companyLogoUrl =
-    preloadedCompanyLogoUrl || resolveCompanyLogoUrl((profile as any)?.company_logo_url ?? null);
+    preloadedCompanyLogoUrl || resolveCompanyLogoUrl(profile?.company_logo_url ?? null);
   const warmupRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
