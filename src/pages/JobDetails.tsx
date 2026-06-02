@@ -471,13 +471,33 @@ const JobDetails = () => {
     }
   }, [location.state, navigate]);
 
+  // Pull-to-dismiss: samma kvalitet och känsla som jobbsökarens JobView.
+  // Aktivera dragstart varsomhelst på sidan – så länge sidan är scrollad till toppen
+  // och dragstarten inte sker på en horisontell scroller (kanban/tabs/karusell).
   const handlePullTouchStart = (e: React.TouchEvent) => {
     if (!useMobileView) return;
-    const target = e.target as HTMLElement | null;
-    // Aktivera bara om dragstarten sker inom jobbheader-kortet
-    if (!target || !target.closest('[data-jobdetails-header="true"]')) {
+    // Endast om sidan är vid toppen (samma princip som JobView's scrollTop === 0)
+    if ((window.scrollY || window.pageYOffset || 0) > 0) {
       pullStartYRef.current = null;
       return;
+    }
+    const target = e.target as HTMLElement | null;
+    // Undvik kapning av horisontella scrollers eller interaktiva element
+    if (target) {
+      let node: HTMLElement | null = target;
+      while (node && node !== document.body) {
+        if (node.dataset?.noPullDismiss === 'true') {
+          pullStartYRef.current = null;
+          return;
+        }
+        const style = window.getComputedStyle(node);
+        const overflowX = style.overflowX;
+        if ((overflowX === 'auto' || overflowX === 'scroll') && node.scrollWidth > node.clientWidth) {
+          pullStartYRef.current = null;
+          return;
+        }
+        node = node.parentElement;
+      }
     }
     pullStartYRef.current = e.touches[0].clientY;
     pullStartXRef.current = e.touches[0].clientX;
@@ -497,6 +517,15 @@ const JobDetails = () => {
     // Kräv vertikal dominans för att inte kapa horisontella swipes
     if (Math.abs(dx) > Math.abs(dy)) {
       pullStartYRef.current = null;
+      if (pullActiveRef.current) setPullY(0);
+      pullActiveRef.current = false;
+      return;
+    }
+    // Avbryt om sidan inte längre är vid toppen (t.ex. momentum-scroll)
+    if ((window.scrollY || window.pageYOffset || 0) > 0) {
+      pullStartYRef.current = null;
+      if (pullActiveRef.current) setPullY(0);
+      pullActiveRef.current = false;
       return;
     }
     pullActiveRef.current = true;
@@ -546,6 +575,8 @@ const JobDetails = () => {
            : isDismissing
              ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
              : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
+         willChange: pullY > 0 || isDismissing ? 'transform' : undefined,
+         touchAction: 'pan-y',
        }}
        className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
         <JobDetailsHeader
