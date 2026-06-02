@@ -43,6 +43,20 @@ interface InfinitePageData {
   pages: Array<{ items?: ItemWithMedia[] }>;
 }
 
+interface ConversationLike {
+  id?: string;
+  members?: Array<{
+    user_id?: string;
+    profile?: {
+      profile_image_url?: string | null;
+      company_logo_url?: string | null;
+    } | null;
+  }>;
+  applicationSnapshot?: {
+    profile_image_snapshot_url?: string | null;
+  } | null;
+}
+
 export function useEmployerMediaWarmup() {
   const { user, userRole } = useAuth();
   const queryClient = useQueryClient();
