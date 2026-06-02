@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { supabase } from '@/integrations/supabase/client';
+import { imageCache } from '@/lib/imageCache';
 
 /**
  * 🖼️ EMPLOYER MEDIA WARMUP
