@@ -51,14 +51,35 @@ import {
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isTouchDevice = useTouchCapable();
   const device = useDevice();
   const useMobileView = isTouchDevice || device === 'mobile';
-  
+
   const { setStageCount } = useKanbanLayout();
   const dragScrollRef = useDragScroll<HTMLDivElement>();
+  const pageRef = useRef<HTMLDivElement>(null);
+
+  const handleBack = useCallback(() => {
+    const navState = (location.state as { fromRoute?: '/dashboard' | '/my-jobs'; fromTab?: 'active' | 'expired' | 'draft' } | null) ?? null;
+    if (navState?.fromRoute) {
+      const tabSuffix = navState.fromTab && navState.fromTab !== 'active' ? `?tab=${navState.fromTab}` : '';
+      navigate(`${navState.fromRoute}${tabSuffix}`, { replace: true });
+    } else if (window.history.state?.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  }, [location.state, navigate]);
+
+  const { handlers: pullHandlers, style: pullStyle } = usePullToDismiss({
+    wrapperRef: pageRef,
+    onDismiss: handleBack,
+    enabled: useMobileView,
+  });
   
   const { 
     job, 
