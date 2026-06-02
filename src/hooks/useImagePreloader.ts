@@ -24,12 +24,10 @@ export const useImagePreloader = (urls: (string | null | undefined)[], options: 
   useEffect(() => {
     if (validUrls.length === 0) return;
 
-
-
-    const validUrls = urls.filter((url): url is string => !!url);
     const newUrls = validUrls.filter(url => !loadedRef.current.has(url));
 
     if (newUrls.length === 0) return;
+
 
     const images: HTMLImageElement[] = [];
 
