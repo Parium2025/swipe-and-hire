@@ -18,6 +18,7 @@ import { forceConnectivityCheck, getIsOnline, onConnectivityChange } from '@/lib
 import { useSessionManager, clearSessionToken } from '@/hooks/useSessionManager';
 import { useQueryClient } from '@tanstack/react-query';
 import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
+import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -734,7 +735,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             mediaPreloadCompleteRef.current = false;
             
             const criticalImages: string[] = [];
-            const companyLogoUrl = processedProfile.company_logo_url || null;
+            const companyLogoUrl = resolveCompanyLogoUrl(processedProfile.company_logo_url);
             let avatarUrl: string | null = null;
             let coverUrl: string | null = null;
             
@@ -1448,6 +1449,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               ? cleanedUpdates.company_logo_url.trim() || null
               : cleanedUpdates.company_logo_url ?? null)
           : undefined;
+        const preloadedNormalizedCompanyLogo = resolveCompanyLogoUrl(normalizedCompanyLogo);
 
         if (hasCompanyNameUpdate) {
           jobPostingSyncUpdates.workplace_name = normalizedCompanyName ?? null;
@@ -1455,10 +1457,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (hasCompanyLogoUpdate) {
           jobPostingSyncUpdates.company_logo_url = normalizedCompanyLogo ?? null;
-          setPreloadedCompanyLogoUrl(normalizedCompanyLogo ?? null);
+          setPreloadedCompanyLogoUrl(preloadedNormalizedCompanyLogo ?? null);
 
           try {
-            if (normalizedCompanyLogo) sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, normalizedCompanyLogo);
+            if (preloadedNormalizedCompanyLogo) sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, preloadedNormalizedCompanyLogo);
             else sessionStorage.removeItem(COMPANY_LOGO_CACHE_KEY);
           } catch {
             // ignore sessionStorage failures

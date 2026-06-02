@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
+import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 
 /** Logo that acts as sidebar trigger — same visual as job seeker side.
  *  Also keeps the company logo decoded in the background so it appears
@@ -16,7 +17,7 @@ export const EmployerLogoSidebarTrigger = memo(() => {
   const { toggleSidebar } = useSidebar();
   const { preloadedCompanyLogoUrl, profile } = useAuth();
   const companyLogoUrl =
-    preloadedCompanyLogoUrl || ((profile as any)?.company_logo_url ?? null);
+    preloadedCompanyLogoUrl || resolveCompanyLogoUrl(profile?.company_logo_url ?? null);
   const warmupRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
