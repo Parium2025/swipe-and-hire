@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { supabase } from '@/integrations/supabase/client';
+import { imageCache } from '@/lib/imageCache';
 
 /**
  * 🖼️ EMPLOYER MEDIA WARMUP
@@ -108,6 +110,51 @@ export function useEmployerMediaWarmup() {
     collectAndWarm(applicationsData);
     collectAndWarm(myCandidatesData);
 
+    // 🖼️ JOB AD IMAGES — speglar jobbsökarens warmup-mönster.
+    // Warmar `job_image_url` + `company_logo_url` direkt in i `imageCache`
+    // SÅ FORT ['jobs', ...] dyker upp i cachen (via background-sync eller
+    // sidebar-prefetch). Resultat: när användaren öppnar /dashboard eller
+    // /my-jobs är ALLA annonsbilder redan inlästa → ingen blixt vid navigering.
+    const JOB_IMAGES_MAX = 80;
+
+    const warmJobAdImages = (jobs: unknown) => {
+      if (!Array.isArray(jobs)) return;
+      const urls: string[] = [];
+      let scanned = 0;
+      for (const job of jobs) {
+        if (!job || typeof job !== 'object') continue;
+        const j = job as { job_image_url?: string | null; company_logo_url?: string | null };
+
+        if (j.job_image_url && typeof j.job_image_url === 'string') {
+          const path = j.job_image_url.trim();
+          if (path && !warmed.has(`job-img:${path}`)) {
+            warmed.add(`job-img:${path}`);
+            const { data } = supabase.storage.from('job-images').getPublicUrl(path);
+            if (data?.publicUrl) urls.push(data.publicUrl);
+          }
+        }
+        if (j.company_logo_url && typeof j.company_logo_url === 'string') {
+          const path = j.company_logo_url.trim();
+          if (path && !warmed.has(`co-logo:${path}`)) {
+            warmed.add(`co-logo:${path}`);
+            const { data } = supabase.storage.from('company-logos').getPublicUrl(path);
+            if (data?.publicUrl) urls.push(data.publicUrl);
+          }
+        }
+        if (++scanned >= JOB_IMAGES_MAX) break;
+      }
+      if (urls.length === 0) return;
+      queueMicrotask(() => {
+        imageCache.preloadImages(urls).catch(() => {});
+      });
+    };
+
+    // Initial scan av jobs-cachen (alla matchande nycklar oavsett scope/orgId)
+    const allJobsQueries = queryClient.getQueryCache().findAll({ queryKey: ['jobs'] });
+    for (const q of allJobsQueries) {
+      warmJobAdImages(q.state.data);
+    }
+
     // Lyssna på framtida uppdateringar (när progressive pagination eller
     // background sync lägger till nya sidor)
     const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
@@ -115,6 +162,14 @@ export function useEmployerMediaWarmup() {
       const key = event.query.queryKey;
       if (!Array.isArray(key)) return;
       const head = key[0];
+
+      // Job ad images: ['jobs', scope, orgId, userId]
+      if (head === 'jobs') {
+        warmJobAdImages(event.query.state.data);
+        return;
+      }
+
+      // Kandidat-/ansökningsmedia (befintligt flöde)
       const owner = key[1];
       if (owner !== userId) return;
       if (head !== 'applications' && head !== 'my-candidates') return;
