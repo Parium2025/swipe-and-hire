@@ -575,6 +575,8 @@ const JobDetails = () => {
            : isDismissing
              ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
              : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
+         willChange: pullY > 0 || isDismissing ? 'transform' : undefined,
+         touchAction: 'pan-y',
        }}
        className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
         <JobDetailsHeader
