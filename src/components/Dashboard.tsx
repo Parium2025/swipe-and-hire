@@ -222,8 +222,11 @@ const Dashboard = memo(() => {
   }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
   if (isLoading || !showContent) {
+    if (!dataWasCached.current) {
+      return <EmployerDashboardSkeleton />;
+    }
     return (
-    <div className="dashboard-page-stack responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+      <div className="dashboard-page-stack responsive-container-wide opacity-0 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
