@@ -577,6 +577,7 @@ const JobDetails = ({ asOverlay = false }: JobDetailsProps = {}) => {
 
   return (
      <div
+       ref={overlayScrollRef}
        onTouchStart={handlePullTouchStart}
        onTouchMove={handlePullTouchMove}
        onTouchEnd={handlePullTouchEnd}
