@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useDragScroll } from '@/hooks/useDragScroll';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
@@ -50,6 +50,8 @@ import {
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isTouchDevice = useTouchCapable();
@@ -58,6 +60,7 @@ const JobDetails = () => {
   
   const { setStageCount } = useKanbanLayout();
   const dragScrollRef = useDragScroll<HTMLDivElement>();
+  
   
   const { 
     job, 
@@ -448,6 +451,76 @@ const JobDetails = () => {
 
   const activeApplication = activeId ? applications.find(a => a.id === activeId) : null;
 
+  // ── Pull-to-dismiss (mobil): dra ner från headern för att gå tillbaka,
+  // samma mönster som jobbsökarens JobView. Inga UI-ändringar i vila.
+  const [pullY, setPullY] = useState(0);
+  const [isDismissing, setIsDismissing] = useState(false);
+  const pullStartYRef = useRef<number | null>(null);
+  const pullStartXRef = useRef<number | null>(null);
+  const pullActiveRef = useRef(false);
+
+  const handleBack = useCallback(() => {
+    const navState = (location.state as { fromRoute?: '/dashboard' | '/my-jobs'; fromTab?: 'active' | 'expired' | 'draft' } | null) ?? null;
+    if (navState?.fromRoute) {
+      const tabSuffix = navState.fromTab && navState.fromTab !== 'active' ? `?tab=${navState.fromTab}` : '';
+      navigate(`${navState.fromRoute}${tabSuffix}`, { replace: true });
+    } else if ((window.history.state?.idx ?? 0) > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  }, [location.state, navigate]);
+
+  const handlePullTouchStart = (e: React.TouchEvent) => {
+    if (!useMobileView) return;
+    const target = e.target as HTMLElement | null;
+    // Aktivera bara om dragstarten sker inom jobbheader-kortet
+    if (!target || !target.closest('[data-jobdetails-header="true"]')) {
+      pullStartYRef.current = null;
+      return;
+    }
+    pullStartYRef.current = e.touches[0].clientY;
+    pullStartXRef.current = e.touches[0].clientX;
+    pullActiveRef.current = false;
+  };
+
+  const handlePullTouchMove = (e: React.TouchEvent) => {
+    if (pullStartYRef.current === null) return;
+    const dy = e.touches[0].clientY - pullStartYRef.current;
+    const dx = e.touches[0].clientX - (pullStartXRef.current ?? 0);
+    if (dy <= 0) {
+      if (pullActiveRef.current) setPullY(0);
+      pullStartYRef.current = null;
+      pullActiveRef.current = false;
+      return;
+    }
+    // Kräv vertikal dominans för att inte kapa horisontella swipes
+    if (Math.abs(dx) > Math.abs(dy)) {
+      pullStartYRef.current = null;
+      return;
+    }
+    pullActiveRef.current = true;
+    setPullY(Math.min(dy * 0.5, 320));
+  };
+
+  const handlePullTouchEnd = () => {
+    const wasActive = pullActiveRef.current;
+    const finalY = pullY;
+    pullStartYRef.current = null;
+    pullStartXRef.current = null;
+    pullActiveRef.current = false;
+    if (wasActive && finalY > 110) {
+      setIsDismissing(true);
+      const target = typeof window !== 'undefined' ? window.innerHeight : 900;
+      setPullY(target);
+      setTimeout(() => {
+        handleBack();
+      }, 320);
+    } else {
+      setPullY(0);
+    }
+  };
+
   if (dataLoading || stagesLoading) {
     return <JobDetailsSkeleton />;
   }
@@ -461,7 +534,20 @@ const JobDetails = () => {
   }
 
   return (
-     <div className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
+     <div
+       onTouchStart={handlePullTouchStart}
+       onTouchMove={handlePullTouchMove}
+       onTouchEnd={handlePullTouchEnd}
+       onTouchCancel={handlePullTouchEnd}
+       style={{
+         transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
+         transition: pullActiveRef.current
+           ? 'none'
+           : isDismissing
+             ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
+             : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
+       }}
+       className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
         <JobDetailsHeader
           jobId={jobId!}
           job={job}
