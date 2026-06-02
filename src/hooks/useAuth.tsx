@@ -7,7 +7,6 @@ import { toast as sonnerToast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
 import { getMediaUrl } from '@/lib/mediaManager';
 import { clearMediaUrlCache, prefetchMediaUrl } from '@/hooks/useMediaUrl';
-import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage } from '@/lib/authStorage';
