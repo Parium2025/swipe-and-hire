@@ -185,17 +185,13 @@ export function EmployerSidebar() {
     sessionStorage.setItem('previousPath', currentPath);
   }, [location.pathname]);
   
-  // Konvertera storage-path till publik URL för company logos
+  // Normalisera utan att ändra cache-nyckeln: företagets logo sparas ofta som
+  // public URL med `?t=...`. Om den queryn kapas blir det en annan browser-cache-
+  // nyckel än den som AuthProvider redan har preloadat → tom ring vid öppning.
   const getPublicLogoUrl = (url: string | null | undefined): string | null => {
-    if (!url || typeof url !== 'string' || url.trim() === '') return null;
-    
-    // Om redan publik URL (company logos lagras som publika URLs i profiles-tabellen)
-    if (url.includes('/storage/v1/object/public/')) {
-      return url.split('?')[0]; // Ta bort query params
-    }
-    
-    // Returnera som är - company logos är redan publika URLs
-    return url;
+    if (!url || typeof url !== 'string') return null;
+    const trimmed = url.trim();
+    return trimmed || null;
   };
 
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
