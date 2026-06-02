@@ -471,13 +471,20 @@ const JobDetails = () => {
     }
   }, [location.state, navigate]);
 
+  // Läs scrollTop från employer-shellens main-container (inte window — sidan
+  // scrollar i en intern <main data-main-scroll-container="true">).
+  const getScrollTop = (): number => {
+    const el = document.querySelector('[data-main-scroll-container="true"]') as HTMLElement | null;
+    if (el) return el.scrollTop;
+    return window.scrollY || window.pageYOffset || 0;
+  };
+
   // Pull-to-dismiss: samma kvalitet och känsla som jobbsökarens JobView.
   // Aktivera dragstart varsomhelst på sidan – så länge sidan är scrollad till toppen
   // och dragstarten inte sker på en horisontell scroller (kanban/tabs/karusell).
   const handlePullTouchStart = (e: React.TouchEvent) => {
     if (!useMobileView) return;
-    // Endast om sidan är vid toppen (samma princip som JobView's scrollTop === 0)
-    if ((window.scrollY || window.pageYOffset || 0) > 0) {
+    if (getScrollTop() > 0) {
       pullStartYRef.current = null;
       return;
     }
@@ -522,7 +529,7 @@ const JobDetails = () => {
       return;
     }
     // Avbryt om sidan inte längre är vid toppen (t.ex. momentum-scroll)
-    if ((window.scrollY || window.pageYOffset || 0) > 0) {
+    if (getScrollTop() > 0) {
       pullStartYRef.current = null;
       if (pullActiveRef.current) setPullY(0);
       pullActiveRef.current = false;
@@ -579,8 +586,24 @@ const JobDetails = () => {
              : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease-out',
          willChange: pullY > 0 || isDismissing ? 'transform, opacity' : undefined,
          touchAction: 'pan-y',
+         boxShadow: useMobileView && (pullY > 0 || isDismissing) ? '0 -12px 40px -8px rgba(0,0,0,0.45)' : undefined,
+         borderTopLeftRadius: useMobileView ? 24 : undefined,
+         borderTopRightRadius: useMobileView ? 24 : undefined,
        }}
        className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
+        {/* Drag handle: synlig "grabber" som signalerar att kortet kan dras bort — matchar iOS-sheet */}
+        {useMobileView && (
+          <div className="flex justify-center -mt-1 mb-1 pointer-events-none select-none">
+            <div
+              className="h-1.5 rounded-full bg-white/40 transition-all duration-200"
+              style={{
+                width: pullY > 0 ? 56 : 44,
+                backgroundColor: pullY > 110 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.4)',
+              }}
+              aria-hidden="true"
+            />
+          </div>
+        )}
         <JobDetailsHeader
           jobId={jobId!}
           job={job}
