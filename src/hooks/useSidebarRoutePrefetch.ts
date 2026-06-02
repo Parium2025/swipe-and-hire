@@ -16,7 +16,8 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export function useSidebarRoutePrefetch() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const orgId = (profile as any)?.organization_id ?? null;
   const prefetchedRef = useRef<Set<string>>(new Set());
 
   const prefetchRoute = useCallback((url: string) => {
@@ -82,6 +83,37 @@ export function useSidebarRoutePrefetch() {
         });
         break;
       }
+      case '/dashboard':
+      case '/my-jobs': {
+        // Båda sidorna hämtar samma data via `useJobsData({ scope: 'personal' })`.
+        // Genom att varma upp exakt samma queryKey används resultatet 1:1 när
+        // sidan monteras — ingen skeleton-blinkning.
+        queryClient.prefetchQuery({
+          queryKey: ['jobs', 'personal', orgId, user.id],
+          queryFn: async () => {
+            const baseSelect = `
+              *,
+              employer_profile:profiles!job_postings_employer_id_fkey (
+                first_name,
+                last_name
+              )
+            `;
+            const { data, error } = await supabase
+              .from('job_postings')
+              .select(baseSelect)
+              .is('deleted_at', null)
+              .eq('employer_id', user.id)
+              .order('created_at', { ascending: false })
+              .range(0, 999);
+            if (error) throw error;
+            return data ?? [];
+          },
+          staleTime: 60_000,
+        }).catch(() => {
+          prefetchedRef.current.delete(key);
+        });
+        break;
+      }
       // För /home, /messages, /profile m.fl. har vi redan
       // background-sync hooks (useJobSeekerBackgroundSync /
       // useEmployerBackgroundSync) som håller datan färsk — ingen
@@ -89,7 +121,7 @@ export function useSidebarRoutePrefetch() {
       default:
         break;
     }
-  }, [queryClient, user]);
+  }, [queryClient, user, orgId]);
 
   return prefetchRoute;
 }
