@@ -39,6 +39,11 @@ import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSke
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
+// Module-level flag: once /my-jobs har laddats färdigt en gång i tab-sessionen,
+// hoppar vi över full-screen skeleton vid sidebar-navigering — speglar
+// `__searchJobsHasMountedOnce` på job-seeker-sidan exakt.
+let __employerDashboardHasMountedOnce = false;
+
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
