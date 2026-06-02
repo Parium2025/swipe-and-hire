@@ -73,7 +73,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
   }, [recruiterTooltipOpen]);
 
   return (
-    <div className="relative z-30 rounded-lg border border-white/20 bg-white/5 p-3 md:p-4">
+    <div data-jobdetails-header="true" className="relative z-30 rounded-lg border border-white/20 bg-white/5 p-3 md:p-4">
       <div className="flex items-start justify-between gap-2">
         <TruncatedText 
           text={job.title} 
