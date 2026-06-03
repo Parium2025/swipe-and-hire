@@ -4,7 +4,7 @@ import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
 
 const LANDING_COLOR = '#2a2a2a';
 const PARIUM_COLOR = '#001935';
-const AUDIENCE_LANDING_COLOR = '#001F3D';
+const AUDIENCE_LANDING_COLOR = '#22436A';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 const isAudienceLandingPath = (pathname: string) =>
