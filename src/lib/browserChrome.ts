@@ -1,6 +1,6 @@
 const LANDING_CHROME_COLOR = '#2a2a2a';
 const PARIUM_CHROME_COLOR = '#001935';
-const AUDIENCE_LANDING_CHROME_COLOR = '#22436A';
+const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 export const BROWSER_CHROME_COLOR_EVENT = 'parium:browser-chrome-color';
 
