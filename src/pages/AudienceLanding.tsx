@@ -841,11 +841,11 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 pb-16 pt-36 sm:px-6 sm:pb-24 sm:pt-40 md:px-12 md:pt-36 lg:px-24"
             style={{
               backgroundImage:
-                'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
+                'linear-gradient(180deg, hsl(212 28% 38%) 0%, hsl(214 45% 24%) 100%)',
               backgroundAttachment: 'scroll',
               backgroundSize: '100% 100svh',
               backgroundRepeat: 'no-repeat',
-              backgroundColor: 'hsl(var(--primary))',
+              backgroundColor: 'hsl(214 45% 24%)',
             }}
           >
             {/* Samma bubblor som hero — utan extra blur-glöd, eftersom iPad Safari kan kompositera den som en svag rektangel under swipe. */}
