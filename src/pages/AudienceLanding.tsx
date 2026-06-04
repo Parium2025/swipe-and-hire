@@ -6,7 +6,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { hapticLight } from '@/lib/haptics';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
-import WaveDivider from '@/components/landing/WaveDivider';
+import WaveBackdrop from '@/components/landing/WaveDivider';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
