@@ -1165,7 +1165,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 transition={{ duration: 0.9, ease }}
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Vanliga frågor</span>
-                <h2 id="faq-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl">
+                <h2 id="faq-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-landing-light-foreground sm:text-5xl">
                   Frågor & svar
                 </h2>
               </motion.div>
@@ -1183,13 +1183,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       hidden: { opacity: 0, x: 60 },
                       visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
                     }}
-                    className="group rounded-2xl border border-white/[0.07] bg-white/[0.035] px-6 py-5 backdrop-blur-xl transition-colors hover:border-white/[0.14] hover:bg-white/[0.05]"
+                    className="group rounded-2xl border border-landing-light-border bg-background/75 px-6 py-5 backdrop-blur-xl transition-colors hover:border-secondary/25"
                   >
-                    <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-white">
+                    <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-landing-light-foreground">
                       {q}
                       <span className="ml-4 text-secondary transition-transform duration-300 group-open:rotate-45">+</span>
                     </summary>
-                    <p className="mt-4 text-sm leading-7 text-white/60">
+                    <p className="mt-4 text-sm leading-7 text-landing-light-muted">
                       Platshållarsvar — fyll på med den faktiska informationen.
                     </p>
                   </motion.details>
@@ -1208,10 +1208,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               className="mx-auto max-w-[920px] text-center"
             >
               <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Kontakt</span>
-              <h2 id="kontakt-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl">
+              <h2 id="kontakt-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-landing-light-foreground sm:text-5xl">
                 Vi finns här för dig.
               </h2>
-              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
+              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-landing-light-muted sm:text-lg">
                 Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.
               </p>
               <a
@@ -1222,6 +1222,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </a>
             </motion.div>
           </section>
+          </div>
 
           {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
           <BouncyFooter audience={audience} onCta={handleStart} />
