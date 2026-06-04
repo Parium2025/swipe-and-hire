@@ -6,7 +6,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { hapticLight } from '@/lib/haptics';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
-import WaveBackdrop from '@/components/landing/WaveDivider';
+import WaveDivider from '@/components/landing/WaveDivider';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
@@ -1000,7 +1000,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       }}
     >
       <AnimatedBackground showGlow={false} />
-      <WaveBackdrop />
       <FixedPhoneLayer />
       <div data-lenis-content className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
