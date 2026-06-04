@@ -1,49 +1,44 @@
-import { memo } from 'react';
-
 /**
- * WaveBackdrop
- * Dekorativ SVG-våg som lever som ett fast bakgrundslager (likt
- * AnimatedBackground/bubblorna). Sitter `fixed` i viewporten bakom
- * allt innehåll — syns hela tiden, blockerar inget, panar inte med scroll.
+ * WaveDivider
+ * Premium SVG-våg som visuellt delar en sektion. Används på publika
+ * landningssidor för att övergå från mörk blå topp till off-white botten.
  *
- * Två mjuka vågor i secondary/accent med mycket låg opacity för premium
- * djup utan att konkurrera med text eller bubblor.
+ * - `fill` defaultar till landing-light token (off-white).
+ * - `flip` vänder vågen vertikalt (för uppåt-böjda divider).
+ * - Höjd skalar mellan mobil (~56px) och desktop (~130px).
  */
-export const WaveBackdrop = memo(() => {
+type WaveDividerProps = {
+  fill?: string;
+  flip?: boolean;
+  className?: string;
+  ariaHidden?: boolean;
+};
+
+export const WaveDivider = ({
+  fill = 'hsl(var(--landing-light))',
+  flip = false,
+  className = '',
+  ariaHidden = true,
+}: WaveDividerProps) => {
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
-      aria-hidden
+      className={`pointer-events-none w-full leading-[0] ${className}`}
+      style={{ transform: flip ? 'scaleY(-1)' : undefined }}
+      aria-hidden={ariaHidden}
     >
-      {/* Övre mjuk våg — ca 38% från toppen */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1440 320"
+        viewBox="0 0 1440 140"
         preserveAspectRatio="none"
-        className="absolute left-0 right-0 top-[34%] h-[28vh] w-full opacity-[0.08] sm:opacity-[0.1]"
+        className="block h-[56px] w-full sm:h-[80px] md:h-[110px] lg:h-[130px]"
       >
         <path
-          d="M0,160 C240,240 480,80 720,140 C960,200 1200,260 1440,140 L1440,320 L0,320 Z"
-          fill="hsl(var(--secondary))"
-        />
-      </svg>
-
-      {/* Nedre långsammare våg — ca 68% från toppen, motsatt rytm */}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1440 320"
-        preserveAspectRatio="none"
-        className="absolute left-0 right-0 top-[62%] h-[34vh] w-full opacity-[0.06] sm:opacity-[0.08]"
-      >
-        <path
-          d="M0,200 C300,120 540,260 820,180 C1080,108 1280,180 1440,220 L1440,320 L0,320 Z"
-          fill="hsl(var(--primary-glow, var(--secondary)))"
+          d="M0,72 C220,128 420,16 720,52 C980,84 1180,140 1440,84 L1440,140 L0,140 Z"
+          fill={fill}
         />
       </svg>
     </div>
   );
-});
+};
 
-WaveBackdrop.displayName = 'WaveBackdrop';
-
-export default WaveBackdrop;
+export default WaveDivider;
