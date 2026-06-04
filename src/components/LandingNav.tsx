@@ -27,6 +27,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const isLightSection = activeId === 'priser' || activeId === 'faq' || activeId === 'kontakt';
 
   const goHome = (e?: React.SyntheticEvent) => {
     e?.preventDefault();
@@ -193,18 +194,36 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               className="cursor-pointer touch-manipulation select-none transition-opacity active:opacity-70 hover:opacity-80 shrink-0"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <img
-                src={pariumLogo}
-                alt="Parium"
-                width={256}
-                height={256}
-                draggable={false}
-                loading="eager"
-                decoding="sync"
-                // @ts-expect-error - fetchpriority is a valid HTML attribute
-                fetchpriority="high"
-                className="h-auto w-36 sm:w-32 md:w-36 lg:w-40 pointer-events-none"
-              />
+              {isLightSection ? (
+                <span className="flex items-center gap-2 text-2xl font-semibold tracking-normal text-primary">
+                  <img
+                    src={pariumLogo}
+                    alt=""
+                    width={256}
+                    height={256}
+                    draggable={false}
+                    loading="eager"
+                    decoding="sync"
+                    // @ts-expect-error - fetchpriority is a valid HTML attribute
+                    fetchpriority="high"
+                    className="h-auto w-10 pointer-events-none object-left object-contain [clip-path:inset(0_72%_0_0)]"
+                  />
+                  <span>Parium</span>
+                </span>
+              ) : (
+                <img
+                  src={pariumLogo}
+                  alt="Parium"
+                  width={256}
+                  height={256}
+                  draggable={false}
+                  loading="eager"
+                  decoding="sync"
+                  // @ts-expect-error - fetchpriority is a valid HTML attribute
+                  fetchpriority="high"
+                  className="h-auto w-36 sm:w-32 md:w-36 lg:w-40 pointer-events-none"
+                />
+              )}
             </a>
 
             {/* Mobil: dropdown-meny. Från tablet-bredd visas hela list-pillen så layout styrs av tillgänglig bredd, inte enhetsnamn. */}
@@ -215,7 +234,11 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                     <button
                       type="button"
                       aria-label="Öppna sektionsmeny"
-                      className="inline-flex h-11 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 text-[15px] font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-colors hover:bg-white/[0.08] active:bg-white/[0.10] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      className={`inline-flex h-11 items-center gap-1.5 rounded-full border px-4 text-[15px] font-medium shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl transition-colors focus:outline-none focus-visible:ring-2 ${
+                        isLightSection
+                          ? 'border-primary/10 bg-background/80 text-primary hover:bg-background focus-visible:ring-primary/20'
+                          : 'border-white/[0.08] bg-white/[0.04] text-white hover:bg-white/[0.08] active:bg-white/[0.10] focus-visible:ring-white/30'
+                      }`}
                     >
                       <span className="whitespace-nowrap max-w-[160px] truncate">
                         {links.find((l) => l.href.replace('#', '') === activeId)?.label ?? 'Meny'}
@@ -260,7 +283,9 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               <div className="hidden flex-1 min-w-0 justify-center md:flex">
                 <div
                   ref={pillScrollerRef}
-                  className="flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                    className={`flex max-w-full items-center gap-1 overflow-x-auto rounded-full border px-1.5 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
+                      isLightSection ? 'border-primary/10 bg-background/80' : 'border-white/[0.06] bg-white/[0.03]'
+                    }`}
                   style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                   {links.map((l) => {
@@ -279,13 +304,17 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                         }}
                         aria-current={isActive ? 'true' : undefined}
                         className={`relative whitespace-nowrap rounded-full px-3 py-1.5 md:px-2.5 md:py-2 lg:px-4 text-[12px] lg:text-[13px] font-medium transition-colors ${
-                          isActive ? 'text-white' : 'text-white/65 hover:text-white'
+                          isLightSection
+                            ? isActive ? 'text-primary' : 'text-primary/60 hover:text-primary'
+                            : isActive ? 'text-white' : 'text-white/65 hover:text-white'
                         }`}
                       >
                         {isActive && (
                           <motion.span
                             layoutId="nav-bubble"
-                            className="absolute inset-0 -z-0 rounded-full bg-white/[0.10] border border-white/[0.10] shadow-[0_4px_20px_rgba(0,0,0,0.25)]"
+                            className={`absolute inset-0 -z-0 rounded-full border shadow-[0_4px_20px_rgba(0,0,0,0.25)] ${
+                              isLightSection ? 'border-primary/10 bg-primary/[0.06]' : 'border-white/[0.10] bg-white/[0.10]'
+                            }`}
                             transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.6 }}
                           />
                         )}
@@ -302,7 +331,9 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               <Button
                 onClick={onLoginClick}
                 size="sm"
-                className="rounded-full px-7 h-11 bg-white/[0.04] border border-white/[0.08] text-white text-[15px] font-medium hover:bg-secondary/20 hover:border-secondary/45 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] transition-all duration-300"
+                className={`h-11 rounded-full border px-7 text-[15px] font-medium transition-all duration-300 hover:border-secondary/45 hover:bg-secondary/20 hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] ${
+                  isLightSection ? 'border-primary/10 bg-background/80 text-primary' : 'border-white/[0.08] bg-white/[0.04] text-white'
+                }`}
               >
                 Logga in
               </Button>
