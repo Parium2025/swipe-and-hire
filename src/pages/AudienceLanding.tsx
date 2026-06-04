@@ -6,7 +6,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { hapticLight } from '@/lib/haptics';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
-import WaveBackdrop from '@/components/landing/WaveDivider';
+import WaveDivider from '@/components/landing/WaveDivider';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
@@ -1000,7 +1000,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       }}
     >
       <AnimatedBackground showGlow={false} />
-      <WaveBackdrop />
       <FixedPhoneLayer />
       <div data-lenis-content className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
@@ -1101,8 +1100,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
+          <WaveDivider />
+
+          <div className="relative z-10 -mt-px bg-landing-light text-landing-light-foreground">
           {/* ──────────────── PRISER ──────────────── */}
-          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 pb-28 pt-20 sm:px-6 md:px-12 md:pt-24 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
               <motion.div
                 initial={{ opacity: 0, x: -60 }}
@@ -1112,10 +1114,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="max-w-2xl"
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Priser</span>
-                <h2 id="priser-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
+                <h2 id="priser-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-landing-light-foreground sm:text-5xl md:text-6xl">
                   {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
                 </h2>
-                <p className="mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
+                <p className="mt-6 max-w-xl text-base leading-8 text-landing-light-muted sm:text-lg">
                   Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
                 </p>
               </motion.div>
@@ -1135,8 +1137,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     }}
                     className={`relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 ${
                       i === 1
-                        ? 'border-secondary/40 bg-gradient-to-br from-secondary/10 to-white/[0.04] shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.5)]'
-                        : 'border-white/[0.08] bg-white/[0.04] hover:border-white/[0.16]'
+                        ? 'border-secondary/40 bg-gradient-to-br from-secondary/10 to-background/90 shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.35)]'
+                        : 'border-landing-light-border bg-background/75 hover:border-secondary/25'
                     }`}
                   >
                     {i === 1 && (
@@ -1144,9 +1146,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         Populär
                       </span>
                     )}
-                    <h3 className="text-xl font-bold text-white">{plan}</h3>
-                    <p className="mt-2 text-3xl font-black text-white">— kr<span className="text-sm font-medium text-white/50">/mån</span></p>
-                    <p className="mt-4 text-sm leading-7 text-white/60">Platshållare för planbeskrivning.</p>
+                    <h3 className="text-xl font-bold text-landing-light-foreground">{plan}</h3>
+                    <p className="mt-2 text-3xl font-black text-landing-light-foreground">— kr<span className="text-sm font-medium text-landing-light-muted">/mån</span></p>
+                    <p className="mt-4 text-sm leading-7 text-landing-light-muted">Platshållare för planbeskrivning.</p>
                   </motion.div>
                 ))}
               </motion.div>
@@ -1163,7 +1165,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 transition={{ duration: 0.9, ease }}
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Vanliga frågor</span>
-                <h2 id="faq-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl">
+                <h2 id="faq-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-landing-light-foreground sm:text-5xl">
                   Frågor & svar
                 </h2>
               </motion.div>
@@ -1181,13 +1183,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       hidden: { opacity: 0, x: 60 },
                       visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
                     }}
-                    className="group rounded-2xl border border-white/[0.07] bg-white/[0.035] px-6 py-5 backdrop-blur-xl transition-colors hover:border-white/[0.14] hover:bg-white/[0.05]"
+                    className="group rounded-2xl border border-landing-light-border bg-background/75 px-6 py-5 backdrop-blur-xl transition-colors hover:border-secondary/25"
                   >
-                    <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-white">
+                    <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-landing-light-foreground">
                       {q}
                       <span className="ml-4 text-secondary transition-transform duration-300 group-open:rotate-45">+</span>
                     </summary>
-                    <p className="mt-4 text-sm leading-7 text-white/60">
+                    <p className="mt-4 text-sm leading-7 text-landing-light-muted">
                       Platshållarsvar — fyll på med den faktiska informationen.
                     </p>
                   </motion.details>
@@ -1206,10 +1208,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               className="mx-auto max-w-[920px] text-center"
             >
               <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Kontakt</span>
-              <h2 id="kontakt-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl">
+              <h2 id="kontakt-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-landing-light-foreground sm:text-5xl">
                 Vi finns här för dig.
               </h2>
-              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
+              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-landing-light-muted sm:text-lg">
                 Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.
               </p>
               <a
@@ -1220,6 +1222,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </a>
             </motion.div>
           </section>
+          </div>
 
           {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
           <BouncyFooter audience={audience} onCta={handleStart} />

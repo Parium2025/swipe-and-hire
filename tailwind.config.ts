@@ -67,6 +67,12 @@ export default {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
+				landing: {
+					light: 'hsl(var(--landing-light))',
+					'light-foreground': 'hsl(var(--landing-light-foreground))',
+					'light-muted': 'hsl(var(--landing-light-muted))',
+					'light-border': 'hsl(var(--landing-light-border))'
+				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
 					foreground: 'hsl(var(--popover-foreground))'

@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
-import WaveBackdrop from '@/components/landing/WaveDivider';
 
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { useAuth } from '@/hooks/useAuth';
@@ -105,7 +104,6 @@ const Landing = () => {
       className="fixed inset-0 z-0 overflow-hidden text-foreground"
       style={{ touchAction: 'none', overscrollBehavior: 'none' }}
     >
-      <WaveBackdrop />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
         <main>
