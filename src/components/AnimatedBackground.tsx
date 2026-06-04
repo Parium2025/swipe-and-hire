@@ -16,7 +16,42 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
   const positionClass = variant === 'card' ? 'absolute' : 'fixed';
 
   return (
-    <div className={`${positionClass} inset-0 pointer-events-none z-0`}>
+    <div className={`${positionClass} inset-0 pointer-events-none z-0 overflow-hidden`}>
+      {/* Subtle persistent wave layers — part of the background, behind everything */}
+      <svg
+        className="absolute inset-x-0 bottom-0 w-full h-[55%] opacity-[0.08]"
+        viewBox="0 0 1440 600"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <path
+          d="M0,320 C220,420 460,200 720,280 C980,360 1220,200 1440,300 L1440,600 L0,600 Z"
+          fill="hsl(var(--secondary))"
+        />
+      </svg>
+      <svg
+        className="absolute inset-x-0 bottom-0 w-full h-[45%] opacity-[0.07]"
+        viewBox="0 0 1440 600"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <path
+          d="M0,380 C260,260 520,420 780,360 C1040,300 1260,420 1440,360 L1440,600 L0,600 Z"
+          fill="hsl(var(--primary-glow))"
+        />
+      </svg>
+      <svg
+        className="absolute inset-x-0 top-0 w-full h-[40%] opacity-[0.05] rotate-180"
+        viewBox="0 0 1440 600"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <path
+          d="M0,340 C240,260 480,420 720,360 C960,300 1200,420 1440,340 L1440,600 L0,600 Z"
+          fill="hsl(var(--secondary))"
+        />
+      </svg>
+
       {showBubbles && (
         <>
           {/* Left-side bubbles (top corner) */}
