@@ -1,49 +1,49 @@
-/**
- * WaveDivider
- * Premium SVG-våg som visuellt delar en sektion. Används på publika
- * landningssidor för att övergå från mörk blå topp till off-white botten.
- *
- * - `fill` defaultar till landing-light token (off-white).
- * - `flip` vänder vågen vertikalt (för uppåt-böjda divider).
- * - Höjd skalar mellan mobil (~56px) och desktop (~110px).
- */
-type WaveDividerProps = {
-  /** Tailwind-color klass eller raw hsl() string. Default off-white token. */
-  fill?: string;
-  /** Vänd vågen vertikalt. */
-  flip?: boolean;
-  /** Extra className för wrappern. */
-  className?: string;
-  /** Aria-hidden default true (dekorativ). */
-  ariaHidden?: boolean;
-};
+import { memo } from 'react';
 
-export const WaveDivider = ({
-  fill = 'hsl(var(--landing-light))',
-  flip = false,
-  className = '',
-  ariaHidden = true,
-}: WaveDividerProps) => {
+/**
+ * WaveBackdrop
+ * Dekorativ SVG-våg som lever som ett fast bakgrundslager (likt
+ * AnimatedBackground/bubblorna). Sitter `fixed` i viewporten bakom
+ * allt innehåll — syns hela tiden, blockerar inget, panar inte med scroll.
+ *
+ * Två mjuka vågor i secondary/accent med mycket låg opacity för premium
+ * djup utan att konkurrera med text eller bubblor.
+ */
+export const WaveBackdrop = memo(() => {
   return (
     <div
-      className={`pointer-events-none w-full leading-[0] ${className}`}
-      style={{ transform: flip ? 'scaleY(-1)' : undefined }}
-      aria-hidden={ariaHidden}
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      aria-hidden
     >
+      {/* Övre mjuk våg — ca 38% från toppen */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1440 140"
+        viewBox="0 0 1440 320"
         preserveAspectRatio="none"
-        className="block h-[56px] w-full sm:h-[80px] md:h-[110px] lg:h-[130px]"
+        className="absolute left-0 right-0 top-[34%] h-[28vh] w-full opacity-[0.08] sm:opacity-[0.1]"
       >
-        {/* Mjuk, asymmetrisk premium-våg — inspirerad av referensen men subtilare */}
         <path
-          d="M0,72 C220,128 420,16 720,52 C980,84 1180,140 1440,84 L1440,140 L0,140 Z"
-          fill={fill}
+          d="M0,160 C240,240 480,80 720,140 C960,200 1200,260 1440,140 L1440,320 L0,320 Z"
+          fill="hsl(var(--secondary))"
+        />
+      </svg>
+
+      {/* Nedre långsammare våg — ca 68% från toppen, motsatt rytm */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+        className="absolute left-0 right-0 top-[62%] h-[34vh] w-full opacity-[0.06] sm:opacity-[0.08]"
+      >
+        <path
+          d="M0,200 C300,120 540,260 820,180 C1080,108 1280,180 1440,220 L1440,320 L0,320 Z"
+          fill="hsl(var(--primary-glow, var(--secondary)))"
         />
       </svg>
     </div>
   );
-};
+});
 
-export default WaveDivider;
+WaveBackdrop.displayName = 'WaveBackdrop';
+
+export default WaveBackdrop;
