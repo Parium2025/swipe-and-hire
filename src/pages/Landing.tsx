@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
+import WaveBackdrop from '@/components/landing/WaveDivider';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { useAuth } from '@/hooks/useAuth';
 
