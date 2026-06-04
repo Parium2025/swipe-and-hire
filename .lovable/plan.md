@@ -1,84 +1,60 @@
-## Status efter förra ändringen
+## Mål
 
-Jag har gått igenom hela kedjan. Den förra fixen löste flimret **för arbetsgivarens chatt-badge**, men jag hittade två platser till med exakt samma bugg som påverkar **jobbsökarsidan** — så strukturen är inte helt likvärdig än. Här är vad jag vill åtgärda + hela bilden av hur det hänger ihop.
+Splitta de publika landningssidorna visuellt: **översta delen behåller dagens mörkblå** (hero + de första sektionerna), en **SVG-våg** delar bakgrunden, och **nedre delen blir off-white** (ca `hsl(40 20% 96%)`) med mörk text för premium kontrast.
 
----
+Gäller endast: `/` (Landing), `/jobbsokare`, `/arbetsgivare` (AudienceLanding). Påverkar **inte** inloggade appen.
 
-## 1. Det jag verifierade fungerar redan
+## Designprinciper
 
-### Chatt-badge på arbetsgivarsidan ✅
-Badgen i `EmployerTopNav` läser `preloadedUnreadMessages` från `useAuth`. Värdet sätts bara till slutligt resultat (aldrig nollställt mid-fetch). Förra fixen tog bort den falska "0"-skrivningen från `useEmployerBackgroundSync`. **Stabilt.**
+- **Off-white**, inte ren vit (för premium-känsla): `hsl(40 18% 96%)` ≈ `#F5F2EE`.
+- **Vågen** är en mjuk SVG-form i samma off-white (toppen = vågens "fyllning" som sticker upp i blått), inspirerad av bifogad referens men mer subtil/premium (inte tecknad).
+- **Brytpunkt** på AudienceLanding: vågen placeras **mellan "Funktioner"-sektionen och "Priser"** — så hero/storytelling stannar i blå premium-mörker, och konvertering (priser/faq/kontakt/CTA-footer) lever i ljus seriös ton.
+- På `/` (Landing.tsx, fullscreen hero utan scroll) appliceras **ingen våg** — den sidan har bara en hero, så split blir meningslös. Vi rör inte den.
 
-### Notisklockan 🔔 (den med "9+") ✅
-`useNotifications` är redan välbyggd:
-- Hydrerar från `localStorage` direkt på mount (inget tomt mellanläge)
-- På flikbyte: refetchar och sätter state till **slutligt värde** — aldrig till 0 först
-- Realtime ökar räknaren inkrementellt på nya notiser
-- Cache delas mellan flikar via `localStorage` (per user)
+## Vad som byggs
 
-Ingen fix behövs här.
+### 1. Ny komponent: `src/components/landing/WaveDivider.tsx`
+- Återanvändbar SVG-våg (full bredd, ~120px hög på desktop, ~70px mobil).
+- Props: `fill` (default off-white token), `flip` (för uppåt/nedåt-böjning).
+- Använder design-tokens, inga hårdkodade färger.
 
-### Flera flikar samma dator ✅
-- En sessionstoken per webbläsare (`localStorage`) → räknas som **en enhet** i 3-enheter-gränsen
-- Varje flik har egen React-state, egna React Query-cacher i minnet, egen scroll-position
-- Ingen `BroadcastChannel`/storage-lyssnare som tvingar omladdning
-- Heartbeats från valfri flik håller sessionen vid liv för alla
-
-Du kan ha 3 flikar med olika kandidater öppna utan att de stör varandra.
-
----
-
-## 2. Det jag vill fixa nu (jobbsökarsidan)
-
-`JobSeekerTopNav` använder `conversationsCtx.totalUnreadCount` (live) — alltså **direkt** beroende av React Query-cachen `['conversations', userId]`. Två preloaders klobbar fortfarande den cachen med konversationer **utan** `unread_count`-fält:
-
-| Fil | Rad | Problem |
-|---|---|---|
-| `src/hooks/useJobSeekerBackgroundSync.ts` | 191 | `queryClient.setQueryData(['conversations', userId], conversations)` — saknar `unread_count` |
-| `src/hooks/useEagerRatingsPreload.ts` | 559 | Samma sak |
-
-**Effekt:** På jobbsökarsidan flimrar chatt-badgen vid flikbyte (>30s) precis som det gjorde på arbetsgivarsidan innan fixen.
-
-**Åtgärd:** Ta bort `setQueryData`-anropen i båda filerna. Behåll `safeSetItem`-skrivningen till `localStorage`/`sessionStorage` (det är en separat fallback-cache och påverkar inte React Query). `useConversations` refetchar själv vid behov via `refetchOnWindowFocus` + realtime.
-
----
-
-## 3. Symmetrin mellan sidorna efter fixen
-
-| Yta | Mekanism | Status efter fix |
-|---|---|---|
-| Arbetsgivare · chatt-badge | `preloadedUnreadMessages` (useAuth state) | Stabil |
-| Jobbsökare · chatt-badge | `totalUnreadCount` (useConversations live) | Stabil |
-| Båda · notisklocka | `useNotifications` localStorage + realtime | Stabil |
-| Båda · multi-flik | Egen React-state per flik, delad session | Isolerade |
-
-Strukturen blir alltså likvärdig — bara olika datakällor under huven (vilket är OK eftersom de täcker samma användarbehov).
-
----
-
-## 4. Stabilitetsbedömning
-
-**Innan denna fix: 7/10**
-- Arbetsgivar-badgen fixad, men jobbsökar-badgen flimrar fortfarande
-- Övriga delar (notisklocka, sessionshantering, multi-flik) är solida
-
-**Efter denna fix: 9/10**
-- Alla badges håller sina värden stabilt vid flikbyten på båda sidor
-- Inga onödiga omladdningar mellan flikar
-- En kvarvarande risk på 1 poäng: den globala `messagesChannel`-realtimen i `useAuth` triggar `refreshEmployerStats` på **alla** nya meddelanden i hela databasen (utan filter), vilket vid hög trafik kan orsaka onödiga RPC-anrop. Inte ett buggproblem — en framtida skalningsoptimering. Lämnar utanför denna fix för att inte ändra något oombett.
-
----
-
-## 5. Tekniska detaljer (för utvecklare)
-
-```text
-Innan: preloader → setQueryData(['conversations', uid], rawRows)
-       useConversations subscribers → totalUnread = sum(c.unread_count) = NaN || 0
-       → badge flimrar → useConversations refetchar → korrekt värde
-
-Efter: preloader → bara localStorage + sessionStorage
-       useConversations egen queryFn → setQueryData med berikade rows
-       (inkl. unread_count) → badge stabil hela tiden
+### 2. Nytt token i `src/index.css`
+```css
+--landing-light: 40 18% 96%;   /* off-white botten */
+--landing-light-foreground: 215 35% 18%;  /* mörk text på ljus */
+--landing-light-muted: 215 15% 38%;
 ```
 
-Inga andra konsumenter använder `['conversations', userId]`-cachen, så borttagningen av `setQueryData` är säker.
+### 3. `AudienceLanding.tsx` — strukturändring
+- Wrappa sektionerna **Priser, FAQ, Kontakt, BouncyFooter** i en `<div className="relative bg-[hsl(var(--landing-light))] text-[hsl(var(--landing-light-foreground))]">` med `<WaveDivider />` placerad ovanpå överkanten.
+- AnimatedBackground och FixedPhoneLayer döljs i ljusa zonen (z-index/clip).
+
+### 4. Färgsvep i ljusa zonen (Priser, FAQ, Kontakt, BouncyFooter)
+- `text-white` → `text-[hsl(var(--landing-light-foreground))]`
+- `text-white/60` → `text-[hsl(var(--landing-light-muted))]`
+- `border-white/[0.07]` → `border-black/10`
+- `bg-white/[0.04]` glass → `bg-white` med subtil shadow + `border-black/8`
+- Sekundärfärgen (secondary/accent) behålls för CTA-knappar — kontrast funkar både ljus och mörk.
+- `BouncyFooter` får en separat ljus-variant (props eller intern detektering).
+
+### 5. Ingen ändring på:
+- LandingNav (transparent, fungerar mot båda)
+- Hero, PinnedHorizontalGallery, Statement, Funktioner (förblir mörk blå)
+- Inloggade appen
+- Auth/EmailConfirm/övriga publika sidor (kan göras senare om önskat)
+
+## Tekniska anteckningar
+
+- `AudienceLanding.tsx` har root `bg-primary` + inline gradient. Den behålls — ljusa zonen läggs som **eget lager ovanpå** med wave-cut på toppen, så scroll-baserad parallax inte påverkas.
+- `FixedPhoneLayer` ligger position:fixed; den är bara aktiv i hero (heroIndex 0), så når aldrig ljusa zonen. Ingen åtgärd.
+- `AnimatedBackground` ges en `style={{ clipPath }}` eller döljs via z-index så bubblor inte syns över ljus bakgrund.
+
+## SEO
+
+Inga SEO-ändringar i denna prompt (du sa att vi tar SEO i nästa).
+
+## Begränsningar / Vad denna prompt INTE gör
+
+- Ingen ändring på `/` Landing (bara hero, ingen scroll → split meningslöst).
+- Ingen ändring i appen bakom login.
+- Inga textuella/innehållsändringar — bara visuell omdaning av nedre tredjedelen.
