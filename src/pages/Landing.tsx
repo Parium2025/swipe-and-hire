@@ -104,6 +104,7 @@ const Landing = () => {
       className="fixed inset-0 z-0 overflow-hidden text-foreground"
       style={{ touchAction: 'none', overscrollBehavior: 'none' }}
     >
+      <WaveBackdrop />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} />
         <main>
