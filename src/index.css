@@ -212,6 +212,12 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 200 100% 60%;
 
+    /* Landing light zone — off-white botten under wave divider */
+    --landing-light: 40 18% 96%;
+    --landing-light-foreground: 215 35% 16%;
+    --landing-light-muted: 215 14% 38%;
+    --landing-light-border: 215 20% 88%;
+
     --radius: 0.5rem;
 
     /* Global control sizing (fluid, device-consistent) */
