@@ -19,13 +19,13 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
     <div className={`${positionClass} inset-0 pointer-events-none z-0 overflow-hidden`}>
       {variant === 'viewport' && (
         <svg
-          className="absolute inset-x-0 bottom-0 h-[54%] w-full"
-          viewBox="0 0 1440 560"
+          className="absolute inset-x-0 bottom-0 h-[22%] w-full"
+          viewBox="0 0 1440 260"
           preserveAspectRatio="none"
           aria-hidden
         >
           <path
-            d="M0,112 C176,164 352,158 528,122 C748,76 918,72 1102,112 C1242,142 1342,144 1440,118 L1440,560 L0,560 Z"
+            d="M0,48 C176,92 352,88 528,58 C748,18 918,16 1102,48 C1242,74 1342,76 1440,54 L1440,260 L0,260 Z"
             fill="hsl(var(--landing-light))"
           />
         </svg>
