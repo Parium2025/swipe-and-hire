@@ -1,62 +1,27 @@
 import { memo } from 'react';
 
-/**
- * WaveBackdrop
- * Permanent dekorativ vågbakgrund som lever som ett fast lager — precis
- * som AnimatedBackground/bubblorna. Ligger `fixed` i viewporten bakom allt
- * innehåll, panar inte med scroll, blockerar inga klick.
- *
- * Tre mjuka lager i sekundär/accent med låg opacitet — ger premium djup
- * utan att konkurrera med text. Syns lika mycket på hela sidan.
- */
-export const WaveBackdrop = memo(() => {
+type WaveDividerProps = {
+  className?: string;
+};
+
+const WaveDivider = memo(({ className = '' }: WaveDividerProps) => {
   return (
-    <div
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
-      aria-hidden
-    >
-      {/* Lager 1 — bred mjuk våg, övre tredjedel */}
+    <div className={`pointer-events-none relative z-10 -mb-px h-28 w-full overflow-hidden sm:h-36 md:h-44 ${className}`} aria-hidden>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1440 400"
+        viewBox="0 0 1440 180"
         preserveAspectRatio="none"
-        className="absolute inset-x-0 top-[18%] h-[42vh] w-full opacity-[0.07] sm:opacity-[0.09]"
+        className="absolute inset-0 h-full w-full"
       >
         <path
-          d="M0,200 C240,300 480,80 720,160 C960,240 1200,320 1440,180 L1440,400 L0,400 Z"
-          fill="hsl(var(--secondary))"
-        />
-      </svg>
-
-      {/* Lager 2 — motsatt rytm, mitten */}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1440 400"
-        preserveAspectRatio="none"
-        className="absolute inset-x-0 top-[42%] h-[44vh] w-full opacity-[0.06] sm:opacity-[0.08]"
-      >
-        <path
-          d="M0,240 C300,140 540,300 820,200 C1080,108 1280,200 1440,260 L1440,400 L0,400 Z"
-          fill="hsl(var(--primary-glow, var(--secondary)))"
-        />
-      </svg>
-
-      {/* Lager 3 — låg, brett bottenlager för extra djup */}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1440 400"
-        preserveAspectRatio="none"
-        className="absolute inset-x-0 bottom-0 h-[38vh] w-full opacity-[0.05] sm:opacity-[0.07]"
-      >
-        <path
-          d="M0,280 C260,200 520,340 760,260 C1020,180 1240,260 1440,220 L1440,400 L0,400 Z"
-          fill="hsl(var(--secondary))"
+          d="M0,78 C180,126 365,118 540,82 C748,38 912,36 1094,76 C1242,108 1338,112 1440,84 L1440,180 L0,180 Z"
+          fill="hsl(var(--landing-light))"
         />
       </svg>
     </div>
   );
 });
 
-WaveBackdrop.displayName = 'WaveBackdrop';
+WaveDivider.displayName = 'WaveDivider';
 
-export default WaveBackdrop;
+export default WaveDivider;
