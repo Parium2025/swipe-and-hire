@@ -1100,139 +1100,126 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
-          {/* ──────────────── LJUS ZON (off-white) börjar — Priser / FAQ / Kontakt ──────────────── */}
-          <div className="relative">
-            {/* Wave divider övergång från mörk blå → off-white */}
-            <WaveDivider />
-            <div
-              className="relative"
-              style={{
-                backgroundColor: 'hsl(var(--landing-light))',
-                color: 'hsl(var(--landing-light-foreground))',
-              }}
-            >
-              {/* ──────────────── PRISER ──────────────── */}
-              <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
-                <div className="mx-auto max-w-[1180px]">
+          {/* ──────────────── PRISER ──────────────── */}
+          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+            <div className="mx-auto max-w-[1180px]">
+              <motion.div
+                initial={{ opacity: 0, x: -60 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.9, ease }}
+                className="max-w-2xl"
+              >
+                <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Priser</span>
+                <h2 id="priser-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
+                  {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
+                </h2>
+                <p className="mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
+                  Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
+                </p>
+              </motion.div>
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
+                className="mt-12 grid gap-5 md:grid-cols-2"
+              >
+                {['Start', 'Premium'].map((plan, i) => (
                   <motion.div
-                    initial={{ opacity: 0, x: -60 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.9, ease }}
-                    className="max-w-2xl"
+                    key={plan}
+                    variants={{
+                      hidden: { opacity: 0 },
+                      visible: { opacity: 1, transition: { duration: 0.9, ease } },
+                    }}
+                    className={`relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 ${
+                      i === 1
+                        ? 'border-secondary/40 bg-gradient-to-br from-secondary/10 to-white/[0.04] shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.5)]'
+                        : 'border-white/[0.08] bg-white/[0.04] hover:border-white/[0.16]'
+                    }`}
                   >
-                    <span className="text-xs font-bold uppercase tracking-[0.32em] text-[hsl(var(--primary))]">Priser</span>
-                    <h2 id="priser-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-[hsl(var(--landing-light-foreground))] sm:text-5xl md:text-6xl">
-                      {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
-                    </h2>
-                    <p className="mt-6 max-w-xl text-base leading-8 text-[hsl(var(--landing-light-muted))] sm:text-lg">
-                      Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
-                    </p>
+                    {i === 1 && (
+                      <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">
+                        Populär
+                      </span>
+                    )}
+                    <h3 className="text-xl font-bold text-white">{plan}</h3>
+                    <p className="mt-2 text-3xl font-black text-white">— kr<span className="text-sm font-medium text-white/50">/mån</span></p>
+                    <p className="mt-4 text-sm leading-7 text-white/60">Platshållare för planbeskrivning.</p>
                   </motion.div>
-                  <motion.div
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: 0.2 }}
-                    variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
-                    className="mt-12 grid gap-5 md:grid-cols-2"
-                  >
-                    {['Start', 'Premium'].map((plan, i) => (
-                      <motion.div
-                        key={plan}
-                        variants={{
-                          hidden: { opacity: 0 },
-                          visible: { opacity: 1, transition: { duration: 0.9, ease } },
-                        }}
-                        className={`relative overflow-hidden rounded-3xl border p-8 transition-all duration-500 hover:-translate-y-1 ${
-                          i === 1
-                            ? 'border-[hsl(var(--primary)/0.18)] bg-white shadow-[0_30px_80px_-30px_hsl(var(--primary)/0.25)]'
-                            : 'border-[hsl(var(--landing-light-border))] bg-white hover:border-[hsl(var(--primary)/0.18)] hover:shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.18)]'
-                        }`}
-                      >
-                        {i === 1 && (
-                          <span className="absolute right-6 top-6 rounded-full bg-[hsl(var(--primary)/0.08)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--primary))]">
-                            Populär
-                          </span>
-                        )}
-                        <h3 className="text-xl font-bold text-[hsl(var(--landing-light-foreground))]">{plan}</h3>
-                        <p className="mt-2 text-3xl font-black text-[hsl(var(--landing-light-foreground))]">— kr<span className="text-sm font-medium text-[hsl(var(--landing-light-muted))]">/mån</span></p>
-                        <p className="mt-4 text-sm leading-7 text-[hsl(var(--landing-light-muted))]">Platshållare för planbeskrivning.</p>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </div>
-              </section>
-
-              {/* ──────────────── FAQ ──────────────── */}
-              <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
-                <div className="mx-auto max-w-[880px]">
-                  <motion.div
-                    initial={{ opacity: 0, x: -60 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.9, ease }}
-                  >
-                    <span className="text-xs font-bold uppercase tracking-[0.32em] text-[hsl(var(--primary))]">Vanliga frågor</span>
-                    <h2 id="faq-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-[hsl(var(--landing-light-foreground))] sm:text-5xl">
-                      Frågor & svar
-                    </h2>
-                  </motion.div>
-                  <motion.div
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: 0.15 }}
-                    variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } } }}
-                    className="mt-10 space-y-3"
-                  >
-                    {['Hur fungerar Parium?', 'Vad kostar det?', 'Är mina uppgifter säkra?', 'Vilka företag finns här?'].map((q) => (
-                      <motion.details
-                        key={q}
-                        variants={{
-                          hidden: { opacity: 0, x: 60 },
-                          visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
-                        }}
-                        className="group rounded-2xl border border-[hsl(var(--landing-light-border))] bg-white px-6 py-5 transition-colors hover:border-[hsl(var(--primary)/0.2)] hover:shadow-[0_12px_40px_-20px_hsl(var(--primary)/0.2)]"
-                      >
-                        <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-[hsl(var(--landing-light-foreground))]">
-                          {q}
-                          <span className="ml-4 text-[hsl(var(--primary))] transition-transform duration-300 group-open:rotate-45">+</span>
-                        </summary>
-                        <p className="mt-4 text-sm leading-7 text-[hsl(var(--landing-light-muted))]">
-                          Platshållarsvar — fyll på med den faktiska informationen.
-                        </p>
-                      </motion.details>
-                    ))}
-                  </motion.div>
-                </div>
-              </section>
-
-              {/* ──────────────── KONTAKT ──────────────── */}
-              <section id="kontakt" aria-labelledby="kontakt-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
-                <motion.div
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={{ duration: 0.9, ease }}
-                  className="mx-auto max-w-[920px] text-center"
-                >
-                  <span className="text-xs font-bold uppercase tracking-[0.32em] text-[hsl(var(--primary))]">Kontakt</span>
-                  <h2 id="kontakt-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-[hsl(var(--landing-light-foreground))] sm:text-5xl">
-                    Vi finns här för dig.
-                  </h2>
-                  <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-[hsl(var(--landing-light-muted))] sm:text-lg">
-                    Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.
-                  </p>
-                  <a
-                    href="mailto:hej@parium.se"
-                    className="mt-8 inline-block text-lg font-semibold text-[hsl(var(--primary))] underline-offset-4 hover:underline"
-                  >
-                    hej@parium.se
-                  </a>
-                </motion.div>
-              </section>
+                ))}
+              </motion.div>
             </div>
-          </div>
-          {/* ──────────────── Slut ljus zon ──────────────── */}
+          </section>
+
+          {/* ──────────────── FAQ ──────────────── */}
+          <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+            <div className="mx-auto max-w-[880px]">
+              <motion.div
+                initial={{ opacity: 0, x: -60 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.9, ease }}
+              >
+                <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Vanliga frågor</span>
+                <h2 id="faq-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl">
+                  Frågor & svar
+                </h2>
+              </motion.div>
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.15 }}
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } } }}
+                className="mt-10 space-y-3"
+              >
+                {['Hur fungerar Parium?', 'Vad kostar det?', 'Är mina uppgifter säkra?', 'Vilka företag finns här?'].map((q) => (
+                  <motion.details
+                    key={q}
+                    variants={{
+                      hidden: { opacity: 0, x: 60 },
+                      visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
+                    }}
+                    className="group rounded-2xl border border-white/[0.07] bg-white/[0.035] px-6 py-5 backdrop-blur-xl transition-colors hover:border-white/[0.14] hover:bg-white/[0.05]"
+                  >
+                    <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-white">
+                      {q}
+                      <span className="ml-4 text-secondary transition-transform duration-300 group-open:rotate-45">+</span>
+                    </summary>
+                    <p className="mt-4 text-sm leading-7 text-white/60">
+                      Platshållarsvar — fyll på med den faktiska informationen.
+                    </p>
+                  </motion.details>
+                ))}
+              </motion.div>
+            </div>
+          </section>
+
+          {/* ──────────────── KONTAKT ──────────────── */}
+          <section id="kontakt" aria-labelledby="kontakt-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.9, ease }}
+              className="mx-auto max-w-[920px] text-center"
+            >
+              <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Kontakt</span>
+              <h2 id="kontakt-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl">
+                Vi finns här för dig.
+              </h2>
+              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
+                Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.
+              </p>
+              <a
+                href="mailto:hej@parium.se"
+                className="mt-8 inline-block text-lg font-semibold text-secondary underline-offset-4 hover:underline"
+              >
+                hej@parium.se
+              </a>
+            </motion.div>
+          </section>
+
 
 
 
