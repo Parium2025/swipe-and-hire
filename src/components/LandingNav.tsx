@@ -8,6 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
 export interface LandingNavLink {
@@ -197,16 +198,16 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               {isLightSection ? (
                 <span className="flex items-center gap-2 text-2xl font-semibold tracking-normal text-primary">
                   <img
-                    src={pariumLogo}
+                    src={pariumLogoRings}
                     alt=""
-                    width={256}
-                    height={256}
+                    width={96}
+                    height={96}
                     draggable={false}
                     loading="eager"
                     decoding="sync"
                     // @ts-expect-error - fetchpriority is a valid HTML attribute
                     fetchpriority="high"
-                    className="h-auto w-10 pointer-events-none object-left object-contain [clip-path:inset(0_72%_0_0)]"
+                    className="pointer-events-none h-7 w-7 object-contain"
                   />
                   <span>Parium</span>
                 </span>
