@@ -1100,8 +1100,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
+          <WaveDivider />
+
+          <div className="relative z-10 -mt-px bg-landing-light text-landing-light-foreground">
           {/* ──────────────── PRISER ──────────────── */}
-          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 pb-28 pt-20 sm:px-6 md:px-12 md:pt-24 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
               <motion.div
                 initial={{ opacity: 0, x: -60 }}
@@ -1111,10 +1114,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="max-w-2xl"
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Priser</span>
-                <h2 id="priser-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
+                <h2 id="priser-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-landing-light-foreground sm:text-5xl md:text-6xl">
                   {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
                 </h2>
-                <p className="mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
+                <p className="mt-6 max-w-xl text-base leading-8 text-landing-light-muted sm:text-lg">
                   Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
                 </p>
               </motion.div>
@@ -1134,8 +1137,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     }}
                     className={`relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 ${
                       i === 1
-                        ? 'border-secondary/40 bg-gradient-to-br from-secondary/10 to-white/[0.04] shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.5)]'
-                        : 'border-white/[0.08] bg-white/[0.04] hover:border-white/[0.16]'
+                        ? 'border-secondary/40 bg-gradient-to-br from-secondary/10 to-background/90 shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.35)]'
+                        : 'border-landing-light-border bg-background/75 hover:border-secondary/25'
                     }`}
                   >
                     {i === 1 && (
@@ -1143,9 +1146,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         Populär
                       </span>
                     )}
-                    <h3 className="text-xl font-bold text-white">{plan}</h3>
-                    <p className="mt-2 text-3xl font-black text-white">— kr<span className="text-sm font-medium text-white/50">/mån</span></p>
-                    <p className="mt-4 text-sm leading-7 text-white/60">Platshållare för planbeskrivning.</p>
+                    <h3 className="text-xl font-bold text-landing-light-foreground">{plan}</h3>
+                    <p className="mt-2 text-3xl font-black text-landing-light-foreground">— kr<span className="text-sm font-medium text-landing-light-muted">/mån</span></p>
+                    <p className="mt-4 text-sm leading-7 text-landing-light-muted">Platshållare för planbeskrivning.</p>
                   </motion.div>
                 ))}
               </motion.div>
