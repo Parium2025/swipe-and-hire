@@ -32,9 +32,45 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
           preserveAspectRatio="none"
           aria-hidden
         >
+          <defs>
+            {/* Subtil vertikal djupgradient för glasyr-droppar (navy) */}
+            <linearGradient id="landing-drip-volume" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(215 100% 14%)" />
+              <stop offset="100%" stopColor="hsl(215 100% 9%)" />
+            </linearGradient>
+          </defs>
+
+          {/* Off-white våg-fyllning */}
           <path
             d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
             fill="hsl(var(--landing-light))"
+          />
+
+          {/* Glasyr-droppar — navy, hänger ner från vågens underkant.
+              Bredare/längre shapes så de skalar synligt på mobil. */}
+
+          {/* Drop 1 — medel-stor, vänster (x≈240) */}
+          <path
+            d="M170,108 C170,108 158,238 240,238 C322,238 310,108 310,108 Z"
+            fill="url(#landing-drip-volume)"
+          />
+
+          {/* Drop 2 — stor, mitten (djupast, x≈740) */}
+          <path
+            d="M660,50 C660,50 640,322 740,322 C840,322 820,50 820,50 Z"
+            fill="url(#landing-drip-volume)"
+          />
+
+          {/* Drop 3 — medel, höger-mitt (x≈1050) */}
+          <path
+            d="M980,66 C980,66 966,222 1050,222 C1134,222 1120,66 1120,66 Z"
+            fill="url(#landing-drip-volume)"
+          />
+
+          {/* Drop 4 — medel-liten, höger (x≈1320) */}
+          <path
+            d="M1260,98 C1260,98 1248,198 1320,198 C1392,198 1380,98 1380,98 Z"
+            fill="url(#landing-drip-volume)"
           />
         </svg>
       )}
