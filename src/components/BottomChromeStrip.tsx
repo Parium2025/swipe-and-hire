@@ -5,10 +5,12 @@ import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
 const LANDING_COLOR = '#2a2a2a';
 const PARIUM_COLOR = '#001935';
 const AUDIENCE_LANDING_COLOR = '#001F3D';
+const AUTH_WAVE_BOTTOM_COLOR = 'hsl(40 18% 96%)';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
+const isAuthPath = (pathname: string) => pathname === '/auth';
 
 /**
  * Tunn färgremsa längst ner — endast på mobil/touch.
@@ -52,7 +54,7 @@ const BottomChromeStrip = () => {
     return () => window.removeEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
   }, []);
 
-  const displayColor = forcedColor ?? color;
+  const displayColor = isAuthPath(location.pathname) ? AUTH_WAVE_BOTTOM_COLOR : forcedColor ?? color;
 
   // Sync CSS variable so scroll containers always reserve space
   // matching the strip — independent of @media (pointer: coarse).
