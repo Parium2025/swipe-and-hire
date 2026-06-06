@@ -812,9 +812,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </a>
             </motion.div>
           </section>
-            {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
-            <BouncyFooter audience={audience} onCta={handleStart} variant="light" />
           </div>
+            {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
+            <BouncyFooter audience={audience} onCta={handleStart} variant="dark" />
 
         </main>
       </div>
