@@ -423,7 +423,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       {/* ─────────── INTRO ─────────── */}
       <section
         aria-label="Introduktion"
-        className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden px-5 pb-16 pt-20 sm:px-6 sm:pb-24 sm:pt-28 md:px-12 md:pt-28 lg:px-24"
+        className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden px-5 pb-10 pt-16 sm:px-6 sm:pb-14 sm:pt-20 md:px-12 md:pt-20 lg:px-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -606,7 +606,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* ──────────────── 3. STATEMENT ──────────────── */}
-          <section className="relative overflow-hidden px-5 py-12 sm:px-6 sm:py-20 md:px-12 md:py-28 lg:px-24">
+          <section className="relative overflow-hidden px-5 py-8 sm:px-6 sm:py-12 md:px-12 md:py-16 lg:px-24">
             <div className="mx-auto grid max-w-[1180px] gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
               <motion.h2
                 initial={{ opacity: 0, x: -80 }}
@@ -630,7 +630,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* ──────────────── FUNKTIONER ──────────────── */}
-          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
               <motion.span
                 initial={{ opacity: 0, x: -40 }}
@@ -665,7 +665,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.15 }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
-                className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+                className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <motion.div
@@ -694,7 +694,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
           <div className="relative z-10 -mt-px bg-landing-light text-landing-light-foreground">
           {/* ──────────────── PRISER ──────────────── */}
-          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 pb-28 pt-20 sm:px-6 md:px-12 md:pt-24 lg:px-24">
+          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 pb-16 pt-12 sm:px-6 md:px-12 md:pb-20 md:pt-16 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
               <motion.div
                 initial={{ opacity: 0, x: -60 }}
@@ -716,7 +716,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
-                className="mt-12 grid gap-5 md:grid-cols-2"
+                className="mt-8 grid gap-5 md:grid-cols-2"
               >
                 {['Start', 'Premium'].map((plan, i) => (
                   <motion.div
@@ -746,7 +746,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* ──────────────── FAQ ──────────────── */}
-          <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+          <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
             <div className="mx-auto max-w-[880px]">
               <motion.div
                 initial={{ opacity: 0, x: -60 }}
@@ -789,7 +789,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* ──────────────── KONTAKT ──────────────── */}
-          <section id="kontakt" aria-labelledby="kontakt-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+          <section id="kontakt" aria-labelledby="kontakt-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -812,9 +812,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </a>
             </motion.div>
           </section>
-            {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
-            <BouncyFooter audience={audience} onCta={handleStart} variant="light" />
           </div>
+            {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
+            <BouncyFooter audience={audience} onCta={handleStart} variant="dark" />
 
         </main>
       </div>
