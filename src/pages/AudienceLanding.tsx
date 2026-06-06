@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import { hapticLight } from '@/lib/haptics';
+
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import WaveDivider from '@/components/landing/WaveDivider';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
