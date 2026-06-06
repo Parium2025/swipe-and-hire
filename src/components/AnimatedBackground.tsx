@@ -33,7 +33,7 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
           aria-hidden
         >
           <defs>
-            {/* Subtil vertikal djupgradient för glasyr-droppar (navy) */}
+            {/* Subtil vertikal djupgradient för pelar-droppar (navy) */}
             <linearGradient id="landing-drip-volume" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(215 100% 14%)" />
               <stop offset="100%" stopColor="hsl(215 100% 9%)" />
@@ -46,32 +46,62 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
             fill="hsl(var(--landing-light))"
           />
 
-          {/* Glasyr-droppar — navy, hänger ner från vågens underkant.
-              Bredare/längre shapes så de skalar synligt på mobil. */}
+          {/* Equalizer-droppar — vertikala pelare som hänger från vågens
+              underkant. Korta varierande höjder så de stannar inom våg-zonen
+              och inte överlappar text i sektionen under. */}
+          {[
+            { x: 60,   top: 78,  h: 30, w: 16 },
+            { x: 118,  top: 96,  h: 46, w: 16 },
+            { x: 176,  top: 108, h: 24, w: 16 },
+            { x: 234,  top: 114, h: 52, w: 16 },
+            { x: 296,  top: 110, h: 32, w: 16 },
+            { x: 358,  top: 100, h: 48, w: 16 },
+            { x: 420,  top: 92,  h: 28, w: 16 },
+            { x: 482,  top: 84,  h: 56, w: 16 },
+            { x: 544,  top: 78,  h: 38, w: 16 },
+            { x: 606,  top: 68,  h: 60, w: 16 },
+            { x: 668,  top: 58,  h: 26, w: 16 },
+            { x: 730,  top: 50,  h: 50, w: 16 },
+            { x: 792,  top: 46,  h: 34, w: 16 },
+            { x: 854,  top: 46,  h: 58, w: 16 },
+            { x: 916,  top: 48,  h: 30, w: 16 },
+            { x: 978,  top: 54,  h: 54, w: 16 },
+            { x: 1040, top: 62,  h: 28, w: 16 },
+            { x: 1102, top: 72,  h: 50, w: 16 },
+            { x: 1164, top: 82,  h: 34, w: 16 },
+            { x: 1226, top: 90,  h: 56, w: 16 },
+            { x: 1288, top: 98,  h: 30, w: 16 },
+            { x: 1350, top: 96,  h: 48, w: 16 },
+            { x: 1410, top: 90,  h: 36, w: 16 },
+          ].map((p, i) => (
+            <rect
+              key={`drip-${i}`}
+              x={p.x}
+              y={p.top}
+              width={p.w}
+              height={p.h}
+              rx={p.w / 2}
+              ry={p.w / 2}
+              fill="url(#landing-drip-volume)"
+            />
+          ))}
 
-          {/* Drop 1 — medel-stor, vänster (x≈240) */}
-          <path
-            d="M170,108 C170,108 158,238 240,238 C322,238 310,108 310,108 Z"
-            fill="url(#landing-drip-volume)"
-          />
-
-          {/* Drop 2 — stor, mitten (djupast, x≈740) */}
-          <path
-            d="M660,50 C660,50 640,322 740,322 C840,322 820,50 820,50 Z"
-            fill="url(#landing-drip-volume)"
-          />
-
-          {/* Drop 3 — medel, höger-mitt (x≈1050) */}
-          <path
-            d="M980,66 C980,66 966,222 1050,222 C1134,222 1120,66 1120,66 Z"
-            fill="url(#landing-drip-volume)"
-          />
-
-          {/* Drop 4 — medel-liten, höger (x≈1320) */}
-          <path
-            d="M1260,98 C1260,98 1248,198 1320,198 C1392,198 1380,98 1380,98 Z"
-            fill="url(#landing-drip-volume)"
-          />
+          {/* Lösa droppar — små punkter under några av de kortare pelarna */}
+          {[
+            { cx: 184, cy: 142, r: 5 },
+            { cx: 428, cy: 130, r: 5 },
+            { cx: 676, cy: 92,  r: 4 },
+            { cx: 924, cy: 86,  r: 4 },
+            { cx: 1296, cy: 136, r: 5 },
+          ].map((d, i) => (
+            <circle
+              key={`drop-${i}`}
+              cx={d.cx}
+              cy={d.cy}
+              r={d.r}
+              fill="url(#landing-drip-volume)"
+            />
+          ))}
         </svg>
       )}
 
