@@ -676,7 +676,7 @@ const Auth = () => {
   // Desktop layout (includes former tablet layout)
 
   return (
-    <div className="h-screen w-full overflow-hidden relative" style={authBackdropStyle}>
+    <div className="relative h-screen w-full overflow-hidden" style={authBackdropStyle}>
       <AuthBackdrop />
       {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
       <main
