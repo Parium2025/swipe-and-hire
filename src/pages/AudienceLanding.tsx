@@ -299,7 +299,6 @@ const FixedPhoneLayer = () => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
 
     const isHeroZone = () => {
-      if (heroIndexRef.current !== 0) return false;
       if (!scrollRoot) return true;
       const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
       if (!stage) return scrollRoot.scrollTop <= window.innerHeight * 0.65;
@@ -309,10 +308,8 @@ const FixedPhoneLayer = () => {
 
     const apply = (next: boolean) => {
       if (next === lastVisibleRef.current && showTimerRef.current === null) return;
-      // Dölj direkt, men vänta ~900ms innan vi visar igen så att
-      // bild 1 hinner lägga sig på plats innan telefonen fade:as in.
       if (next) {
-        if (showTimerRef.current) return; // redan inplanerad
+        if (showTimerRef.current) return;
         showTimerRef.current = setTimeout(() => {
           showTimerRef.current = null;
           lastVisibleRef.current = true;
@@ -326,82 +323,28 @@ const FixedPhoneLayer = () => {
         lastVisibleRef.current = false;
         setVisible(false);
       }
+      setActive(next);
     };
 
     const sync = () => apply(isHeroZone());
 
-    const onIndex = (e: Event) => {
-      const detail = (e as CustomEvent<{ index: number }>).detail;
-      heroIndexRef.current = detail?.index ?? 0;
-      setActive((detail?.index ?? 0) === 0);
-      setPhoneMetrics(calculatePhoneMetrics());
-      apply(detail?.index !== 1 && isHeroZone());
-    };
-
     sync();
     const onSplineReady = () => setPhoneReady(true);
-    window.addEventListener('parium:hero-index', onIndex);
     window.addEventListener('parium:spline-ready', onSplineReady);
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
-
-    // 🔁 Spline-canvasen fångar wheel/touch internt (för 3D-rotation/zoom),
-    // vilket gör att GSAP Observer inte ser scrollen och sidan "fastnar".
-    // Vi forwarder därför scroll-gester från telefonens wrapper till scrollRoot
-    // så att Hero → Intro-animationen triggas precis som utanför telefonen.
-    const phoneWrapper = document.querySelector('[data-phone-scroll-forward]') as HTMLElement | null;
-    let touchY: number | null = null;
-
-    const forwardWheel = (e: WheelEvent) => {
-      if (!scrollRoot) return;
-      e.preventDefault();
-      e.stopPropagation();
-      scrollRoot.dispatchEvent(
-        new WheelEvent('wheel', {
-          deltaY: e.deltaY,
-          deltaX: e.deltaX,
-          deltaMode: e.deltaMode,
-          bubbles: true,
-          cancelable: true,
-        }),
-      );
-    };
-
-    const onTouchStart = (e: TouchEvent) => {
-      touchY = e.touches[0]?.clientY ?? null;
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (touchY === null || !scrollRoot) return;
-      const cy = e.touches[0]?.clientY ?? touchY;
-      const dy = touchY - cy;
-      if (Math.abs(dy) < 6) return;
-      e.preventDefault();
-      // Skicka motsvarande wheel så Observer plockar upp riktningen
-      scrollRoot.dispatchEvent(
-        new WheelEvent('wheel', { deltaY: dy * 2, bubbles: true, cancelable: true }),
-      );
-      touchY = cy;
-    };
-    const onTouchEnd = () => { touchY = null; };
-
-    phoneWrapper?.addEventListener('wheel', forwardWheel, { passive: false, capture: true });
-    phoneWrapper?.addEventListener('touchstart', onTouchStart, { passive: true, capture: true });
-    phoneWrapper?.addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
-    phoneWrapper?.addEventListener('touchend', onTouchEnd, { passive: true, capture: true });
+    window.addEventListener('resize', sync, { passive: true });
 
     return () => {
-      window.removeEventListener('parium:hero-index', onIndex);
       window.removeEventListener('parium:spline-ready', onSplineReady);
       scrollRoot?.removeEventListener('scroll', sync);
-      phoneWrapper?.removeEventListener('wheel', forwardWheel, true);
-      phoneWrapper?.removeEventListener('touchstart', onTouchStart, true);
-      phoneWrapper?.removeEventListener('touchmove', onTouchMove, true);
-      phoneWrapper?.removeEventListener('touchend', onTouchEnd, true);
+      window.removeEventListener('resize', sync);
       if (showTimerRef.current) {
         clearTimeout(showTimerRef.current);
         showTimerRef.current = null;
       }
     };
   }, []);
+
 
   const shouldRenderPhoneLayer = visible;
   const shouldEnablePhoneInteraction = visible && phoneReady;
