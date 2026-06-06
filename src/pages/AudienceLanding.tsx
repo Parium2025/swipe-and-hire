@@ -114,9 +114,9 @@ const useWaveAwareText = () => {
 };
 
 const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
-  <div className="max-w-3xl text-center text-base leading-[1.6] text-white sm:text-lg sm:leading-[1.75] md:text-xl">
+  <div className="max-w-3xl text-center text-base leading-[1.6] sm:text-lg sm:leading-[1.75] md:text-xl">
     {paragraphs.map((paragraph, pIdx) => (
-      <p key={pIdx} className={pIdx > 0 ? 'mt-3 sm:mt-6' : undefined}>
+      <p key={pIdx} className={`wave-text ${pIdx > 0 ? 'mt-3 sm:mt-6' : ''}`.trim()}>
         {paragraph}
       </p>
     ))}
