@@ -64,11 +64,12 @@ const useWaveAwareText = () => {
         const rect = el.getBoundingClientRect();
         if (!waveRect || waveRect.width <= 0 || waveRect.height <= 0 || rect.width <= 0 || rect.height <= 0) {
           if (el.dataset.waveText) delete el.dataset.waveText;
+          if (el.dataset.waveBelow) delete el.dataset.waveBelow;
           el.style.removeProperty('--wave-ink-clip');
           return;
         }
 
-        // Sample wave Y across the element's width to see if it actually intersects.
+        // Sampla vågens Y över elementets bredd för att avgöra om den korsar.
         const samples = Math.max(4, Math.min(18, Math.ceil(rect.width / 34)));
         const ys: number[] = [];
         for (let i = 0; i <= samples; i += 1) {
@@ -80,15 +81,24 @@ const useWaveAwareText = () => {
         const minY = Math.min(...ys);
         const maxY = Math.max(...ys);
 
-        // No intersection: rely on the single-layer base color (off-white above wave,
-        // unreachable below since the element is hidden by the wave fill — but we
-        // never blue-paint here, avoiding the anti-aliasing halo on descenders).
-        if (maxY <= rect.top + 1 || minY >= rect.bottom - 1) {
+        // Helt OVANFÖR vågen → en-lagers vit text (ingen blå halo).
+        if (maxY >= rect.bottom - 1) {
           if (el.dataset.waveText) delete el.dataset.waveText;
+          if (el.dataset.waveBelow) delete el.dataset.waveBelow;
           el.style.removeProperty('--wave-ink-clip');
           return;
         }
 
+        // Helt UNDER vågen → en-lagers blå text (ingen vit halo).
+        if (minY <= rect.top + 1) {
+          if (el.dataset.waveText) delete el.dataset.waveText;
+          if (el.dataset.waveBelow !== '1') el.dataset.waveBelow = '1';
+          el.style.removeProperty('--wave-ink-clip');
+          return;
+        }
+
+        // Vågen korsar elementet → dual-layer med klipp.
+        if (el.dataset.waveBelow) delete el.dataset.waveBelow;
         if (el.dataset.waveText !== text) el.dataset.waveText = text;
 
         const points = ['0% 0%', '100% 0%'];
