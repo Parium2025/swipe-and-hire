@@ -947,7 +947,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             <AnimatedBackground variant="card" showGlow={false} />
             {/* Våg-bakgrund (matchar hero) för visuell konsekvens */}
             <svg
-              className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[42%] w-full"
+              className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[50%] w-full"
               viewBox="0 0 1440 600"
               preserveAspectRatio="none"
               aria-hidden
