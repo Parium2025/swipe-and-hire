@@ -212,13 +212,12 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 200 100% 60%;
 
-    /* Landing light zone — light lavender-blue botten under wave divider */
-    /* Light blue (#bad3f5) — soft lavender tone.
-       Luftigare kontrast mot marinblå hero, mer premium än kritvit. */
-    --landing-light: 215 75% 85%;
-    --landing-light-foreground: 215 38% 15%;
-    --landing-light-muted: 215 16% 36%;
-    --landing-light-border: 215 30% 75%;
+    /* Landing light zone — medium blue botten under wave divider */
+    /* #80b5ff — medium blue. All text pure white for stark kontrast. */
+    --landing-light: 216 100% 75%;
+    --landing-light-foreground: 0 0% 100%;
+    --landing-light-muted: 0 0% 100%;
+    --landing-light-border: 216 80% 65%;
 
     --radius: 0.5rem;
 
