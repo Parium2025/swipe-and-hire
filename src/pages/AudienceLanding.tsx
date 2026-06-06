@@ -301,7 +301,11 @@ const FixedPhoneLayer = () => {
       const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
       if (!stage) return scrollRoot.scrollTop <= window.innerHeight * 0.65;
       const rect = stage.getBoundingClientRect();
-      return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * 0.55;
+      // Strängare tröskel på iPad/mobil så telefonen göms tidigare och inte rör nästa sektions text.
+      // Desktop (≥1180px) behåller den tidigare beteendet eftersom telefonen sitter i sidokolumnen.
+      const isDesktop = window.innerWidth >= 1180;
+      const bottomThreshold = isDesktop ? 0.55 : 0.82;
+      return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * bottomThreshold;
     };
 
     const apply = (next: boolean) => {

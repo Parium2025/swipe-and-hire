@@ -465,7 +465,7 @@ const PinnedHorizontalGallery = () => {
           font-weight: 900;
           line-height: 1.04;
           letter-spacing: -0.025em;
-          color: #ffffff;
+          /* Färg styrs av .wave-text-systemet (vit över blå hero, mörkblå över vit våg). */
           max-width: min(90vw, 20ch);
           margin: 0 auto;
           padding-bottom: 0.12em;
@@ -473,7 +473,7 @@ const PinnedHorizontalGallery = () => {
         }
         .phg-title em {
           font-style: normal;
-          color: #ffffff;
+          color: inherit;
           font-weight: 900;
         }
         @media (min-width: 1536px) { .phg-title { font-size: clamp(3.75rem, 4vw, 5.5rem); } }
@@ -675,7 +675,7 @@ const PinnedHorizontalGallery = () => {
         <div className="phg-sticky">
 
           <div ref={headerRef} className="phg-header" style={{ opacity: 0, transform: 'translate3d(0, 44px, 0)' }}>
-            <p className="phg-title">Vi gör det <em>tillsammans!</em></p>
+            <p className="phg-title wave-text">Vi gör det <em>tillsammans!</em></p>
           </div>
 
           <div className="phg-strip-wrap">
