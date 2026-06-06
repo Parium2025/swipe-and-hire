@@ -19,6 +19,100 @@ type AudienceLandingProps = {
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
+const WAVE_VIEWBOX_WIDTH = 1440;
+const WAVE_VIEWBOX_HEIGHT = 600;
+const WAVE_SEGMENTS = [
+  { x0: 0, y0: 80, x1: 200, y1: 120, x2: 380, y2: 110, x3: 560, y3: 80 },
+  { x0: 560, y0: 80, x1: 760, y1: 46, x2: 940, y2: 44, x3: 1120, y3: 72 },
+  { x0: 1120, y0: 72, x1: 1270, y1: 96, x2: 1360, y2: 100, x3: 1440, y3: 82 },
+] as const;
+
+const cubic = (p0: number, p1: number, p2: number, p3: number, t: number) => {
+  const mt = 1 - t;
+  return mt * mt * mt * p0 + 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t * p3;
+};
+
+const waveYAtViewBoxX = (x: number) => {
+  const clampedX = Math.max(0, Math.min(WAVE_VIEWBOX_WIDTH, x));
+  const segment = WAVE_SEGMENTS.find((s) => clampedX >= s.x0 && clampedX <= s.x3) ?? WAVE_SEGMENTS[WAVE_SEGMENTS.length - 1];
+  let lo = 0;
+  let hi = 1;
+  for (let i = 0; i < 18; i += 1) {
+    const mid = (lo + hi) / 2;
+    const midX = cubic(segment.x0, segment.x1, segment.x2, segment.x3, mid);
+    if (midX < clampedX) lo = mid;
+    else hi = mid;
+  }
+  const t = (lo + hi) / 2;
+  return cubic(segment.y0, segment.y1, segment.y2, segment.y3, t);
+};
+
+const useWaveAwareText = () => {
+  useEffect(() => {
+    let frame = 0;
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+
+    const update = () => {
+      frame = 0;
+      const wave = document.querySelector('[data-landing-wave-map]') as SVGSVGElement | null;
+      const waveRect = wave?.getBoundingClientRect();
+      const items = Array.from(document.querySelectorAll<HTMLElement>('[data-landing-scroll-root] .wave-text'));
+
+      items.forEach((el) => {
+        const text = el.textContent?.trim() ?? '';
+        if (el.dataset.waveText !== text) el.dataset.waveText = text;
+
+        const rect = el.getBoundingClientRect();
+        if (!waveRect || waveRect.width <= 0 || waveRect.height <= 0 || rect.width <= 0 || rect.height <= 0) return;
+
+        const samples = Math.max(4, Math.min(18, Math.ceil(rect.width / 34)));
+        const points = ['0% 0%', '100% 0%'];
+
+        for (let i = samples; i >= 0; i -= 1) {
+          const xPercent = (i / samples) * 100;
+          const viewportX = rect.left + rect.width * (i / samples);
+          const viewBoxX = ((viewportX - waveRect.left) / waveRect.width) * WAVE_VIEWBOX_WIDTH;
+          const viewBoxY = waveYAtViewBoxX(viewBoxX);
+          const viewportY = waveRect.top + (viewBoxY / WAVE_VIEWBOX_HEIGHT) * waveRect.height;
+          const yPercent = Math.max(0, Math.min(100, ((viewportY - rect.top) / rect.height) * 100));
+          points.push(`${xPercent.toFixed(2)}% ${yPercent.toFixed(2)}%`);
+        }
+
+        el.style.setProperty('--wave-ink-clip', `polygon(${points.join(',')})`);
+      });
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+
+    const resizeObserver = new ResizeObserver(schedule);
+    resizeObserver.observe(document.documentElement);
+    if (root) resizeObserver.observe(root);
+
+    const mutationObserver = new MutationObserver(schedule);
+    mutationObserver.observe(root ?? document.body, { childList: true, subtree: true, characterData: true });
+
+    schedule();
+    document.fonts?.ready.then(schedule).catch(() => undefined);
+    root?.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    window.visualViewport?.addEventListener('resize', schedule, { passive: true });
+    window.visualViewport?.addEventListener('scroll', schedule, { passive: true });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+      root?.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      window.visualViewport?.removeEventListener('resize', schedule);
+      window.visualViewport?.removeEventListener('scroll', schedule);
+    };
+  }, []);
+};
+
 const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
   <div className="max-w-3xl text-center text-base leading-[1.6] text-white sm:text-lg sm:leading-[1.75] md:text-xl">
     {paragraphs.map((paragraph, pIdx) => (
