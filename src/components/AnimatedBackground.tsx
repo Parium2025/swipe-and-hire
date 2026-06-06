@@ -32,61 +32,40 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
           preserveAspectRatio="none"
           aria-hidden
         >
-          <g fill="hsl(var(--landing-light))">
-            {/* Bas-vågen (samma kurva som wave-text klipper mot — får inte ändras) */}
-            <path d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z" />
+          <defs>
+            {/* Subtil djup-gradient strax under vågkanten — ger off-white-ytan
+                känslan av tjocklek istället för plattbild. */}
+            <linearGradient id="landing-wave-depth" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(215 38% 15%)" stopOpacity="0.10" />
+              <stop offset="100%" stopColor="hsl(215 38% 15%)" stopOpacity="0" />
+            </linearGradient>
+            {/* Tunn highlight precis på vågens topp — ljusbrytning à la Apple/Linear. */}
+            <linearGradient id="landing-wave-sheen" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(0 0% 100%)" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="hsl(0 0% 100%)" stopOpacity="0" />
+            </linearGradient>
+          </defs>
 
-            {/* Organiska glasyr-droppar som rinner upp ur vågen in i hero-blått.
-                Varje droppe är en rundad rektangel som ankras lite under wave-Y
-                så den smälter ihop med basformen utan glapp. */}
-            {[
-              { x: 70, y: 96, w: 24, h: 64 },
-              { x: 158, y: 108, w: 18, h: 46 },
-              { x: 232, y: 116, w: 26, h: 88 },
-              { x: 318, y: 115, w: 16, h: 38 },
-              { x: 402, y: 104, w: 28, h: 104 },
-              { x: 484, y: 90, w: 20, h: 58 },
-              { x: 568, y: 80, w: 24, h: 78 },
-              { x: 656, y: 62, w: 18, h: 46 },
-              { x: 738, y: 50, w: 26, h: 92 },
-              { x: 822, y: 45, w: 16, h: 36 },
-              { x: 906, y: 45, w: 28, h: 110 },
-              { x: 988, y: 52, w: 20, h: 58 },
-              { x: 1066, y: 64, w: 24, h: 80 },
-              { x: 1148, y: 76, w: 18, h: 46 },
-              { x: 1228, y: 90, w: 26, h: 96 },
-              { x: 1306, y: 98, w: 16, h: 38 },
-              { x: 1380, y: 94, w: 22, h: 70 },
-            ].map((d, i) => {
-              const r = d.w / 2;
-              return (
-                <rect
-                  key={`drip-${i}`}
-                  x={d.x - r}
-                  y={d.y - d.h}
-                  width={d.w}
-                  height={d.h + r + 6}
-                  rx={r}
-                  ry={r}
-                />
-              );
-            })}
+          {/* Bas-vågen (oförändrad kurva — wave-text klipper mot den) */}
+          <path
+            d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
+            fill="hsl(var(--landing-light))"
+          />
 
-            {/* Fristående droppar — som glasyr-stänk i hero-zonen ovanför vågen */}
-            {[
-              { cx: 118, cy: 60, r: 5 },
-              { cx: 280, cy: 78, r: 4 },
-              { cx: 440, cy: 56, r: 6 },
-              { cx: 612, cy: 30, r: 5 },
-              { cx: 786, cy: 18, r: 4 },
-              { cx: 962, cy: 20, r: 5 },
-              { cx: 1132, cy: 42, r: 6 },
-              { cx: 1296, cy: 60, r: 5 },
-              { cx: 1418, cy: 58, r: 4 },
-            ].map((c, i) => (
-              <circle key={`dot-${i}`} cx={c.cx} cy={c.cy} r={c.r} />
-            ))}
-          </g>
+          {/* Djup-band precis under kanten */}
+          <path
+            d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,180 L0,180 Z"
+            fill="url(#landing-wave-depth)"
+          />
+
+          {/* Sheen på vågens topp */}
+          <path
+            d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82"
+            stroke="url(#landing-wave-sheen)"
+            strokeWidth="1.5"
+            fill="none"
+          />
+
         </svg>
       )}
 
