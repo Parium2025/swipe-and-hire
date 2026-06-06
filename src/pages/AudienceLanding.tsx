@@ -157,8 +157,111 @@ const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
 
 type HeroIntroStageProps = {
   c: (typeof audienceContent)[AudienceRole];
+  audience: AudienceRole;
   onIntroCta?: () => void;
   introCtaLabel?: string;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HeroDesktopCallout — CTA + proof-rad under HeroText på desktop.
+// Fyller den glesa ytan under rubriken med tydlig handling + bevis,
+// utan att röra mobil eller HeroText (visuell paritet bevarad).
+// ─────────────────────────────────────────────────────────────────────────────
+type HeroProof = { value: string; label: string };
+const HeroDesktopCallout = ({
+  proof,
+  ctaLabel,
+  onPrimary,
+}: {
+  proof: HeroProof[];
+  ctaLabel: string;
+  onPrimary?: () => void;
+}) => {
+  const handleSecondary = () => {
+    const target = document.querySelector('[aria-label="Introduktion"]') as HTMLElement | null;
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const premiumEase = [0.22, 1, 0.36, 1] as const;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1.1, ease: premiumEase, delay: 1.9 }}
+      className="pointer-events-auto mt-10 hidden flex-col gap-7 md:flex md:[@media_(orientation:portrait)]:items-center md:[@media_(orientation:portrait)]:text-center lg:[@media_(orientation:portrait)]:items-start lg:[@media_(orientation:portrait)]:text-left"
+    >
+      <div className="flex flex-wrap items-center gap-3">
+        {onPrimary && (
+          <button
+            type="button"
+            onPointerDown={onPrimary}
+            className="group inline-flex min-h-touch items-center justify-center gap-2 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-white shadow-[0_18px_50px_-12px_hsl(var(--secondary)/0.55)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_22px_60px_-10px_hsl(var(--secondary)/0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+          >
+            {ctaLabel}
+            <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
+          </button>
+        )}
+        <button
+          type="button"
+          onPointerDown={handleSecondary}
+          className="inline-flex min-h-touch items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition-colors duration-300 hover:border-white/30 hover:bg-white/[0.08]"
+        >
+          Se hur det funkar
+        </button>
+      </div>
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+        {proof.map((p) => (
+          <div key={p.label} className="flex items-baseline gap-2">
+            <span className="text-2xl font-black tracking-tight text-white">{p.value}</span>
+            <span className="text-[12px] font-medium uppercase tracking-[0.14em] text-white/55">{p.label}</span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HeroFloatingCards — svävande glas-kort runt telefonen på desktop landscape.
+// Pointer-events: none (interfererar inte). Döljs i portrait + tablet/mobil.
+// Subtila floats för att fylla den glesa ytan på högra sidan.
+// ─────────────────────────────────────────────────────────────────────────────
+const HeroFloatingCards = ({ role }: { role: AudienceRole }) => {
+  const isSeeker = role === 'job_seeker';
+  const cards = isSeeker
+    ? [
+        { id: 'match', top: '18%', right: '6%', delay: 1.4, title: 'Ny match!', body: 'Frontend-utvecklare · Stockholm', dot: 'bg-emerald-400' },
+        { id: 'chat', bottom: '22%', right: '22%', delay: 1.9, title: 'Meddelande från Nordea', body: '"Kan vi prata på torsdag?"', dot: 'bg-secondary' },
+      ]
+    : [
+        { id: 'cand', top: '16%', right: '5%', delay: 1.4, title: '12 nya kandidater', body: 'Matchar din annons idag', dot: 'bg-emerald-400' },
+        { id: 'int', bottom: '24%', right: '22%', delay: 1.9, title: 'Intervju bokad', body: 'Anna L. · imorgon 14:00', dot: 'bg-secondary' },
+      ];
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] hidden lg:[@media_(orientation:landscape)]:block">
+      {cards.map((card, i) => (
+        <motion.div
+          key={card.id}
+          initial={{ opacity: 0, y: 20, scale: 0.92 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: card.delay }}
+          style={{ top: card.top, right: card.right, bottom: card.bottom }}
+          className="absolute"
+        >
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 6 + i * 1.5, ease: 'easeInOut', repeat: Infinity, delay: i * 0.7 }}
+            className="flex w-[230px] items-start gap-3 rounded-2xl border border-white/12 bg-white/[0.06] p-4 shadow-[0_20px_60px_-20px_rgb(0_0_0/0.6)] backdrop-blur-xl"
+          >
+            <span className={`mt-1 inline-flex h-2 w-2 shrink-0 rounded-full ${card.dot} shadow-[0_0_12px_currentColor]`} />
+            <div className="min-w-0 flex-1">
+              <div className="text-[13px] font-bold leading-tight text-white">{card.title}</div>
+              <div className="mt-1 truncate text-[12px] font-medium text-white/65">{card.body}</div>
+            </div>
+          </motion.div>
+        </motion.div>
+      ))}
+    </div>
+  );
 };
 
 const PHONE_ASPECT = 9 / 19.5;
@@ -365,7 +468,7 @@ const FixedPhoneLayer = () => {
 // `whileInView`. Telefonen (FixedPhoneLayer) hittar fortfarande hero via
 // data-hero-intro-stage och döljs när användaren scrollar förbi.
 // ─────────────────────────────────────────────────────────────────────────────
-const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
+const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   return (
     <>
       {/* ─────────── HERO ─────────── */}
@@ -404,6 +507,15 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             animate={{ opacity: [0.5, 0.75, 0.5] }}
             transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
           />
+          {/* Ambient glow bottom-left för att fylla nedre ytan på stora skärmar */}
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-48 left-[-15%] hidden h-[620px] w-[620px] rounded-full bg-secondary/[0.05] blur-[170px] lg:block"
+            animate={{ opacity: [0.35, 0.6, 0.35] }}
+            transition={{ duration: 11, ease: 'easeInOut', repeat: Infinity, delay: 1.4 }}
+          />
+          {/* Floating glass-kort som svävar runt telefonen (desktop landscape only) */}
+          <HeroFloatingCards role={audience} />
           <div className="relative z-10 mx-auto grid w-full max-w-[1400px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 px-3 sm:px-5 md:px-6 md:[@media_(orientation:portrait)]:block lg:grid-cols-2 lg:gap-16 lg:px-24 lg:[@media_(orientation:portrait)]:grid">
             <motion.div
               data-hero-phone-anchor
@@ -414,6 +526,12 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
             >
               <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
+              {/* CTA + proof-rad — fyller ut hero-ytan på stora skärmar */}
+              <HeroDesktopCallout
+                proof={c.proof}
+                ctaLabel={c.hero.cta}
+                onPrimary={onIntroCta}
+              />
             </motion.div>
             <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
           </div>
@@ -596,7 +714,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
         <main>
-          <HeroIntroStage c={c} onIntroCta={handleStart} introCtaLabel="Skapa min profil idag" />
+          <HeroIntroStage c={c} audience={audience} onIntroCta={handleStart} introCtaLabel="Skapa min profil idag" />
 
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
