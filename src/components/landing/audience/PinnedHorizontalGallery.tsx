@@ -47,6 +47,43 @@ const CardItem = ({ item, index }: CardItemProps) => {
   // network error, 404, codec-fel eller om användaren är offline när videon
   // ska laddas. Användaren ser alltid en relevant bild istället för svart ruta.
   const [failed, setFailed] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Pausa videor som ligger utanför viewporten. Annars håller browsern igång
+  // 8 parallella H.264-dekodrar samtidigt vilket hackar/lagger på Windows-
+  // laptops utan dedikerad GPU. Vi använder gallery-progress (samma event
+  // som strippens transform) eftersom IntersectionObserver inte triggar på
+  // ren transform-ändring inom overflow:hidden-strippen.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || item.type !== 'video' || failed) return;
+    const evaluate = () => {
+      const rect = v.getBoundingClientRect();
+      const vw = window.innerWidth || document.documentElement.clientWidth;
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      // Margin: håll grannkort "varma" så vi inte pausar precis när de glider in.
+      const margin = vw * 0.15;
+      const visibleH = rect.bottom > 0 && rect.top < vh;
+      const visibleX = rect.right > -margin && rect.left < vw + margin;
+      const shouldPlay = visibleH && visibleX;
+      if (shouldPlay && v.paused) {
+        const p = v.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      } else if (!shouldPlay && !v.paused) {
+        v.pause();
+      }
+    };
+    const onProgress = () => evaluate();
+    window.addEventListener('parium:gallery-progress', onProgress);
+    window.addEventListener('resize', evaluate);
+    window.addEventListener('scroll', evaluate, { passive: true });
+    evaluate();
+    return () => {
+      window.removeEventListener('parium:gallery-progress', onProgress);
+      window.removeEventListener('resize', evaluate);
+      window.removeEventListener('scroll', evaluate);
+    };
+  }, [item.type, failed]);
 
   return (
     <div
@@ -55,6 +92,7 @@ const CardItem = ({ item, index }: CardItemProps) => {
     >
       {item.type === 'video' && !failed ? (
         <video
+          ref={videoRef}
           src={item.src}
           poster={item.poster}
           muted
