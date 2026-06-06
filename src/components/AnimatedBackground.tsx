@@ -47,30 +47,29 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
           />
 
           {/* Glasyr-droppar — navy, hänger ner från vågens underkant.
-              Asymmetriska, varierande längd/bredd. ViewBox är 1440×600, så
-              droppar behöver vara breda nog att synas efter skalning till skärm. */}
+              Bredare/längre shapes så de skalar synligt på mobil. */}
 
-          {/* Drop 1 — medel, vänster (x≈230) */}
+          {/* Drop 1 — medel-stor, vänster (x≈240) */}
           <path
-            d="M200,112 C200,112 192,196 232,196 C272,196 264,112 264,112 Z"
+            d="M170,108 C170,108 158,238 240,238 C322,238 310,108 310,108 Z"
             fill="url(#landing-drip-volume)"
           />
 
           {/* Drop 2 — stor, mitten (djupast, x≈740) */}
           <path
-            d="M700,50 C700,50 686,272 742,272 C798,272 784,50 784,50 Z"
+            d="M660,50 C660,50 640,322 740,322 C840,322 820,50 820,50 Z"
             fill="url(#landing-drip-volume)"
           />
 
           {/* Drop 3 — medel, höger-mitt (x≈1050) */}
           <path
-            d="M1018,68 C1018,68 1008,168 1052,168 C1096,168 1086,68 1086,68 Z"
+            d="M980,66 C980,66 966,222 1050,222 C1134,222 1120,66 1120,66 Z"
             fill="url(#landing-drip-volume)"
           />
 
-          {/* Drop 4 — liten, höger (x≈1310) */}
+          {/* Drop 4 — medel-liten, höger (x≈1320) */}
           <path
-            d="M1286,98 C1286,98 1280,162 1314,162 C1348,162 1342,98 1342,98 Z"
+            d="M1260,98 C1260,98 1248,198 1320,198 C1392,198 1380,98 1380,98 Z"
             fill="url(#landing-drip-volume)"
           />
         </svg>
