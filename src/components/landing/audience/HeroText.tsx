@@ -33,7 +33,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
   // Följer samma vågmask som bakgrunden: vit på blått, blå på vitt.
   const subtitleClass = isMobile
     ? 'wave-text mt-7 max-w-xl text-base leading-8 font-medium'
-    : 'wave-text mt-7 lg:[@media_(orientation:landscape)]:mt-32 xl:[@media_(orientation:landscape)]:mt-40 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)] lg:[@media_(orientation:landscape)]:ml-auto lg:[@media_(orientation:landscape)]:mr-0 lg:[@media_(orientation:landscape)]:text-left lg:[@media_(orientation:landscape)]:translate-x-[18vw] xl:[@media_(orientation:landscape)]:translate-x-[20vw]';
+    : 'wave-text mt-7 lg:[@media_(orientation:landscape)]:mt-24 xl:[@media_(orientation:landscape)]:mt-32 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)] lg:[@media_(orientation:landscape)]:ml-auto lg:[@media_(orientation:landscape)]:mr-0 lg:[@media_(orientation:landscape)]:text-left lg:[@media_(orientation:landscape)]:translate-x-[18vw] xl:[@media_(orientation:landscape)]:translate-x-[20vw]';
 
   // Premium-entré: enbart opacity. Ingen blur, ingen skugga, ingen translate.
   // Långsam, lugn ease (Apple-style) med en mjuk stagger rad-för-rad.
