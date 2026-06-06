@@ -694,7 +694,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
           <div className="relative z-10 -mt-px bg-landing-light text-landing-light-foreground">
           {/* ──────────────── PRISER ──────────────── */}
-          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 pb-28 pt-20 sm:px-6 md:px-12 md:pt-24 lg:px-24">
+          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 pb-16 pt-12 sm:px-6 md:px-12 md:pb-20 md:pt-16 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
               <motion.div
                 initial={{ opacity: 0, x: -60 }}
