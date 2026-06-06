@@ -46,30 +46,33 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
             fill="hsl(var(--landing-light))"
           />
 
-          {/* Equalizer-droppar — vertikala pelare med rundade tippar som hänger
-              från vågens underkant. Varierande höjder för en organisk känsla.
-              Höjder hålls tight så de inte överlappar text i sektionen under. */}
+          {/* Equalizer-droppar — vertikala pelare som hänger från vågens
+              underkant. Korta varierande höjder så de stannar inom våg-zonen
+              och inte överlappar text i sektionen under. */}
           {[
-            { x: 60,   top: 78,  h: 48,  w: 18 },
-            { x: 122,  top: 96,  h: 78,  w: 18 },
-            { x: 184,  top: 108, h: 36,  w: 18 },
-            { x: 246,  top: 114, h: 92,  w: 18 },
-            { x: 320,  top: 110, h: 54,  w: 18 },
-            { x: 394,  top: 100, h: 84,  w: 18 },
-            { x: 468,  top: 90,  h: 44,  w: 18 },
-            { x: 542,  top: 80,  h: 96,  w: 18 },
-            { x: 616,  top: 66,  h: 64,  w: 18 },
-            { x: 690,  top: 56,  h: 102, w: 18 },
-            { x: 764,  top: 48,  h: 40,  w: 18 },
-            { x: 838,  top: 46,  h: 86,  w: 18 },
-            { x: 912,  top: 46,  h: 58,  w: 18 },
-            { x: 986,  top: 54,  h: 98,  w: 18 },
-            { x: 1060, top: 64,  h: 46,  w: 18 },
-            { x: 1134, top: 78,  h: 88,  w: 18 },
-            { x: 1208, top: 88,  h: 50,  w: 18 },
-            { x: 1282, top: 98,  h: 90,  w: 18 },
-            { x: 1356, top: 96,  h: 56,  w: 18 },
-            { x: 1414, top: 88,  h: 76,  w: 18 },
+            { x: 60,   top: 78,  h: 30, w: 16 },
+            { x: 118,  top: 96,  h: 46, w: 16 },
+            { x: 176,  top: 108, h: 24, w: 16 },
+            { x: 234,  top: 114, h: 52, w: 16 },
+            { x: 296,  top: 110, h: 32, w: 16 },
+            { x: 358,  top: 100, h: 48, w: 16 },
+            { x: 420,  top: 92,  h: 28, w: 16 },
+            { x: 482,  top: 84,  h: 56, w: 16 },
+            { x: 544,  top: 78,  h: 38, w: 16 },
+            { x: 606,  top: 68,  h: 60, w: 16 },
+            { x: 668,  top: 58,  h: 26, w: 16 },
+            { x: 730,  top: 50,  h: 50, w: 16 },
+            { x: 792,  top: 46,  h: 34, w: 16 },
+            { x: 854,  top: 46,  h: 58, w: 16 },
+            { x: 916,  top: 48,  h: 30, w: 16 },
+            { x: 978,  top: 54,  h: 54, w: 16 },
+            { x: 1040, top: 62,  h: 28, w: 16 },
+            { x: 1102, top: 72,  h: 50, w: 16 },
+            { x: 1164, top: 82,  h: 34, w: 16 },
+            { x: 1226, top: 90,  h: 56, w: 16 },
+            { x: 1288, top: 98,  h: 30, w: 16 },
+            { x: 1350, top: 96,  h: 48, w: 16 },
+            { x: 1410, top: 90,  h: 36, w: 16 },
           ].map((p, i) => (
             <rect
               key={`drip-${i}`}
@@ -85,11 +88,11 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
 
           {/* Lösa droppar — små punkter under några av de kortare pelarna */}
           {[
-            { cx: 193, cy: 158, r: 6 },
-            { cx: 477, cy: 150, r: 7 },
-            { cx: 773, cy: 104, r: 6 },
-            { cx: 921, cy: 120, r: 5 },
-            { cx: 1217, cy: 152, r: 6 },
+            { cx: 184, cy: 142, r: 5 },
+            { cx: 428, cy: 130, r: 5 },
+            { cx: 676, cy: 92,  r: 4 },
+            { cx: 924, cy: 86,  r: 4 },
+            { cx: 1296, cy: 136, r: 5 },
           ].map((d, i) => (
             <circle
               key={`drop-${i}`}
