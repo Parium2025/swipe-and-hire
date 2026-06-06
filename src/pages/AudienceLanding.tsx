@@ -435,595 +435,123 @@ const FixedPhoneLayer = () => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HeroIntroStage — GSAP Observer
-// Två lager (Hero + Intro) i samma 100svh-yta. Wheel/touch fångas av Observer
-// och animerar lagren in/ut (Intro kommer UPPIFRÅN). När man redan är på Intro
-// och scrollar nedåt igen släpps kontrollen och sidan scrollar vidare normalt.
-// Inga scroll-snap, ingen sticky, inga konkurrerande wheel-locks.
+// HeroIntroStage — Native scroll, inga hijacks.
+// Hero ligger som en vanlig 100svh-sektion. Intro ligger som en egen
+// fullhöjds-sektion direkt under och fadar/slidar in via framer-motion
+// `whileInView`. Telefonen (FixedPhoneLayer) hittar fortfarande hero via
+// data-hero-intro-stage och döljs när användaren scrollar förbi.
 // ─────────────────────────────────────────────────────────────────────────────
 const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
-  const stageRef = useRef<HTMLElement | null>(null);
-  const heroOuterRef = useRef<HTMLDivElement | null>(null);
-  const heroInnerRef = useRef<HTMLDivElement | null>(null);
-  const introOuterRef = useRef<HTMLDivElement | null>(null);
-  const introInnerRef = useRef<HTMLDivElement | null>(null);
-  const introTextRef = useRef<HTMLDivElement | null>(null);
-  const indexRef = useRef(0); // 0 = hero, 1 = intro
-  const animatingRef = useRef(false);
-  const releaseLockedRef = useRef(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    let observer: { kill: () => void; enable?: () => void; disable?: () => void; isEnabled?: boolean } | null = null;
-    let setupTeardown: (() => void) | undefined;
-
-    const setup = async () => {
-      const [{ default: gsap }, { Observer }] = await Promise.all([
-        import('gsap'),
-        import('gsap/Observer'),
-      ]);
-      if (cancelled) return;
-      gsap.registerPlugin(Observer);
-
-      const heroOuter = heroOuterRef.current;
-      const heroInner = heroInnerRef.current;
-      const introOuter = introOuterRef.current;
-      const introInner = introInnerRef.current;
-      const introText = introTextRef.current;
-      const stage = stageRef.current;
-      const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-      if (!heroOuter || !heroInner || !introOuter || !introInner || !stage) return;
-
-      // Respektera systeminställningen "Minska rörelse" (iOS/macOS/Android).
-      // Vi behåller alla transitions visuellt identiska men korta — premium-
-      // detalj som stora bolag (Apple, Spotify) alltid har. Ingen UI-påverkan
-      // för användare utan flaggan.
-      const reducedMotion = typeof window !== 'undefined'
-        && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
-      const DURATION_SCALE = reducedMotion ? 0.7 : 1;
-
-      // OBS: heroTextItems plockas INTE — framer-motion (HeroText) äger
-      // hero-textens opacitet helt. GSAP rör bara layer-transformerna.
-      const gallerySection = document.getElementById('sa-funkar-det');
-      const introTextItems = introText ? gsap.utils.toArray<HTMLElement>(introText.querySelectorAll('p')) : [];
-      const introCtaEl = introText?.querySelector<HTMLElement>('[data-intro-anim]') ?? null;
-      const introHeadingEl = introText?.querySelector<HTMLElement>('[data-intro-heading]') ?? null;
-      let releasedToGallery = false;
-      let programmaticReturn = false;
-      let prevScrollTop = scrollRoot?.scrollTop ?? 0;
-      let restoreScrollBehavior: (() => void) | null = null;
-
-      let observerActive = false;
-      const setObserverActive = (active: boolean) => {
-        if (!observer || active === observerActive) return;
-        observerActive = active;
-        if (active) observer.enable?.();
-        else observer.disable?.();
-      };
-
-      const clearReturnWork = () => {
-        if (scrollRoot) gsap.killTweensOf(scrollRoot);
-        restoreScrollBehavior?.();
-        restoreScrollBehavior = null;
-      };
-
-      const snapStageToTop = () => {
-        if (!scrollRoot) return;
-        const top = scrollRoot.scrollTop + stage.getBoundingClientRect().top;
-        if (Math.abs(scrollRoot.scrollTop - top) > 1) {
-          scrollRoot.scrollTo({ top, behavior: 'auto' });
-        }
-      };
-
-      // VIKTIGT: Vi rör INTE heroTextItems via GSAP. Hero-texten ägs av
-      // framer-motion (HeroText) som har en lång premium-fade (~3s totalt).
-      // Om GSAP gör `gsap.set(...opacity:1)` eller tween:ar opacity här
-      // kapas framer-motions pågående animation mitt i → text "hackar"
-      // eller "försvinner fel" vid första scrollen efter refresh.
-      // Hero-text-layern (heroOuter) skiftar yPercent → texten lämnar
-      // viewporten visuellt utan att vi behöver röra textens opacity.
-      const setHeroStart = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, introHeadingEl, ...introTextItems].filter(Boolean));
-        gsap.set(heroOuter, { yPercent: 0, autoAlpha: 1 });
-        gsap.set(heroInner, { yPercent: 0 });
-        gsap.set(introOuter, { yPercent: 100, autoAlpha: 0 });
-        gsap.set(introInner, { yPercent: -100 });
-        if (introText) gsap.set(introText, { opacity: 1, clearProps: 'transform' });
-        gsap.set(introTextItems, { y: 44, opacity: 0 });
-        if (introCtaEl) gsap.set(introCtaEl, { opacity: 0 });
-        if (introHeadingEl) gsap.set(introHeadingEl, { opacity: 0 });
-        indexRef.current = 0;
-      };
-
-      const setIntroResting = () => {
-        gsap.killTweensOf([heroOuter, heroInner, introOuter, introInner, introText, introCtaEl, introHeadingEl, ...introTextItems].filter(Boolean));
-        gsap.set(heroOuter, { yPercent: -100, autoAlpha: 1 });
-        gsap.set(heroInner, { yPercent: 100 });
-        gsap.set(introOuter, { yPercent: 0, autoAlpha: 1 });
-        gsap.set(introInner, { yPercent: 0 });
-        if (introText) gsap.set(introText, { opacity: 1, clearProps: 'transform' });
-        // När intro ligger stilla ska texten inte längre ligga på ett GSAP-
-        // transformlager. På hård scroll mot 3:an kunde compositing annars ge
-        // en ghost/dubblett-frame av texten i Chrome/Lovable-preview.
-        gsap.set(introTextItems, { opacity: 1, clearProps: 'transform' });
-        if (introCtaEl) gsap.set(introCtaEl, { opacity: 1, clearProps: 'transform' });
-        if (introHeadingEl) gsap.set(introHeadingEl, { opacity: 1, clearProps: 'transform' });
-        indexRef.current = 1;
-      };
-
-      setHeroStart();
-
-      const goToIntro = ({ snap = true } = {}) => {
-        if (animatingRef.current || indexRef.current === 1) return;
-        clearReturnWork();
-        animatingRef.current = true;
-        indexRef.current = 1;
-        if (snap) snapStageToTop();
-        void hapticLight();
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'next' } }));
-
-        const tl = gsap.timeline({
-          defaults: { duration: 1.08 * DURATION_SCALE, ease: 'power2.inOut' },
-          onComplete: () => {
-            setIntroResting();
-            animatingRef.current = false;
-            releaseLockedRef.current = false;
-            programmaticReturn = false;
-            window.dispatchEvent(new Event('parium:gallery-warm'));
-            if (!releasedToGallery) setObserverActive(true);
-          },
-        });
-        // heroTextItems-tween borttagen — framer-motion äger hero-textens
-        // opacitet. Layern (heroOuter) translateY tar texten ur viewporten.
-        tl.to(heroOuter, { yPercent: -100 }, 0);
-        tl.to(heroInner, { yPercent: 100 }, 0);
-        tl.set(introOuter, { autoAlpha: 1 }, 0);
-        tl.fromTo(introOuter, { yPercent: 100 }, { yPercent: 0 }, 0);
-        tl.fromTo(introInner, { yPercent: -100 }, { yPercent: 0 }, 0);
-        if (introHeadingEl) {
-          // Rubriken matchar hero-h1: opacity-only premium fade, lugn och lång.
-          tl.fromTo(introHeadingEl, { opacity: 0 }, { opacity: 1, duration: 1.2 * DURATION_SCALE, ease: 'power3.out' }, 0.3 * DURATION_SCALE);
-        }
-        tl.fromTo(introTextItems, { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.62 * DURATION_SCALE, stagger: 0.08 * DURATION_SCALE, ease: 'power2.out' }, 0.62 * DURATION_SCALE);
-        if (introCtaEl) {
-          // CTA fadar bara in (ingen y-translate) så den inte "sticker upp" i slutet.
-          tl.fromTo(introCtaEl, { opacity: 0 }, { opacity: 1, duration: 0.62 * DURATION_SCALE, ease: 'power2.out' }, (0.62 + introTextItems.length * 0.08) * DURATION_SCALE);
-        }
-      };
-
-      const goToHero = () => {
-        if (animatingRef.current || indexRef.current === 0) return;
-        clearReturnWork();
-        releasedToGallery = false;
-        programmaticReturn = false;
-        animatingRef.current = true;
-        indexRef.current = 0;
-        snapStageToTop();
-        void hapticLight();
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 0, direction: 'prev' } }));
-
-        const tl = gsap.timeline({
-          defaults: { duration: 1.08 * DURATION_SCALE, ease: 'power2.inOut' },
-          onComplete: () => {
-            setHeroStart();
-            animatingRef.current = false;
-            releaseLockedRef.current = false;
-            setObserverActive(true);
-          },
-        });
-        tl.to(introTextItems, { y: 44, opacity: 0, duration: 0.42 * DURATION_SCALE, stagger: 0.055 * DURATION_SCALE, ease: 'power2.in' }, 0);
-        if (introCtaEl) tl.to(introCtaEl, { opacity: 0, duration: 0.32 * DURATION_SCALE, ease: 'power2.in' }, 0);
-        if (introHeadingEl) tl.to(introHeadingEl, { opacity: 0, duration: 0.42 * DURATION_SCALE, ease: 'power2.in' }, 0);
-        tl.to(introOuter, { yPercent: 100 }, 0);
-        tl.to(introInner, { yPercent: -100 }, 0);
-        tl.set(introOuter, { autoAlpha: 0 });
-        tl.fromTo(heroOuter, { yPercent: -100 }, { yPercent: 0 }, 0);
-        tl.fromTo(heroInner, { yPercent: 100 }, { yPercent: 0 }, 0);
-        // heroTextItems-tween borttagen — framer-motion ägde entrén och
-        // återkomst-fade hanteras visuellt via layerns yPercent-slide.
-      };
-
-      // 2↔3 måste vara en låst premium-transition, inte native momentum-scroll.
-      // På touch kunde iOS/Chrome annars fortsätta scrolla mellan sektionerna
-      // innan returen hann trigga. Därför äger GSAP scrollTop under själva
-      // tröskelpassagen, medan galleriets egen progress är fryst tills landning.
-      let transitionBlockUntil = 0;
-      let galleryTouchY: number | null = null;
-      let galleryProgress = 0;
-      const galleryStartThreshold = 0.0015;
-      const getGalleryAtStart = () => {
-        const progressSource = gallerySection?.querySelector('[data-phg-section]') as HTMLElement | null;
-        const progress = progressSource?.dataset.phgProgress;
-        if (progress !== undefined) galleryProgress = Number(progress) || 0;
-        return galleryProgress <= galleryStartThreshold;
-      };
-      const blockNativeInput = (e: Event) => {
-        if (performance.now() < transitionBlockUntil) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-
-        if (releasedToGallery && !programmaticReturn && !animatingRef.current && scrollRoot) {
-          const wheelBack = e instanceof WheelEvent && e.deltaY < -8;
-          const touch = e instanceof TouchEvent ? e.touches[0] : null;
-          const touchBack = touch && galleryTouchY !== null ? galleryTouchY - touch.clientY < -6 : false;
-          if (touch) galleryTouchY = touch.clientY;
-
-          // Retur får bara starta när kortens faktiska progress är 0. Att läsa
-          // section.top var för grovt på snabb touch: native momentum kunde ge
-          // top≈0 medan kort-strippen fortfarande låg en bit från vänsterkanten.
-          if (getGalleryAtStart() && (wheelBack || touchBack)) {
-            e.preventDefault();
-            e.stopPropagation();
-            returnFromGalleryToIntro();
-          }
-        }
-
-      };
-      const trackTouchStart = (e: TouchEvent) => {
-        galleryTouchY = e.touches[0]?.clientY ?? null;
-      };
-      const clearTouchTrack = () => {
-        galleryTouchY = null;
-      };
-      const onGalleryProgress = (e: Event) => {
-        const detail = (e as CustomEvent<{ progress: number }>).detail;
-        galleryProgress = Number(detail?.progress) || 0;
-      };
-      const lockNativeInput = (ms: number) => {
-        transitionBlockUntil = performance.now() + ms;
-      };
-      const withScrollBehaviorAuto = () => {
-        if (!scrollRoot) return;
-        restoreScrollBehavior?.();
-        const previousScrollBehavior = scrollRoot.style.scrollBehavior;
-        scrollRoot.style.scrollBehavior = 'auto';
-        restoreScrollBehavior = () => {
-          scrollRoot.style.scrollBehavior = previousScrollBehavior;
-        };
-      };
-      scrollRoot?.addEventListener('wheel', blockNativeInput, { passive: false, capture: true });
-      scrollRoot?.addEventListener('touchstart', trackTouchStart, { passive: true, capture: true });
-      scrollRoot?.addEventListener('touchmove', blockNativeInput, { passive: false, capture: true });
-      scrollRoot?.addEventListener('touchend', clearTouchTrack, { passive: true, capture: true });
-      window.addEventListener('parium:gallery-progress', onGalleryProgress);
-
-      const isStageDocked = () => {
-        const rect = stage.getBoundingClientRect();
-        const vh = window.innerHeight;
-        return Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
-      };
-
-      const isPastStage = () => stage.getBoundingClientRect().bottom <= 0;
-
-      // 2↔3 ska kännas EXAKT som 1↔2 (goToIntro/goToHero):
-      // - Samma duration (1.08s) och ease (power2.inOut)
-      // - INGEN konkurrerande text-fade — intro-texten åker bara med via
-      //   layer-translateY (samma princip som hero-texten i 1↔2).
-      // - Komplett input-lock under HELA transition-fönstret så att varken
-      //   wheel-momentum eller iOS touch-momentum kan rubba scrollen.
-      const TRANSITION_DURATION = 1.08 * DURATION_SCALE;
-      const TRANSITION_LOCK_MS = Math.round(1200 * DURATION_SCALE); // duration + buffer för momentum
-
-      const releaseAndScrollNext = () => {
-        const root = scrollRoot;
-        const next = gallerySection;
-        if (!root || !next) return;
-        if (animatingRef.current) return;
-        releasedToGallery = true;
-        programmaticReturn = true;
-        animatingRef.current = true;
-        setObserverActive(false);
-        void hapticLight();
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
-        const startScroll = root.scrollTop;
-        const targetScroll = startScroll + next.getBoundingClientRect().top;
-        prevScrollTop = startScroll;
-        lockNativeInput(TRANSITION_LOCK_MS);
-        withScrollBehaviorAuto();
-        window.dispatchEvent(new Event('parium:gallery-reset-start'));
-
-        const finishForward = () => {
-          root.scrollTop = targetScroll;
-          restoreScrollBehavior?.();
-          restoreScrollBehavior = null;
-          transitionBlockUntil = 0;
-          programmaticReturn = false;
-          animatingRef.current = false;
-          prevScrollTop = root.scrollTop;
-          releaseLockedRef.current = false;
-          releasedToGallery = true;
-          window.dispatchEvent(new Event('parium:gallery-enter'));
-        };
-
-        gsap.killTweensOf(root);
-        gsap.to(root, {
-          scrollTop: targetScroll,
-          duration: TRANSITION_DURATION,
-          ease: 'power2.inOut',
-          overwrite: true,
-          onComplete: finishForward,
-          onInterrupt: finishForward,
-        });
-      };
-
-      const returnFromGalleryToIntro = () => {
-        if (!scrollRoot || programmaticReturn || animatingRef.current) return;
-        programmaticReturn = true;
-        animatingRef.current = true;
-        releasedToGallery = false;
-        releaseLockedRef.current = false;
-        setObserverActive(false);
-        void hapticLight();
-        // Intro ligger redan i "resting" state visuellt (synlig). Vi rör inte
-        // text/heading/CTA-opacity — exakt som 1↔2 där hero-texten är synlig
-        // hela tiden och bara åker med layern.
-        setIntroResting();
-        window.dispatchEvent(new Event('parium:gallery-leave'));
-        const target = Math.max(0, scrollRoot.scrollTop + stage.getBoundingClientRect().top);
-
-        lockNativeInput(TRANSITION_LOCK_MS);
-        withScrollBehaviorAuto();
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 1, direction: 'prev' } }));
-
-        const finishReturn = () => {
-          scrollRoot.scrollTop = target;
-          restoreScrollBehavior?.();
-          restoreScrollBehavior = null;
-          transitionBlockUntil = 0;
-          programmaticReturn = false;
-          animatingRef.current = false;
-          prevScrollTop = scrollRoot.scrollTop;
-          setObserverActive(true);
-        };
-
-        gsap.killTweensOf(scrollRoot);
-        gsap.to(scrollRoot, {
-          scrollTop: target,
-          duration: TRANSITION_DURATION,
-          ease: 'power2.inOut',
-          overwrite: true,
-          onComplete: finishReturn,
-          onInterrupt: finishReturn,
-        });
-      };
-
-      observer = Observer.create({
-        target: scrollRoot ?? window,
-        type: 'wheel,touch',
-        wheelSpeed: -1,
-        tolerance: 16,
-        preventDefault: true,
-        onUp: () => {
-          if (releasedToGallery || programmaticReturn || animatingRef.current) return;
-          if (!isStageDocked() || isPastStage()) {
-            setObserverActive(false);
-            return;
-          }
-          if (indexRef.current === 0) {
-            goToIntro();
-            return;
-          }
-          if (releaseLockedRef.current) return;
-          releaseLockedRef.current = true;
-          releaseAndScrollNext();
-        },
-        onDown: () => {
-          if (releasedToGallery || programmaticReturn || animatingRef.current) return;
-          if (!isStageDocked() || isPastStage()) {
-            setObserverActive(false);
-            return;
-          }
-          if (indexRef.current === 1) goToHero();
-        },
-      });
-      observer.disable?.();
-      observerActive = false;
-
-      const onScrollWatch = () => {
-        if (!scrollRoot) return;
-        // Bail TIDIGT så vi inte gör layout-läsningar (getBoundingClientRect)
-        // varje frame medan programstyrda scrolls eller GSAP-animationer pågår.
-        if (programmaticReturn || animatingRef.current) return;
-
-        const cur = scrollRoot.scrollTop;
-        const direction = cur < prevScrollTop ? 'up' : 'down';
-        prevScrollTop = cur;
-        const rect = stage.getBoundingClientRect();
-        const vh = window.innerHeight;
-
-        if (releasedToGallery) {
-          setObserverActive(false);
-          if (direction === 'up' && getGalleryAtStart()) {
-            returnFromGalleryToIntro();
-          }
-          return;
-        }
-
-
-        const stageIsDocked = Math.abs(rect.top) < 4 && rect.bottom > vh * 0.9;
-        if (stageIsDocked) {
-          setObserverActive(true);
-          if (indexRef.current !== 0 && indexRef.current !== 1) setIntroResting();
-        } else if (rect.bottom <= 0 || rect.top >= vh) {
-          setObserverActive(false);
-        }
-      };
-
-      scrollRoot?.addEventListener('scroll', onScrollWatch, { passive: true });
-      onScrollWatch();
-
-      // När navigationen (dropdown/pill) hoppar till en sektion bortom
-      // hero/intro behöver vi släppa orchestreringens lås — annars fortsätter
-      // Observer + blockNativeInput att äga wheel/touch och scroll genom
-      // pinned-galleriet känns "låst". Vi sätter intro till sitt resting state
-      // så att 3→2-returen fortfarande ser korrekt ut, och tinar galleriets
-      // frysta scroll-progress.
-      const handleNavJump = () => {
-        clearReturnWork();
-        releasedToGallery = true;
-        programmaticReturn = false;
-        animatingRef.current = false;
-        releaseLockedRef.current = false;
-        transitionBlockUntil = 0;
-        setObserverActive(false);
-        setIntroResting();
-        window.dispatchEvent(new Event('parium:gallery-enter'));
-        window.dispatchEvent(new CustomEvent('parium:hero-index', { detail: { index: 2, direction: 'next' } }));
-      };
-      window.addEventListener('parium:nav-jump', handleNavJump);
-
-      setupTeardown = () => {
-        clearReturnWork();
-        scrollRoot?.removeEventListener('scroll', onScrollWatch);
-        scrollRoot?.removeEventListener('wheel', blockNativeInput, true);
-        scrollRoot?.removeEventListener('touchstart', trackTouchStart, true);
-        scrollRoot?.removeEventListener('touchmove', blockNativeInput, true);
-        scrollRoot?.removeEventListener('touchend', clearTouchTrack, true);
-        window.removeEventListener('parium:gallery-progress', onGalleryProgress);
-        window.removeEventListener('parium:nav-jump', handleNavJump);
-      };
-    };
-
-    setup();
-
-    return () => {
-      cancelled = true;
-      observer?.kill();
-      setupTeardown?.();
-    };
-  }, []);
-
   return (
-    <section
-      ref={stageRef}
-      data-hero-intro-stage
-      className="relative h-[100svh] w-full overflow-hidden"
-    >
-      {/* HERO LAGER */}
-      <div ref={heroOuterRef} className="absolute inset-0 overflow-hidden">
-        <div ref={heroInnerRef} className="absolute inset-0 overflow-hidden">
-          {/* Mobile hero — endast text. Telefonen renderas i FixedPhoneLayer (samma som desktop) så den aldrig kan scrollas iväg eller klippas. */}
-          <section
-            className="relative h-full w-screen overflow-hidden md:hidden"
-            style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
-            aria-labelledby="audience-hero-heading-mobile"
+    <>
+      {/* ─────────── HERO ─────────── */}
+      <section
+        data-hero-intro-stage
+        className="relative h-[100svh] w-full overflow-hidden"
+      >
+        {/* Mobile hero */}
+        <section
+          className="relative h-full w-screen overflow-hidden md:hidden"
+          style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
+          aria-labelledby="audience-hero-heading-mobile"
+        >
+          <motion.div
+            data-hero-phone-anchor
+            className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center px-5 pt-[clamp(5.25rem,12svh,6rem)] text-center"
+            initial="hidden"
+            animate="visible"
+            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
           >
+            <HeroText
+              eyebrow={c.eyebrow}
+              headline={c.hero.headline}
+              subtitle={c.hero.subtitle}
+              variant="mobile"
+              headingId="audience-hero-heading-mobile"
+            />
+          </motion.div>
+        </section>
+
+        {/* Desktop / tablet hero */}
+        <section className="relative hidden h-full items-center justify-center overflow-hidden pb-16 pt-28 md:flex md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28">
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
+            animate={{ opacity: [0.5, 0.75, 0.5] }}
+            transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
+          />
+          <div className="relative z-10 mx-auto grid w-full max-w-[1400px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 px-3 sm:px-5 md:px-6 md:[@media_(orientation:portrait)]:block lg:grid-cols-2 lg:gap-16 lg:px-24 lg:[@media_(orientation:portrait)]:grid">
             <motion.div
               data-hero-phone-anchor
-              className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center px-5 pt-[clamp(5.25rem,12svh,6rem)] text-center"
+              className="-translate-y-8 pt-8 text-left md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(92vw,54rem)] md:[@media_(orientation:portrait)]:translate-y-0 md:[@media_(orientation:portrait)]:pt-0 md:[@media_(orientation:portrait)]:text-center min-[1100px]:-translate-y-16 xl:pt-10 lg:[@media_(orientation:portrait)]:mx-0 lg:[@media_(orientation:portrait)]:max-w-none lg:[@media_(orientation:portrait)]:-translate-y-8 lg:[@media_(orientation:portrait)]:pt-8 lg:[@media_(orientation:portrait)]:text-left"
+              style={{ paddingLeft: 'var(--logo-ring-offset, 26px)', paddingRight: 'var(--logo-ring-offset, 26px)' }}
               initial="hidden"
               animate="visible"
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
             >
-              <HeroText
-                eyebrow={c.eyebrow}
-                headline={c.hero.headline}
-                subtitle={c.hero.subtitle}
-                variant="mobile"
-                headingId="audience-hero-heading-mobile"
-              />
+              <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
             </motion.div>
-          </section>
+            <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
+          </div>
+        </section>
+      </section>
 
-          {/* Desktop/tablet hero — portrait-tablet staplas så texten inte pressar/klipper Spline-telefonen. */}
-          <section className="relative hidden h-full items-center justify-center overflow-hidden pb-16 pt-28 md:flex md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28">
-            <motion.div
-              aria-hidden
-              className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
-              animate={{ opacity: [0.5, 0.75, 0.5] }}
-              transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
-            />
-            <div className="relative z-10 mx-auto grid w-full max-w-[1400px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 px-3 sm:px-5 md:px-6 md:[@media_(orientation:portrait)]:block lg:grid-cols-2 lg:gap-16 lg:px-24 lg:[@media_(orientation:portrait)]:grid">
-              <motion.div
-                data-hero-phone-anchor
-                className="-translate-y-8 pt-8 text-left md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(92vw,54rem)] md:[@media_(orientation:portrait)]:translate-y-0 md:[@media_(orientation:portrait)]:pt-0 md:[@media_(orientation:portrait)]:text-center min-[1100px]:-translate-y-16 xl:pt-10 lg:[@media_(orientation:portrait)]:mx-0 lg:[@media_(orientation:portrait)]:max-w-none lg:[@media_(orientation:portrait)]:-translate-y-8 lg:[@media_(orientation:portrait)]:pt-8 lg:[@media_(orientation:portrait)]:text-left"
-                style={{ paddingLeft: 'var(--logo-ring-offset, 26px)', paddingRight: 'var(--logo-ring-offset, 26px)' }}
-                initial="hidden"
-                animate="visible"
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
-              >
-                <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
-              </motion.div>
-              <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
-            </div>
-          </section>
-        </div>
-      </div>
-
-      {/* INTRO LAGER (kommer uppifrån) */}
-      {/* Inline opacity:0 håller intro-lagret osynligt innan GSAP hinner ladda
-          dynamiskt — annars syns "Söka jobb…" en bråkdel av en sekund och täcker
-          hero-texten, vilket upplevs som en flash. GSAP tar över via autoAlpha
-          så fort den laddats och kan animera in lagret normalt vid scroll. */}
-      <div
-        ref={introOuterRef}
-        className="absolute inset-0 z-30 overflow-hidden"
-        style={{ opacity: 0 }}
+      {/* ─────────── INTRO ─────────── */}
+      <section
+        aria-label="Introduktion"
+        className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden px-5 pb-16 pt-20 sm:px-6 sm:pb-24 sm:pt-28 md:px-12 md:pt-28 lg:px-24"
       >
-        <div ref={introInnerRef} className="absolute inset-0 overflow-hidden">
-          <section
-            aria-label="Introduktion"
-            className="relative flex h-full w-full items-center justify-center overflow-hidden px-5 pb-16 pt-36 sm:px-6 sm:pb-24 sm:pt-40 md:px-12 md:pt-36 lg:px-24"
-            style={{
-              backgroundImage:
-                'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
-              backgroundAttachment: 'scroll',
-              backgroundSize: '100% 100svh',
-              backgroundRepeat: 'no-repeat',
-              backgroundColor: 'hsl(var(--primary))',
-            }}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 1, ease }}
+          className="relative z-10 flex max-w-4xl flex-col items-center text-center"
+        >
+          <motion.h2
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 1.1, ease, delay: 0.05 }}
+            className="wave-text mb-5 max-w-[min(92vw,52rem)] text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] sm:mb-8 sm:text-[clamp(2.75rem,4.4vw,4.75rem)]"
           >
-            {/* Bubblor låsta till viewporten (fixed) så de inte följer med scrollen
-                — matchar känslan från /auth där bakgrunden står stilla medan innehållet rör sig. */}
-            <AnimatedBackground showGlow={false} />
-            {/* Våg-bakgrund (matchar hero) — fast i viewport så den följer exakt
-                samma position som data-landing-wave-map oavsett GSAP-transformer
-                på intro-lagret. Annars hamnar visuell våg och clip-path ur synk. */}
-            <svg
-              data-landing-wave-map
-              className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-[50svh] w-full"
-              viewBox="0 0 1440 600"
-              preserveAspectRatio="none"
-              aria-hidden
+            Vi har gjort det enkelt för alla!
+          </motion.h2>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.25 }}
+            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } } }}
+          >
+            <IntroText
+              paragraphs={[
+                'Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
+                'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
+                'I nästa sektion ser du olika exemplar på yrken som tar Sverige framåt!',
+              ]}
+            />
+          </motion.div>
+          {onIntroCta && (
+            <motion.button
+              type="button"
+              onClick={onIntroCta}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.8, ease, delay: 0.55 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              className="mt-6 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white shadow-[0_10px_40px_-12px_hsl(var(--secondary)/0.6)] transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:mt-10 sm:text-lg"
             >
-              <path
-                d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
-                fill="hsl(var(--landing-light))"
-              />
-            </svg>
-            <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center text-center will-change-transform">
-              <h2
-                data-intro-heading
-                className="wave-text mb-5 max-w-[min(92vw,52rem)] text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] sm:mb-8 sm:text-[clamp(2.75rem,4.4vw,4.75rem)]"
-              >
-                Vi har gjort det enkelt för alla!
-              </h2>
-              <IntroText
-                paragraphs={[
-                  'Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
-                  'Ditt CV och din profil sparas på ett och samma ställe, vilket gör det enkelt att söka flera jobb utan att behöva fylla i samma information varje gång.',
-                  'I nästa sektion ser du olika exemplar på yrken som tar Sverige framåt!',
-                ]}
-              />
-              {onIntroCta && (
-                <button
-                  type="button"
-                  data-intro-anim
-                  onClick={onIntroCta}
-                  className="mt-6 inline-flex items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white shadow-[0_10px_40px_-12px_hsl(var(--secondary)/0.6)] transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:mt-10 sm:text-lg"
-                >
-                  {introCtaLabel ?? 'Skapa min profil idag'}
-                </button>
-              )}
-            </div>
-          </section>
-        </div>
-      </div>
-    </section>
+              {introCtaLabel ?? 'Skapa min profil idag'}
+            </motion.button>
+          )}
+        </motion.div>
+      </section>
+    </>
   );
 };
+
 
 
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
