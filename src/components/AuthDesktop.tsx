@@ -550,8 +550,8 @@ const AuthDesktop = ({
     <div 
       className="flex flex-col relative auth-dark" 
     >
-      {/* Animated background with bubbles and glow */}
-      <AnimatedBackground />
+      {/* Animated background with bubbles, glow and the same off-white wave as the public landing pages. */}
+      <AnimatedBackground showWave />
 
       <div className="relative z-10 flex flex-col min-h-full py-8 px-6">
         {/* Header med logo och text */}
@@ -588,7 +588,7 @@ const AuthDesktop = ({
 
           {/* Auth form */}
           <div className="w-full max-w-md">
-            <Card className="bg-white/[0.01] backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
+            <Card className="bg-primary/85 backdrop-blur-xl border-white/20 shadow-2xl rounded-2xl overflow-hidden">
               <CardContent className="p-6">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <SlidingTabs isLogin={isLogin} onTabChange={handleTabChange} />
