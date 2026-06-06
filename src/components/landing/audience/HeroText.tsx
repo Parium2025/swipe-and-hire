@@ -26,8 +26,8 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     : 'text-xs font-bold uppercase tracking-[0.28em] text-secondary/80';
 
   const headlineClass = isMobile
-    ? 'wave-text mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[0] sm:text-[4rem] md:text-[5rem]'
-    : 'wave-text mt-6 max-w-[min(92vw,60rem)] text-[clamp(2.75rem,5.2vw,7rem)] font-black leading-[1.04] tracking-[0] md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(88vw,48rem)] md:[@media_(orientation:portrait)]:text-[clamp(3.1rem,5.8vw,4.75rem)]';
+    ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[0] sm:text-[4rem] md:text-[5rem]'
+    : 'mt-6 max-w-[min(92vw,60rem)] text-[clamp(2.75rem,5.2vw,7rem)] font-black leading-[1.04] tracking-[0] md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(88vw,48rem)] md:[@media_(orientation:portrait)]:text-[clamp(3.1rem,5.8vw,4.75rem)]';
 
   // Följer samma vågmask som bakgrunden: vit på blått, blå på vitt.
   const subtitleClass = isMobile
@@ -59,7 +59,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
             animate={{ opacity: 1 }}
             transition={{ duration: 1.6, ease: premiumEase, delay: 0.5 + i * 0.32 }}
             style={fadeStyle}
-            className={isMobile ? 'block' : 'block whitespace-nowrap'}
+            className={isMobile ? 'wave-text block' : 'wave-text block whitespace-nowrap'}
           >
             {line}
           </motion.span>
