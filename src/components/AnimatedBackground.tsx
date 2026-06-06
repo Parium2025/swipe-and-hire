@@ -32,9 +32,52 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
           preserveAspectRatio="none"
           aria-hidden
         >
+          <defs>
+            {/* Subtil vertikal djupgradient för glasyr-droppar (navy) */}
+            <linearGradient id="landing-drip-volume" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(215 100% 14%)" />
+              <stop offset="100%" stopColor="hsl(215 100% 9%)" />
+            </linearGradient>
+          </defs>
+
+          {/* Off-white våg-fyllning */}
           <path
             d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
             fill="hsl(var(--landing-light))"
+          />
+
+          {/* Glasyr-droppar — navy, hänger ner från vågens underkant.
+              Asymmetriska, varierande längd/bredd för en handgjord premium-känsla.
+              Y-koordinaten på toppen matchar vågkurvan vid respektive x. */}
+
+          {/* Drop 1 — liten, vänster (x≈220, kurva y≈115) */}
+          <path
+            d="M212,113 C212,113 208,168 222,168 C236,168 232,113 232,113 Z"
+            fill="url(#landing-drip-volume)"
+          />
+
+          {/* Drop 2 — medel, vänster-mitt (x≈480, kurva y≈92) */}
+          <path
+            d="M468,90 C468,90 462,172 482,172 C502,172 496,90 496,90 Z"
+            fill="url(#landing-drip-volume)"
+          />
+
+          {/* Drop 3 — stor, mitten (x≈760, kurva y≈50, djupast) */}
+          <path
+            d="M744,48 C744,48 734,228 762,228 C790,228 780,48 780,48 Z"
+            fill="url(#landing-drip-volume)"
+          />
+
+          {/* Drop 4 — liten-medel, höger-mitt (x≈1050, kurva y≈64) */}
+          <path
+            d="M1040,62 C1040,62 1034,138 1052,138 C1070,138 1064,62 1064,62 Z"
+            fill="url(#landing-drip-volume)"
+          />
+
+          {/* Drop 5 — liten, höger (x≈1320, kurva y≈100) */}
+          <path
+            d="M1312,98 C1312,98 1308,148 1322,148 C1336,148 1332,98 1332,98 Z"
+            fill="url(#landing-drip-volume)"
           />
         </svg>
       )}
