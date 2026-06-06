@@ -33,7 +33,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
   // Följer samma vågmask som bakgrunden: vit på blått, blå på vitt.
   const subtitleClass = isMobile
     ? 'wave-text mt-7 max-w-xl text-base leading-8 font-medium'
-    : 'wave-text mt-7 lg:[@media_(orientation:landscape)]:mt-36 xl:[@media_(orientation:landscape)]:mt-44 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)] lg:[@media_(orientation:landscape)]:relative lg:[@media_(orientation:landscape)]:left-[55%] lg:[@media_(orientation:landscape)]:-translate-x-1/2 lg:[@media_(orientation:landscape)]:mx-0 lg:[@media_(orientation:landscape)]:text-center';
+    : 'wave-text mt-7 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)] lg:[@media_(orientation:landscape)]:absolute lg:[@media_(orientation:landscape)]:left-1/2 lg:[@media_(orientation:landscape)]:-translate-x-1/2 lg:[@media_(orientation:landscape)]:bottom-[20%] lg:[@media_(orientation:landscape)]:mt-0 lg:[@media_(orientation:landscape)]:w-[min(36rem,80vw)] lg:[@media_(orientation:landscape)]:max-w-none lg:[@media_(orientation:landscape)]:text-center';
 
   // Premium-entré: enbart opacity. Ingen blur, ingen skugga, ingen translate.
   // Långsam, lugn ease (Apple-style) med en mjuk stagger rad-för-rad.
@@ -85,7 +85,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
         className={
           isMobile
             ? 'mt-6 flex flex-wrap gap-3'
-            : 'mt-7 flex flex-wrap gap-3 md:[@media_(orientation:portrait)]:justify-center lg:[@media_(orientation:landscape)]:relative lg:[@media_(orientation:landscape)]:left-[55%] lg:[@media_(orientation:landscape)]:-translate-x-1/2 lg:[@media_(orientation:landscape)]:w-fit lg:[@media_(orientation:landscape)]:justify-center'
+            : 'mt-7 flex flex-wrap gap-3 md:[@media_(orientation:portrait)]:justify-center lg:[@media_(orientation:landscape)]:absolute lg:[@media_(orientation:landscape)]:left-1/2 lg:[@media_(orientation:landscape)]:-translate-x-1/2 lg:[@media_(orientation:landscape)]:bottom-[8%] lg:[@media_(orientation:landscape)]:mt-0 lg:[@media_(orientation:landscape)]:justify-center'
         }
         aria-label="Ladda ner Parium-appen"
       >
