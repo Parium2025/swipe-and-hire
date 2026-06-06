@@ -1023,7 +1023,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 1, ease }}
-                className="text-4xl font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl lg:text-[4.75rem]"
+                className="wave-text text-4xl font-black leading-[1.02] tracking-[0] sm:text-5xl md:text-6xl lg:text-[4.75rem]"
               >
                 En lugnare väg till nästa steg.
               </motion.h2>
@@ -1032,7 +1032,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 1, ease, delay: 0.1 }}
-                className="text-base leading-8 text-white/60 sm:text-lg"
+                className="wave-text text-base leading-8 opacity-70 sm:text-lg"
               >
                 Platshållartext. Här kan en lugnare brödtext landa efter den intensiva resan — rytm är viktigt.
               </motion.p>
@@ -1057,7 +1057,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.9, ease, delay: 0.05 }}
-                className="mt-4 max-w-3xl text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl"
+                className="wave-text mt-4 max-w-3xl text-4xl font-black leading-[1.04] tracking-[0] sm:text-5xl md:text-6xl"
               >
                 Allt du behöver för att {audience === 'job_seeker' ? 'hitta rätt jobb' : 'hitta rätt person'}.
               </motion.h2>
@@ -1066,7 +1066,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.9, ease, delay: 0.15 }}
-                className="mt-6 max-w-2xl text-base leading-8 text-white/60 sm:text-lg"
+                className="wave-text mt-6 max-w-2xl text-base leading-8 opacity-70 sm:text-lg"
               >
                 Platshållartext för funktionsöversikten — fyll med de viktigaste fördelarna.
               </motion.p>
@@ -1090,8 +1090,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
                       <span className="text-sm font-bold">0{i}</span>
                     </div>
-                    <h3 className="text-lg font-bold text-white">Funktion {i}</h3>
-                    <p className="mt-2 text-sm leading-7 text-white/60">
+                    <h3 className="wave-text text-lg font-bold">Funktion {i}</h3>
+                    <p className="wave-text mt-2 text-sm leading-7 opacity-70">
                       Platshållartext som beskriver funktionen kort och tydligt.
                     </p>
                   </motion.div>

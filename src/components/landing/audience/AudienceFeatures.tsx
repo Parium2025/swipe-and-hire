@@ -13,7 +13,7 @@ const AudienceFeatures = ({ role }: { role: AudienceRole }) => {
               <span className="h-px w-12 bg-gradient-to-r from-secondary to-transparent" />
               Funktioner
             </span>
-            <h2 className="wave-text wave-text-below mt-5 text-4xl font-black tracking-[-0.025em] sm:text-5xl md:text-6xl">
+            <h2 className="wave-text mt-5 text-4xl font-black tracking-[0] sm:text-5xl md:text-6xl">
               Allt hänger ihop.
             </h2>
           </motion.div>
@@ -22,7 +22,7 @@ const AudienceFeatures = ({ role }: { role: AudienceRole }) => {
             whileInView="visible"
             viewport={inView}
             variants={slideRight}
-            className="wave-text wave-text-below max-w-2xl text-base leading-8 opacity-70"
+            className="wave-text max-w-2xl text-base leading-8 opacity-70"
           >
             Byggt för {role === 'job_seeker' ? 'dig som söker jobb' : 'dig som rekryterar'} — snabbt, mobilt och utan onödigt brus.
           </motion.p>
@@ -46,8 +46,8 @@ const AudienceFeatures = ({ role }: { role: AudienceRole }) => {
                 <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/25 bg-secondary/[0.08] text-secondary">
                   <Icon className="h-5 w-5" />
                 </span>
-                <h3 className="mt-5 text-lg font-bold text-white">{f.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-white/55">{f.description}</p>
+                <h3 className="wave-text mt-5 text-lg font-bold">{f.title}</h3>
+                <p className="wave-text mt-3 text-sm leading-6 opacity-70">{f.description}</p>
               </motion.div>
             );
           })}

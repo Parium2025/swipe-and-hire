@@ -32,7 +32,7 @@ const AudienceProof = ({ role }: { role: AudienceRole }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={inView}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-          className="wave-text wave-text-below mx-auto mt-5 max-w-3xl text-4xl font-black leading-[1] tracking-[-0.025em] sm:text-5xl md:text-6xl"
+          className="wave-text mx-auto mt-5 max-w-3xl text-4xl font-black leading-[1] tracking-[0] sm:text-5xl md:text-6xl"
         >
           Snabbare. Smartare. Tydligare.
         </motion.h2>
@@ -50,8 +50,8 @@ const AudienceProof = ({ role }: { role: AudienceRole }) => {
               variants={fadeUp}
               className="rounded-3xl border border-white/10 bg-white/[0.035] p-8 backdrop-blur-xl"
             >
-              <div className="text-5xl font-black tracking-tight text-white sm:text-6xl">{p.value}</div>
-              <div className="mt-3 text-sm font-medium text-white/55">{p.label}</div>
+              <div className="wave-text text-5xl font-black tracking-[0] sm:text-6xl">{p.value}</div>
+              <div className="wave-text mt-3 text-sm font-medium opacity-70">{p.label}</div>
             </motion.div>
           ))}
         </motion.div>
