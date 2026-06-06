@@ -945,9 +945,11 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           >
             {/* Samma bubblor som hero — utan extra blur-glöd, eftersom iPad Safari kan kompositera den som en svag rektangel under swipe. */}
             <AnimatedBackground variant="card" showGlow={false} />
-            {/* Våg-bakgrund (matchar hero) för visuell konsekvens */}
+            {/* Våg-bakgrund (matchar hero) — fast i viewport så den följer exakt
+                samma position som data-landing-wave-map oavsett GSAP-transformer
+                på intro-lagret. Annars hamnar visuell våg och clip-path ur synk. */}
             <svg
-              className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[50%] w-full"
+              className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-[50svh] w-full"
               viewBox="0 0 1440 600"
               preserveAspectRatio="none"
               aria-hidden
