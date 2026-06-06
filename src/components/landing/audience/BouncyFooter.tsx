@@ -77,7 +77,7 @@ const BouncyFooter = ({ audience, onCta, variant = 'dark' }: Props) => {
   const isLight = variant === 'light';
 
   return (
-    <div ref={wrapperRef} className={`relative w-full overflow-hidden ${isLight ? 'bg-landing-light' : ''}`}>
+    <div ref={wrapperRef} className={`relative w-full overflow-hidden ${isLight ? 'bg-landing-light' : 'bg-primary'}`}>
       {/* Bouncy gradient wave */}
       <div className="relative w-full">
         <svg
@@ -89,8 +89,8 @@ const BouncyFooter = ({ audience, onCta, variant = 'dark' }: Props) => {
         >
           <defs>
             <linearGradient id="bouncy-footer-grad" x1="0" y1="0" x2="2278" y2="683" gradientUnits="userSpaceOnUse">
-              <stop offset="0.2" stopColor="hsl(var(--secondary))" />
-              <stop offset="0.8" stopColor="hsl(var(--primary-glow, var(--primary)))" />
+              <stop offset="0.2" stopColor="hsl(var(--primary))" />
+              <stop offset="0.8" stopColor="hsl(var(--parium-chrome-blue))" />
             </linearGradient>
           </defs>
           <path
