@@ -945,6 +945,18 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           >
             {/* Samma bubblor som hero — utan extra blur-glöd, eftersom iPad Safari kan kompositera den som en svag rektangel under swipe. */}
             <AnimatedBackground variant="card" showGlow={false} />
+            {/* Våg-bakgrund (matchar hero) för visuell konsekvens */}
+            <svg
+              className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[42%] w-full"
+              viewBox="0 0 1440 600"
+              preserveAspectRatio="none"
+              aria-hidden
+            >
+              <path
+                d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
+                fill="hsl(var(--landing-light))"
+              />
+            </svg>
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center text-center will-change-transform">
               <h2
                 data-intro-heading
