@@ -213,9 +213,9 @@ All colors MUST be HSL.
     --ring: 200 100% 60%;
 
     /* Landing light zone — off-white botten under wave divider */
-    /* Cool off-white (#F4F8FC) — soft ice tone.
+    /* Warm off-white (#ECE8E1) — soft cream tone.
        Luftigare kontrast mot marinblå hero, mer premium än kritvit. */
-    --landing-light: 210 57% 97%;
+    --landing-light: 38 22% 90%;
     --landing-light-foreground: 215 38% 15%;
     --landing-light-muted: 215 16% 36%;
     --landing-light-border: 36 18% 84%;
