@@ -25,7 +25,7 @@ const AudienceStatement = ({ role }: { role: AudienceRole }) => {
           whileInView="visible"
           viewport={inView}
           variants={slideRight}
-          className="max-w-xl text-base leading-8 text-white/55 sm:text-lg md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[52ch] md:[@media_(orientation:portrait)]:text-xl md:[@media_(orientation:portrait)]:leading-9"
+          className="wave-text wave-text-below max-w-xl text-base leading-8 opacity-75 sm:text-lg md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[52ch] md:[@media_(orientation:portrait)]:text-xl md:[@media_(orientation:portrait)]:leading-9"
         >
           {c.body}
         </motion.p>
