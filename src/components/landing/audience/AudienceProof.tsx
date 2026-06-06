@@ -32,7 +32,7 @@ const AudienceProof = ({ role }: { role: AudienceRole }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={inView}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-          className="mx-auto mt-5 max-w-3xl text-4xl font-black leading-[1] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl"
+          className="wave-text wave-text-below mx-auto mt-5 max-w-3xl text-4xl font-black leading-[1] tracking-[-0.025em] sm:text-5xl md:text-6xl"
         >
           Snabbare. Smartare. Tydligare.
         </motion.h2>
