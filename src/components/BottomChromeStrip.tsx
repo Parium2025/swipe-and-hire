@@ -5,7 +5,6 @@ import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
 const LANDING_COLOR = '#2a2a2a';
 const PARIUM_COLOR = '#001935';
 const AUDIENCE_LANDING_COLOR = '#001F3D';
-const AUTH_WAVE_BOTTOM_COLOR = 'hsl(40 18% 96%)';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 const isAudienceLandingPath = (pathname: string) =>
@@ -54,7 +53,7 @@ const BottomChromeStrip = () => {
     return () => window.removeEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
   }, []);
 
-  const displayColor = isAuthPath(location.pathname) ? AUTH_WAVE_BOTTOM_COLOR : forcedColor ?? color;
+  const displayColor = forcedColor ?? color;
 
   // Sync CSS variable so scroll containers always reserve space
   // matching the strip — independent of @media (pointer: coarse).
@@ -74,7 +73,7 @@ const BottomChromeStrip = () => {
     };
   }, [isTouch]);
 
-  if (!isTouch) return null;
+  if (!isTouch || isAuthPath(location.pathname)) return null;
 
   return (
     <div
