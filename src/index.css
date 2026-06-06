@@ -1535,27 +1535,22 @@ All colors MUST be HSL.
   /*
    * Wave-aware text on audience landing pages.
    *
-   * Previous background-clip/fixed-attachment masks are unreliable on iOS.
-   * The page script now calculates the visible blue area from the real SVG wave
-   * and sets --wave-ink-clip per element. Base text is brand blue; the cloned
-   * pseudo layer is clipped to the blue background and painted off-white.
+   * All text is pure white regardless of wave position for this color test.
    */
   .wave-text {
-    color: hsl(var(--landing-light));
+    color: hsl(var(--pure-white));
     -webkit-text-fill-color: currentColor;
   }
 
-  /* Helt under vågen: mörk navy text mot ljus bakgrund (premium kontrast). */
   .wave-text[data-wave-below] {
-    color: hsl(var(--primary));
-    -webkit-text-fill-color: hsl(var(--primary));
+    color: hsl(var(--pure-white));
+    -webkit-text-fill-color: hsl(var(--pure-white));
   }
 
-  /* Korsar vågen: dual-layer med klipp för exakt växling. */
   .wave-text[data-wave-text] {
     position: relative;
-    color: hsl(var(--primary));
-    -webkit-text-fill-color: hsl(var(--primary));
+    color: hsl(var(--pure-white));
+    -webkit-text-fill-color: hsl(var(--pure-white));
   }
 
   .wave-text[data-wave-text]::before {
@@ -1564,8 +1559,8 @@ All colors MUST be HSL.
     position: absolute;
     inset: 0;
     z-index: 1;
-    color: hsl(var(--landing-light));
-    -webkit-text-fill-color: hsl(var(--landing-light));
+    color: hsl(var(--pure-white));
+    -webkit-text-fill-color: hsl(var(--pure-white));
     clip-path: var(--wave-ink-clip, inset(0 0 0 0));
     font: inherit;
     font-weight: inherit;
