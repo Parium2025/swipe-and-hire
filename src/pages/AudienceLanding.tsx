@@ -60,21 +60,41 @@ const useWaveAwareText = () => {
 
       items.forEach((el) => {
         const text = el.textContent?.trim() ?? '';
-        if (el.dataset.waveText !== text) el.dataset.waveText = text;
 
         const rect = el.getBoundingClientRect();
-        if (!waveRect || waveRect.width <= 0 || waveRect.height <= 0 || rect.width <= 0 || rect.height <= 0) return;
+        if (!waveRect || waveRect.width <= 0 || waveRect.height <= 0 || rect.width <= 0 || rect.height <= 0) {
+          if (el.dataset.waveText) delete el.dataset.waveText;
+          el.style.removeProperty('--wave-ink-clip');
+          return;
+        }
 
+        // Sample wave Y across the element's width to see if it actually intersects.
         const samples = Math.max(4, Math.min(18, Math.ceil(rect.width / 34)));
-        const points = ['0% 0%', '100% 0%'];
-
-        for (let i = samples; i >= 0; i -= 1) {
-          const xPercent = (i / samples) * 100;
+        const ys: number[] = [];
+        for (let i = 0; i <= samples; i += 1) {
           const viewportX = rect.left + rect.width * (i / samples);
           const viewBoxX = ((viewportX - waveRect.left) / waveRect.width) * WAVE_VIEWBOX_WIDTH;
           const viewBoxY = waveYAtViewBoxX(viewBoxX);
-          const viewportY = waveRect.top + (viewBoxY / WAVE_VIEWBOX_HEIGHT) * waveRect.height;
-          const yPercent = Math.max(0, Math.min(100, ((viewportY - rect.top) / rect.height) * 100));
+          ys.push(waveRect.top + (viewBoxY / WAVE_VIEWBOX_HEIGHT) * waveRect.height);
+        }
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
+
+        // No intersection: rely on the single-layer base color (off-white above wave,
+        // unreachable below since the element is hidden by the wave fill — but we
+        // never blue-paint here, avoiding the anti-aliasing halo on descenders).
+        if (maxY <= rect.top + 1 || minY >= rect.bottom - 1) {
+          if (el.dataset.waveText) delete el.dataset.waveText;
+          el.style.removeProperty('--wave-ink-clip');
+          return;
+        }
+
+        if (el.dataset.waveText !== text) el.dataset.waveText = text;
+
+        const points = ['0% 0%', '100% 0%'];
+        for (let i = samples; i >= 0; i -= 1) {
+          const xPercent = (i / samples) * 100;
+          const yPercent = Math.max(0, Math.min(100, ((ys[i] - rect.top) / rect.height) * 100));
           points.push(`${xPercent.toFixed(2)}% ${yPercent.toFixed(2)}%`);
         }
 
