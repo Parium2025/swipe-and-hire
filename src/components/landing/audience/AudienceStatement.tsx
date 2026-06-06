@@ -16,7 +16,7 @@ const AudienceStatement = ({ role }: { role: AudienceRole }) => {
           <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-secondary/70">
             {c.kicker}
           </span>
-          <h2 className="mt-5 max-w-2xl text-4xl font-black leading-[0.98] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[14ch] md:[@media_(orientation:portrait)]:text-[clamp(3.5rem,7vw,5.5rem)]">
+          <h2 className="wave-text wave-text-below mt-5 max-w-2xl text-4xl font-black leading-[0.98] tracking-[-0.025em] sm:text-5xl md:text-6xl md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[14ch] md:[@media_(orientation:portrait)]:text-[clamp(3.5rem,7vw,5.5rem)]">
             {c.title}
           </h2>
         </motion.div>
@@ -25,7 +25,7 @@ const AudienceStatement = ({ role }: { role: AudienceRole }) => {
           whileInView="visible"
           viewport={inView}
           variants={slideRight}
-          className="max-w-xl text-base leading-8 text-white/55 sm:text-lg md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[52ch] md:[@media_(orientation:portrait)]:text-xl md:[@media_(orientation:portrait)]:leading-9"
+          className="wave-text wave-text-below max-w-xl text-base leading-8 opacity-75 sm:text-lg md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[52ch] md:[@media_(orientation:portrait)]:text-xl md:[@media_(orientation:portrait)]:leading-9"
         >
           {c.body}
         </motion.p>
