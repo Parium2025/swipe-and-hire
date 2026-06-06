@@ -212,13 +212,11 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 200 100% 60%;
 
-    /* Landing light zone — off-white botten under wave divider */
-    /* Warm off-white (#F5F1EA) — enterprise paper tone (Stripe/Linear/Apple).
-       Mjukare kontrast mot marinblå hero, mer premium än kritvit. */
-    --landing-light: 36 35% 94%;
-    --landing-light-foreground: 215 38% 15%;
-    --landing-light-muted: 215 16% 36%;
-    --landing-light-border: 36 18% 84%;
+    /* Landing light zone — ljusblå botten under wave divider (#73b4ff) */
+    --landing-light: 211 100% 73%;
+    --landing-light-foreground: 0 0% 100%;
+    --landing-light-muted: 0 0% 100%;
+    --landing-light-border: 211 100% 80%;
 
     --radius: 0.5rem;
 
