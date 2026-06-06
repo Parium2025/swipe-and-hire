@@ -404,6 +404,15 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             animate={{ opacity: [0.5, 0.75, 0.5] }}
             transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
           />
+          {/* Ambient glow bottom-left för att fylla nedre ytan på stora skärmar */}
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-48 left-[-15%] hidden h-[620px] w-[620px] rounded-full bg-secondary/[0.05] blur-[170px] lg:block"
+            animate={{ opacity: [0.35, 0.6, 0.35] }}
+            transition={{ duration: 11, ease: 'easeInOut', repeat: Infinity, delay: 1.4 }}
+          />
+          {/* Floating glass-kort som svävar runt telefonen (desktop landscape only) */}
+          <HeroFloatingCards role={audience} />
           <div className="relative z-10 mx-auto grid w-full max-w-[1400px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 px-3 sm:px-5 md:px-6 md:[@media_(orientation:portrait)]:block lg:grid-cols-2 lg:gap-16 lg:px-24 lg:[@media_(orientation:portrait)]:grid">
             <motion.div
               data-hero-phone-anchor
@@ -414,6 +423,12 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
             >
               <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
+              {/* CTA + proof-rad — fyller ut hero-ytan på stora skärmar */}
+              <HeroDesktopCallout
+                proof={c.proof}
+                ctaLabel={c.hero.cta}
+                onPrimary={onIntroCta}
+              />
             </motion.div>
             <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
           </div>
