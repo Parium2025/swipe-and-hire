@@ -310,26 +310,18 @@ const FixedPhoneLayer = () => {
       setVisible(next);
       setActive(next);
     };
-
-
     const sync = () => apply(isHeroZone());
 
     sync();
-    const onSplineReady = () => setPhoneReady(true);
-    window.addEventListener('parium:spline-ready', onSplineReady);
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
     window.addEventListener('resize', sync, { passive: true });
 
     return () => {
-      window.removeEventListener('parium:spline-ready', onSplineReady);
       scrollRoot?.removeEventListener('scroll', sync);
       window.removeEventListener('resize', sync);
-      if (showTimerRef.current) {
-        clearTimeout(showTimerRef.current);
-        showTimerRef.current = null;
-      }
     };
   }, []);
+
 
 
   const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
