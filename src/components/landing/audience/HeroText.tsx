@@ -26,14 +26,13 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     : 'text-xs font-bold uppercase tracking-[0.28em] text-secondary/80';
 
   const headlineClass = isMobile
-    ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[0] text-white sm:text-[4rem] md:text-[5rem]'
-    : 'mt-6 max-w-[min(92vw,60rem)] text-[clamp(2.75rem,5.2vw,7rem)] font-black leading-[1.04] tracking-[0] text-white md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(88vw,48rem)] md:[@media_(orientation:portrait)]:text-[clamp(3.1rem,5.8vw,4.75rem)]';
+    ? 'wave-text mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[0] sm:text-[4rem] md:text-[5rem]'
+    : 'wave-text mt-6 max-w-[min(92vw,60rem)] text-[clamp(2.75rem,5.2vw,7rem)] font-black leading-[1.04] tracking-[0] md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(88vw,48rem)] md:[@media_(orientation:portrait)]:text-[clamp(3.1rem,5.8vw,4.75rem)]';
 
-  // Subtiteln sitter ovanför vågens vita bakgrund → använd primär-blå
-  // istället för vit så texten alltid är läsbar.
+  // Följer samma vågmask som bakgrunden: vit på blått, blå på vitt.
   const subtitleClass = isMobile
-    ? 'wave-text wave-text-below mt-7 max-w-xl text-base leading-8 font-medium'
-    : 'wave-text wave-text-below mt-7 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)]';
+    ? 'wave-text mt-7 max-w-xl text-base leading-8 font-medium'
+    : 'wave-text mt-7 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)]';
 
   // Premium-entré: enbart opacity. Ingen blur, ingen skugga, ingen translate.
   // Långsam, lugn ease (Apple-style) med en mjuk stagger rad-för-rad.
