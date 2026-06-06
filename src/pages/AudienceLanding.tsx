@@ -692,7 +692,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
           <WaveDivider />
 
-          <div className="relative z-10 -mt-px bg-primary text-landing-light-foreground">
+          <div className="relative z-10 -mt-px bg-landing-light text-landing-light-foreground">
           {/* ──────────────── PRISER ──────────────── */}
           <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 pb-16 pt-12 sm:px-6 md:px-12 md:pb-20 md:pt-16 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
