@@ -1139,7 +1139,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         backgroundColor: 'hsl(var(--primary))',
       }}
     >
-      <AnimatedBackground showGlow={false} />
+      <AnimatedBackground showGlow={false} showWave />
       <FixedPhoneLayer />
       <div data-lenis-content className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
