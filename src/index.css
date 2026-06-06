@@ -1531,6 +1531,50 @@ All colors MUST be HSL.
 
 /* Fallback utility for 2-line ellipsis without Tailwind line-clamp plugin */
 @layer utilities {
+  /*
+   * Wave-aware text: text color automatically switches based on which side of
+   * the global wave it sits on in the viewport. Above the wave (blue page bg)
+   * → landing-light. Below the wave (off-white) → primary brand blue.
+   *
+   * Implementation: a viewport-fixed SVG "color map" identical in shape to the
+   * wave in AnimatedBackground, clipped to the text via background-clip: text.
+   * No JS, scrolls/resizes for free.
+   *
+   * Colors are hardcoded from CSS vars:
+   *   landing-light  hsl(40 18% 96%)  ≈ #F9F6F1
+   *   primary        hsl(215 100% 12%) ≈ #001A3D
+   *
+   * iOS Safari fallback: background-attachment:fixed degrades; the
+   * @supports block below provides a solid landing-light fill so text on
+   * blue stays readable; on white wave area the .wave-text-below override
+   * can be used as needed.
+   */
+  .wave-text {
+    background-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 1000' preserveAspectRatio='none'><rect width='1440' height='1000' fill='%23F9F6F1'/><path d='M0,567 C200,600 380,592 560,567 C760,538 940,537 1120,560 C1270,580 1360,583 1440,568 L1440,1000 L0,1000 Z' fill='%23001A3D'/></svg>");
+    background-attachment: fixed;
+    background-size: 100vw 100vh;
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* iOS / browsers without working fixed-attachment: fall back to a sane color
+     based on whether the element is intended to sit above or below the wave. */
+  @supports (-webkit-touch-callout: none) {
+    .wave-text {
+      background: none;
+      color: hsl(var(--landing-light));
+      -webkit-text-fill-color: hsl(var(--landing-light));
+    }
+    .wave-text.wave-text-below {
+      color: hsl(var(--primary));
+      -webkit-text-fill-color: hsl(var(--primary));
+    }
+  }
+
   .two-line-ellipsis {
     display: -webkit-box;
     -webkit-line-clamp: 2;
