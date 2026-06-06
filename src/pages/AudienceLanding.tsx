@@ -165,7 +165,7 @@ const PHONE_ASPECT = 9 / 19.5;
 
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
-  const heroIndexRef = useRef(0);
+  
   const lastHeroMetricsRef = useRef<{ isDesktop: boolean; isPortraitTablet?: boolean; top: number; height: number; zoom: number; yOffset: number } | null>(null);
   const getVisibleAnchor = () => {
     const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
