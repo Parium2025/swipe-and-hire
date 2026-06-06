@@ -32,106 +32,12 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
           preserveAspectRatio="none"
           aria-hidden
         >
-          <defs>
-            <linearGradient id="landing-drip-volume" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(215 100% 13%)" />
-              <stop offset="100%" stopColor="hsl(215 100% 10%)" />
-            </linearGradient>
-          </defs>
-
-          {/* Off-white botten-fyllning under hela drip-zonen */}
-          <rect x="0" y="0" width="1440" height="600" fill="hsl(var(--landing-light))" />
-
-          {/* Navy-block med flat botten + vertikala rundade pelare som hänger ner.
-              Pelarna är stadium-formade (rundade i båda ändar) men eftersom de
-              ankrar uppe i navy-blocket smälter toppen ihop = ser ut som riktig
-              icicle/paint-drip referens. */}
-          {/* 1) Flat navy-block överst */}
-          <rect
-            x="0"
-            y="-40"
-            width="1440"
-            height="120"
-            fill="url(#landing-drip-volume)"
+          <path
+            d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
+            fill="hsl(var(--landing-light))"
           />
-
-          {/* 2) Hängande pelare i varierande höjd & bredd */}
-          {[
-            { x: 30,   w: 28, h: 90 },
-            { x: 78,   w: 22, h: 140 },
-            { x: 120,  w: 26, h: 70 },
-            { x: 168,  w: 30, h: 180 },
-            { x: 222,  w: 22, h: 110 },
-            { x: 268,  w: 28, h: 60 },
-            { x: 320,  w: 24, h: 150 },
-            { x: 368,  w: 30, h: 95 },
-            { x: 422,  w: 22, h: 200 },
-            { x: 470,  w: 26, h: 75 },
-            { x: 518,  w: 28, h: 130 },
-            { x: 572,  w: 22, h: 165 },
-            { x: 618,  w: 30, h: 80 },
-            { x: 672,  w: 24, h: 220 },
-            { x: 720,  w: 28, h: 105 },
-            { x: 772,  w: 22, h: 145 },
-            { x: 818,  w: 30, h: 65 },
-            { x: 872,  w: 26, h: 175 },
-            { x: 922,  w: 22, h: 90 },
-            { x: 968,  w: 30, h: 195 },
-            { x: 1022, w: 24, h: 115 },
-            { x: 1072, w: 28, h: 70 },
-            { x: 1122, w: 22, h: 160 },
-            { x: 1168, w: 30, h: 100 },
-            { x: 1222, w: 26, h: 185 },
-            { x: 1272, w: 22, h: 80 },
-            { x: 1318, w: 28, h: 140 },
-            { x: 1370, w: 24, h: 95 },
-            { x: 1408, w: 30, h: 170 },
-          ].map((p, i) => (
-            <rect
-              key={`pillar-${i}`}
-              x={p.x}
-              y={50}
-              width={p.w}
-              height={p.h}
-              rx={p.w / 2}
-              ry={p.w / 2}
-              fill="url(#landing-drip-volume)"
-            />
-          ))}
-
-          {/* 3) Lösa droppar — små runda pärlor utspridda under pelarna */}
-          {[
-            { cx: 92,   cy: 260, r: 7 },
-            { cx: 145,  cy: 230, r: 5 },
-            { cx: 246,  cy: 250, r: 6 },
-            { cx: 345,  cy: 290, r: 8 },
-            { cx: 395,  cy: 240, r: 5 },
-            { cx: 498,  cy: 320, r: 7 },
-            { cx: 550,  cy: 270, r: 6 },
-            { cx: 645,  cy: 300, r: 5 },
-            { cx: 698,  cy: 360, r: 8 },
-            { cx: 798,  cy: 280, r: 6 },
-            { cx: 848,  cy: 240, r: 5 },
-            { cx: 945,  cy: 310, r: 7 },
-            { cx: 998,  cy: 350, r: 6 },
-            { cx: 1098, cy: 260, r: 5 },
-            { cx: 1148, cy: 305, r: 7 },
-            { cx: 1248, cy: 330, r: 6 },
-            { cx: 1298, cy: 260, r: 5 },
-            { cx: 1395, cy: 290, r: 7 },
-          ].map((d, i) => (
-            <circle
-              key={`drop-${i}`}
-              cx={d.cx}
-              cy={d.cy}
-              r={d.r}
-              fill="url(#landing-drip-volume)"
-            />
-          ))}
         </svg>
       )}
-
-
 
       {showBubbles && (
         <>
