@@ -468,7 +468,7 @@ const FixedPhoneLayer = () => {
 // `whileInView`. Telefonen (FixedPhoneLayer) hittar fortfarande hero via
 // data-hero-intro-stage och döljs när användaren scrollar förbi.
 // ─────────────────────────────────────────────────────────────────────────────
-const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
+const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   return (
     <>
       {/* ─────────── HERO ─────────── */}
