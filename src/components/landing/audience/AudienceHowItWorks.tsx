@@ -13,10 +13,10 @@ const AudienceHowItWorks = ({ role }: { role: AudienceRole }) => {
             <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-secondary/70">
               Så fungerar det
             </span>
-            <h2 className="mt-5 text-4xl font-black leading-[0.98] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
+            <h2 className="wave-text wave-text-below mt-5 text-4xl font-black leading-[0.98] tracking-[-0.025em] sm:text-5xl md:text-6xl">
               {role === 'job_seeker' ? 'Från profil till jobb.' : 'Från roll till anställd.'}
             </h2>
-            <p className="mt-6 max-w-md text-base leading-8 text-white/55 sm:text-lg">
+            <p className="wave-text wave-text-below mt-6 max-w-md text-base leading-8 opacity-75 sm:text-lg">
               Fyra enkla steg. Ingen byråkrati. Bara det som faktiskt för dig framåt.
             </p>
           </motion.div>
