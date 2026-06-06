@@ -610,7 +610,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     >
       <AnimatedBackground showGlow={false} showWave />
       <FixedPhoneLayer />
-      <div data-lenis-content className="relative z-10 min-h-full">
+      <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 
 
