@@ -212,12 +212,13 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 200 100% 60%;
 
-    /* Landing light zone — bright sky blue botten under wave divider */
-    /* #73b4ff — bright sky blue. All text pure white for stark kontrast. */
-    --landing-light: 212 100% 73%;
-    --landing-light-foreground: 0 0% 100%;
-    --landing-light-muted: 0 0% 100%;
-    --landing-light-border: 212 80% 63%;
+    /* Landing light zone — off-white botten under wave divider */
+    /* Warm off-white (#F5F1EA) — enterprise paper tone (Stripe/Linear/Apple).
+       Mjukare kontrast mot marinblå hero, mer premium än kritvit. */
+    --landing-light: 36 35% 94%;
+    --landing-light-foreground: 215 38% 15%;
+    --landing-light-muted: 215 16% 36%;
+    --landing-light-border: 36 18% 84%;
 
     --radius: 0.5rem;
 
@@ -1535,22 +1536,27 @@ All colors MUST be HSL.
   /*
    * Wave-aware text on audience landing pages.
    *
-   * All text is pure white regardless of wave position for this color test.
+   * Previous background-clip/fixed-attachment masks are unreliable on iOS.
+   * The page script now calculates the visible blue area from the real SVG wave
+   * and sets --wave-ink-clip per element. Base text is brand blue; the cloned
+   * pseudo layer is clipped to the blue background and painted off-white.
    */
   .wave-text {
-    color: hsl(var(--pure-white));
+    color: hsl(var(--landing-light));
     -webkit-text-fill-color: currentColor;
   }
 
+  /* Helt under vågen: mörk navy text mot ljus bakgrund (premium kontrast). */
   .wave-text[data-wave-below] {
-    color: hsl(var(--pure-white));
-    -webkit-text-fill-color: hsl(var(--pure-white));
+    color: hsl(var(--primary));
+    -webkit-text-fill-color: hsl(var(--primary));
   }
 
+  /* Korsar vågen: dual-layer med klipp för exakt växling. */
   .wave-text[data-wave-text] {
     position: relative;
-    color: hsl(var(--pure-white));
-    -webkit-text-fill-color: hsl(var(--pure-white));
+    color: hsl(var(--primary));
+    -webkit-text-fill-color: hsl(var(--primary));
   }
 
   .wave-text[data-wave-text]::before {
@@ -1559,8 +1565,8 @@ All colors MUST be HSL.
     position: absolute;
     inset: 0;
     z-index: 1;
-    color: hsl(var(--pure-white));
-    -webkit-text-fill-color: hsl(var(--pure-white));
+    color: hsl(var(--landing-light));
+    -webkit-text-fill-color: hsl(var(--landing-light));
     clip-path: var(--wave-ink-clip, inset(0 0 0 0));
     font: inherit;
     font-weight: inherit;
