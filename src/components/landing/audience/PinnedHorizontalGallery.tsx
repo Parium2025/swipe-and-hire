@@ -655,7 +655,7 @@ const PinnedHorizontalGallery = () => {
              avståndet ovanför och under titeln känns lika mot nav/kort.
              Rubriken matchar hero ("Hitta rätt människor snabbare!") i
              storlek och radhöjd så alla tre sektioner känns enhetliga. */
-          .phg-header { padding: clamp(52px, 8vh, 82px) 24px clamp(52px, 8vh, 82px); }
+          .phg-header { padding: clamp(28px, 5vh, 56px) 24px clamp(20px, 3vh, 36px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
