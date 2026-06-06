@@ -630,7 +630,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* ──────────────── FUNKTIONER ──────────────── */}
-          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
               <motion.span
                 initial={{ opacity: 0, x: -40 }}
