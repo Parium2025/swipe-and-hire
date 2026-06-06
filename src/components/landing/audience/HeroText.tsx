@@ -84,34 +84,28 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
         style={fadeStyle}
         className={
           isMobile
-            ? 'wave-text mt-6 flex flex-wrap gap-3'
-            : 'wave-text mt-7 flex flex-wrap gap-3 md:[@media_(orientation:portrait)]:justify-center'
+            ? 'mt-6 flex flex-wrap gap-3'
+            : 'mt-7 flex flex-wrap gap-3 md:[@media_(orientation:portrait)]:justify-center'
         }
         aria-label="Ladda ner Parium-appen"
       >
         <a
           href="#"
           onClick={(e) => e.preventDefault()}
-          className="group inline-flex min-h-touch items-center gap-3 rounded-2xl border border-current/30 bg-current/[0.06] px-4 py-2.5 backdrop-blur-sm transition-all hover:bg-current/[0.12] hover:border-current/50"
+          className="wave-text group inline-flex min-h-touch items-center gap-3 rounded-2xl border border-current/30 bg-current/[0.06] px-4 py-2.5 backdrop-blur-sm transition-all hover:bg-current/[0.12] hover:border-current/50"
           aria-label="Ladda ner på App Store (kommer snart)"
         >
-          <Apple className="h-7 w-7 shrink-0" strokeWidth={1.5} />
-          <span className="flex flex-col leading-tight text-left">
-            <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">Ladda ner på</span>
-            <span className="text-base font-bold">App Store</span>
-          </span>
+          <Apple className="h-7 w-7 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+          <span className="text-base font-bold leading-none">App Store</span>
         </a>
         <a
           href="#"
           onClick={(e) => e.preventDefault()}
-          className="group inline-flex min-h-touch items-center gap-3 rounded-2xl border border-current/30 bg-current/[0.06] px-4 py-2.5 backdrop-blur-sm transition-all hover:bg-current/[0.12] hover:border-current/50"
+          className="wave-text group inline-flex min-h-touch items-center gap-3 rounded-2xl border border-current/30 bg-current/[0.06] px-4 py-2.5 backdrop-blur-sm transition-all hover:bg-current/[0.12] hover:border-current/50"
           aria-label="Hämta på Google Play (kommer snart)"
         >
-          <Play className="h-6 w-6 shrink-0 fill-current" strokeWidth={1.5} />
-          <span className="flex flex-col leading-tight text-left">
-            <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">Hämta på</span>
-            <span className="text-base font-bold">Google Play</span>
-          </span>
+          <Play className="h-6 w-6 shrink-0 fill-current" strokeWidth={1.5} aria-hidden="true" />
+          <span className="text-base font-bold leading-none">Google Play</span>
         </a>
       </motion.div>
     </>
