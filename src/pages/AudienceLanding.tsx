@@ -103,10 +103,14 @@ const useWaveAwareText = () => {
         if (el.dataset.waveBelow) delete el.dataset.waveBelow;
         if (el.dataset.waveText !== text) el.dataset.waveText = text;
 
+        // Säkerhetsbuffert: utöka off-white-klippet 2px nedåt så navy-basen aldrig
+        // läcker upp på den blå ytan vid sub-pixel-avrundning eller anti-aliasing.
+        const safetyPx = 2;
         const points = ['0% 0%', '100% 0%'];
         for (let i = samples; i >= 0; i -= 1) {
           const xPercent = (i / samples) * 100;
-          const yPercent = Math.max(0, Math.min(100, ((ys[i] - rect.top) / rect.height) * 100));
+          const yPx = ys[i] - rect.top + safetyPx;
+          const yPercent = Math.max(0, Math.min(100, (yPx / rect.height) * 100));
           points.push(`${xPercent.toFixed(2)}% ${yPercent.toFixed(2)}%`);
         }
 
