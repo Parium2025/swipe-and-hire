@@ -665,7 +665,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.15 }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
-                className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+                className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <motion.div
