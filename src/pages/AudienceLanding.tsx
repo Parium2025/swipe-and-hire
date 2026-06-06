@@ -982,6 +982,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
 
+  useWaveAwareText();
+
   // 🎢 Premium smooth-scroll på mus/trackpad (Windows får samma silkeslena
   // inertia som macOS får gratis från OS). Hooken är no-op på touch och vid
   // prefers-reduced-motion. GSAP-wheel-locken runt pinned-galleriet använder
