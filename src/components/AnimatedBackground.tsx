@@ -32,43 +32,12 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
           preserveAspectRatio="none"
           aria-hidden
         >
-          <defs>
-            {/* Subtil djup-gradient strax under vågkanten — ger off-white-ytan
-                känslan av tjocklek istället för plattbild. */}
-            <linearGradient id="landing-wave-depth" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(215 38% 15%)" stopOpacity="0.10" />
-              <stop offset="100%" stopColor="hsl(215 38% 15%)" stopOpacity="0" />
-            </linearGradient>
-            {/* Tunn highlight precis på vågens topp — ljusbrytning à la Apple/Linear. */}
-            <linearGradient id="landing-wave-sheen" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(0 0% 100%)" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="hsl(0 0% 100%)" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-
-          {/* Bas-vågen (oförändrad kurva — wave-text klipper mot den) */}
           <path
             d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
             fill="hsl(var(--landing-light))"
           />
-
-          {/* Djup-band precis under kanten */}
-          <path
-            d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,180 L0,180 Z"
-            fill="url(#landing-wave-depth)"
-          />
-
-          {/* Sheen på vågens topp */}
-          <path
-            d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82"
-            stroke="url(#landing-wave-sheen)"
-            strokeWidth="1.5"
-            fill="none"
-          />
-
         </svg>
       )}
-
 
       {showBubbles && (
         <>
