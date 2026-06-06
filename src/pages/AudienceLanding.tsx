@@ -746,7 +746,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* ──────────────── FAQ ──────────────── */}
-          <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
+          <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
             <div className="mx-auto max-w-[880px]">
               <motion.div
                 initial={{ opacity: 0, x: -60 }}
