@@ -1532,47 +1532,42 @@ All colors MUST be HSL.
 /* Fallback utility for 2-line ellipsis without Tailwind line-clamp plugin */
 @layer utilities {
   /*
-   * Wave-aware text: text color automatically switches based on which side of
-   * the global wave it sits on in the viewport. Above the wave (blue page bg)
-   * → landing-light. Below the wave (off-white) → primary brand blue.
+   * Wave-aware text on audience landing pages.
    *
-   * Implementation: a viewport-fixed SVG "color map" identical in shape to the
-   * wave in AnimatedBackground, clipped to the text via background-clip: text.
-   * No JS, scrolls/resizes for free.
-   *
-   * Colors are hardcoded from CSS vars:
-   *   landing-light  hsl(40 18% 96%)  ≈ #F9F6F1
-   *   primary        hsl(215 100% 12%) ≈ #001A3D
-   *
-   * iOS Safari fallback: background-attachment:fixed degrades; the
-   * @supports block below provides a solid landing-light fill so text on
-   * blue stays readable; on white wave area the .wave-text-below override
-   * can be used as needed.
+   * Previous background-clip/fixed-attachment masks are unreliable on iOS.
+   * The page script now calculates the visible blue area from the real SVG wave
+   * and sets --wave-ink-clip per element. Base text is brand blue; the cloned
+   * pseudo layer is clipped to the blue background and painted off-white.
    */
   .wave-text {
-    background-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 1000' preserveAspectRatio='none'><rect width='1440' height='1000' fill='%23F9F6F1'/><path d='M0,567 C200,600 380,592 560,567 C760,538 940,537 1120,560 C1270,580 1360,583 1440,568 L1440,1000 L0,1000 Z' fill='%23001A3D'/></svg>");
-    background-attachment: fixed;
-    background-size: 100vw 100vh;
-    background-position: 0 0;
-    background-repeat: no-repeat;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
+    color: hsl(var(--landing-light));
+    -webkit-text-fill-color: currentColor;
   }
 
-  /* iOS / browsers without working fixed-attachment: fall back to a sane color
-     based on whether the element is intended to sit above or below the wave. */
-  @supports (-webkit-touch-callout: none) {
-    .wave-text {
-      background: none;
-      color: hsl(var(--landing-light));
-      -webkit-text-fill-color: hsl(var(--landing-light));
-    }
-    .wave-text.wave-text-below {
-      color: hsl(var(--primary));
-      -webkit-text-fill-color: hsl(var(--primary));
-    }
+  .wave-text[data-wave-text] {
+    position: relative;
+    color: hsl(var(--primary));
+    -webkit-text-fill-color: hsl(var(--primary));
+  }
+
+  .wave-text[data-wave-text]::before {
+    content: attr(data-wave-text);
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    color: hsl(var(--landing-light));
+    -webkit-text-fill-color: hsl(var(--landing-light));
+    clip-path: var(--wave-ink-clip, inset(0 0 0 0));
+    font: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    text-align: inherit;
+    text-transform: inherit;
+    white-space: inherit;
+    word-break: inherit;
+    overflow-wrap: inherit;
   }
 
   .two-line-ellipsis {
