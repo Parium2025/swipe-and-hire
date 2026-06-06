@@ -608,18 +608,31 @@ const Auth = () => {
   }
 
   // Använd rätt komponent baserat på skärmstorlek
+  const authBackdropStyle = {
+    backgroundColor: 'hsl(215 100% 12%)',
+    backgroundImage:
+      'radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 22%) 50%, hsl(215 100% 12%) 100%)',
+  };
+
+  const AuthBackdrop = () => (
+    <div aria-hidden className="absolute inset-0 z-0 overflow-hidden pointer-events-none" style={authBackdropStyle}>
+      <svg
+        className="absolute inset-x-0 bottom-0 h-[50%] w-full"
+        viewBox="0 0 1440 600"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
+          fill="hsl(var(--landing-light))"
+        />
+      </svg>
+    </div>
+  );
+
   if (device === 'mobile') {
     return (
-      <div className="h-screen w-full overflow-hidden relative">
-        <div
-          aria-hidden
-          className="fixed inset-0 -z-10 pointer-events-none"
-          style={{
-            backgroundColor: 'hsl(215 100% 12%)',
-            backgroundImage:
-              'radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 22%) 50%, hsl(215 100% 12%) 100%)',
-          }}
-        />
+      <div className="h-screen w-full overflow-hidden relative" style={authBackdropStyle}>
+        <AuthBackdrop />
         {/* Bottom safe-area blend to eliminate iOS seam */}
         <div
           className="fixed inset-x-0 bottom-0 pointer-events-none z-40"
@@ -659,16 +672,8 @@ const Auth = () => {
   // Desktop layout (includes former tablet layout)
 
   return (
-    <div className="h-screen w-full overflow-hidden relative">
-      <div
-        aria-hidden
-        className="fixed inset-0 -z-10 pointer-events-none"
-        style={{
-          backgroundColor: 'hsl(215 100% 12%)',
-          backgroundImage:
-            'radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 22%) 50%, hsl(215 100% 12%) 100%)',
-        }}
-      />
+    <div className="h-screen w-full overflow-hidden relative" style={authBackdropStyle}>
+      <AuthBackdrop />
       {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
       <main
         className="h-full w-full min-h-0 overflow-y-auto overflow-x-hidden relative z-10"
