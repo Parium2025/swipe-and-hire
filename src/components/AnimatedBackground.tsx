@@ -19,6 +19,7 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
     <div className={`${positionClass} inset-0 pointer-events-none z-0 overflow-hidden`}>
       {variant === 'viewport' && (
         <svg
+          data-landing-wave-map
           className="absolute inset-x-0 bottom-0 h-[50%] w-full"
           viewBox="0 0 1440 600"
           preserveAspectRatio="none"
