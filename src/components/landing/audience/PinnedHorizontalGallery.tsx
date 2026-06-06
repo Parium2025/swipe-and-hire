@@ -675,7 +675,7 @@ const PinnedHorizontalGallery = () => {
         <div className="phg-sticky">
 
           <div ref={headerRef} className="phg-header" style={{ opacity: 0, transform: 'translate3d(0, 44px, 0)' }}>
-            <p className="phg-title">Vi gör det <em>tillsammans!</em></p>
+            <p className="phg-title wave-text">Vi gör det <em>tillsammans!</em></p>
           </div>
 
           <div className="phg-strip-wrap">
