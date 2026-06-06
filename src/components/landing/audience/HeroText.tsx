@@ -32,8 +32,8 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
   // Subtiteln sitter ovanför vågens vita bakgrund → använd primär-blå
   // istället för vit så texten alltid är läsbar.
   const subtitleClass = isMobile
-    ? 'mt-7 max-w-xl text-base leading-8 text-primary font-medium'
-    : 'mt-7 max-w-xl text-lg leading-8 text-primary font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)]';
+    ? 'wave-text wave-text-below mt-7 max-w-xl text-base leading-8 font-medium'
+    : 'wave-text wave-text-below mt-7 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)]';
 
   // Premium-entré: enbart opacity. Ingen blur, ingen skugga, ingen translate.
   // Långsam, lugn ease (Apple-style) med en mjuk stagger rad-för-rad.
