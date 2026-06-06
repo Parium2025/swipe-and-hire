@@ -563,7 +563,6 @@ const PinnedHorizontalGallery = () => {
         }
         .phg-strip.phg-entered:not(.phg-leaving) .phg-card:hover {
           box-shadow:
-            0 44px 90px -28px rgba(0,0,0,0.85),
             0 0 0 1px rgba(255,255,255,0.14),
             0 0 60px -12px hsl(var(--secondary) / 0.4);
         }
