@@ -615,7 +615,11 @@ const Auth = () => {
   };
 
   const AuthBackdrop = () => (
-    <div aria-hidden className="absolute inset-0 z-0 overflow-hidden pointer-events-none" style={authBackdropStyle}>
+    <div
+      aria-hidden
+      className="fixed inset-x-0 top-0 z-0 h-[calc(100dvh+var(--chrome-strip-pad,0px))] overflow-hidden pointer-events-none"
+      style={authBackdropStyle}
+    >
       <svg
         className="absolute inset-x-0 bottom-0 h-[50%] w-full"
         viewBox="0 0 1440 600"
@@ -631,7 +635,7 @@ const Auth = () => {
 
   if (device === 'mobile') {
     return (
-      <div className="h-screen w-full overflow-hidden relative" style={authBackdropStyle}>
+      <div className="relative h-dvh min-h-dvh w-full max-w-full overflow-hidden" style={authBackdropStyle}>
         <AuthBackdrop />
         {/* Bottom safe-area blend to eliminate iOS seam */}
         <div
@@ -644,7 +648,7 @@ const Auth = () => {
 
         {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
         <main
-          className="h-full w-full min-h-0 overflow-y-auto overflow-x-hidden relative z-10"
+          className="relative z-10 h-full min-h-0 w-full max-w-full overflow-y-auto overflow-x-hidden"
           style={{ 
             WebkitOverflowScrolling: 'touch',
             scrollBehavior: 'smooth',
@@ -672,7 +676,7 @@ const Auth = () => {
   // Desktop layout (includes former tablet layout)
 
   return (
-    <div className="h-screen w-full overflow-hidden relative" style={authBackdropStyle}>
+    <div className="relative h-screen w-full overflow-hidden" style={authBackdropStyle}>
       <AuthBackdrop />
       {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
       <main

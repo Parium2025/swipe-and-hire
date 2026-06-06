@@ -9,6 +9,7 @@ const AUDIENCE_LANDING_COLOR = '#001F3D';
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
+const isAuthPath = (pathname: string) => pathname === '/auth';
 
 /**
  * Tunn färgremsa längst ner — endast på mobil/touch.
@@ -72,7 +73,7 @@ const BottomChromeStrip = () => {
     };
   }, [isTouch]);
 
-  if (!isTouch) return null;
+  if (!isTouch || isAuthPath(location.pathname)) return null;
 
   return (
     <div
