@@ -307,24 +307,12 @@ const FixedPhoneLayer = () => {
     };
 
     const apply = (next: boolean) => {
-      if (next === lastVisibleRef.current && showTimerRef.current === null) return;
-      if (next) {
-        if (showTimerRef.current) return;
-        showTimerRef.current = setTimeout(() => {
-          showTimerRef.current = null;
-          lastVisibleRef.current = true;
-          setVisible(true);
-        }, 900);
-      } else {
-        if (showTimerRef.current) {
-          clearTimeout(showTimerRef.current);
-          showTimerRef.current = null;
-        }
-        lastVisibleRef.current = false;
-        setVisible(false);
-      }
+      if (next === lastVisibleRef.current) return;
+      lastVisibleRef.current = next;
+      setVisible(next);
       setActive(next);
     };
+
 
     const sync = () => apply(isHeroZone());
 
