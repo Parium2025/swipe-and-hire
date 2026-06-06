@@ -55,9 +55,6 @@ const BouncyFooter = ({ audience, onCta, variant = 'dark' }: Props) => {
     observers.push(makeObserver(null));
     observers.forEach((o) => o.observe(el));
     return () => observers.forEach((o) => o.disconnect());
-
-    io.observe(el);
-    return () => io.disconnect();
   }, []);
 
   useAnimationFrame((t) => {
