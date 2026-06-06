@@ -451,7 +451,7 @@ const PinnedHorizontalGallery = () => {
           /* Mer luftigt avstånd ovan/under rubriken på alla skärmar — håller
              professionellt andrum mellan topp-nav (Parium-logo) och titel,
              samt mellan titel och kortrad. */
-          padding: clamp(110px, 14vh, 150px) 24px clamp(36px, 6vh, 72px);
+          padding: clamp(48px, 7vh, 80px) 24px clamp(20px, 3vh, 40px);
           text-align: center;
           z-index: 3;
           will-change: transform, opacity;
