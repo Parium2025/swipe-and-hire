@@ -29,23 +29,32 @@ const BouncyFooter = ({ audience, onCta, variant = 'dark' }: Props) => {
     const el = wrapperRef.current;
     if (!el) return;
 
-    const root = (document.querySelector('[data-landing-scroll-root]') as HTMLElement) ?? null;
+    const scrollRoot = (document.querySelector('[data-landing-scroll-root]') as HTMLElement) ?? null;
     let wasInside = false;
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting && !wasInside) {
-            wasInside = true;
-            startRef.current = null;
-            setAnimating(true);
-          } else if (!entry.isIntersecting && wasInside) {
-            wasInside = false;
+    const makeObserver = (root: Element | null) =>
+      new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting && !wasInside) {
+              wasInside = true;
+              startRef.current = null;
+              setAnimating(true);
+            } else if (!entry.isIntersecting && wasInside) {
+              wasInside = false;
+            }
           }
-        }
-      },
-      { root, threshold: 0.05 }
-    );
+        },
+        { root, threshold: 0.05 }
+      );
+
+    // Observe against both the landing scroll container (if any) and the viewport,
+    // so the elastic bounce always re-triggers when the footer enters view.
+    const observers: IntersectionObserver[] = [];
+    if (scrollRoot) observers.push(makeObserver(scrollRoot));
+    observers.push(makeObserver(null));
+    observers.forEach((o) => o.observe(el));
+    return () => observers.forEach((o) => o.disconnect());
 
     io.observe(el);
     return () => io.disconnect();
