@@ -22,7 +22,7 @@ interface AnimatedBackgroundProps {
 export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, variant = 'viewport', showWave = false, waveHeightClassName = 'h-[50%]' }: AnimatedBackgroundProps) => {
   const positionClass = variant === 'card' ? 'absolute' : 'fixed';
 
-  const waveFill = 'hsl(var(--primary))';
+  const waveFill = 'hsl(var(--landing-light))';
 
   return (
     <div className={`${positionClass} inset-0 pointer-events-none z-0 overflow-hidden`}>
