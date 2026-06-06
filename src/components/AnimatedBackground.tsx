@@ -16,9 +16,10 @@ interface AnimatedBackgroundProps {
    * so it does NOT leak into /auth or in-app shells.
    */
   showWave?: boolean;
+  waveHeightClassName?: string;
 }
 
-export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, variant = 'viewport', showWave = false }: AnimatedBackgroundProps) => {
+export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, variant = 'viewport', showWave = false, waveHeightClassName = 'h-[50%]' }: AnimatedBackgroundProps) => {
   const positionClass = variant === 'card' ? 'absolute' : 'fixed';
 
   return (
@@ -26,7 +27,7 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
       {variant === 'viewport' && showWave && (
         <svg
           data-landing-wave-map
-          className="absolute inset-x-0 bottom-0 h-[50%] w-full"
+          className={`absolute inset-x-0 bottom-0 ${waveHeightClassName} w-full`}
           viewBox="0 0 1440 600"
           preserveAspectRatio="none"
           aria-hidden
