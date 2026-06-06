@@ -212,12 +212,12 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 200 100% 60%;
 
-    /* Landing light zone — soft sky blue botten under wave divider */
-    /* #8dc7f7 — soft sky blue. All text pure white for stark kontrast. */
-    --landing-light: 207 87% 76%;
+    /* Landing light zone — bright sky blue botten under wave divider */
+    /* #73b4ff — bright sky blue. All text pure white for stark kontrast. */
+    --landing-light: 212 100% 73%;
     --landing-light-foreground: 0 0% 100%;
     --landing-light-muted: 0 0% 100%;
-    --landing-light-border: 207 80% 66%;
+    --landing-light-border: 212 80% 63%;
 
     --radius: 0.5rem;
 
