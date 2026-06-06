@@ -10,14 +10,20 @@ interface AnimatedBackgroundProps {
   showBubbles?: boolean;
   showGlow?: boolean;
   variant?: 'viewport' | 'card';
+  /**
+   * Render the off-white wave map at the bottom. Only used on the audience
+   * landing page so that wave-aware text can clip against it. Off by default
+   * so it does NOT leak into /auth or in-app shells.
+   */
+  showWave?: boolean;
 }
 
-export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, variant = 'viewport' }: AnimatedBackgroundProps) => {
+export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, variant = 'viewport', showWave = false }: AnimatedBackgroundProps) => {
   const positionClass = variant === 'card' ? 'absolute' : 'fixed';
 
   return (
     <div className={`${positionClass} inset-0 pointer-events-none z-0 overflow-hidden`}>
-      {variant === 'viewport' && (
+      {variant === 'viewport' && showWave && (
         <svg
           data-landing-wave-map
           className="absolute inset-x-0 bottom-0 h-[50%] w-full"
