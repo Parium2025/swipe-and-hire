@@ -1546,17 +1546,17 @@ All colors MUST be HSL.
     -webkit-text-fill-color: currentColor;
   }
 
-  /* Helt under vågen: ren blå text, ingen dual-layer (slipper AA-halo). */
+  /* Helt under vågen: mörk navy text mot ljus bakgrund (premium kontrast). */
   .wave-text[data-wave-below] {
-    color: hsl(var(--secondary));
-    -webkit-text-fill-color: hsl(var(--secondary));
+    color: hsl(var(--primary));
+    -webkit-text-fill-color: hsl(var(--primary));
   }
 
   /* Korsar vågen: dual-layer med klipp för exakt växling. */
   .wave-text[data-wave-text] {
     position: relative;
-    color: hsl(var(--secondary));
-    -webkit-text-fill-color: hsl(var(--secondary));
+    color: hsl(var(--primary));
+    -webkit-text-fill-color: hsl(var(--primary));
   }
 
   .wave-text[data-wave-text]::before {
