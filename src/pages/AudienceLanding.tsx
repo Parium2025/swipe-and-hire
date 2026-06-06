@@ -264,9 +264,7 @@ const FixedPhoneLayer = () => {
   };
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
-  const [phoneReady, setPhoneReady] = useState(false);
   const [phoneMetrics, setPhoneMetrics] = useState(calculatePhoneMetrics);
-  const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVisibleRef = useRef(true);
 
   useEffect(() => {
@@ -307,47 +305,25 @@ const FixedPhoneLayer = () => {
     };
 
     const apply = (next: boolean) => {
-      if (next === lastVisibleRef.current && showTimerRef.current === null) return;
-      if (next) {
-        if (showTimerRef.current) return;
-        showTimerRef.current = setTimeout(() => {
-          showTimerRef.current = null;
-          lastVisibleRef.current = true;
-          setVisible(true);
-        }, 900);
-      } else {
-        if (showTimerRef.current) {
-          clearTimeout(showTimerRef.current);
-          showTimerRef.current = null;
-        }
-        lastVisibleRef.current = false;
-        setVisible(false);
-      }
+      if (next === lastVisibleRef.current) return;
+      lastVisibleRef.current = next;
+      setVisible(next);
       setActive(next);
     };
-
     const sync = () => apply(isHeroZone());
 
     sync();
-    const onSplineReady = () => setPhoneReady(true);
-    window.addEventListener('parium:spline-ready', onSplineReady);
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
     window.addEventListener('resize', sync, { passive: true });
 
     return () => {
-      window.removeEventListener('parium:spline-ready', onSplineReady);
       scrollRoot?.removeEventListener('scroll', sync);
       window.removeEventListener('resize', sync);
-      if (showTimerRef.current) {
-        clearTimeout(showTimerRef.current);
-        showTimerRef.current = null;
-      }
     };
   }, []);
 
 
-  const shouldRenderPhoneLayer = visible;
-  const shouldEnablePhoneInteraction = visible && phoneReady;
+
   const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
 
   return (
@@ -359,12 +335,13 @@ const FixedPhoneLayer = () => {
         <div aria-hidden className="hidden md:block" />
         <div
           data-phone-scroll-forward
-          className={`${shouldEnablePhoneInteraction ? 'pointer-events-auto' : 'pointer-events-none'} ${shouldRenderPhoneLayer ? 'visible opacity-100 transition-opacity duration-500 ease-out' : 'invisible opacity-0 transition-none'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center'}`}
+          className={`pointer-events-none transition-opacity duration-[700ms] ease-out ${visible ? 'opacity-100' : 'opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center'}`}
           style={phoneMetrics.isDesktop
-            ? { touchAction: 'none', overscrollBehavior: 'contain', height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
-            : { touchAction: 'none', overscrollBehavior: 'contain', top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
+            ? { height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
+            : { top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
           }
         >
+
           <SplinePhone
             className="h-full w-full"
             style={phoneMetrics.isDesktop ? undefined : { transform: `translateY(-${phoneMetrics.yOffset}px)` }}
