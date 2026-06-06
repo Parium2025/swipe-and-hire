@@ -97,7 +97,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
         >
           <Apple className="h-7 w-7 shrink-0" strokeWidth={1.5} aria-hidden="true" />
           <span className="flex flex-col leading-tight text-left">
-            <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">LADDA NER PÅ</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">LADDA NER PÅ </span>
             <span className="text-base font-bold">App Store</span>
           </span>
         </a>
@@ -109,7 +109,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
         >
           <Play className="h-6 w-6 shrink-0 fill-current" strokeWidth={1.5} aria-hidden="true" />
           <span className="flex flex-col leading-tight text-left">
-            <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">LADDA NER PÅ</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">LADDA NER PÅ </span>
             <span className="text-base font-bold">Google Play</span>
           </span>
         </a>
