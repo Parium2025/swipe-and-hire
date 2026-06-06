@@ -982,6 +982,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
                 samma position som data-landing-wave-map oavsett GSAP-transformer
                 på intro-lagret. Annars hamnar visuell våg och clip-path ur synk. */}
             <svg
+              data-landing-wave-map
               className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-[50svh] w-full"
               viewBox="0 0 1440 600"
               preserveAspectRatio="none"
