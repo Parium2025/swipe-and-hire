@@ -1546,8 +1546,8 @@ All colors MUST be HSL.
 
   .wave-text[data-wave-text] {
     position: relative;
-    color: hsl(var(--primary));
-    -webkit-text-fill-color: hsl(var(--primary));
+    color: hsl(var(--secondary));
+    -webkit-text-fill-color: hsl(var(--secondary));
   }
 
   .wave-text[data-wave-text]::before {
