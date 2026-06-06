@@ -212,11 +212,11 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 200 100% 60%;
 
-    /* Landing light zone — ljusblå botten under wave divider (#73b4ff) */
-    --landing-light: 211 100% 73%;
+    /* Landing light zone — nu mörkblå (matchar primary/gallery-sektionen) */
+    --landing-light: 215 100% 12%;
     --landing-light-foreground: 0 0% 100%;
     --landing-light-muted: 0 0% 100%;
-    --landing-light-border: 211 100% 80%;
+    --landing-light-border: 215 100% 20%;
 
     --radius: 0.5rem;
 
