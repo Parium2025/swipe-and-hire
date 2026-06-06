@@ -33,66 +33,150 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
           aria-hidden
         >
           <defs>
-            {/* Subtil vertikal djupgradient för pelar-droppar (navy) */}
             <linearGradient id="landing-drip-volume" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(215 100% 14%)" />
+              <stop offset="0%" stopColor="hsl(215 100% 13%)" />
               <stop offset="100%" stopColor="hsl(215 100% 9%)" />
             </linearGradient>
           </defs>
 
-          {/* Off-white våg-fyllning */}
+          {/* Off-white botten-fyllning (under vågen) */}
           <path
             d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
             fill="hsl(var(--landing-light))"
           />
 
-          {/* Equalizer-droppar — vertikala pelare som hänger från vågens
-              underkant. Korta varierande höjder så de stannar inom våg-zonen
-              och inte överlappar text i sektionen under. */}
-          {[
-            { x: 60,   top: 78,  h: 30, w: 16 },
-            { x: 118,  top: 96,  h: 46, w: 16 },
-            { x: 176,  top: 108, h: 24, w: 16 },
-            { x: 234,  top: 114, h: 52, w: 16 },
-            { x: 296,  top: 110, h: 32, w: 16 },
-            { x: 358,  top: 100, h: 48, w: 16 },
-            { x: 420,  top: 92,  h: 28, w: 16 },
-            { x: 482,  top: 84,  h: 56, w: 16 },
-            { x: 544,  top: 78,  h: 38, w: 16 },
-            { x: 606,  top: 68,  h: 60, w: 16 },
-            { x: 668,  top: 58,  h: 26, w: 16 },
-            { x: 730,  top: 50,  h: 50, w: 16 },
-            { x: 792,  top: 46,  h: 34, w: 16 },
-            { x: 854,  top: 46,  h: 58, w: 16 },
-            { x: 916,  top: 48,  h: 30, w: 16 },
-            { x: 978,  top: 54,  h: 54, w: 16 },
-            { x: 1040, top: 62,  h: 28, w: 16 },
-            { x: 1102, top: 72,  h: 50, w: 16 },
-            { x: 1164, top: 82,  h: 34, w: 16 },
-            { x: 1226, top: 90,  h: 56, w: 16 },
-            { x: 1288, top: 98,  h: 30, w: 16 },
-            { x: 1350, top: 96,  h: 48, w: 16 },
-            { x: 1410, top: 90,  h: 36, w: 16 },
-          ].map((p, i) => (
-            <rect
-              key={`drip-${i}`}
-              x={p.x}
-              y={p.top}
-              width={p.w}
-              height={p.h}
-              rx={p.w / 2}
-              ry={p.w / 2}
-              fill="url(#landing-drip-volume)"
-            />
-          ))}
+          {/* Navy paint-drip: blå området "rinner" ner i off-white.
+              En sammanhängande path som följer vågens underkant och
+              släpper droppar nedåt med varierande längd + bulbiga ändar.
+              Slutar uppåt utanför viewBox så det smälter ihop med blå sektion ovan. */}
+          <path
+            fill="url(#landing-drip-volume)"
+            d="
+              M0,-20
+              L1440,-20
+              L1440,82
+              C1360,100 1270,96 1120,72
+              C940,44 760,46 560,80
+              C380,110 200,120 0,80
+              Z
+              M58,108
+              c-6,0 -10,8 -10,18
+              c0,12 4,20 12,20
+              c8,0 12,-8 12,-20
+              c0,-10 -4,-18 -10,-18
+              Z
+              M132,128
+              c-7,0 -12,10 -12,24
+              c0,16 5,28 14,28
+              c10,0 14,-12 14,-28
+              c0,-14 -5,-24 -12,-24
+              Z
+              M214,116
+              c-5,0 -9,6 -9,14
+              c0,9 4,15 10,15
+              c6,0 9,-6 9,-15
+              c0,-8 -4,-14 -9,-14
+              Z
+              M286,140
+              c-8,0 -13,12 -13,30
+              c0,22 5,38 16,38
+              c11,0 15,-16 15,-38
+              c0,-18 -5,-30 -13,-30
+              Z
+              M372,120
+              c-6,0 -10,8 -10,18
+              c0,12 4,20 11,20
+              c7,0 10,-8 10,-20
+              c0,-10 -4,-18 -9,-18
+              Z
+              M448,118
+              c-9,0 -15,14 -15,34
+              c0,26 6,46 18,46
+              c12,0 17,-20 17,-46
+              c0,-20 -6,-34 -15,-34
+              Z
+              M538,96
+              c-6,0 -10,8 -10,18
+              c0,12 4,20 11,20
+              c7,0 10,-8 10,-20
+              c0,-10 -4,-18 -9,-18
+              Z
+              M620,90
+              c-9,0 -16,18 -16,42
+              c0,30 7,52 19,52
+              c12,0 18,-22 18,-52
+              c0,-24 -7,-42 -16,-42
+              Z
+              M708,72
+              c-5,0 -9,6 -9,14
+              c0,10 4,16 10,16
+              c6,0 9,-6 9,-16
+              c0,-8 -4,-14 -9,-14
+              Z
+              M780,62
+              c-8,0 -14,14 -14,32
+              c0,22 6,38 16,38
+              c10,0 15,-16 15,-38
+              c0,-18 -6,-32 -14,-32
+              Z
+              M862,62
+              c-6,0 -10,8 -10,18
+              c0,12 4,20 11,20
+              c7,0 10,-8 10,-20
+              c0,-10 -4,-18 -9,-18
+              Z
+              M940,66
+              c-9,0 -16,16 -16,38
+              c0,28 7,48 18,48
+              c11,0 17,-20 17,-48
+              c0,-22 -7,-38 -16,-38
+              Z
+              M1022,76
+              c-5,0 -9,6 -9,14
+              c0,9 4,15 10,15
+              c6,0 9,-6 9,-15
+              c0,-8 -4,-14 -9,-14
+              Z
+              M1100,88
+              c-9,0 -15,14 -15,34
+              c0,26 6,46 18,46
+              c12,0 17,-20 17,-46
+              c0,-20 -6,-34 -15,-34
+              Z
+              M1184,104
+              c-6,0 -10,8 -10,18
+              c0,12 4,20 11,20
+              c7,0 10,-8 10,-20
+              c0,-10 -4,-18 -9,-18
+              Z
+              M1262,114
+              c-9,0 -16,16 -16,38
+              c0,28 7,48 18,48
+              c12,0 18,-20 18,-48
+              c0,-22 -7,-38 -16,-38
+              Z
+              M1344,108
+              c-6,0 -10,8 -10,18
+              c0,12 4,20 11,20
+              c7,0 10,-8 10,-20
+              c0,-10 -4,-18 -9,-18
+              Z
+              M1408,116
+              c-7,0 -12,10 -12,24
+              c0,16 5,28 14,28
+              c10,0 14,-12 14,-28
+              c0,-14 -5,-24 -12,-24
+              Z
+            "
+          />
 
-          {/* Lösa droppar — små punkter under några av de kortare pelarna */}
+          {/* Lösa droppar (helt frikopplade pärlor lägre ner) */}
           {[
-            { cx: 184, cy: 142, r: 5 },
-            { cx: 428, cy: 130, r: 5 },
-            { cx: 676, cy: 92,  r: 4 },
-            { cx: 924, cy: 86,  r: 4 },
-            { cx: 1296, cy: 136, r: 5 },
+              { cx: 96, cy: 180, r: 5 },
+              { cx: 350, cy: 220, r: 6 },
+              { cx: 656, cy: 200, r: 5 },
+              { cx: 988, cy: 178, r: 5 },
+              { cx: 1316, cy: 218, r: 6 },
           ].map((d, i) => (
             <circle
               key={`drop-${i}`}
@@ -104,6 +188,7 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
           ))}
         </svg>
       )}
+
 
       {showBubbles && (
         <>
