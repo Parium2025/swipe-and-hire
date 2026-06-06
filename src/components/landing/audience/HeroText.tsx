@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { Apple, Play } from 'lucide-react';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -27,13 +26,13 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     : 'text-xs font-bold uppercase tracking-[0.28em] text-secondary/80';
 
   const headlineClass = isMobile
-    ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[0] pb-2 sm:text-[4rem] md:text-[5rem]'
-    : 'mt-6 max-w-[min(92vw,60rem)] text-[clamp(2.75rem,5.2vw,7rem)] font-black leading-[1.04] tracking-[0] pb-3 md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(88vw,48rem)] md:[@media_(orientation:portrait)]:text-[clamp(3.1rem,5.8vw,4.75rem)]';
+    ? 'mt-6 max-w-4xl text-[3.25rem] font-black leading-[1.04] tracking-[0] sm:text-[4rem] md:text-[5rem]'
+    : 'mt-6 max-w-[min(92vw,60rem)] text-[clamp(2.75rem,5.2vw,7rem)] font-black leading-[1.04] tracking-[0] md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(88vw,48rem)] md:[@media_(orientation:portrait)]:text-[clamp(3.1rem,5.8vw,4.75rem)]';
 
   // Följer samma vågmask som bakgrunden: vit på blått, blå på vitt.
   const subtitleClass = isMobile
-    ? 'wave-text mt-5 max-w-xl text-sm leading-6 font-medium'
-    : 'wave-text mt-7 lg:[@media_(orientation:landscape)]:mt-24 xl:[@media_(orientation:landscape)]:mt-32 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)] lg:[@media_(orientation:landscape)]:ml-auto lg:[@media_(orientation:landscape)]:mr-0 lg:[@media_(orientation:landscape)]:text-left lg:[@media_(orientation:landscape)]:translate-x-[18vw] xl:[@media_(orientation:landscape)]:translate-x-[20vw]';
+    ? 'wave-text mt-7 max-w-xl text-base leading-8 font-medium'
+    : 'wave-text mt-7 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)]';
 
   // Premium-entré: enbart opacity. Ingen blur, ingen skugga, ingen translate.
   // Långsam, lugn ease (Apple-style) med en mjuk stagger rad-för-rad.
@@ -76,52 +75,6 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
       >
         {subtitle}
       </motion.p>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.2, ease: premiumEase, delay: 0.5 + headline.length * 0.32 + 0.35 }}
-        style={fadeStyle}
-        className={
-          isMobile
-            ? 'mt-4 flex flex-wrap justify-center gap-2.5'
-            : 'mt-7 flex flex-wrap gap-3 md:[@media_(orientation:portrait)]:justify-center lg:[@media_(orientation:landscape)]:ml-auto lg:[@media_(orientation:landscape)]:mr-0 lg:[@media_(orientation:landscape)]:max-w-xl lg:[@media_(orientation:landscape)]:justify-center lg:[@media_(orientation:landscape)]:translate-x-[18vw] xl:[@media_(orientation:landscape)]:translate-x-[20vw]'
-        }
-        aria-label="Ladda ner Parium-appen"
-      >
-        <a
-          href="#"
-          onClick={(e) => e.preventDefault()}
-          className={
-            isMobile
-              ? 'group inline-flex min-h-touch items-center gap-2 rounded-xl border border-white/20 bg-[hsl(var(--secondary))] px-3 py-2 text-white shadow-[0_6px_18px_-8px_rgba(0,0,0,0.45)] transition-all'
-              : 'group inline-flex min-h-touch items-center gap-3 rounded-2xl border border-white/20 bg-[hsl(var(--secondary))] px-4 py-2.5 text-white shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] transition-all hover:bg-[hsl(var(--secondary))]/90 hover:border-white/30'
-          }
-          aria-label="LADDA NER PÅ App Store (kommer snart)"
-        >
-          <Apple className={isMobile ? 'h-5 w-5 shrink-0' : 'h-7 w-7 shrink-0'} strokeWidth={1.5} aria-hidden="true" />
-          <span className="flex flex-col leading-tight text-left">
-            <span className={isMobile ? 'text-[9px] font-medium uppercase tracking-wider opacity-80' : 'text-[10px] font-medium uppercase tracking-wider opacity-80'}>LADDA NER PÅ </span>
-            <span className={isMobile ? 'text-sm font-bold' : 'text-base font-bold'}>App Store</span>
-          </span>
-        </a>
-        <a
-          href="#"
-          onClick={(e) => e.preventDefault()}
-          className={
-            isMobile
-              ? 'group inline-flex min-h-touch items-center gap-2 rounded-xl border border-white/20 bg-[hsl(var(--secondary))] px-3 py-2 text-white shadow-[0_6px_18px_-8px_rgba(0,0,0,0.45)] transition-all'
-              : 'group inline-flex min-h-touch items-center gap-3 rounded-2xl border border-white/20 bg-[hsl(var(--secondary))] px-4 py-2.5 text-white shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] transition-all hover:bg-[hsl(var(--secondary))]/90 hover:border-white/30'
-          }
-          aria-label="LADDA NER PÅ Google Play (kommer snart)"
-        >
-          <Play className={isMobile ? 'h-5 w-5 shrink-0 fill-current' : 'h-6 w-6 shrink-0 fill-current'} strokeWidth={1.5} aria-hidden="true" />
-          <span className="flex flex-col leading-tight text-left">
-            <span className={isMobile ? 'text-[9px] font-medium uppercase tracking-wider opacity-80' : 'text-[10px] font-medium uppercase tracking-wider opacity-80'}>LADDA NER PÅ </span>
-            <span className={isMobile ? 'text-sm font-bold' : 'text-base font-bold'}>Google Play</span>
-          </span>
-        </a>
-      </motion.div>
     </>
   );
 };

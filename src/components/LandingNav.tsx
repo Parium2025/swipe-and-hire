@@ -195,18 +195,36 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
               className="cursor-pointer touch-manipulation select-none transition-opacity active:opacity-70 hover:opacity-80 shrink-0"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <img
-                src={pariumLogo}
-                alt="Parium"
-                width={256}
-                height={256}
-                draggable={false}
-                loading="eager"
-                decoding="sync"
-                // @ts-expect-error - fetchpriority is a valid HTML attribute
-                fetchpriority="high"
-                className="h-auto w-36 sm:w-32 md:w-36 lg:w-40 pointer-events-none"
-              />
+              {isLightSection ? (
+                <span className="flex items-center gap-2 text-2xl font-semibold tracking-normal text-primary">
+                  <img
+                    src={pariumLogoRings}
+                    alt=""
+                    width={96}
+                    height={96}
+                    draggable={false}
+                    loading="eager"
+                    decoding="sync"
+                    // @ts-expect-error - fetchpriority is a valid HTML attribute
+                    fetchpriority="high"
+                    className="pointer-events-none h-7 w-7 object-contain"
+                  />
+                  <span>Parium</span>
+                </span>
+              ) : (
+                <img
+                  src={pariumLogo}
+                  alt="Parium"
+                  width={256}
+                  height={256}
+                  draggable={false}
+                  loading="eager"
+                  decoding="sync"
+                  // @ts-expect-error - fetchpriority is a valid HTML attribute
+                  fetchpriority="high"
+                  className="h-auto w-36 sm:w-32 md:w-36 lg:w-40 pointer-events-none"
+                />
+              )}
             </a>
 
             {/* Mobil: dropdown-meny. Från tablet-bredd visas hela list-pillen så layout styrs av tillgänglig bredd, inte enhetsnamn. */}

@@ -89,8 +89,8 @@ const BouncyFooter = ({ audience, onCta, variant = 'dark' }: Props) => {
         >
           <defs>
             <linearGradient id="bouncy-footer-grad" x1="0" y1="0" x2="2278" y2="683" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stopColor="hsl(var(--primary))" />
-              <stop offset="1" stopColor="hsl(var(--primary))" />
+              <stop offset="0.2" stopColor="hsl(var(--secondary))" />
+              <stop offset="0.8" stopColor="hsl(var(--primary-glow, var(--primary)))" />
             </linearGradient>
           </defs>
           <path
@@ -118,7 +118,7 @@ const BouncyFooter = ({ audience, onCta, variant = 'dark' }: Props) => {
             <button
               type="button"
               onPointerDown={onCta}
-              className="group mt-8 inline-flex min-h-touch items-center justify-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-white shadow-[0_18px_55px_hsl(var(--secondary)/0.45)] transition-shadow hover:shadow-[0_22px_70px_hsl(var(--secondary)/0.6)]"
+              className="group mt-8 inline-flex min-h-touch items-center justify-center gap-3 rounded-full bg-background px-7 py-3.5 text-sm font-bold text-foreground shadow-[0_18px_55px_hsl(var(--background)/0.35)] transition-shadow hover:shadow-[0_22px_70px_hsl(var(--background)/0.5)]"
             >
               {cta}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

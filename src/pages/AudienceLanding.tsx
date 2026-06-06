@@ -167,33 +167,8 @@ const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   
   const lastHeroMetricsRef = useRef<{ isDesktop: boolean; isPortraitTablet?: boolean; top: number; height: number; zoom: number; yOffset: number } | null>(null);
-  const stableMobileViewportRef = useRef<{ width: number; height: number } | null>(null);
-
-  const getStableViewport = () => {
-    const width = window.visualViewport?.width ?? window.innerWidth;
-    const observedHeight = Math.min(
-      window.innerHeight,
-      document.documentElement.clientHeight || window.innerHeight,
-      window.visualViewport?.height ?? window.innerHeight,
-    );
-
-    if (width >= 768) return { width, height: observedHeight };
-
-    const previous = stableMobileViewportRef.current;
-    if (!previous || Math.abs(previous.width - width) > 16) {
-      stableMobileViewportRef.current = { width, height: observedHeight };
-      return stableMobileViewportRef.current;
-    }
-
-    stableMobileViewportRef.current = {
-      width,
-      height: Math.min(previous.height, observedHeight),
-    };
-    return stableMobileViewportRef.current;
-  };
-
   const getVisibleAnchor = () => {
-    const viewportHeight = getStableViewport().height;
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const anchors = Array.from(document.querySelectorAll('[data-hero-phone-anchor]')) as HTMLElement[];
     return anchors.find((anchor) => {
       const rect = anchor.getBoundingClientRect();
@@ -203,7 +178,8 @@ const FixedPhoneLayer = () => {
   const calculatePhoneMetrics = () => {
     if (typeof window === 'undefined') return { isDesktop: true, top: 0, height: 660, zoom: 0.68, yOffset: 0 };
     if (lastHeroMetricsRef.current && !document.querySelector('[data-hero-intro-stage]')) return lastHeroMetricsRef.current;
-    const { width, height } = getStableViewport();
+    const width = window.visualViewport?.width ?? window.innerWidth;
+    const height = window.visualViewport?.height ?? window.innerHeight;
 
     const isPortraitTablet = width >= 768 && width < 1180 && height > width;
 
@@ -253,23 +229,24 @@ const FixedPhoneLayer = () => {
     const anchor = getVisibleAnchor();
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.48;
     const tablet = width >= 700;
-    // iOS Safari changes visualViewport when the toolbar collapses/expands.
-    // Keep the phone tied to the stable 100svh hero instead, and fit it inside
-    // the blue band between the store buttons and the bottom chrome strip.
-    const desiredGap = tablet ? clamp(height * 0.045, 34, 72) : clamp(height * 0.032, 22, 32);
-    const minGap = tablet ? 28 : 18;
-    const bottomSafe = tablet ? clamp(height * 0.09, 68, 132) : clamp(height * 0.09, 56, 92);
-    const desiredTop = textBottom + desiredGap;
-    const maxCanvasHeight = tablet ? clamp(height * 0.46, 340, 500) : clamp(height * 0.39, 230, 330);
-    const minCanvasHeight = tablet ? 260 : 205;
-    const heightAtDesiredTop = Math.max(120, height - desiredTop - bottomSafe);
-    const targetHeight = clamp(heightAtDesiredTop, minCanvasHeight, maxCanvasHeight);
-    const top = Math.max(textBottom + minGap, Math.min(desiredTop, height - bottomSafe - targetHeight));
-    const finalHeight = Math.max(120, Math.min(targetHeight, height - top - bottomSafe));
-    const yOffset = width >= 768 ? 14 : 0;
-    // Reference baseline: scale zoom with the fitted canvas so the model stays centered without clipping.
-    const referenceHeight = tablet ? 440 : 300;
-    const baseZoom = tablet ? 0.46 : 0.38;
+    // Proportional safe areas — scale with viewport height so phone never clips and breathes equally top/bottom.
+    const gap = tablet ? clamp(height * 0.055, 44, 96) : clamp(height * 0.06, 40, 88);
+    const topSafeGap = tablet ? clamp(height * 0.075, 56, 120) : clamp(height * 0.082, 54, 110);
+    const bottomSafe = tablet ? clamp(height * 0.095, 70, 140) : clamp(height * 0.11, 76, 132);
+    const canvasTopBreathingRoom = tablet ? clamp(height * 0.07, 50, 110) : clamp(height * 0.095, 64, 120);
+    // Maximize canvas area between text and bottom safe area — no hard cap so phone uses all available space.
+    const availableHeight = Math.max(220, height - textBottom - gap - bottomSafe);
+    const maxCanvasHeight = Math.max(220, height - gap - bottomSafe);
+    const visualHeight = availableHeight;
+    const finalHeight = Math.min(visualHeight + canvasTopBreathingRoom, maxCanvasHeight);
+    const yOffset = width >= 768 ? 18 : clamp(height * 0.038, 28, 42);
+    const safeTop = textBottom + topSafeGap + (tablet ? 0 : yOffset);
+    const bottomAnchoredTop = height - bottomSafe - visualHeight;
+    const top = Math.max(gap, safeTop, bottomAnchoredTop);
+    // Reference baseline: at 390×844 finalHeight ≈ 376, zoom 0.44 looks perfect.
+    // Scale zoom directly with canvas height so phone fills available area proportionally without clipping.
+    const referenceHeight = tablet ? 460 : 376;
+    const baseZoom = tablet ? 0.46 : 0.44;
     // Width constraint: phone aspect ≈ 9:19.5. Ensure phone width fits canvas width.
     const canvasWidth = Math.min(width, tablet ? 560 : width);
     const widthLimitedZoom = baseZoom * (canvasWidth / (tablet ? 560 : 390));
@@ -327,7 +304,7 @@ const FixedPhoneLayer = () => {
       // Strängare tröskel på iPad/mobil så telefonen göms tidigare och inte rör nästa sektions text.
       // Desktop (≥1180px) behåller den tidigare beteendet eftersom telefonen sitter i sidokolumnen.
       const isDesktop = window.innerWidth >= 1180;
-      const bottomThreshold = isDesktop ? 0.72 : 0.92;
+      const bottomThreshold = isDesktop ? 0.55 : 0.82;
       return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * bottomThreshold;
     };
 
@@ -351,9 +328,6 @@ const FixedPhoneLayer = () => {
 
 
 
-  const mobileCanvasTopGuard = phoneMetrics.isDesktop ? 0 : Math.min(36, Math.max(22, phoneMetrics.height * 0.1));
-  const mobileCanvasBottomGuard = phoneMetrics.isDesktop ? 0 : Math.min(20, Math.max(10, phoneMetrics.height * 0.045));
-  const phoneCanvasHeight = phoneMetrics.height + mobileCanvasTopGuard + mobileCanvasBottomGuard;
   const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
 
   return (
@@ -368,7 +342,7 @@ const FixedPhoneLayer = () => {
           className={`pointer-events-none transition-opacity duration-[700ms] ease-out ${visible ? 'opacity-100' : 'opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center'}`}
           style={phoneMetrics.isDesktop
             ? { height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
-            : { top: `${phoneMetrics.top - mobileCanvasTopGuard}px`, height: `${phoneCanvasHeight}px`, width: `${phoneWidth}px` }
+            : { top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
           }
         >
 
@@ -433,7 +407,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           <div className="relative z-10 mx-auto grid w-full max-w-[1400px] grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] items-start gap-10 px-3 sm:px-5 md:px-6 md:[@media_(orientation:portrait)]:block lg:grid-cols-2 lg:gap-16 lg:px-24 lg:[@media_(orientation:portrait)]:grid">
             <motion.div
               data-hero-phone-anchor
-              className="-translate-y-8 pt-8 text-left md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(92vw,54rem)] md:[@media_(orientation:portrait)]:translate-y-0 md:[@media_(orientation:portrait)]:pt-0 md:[@media_(orientation:portrait)]:text-center min-[1100px]:-translate-y-16 xl:pt-10 lg:[@media_(orientation:landscape)]:-translate-y-4 xl:[@media_(orientation:landscape)]:-translate-y-6 lg:[@media_(orientation:portrait)]:mx-0 lg:[@media_(orientation:portrait)]:max-w-none lg:[@media_(orientation:portrait)]:-translate-y-8 lg:[@media_(orientation:portrait)]:pt-8 lg:[@media_(orientation:portrait)]:text-left"
+              className="-translate-y-8 pt-8 text-left md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(92vw,54rem)] md:[@media_(orientation:portrait)]:translate-y-0 md:[@media_(orientation:portrait)]:pt-0 md:[@media_(orientation:portrait)]:text-center min-[1100px]:-translate-y-16 xl:pt-10 lg:[@media_(orientation:portrait)]:mx-0 lg:[@media_(orientation:portrait)]:max-w-none lg:[@media_(orientation:portrait)]:-translate-y-8 lg:[@media_(orientation:portrait)]:pt-8 lg:[@media_(orientation:portrait)]:text-left"
               style={{ paddingLeft: 'var(--logo-ring-offset, 26px)', paddingRight: 'var(--logo-ring-offset, 26px)' }}
               initial="hidden"
               animate="visible"
@@ -449,7 +423,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       {/* ─────────── INTRO ─────────── */}
       <section
         aria-label="Introduktion"
-        className="relative flex w-full items-center justify-center overflow-hidden px-5 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-14 md:px-12 md:pb-16 md:pt-16 lg:px-24"
+        className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden px-5 pb-16 pt-20 sm:px-6 sm:pb-24 sm:pt-28 md:px-12 md:pt-28 lg:px-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -632,7 +606,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* ──────────────── 3. STATEMENT ──────────────── */}
-          <section className="relative overflow-hidden px-5 py-8 sm:px-6 sm:py-12 md:px-12 md:py-16 lg:px-24">
+          <section className="relative overflow-hidden px-5 py-12 sm:px-6 sm:py-20 md:px-12 md:py-28 lg:px-24">
             <div className="mx-auto grid max-w-[1180px] gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
               <motion.h2
                 initial={{ opacity: 0, x: -80 }}
@@ -656,7 +630,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* ──────────────── FUNKTIONER ──────────────── */}
-          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
+          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-28 sm:px-6 md:px-12 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
               <motion.span
                 initial={{ opacity: 0, x: -40 }}
