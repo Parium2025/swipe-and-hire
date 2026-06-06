@@ -465,7 +465,7 @@ const PinnedHorizontalGallery = () => {
           font-weight: 900;
           line-height: 1.04;
           letter-spacing: -0.025em;
-          /* Färg styrs av .wave-text-systemet (vit över blå hero, mörkblå över vit våg). */
+          /* Färg styrs av .wave-text-systemet och ska vara kritvit över blå ytor. */
           max-width: min(90vw, 20ch);
           margin: 0 auto;
           padding-bottom: 0.12em;
@@ -608,7 +608,7 @@ const PinnedHorizontalGallery = () => {
           font-weight: 700;
           letter-spacing: 0.28em;
           text-transform: uppercase;
-          color: hsl(var(--secondary) / 0.95);
+          color: hsl(var(--landing-light-foreground) / 0.95);
           margin-bottom: 6px;
         }
         .phg-cap-title {
