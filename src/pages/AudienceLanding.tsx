@@ -266,10 +266,10 @@ const FixedPhoneLayer = () => {
     const targetHeight = clamp(heightAtDesiredTop, minCanvasHeight, maxCanvasHeight);
     const top = Math.max(textBottom + minGap, Math.min(desiredTop, height - bottomSafe - targetHeight));
     const finalHeight = Math.max(120, Math.min(targetHeight, height - top - bottomSafe));
-    const yOffset = width >= 768 ? 14 : clamp(height * 0.018, 10, 16);
+    const yOffset = width >= 768 ? 14 : 0;
     // Reference baseline: scale zoom with the fitted canvas so the model stays centered without clipping.
     const referenceHeight = tablet ? 440 : 300;
-    const baseZoom = tablet ? 0.46 : 0.44;
+    const baseZoom = tablet ? 0.46 : 0.38;
     // Width constraint: phone aspect ≈ 9:19.5. Ensure phone width fits canvas width.
     const canvasWidth = Math.min(width, tablet ? 560 : width);
     const widthLimitedZoom = baseZoom * (canvasWidth / (tablet ? 560 : 390));
