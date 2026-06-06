@@ -93,11 +93,11 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
           href="#"
           onClick={(e) => e.preventDefault()}
           className="group inline-flex min-h-touch items-center gap-3 rounded-2xl border border-white/20 bg-[hsl(var(--secondary))] px-4 py-2.5 text-white shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] transition-all hover:bg-[hsl(var(--secondary))]/90 hover:border-white/30"
-          aria-label="Ladda ner på App Store (kommer snart)"
+          aria-label="LADDA NER PÅ App Store (kommer snart)"
         >
           <Apple className="h-7 w-7 shrink-0" strokeWidth={1.5} aria-hidden="true" />
           <span className="flex flex-col leading-tight text-left">
-            <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">Ladda ner på</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">LADDA NER PÅ </span>
             <span className="text-base font-bold">App Store</span>
           </span>
         </a>
@@ -105,11 +105,11 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
           href="#"
           onClick={(e) => e.preventDefault()}
           className="group inline-flex min-h-touch items-center gap-3 rounded-2xl border border-white/20 bg-[hsl(var(--secondary))] px-4 py-2.5 text-white shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] transition-all hover:bg-[hsl(var(--secondary))]/90 hover:border-white/30"
-          aria-label="Hämta på Google Play (kommer snart)"
+          aria-label="LADDA NER PÅ Google Play (kommer snart)"
         >
           <Play className="h-6 w-6 shrink-0 fill-current" strokeWidth={1.5} aria-hidden="true" />
           <span className="flex flex-col leading-tight text-left">
-            <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">Hämta på</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">LADDA NER PÅ </span>
             <span className="text-base font-bold">Google Play</span>
           </span>
         </a>
