@@ -85,7 +85,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
         className={
           isMobile
             ? 'mt-6 flex flex-wrap gap-3'
-            : 'mt-7 flex flex-wrap gap-3 md:[@media_(orientation:portrait)]:justify-center lg:[@media_(orientation:landscape)]:absolute lg:[@media_(orientation:landscape)]:left-1/2 lg:[@media_(orientation:landscape)]:-translate-x-1/2 lg:[@media_(orientation:landscape)]:bottom-[8%] lg:[@media_(orientation:landscape)]:mt-0 lg:[@media_(orientation:landscape)]:justify-center'
+            : 'mt-7 flex flex-wrap gap-3 md:[@media_(orientation:portrait)]:justify-center'
         }
         aria-label="Ladda ner Parium-appen"
       >
