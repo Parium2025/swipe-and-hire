@@ -451,7 +451,7 @@ const PinnedHorizontalGallery = () => {
           /* Mer luftigt avstånd ovan/under rubriken på alla skärmar — håller
              professionellt andrum mellan topp-nav (Parium-logo) och titel,
              samt mellan titel och kortrad. */
-          padding: clamp(110px, 14vh, 150px) 24px clamp(36px, 6vh, 72px);
+          padding: clamp(48px, 7vh, 80px) 24px clamp(20px, 3vh, 40px);
           text-align: center;
           z-index: 3;
           will-change: transform, opacity;
@@ -655,7 +655,7 @@ const PinnedHorizontalGallery = () => {
              avståndet ovanför och under titeln känns lika mot nav/kort.
              Rubriken matchar hero ("Hitta rätt människor snabbare!") i
              storlek och radhöjd så alla tre sektioner känns enhetliga. */
-          .phg-header { padding: clamp(52px, 8vh, 82px) 24px clamp(52px, 8vh, 82px); }
+          .phg-header { padding: clamp(28px, 5vh, 56px) 24px clamp(20px, 3vh, 36px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
