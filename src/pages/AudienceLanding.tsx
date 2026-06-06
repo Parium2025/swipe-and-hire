@@ -114,9 +114,9 @@ const useWaveAwareText = () => {
 };
 
 const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
-  <div className="max-w-3xl text-center text-base leading-[1.6] text-white sm:text-lg sm:leading-[1.75] md:text-xl">
+  <div className="max-w-3xl text-center text-base leading-[1.6] sm:text-lg sm:leading-[1.75] md:text-xl">
     {paragraphs.map((paragraph, pIdx) => (
-      <p key={pIdx} className={pIdx > 0 ? 'mt-3 sm:mt-6' : undefined}>
+      <p key={pIdx} className={`wave-text ${pIdx > 0 ? 'mt-3 sm:mt-6' : ''}`.trim()}>
         {paragraph}
       </p>
     ))}
@@ -945,10 +945,22 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           >
             {/* Samma bubblor som hero — utan extra blur-glöd, eftersom iPad Safari kan kompositera den som en svag rektangel under swipe. */}
             <AnimatedBackground variant="card" showGlow={false} />
+            {/* Våg-bakgrund (matchar hero) för visuell konsekvens */}
+            <svg
+              className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[50%] w-full"
+              viewBox="0 0 1440 600"
+              preserveAspectRatio="none"
+              aria-hidden
+            >
+              <path
+                d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
+                fill="hsl(var(--landing-light))"
+              />
+            </svg>
             <div ref={introTextRef} className="relative z-10 flex max-w-4xl flex-col items-center text-center will-change-transform">
               <h2
                 data-intro-heading
-                className="mb-5 max-w-[min(92vw,52rem)] text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] text-white sm:mb-8 sm:text-[clamp(2.75rem,4.4vw,4.75rem)]"
+                className="wave-text mb-5 max-w-[min(92vw,52rem)] text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] sm:mb-8 sm:text-[clamp(2.75rem,4.4vw,4.75rem)]"
               >
                 Vi har gjort det enkelt för alla!
               </h2>
