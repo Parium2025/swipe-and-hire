@@ -13,7 +13,7 @@ const AudienceFeatures = ({ role }: { role: AudienceRole }) => {
               <span className="h-px w-12 bg-gradient-to-r from-secondary to-transparent" />
               Funktioner
             </span>
-            <h2 className="mt-5 text-4xl font-black tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
+            <h2 className="wave-text wave-text-below mt-5 text-4xl font-black tracking-[-0.025em] sm:text-5xl md:text-6xl">
               Allt hänger ihop.
             </h2>
           </motion.div>
@@ -22,7 +22,7 @@ const AudienceFeatures = ({ role }: { role: AudienceRole }) => {
             whileInView="visible"
             viewport={inView}
             variants={slideRight}
-            className="max-w-2xl text-base leading-8 text-white/50"
+            className="wave-text wave-text-below max-w-2xl text-base leading-8 opacity-70"
           >
             Byggt för {role === 'job_seeker' ? 'dig som söker jobb' : 'dig som rekryterar'} — snabbt, mobilt och utan onödigt brus.
           </motion.p>
