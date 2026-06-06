@@ -167,8 +167,33 @@ const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   
   const lastHeroMetricsRef = useRef<{ isDesktop: boolean; isPortraitTablet?: boolean; top: number; height: number; zoom: number; yOffset: number } | null>(null);
+  const stableMobileViewportRef = useRef<{ width: number; height: number } | null>(null);
+
+  const getStableViewport = () => {
+    const width = window.visualViewport?.width ?? window.innerWidth;
+    const observedHeight = Math.min(
+      window.innerHeight,
+      document.documentElement.clientHeight || window.innerHeight,
+      window.visualViewport?.height ?? window.innerHeight,
+    );
+
+    if (width >= 768) return { width, height: observedHeight };
+
+    const previous = stableMobileViewportRef.current;
+    if (!previous || Math.abs(previous.width - width) > 16) {
+      stableMobileViewportRef.current = { width, height: observedHeight };
+      return stableMobileViewportRef.current;
+    }
+
+    stableMobileViewportRef.current = {
+      width,
+      height: Math.min(previous.height, observedHeight),
+    };
+    return stableMobileViewportRef.current;
+  };
+
   const getVisibleAnchor = () => {
-    const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+    const viewportHeight = getStableViewport().height;
     const anchors = Array.from(document.querySelectorAll('[data-hero-phone-anchor]')) as HTMLElement[];
     return anchors.find((anchor) => {
       const rect = anchor.getBoundingClientRect();
@@ -178,8 +203,7 @@ const FixedPhoneLayer = () => {
   const calculatePhoneMetrics = () => {
     if (typeof window === 'undefined') return { isDesktop: true, top: 0, height: 660, zoom: 0.68, yOffset: 0 };
     if (lastHeroMetricsRef.current && !document.querySelector('[data-hero-intro-stage]')) return lastHeroMetricsRef.current;
-    const width = window.visualViewport?.width ?? window.innerWidth;
-    const height = window.visualViewport?.height ?? window.innerHeight;
+    const { width, height } = getStableViewport();
 
     const isPortraitTablet = width >= 768 && width < 1180 && height > width;
 
@@ -229,24 +253,23 @@ const FixedPhoneLayer = () => {
     const anchor = getVisibleAnchor();
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.48;
     const tablet = width >= 700;
-    // Proportional safe areas — scale with viewport height so phone never clips and breathes equally top/bottom.
-    const gap = tablet ? clamp(height * 0.055, 44, 96) : clamp(height * 0.06, 40, 88);
-    const topSafeGap = tablet ? clamp(height * 0.075, 56, 120) : clamp(height * 0.082, 54, 110);
-    const bottomSafe = tablet ? clamp(height * 0.095, 70, 140) : clamp(height * 0.11, 76, 132);
-    const canvasTopBreathingRoom = tablet ? clamp(height * 0.07, 50, 110) : clamp(height * 0.095, 64, 120);
-    // Maximize canvas area between text and bottom safe area — no hard cap so phone uses all available space.
-    const availableHeight = Math.max(220, height - textBottom - gap - bottomSafe);
-    const maxCanvasHeight = Math.max(220, height - gap - bottomSafe);
-    const visualHeight = availableHeight;
-    const finalHeight = Math.min(visualHeight + canvasTopBreathingRoom, maxCanvasHeight);
-    const yOffset = width >= 768 ? 18 : clamp(height * 0.038, 28, 42);
-    const safeTop = textBottom + topSafeGap + (tablet ? 0 : yOffset);
-    const bottomAnchoredTop = height - bottomSafe - visualHeight;
-    const top = Math.max(gap, safeTop, bottomAnchoredTop);
-    // Reference baseline: at 390×844 finalHeight ≈ 376, zoom 0.44 looks perfect.
-    // Scale zoom directly with canvas height so phone fills available area proportionally without clipping.
-    const referenceHeight = tablet ? 460 : 376;
-    const baseZoom = tablet ? 0.46 : 0.44;
+    // iOS Safari changes visualViewport when the toolbar collapses/expands.
+    // Keep the phone tied to the stable 100svh hero instead, and fit it inside
+    // the blue band between the store buttons and the bottom chrome strip.
+    const desiredGap = tablet ? clamp(height * 0.045, 34, 72) : clamp(height * 0.032, 22, 32);
+    const minGap = tablet ? 28 : 18;
+    const bottomSafe = tablet ? clamp(height * 0.09, 68, 132) : clamp(height * 0.09, 56, 92);
+    const desiredTop = textBottom + desiredGap;
+    const maxCanvasHeight = tablet ? clamp(height * 0.46, 340, 500) : clamp(height * 0.39, 230, 330);
+    const minCanvasHeight = tablet ? 260 : 205;
+    const heightAtDesiredTop = Math.max(120, height - desiredTop - bottomSafe);
+    const targetHeight = clamp(heightAtDesiredTop, minCanvasHeight, maxCanvasHeight);
+    const top = Math.max(textBottom + minGap, Math.min(desiredTop, height - bottomSafe - targetHeight));
+    const finalHeight = Math.max(120, Math.min(targetHeight, height - top - bottomSafe));
+    const yOffset = width >= 768 ? 14 : 0;
+    // Reference baseline: scale zoom with the fitted canvas so the model stays centered without clipping.
+    const referenceHeight = tablet ? 440 : 300;
+    const baseZoom = tablet ? 0.46 : 0.38;
     // Width constraint: phone aspect ≈ 9:19.5. Ensure phone width fits canvas width.
     const canvasWidth = Math.min(width, tablet ? 560 : width);
     const widthLimitedZoom = baseZoom * (canvasWidth / (tablet ? 560 : 390));
