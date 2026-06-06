@@ -975,8 +975,9 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
               backgroundColor: 'hsl(var(--primary))',
             }}
           >
-            {/* Samma bubblor som hero — utan extra blur-glöd, eftersom iPad Safari kan kompositera den som en svag rektangel under swipe. */}
-            <AnimatedBackground variant="card" showGlow={false} />
+            {/* Bubblor låsta till viewporten (fixed) så de inte följer med scrollen
+                — matchar känslan från /auth där bakgrunden står stilla medan innehållet rör sig. */}
+            <AnimatedBackground showGlow={false} />
             {/* Våg-bakgrund (matchar hero) — fast i viewport så den följer exakt
                 samma position som data-landing-wave-map oavsett GSAP-transformer
                 på intro-lagret. Annars hamnar visuell våg och clip-path ur synk. */}
