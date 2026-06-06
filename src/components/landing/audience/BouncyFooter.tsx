@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 type Props = {
   audience: 'job_seeker' | 'employer';
   onCta: () => void;
+  variant?: 'dark' | 'light';
 };
 
 // Elastic ease-out (matches GSAP elastic.out(1, 0.3) feel)
@@ -17,7 +18,7 @@ const elasticOut = (t: number, amplitude = 1, period = 0.3) => {
 const buildPath = (curveY: number) =>
   `M0-0.3C0-0.3,464,${curveY},1139,${curveY}S2278-0.3,2278-0.3V683H0V-0.3z`;
 
-const BouncyFooter = ({ audience, onCta }: Props) => {
+const BouncyFooter = ({ audience, onCta, variant = 'dark' }: Props) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const startRef = useRef<number | null>(null);
@@ -73,8 +74,10 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
       : 'Vi är här för att ta er till nästa anställning.';
   const cta = audience === 'job_seeker' ? 'Kom igång gratis' : 'Skapa arbetsgivarkonto';
 
+  const isLight = variant === 'light';
+
   return (
-    <div ref={wrapperRef} className="relative w-full overflow-hidden">
+    <div ref={wrapperRef} className={`relative w-full overflow-hidden ${isLight ? 'bg-landing-light' : ''}`}>
       {/* Bouncy gradient wave */}
       <div className="relative w-full">
         <svg
@@ -98,7 +101,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
         </svg>
 
         {/* Content overlay – sits inside the colored bounce */}
-        <div className="absolute inset-x-0 bottom-0 top-0 flex items-end justify-center px-6 pb-16 sm:pb-20 md:pb-28">
+          <div className="absolute inset-x-0 bottom-0 top-0 flex items-end justify-center px-6 pb-16 sm:pb-20 md:pb-28">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -106,7 +109,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
             className="mx-auto max-w-3xl text-center"
           >
-            <h2 className="text-3xl font-black leading-[1.05] tracking-[-0.02em] text-background sm:text-5xl md:text-6xl">
+              <h2 className="text-3xl font-black leading-[1.05] tracking-[0] text-background sm:text-5xl md:text-6xl">
               {headline}
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-7 text-background/80 sm:text-lg">

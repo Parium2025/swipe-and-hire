@@ -81,16 +81,21 @@ const useWaveAwareText = () => {
         const minY = Math.min(...ys);
         const maxY = Math.max(...ys);
 
-        // Helt OVANFÖR vågen → en-lagers vit text (ingen blå halo).
-        if (maxY >= rect.bottom - 1) {
+        // Helt OVANFÖR vågen/blå yta → en-lagers vit text (ingen blå halo).
+        // Koordinater: lägre Y-tal är högre upp på skärmen. För att hela texten
+        // ska ligga ovanför vågen måste vågens HÖGSTA punkt fortfarande ligga
+        // under textens nederkant över hela elementets bredd.
+        if (minY >= rect.bottom - 1) {
           if (el.dataset.waveText) delete el.dataset.waveText;
           if (el.dataset.waveBelow) delete el.dataset.waveBelow;
           el.style.removeProperty('--wave-ink-clip');
           return;
         }
 
-        // Helt UNDER vågen → en-lagers blå text (ingen vit halo).
-        if (minY <= rect.top + 1) {
+        // Helt UNDER vågen/vit yta → en-lagers blå text (ingen vit halo).
+        // Hela texten är i den vita ytan först när vågens LÄGSTA punkt ligger
+        // ovanför textens överkant över hela elementets bredd.
+        if (maxY <= rect.top + 1) {
           if (el.dataset.waveText) delete el.dataset.waveText;
           if (el.dataset.waveBelow !== '1') el.dataset.waveBelow = '1';
           el.style.removeProperty('--wave-ink-clip');
@@ -1362,10 +1367,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </a>
             </motion.div>
           </section>
+            {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
+            <BouncyFooter audience={audience} onCta={handleStart} variant="light" />
           </div>
-
-          {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
-          <BouncyFooter audience={audience} onCta={handleStart} />
 
         </main>
       </div>

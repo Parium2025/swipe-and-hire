@@ -618,8 +618,8 @@ const AuthMobile = ({
         minHeight: '100svh'
       }}
     >
-      {/* Animated background with bubbles and glow */}
-      <AnimatedBackground />
+      {/* Animated background with bubbles, glow and the same off-white wave as the public landing pages. */}
+      <AnimatedBackground showWave />
 
       <div 
         ref={containerRef} 
@@ -665,7 +665,7 @@ const AuthMobile = ({
           {/* Auth form */}
           <div className="w-full max-w-sm overscroll-contain">
             <Card 
-              className="bg-white/[0.01] backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
+              className="bg-primary/85 backdrop-blur-xl border-white/20 shadow-2xl rounded-2xl overflow-hidden"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <CardContent className={cn("p-4 md:p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
