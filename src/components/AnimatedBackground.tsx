@@ -22,6 +22,8 @@ interface AnimatedBackgroundProps {
 export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, variant = 'viewport', showWave = false, waveHeightClassName = 'h-[50%]' }: AnimatedBackgroundProps) => {
   const positionClass = variant === 'card' ? 'absolute' : 'fixed';
 
+  const waveFill = 'hsl(var(--primary))';
+
   return (
     <div className={`${positionClass} inset-0 pointer-events-none z-0 overflow-hidden`}>
       {variant === 'viewport' && showWave && (
@@ -34,7 +36,7 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
         >
           <path
             d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
-            fill="hsl(var(--landing-light))"
+            fill={waveFill}
           />
         </svg>
       )}
