@@ -1,60 +1,83 @@
 ## Mål
 
-Splitta de publika landningssidorna visuellt: **översta delen behåller dagens mörkblå** (hero + de första sektionerna), en **SVG-våg** delar bakgrunden, och **nedre delen blir off-white** (ca `hsl(40 20% 96%)`) med mörk text för premium kontrast.
+Ta bort den scroll-kapande "vi gör det tillsammans"-mekaniken på `/jobbsokare`, så att hjul/touch beter sig 1:1 som på en vanlig premium-sajt (Apple, Linear, Stripe). Behåll allt visuellt — Hero, Intro, wave, bubblor, telefon, galleri, statement, features, stats, testimonials, CTA — och addera diskreta, eleganta scroll-in-animationer per sektion.
 
-Gäller endast: `/` (Landing), `/jobbsokare`, `/arbetsgivare` (AudienceLanding). Påverkar **inte** inloggade appen.
+## Vad som tas bort (endast scroll-kontroll-logik)
 
-## Designprinciper
+I `src/pages/AudienceLanding.tsx`:
+- `HeroIntroStage` GSAP `Observer` (wheel/touch-hijack mellan Hero ↔ Intro)
+- `blockNativeInput` + alla `wheel`/`touchmove` capture-listeners på `scrollRoot`
+- `releaseAndScrollNext` / `returnFromGalleryToIntro` (programmatisk GSAP scrollTop-tween mellan Intro ↔ galleri)
+- `snapStageToTop`, `lockNativeInput`, `withScrollBehaviorAuto`, `transitionBlockUntil`
+- Pinned-gallery "wheel back to intro"-tröskeln
+- `useLenisOnElement` (Lenis smooth-scroll på scroll-roten) — native scroll är mer förutsägbart och matchar resten av appen
 
-- **Off-white**, inte ren vit (för premium-känsla): `hsl(40 18% 96%)` ≈ `#F5F2EE`.
-- **Vågen** är en mjuk SVG-form i samma off-white (toppen = vågens "fyllning" som sticker upp i blått), inspirerad av bifogad referens men mer subtil/premium (inte tecknad).
-- **Brytpunkt** på AudienceLanding: vågen placeras **mellan "Funktioner"-sektionen och "Priser"** — så hero/storytelling stannar i blå premium-mörker, och konvertering (priser/faq/kontakt/CTA-footer) lever i ljus seriös ton.
-- På `/` (Landing.tsx, fullscreen hero utan scroll) appliceras **ingen våg** — den sidan har bara en hero, så split blir meningslös. Vi rör inte den.
+Behåll:
+- Hela DOM-strukturen, alla refs, alla sektioner
+- Pinned horizontal gallery (den scrollar fortfarande horisontellt när man når den — det är inte scroll-hijack, det är en sticky-sektion med native scroll-driven progress)
+- Telefon-anchor och wave-map
+- Alla framer-motion `useScroll`-animationer i `LandingFeatures`, `LandingStats`, `LandingForUsers`, `LandingTestimonials`, `LandingHowItWorks`, `LandingStatement`, `LandingCTA`
 
-## Vad som byggs
+## Ny struktur för Hero + Intro
 
-### 1. Ny komponent: `src/components/landing/WaveDivider.tsx`
-- Återanvändbar SVG-våg (full bredd, ~120px hög på desktop, ~70px mobil).
-- Props: `fill` (default off-white token), `flip` (för uppåt/nedåt-böjning).
-- Använder design-tokens, inga hårdkodade färger.
+Istället för två lager i samma 100svh-yta som byts via Observer:
 
-### 2. Nytt token i `src/index.css`
-```css
---landing-light: 40 18% 96%;   /* off-white botten */
---landing-light-foreground: 215 35% 18%;  /* mörk text på ljus */
---landing-light-muted: 215 15% 38%;
+```text
+[ Hero section — 100svh, native scroll ]
+[ Intro section — auto-höjd, native scroll, fade+slide-in när den entrar viewport ]
+[ Pinned gallery (oförändrad) ]
+[ Övriga sektioner (oförändrade) ]
 ```
 
-### 3. `AudienceLanding.tsx` — strukturändring
-- Wrappa sektionerna **Priser, FAQ, Kontakt, BouncyFooter** i en `<div className="relative bg-[hsl(var(--landing-light))] text-[hsl(var(--landing-light-foreground))]">` med `<WaveDivider />` placerad ovanpå överkanten.
-- AnimatedBackground och FixedPhoneLayer döljs i ljusa zonen (z-index/clip).
+- Hero behåller framer-motion-fade på rubrik/CTA
+- Intro renderas som en vanlig sektion (inte absolut-positionerad ovanpå Hero)
+- Intro-rubrik, paragrafer och CTA fadar/slidar in via framer-motion `whileInView` när sektionen entrar viewport
+- Phone-anchor justeras så telefonen ligger kvar i Hero som idag (ingen visuell förändring där)
 
-### 4. Färgsvep i ljusa zonen (Priser, FAQ, Kontakt, BouncyFooter)
-- `text-white` → `text-[hsl(var(--landing-light-foreground))]`
-- `text-white/60` → `text-[hsl(var(--landing-light-muted))]`
-- `border-white/[0.07]` → `border-black/10`
-- `bg-white/[0.04]` glass → `bg-white` med subtil shadow + `border-black/8`
-- Sekundärfärgen (secondary/accent) behålls för CTA-knappar — kontrast funkar både ljus och mörk.
-- `BouncyFooter` får en separat ljus-variant (props eller intern detektering).
+## Premium scroll-in-animationer (nya)
 
-### 5. Ingen ändring på:
-- LandingNav (transparent, fungerar mot båda)
-- Hero, PinnedHorizontalGallery, Statement, Funktioner (förblir mörk blå)
-- Inloggade appen
-- Auth/EmailConfirm/övriga publika sidor (kan göras senare om önskat)
+Skapa en liten återanvändbar `<Reveal>`-wrapper (framer-motion) som används i sektioner som idag saknar entry-animation:
 
-## Tekniska anteckningar
+- Default: `opacity 0 → 1`, `y: 24 → 0`, `duration 0.7`, `ease: [0.16, 1, 0.3, 1]` (samma "expo-out" som resten av sajten)
+- Varianter: `fade`, `slide-up`, `slide-left`, `slide-right`, `scale`
+- Stagger-stöd för listor (cards, stats, testimonials)
+- Triggrar via `whileInView` med `viewport={{ once: true, margin: '-10% 0px' }}`
+- Respekterar `prefers-reduced-motion` (deaktiverar translate, behåller fade)
 
-- `AudienceLanding.tsx` har root `bg-primary` + inline gradient. Den behålls — ljusa zonen läggs som **eget lager ovanpå** med wave-cut på toppen, så scroll-baserad parallax inte påverkas.
-- `FixedPhoneLayer` ligger position:fixed; den är bara aktiv i hero (heroIndex 0), så når aldrig ljusa zonen. Ingen åtgärd.
-- `AnimatedBackground` ges en `style={{ clipPath }}` eller döljs via z-index så bubblor inte syns över ljus bakgrund.
+Appliceras lätt och konsekvent på:
+- Intro-block (rubrik + paragrafer + CTA, stagger 0.08s)
+- Statement-sektion (stora citatet fadar in)
+- Features-kort (stagger när raden entrar)
+- Stats-siffror (count-up finns redan, lägg till container-fade)
+- Testimonials-kort (stagger)
+- CTA-band (scale-in på knappen)
 
-## SEO
+Inga nya bibliotek. framer-motion finns redan.
 
-Inga SEO-ändringar i denna prompt (du sa att vi tar SEO i nästa).
+## Tekniska detaljer
 
-## Begränsningar / Vad denna prompt INTE gör
+- Ta INTE bort `gsap`/`gsap/Observer`-importer från projektet (används av PinnedHorizontalGallery internt om det gör det — verifiera först)
+- Ta bort `useLenisOnElement`-anropet i `AudienceLanding.tsx`, men behåll själva hooken (kan användas elsewhere)
+- Ta bort `parium:hero-index`, `parium:gallery-reset-start`, `parium:gallery-enter`, `parium:gallery-leave`-events som inte längre triggas, OCH deras lyssnare i child-komponenter (sök igenom alla `landing/`-filer först)
+- Phone-anchor: behåll `phoneWrapper` wheel-forward eftersom Spline-canvasen fortfarande äter scroll annars
+- `data-landing-scroll-root` blir vanlig scroll-container utan Lenis — overflow ändras inte
+- Visuell QA: jämför hero/intro/galleri före och efter på desktop + mobil (390px) via browser-tool
 
-- Ingen ändring på `/` Landing (bara hero, ingen scroll → split meningslöst).
-- Ingen ändring i appen bakom login.
-- Inga textuella/innehållsändringar — bara visuell omdaning av nedre tredjedelen.
+## Vad jag INTE rör
+
+- Backend, auth, RLS
+- Pinned horizontal gallery's interna scroll-mekanik
+- Alla andra sidor/routes
+- Design-tokens, färger, fonter, layout
+- `EditJobDialog`, `MobileJobWizard`, `ProfilePreview`, `ProfileVideo` (memory-skyddade)
+
+## Risk & verifiering
+
+Detta är en stor refaktor i en 1379-radersfil med tätt sammanflätad scroll-logik. Plan:
+1. Implementera i en commit
+2. Verifiera /jobbsokare i preview på desktop + mobil
+3. Klicka igenom alla CTAs och navigationslänkar (Så funkar det, Funktioner, Priser, Vanliga frågor, Kontakt)
+4. Kontrollera att galleriet fortfarande pinnar och scrollar horisontellt
+5. Kontrollera att inga console-fel uppstår
+
+Vill du att jag kör det här rakt av, eller vill du först se en mindre PoC bara på Hero ↔ Intro-övergången?
