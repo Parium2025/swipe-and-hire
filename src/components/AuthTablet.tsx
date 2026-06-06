@@ -560,8 +560,8 @@ const AuthTablet = ({
         paddingBottom: 'env(safe-area-inset-bottom, 0px)'
       }}
     >
-      {/* Animated background with bubbles, glow and the same off-white wave as the public landing pages. */}
-      <AnimatedBackground showWave />
+      {/* Decorative bubbles only. /auth keeps a dark, readable form surface and must not create a false white zone behind controls. */}
+      <AnimatedBackground showGlow={false} />
 
       <div className="relative z-10 flex flex-col min-h-screen py-safe animate-fade-in">
         {/* Header med logo och text */}

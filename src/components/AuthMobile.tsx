@@ -618,8 +618,8 @@ const AuthMobile = ({
         minHeight: '100svh'
       }}
     >
-      {/* Animated background with bubbles, glow and the same off-white wave as the public landing pages. */}
-      <AnimatedBackground showWave />
+      {/* Decorative bubbles only. /auth keeps a dark, readable form surface and must not create a false white zone behind controls. */}
+      <AnimatedBackground showGlow={false} />
 
       <div 
         ref={containerRef} 
