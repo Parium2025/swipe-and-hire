@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
-import SplitHeadline from './audience/SplitHeadline';
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -21,11 +20,9 @@ const LandingCTA = () => {
   return (
     <section ref={sectionRef} className="relative overflow-hidden px-5 py-28 sm:px-6 sm:py-36 md:px-12 lg:px-24" aria-label="Kom igång">
       <motion.div style={{ y, opacity }} className="relative z-10 mx-auto max-w-[1100px] text-center">
-        <SplitHeadline
-          text="Börja med en bättre matchning."
-          as="h2"
-          className="text-[2.8rem] font-black leading-[0.98] tracking-[-0.03em] text-white sm:text-[4.5rem] md:text-[6.2rem]"
-        />
+        <h2 className="text-[2.8rem] font-black leading-[0.98] tracking-[-0.03em] text-white sm:text-[4.5rem] md:text-[6.2rem]">
+          Börja med en bättre matchning.
+        </h2>
         <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-white/55 sm:text-lg">
           Skapa konto gratis och upplev ett renare, snabbare sätt att mötas kring jobb.
         </p>

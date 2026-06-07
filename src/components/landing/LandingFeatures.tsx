@@ -2,7 +2,6 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Brain, ShieldCheck, Smartphone, Zap } from 'lucide-react';
 import { useRef } from 'react';
 import { StaggerReveal, StaggerItem } from './ScrollReveal';
-import SplitHeadline from './audience/SplitHeadline';
 
 const features = [
   { title: 'Matchning som känns relevant', description: 'Rekommendationer baserade på roll, plats, erfarenhet och vad båda sidor faktiskt söker.', icon: Brain },
@@ -26,11 +25,9 @@ const LandingFeatures = () => {
               <span className="h-px w-12 bg-gradient-to-r from-secondary to-transparent" />
               Funktioner
             </span>
-            <SplitHeadline
-              text="Allt hänger ihop."
-              as="h2"
-              className="mt-5 text-4xl font-black tracking-[-0.025em] text-white sm:text-5xl md:text-6xl"
-            />
+            <h2 id="features-heading" className="mt-5 text-4xl font-black tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
+              Allt hänger ihop.
+            </h2>
           </div>
           <p className="max-w-2xl text-base leading-8 text-white/50">
             En landningssida ska kännas som produkten: tydlig, snabb och modern. Därför är varje sektion byggd runt samma visuella språk.
