@@ -300,16 +300,19 @@ const FixedPhoneLayer = () => {
     };
   }, []);
 
+  // På mobil: telefonen ska scrolla med texten (inte vara fixed), så vi
+  // negerar scrollTop via translateY på wrappern. På större skärmar behåller
+  // vi det gamla beteendet där telefonen fadar ut när man lämnar hero.
+  const [mobileScrollY, setMobileScrollY] = useState(0);
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    const isSmallScreen = () => window.innerWidth < 768;
 
     const isHeroZone = () => {
       if (!scrollRoot) return true;
       const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
       if (!stage) return scrollRoot.scrollTop <= window.innerHeight * 0.65;
       const rect = stage.getBoundingClientRect();
-      // Strängare tröskel på iPad/mobil så telefonen göms tidigare och inte rör nästa sektions text.
-      // Desktop (≥1180px) behåller den tidigare beteendet eftersom telefonen sitter i sidokolumnen.
       const isDesktop = window.innerWidth >= 1180;
       const bottomThreshold = isDesktop ? 0.78 : 0.92;
       return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * bottomThreshold;
@@ -321,7 +324,16 @@ const FixedPhoneLayer = () => {
       setVisible(next);
       setActive(next);
     };
-    const sync = () => apply(isHeroZone());
+    const sync = () => {
+      if (isSmallScreen()) {
+        // På mobil: håll alltid visible/active så telefonen följer med scroll
+        apply(true);
+        setMobileScrollY(scrollRoot?.scrollTop ?? 0);
+      } else {
+        setMobileScrollY(0);
+        apply(isHeroZone());
+      }
+    };
 
     sync();
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
@@ -332,6 +344,7 @@ const FixedPhoneLayer = () => {
       window.removeEventListener('resize', sync);
     };
   }, []);
+
 
 
 
