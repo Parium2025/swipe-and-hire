@@ -544,7 +544,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       {/* ─────────── HERO ─────────── */}
       <section
         data-hero-intro-stage
-        className="relative h-[100svh] w-full overflow-hidden"
+        className="relative min-h-[100svh] w-full overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden"
       >
         {/* Mobile hero */}
         <section
