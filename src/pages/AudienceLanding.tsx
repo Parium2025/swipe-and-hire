@@ -728,7 +728,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
-  const prearmFeatureMotion = useMobilePrearmedMotion();
+  const isMobileFeatureMotion = useIsMobileLandingMotion();
 
   useWaveAwareText();
 
@@ -883,15 +883,33 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </section>
 
           {/* ──────────────── FUNKTIONER ──────────────── */}
+          {isMobileFeatureMotion && (
+            <style>{`
+              @keyframes landingFeatureMobileIn {
+                0% { opacity: 0; transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0); filter: blur(6px); }
+                100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+              }
+              [data-mobile-feature-prearm] .landing-feature-mobile-in {
+                opacity: 0;
+                transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
+                animation: landingFeatureMobileIn 760ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                animation-delay: var(--lf-delay, 0ms);
+              }
+              [data-mobile-feature-prearm] .landing-feature-card {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+              }
+            `}</style>
+          )}
           <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
-            <div className="mx-auto max-w-[1180px]">
+            <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
-                initial={{ opacity: 0, x: -40 }}
-                animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
-                whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
-                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
+                whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.7, ease }}
-                className="block text-xs font-bold uppercase tracking-[0.32em] text-secondary/85"
+                className="landing-feature-mobile-in block text-xs font-bold uppercase tracking-[0.32em] text-secondary/85"
+                style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-40px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '120ms' } : undefined}
               >
                 Funktioner
               </motion.span>
