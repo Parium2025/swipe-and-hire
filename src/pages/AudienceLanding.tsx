@@ -187,10 +187,10 @@ const calculateInlinePhoneMetrics = () => {
   const isPortraitTablet = placement === 'portraitTablet';
   const rawHeight = isPortraitTablet
     ? clamp(height * 0.44, 340, 520)
-    : clamp(height * 0.4, 220, 360);
+    : clamp(height * 0.52, 300, 430);
   const maxPhoneWidth = isPortraitTablet
     ? Math.min(width * 0.36, 270)
-    : Math.min(width * 0.5, 190);
+    : Math.min(width * 0.68, 260);
   const safeHeight = Math.min(rawHeight, maxPhoneWidth / PHONE_ASPECT);
 
   return {
@@ -198,8 +198,8 @@ const calculateInlinePhoneMetrics = () => {
     width: safeHeight * PHONE_ASPECT,
     zoom: isPortraitTablet
       ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
-      : clamp((safeHeight / 376) * 0.38, 0.28, 0.5),
-    topGap: isPortraitTablet ? clamp(height * 0.11, 92, 140) : clamp(height * 0.085, 58, 88),
+      : clamp((safeHeight / 376) * 0.58, 0.42, 0.74),
+    topGap: isPortraitTablet ? clamp(height * 0.11, 92, 140) : clamp(height * 0.04, 28, 44),
   };
 };
 
@@ -529,7 +529,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       {/* ─────────── INTRO ─────────── */}
       <section
         aria-label="Introduktion"
-        className="relative flex w-full items-center justify-center overflow-hidden px-5 pb-8 pt-12 sm:px-6 sm:pb-10 sm:pt-14 md:px-12 md:pb-12 md:pt-16 lg:px-24"
+        className="relative flex w-full items-center justify-center overflow-hidden px-5 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-10 md:px-12 md:pb-12 md:pt-16 lg:px-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 32 }}
