@@ -244,8 +244,7 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
       style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px` }}
     >
       <SplinePhone
-        className="w-full"
-        style={{ height: `${metrics.height}px` }}
+        className="h-full w-full"
         zoom={metrics.zoom}
         active={enabled}
       />
