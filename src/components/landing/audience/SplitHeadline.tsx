@@ -25,7 +25,7 @@ const SplitHeadline = ({
   as = 'h2',
   className,
   emphasizeLast = false,
-  amount = 0.55,
+  amount = 0.01,
   stagger = 0.08,
   delay = 0.05,
 }: Props) => {
@@ -62,7 +62,7 @@ const SplitHeadline = ({
       variants: container,
       initial: 'hidden',
       whileInView: 'visible',
-      viewport: { once: true, amount, margin: '0px 0px 25% 0px' },
+      viewport: { once: true, amount, margin: '0px 0px 100% 0px' },
       'aria-label': text,
     },
     words.map((w, i) => (

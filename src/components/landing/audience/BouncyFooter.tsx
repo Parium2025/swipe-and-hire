@@ -119,7 +119,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
             <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+            viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
             className="mx-auto max-w-3xl text-center"
           >
