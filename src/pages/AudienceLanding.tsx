@@ -197,8 +197,8 @@ const calculateInlinePhoneMetrics = () => {
     height: safeHeight,
     width: safeHeight * PHONE_ASPECT,
     zoom: isPortraitTablet
-      ? clamp((safeHeight / 460) * 0.46, 0.34, 0.62)
-      : clamp((safeHeight / 376) * 0.44, 0.32, 0.58),
+      ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
+      : clamp((safeHeight / 376) * 0.38, 0.28, 0.5),
     topGap: isPortraitTablet ? clamp(height * 0.11, 92, 140) : clamp(height * 0.085, 58, 88),
   };
 };
