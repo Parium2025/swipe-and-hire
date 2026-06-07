@@ -636,8 +636,8 @@ const PinnedHorizontalGallery = () => {
         }
 
         @media (max-width: 767px) {
-          /* Mobil: kortare pin = snabbare touchscroll utan tunghet. */
-          .phg-section { height: 280vh; }
+          /* Mobil touch: längre pin = lugnare, mer kontrollerad scroll utan tunghetskänsla. */
+          .phg-section { height: 520vh; }
           .phg-header { padding: clamp(28px, 5vh, 56px) 24px clamp(20px, 3vh, 36px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
@@ -647,8 +647,8 @@ const PinnedHorizontalGallery = () => {
         }
 
         @media (pointer: coarse) and (min-width: 768px) and (max-width: 1366px) {
-          /* iPad/tablet: ännu kortare pin-distans för minimalt fingerarbete. */
-          .phg-section { height: 300vh; }
+          /* iPad/tablet touch: lugn pin för fingerscroll. */
+          .phg-section { height: 480vh; }
         }
       `}</style>
 
