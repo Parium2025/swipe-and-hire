@@ -222,6 +222,9 @@ const calculateInlinePhoneMetrics = () => {
   );
   const centeredMobileGap = (height - textBottom - canvasHeight) / 2;
   const maxMobileGap = Math.max(0, mobileViewportBottom - textBottom - canvasHeight);
+  const mobileZoom = mobileAvailableCanvasHeight >= 260
+    ? clamp((Math.min(mobileAvailableCanvasHeight, 340) / 340) * 0.5, 0.42, 0.54)
+    : clamp((mobileAvailableCanvasHeight / 260) * 0.38, 0.08, 0.42);
 
   return {
     height: safeHeight,
@@ -229,7 +232,7 @@ const calculateInlinePhoneMetrics = () => {
     canvasHeight,
     zoom: isPortraitTablet
       ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
-      : clamp((safeHeight / 376) * 0.51, 0.08, 0.56),
+      : mobileZoom,
     topGap: isPortraitTablet ? clamp(height * 0.11, 92, 140) : Math.min(Math.max(centeredMobileGap, mobileGap), maxMobileGap),
   };
 };
