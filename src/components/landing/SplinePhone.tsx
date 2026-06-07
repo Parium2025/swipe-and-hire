@@ -52,10 +52,12 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
     let idleHandle: number | null = null;
     let timeoutHandle: number | null = null;
 
-    // Vänta tills webbläsaren är idle (eller max 1.2s) innan vi börjar ladda
-    // Spline-runtime + scene-fil. Detta gör reloads markant snabbare på
-    // tyngre devices (särskilt iPad Safari) eftersom HTML/CSS/main bundle
-    // hinner måla och bli interaktiva först.
+    // Vänta tills webbläsaren är idle innan vi börjar ladda Spline-runtime
+    // + scene-fil. På iPad/tablet-klass (coarse pointer, 700–1180px) väntar
+    // vi dessutom på window 'load' + längre idle-timeout — annars blockerar
+    // Spline-init huvudtråden under hela reload och sidan känns superseg.
+    let loadListener: (() => void) | null = null;
+
     const startLoading = () => {
       if (cancelled) return;
       void boot();
@@ -65,10 +67,32 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
       cancelIdleCallback?: (h: number) => void;
     };
-    if (typeof w.requestIdleCallback === 'function') {
-      idleHandle = w.requestIdleCallback(startLoading, { timeout: 1200 });
+
+    const isCoarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+    const widthPx = window.innerWidth || 0;
+    const isTabletClass = isCoarse && widthPx >= 700 && widthPx <= 1180;
+    const idleTimeout = isTabletClass ? 3500 : 1200;
+    const fallbackDelay = isTabletClass ? 1200 : 250;
+
+    const scheduleIdle = () => {
+      if (cancelled) return;
+      if (typeof w.requestIdleCallback === 'function') {
+        idleHandle = w.requestIdleCallback(startLoading, { timeout: idleTimeout });
+      } else {
+        timeoutHandle = window.setTimeout(startLoading, fallbackDelay);
+      }
+    };
+
+    // På iPad-klass: vänta på window 'load' (alla bilder/fonts klara) först.
+    // Då blir HTML/CSS/hero-video interaktiva *innan* vi ens börjar parsa
+    // Three.js + Spline-runtime, vilket gör reload markant snabbare.
+    if (isTabletClass && document.readyState !== 'complete') {
+      loadListener = () => scheduleIdle();
+      window.addEventListener('load', loadListener, { once: true });
+      // Säkerhetsnät: om 'load' aldrig fyrar, boota ändå efter 5s.
+      timeoutHandle = window.setTimeout(scheduleIdle, 5000);
     } else {
-      timeoutHandle = window.setTimeout(startLoading, 250);
+      scheduleIdle();
     }
 
     const boot = async () => {
