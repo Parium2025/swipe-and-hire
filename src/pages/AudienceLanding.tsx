@@ -11,6 +11,8 @@ import BouncyFooter from '@/components/landing/audience/BouncyFooter';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
+import LandingParticles from '@/components/landing/effects/LandingParticles';
+
 
 
 type AudienceLandingProps = {
@@ -373,6 +375,8 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         data-hero-intro-stage
         className="relative h-[100svh] w-full overflow-hidden"
       >
+        <LandingParticles className="z-0" quantity={55} color="255,255,255" />
+
         {/* Mobile hero */}
         <section
           className="relative h-full w-screen overflow-hidden md:hidden"
