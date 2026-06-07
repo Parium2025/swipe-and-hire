@@ -330,7 +330,7 @@ const FixedPhoneLayer = () => {
     // Reference baseline: at 390×844 finalHeight ≈ 376, zoom 0.44 looks perfect.
     // Scale zoom directly with canvas height so phone fills available area proportionally without clipping.
     const referenceHeight = tablet ? 460 : 376;
-    const baseZoom = tablet ? 0.66 : 0.56;
+    const baseZoom = tablet ? 0.66 : 0.4;
     // Width constraint: phone aspect ≈ 9:19.5. Ensure phone width fits canvas width.
     const canvasWidth = Math.min(width, tablet ? 560 : width);
     const widthLimitedZoom = baseZoom * (canvasWidth / (tablet ? 560 : 390));
