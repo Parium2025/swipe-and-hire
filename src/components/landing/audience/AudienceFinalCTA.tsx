@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { audienceContent, type AudienceRole } from './content';
 import { fadeUp, inView, stagger } from './motionPresets';
 import SplitHeadline from './SplitHeadline';
+import MagneticButton from './MagneticButton';
 
 const AudienceFinalCTA = ({ role }: { role: AudienceRole }) => {
   const navigate = useNavigate();
@@ -33,14 +34,14 @@ const AudienceFinalCTA = ({ role }: { role: AudienceRole }) => {
           {c.body}
         </motion.p>
         <motion.div variants={fadeUp} className="mt-10 flex justify-center">
-          <button
+          <MagneticButton
             type="button"
             onPointerDown={handleStart}
-            className="group inline-flex min-h-touch items-center justify-center gap-3 rounded-full bg-secondary px-8 py-4 text-sm font-bold text-secondary-foreground shadow-[0_22px_70px_hsl(var(--secondary)/0.36)] transition-shadow hover:shadow-[0_28px_90px_hsl(var(--secondary)/0.5)]"
+            className="group inline-flex min-h-touch items-center justify-center rounded-full bg-secondary px-8 py-4 text-sm font-bold text-secondary-foreground shadow-[0_22px_70px_hsl(var(--secondary)/0.36)] transition-shadow hover:shadow-[0_28px_90px_hsl(var(--secondary)/0.5)]"
           >
             {c.cta}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </button>
+          </MagneticButton>
         </motion.div>
       </motion.div>
     </section>

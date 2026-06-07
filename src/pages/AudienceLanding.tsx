@@ -769,7 +769,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   return (
     <div
       data-landing-scroll-root
-      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
+      className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary font-display text-primary-foreground"
       style={{
         overscrollBehavior: 'none',
         // -webkit-overflow-scrolling: touch ger iOS Safari momentum-scroll
