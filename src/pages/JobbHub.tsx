@@ -142,8 +142,25 @@ const JobbHub = () => {
         </div>
       </section>
 
+      {/* Guider */}
+      <section className="px-5 py-12 sm:px-8 md:px-12">
+        <div className="mx-auto max-w-5xl text-center">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Guider för dig som söker jobb
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-white/70">
+            CV-mall, lönerapport, intervjutips och checklista för jobbyte – uppdaterat för 2026.
+          </p>
+          <Link
+            to="/guider"
+            className="mt-6 inline-flex items-center gap-1.5 text-white/80 hover:text-white underline-offset-4 hover:underline"
+          >
+            Läs alla guider →
+          </Link>
+        </div>
+      </section>
 
-      {/* CTA */}
+
       <section className="px-5 py-20 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-10 text-center">
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
