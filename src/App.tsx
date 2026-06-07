@@ -15,6 +15,7 @@ import JobbCity from "./pages/JobbCity";
 import YrkenHub from "./pages/YrkenHub";
 import YrkePage from "./pages/YrkePage";
 import JobbCityYrke from "./pages/JobbCityYrke";
+import PublicJobPage from "./pages/PublicJobPage";
 import GuiderHub from "./pages/GuiderHub";
 import GuidePage from "./pages/GuidePage";
 import Auth from "./pages/Auth";
