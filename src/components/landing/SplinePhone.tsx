@@ -159,6 +159,9 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
     return () => {
       cancelled = true;
+      if (loadListener) {
+        window.removeEventListener('load', loadListener);
+      }
       if (idleHandle !== null && typeof w.cancelIdleCallback === 'function') {
         w.cancelIdleCallback(idleHandle);
       }
