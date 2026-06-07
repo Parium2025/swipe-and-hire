@@ -864,7 +864,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <motion.div
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
                 className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
@@ -900,7 +900,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <motion.div
                 initial={{ opacity: 0, x: -60 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease }}
                 className="max-w-2xl"
               >
@@ -915,7 +915,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <motion.div
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
                 className="mt-8 grid gap-5 md:grid-cols-2"
               >
