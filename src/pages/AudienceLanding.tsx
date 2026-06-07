@@ -335,12 +335,15 @@ const FixedPhoneLayer = () => {
       if (isSmallScreen()) {
         // På mobil: håll alltid visible/active så telefonen följer med scroll
         apply(true);
-        setMobileScrollY(scrollRoot?.scrollTop ?? 0);
+        // Clampa till >=0 så iOS rubber-band/overscroll inte puttar telefonen uppåt
+        const raw = scrollRoot?.scrollTop ?? 0;
+        setMobileScrollY(Math.max(0, raw));
       } else {
         setMobileScrollY(0);
         apply(isHeroZone());
       }
     };
+
 
     sync();
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
