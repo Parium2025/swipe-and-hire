@@ -8,6 +8,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import WaveDivider from '@/components/landing/WaveDivider';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
+import SplitHeadline from '@/components/landing/audience/SplitHeadline';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
@@ -901,9 +902,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="max-w-2xl"
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Priser</span>
-                <h2 id="priser-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
-                  {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
-                </h2>
+                <SplitHeadline
+                  as="h2"
+                  text={audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
+                  className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:text-6xl"
+                />
                 <p className="mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
                   Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
                 </p>
@@ -952,9 +955,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 transition={{ duration: 0.9, ease }}
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Vanliga frågor</span>
-                <h2 id="faq-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl">
-                  Frågor & svar
-                </h2>
+                <SplitHeadline
+                  as="h2"
+                  text="Frågor & svar"
+                  className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl"
+                />
               </motion.div>
               <motion.div
                 initial="hidden"
@@ -995,9 +1000,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               className="mx-auto max-w-[920px] text-center"
             >
               <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Kontakt</span>
-              <h2 id="kontakt-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl">
-                Vi finns här för dig.
-              </h2>
+              <SplitHeadline
+                as="h2"
+                text="Vi finns här för dig."
+                emphasizeLast
+                className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl"
+              />
               <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
                 Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.
               </p>
