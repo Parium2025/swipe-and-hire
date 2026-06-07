@@ -301,13 +301,13 @@ const FixedPhoneLayer = () => {
     };
   }, []);
 
-  // På mobil: telefonen ska scrolla med texten (inte vara fixed), så vi
-  // negerar scrollTop via translateY på wrappern. På större skärmar behåller
-  // vi det gamla beteendet där telefonen fadar ut när man lämnar hero.
-  const [mobileScrollY, setMobileScrollY] = useState(0);
+  // På mobil: telefonen ska scrolla med texten (inte vara fixed). Vi driver
+  // translateY direkt via ref + rAF för att undvika React-state-lag som
+  // orsakar overshoot när användaren snabbt scrollar till toppen (telefonen
+  // hamnar då för högt upp innan staten hinner ifatt).
+  const phoneWrapperRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    // Mobil + portrait tablet (där telefonen ligger nedanför texten) ska följa med scrollen
     const isSmallScreen = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -331,15 +331,31 @@ const FixedPhoneLayer = () => {
       setVisible(next);
       setActive(next);
     };
-    const sync = () => {
+
+    let rafId = 0;
+    const applyTransform = () => {
+      rafId = 0;
+      const wrapper = phoneWrapperRef.current;
       if (isSmallScreen()) {
-        // På mobil: håll alltid visible/active så telefonen följer med scroll
         apply(true);
-        setMobileScrollY(scrollRoot?.scrollTop ?? 0);
+        if (wrapper) {
+          // Clampa till >=0 så iOS rubber-band/overscroll inte puttar telefonen uppåt
+          const y = Math.max(0, scrollRoot?.scrollTop ?? 0);
+          wrapper.style.transform = y > 0 ? `translate3d(0, ${-y}px, 0)` : 'translate3d(0,0,0)';
+          wrapper.style.willChange = 'transform';
+        }
       } else {
-        setMobileScrollY(0);
+        if (wrapper) {
+          wrapper.style.transform = '';
+          wrapper.style.willChange = '';
+        }
         apply(isHeroZone());
       }
+    };
+
+    const sync = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(applyTransform);
     };
 
     sync();
@@ -347,6 +363,7 @@ const FixedPhoneLayer = () => {
     window.addEventListener('resize', sync, { passive: true });
 
     return () => {
+      if (rafId) window.cancelAnimationFrame(rafId);
       scrollRoot?.removeEventListener('scroll', sync);
       window.removeEventListener('resize', sync);
     };
@@ -363,8 +380,8 @@ const FixedPhoneLayer = () => {
       aria-hidden="true"
     >
       <div
+        ref={phoneWrapperRef}
         className={`relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center ${phoneMetrics.isPortraitTablet ? '' : 'md:grid md:h-auto md:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] md:items-start md:gap-10 lg:grid-cols-2 lg:gap-16'} 2xl:max-w-[1440px]`}
-        style={mobileScrollY > 0 ? { transform: `translateY(${-mobileScrollY}px)`, willChange: 'transform' } : undefined}
       >
         <div aria-hidden className="hidden md:block" />
         <div
