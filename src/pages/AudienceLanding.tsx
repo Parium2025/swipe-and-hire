@@ -51,6 +51,16 @@ const waveYAtViewBoxX = (x: number) => {
 
 const useWaveAwareText = () => {
   useEffect(() => {
+    const isTouchViewport = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
+    if (isTouchViewport) {
+      document.querySelectorAll<HTMLElement>('[data-landing-scroll-root] .wave-text').forEach((el) => {
+        if (el.dataset.waveText) delete el.dataset.waveText;
+        if (el.dataset.waveBelow) delete el.dataset.waveBelow;
+        el.style.removeProperty('--wave-ink-clip');
+      });
+      return;
+    }
+
     let frame = 0;
     const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
 
