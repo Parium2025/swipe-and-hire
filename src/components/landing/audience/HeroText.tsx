@@ -26,7 +26,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
     : 'text-xs font-bold uppercase tracking-[0.28em] text-secondary/80';
 
   const headlineClass = isMobile
-    ? 'mt-5 max-w-4xl text-[2.5rem] font-black leading-[1.05] tracking-[0] min-[376px]:mt-6 min-[376px]:text-[3.25rem] min-[376px]:leading-[1.04] sm:text-[4rem] md:text-[5rem]'
+    ? 'mt-5 max-w-4xl text-[2.5rem] font-black leading-[1.05] tracking-[0] min-[376px]:mt-6 min-[376px]:text-[3.25rem] min-[376px]:leading-[1.04] sm:text-[3.5rem] md:text-[3.75rem]'
     : 'mt-6 max-w-[min(92vw,60rem)] text-[clamp(2.75rem,5.2vw,7rem)] font-black leading-[1.04] tracking-[0] md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(88vw,48rem)] md:[@media_(orientation:portrait)]:text-[clamp(3.1rem,5.8vw,4.75rem)]';
 
   // Följer samma vågmask som bakgrunden: vit på blått, blå på vitt.
