@@ -692,7 +692,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
           
 
-          <div className="relative z-10 -mt-px bg-landing-light text-landing-light-foreground">
+          <div className="relative z-10 -mt-px text-white">
           {/* ──────────────── PRISER ──────────────── */}
           <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 pb-16 pt-12 sm:px-6 md:px-12 md:pb-20 md:pt-16 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
@@ -704,10 +704,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="max-w-2xl"
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Priser</span>
-                <h2 id="priser-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-landing-light-foreground sm:text-5xl md:text-6xl">
+                <h2 id="priser-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl">
                   {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
                 </h2>
-                <p className="mt-6 max-w-xl text-base leading-8 text-landing-light-muted sm:text-lg">
+                <p className="mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
                   Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
                 </p>
               </motion.div>
@@ -727,8 +727,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     }}
                     className={`relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 ${
                       i === 1
-                        ? 'border-secondary/40 bg-gradient-to-br from-secondary/10 to-background/90 shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.35)]'
-                        : 'border-landing-light-border bg-background/75 hover:border-secondary/25'
+                        ? 'border-secondary/40 bg-gradient-to-br from-secondary/20 to-white/5 shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.35)]'
+                        : 'border-white/15 bg-white/5 hover:border-secondary/25'
                     }`}
                   >
                     {i === 1 && (
@@ -736,9 +736,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         Populär
                       </span>
                     )}
-                    <h3 className="text-xl font-bold text-landing-light-foreground">{plan}</h3>
-                    <p className="mt-2 text-3xl font-black text-landing-light-foreground">— kr<span className="text-sm font-medium text-landing-light-muted">/mån</span></p>
-                    <p className="mt-4 text-sm leading-7 text-landing-light-muted">Platshållare för planbeskrivning.</p>
+                    <h3 className="text-xl font-bold text-white">{plan}</h3>
+                    <p className="mt-2 text-3xl font-black text-white">— kr<span className="text-sm font-medium text-white/70">/mån</span></p>
+                    <p className="mt-4 text-sm leading-7 text-white/70">Platshållare för planbeskrivning.</p>
                   </motion.div>
                 ))}
               </motion.div>
@@ -755,7 +755,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 transition={{ duration: 0.9, ease }}
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Vanliga frågor</span>
-                <h2 id="faq-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-landing-light-foreground sm:text-5xl">
+                <h2 id="faq-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl">
                   Frågor & svar
                 </h2>
               </motion.div>
@@ -773,13 +773,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       hidden: { opacity: 0, x: 60 },
                       visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
                     }}
-                    className="group rounded-2xl border border-landing-light-border bg-background/75 px-6 py-5 backdrop-blur-xl transition-colors hover:border-secondary/25"
+                    className="group rounded-2xl border border-white/15 bg-white/5 px-6 py-5 backdrop-blur-xl transition-colors hover:border-secondary/25"
                   >
-                    <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-landing-light-foreground">
+                    <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-white">
                       {q}
                       <span className="ml-4 text-secondary transition-transform duration-300 group-open:rotate-45">+</span>
                     </summary>
-                    <p className="mt-4 text-sm leading-7 text-landing-light-muted">
+                    <p className="mt-4 text-sm leading-7 text-white/70">
                       Platshållarsvar — fyll på med den faktiska informationen.
                     </p>
                   </motion.details>
@@ -798,10 +798,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               className="mx-auto max-w-[920px] text-center"
             >
               <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Kontakt</span>
-              <h2 id="kontakt-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-landing-light-foreground sm:text-5xl">
+              <h2 id="kontakt-heading" className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.025em] text-white sm:text-5xl">
                 Vi finns här för dig.
               </h2>
-              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-landing-light-muted sm:text-lg">
+              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
                 Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.
               </p>
               <a
