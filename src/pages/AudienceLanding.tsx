@@ -157,6 +157,25 @@ const useWaveAwareText = () => {
   }, []);
 };
 
+const isMobileAnimationPrearmed = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
+};
+
+const useMobilePrearmedMotion = () => {
+  const [prearmed, setPrearmed] = useState(isMobileAnimationPrearmed);
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 767px), (pointer: coarse)');
+    const sync = () => setPrearmed(query.matches);
+    sync();
+    query.addEventListener?.('change', sync);
+    return () => query.removeEventListener?.('change', sync);
+  }, []);
+
+  return prearmed;
+};
+
 const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
   <div className="max-w-3xl text-center text-base leading-[1.6] sm:text-lg sm:leading-[1.75] md:text-xl">
     {paragraphs.map((paragraph, pIdx) => (
@@ -690,6 +709,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
+  const prearmFeatureMotion = useMobilePrearmedMotion();
 
   useWaveAwareText();
 
@@ -844,9 +864,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
               <motion.span
-                initial={{ opacity: 0, x: -40 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={prearmFeatureMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -40 }}
+                animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
+                whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.7, ease }}
                 className="block text-xs font-bold uppercase tracking-[0.32em] text-secondary/85"
               >
@@ -854,27 +875,30 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </motion.span>
               <motion.h2
                 id="funktioner-heading"
-                initial={{ opacity: 0, x: -60 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={prearmFeatureMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -60 }}
+                animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
+                whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.05 }}
                 className="wave-text mt-4 max-w-3xl text-4xl font-black leading-[1.04] tracking-[0] sm:text-5xl md:text-6xl"
               >
                 Allt du behöver för att {audience === 'job_seeker' ? 'hitta rätt jobb' : 'hitta rätt person'}.
               </motion.h2>
               <motion.p
-                initial={{ opacity: 0, x: 60 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={prearmFeatureMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: 60 }}
+                animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
+                whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.15 }}
                 className="wave-text mt-6 max-w-2xl text-base leading-8 opacity-70 sm:text-lg"
               >
                 Platshållartext för funktionsöversikten — fyll med de viktigaste fördelarna.
               </motion.p>
               <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={prearmFeatureMotion ? "visible" : "hidden"}
+                animate={prearmFeatureMotion ? "visible" : undefined}
+                whileInView={prearmFeatureMotion ? undefined : "visible"}
+                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
                 className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
