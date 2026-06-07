@@ -635,6 +635,65 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
       }}
     >
+      {job && (
+        <Helmet>
+          <title>{`${job.title}${job.workplace_city ? ' i ' + job.workplace_city : ''} – ${getDisplayCompanyName(job)} | Parium`}</title>
+          <meta
+            name="description"
+            content={(job.description || job.pitch || `${job.title} hos ${getDisplayCompanyName(job)}`).replace(/\s+/g, ' ').slice(0, 155)}
+          />
+          <link rel="canonical" href={`https://parium-ab.lovable.app/job/${job.id}`} />
+          <meta property="og:title" content={`${job.title} – ${getDisplayCompanyName(job)}`} />
+          <meta property="og:description" content={(job.pitch || job.description || '').replace(/\s+/g, ' ').slice(0, 155)} />
+          <meta property="og:url" content={`https://parium-ab.lovable.app/job/${job.id}`} />
+          <meta property="og:type" content="website" />
+          <script type="application/ld+json">{JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'JobPosting',
+            title: job.title,
+            description: job.description || job.pitch || '',
+            datePosted: job.created_at,
+            ...(job.expires_at ? { validThrough: job.expires_at } : {}),
+            ...(job.employment_type ? { employmentType: job.employment_type.toUpperCase() } : {}),
+            hiringOrganization: {
+              '@type': 'Organization',
+              name: getDisplayCompanyName(job),
+              ...(job.company_logo_url ? { logo: job.company_logo_url } : {}),
+            },
+            jobLocation: {
+              '@type': 'Place',
+              address: {
+                '@type': 'PostalAddress',
+                ...(job.workplace_address ? { streetAddress: job.workplace_address } : {}),
+                ...(job.workplace_city ? { addressLocality: job.workplace_city } : {}),
+                ...(job.workplace_county ? { addressRegion: job.workplace_county } : {}),
+                ...(job.workplace_postal_code ? { postalCode: job.workplace_postal_code } : {}),
+                addressCountry: 'SE',
+              },
+            },
+            ...(job.work_location_type === 'remote' || job.remote_work_possible === 'yes'
+              ? { jobLocationType: 'TELECOMMUTE' }
+              : {}),
+            ...(job.salary_min || job.salary_max
+              ? {
+                  baseSalary: {
+                    '@type': 'MonetaryAmount',
+                    currency: 'SEK',
+                    value: {
+                      '@type': 'QuantitativeValue',
+                      ...(job.salary_min ? { minValue: job.salary_min } : {}),
+                      ...(job.salary_max ? { maxValue: job.salary_max } : {}),
+                      unitText: (job.salary_type || 'MONTH').toUpperCase(),
+                    },
+                  },
+                }
+              : {}),
+            ...(job.positions_count ? { totalJobOpenings: job.positions_count } : {}),
+            directApply: true,
+            url: `https://parium-ab.lovable.app/job/${job.id}`,
+          })}</script>
+        </Helmet>
+      )}
 
        <div className="jobview-container py-4">
         {/* Combined header */}
