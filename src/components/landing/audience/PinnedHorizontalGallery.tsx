@@ -59,6 +59,10 @@ const CardItem = ({ item, index }: CardItemProps) => {
     if (!v || item.type !== 'video' || failed) return;
     const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
     const evaluate = () => {
+      if (document.hidden) {
+        v.pause();
+        return;
+      }
       const rect = v.getBoundingClientRect();
       const vw = window.innerWidth || document.documentElement.clientWidth;
       const vh = window.innerHeight || document.documentElement.clientHeight;
