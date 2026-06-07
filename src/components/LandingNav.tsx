@@ -92,55 +92,31 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   };
 
 
-  useEffect(() => {
-    // Hitta faktisk scroll-container (fixed inset-0 overflow-y-auto används på audience-sidor)
-    const findScroller = (): HTMLElement | Window => {
-      const candidates = Array.from(document.querySelectorAll<HTMLElement>('div'));
-      for (const el of candidates) {
-        const cs = getComputedStyle(el);
-        if (
-          (cs.overflowY === 'auto' || cs.overflowY === 'scroll') &&
-          cs.position === 'fixed' &&
-          el.scrollHeight > el.clientHeight
-        ) {
-          return el;
-        }
+  // Hitta faktisk scroll-container (fixed inset-0 overflow-y-auto används på audience-sidor)
+  const findScroller = (): HTMLElement | Window => {
+    const candidates = Array.from(document.querySelectorAll<HTMLElement>('div'));
+    for (const el of candidates) {
+      const cs = getComputedStyle(el);
+      if (
+        (cs.overflowY === 'auto' || cs.overflowY === 'scroll') &&
+        cs.position === 'fixed' &&
+        el.scrollHeight > el.clientHeight
+      ) {
+        return el;
       }
-      return window;
-    };
-    const scroller = findScroller();
-    const getY = () =>
-      scroller === window ? window.scrollY : (scroller as HTMLElement).scrollTop;
-    const onScroll = () => setScrolled(getY() > 40);
-    onScroll();
-    scroller.addEventListener('scroll', onScroll, { passive: true } as any);
-    return () => scroller.removeEventListener('scroll', onScroll as any);
-  }, [location.pathname]);
+    }
+    return window;
+  };
 
-  // Tracka aktiv sektion via scroll-position (mer robust än IntersectionObserver
-  // när scroll-containern är fixed inset-0 och sektionerna är höga).
   useEffect(() => {
-    if (!links.length) return;
-    const ids = links.map((l) => l.href.replace('#', '')).filter(Boolean);
-
-    const findScroller = (): HTMLElement | Window => {
-      const candidates = Array.from(document.querySelectorAll<HTMLElement>('div'));
-      for (const el of candidates) {
-        const cs = getComputedStyle(el);
-        if (
-          (cs.overflowY === 'auto' || cs.overflowY === 'scroll') &&
-          cs.position === 'fixed' &&
-          el.scrollHeight > el.clientHeight
-        ) {
-          return el;
-        }
-      }
-      return window;
-    };
     const scroller = findScroller();
     const isWin = scroller === window;
+    const getY = () => (isWin ? window.scrollY : (scroller as HTMLElement).scrollTop);
 
-    const compute = () => {
+    const ids = links.map((l) => l.href.replace('#', '')).filter(Boolean);
+
+    const computeActive = () => {
+      if (!ids.length) return;
       const elements = ids
         .map((id) => document.getElementById(id))
         .filter((el): el is HTMLElement => Boolean(el));
@@ -157,15 +133,19 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
       setActiveId(currentId);
     };
 
-    compute();
-    const onScroll = () => compute();
+    const onScroll = () => {
+      setScrolled(getY() > 40);
+      computeActive();
+    };
+
+    onScroll();
     scroller.addEventListener('scroll', onScroll, { passive: true } as any);
     window.addEventListener('resize', onScroll);
     return () => {
       scroller.removeEventListener('scroll', onScroll as any);
       window.removeEventListener('resize', onScroll);
     };
-  }, [links]);
+  }, [location.pathname, links]);
 
   // Auto-centrera aktiv chip i pillen när scroll ändrar aktiv sektion
   useEffect(() => {
