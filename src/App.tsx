@@ -15,6 +15,7 @@ import JobbCity from "./pages/JobbCity";
 import YrkenHub from "./pages/YrkenHub";
 import YrkePage from "./pages/YrkePage";
 import JobbCityYrke from "./pages/JobbCityYrke";
+import PublicJobPage from "./pages/PublicJobPage";
 import GuiderHub from "./pages/GuiderHub";
 import GuidePage from "./pages/GuidePage";
 import Auth from "./pages/Auth";
@@ -161,6 +162,7 @@ const AnimatedRoutes = () => {
           <Route path="/jobb/:citySlug" element={<JobbCity />} />
           <Route path="/jobb/:citySlug/:occupationSlug" element={<JobbCityYrke />} />
           <Route path="/yrken" element={<YrkenHub />} />
+          <Route path="/annons/:jobId" element={<PublicJobPage />} />
           <Route path="/yrke/:occupationSlug" element={<YrkePage />} />
           <Route path="/guider" element={<GuiderHub />} />
           <Route path="/guider/:slug" element={<GuidePage />} />
