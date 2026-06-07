@@ -418,6 +418,238 @@ export const GUIDES: GuideData[] = [
       { q: 'Påverkar föräldraledighet pensionen?', a: 'Marginellt. Staten ger pensionsrätt även under föräldraledighet, och de fyra första åren räknas extra förmånligt.' },
     ],
   },
+  {
+    slug: 'semesterlagen-2026',
+    title: 'Semesterlagen 2026 – dagar, lön & dina rättigheter',
+    metaTitle: 'Semesterlagen 2026: antal dagar, semesterlön & regler | Parium',
+    description: 'Allt om semesterlagen 2026. Antal semesterdagar, hur semesterlön räknas, sparande av dagar, semesterersättning och vad arbetsgivaren får besluta om.',
+    excerpt: '25 dagar i lagen, ofta 30 i kollektivavtalet. Här är reglerna som styr din semester 2026 – och knepen som ger dig flera tusenlappar extra.',
+    category: 'Arbetsrätt',
+    readingMinutes: 7,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Hur många semesterdagar har jag rätt till?',
+        body: 'Semesterlagen ger alla anställda minst 25 betalda semesterdagar per år. Många kollektivavtal ger fler – 30, 31 eller 32 dagar är vanligt efter 40 års ålder. Du har rätt att ta ut minst 4 sammanhängande veckor under perioden juni–augusti. Deltidsanställda får semester proportionellt.',
+      },
+      {
+        heading: 'Så räknas semesterlönen',
+        body: 'Semesterlön är 12% av all utbetald lön (inkl. OB, jour, bonus) under intjänandeåret (1 april – 31 mars). Vid en månadslön på 30 000 kr blir det cirka 3 600 kr extra utöver ordinarie månadslön under semesterperioden. Slutar du innan du tagit ut semestern: semesterersättning betalas ut i sista lönen.',
+      },
+      {
+        heading: 'Spara semesterdagar – så funkar det',
+        body: 'Du kan spara max 5 dagar/år om du har 25 dagars semester. Sparade dagar kan användas i upp till 5 år. Det innebär att du kan bygga upp 25 sparade dagar + årets 25 = 50 dagar att ta ut sammanhängande för t.ex. långresa eller sabbatical.',
+      },
+      {
+        heading: 'Förskottssemester och obetald semester',
+        body: 'Är du ny på jobbet och inte hunnit tjäna in semester kan arbetsgivaren ge dig förskottssemester – betald semester du återbetalar om du slutar inom 5 år. Obetald semester (utan lön) är ALLTID din rätt om du saknar betalda dagar – arbetsgivaren får inte neka dig ledigt.',
+      },
+      {
+        heading: '5 saker arbetsgivare ofta missar (= du förlorar pengar)',
+        body: '1. Glömmer betala 12% semesterlön på rörlig lön/bonus.\n2. Räknar fel på OB-tillägg vid semester.\n3. Anger fel intjänandeår.\n4. Missar att lägga in sparade dagar i lönesystemet.\n5. Betalar inte semesterersättning vid avslut. → Begär alltid lönespec och kolla.',
+      },
+    ],
+    faqs: [
+      { q: 'Måste jag ta ut all semester samma år?', a: 'Nej. 5 dagar/år får sparas i upp till 5 år.' },
+      { q: 'Kan chefen tvinga mig ta semester en viss vecka?', a: 'Ja, men du har rätt till minst 4 sammanhängande veckor juni–augusti.' },
+      { q: 'Får jag semesterlön på provanställning?', a: 'Ja, du tjänar in semesterdagar från första arbetsdagen.' },
+      { q: 'Vad händer med outtagen semester om jag slutar?', a: 'Du får semesterersättning utbetald i slutlönen – 12% av all intjänad lön som inte tagits ut som semester.' },
+    ],
+  },
+  {
+    slug: 'sjuklon-karens-2026',
+    title: 'Sjuklön & karensavdrag 2026 – så funkar det',
+    metaTitle: 'Sjuklön 2026: karens, ersättning & läkarintyg | Parium',
+    description: 'Allt om sjuklön 2026. Hur karensavdraget räknas, vad arbetsgivaren betalar dagar 2–14, när Försäkringskassan tar över och regler för läkarintyg.',
+    excerpt: 'Karensavdraget kan kosta dig en halv dagslön – men reglerna är inte alltid som du tror. Här är allt du behöver veta om sjuklön 2026.',
+    category: 'Arbetsrätt',
+    readingMinutes: 6,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Karensavdrag istället för karensdag',
+        body: 'Sedan 2019 är det karensavdrag (inte karensdag). Avdraget motsvarar 20% av en genomsnittlig veckas sjuklön – oavsett vilken dag du är sjuk. Är du sjuk i en hel vecka blir avdraget alltså cirka en dag, men avdraget tas alltid första sjukdagen. Det förhindrar att deltidare straffas oproportionerligt.',
+      },
+      {
+        heading: 'Vad får jag i sjuklön?',
+        body: 'Dag 1: karensavdrag (cirka 20% av en veckas sjuklön).\nDag 2–14: arbetsgivaren betalar 80% av din ordinarie lön.\nDag 15 och framåt: Försäkringskassan tar över med sjukpenning (80% av SGI, max cirka 1 116 kr/dag 2026).\nMånga kollektivavtal ger 10% extra ovanpå i upp till 90 dagar.',
+      },
+      {
+        heading: 'Sjukanmälan och läkarintyg',
+        body: 'Anmäl till arbetsgivaren första sjukdagen. Läkarintyg krävs först från dag 8. Vid längre sjukfrånvaro krävs intyg från dag 8 till arbetsgivaren och från dag 15 till Försäkringskassan. Vid misstanke om missbruk kan arbetsgivaren begära förstadagsintyg.',
+      },
+      {
+        heading: 'Sjuk fler gånger på kort tid?',
+        body: 'Återinsjuknanderegeln: blir du sjuk inom 5 kalenderdagar från förra sjukperioden räknas det som samma period – du får inget nytt karensavdrag. Detta gäller även om mellanperioden bara var en halvdag.',
+      },
+      {
+        heading: 'Vab vs egen sjukdom – skilj på',
+        body: 'Vab (vård av barn): tillfällig föräldrapenning, betalas av Försäkringskassan, INGET karensavdrag, max 120 dagar/år och barn. Egen sjukdom: sjuklön från arbetsgivaren första 14 dagarna med karensavdrag dag 1. Båda kräver anmälan.',
+      },
+    ],
+    faqs: [
+      { q: 'Hur mycket är karensavdraget?', a: 'Cirka 20% av en genomsnittlig veckas sjuklön. För en heltidare med 30 000 kr i månadslön: cirka 1 380 kr.' },
+      { q: 'Måste jag ha läkarintyg från dag 1?', a: 'Nej, normalt först från dag 8. Arbetsgivaren kan kräva förstadagsintyg vid återkommande korta sjukfrånvaron.' },
+      { q: 'Kan jag bli uppsagd för sjukdom?', a: 'Sjukdom är inte saklig grund för uppsägning så länge du kan återgå till arbete inom rimlig tid med rehabilitering.' },
+      { q: 'Får jag sjuklön på provanställning?', a: 'Ja, från första anställningsdagen.' },
+    ],
+  },
+  {
+    slug: 'provanstallning-las-2026',
+    title: 'Provanställning & LAS 2026 – dina rättigheter',
+    metaTitle: 'Provanställning 2026: regler, längd & LAS | Parium',
+    description: 'Allt om provanställning och LAS 2026. Hur lång provanställning får vara, uppsägningstider, övergång till tillsvidare och vad arbetsgivaren får göra.',
+    excerpt: '6 månader, sedan tillsvidare automatiskt – om arbetsgivaren inte säger upp. Här är reglerna om provanställning och LAS du behöver kunna.',
+    category: 'Arbetsrätt',
+    readingMinutes: 6,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Hur lång får en provanställning vara?',
+        body: 'Max 6 månader enligt LAS. Vissa kollektivavtal tillåter kortare (3–4 mån) eller längre i särskilda fall. När de 6 månaderna gått övergår anställningen AUTOMATISKT till tillsvidare om ingen säger upp den – arbetsgivaren behöver inte göra något aktivt.',
+      },
+      {
+        heading: 'Uppsägning under prov',
+        body: 'Både du och arbetsgivaren får avbryta provanställningen utan saklig grund – men ska meddela 2 veckor i förväg (varselskyldighet enligt LAS § 31). Det är inte uppsägningstid utan en underrättelse; anställningen kan avslutas direkt. Lön betalas under de 2 veckorna.',
+      },
+      {
+        heading: 'Vad LAS skyddar dig mot',
+        body: 'LAS (lagen om anställningsskydd) säger att tillsvidareanställda bara kan sägas upp av "saklig grund" – arbetsbrist eller personliga skäl. Provanställda har inte detta skydd: arbetsgivaren behöver inte motivera varför provanställningen avbryts. Men de FÅR inte avbryta den av diskriminerande skäl (kön, ålder, ursprung, religion, fackligt engagemang).',
+      },
+      {
+        heading: 'Visstidsanställning – när blir det fast?',
+        body: 'Sedan LAS-reformen 2022 finns "särskild visstidsanställning" (SÄVA). Om du jobbat på SÄVA i sammanlagt 12 månader under en 5-årsperiod hos samma arbetsgivare → övergår till tillsvidare. Tidigare regel (allmän visstid, ALVA) gav fast efter 2 år; den finns kvar för anställningar påbörjade före 2022.',
+      },
+      {
+        heading: 'Turordning vid arbetsbrist',
+        body: 'Vid uppsägning på grund av arbetsbrist gäller "sist in, först ut" inom samma turordningskrets (driftsenhet + kollektivavtalsområde). Sedan LAS-reformen får arbetsgivaren undanta upp till 3 personer som anses ha särskild betydelse för fortsatt verksamhet, oavsett anställningstid.',
+      },
+    ],
+    faqs: [
+      { q: 'Måste jag jobba två veckor efter besked om avbruten provanställning?', a: 'Tekniskt nej – arbetsgivaren kan avsluta direkt men måste betala lön under de 2 veckorna efter underrättelsen.' },
+      { q: 'Kan provanställning förlängas?', a: 'Nej. Max 6 månader, sedan tillsvidare. Undantag: föräldraledighet eller sjukfrånvaro kan förlänga.' },
+      { q: 'Räknas provanställning som anställningstid för LAS?', a: 'Ja, om du blir tillsvidareanställd räknas provtiden in i anställningstiden.' },
+      { q: 'Vad gör jag om jag tror prov avbröts av diskriminerande skäl?', a: 'Kontakta facket eller DO (Diskrimineringsombudsmannen) inom 2 månader.' },
+    ],
+  },
+  {
+    slug: 'tjanstledig-guide',
+    title: 'Tjänstledighet 2026 – när har du rätt att vara ledig?',
+    metaTitle: 'Tjänstledighet 2026: rättigheter, studier & start eget | Parium',
+    description: 'Allt om tjänstledighet 2026. Studieledighet, ledighet för att starta eget, sjuk anhörig, fackligt uppdrag och vad arbetsgivaren får neka.',
+    excerpt: 'Studier, eget företag, fackligt uppdrag – det finns flera lagstadgade rätter att vara tjänstledig. Här är vilka som gäller och hur du ansöker.',
+    category: 'Arbetsrätt',
+    readingMinutes: 6,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Studieledighet (studieledighetslagen)',
+        body: 'Du har rätt att vara tjänstledig för studier om du varit anställd i minst 6 månader – obegränsat länge. Studierna behöver inte vara jobbrelaterade. Ansök minst 6 månader innan. Arbetsgivaren kan skjuta upp ledigheten max 6 månader, sedan måste de bevilja. Du har rätt att komma tillbaka till samma eller likvärdig tjänst.',
+      },
+      {
+        heading: 'Ledighet för att starta eget',
+        body: 'Lagen om rätt till ledighet för att bedriva näringsverksamhet ger dig rätt till max 6 månaders tjänstledigt för att starta eget – om du varit anställd minst 6 månader och företaget inte konkurrerar med arbetsgivaren. Ansök minst 3 månader innan.',
+      },
+      {
+        heading: 'Vård av närstående',
+        body: 'Du har rätt att vara ledig med närståendepenning från Försäkringskassan (cirka 80% av SGI) för att vårda en närstående som är allvarligt sjuk. Max 100 dagar per närstående. Anmäl till arbetsgivaren så fort som möjligt.',
+      },
+      {
+        heading: 'Fackligt förtroendeuppdrag',
+        body: 'Som facklig förtroendeman har du rätt till betald ledighet för det fackliga arbetet under arbetstid (FML – förtroendemannalagen). Omfattning beror på företagets storlek och uppdraget.',
+      },
+      {
+        heading: 'Tjänstledig av andra skäl (utan lagstöd)',
+        body: 'För resor, sabbatical eller eget val behöver du arbetsgivarens godkännande – det är inget du har rätt till. Tipset: kom överens skriftligt om återgångsdatum, lön under ledigheten (oftast 0), och att tjänsten finns kvar.',
+      },
+    ],
+    faqs: [
+      { q: 'Får jag lön under tjänstledighet för studier?', a: 'Nej, inte från arbetsgivaren. Men du kan söka studiestöd (CSN).' },
+      { q: 'Kan chefen säga nej till studieledighet?', a: 'Nej, bara skjuta upp max 6 månader. Sedan måste de godkänna.' },
+      { q: 'Räknas tjänstledighet som anställningstid?', a: 'Oftast ja för LAS-syften (anställningstid), men inte för intjänande av semester.' },
+      { q: 'Kan jag bli av med jobbet under tjänstledighet?', a: 'Nej, du har rätt att återgå till samma eller likvärdig tjänst med samma villkor.' },
+    ],
+  },
+  {
+    slug: 'jobbintervju-fragor-svar',
+    title: '50 vanliga intervjufrågor 2026 – med svar som funkar',
+    metaTitle: '50 vanliga intervjufrågor 2026: svar & exempel | Parium',
+    description: 'De 50 vanligaste intervjufrågorna 2026 med konkreta svar, exempel och vad rekryterare egentligen letar efter. Plus de svåra "varför ska vi anställa dig?".',
+    excerpt: 'Det är samma frågor på 90% av alla intervjuer. Lär dig svaren som faktiskt landar – med exempel direkt från riktiga rekryterare.',
+    category: 'Jobbsökning',
+    readingMinutes: 9,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Berätta om dig själv',
+        body: 'Den vanligaste och mest underskattade frågan. Använd PEP-formeln: Present (vad du gör nu, 1 mening), Erfarenhet (2–3 nyckelroller med resultat), Plan (varför just det här jobbet, 1 mening). Max 90 sekunder. Sluta med en hook: "Det är därför rollen som [titel] hos er kändes som ett självklart nästa steg."',
+      },
+      {
+        heading: 'Vad är din största styrka / svaghet?',
+        body: 'STYRKA: Välj EN styrka som matchar jobbet, ge ett konkret exempel som bevisar den, koppla till hur det skulle hjälpa dem.\nSVAGHET: Ärlig svaghet (inte falsk modesty som "jag jobbar för mycket"), berätta vad du AKTIVT gör för att jobba med den. Ex: "Jag har varit dålig på att delegera – nu använder jag veckomöten med konkreta delegerings-rutiner."',
+      },
+      {
+        heading: 'Varför ska vi anställa just dig?',
+        body: 'Trippel-formeln: 1) En specifik kompetens som matchar deras behov, 2) Ett konkret resultat som bevisar det, 3) Hur det löser deras problem. Ex: "Ni nämnde att ni behöver öka konverteringen. Senaste året ökade jag konvertering på vår landingssida med 34% via A/B-testning – jag tror jag kan göra något liknande hos er."',
+      },
+      {
+        heading: 'Varför vill du byta jobb?',
+        body: 'Aldrig tala illa om förra arbetsgivaren. Ramin det positivt: "Jag har lärt mig mycket på [företaget], men nu söker jag större ansvar/teknisk fördjupning/nya utmaningar inom X." Om du blev uppsagd: var ärlig kort, vänd snabbt till vad du tar med dig.',
+      },
+      {
+        heading: 'Vad har du för löneförväntningar?',
+        body: 'Gör hemläxan – kolla SCB, fackets lönesök, lönekoll.se. Ge ett intervall, inte exakt: "Marknadsmässigt ligger rollen på 38 000–44 000 baserat på min erfarenhet. Jag är nyfiken på vad er löneband ser ut för rollen?" Vänd frågan tillbaka.',
+      },
+      {
+        heading: 'Frågor DU ska ställa till dem',
+        body: '1. "Vad gör en person framgångsrik i den här rollen efter 6 månader?"\n2. "Vilka är de största utmaningarna teamet står inför?"\n3. "Hur ser ni på utveckling och nästa steg för den som tar den här rollen?"\n4. "Vad är nästa steg i processen och när kan jag förvänta mig återkoppling?"\nAtt ställa frågor signalerar engagemang och hjälper DIG bedöma om jobbet passar.',
+      },
+    ],
+    faqs: [
+      { q: 'Hur lång ska intervjun vara?', a: 'Förstaintervju oftast 30–45 minuter. Andra intervju 60–90 min. Slutintervju ofta längre med flera personer.' },
+      { q: 'Vad ska jag ha på mig?', a: 'En nivå snyggare än vad anställda har dagligen. Tech: smart casual. Bank/juridik: kostym. Restaurang/butik: snyggt och rent.' },
+      { q: 'Hur snabbt ska jag tacka efter intervjun?', a: 'Skicka ett kort tackmail samma dag eller dagen efter. Nämn något konkret från samtalet.' },
+      { q: 'Får jag fråga om lön på första intervjun?', a: 'Vänta tills de tar upp det eller andra intervjun. Att fråga för tidigt kan signalera att lön är viktigast.' },
+    ],
+  },
+  {
+    slug: 'arbetsgivarintyg-guide',
+    title: 'Arbetsgivarintyg 2026 – så får du det rätt ifyllt',
+    metaTitle: 'Arbetsgivarintyg 2026: mall, regler & a-kassa | Parium',
+    description: 'Komplett guide till arbetsgivarintyg. När du behöver det, vad det ska innehålla, hur du begär det och vad du gör om arbetsgivaren vägrar.',
+    excerpt: 'Utan korrekt arbetsgivarintyg får du inte ut din a-kassa. Här är vad intyget måste innehålla – och hur du tvingar fram det om arbetsgivaren bråkar.',
+    category: 'Arbetsrätt',
+    readingMinutes: 5,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Vad är ett arbetsgivarintyg?',
+        body: 'Ett dokument från din tidigare arbetsgivare som styrker din anställning – arbetad tid, lön, anställningsform och anledning till att anställningen upphörde. Krävs av a-kassan för att kunna betala ut inkomstrelaterad ersättning, och ofta vid byte av jobb, ansökan om bostadslån eller försäkringar.',
+      },
+      {
+        heading: 'Vad ska intyget innehålla?',
+        body: '• Personuppgifter (namn, personnummer)\n• Anställningsperiod (från – till, exakta datum)\n• Anställningsform (tillsvidare, visstid, prov)\n• Arbetad tid per vecka/månad senaste 12 månaderna\n• Bruttolön (uppdelat på månad)\n• Anledning till anställningens upphörande (uppsagd av arbetsgivare/egen begäran)\n• Sjukfrånvaro och föräldraledighet (perioder)\n\nAnvänd a-kassans formulär på arbetsgivarintyg.nu – det är digitalt och godkänt av alla a-kassor.',
+      },
+      {
+        heading: 'Hur begär du det?',
+        body: 'Mejla HR/lönekontoret skriftligen: "Jag begär arbetsgivarintyg enligt 47 § lagen om arbetslöshetsförsäkring. Var god skicka digitalt via arbetsgivarintyg.nu till min e-post inom 14 dagar." Arbetsgivaren är SKYLDIG att skicka det – senast inom rimlig tid (oftast 1–2 veckor).',
+      },
+      {
+        heading: 'Om arbetsgivaren vägrar eller drar ut på tiden',
+        body: '1. Skicka skriftlig påminnelse med hänvisning till lagen.\n2. Anmäl till facket – de kan trycka på.\n3. Kontakta a-kassan – de kan utfärda intyg på sannolika grunder med hjälp av lönebesked, anställningsavtal och kontoutdrag.\n4. I sista hand: anmäl till Inspektionen för arbetslöshetsförsäkringen (IAF) eller polisanmäl för tjänstefel.',
+      },
+      {
+        heading: 'Tips som sparar tid',
+        body: '1. Begär intyget DIREKT när du slutar – inte 3 månader senare.\n2. Be om digital version via arbetsgivarintyg.nu – sparas direkt hos a-kassan.\n3. Spara alltid kopior av lönespecar de senaste 12 månaderna.\n4. Om anställningen var kort: be också om anställningsbevis och tidsregistreringar.',
+      },
+    ],
+    faqs: [
+      { q: 'Hur lång tid har arbetsgivaren på sig?', a: 'Lagen säger "inom rimlig tid". A-kassan accepterar oftast 1–2 veckor; därefter kan du driva ärendet.' },
+      { q: 'Kostar det något?', a: 'Nej. Arbetsgivaren är skyldig att utfärda intyget kostnadsfritt.' },
+      { q: 'Behöver jag arbetsgivarintyg om jag bytt direkt till nytt jobb?', a: 'Inte för a-kassa, men spara det ändå – det krävs ofta vid bostadslån, försäkringar och framtida arbetslöshet.' },
+      { q: 'Vad gör jag om arbetsgivaren gått i konkurs?', a: 'Kontakta konkursförvaltaren. A-kassan kan också utfärda intyg på sannolika grunder via lönespecar.' },
+    ],
+  },
 ];
 
 
