@@ -1,0 +1,12 @@
+# Parium
+
+> Parium är en svensk jobbapp och rekryteringsplattform där kandidater hittar jobb som faktiskt passar dem, och arbetsgivare rekryterar rätt – snabbt och enkelt.
+
+Parium kombinerar matchning, video och en swipe-baserad upplevelse för att koppla ihop jobbsökare och arbetsgivare i Sverige. Plattformen är byggd för både kandidater som söker lediga jobb och företag som vill effektivisera sin rekrytering.
+
+## Pages
+
+- [Startsida](/): Översikt av Parium – jobbapp och rekryteringsplattform i Sverige.
+- [För jobbsökare](/jobbsokare): Hitta jobb som passar dig – lediga jobb, matchning och jobbapp.
+- [För arbetsgivare](/arbetsgivare): Rekrytera rätt, snabbt och enkelt – hitta rätt kandidater.
+- [Logga in](/auth): Logga in eller skapa konto på Parium.

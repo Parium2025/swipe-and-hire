@@ -21,7 +21,8 @@ const Landing = () => {
 
   // SEO
   useEffect(() => {
-    document.title = 'Parium – Rekrytering. På 60 sekunder.';
+    const title = 'Parium – Hitta jobb som passar dig & rekrytera rätt';
+    document.title = title;
 
     const setMeta = (name: string, content: string, attr = 'name') => {
       let el = document.querySelector(`meta[${attr}="${name}"]`);
@@ -33,19 +34,19 @@ const Landing = () => {
       el.setAttribute('content', content);
     };
 
-    const desc = 'Parium matchar kandidater och arbetsgivare på sekunder. Swipea, matcha och anställ – Tinder för jobb.';
+    const desc = 'Parium är jobbappen där du hittar lediga jobb som faktiskt passar dig – och där arbetsgivare rekryterar rätt, snabbt och enkelt.';
     setMeta('description', desc);
-    setMeta('og:title', 'Parium – Rekrytering. På 60 sekunder.', 'property');
+    setMeta('og:title', title, 'property');
     setMeta('og:description', desc, 'property');
     setMeta('og:type', 'website', 'property');
     setMeta('og:locale', 'sv_SE', 'property');
     setMeta('og:site_name', 'Parium', 'property');
-    setMeta('og:url', 'https://parium.se', 'property');
-    setMeta('twitter:title', 'Parium – Rekrytering. På 60 sekunder.');
+    setMeta('og:url', 'https://parium-ab.lovable.app/', 'property');
+    setMeta('twitter:title', title);
     setMeta('twitter:description', desc);
     setMeta('twitter:card', 'summary_large_image');
     setMeta('robots', 'index, follow, max-image-preview:large');
-    setMeta('keywords', 'rekrytering, jobb, swipe, matchning, AI, hitta jobb, Sverige, kandidater');
+    setMeta('keywords', 'lediga jobb, hitta jobb, jobbapp, jobbsajt, rekrytering, rekrytera, kandidater, Sverige, Parium');
 
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
     if (!canonical) {
