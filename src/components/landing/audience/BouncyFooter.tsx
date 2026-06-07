@@ -23,31 +23,36 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
   const startRef = useRef<number | null>(null);
   const animatingRef = useRef(false);
 
-  // Trigger elastic morph ONCE when the footer first enters viewport.
-  // Tidigare återställdes path till nedböjd state varje gång sektionen lämnade
-  // viewporten, vilket gjorde att en liten scroll mitt i animationen kunde
-  // "glitcha tillbaka" kurvan. Nu spelas bouncen exakt en gång och behåller
-  // sitt slutläge.
+  // Replay elastic morph varje gång sektionen kommer in i viewporten igen.
+  // Vi "armar" triggern först när elementet helt har lämnat viewporten,
+  // och låser triggern medan animationen pågår. Det gör att små scrollar
+  // mitt i animationen inte kan starta om bouncen och orsaka glitch.
   useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
 
     const scrollRoot = (document.querySelector('[data-landing-scroll-root]') as HTMLElement) ?? null;
-    let triggered = false;
+    let armed = true;
 
     const triggerBounce = () => {
-      if (triggered) return;
-      triggered = true;
+      if (!armed || animatingRef.current) return;
+      armed = false;
       startRef.current = null;
       pathRef.current?.setAttribute('d', buildPath(156));
       animatingRef.current = true;
-      io.disconnect();
     };
 
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) triggerBounce();
+          if (entry.isIntersecting) {
+            triggerBounce();
+          } else if (!animatingRef.current) {
+            // Helt utanför viewporten och ingen animation pågår -> arma om
+            armed = true;
+            // Återställ kurvan till nedböjt startläge inför nästa entry
+            pathRef.current?.setAttribute('d', buildPath(156));
+          }
         }
       },
       { root: scrollRoot, rootMargin: '0px 0px 18% 0px', threshold: 0 }
