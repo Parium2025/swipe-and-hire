@@ -16,7 +16,7 @@ const SEO: Record<AudienceRole, SEOConfig> = {
     canonical: 'https://parium.se/jobbsokare',
   },
   employer: {
-    title: 'Rekrytering på 60 sekunder – hitta rätt kandidater | Parium',
+    title: 'Rekrytera rätt, snabbt och enkelt – hitta rätt kandidater | Parium',
     description:
       'Snabbare rekrytering med smart matchning. Få kvalificerade kandidater i flödet, granska mobilt och boka samtal direkt. Testa Parium gratis.',
     canonical: 'https://parium.se/arbetsgivare',

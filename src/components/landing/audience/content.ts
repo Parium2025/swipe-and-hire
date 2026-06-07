@@ -56,7 +56,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
       cta: 'Skapa arbetsgivarkonto',
     },
     statement: {
-      kicker: 'Rekrytering på 60 sekunder',
+      kicker: 'Rekrytera rätt, snabbt och enkelt',
       title: 'Bygg ett team utan att tappa fart.',
       body: 'Färre formulär, mer människor. Parium hjälper dig att fokusera på kandidaterna som faktiskt passar rollen.',
     },
