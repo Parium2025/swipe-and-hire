@@ -952,7 +952,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <motion.div
                 initial={{ opacity: 0, x: -60 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease }}
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Vanliga frågor</span>
@@ -965,7 +965,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <motion.div
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } } }}
                 className="mt-10 space-y-3"
               >
@@ -996,7 +996,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+              viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
               transition={{ duration: 0.9, ease }}
               className="mx-auto max-w-[920px] text-center"
             >
