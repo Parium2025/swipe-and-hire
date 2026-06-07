@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
+import SplitHeadline from './audience/SplitHeadline';
 
 const LandingStatement = () => {
   const ref = useRef<HTMLElement>(null);
