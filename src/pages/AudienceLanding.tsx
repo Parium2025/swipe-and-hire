@@ -157,6 +157,35 @@ const useWaveAwareText = () => {
   }, []);
 };
 
+const isMobileAnimationPrearmed = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
+};
+
+const useMobilePrearmedMotion = () => {
+  const [prearmed, setPrearmed] = useState(isMobileAnimationPrearmed);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 767px), (pointer: coarse)');
+    const sync = () => setPrearmed(query.matches);
+    sync();
+    query.addEventListener?.('change', sync);
+    return () => query.removeEventListener?.('change', sync);
+  }, []);
+
+  useEffect(() => {
+    if (!prearmed) {
+      setReady(false);
+      return;
+    }
+    const handle = window.setTimeout(() => setReady(true), 280);
+    return () => window.clearTimeout(handle);
+  }, [prearmed]);
+
+  return prearmed && ready;
+};
+
 const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
   <div className="max-w-3xl text-center text-base leading-[1.6] sm:text-lg sm:leading-[1.75] md:text-xl">
     {paragraphs.map((paragraph, pIdx) => (
@@ -690,6 +719,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
 const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
+  const prearmFeatureMotion = useMobilePrearmedMotion();
 
   useWaveAwareText();
 
@@ -703,7 +733,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // /auth-route-chunken i bakgrunden så att "Skapa min profil"-CTA känns instant.
   // Helt osynligt — bara modul-prefetch, ingen render, ingen state-mutation.
   useEffect(() => {
-    const w = window as any;
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
     const idle: (cb: () => void) => number =
       typeof w.requestIdleCallback === 'function'
         ? (cb) => w.requestIdleCallback(cb, { timeout: 2500 })
@@ -715,7 +748,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       // Prefetcha /auth-chunken tyst. Fel slukas — det är ren optimering.
       import('@/pages/Auth').catch(() => {});
     });
-    return () => { try { cancel(handle); } catch {} };
+    return () => cancel(handle);
   }, []);
 
   useEffect(() => {
@@ -845,8 +878,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             <div className="mx-auto max-w-[1180px]">
               <motion.span
                 initial={{ opacity: 0, x: -40 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
+                whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.7, ease }}
                 className="block text-xs font-bold uppercase tracking-[0.32em] text-secondary/85"
               >
@@ -855,8 +889,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <motion.h2
                 id="funktioner-heading"
                 initial={{ opacity: 0, x: -60 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
+                whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.05 }}
                 className="wave-text mt-4 max-w-3xl text-4xl font-black leading-[1.04] tracking-[0] sm:text-5xl md:text-6xl"
               >
@@ -864,8 +899,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, x: 60 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
+                whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.15 }}
                 className="wave-text mt-6 max-w-2xl text-base leading-8 opacity-70 sm:text-lg"
               >
@@ -873,8 +909,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </motion.p>
               <motion.div
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                animate={prearmFeatureMotion ? "visible" : undefined}
+                whileInView={prearmFeatureMotion ? undefined : "visible"}
+                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
                 className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
@@ -882,9 +919,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   <motion.div
                     key={i}
                     variants={{
-                      hidden: { opacity: 0 },
-                      visible: { opacity: 1, transition: { duration: 0.9, ease } },
+                      hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
+                      visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.75, ease } },
                     }}
+                    style={{ willChange: prearmFeatureMotion ? 'auto' : 'opacity, transform' }}
                     className="group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)]"
                   >
                     <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.12),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
