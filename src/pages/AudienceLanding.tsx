@@ -162,28 +162,18 @@ const isMobileAnimationPrearmed = () => {
   return window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
 };
 
-const useMobilePrearmedMotion = () => {
-  const [prearmed, setPrearmed] = useState(isMobileAnimationPrearmed);
-  const [ready, setReady] = useState(false);
+const useIsMobileLandingMotion = () => {
+  const [isMobile, setIsMobile] = useState(isMobileAnimationPrearmed);
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 767px), (pointer: coarse)');
-    const sync = () => setPrearmed(query.matches);
+    const sync = () => setIsMobile(query.matches);
     sync();
     query.addEventListener?.('change', sync);
     return () => query.removeEventListener?.('change', sync);
   }, []);
 
-  useEffect(() => {
-    if (!prearmed) {
-      setReady(false);
-      return;
-    }
-    const handle = window.setTimeout(() => setReady(true), 280);
-    return () => window.clearTimeout(handle);
-  }, [prearmed]);
-
-  return prearmed && ready;
+  return isMobile;
 };
 
 const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
