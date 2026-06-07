@@ -252,6 +252,61 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
   );
 };
 
+const calculateMobileHeroMinHeight = () => {
+  if (typeof window === 'undefined' || getInlinePhonePlacement() !== 'mobile') return null;
+
+  const hero = document.querySelector('[data-mobile-hero-section]') as HTMLElement | null;
+  const anchor = hero?.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
+  if (!hero || !anchor) return null;
+
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+  const { height } = getViewportSize();
+  const heroTop = hero.getBoundingClientRect().top;
+  const anchorBottom = anchor.getBoundingClientRect().bottom - heroTop;
+  const metrics = calculateInlinePhoneMetrics();
+  const phoneBlockHeight = (metrics.canvasHeight ?? metrics.height) + (metrics.topGap ?? 0);
+  const bottomSafe = clamp(height * 0.05, 28, 56);
+
+  return Math.ceil(Math.max(height, anchorBottom + phoneBlockHeight + bottomSafe));
+};
+
+const useMobileHeroMinHeight = () => {
+  const [minHeight, setMinHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const sync = () => {
+      frame = 0;
+      setMinHeight(calculateMobileHeroMinHeight());
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(sync);
+    };
+
+    schedule();
+    const timers = [80, 180, 360, 720].map((delay) => window.setTimeout(schedule, delay));
+    const anchor = document.querySelector('[data-mobile-hero-section] [data-hero-phone-anchor]') as HTMLElement | null;
+    const observer = anchor ? new ResizeObserver(schedule) : null;
+    if (anchor) observer?.observe(anchor);
+    document.fonts?.ready.then(schedule).catch(() => undefined);
+    window.addEventListener('resize', schedule, { passive: true });
+    window.visualViewport?.addEventListener('resize', schedule, { passive: true });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      observer?.disconnect();
+      window.removeEventListener('resize', schedule);
+      window.visualViewport?.removeEventListener('resize', schedule);
+    };
+  }, []);
+
+  return minHeight;
+};
+
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   
