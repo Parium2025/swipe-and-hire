@@ -616,7 +616,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       {/* ─────────── INTRO ─────────── */}
       <section
         aria-label="Introduktion"
-        className="relative flex w-full items-center justify-center overflow-hidden px-5 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-10 md:px-12 md:pb-12 md:pt-16 lg:px-24"
+        className="relative flex w-full items-center justify-center overflow-hidden px-5 pb-8 pt-2 sm:px-6 sm:pb-10 sm:pt-10 md:px-12 md:pb-12 md:pt-16 lg:px-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 32 }}
