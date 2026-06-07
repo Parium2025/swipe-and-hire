@@ -215,6 +215,7 @@ const calculateInlinePhoneMetrics = () => {
     height: safeHeight,
     width: safeHeight * PHONE_ASPECT,
     canvasHeight,
+    canvasBottomTrim: isPortraitTablet ? 0 : canvasVerticalPadding / 2,
     zoom: isPortraitTablet
       ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
       : clamp((safeHeight / 376) * 0.51, 0.34, 0.56),
@@ -247,7 +248,7 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
     <div
       aria-hidden="true"
       className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-center justify-center overflow-visible ${className}`}
-      style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px` }}
+      style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px`, marginBottom: `-${metrics.canvasBottomTrim ?? 0}px` }}
     >
       <SplinePhone
         className="h-full w-full"
@@ -270,8 +271,8 @@ const calculateMobileHeroMinHeight = () => {
   const heroTop = hero.getBoundingClientRect().top;
   const anchorBottom = anchor.getBoundingClientRect().bottom - heroTop;
   const metrics = calculateInlinePhoneMetrics();
-  const phoneBlockHeight = (metrics.canvasHeight ?? metrics.height) + (metrics.topGap ?? 0);
-  const bottomSafe = clamp(height * 0.05, 28, 56);
+  const phoneBlockHeight = (metrics.canvasHeight ?? metrics.height) + (metrics.topGap ?? 0) - (metrics.canvasBottomTrim ?? 0);
+  const bottomSafe = clamp(height * 0.02, 12, 24);
 
   return Math.ceil(anchorBottom + phoneBlockHeight + bottomSafe);
 };
