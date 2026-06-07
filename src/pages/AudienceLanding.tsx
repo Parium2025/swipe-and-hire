@@ -301,10 +301,20 @@ const FixedPhoneLayer = () => {
     };
   }, []);
 
-  // Telefonen ligger i en fixed overlay och ska ALDRIG flytta sig med scroll —
-  // den behåller alltid sin slot. Vi togglar bara opacity baserat på hero-zone.
+  // På mobil + portrait-tablet: telefonen ska följa med scrollen (aldrig
+  // försvinna) — vi negerar scrollTop via translateY på wrappern så att den
+  // glider upp med innehållet. På desktop/landscape: behåll fade-ut när man
+  // lämnar hero-zonen.
+  const [mobileScrollY, setMobileScrollY] = useState(0);
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+
+    const isSmallScreen = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const portraitTablet = w >= 768 && w < 1180 && h > w;
+      return w < 768 || portraitTablet;
+    };
 
     const isHeroZone = () => {
       if (!scrollRoot) return true;
@@ -322,7 +332,15 @@ const FixedPhoneLayer = () => {
       setVisible(next);
       setActive(next);
     };
-    const sync = () => apply(isHeroZone());
+    const sync = () => {
+      if (isSmallScreen()) {
+        apply(true);
+        setMobileScrollY(scrollRoot?.scrollTop ?? 0);
+      } else {
+        setMobileScrollY(0);
+        apply(isHeroZone());
+      }
+    };
 
     sync();
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
@@ -333,6 +351,7 @@ const FixedPhoneLayer = () => {
       window.removeEventListener('resize', sync);
     };
   }, []);
+
 
 
 
