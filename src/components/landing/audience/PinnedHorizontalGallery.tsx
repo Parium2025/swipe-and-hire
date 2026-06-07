@@ -657,14 +657,10 @@ const PinnedHorizontalGallery = () => {
           .phg-footer { padding: 8px 24px 16px; gap: 8px; }
         }
 
-        /* Ultra-små skärmar (iPhone SE 1:a/2:a gen, små Android): krymper
-           rubriken så header/meny inte överlappas, och minskar kortbredden
-           något så att hela kompositionen får luft. */
-        @media (max-width: 430px) {
-          /* Alla mobiler (iPhone SE → iPhone Pro Max): pusha titeln tydligt
-             under den fixerade top-navens (Parium/Meny/Logga in) så den inte
-             kolliderar visuellt. Krymper också korten så att rubrik +
-             kortrad + footer ryms inom 100vh utan att klippas. */
+        /* Ultra-små skärmar ENDAST (iPhone SE, små Android ≤ 380px).
+           Standardmobiler (iPhone 12/13/14/15, Pro, Pro Max) använder
+           default-mobilreglerna ovan (max-width: 767px) helt orörda. */
+        @media (max-width: 380px) {
           .phg-sticky { justify-content: flex-start; padding-top: 96px; }
           .phg-header { padding: 8px 20px 32px; }
           .phg-title { font-size: 2.25rem; line-height: 1.05; }
@@ -674,8 +670,7 @@ const PinnedHorizontalGallery = () => {
         }
 
         @media (max-width: 360px) {
-          /* Extra trångt på iPhone SE 1:a/2:a och små Android: ännu mindre
-             rubrik och kort så inget klipps eller överlappar. */
+          /* Extra trångt på iPhone SE 1:a/2:a och små Android. */
           .phg-sticky { padding-top: 84px; }
           .phg-header { padding: 8px 20px 28px; }
           .phg-title { font-size: 1.95rem; line-height: 1.06; }
@@ -683,6 +678,7 @@ const PinnedHorizontalGallery = () => {
           .phg-card { width: 52vw; }
           .phg-strip { padding: 0 28vw 0 10vw; gap: 12px; }
         }
+
 
 
 
