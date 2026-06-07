@@ -160,7 +160,152 @@ export const GUIDES: GuideData[] = [
       { q: 'Ska jag säga upp mig innan jag har nytt jobb?', a: 'Nej – ha alltid ett påskrivet erbjudande först. Marknaden kan vara tuffare än du tror.' },
     ],
   },
+  {
+    slug: 'tjanstepension-forklarat',
+    title: 'Tjänstepension förklarat 2026 – så funkar det och så maxar du den',
+    metaTitle: 'Tjänstepension 2026: ITP, SAF-LO & vad du bör veta | Parium',
+    description: 'Allt om tjänstepension 2026: ITP, SAF-LO, KAP-KL och PA16. Så väljer du fonder, så flyttar du och så maxar du din pension. Enkel guide.',
+    excerpt: 'Tjänstepensionen är ofta värd lika mycket som lönen över ett arbetsliv. Här är det viktigaste att förstå – och de val som faktiskt gör skillnad.',
+    category: 'Pension & lön',
+    readingMinutes: 7,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Vad är tjänstepension?',
+        body: 'Tjänstepension är den pension din arbetsgivare betalar in utöver din lön – ovanpå den allmänna pensionen från Pensionsmyndigheten. Cirka 9 av 10 anställda i Sverige har tjänstepension via kollektivavtal. Saknar du det kan du själv begära att arbetsgivaren tecknar en, eller välja en arbetsgivare som har avtal.',
+      },
+      {
+        heading: 'De fyra stora avtalen',
+        body: 'ITP (tjänstemän i privat sektor – Alecta/Collectum). SAF-LO (LO-anställda i privat sektor – Fora). KAP-KL/AKAP-KR (kommun och region). PA16 (statligt anställda). Vilket du har bestäms av arbetsgivarens kollektivavtal, inte av dig.',
+      },
+      {
+        heading: 'Så väljer du fonder',
+        body: 'Är du under 50 → välj global indexfond med låg avgift (helst <0,4%). Är du över 55 → börja gradvis flytta till räntefonder för att skydda kapitalet. Avstå alltid från fonder med över 1% avgift – över 30 år äter avgifter upp hundratusentals kronor.',
+      },
+      {
+        heading: 'Ska du flytta din tjänstepension?',
+        body: 'Att samla flera tjänstepensioner hos en aktör (t.ex. Avanza, Lysa, SPP) ger bättre överblick och oftast lägre avgifter. Kolla först om du har "fri flytträtt" – ITP har det sedan 2018, KAP-KL har det inte alltid. Flyttavgiften är max 600 kr enligt lag.',
+      },
+      {
+        heading: 'Vad ska du som jobbsökare fråga om?',
+        body: 'Fråga alltid vid anställningsintervjun: "Har ni kollektivavtal?" och "Hur stor procent av lönen sätts av till tjänstepension?". Standard är 4,5% upp till 7,5 inkomstbasbelopp, 30% därutöver. Ingen tjänstepension = lägre total ersättning, även om grundlönen ser bra ut.',
+      },
+    ],
+    faqs: [
+      { q: 'Hur mycket är tjänstepensionen värd?', a: 'För en genomsnittlig svensk är tjänstepensionen ungefär 25–35% av den totala pensionen. Saknar du den kan du tappa flera miljoner i livsinkomst.' },
+      { q: 'Kan jag ta ut tjänstepensionen tidigare?', a: 'Tidigast vid 55 år, men då blir månadsbeloppet betydligt lägre. De flesta tar ut den från 65 år.' },
+      { q: 'Vad händer med tjänstepensionen om jag byter jobb?', a: 'Den följer med dig – kapitalet är ditt. Nya arbetsgivaren börjar bara betala in på ett nytt avtal.' },
+      { q: 'Behöver jag pensionsspara själv om jag har tjänstepension?', a: 'För de flesta räcker tjänstepension + allmän pension till 60–70% av slutlönen. Vill du gå tidigare eller leva mer flexibelt – ja, ISK eller IPS är vanliga val.' },
+    ],
+  },
+  {
+    slug: 'uppsagning-rattigheter',
+    title: 'Uppsagd? Dina rättigheter steg för steg (2026)',
+    metaTitle: 'Uppsagd från jobbet 2026: rättigheter, LAS & vad du gör | Parium',
+    description: 'Uppsagd från jobbet? Här är dina rättigheter enligt LAS 2026: uppsägningstid, lön, A-kassa, avgångsvederlag och konkreta nästa steg.',
+    excerpt: 'Att bli uppsagd är jobbigt – men du har fler rättigheter än du tror. Den här guiden går igenom exakt vad du ska göra de första 14 dagarna.',
+    category: 'Arbetsrätt',
+    readingMinutes: 9,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Saklig grund – arbetsbrist eller personliga skäl?',
+        body: 'En arbetsgivare får bara säga upp dig om det finns saklig grund: arbetsbrist (företaget behöver minska personal) eller personliga skäl (allvarlig misskötsamhet). Vid arbetsbrist gäller "sist in, först ut" enligt LAS – med vissa undantag sedan 2022 års reform (3 personer får undantas). Vid personliga skäl ska du ha fått tydliga skriftliga varningar först.',
+      },
+      {
+        heading: 'Uppsägningstider enligt LAS',
+        body: 'Mindre än 2 års anställning: 1 månad. 2–4 år: 2 månader. 4–6 år: 3 månader. 6–8 år: 4 månader. 8–10 år: 5 månader. Över 10 år: 6 månader. Kollektivavtal kan ge längre tider. Under uppsägningstiden har du rätt till full lön även om arbetsgivaren ber dig stanna hemma.',
+      },
+      {
+        heading: 'Första 14 dagarna – checklista',
+        body: '1. Begär uppsägningen skriftligt – det är ett krav.\n2. Kontakta facket samma vecka, även om du inte är medlem (vissa hjälper ändå).\n3. Anmäl dig till Arbetsförmedlingen första vardagen som arbetslös.\n4. Ansök om A-kassa – gör det DIREKT, ersättning betalas inte retroaktivt mer än vissa veckor.\n5. Begär arbetsgivarintyg – krävs för A-kassan.\n6. Spara alla mejl och dokument från arbetsgivaren.',
+      },
+      {
+        heading: 'A-kassa och inkomstförsäkring',
+        body: 'Grund-A-kassa: max 510 kr/dag (efter skatt cirka 11 000 kr/mån). Inkomstbaserad ersättning kräver medlemskap i A-kassa i 12 månader: 80% av tidigare lön upp till 33 000 kr/mån de första 100 dagarna. Många fackförbund har dessutom inkomstförsäkring som täcker upp till 80% av högre löner – kolla din!',
+      },
+      {
+        heading: 'Avgångsvederlag – ofta förhandlingsbart',
+        body: 'Det finns ingen lagstadgad rätt till avgångsvederlag, men vid arbetsbrist erbjuder många arbetsgivare 2–6 månadslöner extra för att slippa MBL-förhandlingar. Tacka aldrig ja på sittande möte – be om 48 timmars betänketid och låt facket eller en jurist titta på avtalet först.',
+      },
+    ],
+    faqs: [
+      { q: 'Kan jag bli sparkad på dagen?', a: 'Nej – avsked (utan uppsägningstid) får bara ske vid grov misskötsamhet (stöld, våld, allvarlig illojalitet). Annars gäller alltid uppsägningstid.' },
+      { q: 'Måste jag arbeta under uppsägningstiden?', a: 'Ja, om arbetsgivaren vill. Men du har rätt till skälig ledighet för att söka nytt jobb.' },
+      { q: 'Får jag semesterersättning vid uppsägning?', a: 'Ja – alla intjänade men ej uttagna semesterdagar betalas ut som semesterersättning på slutlönen.' },
+      { q: 'Kan jag söka nytt jobb under uppsägningstiden?', a: 'Absolut – och du bör. Många hittar nytt jobb redan innan sista arbetsdagen. Apparna gör det enklare att söka snabbt.' },
+    ],
+  },
+  {
+    slug: 'extrajobb-student-2026',
+    title: 'Extrajobb för studenter 2026 – så hittar du jobb vid sidan av studierna',
+    metaTitle: 'Extrajobb student 2026: bästa jobben & så hittar du dem | Parium',
+    description: 'Bästa extrajobben för studenter 2026: lön, flexibilitet och hur du söker. Lager, kassa, vård, hemtjänst, leverans, korttidsuppdrag.',
+    excerpt: 'Extrajobb som funkar med studierna finns – om du vet var du ska leta. Här är de bästa typerna 2026 och hur du landar dem snabbt.',
+    category: 'Jobbsökning',
+    readingMinutes: 5,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Vad räknas som extrajobb?',
+        body: 'Extrajobb (även kallat deltidsjobb, helgjobb eller studentjobb) är allt från någon kväll i veckan upp till 50% av en heltid. CSN tillåter att du tjänar upp till fribeloppet (cirka 100 000 kr/halvår 2026) utan att studiebidraget påverkas – det betyder att de flesta studenter kan jobba 15–20h/vecka utan problem.',
+      },
+      {
+        heading: 'De bästa extrajobben',
+        body: '• Lager & logistik (PostNord, DHL, Bring) – ofta kvälls- och helgpass.\n• Kassör & butik – kvällar/helger, många heltidsstudenter jobbar Coop, ICA, H&M.\n• Restaurang & café – flexibla scheman.\n• Vård (vårdbiträde, personlig assistent) – välbetalt och ger erfarenhet inför vårdyrken.\n• Bud & leverans (Foodora, Wolt, Bolt Food) – välj själv när du jobbar.\n• Callcenter & telefonförsäljning – ofta kvällar, hög timlön.\n• Föreläsare/läxhjälpare via plattformar som Mathem eller Studybuddy.',
+      },
+      {
+        heading: 'Lönenivåer 2026',
+        body: 'Lager: 145–180 kr/h. Butik: 140–170 kr/h. Restaurang: 135–165 kr/h + ev. dricks. Vård: 165–210 kr/h (helg/natt mer). Bud: 100–250 kr/h beroende på antal leveranser. Telefonförsäljning: 130 kr/h + provision (kan landa på 200+ kr/h).',
+      },
+      {
+        heading: 'Så söker du smart',
+        body: 'Använd en jobbapp där du kan filtrera på "deltid" och "din stad". Ha CV redo med "tillgänglig kvällar/helger" tydligt. Sök på fredagar – många arbetsgivare lägger ut nya pass inför veckan. Svara inom 24h när du blir kontaktad – studentjobb går extremt snabbt.',
+      },
+    ],
+    faqs: [
+      { q: 'Hur mycket får jag tjäna utan att förlora studiebidrag?', a: 'Fribeloppet 2026 är ungefär 100 000 kr per halvår vid heltidsstudier. Över det minskas studiemedlet successivt.' },
+      { q: 'Vilket extrajobb betalar bäst?', a: 'Vård (med OB-tillägg på natt och helg), personlig assistans och provisionsbaserad försäljning toppar listan.' },
+      { q: 'Kan jag jobba mer på loven?', a: 'Ja – sommarjobb räknas separat. Många studenter går upp i 100% juni–augusti.' },
+      { q: 'Behöver jag deklarera extrajobb?', a: 'Nej, arbetsgivaren betalar in skatt och ger ut kontrolluppgift. Du behöver bara kolla att uppgifterna stämmer i din deklaration.' },
+    ],
+  },
+  {
+    slug: 'sommarjobb-2026',
+    title: 'Sommarjobb 2026 – så hittar du ett bra sommarjobb snabbt',
+    metaTitle: 'Sommarjobb 2026: bästa jobben, lön & så söker du | Parium',
+    description: 'Hitta sommarjobb 2026: vård, lager, turism, kommunala jobb. Lönenivåer, deadline för ansökningar och tips som faktiskt funkar.',
+    excerpt: 'Sommarjobben försvinner snabbt – men det finns alltid jobb kvar för den som söker smart. Här är var du hittar dem 2026.',
+    category: 'Jobbsökning',
+    readingMinutes: 5,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'När ska du söka?',
+        body: 'Kommunala sommarjobb (för 16–18-åringar) öppnar redan januari–februari. Vanliga sommarjobb (vård, lager, turism) öppnar februari–april. Sena sommarjobb (juni–augusti) finns alltid kvar inom vård, restaurang och bud – arbetsgivare panikrekryterar in i sista stund.',
+      },
+      {
+        heading: 'Var hittar du sommarjobben?',
+        body: '• Din kommuns webbplats (för dig under 18).\n• Vårdföretag och regioner – sommaren är deras toppsäsong, de tar in tusentals vikarier.\n• Turistorter (Gotland, Öland, fjällen, västkusten) – boende ofta inkluderat.\n• Lager (PostNord, Postnord, Schenker, e-handelsföretag).\n• Restauranger och uteserveringar.\n• Festivaler och evenemangsbolag.',
+      },
+      {
+        heading: 'Lönenivåer för sommarjobb 2026',
+        body: 'Under 18: ofta 75–90% av minimilönen i kollektivavtalet (cirka 110–140 kr/h). Över 18: 145–180 kr/h grundlön + OB-tillägg helg/natt. Vård: 165–220 kr/h med tillägg. Försäljning på provision kan landa på 200+ kr/h.',
+      },
+      {
+        heading: 'Tips som faktiskt funkar',
+        body: '1. Sök BREDT – minst 10–20 ansökningar.\n2. Ring efter ansökan – visar engagemang och snabbar på processen.\n3. Säg "ja" till uppgifter ingen annan vill ha (nätter, midsommar, semestervecka) – du sticker ut direkt.\n4. Använd en app där du kan ansöka på 30 sekunder istället för långa formulär.\n5. Saknar du erfarenhet? Lyft fram skola, föreningsliv, ideellt arbete – det räknas.',
+      },
+    ],
+    faqs: [
+      { q: 'När är det sista chansen att hitta sommarjobb?', a: 'Det finns sommarjobb hela vägen in i juli – särskilt inom vård och restaurang. Vänta inte, men ge inte upp.' },
+      { q: 'Får 15-åringar jobba?', a: 'Ja, lättare arbete från det år man fyller 13. Från 16 år får du jobba mer fritt, men max 8h/dag och inte sena nätter.' },
+      { q: 'Hur lång är en typisk sommarjobbsperiod?', a: '4–10 veckor. Vanligast är 6 veckor juni–augusti, men vården erbjuder ofta hela sommaren.' },
+      { q: 'Räknas sommarjobb som arbetslivserfarenhet?', a: 'Ja, absolut. Lägg in det i CV:t med datum och konkreta arbetsuppgifter.' },
+    ],
+  },
 ];
+
 
 export const GUIDE_BY_SLUG: Record<string, GuideData> = GUIDES.reduce(
   (acc, g) => ({ ...acc, [g.slug]: g }),
