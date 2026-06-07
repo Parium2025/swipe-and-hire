@@ -28,7 +28,8 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const isLightSection = activeId === 'priser' || activeId === 'faq' || activeId === 'kontakt';
+  // Hela sidan är mörkblå nu — håll alltid nav i mörkt glas-läge
+  const isLightSection = false;
 
   const goHome = (e?: React.SyntheticEvent) => {
     e?.preventDefault();
