@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
+import SplitHeadline from './audience/SplitHeadline';
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
