@@ -627,14 +627,14 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+          viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
           transition={{ duration: 1, ease }}
           className="relative z-10 flex max-w-4xl flex-col items-center text-center"
         >
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+            viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
             transition={{ duration: 1.1, ease, delay: 0.05 }}
             className="wave-text mb-5 max-w-[min(92vw,52rem)] text-[3.25rem] font-black leading-[1.04] tracking-[-0.025em] sm:mb-8 sm:text-[clamp(2.75rem,4.4vw,4.75rem)]"
           >
@@ -643,7 +643,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+            viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } } }}
           >
             <IntroText
@@ -660,7 +660,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
               onClick={onIntroCta}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0 }}
+              viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
               transition={{ duration: 0.8, ease, delay: 0.15 }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
@@ -812,7 +812,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <motion.h2
                 initial={{ opacity: 0, x: -80 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 1, ease }}
                 className="wave-text text-4xl font-black leading-[1.02] tracking-[0] sm:text-5xl md:text-6xl lg:text-[4.75rem]"
               >
@@ -821,7 +821,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <motion.p
                 initial={{ opacity: 0, x: 80 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 1, ease, delay: 0.1 }}
                 className="wave-text text-base leading-8 opacity-70 sm:text-lg"
               >
