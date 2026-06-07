@@ -223,8 +223,8 @@ const calculateInlinePhoneMetrics = () => {
   const centeredMobileGap = (height - textBottom - canvasHeight) / 2;
   const maxMobileGap = Math.max(0, mobileViewportBottom - textBottom - canvasHeight);
   const mobileZoom = mobileAvailableCanvasHeight >= 260
-    ? clamp((Math.min(mobileAvailableCanvasHeight, 390) / 390) * 0.54, 0.42, 0.56)
-    : clamp((mobileAvailableCanvasHeight / 260) * 0.38, 0.08, 0.42);
+    ? clamp((Math.min(mobileAvailableCanvasHeight, 390) / 390) * 0.5, 0.4, 0.52)
+    : clamp((mobileAvailableCanvasHeight / 260) * 0.36, 0.08, 0.4);
 
   return {
     height: safeHeight,
