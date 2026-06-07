@@ -231,7 +231,7 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-end justify-center overflow-visible ${className}`}
+      className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-center justify-center overflow-visible ${className}`}
       style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px` }}
     >
       <SplinePhone
