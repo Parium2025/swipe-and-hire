@@ -25,10 +25,9 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
   const startRef = useRef<number | null>(null);
   const animatingRef = useRef(false);
 
-  // Replay elastic morph varje gång sektionen kommer in i viewporten igen.
-  // Vi "armar" triggern först när elementet helt har lämnat viewporten,
-  // och låser triggern medan animationen pågår. Det gör att små scrollar
-  // mitt i animationen inte kan starta om bouncen och orsaka glitch.
+  // Replay elastic morph varje gång sektionen passerar in igen efter reset-linjen.
+  // Reset-linjen armar om även om föregående bounce fortfarande klingar av; annars
+  // missas varannan trigger när man scrollar upp snabbt och vänder tillbaka ned.
   useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
@@ -37,7 +36,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
     let armed = true;
 
     const triggerBounce = () => {
-      if (!armed || animatingRef.current) return;
+      if (!armed) return;
       armed = false;
       startRef.current = null;
       pathRef.current?.setAttribute('d', buildPath(156));
@@ -49,10 +48,10 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             triggerBounce();
-          } else if (!animatingRef.current) {
-            // Helt utanför viewporten och ingen animation pågår -> arma om
+          } else {
+            // Förbi reset-linjen -> arma alltid om inför nästa nedscrollning.
             armed = true;
-            // Återställ kurvan till nedböjt startläge inför nästa entry
+            // Återställ kurvan till nedböjt startläge medan den är utanför triggerzonen.
             pathRef.current?.setAttribute('d', buildPath(156));
           }
         }
