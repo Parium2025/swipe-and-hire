@@ -201,8 +201,9 @@ const calculateInlinePhoneMetrics = () => {
     ? document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null
     : null;
   const textBottom = textAnchor?.getBoundingClientRect().bottom ?? mobileTextReserve;
+  const centeredMobileGap = (height - textBottom - canvasHeight) / 2;
+  const desiredMobileGap = Math.max(centeredMobileGap, clamp(height * 0.075, 42, 72));
   const maxMobileGap = Math.max(18, height - textBottom - canvasHeight - clamp(height * 0.03, 16, 28));
-  const mobileDownShift = isPortraitTablet ? 0 : clamp(height * 0.11, 70, 118);
 
   return {
     height: safeHeight,
@@ -211,7 +212,7 @@ const calculateInlinePhoneMetrics = () => {
     zoom: isPortraitTablet
       ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
       : clamp((safeHeight / 376) * 0.51, 0.34, 0.56),
-    topGap: isPortraitTablet ? clamp(height * 0.11, 92, 140) : maxMobileGap + mobileDownShift,
+    topGap: isPortraitTablet ? clamp(height * 0.11, 92, 140) : Math.min(desiredMobileGap, maxMobileGap),
   };
 };
 
