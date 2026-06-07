@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
-// Always serve the full-quality video (1080p) on every device.
-const pickSrc = () => '/hero-video.mp4';
+// Serve 720p (2.4 MB) på mobil/tablet och 1080p (13 MB) på desktop.
+// Sparar ~10 MB nedladdning på mobil utan synlig kvalitetsskillnad.
+const pickSrc = () => {
+  if (typeof window === 'undefined') return '/hero-video.mp4';
+  return window.innerWidth < 1024 ? '/hero-video-720.mp4' : '/hero-video.mp4';
+};
 
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
