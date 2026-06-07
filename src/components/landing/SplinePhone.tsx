@@ -69,6 +69,17 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
         await app.load(SCENE_URL);
+        // Cap pixel ratio on mobile/touch devices to free GPU bandwidth.
+        // dpr=3 på iPhone 14 betyder 9x pixels att rita per frame — vi sänker
+        // till max 1.5 där, vilket är osynligt på en 393px-skärm men ger
+        // 30–40% lägre GPU-belastning så övriga scroll-animationer stannar
+        // smooth. Desktop lämnas orört (max 2).
+        try {
+          const isCoarse = window.matchMedia?.('(pointer: coarse)').matches;
+          const cap = isCoarse ? 1.5 : 2;
+          const renderer = (app as unknown as { renderer?: { setPixelRatio?: (n: number) => void } }).renderer;
+          renderer?.setPixelRatio?.(Math.min(window.devicePixelRatio || 1, cap));
+        } catch { /* no-op */ }
         // Spline-scenen kan ha en egen background-color som annars syns som
         // en vit ram innan WebGL fyller canvasen. Tvinga transparent.
         try {
