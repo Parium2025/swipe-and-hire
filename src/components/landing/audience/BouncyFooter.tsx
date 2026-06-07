@@ -63,9 +63,8 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
     const duration = 2;
     const progress = Math.min(elapsed / duration, 1);
     const eased = elasticOut(progress);
-    // From 156 (deep bounce) easing to a resting curve (80) — vågen behåller alltid sin form
-    const restY = 80;
-    const y = 156 + (restY - 156) * eased;
+    // From 156 (down/bouncy) to 0 (center/flat)
+    const y = 156 + (0 - 156) * eased;
     pathRef.current.setAttribute('d', buildPath(y));
     if (progress >= 1) setAnimating(false);
   });
