@@ -274,7 +274,9 @@ const calculateInlinePhoneMetrics = () => {
 };
 
 const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 'portraitTablet'; className?: string }) => {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [enabled, setEnabled] = useState(() => getInlinePhonePlacement() === placement);
+  const [active, setActive] = useState(() => getInlinePhonePlacement() === placement);
   const [metrics, setMetrics] = useState(calculateInlinePhoneMetrics);
 
   useEffect(() => {
@@ -292,10 +294,27 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
     };
   }, [placement]);
 
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper || !enabled) {
+      setActive(false);
+      return;
+    }
+
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
+    const observer = new IntersectionObserver(
+      ([entry]) => setActive(entry.isIntersecting && entry.intersectionRatio > 0.01),
+      { root, rootMargin: '180px 0px 180px 0px', threshold: [0, 0.01, 0.25] },
+    );
+    observer.observe(wrapper);
+    return () => observer.disconnect();
+  }, [enabled]);
+
   if (!enabled) return null;
 
   return (
     <div
+      ref={wrapperRef}
       aria-hidden="true"
       className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-center justify-center overflow-visible ${className}`}
       style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px`, marginBottom: `-${metrics.canvasBottomTrim ?? 0}px` }}
@@ -303,7 +322,7 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
       <SplinePhone
         className="h-full w-full"
         zoom={metrics.zoom}
-        active={enabled}
+        active={enabled && active}
       />
     </div>
   );
