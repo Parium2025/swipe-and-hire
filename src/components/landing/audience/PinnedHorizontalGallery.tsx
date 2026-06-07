@@ -636,21 +636,19 @@ const PinnedHorizontalGallery = () => {
         }
 
         @media (max-width: 767px) {
-          /* Mobil: korten ligger kvar; jämna ut rubrikens egna andrum så
-             avståndet ovanför och under titeln känns lika mot nav/kort.
-             Rubriken matchar hero ("Hitta rätt människor snabbare!") i
-             storlek och radhöjd så alla tre sektioner känns enhetliga. */
+          /* Mobil: kortare pin = snabbare touchscroll utan tunghet. */
+          .phg-section { height: 280vh; }
           .phg-header { padding: clamp(28px, 5vh, 56px) 24px clamp(20px, 3vh, 36px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
           .phg-strip { padding: 0 18vw 0 8vw; }
-          .phg-footer { padding: 8px 24px 12px; gap: 8px; }
+          .phg-footer { padding: 8px 24px 16px; gap: 8px; }
         }
 
         @media (pointer: coarse) and (min-width: 768px) and (max-width: 1366px) {
-          /* iPad/tablet: kortare pin-distans = mindre fingerarbete och snabbare progressbar. */
-          .phg-section { height: 360vh; }
+          /* iPad/tablet: ännu kortare pin-distans för minimalt fingerarbete. */
+          .phg-section { height: 300vh; }
         }
       `}</style>
 
