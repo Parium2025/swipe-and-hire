@@ -730,6 +730,33 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const c = audienceContent[audience];
   const isMobileFeatureMotion = useIsMobileLandingMotion();
 
+  // Mobil: trigga `.landing-feature-mobile-in` när de scrollas in.
+  // Header-elementen (eyebrow/h2/p) animeras direkt vid mount; korten
+  // animeras när användaren faktiskt når sektionen så att slide-in
+  // från sidorna upplevs i takt med scrollen.
+  useEffect(() => {
+    if (!isMobileFeatureMotion) return;
+    const root = document.querySelector('[data-mobile-feature-prearm]');
+    if (!root) return;
+    const headers = root.querySelectorAll(':scope > .landing-feature-mobile-in');
+    headers.forEach((el) => el.classList.add('is-in-view'));
+    const cards = root.querySelectorAll('.landing-feature-card.landing-feature-mobile-in');
+    if (!cards.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-in-view');
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.12 },
+    );
+    cards.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [isMobileFeatureMotion]);
+
   useWaveAwareText();
 
   // Native scroll på /jobbsokare — inga scroll-hijacks, inga snap-låsningar.
@@ -892,6 +919,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               [data-mobile-feature-prearm] .landing-feature-mobile-in {
                 opacity: 0;
                 transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
+              }
+              [data-mobile-feature-prearm] .landing-feature-mobile-in.is-in-view {
                 animation: landingFeatureMobileIn 760ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 animation-delay: var(--lf-delay, 0ms);
               }
@@ -901,6 +930,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               }
             `}</style>
           )}
+
           <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
             <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
@@ -948,7 +978,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
                       visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.75, ease } },
                     }}
-                    style={isMobileFeatureMotion ? { ['--lf-delay' as string]: `${340 + i * 70}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
+                    style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '-48px' : '48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${(i - 1) * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
                     className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)]"
                   >
                     <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.12),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
