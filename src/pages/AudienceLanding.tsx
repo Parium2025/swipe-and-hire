@@ -301,13 +301,13 @@ const FixedPhoneLayer = () => {
     };
   }, []);
 
-  // På mobil + portrait-tablet: telefonen ska alltid vara synlig men låst i
-  // sin beräknade startposition. Den får aldrig kompenseras med scrollTop,
-  // eftersom det kan dra den upp i rubrik/brödtext när man scrollar tillbaka.
-  // På desktop/landscape: behåll fade-ut när man lämnar hero-zonen.
+  // På mobil: telefonen ska scrolla med texten (inte vara fixed), så vi
+  // negerar scrollTop via translateY på wrappern. På större skärmar behåller
+  // vi det gamla beteendet där telefonen fadar ut när man lämnar hero.
+  const [mobileScrollY, setMobileScrollY] = useState(0);
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-
+    // Mobil + portrait tablet (där telefonen ligger nedanför texten) ska följa med scrollen
     const isSmallScreen = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -333,8 +333,11 @@ const FixedPhoneLayer = () => {
     };
     const sync = () => {
       if (isSmallScreen()) {
+        // På mobil: håll alltid visible/active så telefonen följer med scroll
         apply(true);
+        setMobileScrollY(scrollRoot?.scrollTop ?? 0);
       } else {
+        setMobileScrollY(0);
         apply(isHeroZone());
       }
     };
@@ -352,20 +355,17 @@ const FixedPhoneLayer = () => {
 
 
 
-
-
   const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
 
   return (
     <div
-      className="pointer-events-none absolute inset-x-0 top-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:fixed md:inset-0 md:items-center md:px-12 md:pb-16 md:pt-28 lg:px-24"
+      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:items-center md:px-12 md:pb-16 md:pt-28 lg:px-24"
       aria-hidden="true"
     >
       <div
         className={`relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center ${phoneMetrics.isPortraitTablet ? '' : 'md:grid md:h-auto md:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] md:items-start md:gap-10 lg:grid-cols-2 lg:gap-16'} 2xl:max-w-[1440px]`}
+        style={mobileScrollY > 0 ? { transform: `translateY(${-mobileScrollY}px)`, willChange: 'transform' } : undefined}
       >
-
-
         <div aria-hidden className="hidden md:block" />
         <div
           data-phone-scroll-forward
