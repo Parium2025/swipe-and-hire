@@ -49,8 +49,29 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
     let cancelled = false;
     let app: SplineApplication | null = null;
+    let idleHandle: number | null = null;
+    let timeoutHandle: number | null = null;
 
-    (async () => {
+    // Vänta tills webbläsaren är idle (eller max 1.2s) innan vi börjar ladda
+    // Spline-runtime + scene-fil. Detta gör reloads markant snabbare på
+    // tyngre devices (särskilt iPad Safari) eftersom HTML/CSS/main bundle
+    // hinner måla och bli interaktiva först.
+    const startLoading = () => {
+      if (cancelled) return;
+      void boot();
+    };
+
+    const w = window as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (h: number) => void;
+    };
+    if (typeof w.requestIdleCallback === 'function') {
+      idleHandle = w.requestIdleCallback(startLoading, { timeout: 1200 });
+    } else {
+      timeoutHandle = window.setTimeout(startLoading, 250);
+    }
+
+    const boot = async () => {
       try {
         const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
