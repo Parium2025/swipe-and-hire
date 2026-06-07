@@ -114,7 +114,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
             <button
               type="button"
               onPointerDown={onCta}
-              className="group mt-8 inline-flex min-h-touch items-center justify-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-white shadow-[0_18px_55px_-12px_hsl(var(--secondary)/0.6)] transition-shadow hover:shadow-[0_22px_70px_-12px_hsl(var(--secondary)/0.8)]"
+              className="group mt-8 inline-flex min-h-touch items-center justify-center gap-3 rounded-full border-2 border-white bg-secondary px-7 py-3.5 text-sm font-bold text-white shadow-[0_18px_55px_-12px_hsl(var(--secondary)/0.6)] transition-shadow hover:shadow-[0_22px_70px_-12px_hsl(var(--secondary)/0.8)]"
             >
               {cta}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
