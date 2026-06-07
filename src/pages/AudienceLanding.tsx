@@ -915,30 +915,29 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </motion.span>
               <motion.h2
                 id="funktioner-heading"
-                initial={{ opacity: 0, x: -60 }}
-                animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
-                whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
-                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={isMobileFeatureMotion ? false : { opacity: 0, x: -60 }}
+                whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.05 }}
-                className="wave-text mt-4 max-w-3xl text-4xl font-black leading-[1.04] tracking-[0] sm:text-5xl md:text-6xl"
+                className="landing-feature-mobile-in wave-text mt-4 max-w-3xl text-4xl font-black leading-[1.04] tracking-[0] sm:text-5xl md:text-6xl"
+                style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '180ms' } : undefined}
               >
                 Allt du behöver för att {audience === 'job_seeker' ? 'hitta rätt jobb' : 'hitta rätt person'}.
               </motion.h2>
               <motion.p
-                initial={{ opacity: 0, x: 60 }}
-                animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
-                whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
-                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={isMobileFeatureMotion ? false : { opacity: 0, x: 60 }}
+                whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.15 }}
-                className="wave-text mt-6 max-w-2xl text-base leading-8 opacity-70 sm:text-lg"
+                className="landing-feature-mobile-in wave-text mt-6 max-w-2xl text-base leading-8 opacity-70 sm:text-lg"
+                style={isMobileFeatureMotion ? { ['--lf-x' as string]: '60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '260ms' } : undefined}
               >
                 Platshållartext för funktionsöversikten — fyll med de viktigaste fördelarna.
               </motion.p>
               <motion.div
-                initial="hidden"
-                animate={prearmFeatureMotion ? "visible" : undefined}
-                whileInView={prearmFeatureMotion ? undefined : "visible"}
-                viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={isMobileFeatureMotion ? false : "hidden"}
+                whileInView={isMobileFeatureMotion ? undefined : "visible"}
+                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
                 className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
@@ -949,8 +948,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
                       visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.75, ease } },
                     }}
-                    style={{ willChange: prearmFeatureMotion ? 'auto' : 'opacity, transform' }}
-                    className="group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)]"
+                    style={isMobileFeatureMotion ? { ['--lf-delay' as string]: `${340 + i * 70}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
+                    className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)]"
                   >
                     <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.12),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                     <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
