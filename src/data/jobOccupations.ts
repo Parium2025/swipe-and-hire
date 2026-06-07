@@ -38,7 +38,7 @@ export const OCCUPATIONS: OccupationData[] = [
     salary: 'Genomsnittlig lön för elektriker i Sverige är cirka 33 000–40 000 kr/månad.',
   },
   {
-    slug: 'undersköterska',
+    slug: 'underskoterska',
     name: 'Undersköterska',
     plural: 'undersköterskor',
     asForm: 'som undersköterska',
