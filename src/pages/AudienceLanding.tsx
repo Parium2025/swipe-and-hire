@@ -215,6 +215,7 @@ const calculateInlinePhoneMetrics = () => {
     height: safeHeight,
     width: safeHeight * PHONE_ASPECT,
     canvasHeight,
+    canvasBottomTrim: isPortraitTablet ? 0 : canvasVerticalPadding / 2,
     zoom: isPortraitTablet
       ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
       : clamp((safeHeight / 376) * 0.51, 0.34, 0.56),
