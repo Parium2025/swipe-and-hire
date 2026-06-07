@@ -6,7 +6,7 @@ import LandingNav from '@/components/LandingNav';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin } from 'lucide-react';
-import { CITIES, POPULAR_ROLES } from '@/data/jobCities';
+import { CITIES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 
 const CANONICAL = 'https://parium.se/jobb';
