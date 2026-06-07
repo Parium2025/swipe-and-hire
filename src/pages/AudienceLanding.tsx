@@ -1006,26 +1006,42 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           <div className="relative z-10 -mt-px text-white">
           {/* ──────────────── PRISER ──────────────── */}
           <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 pb-16 pt-12 sm:px-6 md:px-12 md:pb-20 md:pt-16 lg:px-24">
-            <div className="mx-auto max-w-[1180px]">
-              <motion.div
-                initial={{ opacity: 0, x: -60 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
-                transition={{ duration: 0.9, ease }}
-                className="max-w-2xl"
+            <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
+              <motion.span
+                initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
+                whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                transition={{ duration: 0.7, ease }}
+                className="landing-feature-mobile-in block text-xs font-bold uppercase tracking-[0.32em] text-secondary/85"
+                style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-40px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '120ms' } : undefined}
               >
-                <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Priser</span>
-                <h2 className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:text-6xl">
-                  {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
-                </h2>
-                <p className="mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
-                  Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
-                </p>
-              </motion.div>
+                Priser
+              </motion.span>
+              <motion.h2
+                id="priser-heading"
+                initial={isMobileFeatureMotion ? false : { opacity: 0, x: -60 }}
+                whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                transition={{ duration: 0.9, ease, delay: 0.05 }}
+                className="landing-feature-mobile-in mt-4 max-w-2xl text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:text-6xl"
+                style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '180ms' } : undefined}
+              >
+                {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
+              </motion.h2>
+              <motion.p
+                initial={isMobileFeatureMotion ? false : { opacity: 0, x: 60 }}
+                whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                transition={{ duration: 0.9, ease, delay: 0.15 }}
+                className="landing-feature-mobile-in mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg"
+                style={isMobileFeatureMotion ? { ['--lf-x' as string]: '60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '260ms' } : undefined}
+              >
+                Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
+              </motion.p>
               <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
+                initial={isMobileFeatureMotion ? false : "hidden"}
+                whileInView={isMobileFeatureMotion ? undefined : "visible"}
+                viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
                 className="mt-8 grid gap-5 md:grid-cols-2"
               >
@@ -1036,7 +1052,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       hidden: { opacity: 0 },
                       visible: { opacity: 1, transition: { duration: 0.9, ease } },
                     }}
-                    className={`relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 ${
+                    style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
+                    className={`landing-feature-card landing-feature-mobile-in relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 ${
                       i === 1
                         ? 'border-secondary/40 bg-gradient-to-br from-secondary/20 to-white/5 shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.35)]'
                         : 'border-white/15 bg-white/5 hover:border-secondary/25'
