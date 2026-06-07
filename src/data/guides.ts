@@ -304,6 +304,120 @@ export const GUIDES: GuideData[] = [
       { q: 'Räknas sommarjobb som arbetslivserfarenhet?', a: 'Ja, absolut. Lägg in det i CV:t med datum och konkreta arbetsuppgifter.' },
     ],
   },
+  {
+    slug: 'a-kassa-guide-2026',
+    title: 'A-kassa 2026 – så funkar arbetslöshetsförsäkringen',
+    metaTitle: 'A-kassa 2026: regler, ersättning & så ansöker du | Parium',
+    description: 'Komplett guide till a-kassan 2026. Ersättningsnivåer, villkor, karens, hur du ansöker och vad som händer om du blir uppsagd eller säger upp dig själv.',
+    excerpt: 'A-kassan kan ge upp till 26 400 kr/månad de första 100 dagarna 2026 – men bara om du gjort rätt. Här är allt du behöver veta för att slippa stå tomhänt.',
+    category: 'Trygghet',
+    readingMinutes: 7,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Vad är a-kassa och vem får?',
+        body: 'A-kassa (arbetslöshetsersättning) är en försäkring som ger dig pengar om du blir arbetslös. Det finns två nivåer: grundersättning (för alla som uppfyller arbetsvillkoret) och inkomstrelaterad ersättning (för dig som varit medlem i en a-kassa minst 12 månader). För inkomstrelaterad krävs både medlemsvillkor (12 mån) och arbetsvillkor (jobbat minst 6 av senaste 12 månaderna, ≥60h/månad).',
+      },
+      {
+        heading: 'Hur mycket får jag? (2026)',
+        body: 'Inkomstrelaterad ersättning: 80% av tidigare lön, max 1 200 kr/dag (cirka 26 400 kr/mån) de första 100 dagarna. Dag 101–200: max 1 000 kr/dag. Dag 201–300: max 760 kr/dag. Grundersättning (utan medlemskap 12 mån): max 510 kr/dag. Karens: 6 dagar innan första utbetalningen. Sägs du upp själv utan giltigt skäl: 45 dagars avstängning.',
+      },
+      {
+        heading: 'Hur ansöker jag?',
+        body: '1. Skriv in dig på Arbetsförmedlingen FÖRSTA arbetslösa dagen (annars förlorar du dagar).\n2. Ansök hos din a-kassa via deras webbplats.\n3. Fyll i tidsrapporter varje vecka.\n4. Sök jobb aktivt och rapportera in dina sökta jobb.\nDu får pengar i efterskott, oftast 1–2 veckor efter rapport.',
+      },
+      {
+        heading: 'Vilken a-kassa ska jag välja?',
+        body: 'Alla a-kassor betalar samma ersättning – skillnaden är avgift (90–180 kr/mån) och servicenivå. Vanliga val: Unionens, Akademikernas (AEA), Kommunals, Handels, Byggnads, IF Metalls. Du måste välja en a-kassa som matchar din bransch eller en av de stora yrkesövergripande. Du kan byta a-kassa när som helst – din medlemstid följer med.',
+      },
+      {
+        heading: 'Vanliga misstag som kostar pengar',
+        body: '1. Anmäler sig till Arbetsförmedlingen för sent (förlorade dagar går inte att få tillbaka).\n2. Är inte med i någon a-kassa när jobbet försvinner (då bara grundersättning).\n3. Säger upp sig själv utan giltigt skäl (45 dagars avstängning).\n4. Tackar nej till anvisat jobb (kan ge avstängning).\n5. Missar tidsrapporter (ingen utbetalning).',
+      },
+    ],
+    faqs: [
+      { q: 'Får jag a-kassa om jag säger upp mig själv?', a: 'Ja, men efter 45 dagars avstängning – om du inte hade giltigt skäl (t.ex. trakasserier, omöjlig arbetssituation, flytt pga partner).' },
+      { q: 'Måste jag vara medlem i facket för att få a-kassa?', a: 'Nej. A-kassa och fackföreningen är skilda saker – du kan vara med i bara a-kassan. Vissa fack kräver dock båda.' },
+      { q: 'Hur länge får jag a-kassa?', a: 'Upp till 300 ersättningsdagar (450 om du har barn under 18). Sedan måste du kvalificera dig på nytt genom arbete.' },
+      { q: 'Kan jag jobba extra och få a-kassa samtidigt?', a: 'Ja, men dagar du jobbar dras av från ersättningen. Du måste rapportera alla timmar.' },
+    ],
+  },
+  {
+    slug: 'lonesamtal-tips',
+    title: 'Lönesamtal – så förhandlar du upp lönen 2026',
+    metaTitle: 'Lönesamtal 2026: 10 tips för att förhandla högre lön | Parium',
+    description: 'Konkreta tips inför lönesamtalet. Hur du förbereder dig, vad du ska säga, vilka siffror att begära och hur du undviker de vanligaste misstagen.',
+    excerpt: 'Tre minuter av samtalet avgör tusenlappar varje månad i flera år framåt. Här är receptet rekryterare och chefer själva använder när de byter jobb.',
+    category: 'Lön',
+    readingMinutes: 6,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Förbered dig – innan mötet',
+        body: 'Samla 3–5 konkreta exempel på resultat du levererat senaste året: siffror, projekt, kunder, sparade kostnader. Kolla upp marknadslönen för din roll (SCB, fackets lönesök, lönekoll.se). Bestäm tre nivåer: drömnivå, målnivå, lägstanivå. Skriv ner. Aldrig gå in oförberedd.',
+      },
+      {
+        heading: 'Vad du ska säga (manus)',
+        body: '"Tack för året. Jag vill prata om lönen. Senaste året har jag [konkret resultat 1], [resultat 2] och tagit ansvar för [område]. Marknadslönen för min roll ligger på X–Y kr. Jag tycker en rimlig nivå är Z kr." → Sedan: TYST. Den första som pratar förlorar. Låt chefen reagera.',
+      },
+      {
+        heading: 'Siffror som funkar 2026',
+        body: 'Normal årlig löneökning: 2,5–4%. Bra prestation: 5–8%. Ny roll eller ansvar: 8–15%. Byter jobb externt: ofta 10–20% mer. Be om mer än du vill ha – chefen kommer förhandla ner.',
+      },
+      {
+        heading: 'Om de säger nej till lönehöjning',
+        body: 'Förhandla andra förmåner: extra semesterdagar, kompetensutveckling, hemarbete, bonus, bättre tjänstebil, högre pensionsavsättning. Be om ett konkret datum för nästa lönesamtal med tydliga kriterier. Om chefen säger "det finns inga pengar" – fråga vad som krävs för att det ska finnas pengar om 6 månader.',
+      },
+      {
+        heading: '5 misstag som sänker dig',
+        body: '1. Säger en exakt siffra först (bind dig inte).\n2. Argumenterar med privata behov ("jag behöver pengarna").\n3. Hotar med uppsägning utan att mena det.\n4. Jämför med kollegor.\n5. Tackar ja direkt – be alltid att få fundera till nästa dag.',
+      },
+    ],
+    faqs: [
+      { q: 'När är bästa tiden att be om löneförhöjning?', a: 'I samband med årligt lönesamtal, efter en lyckad leverans, eller när du fått nytt ansvar. Undvik bokslutsperiod och chefens stressigaste veckor.' },
+      { q: 'Hur mycket kan jag begära?', a: 'Vid årlig översyn: 5–10% om du presterat bra. Vid ny roll eller jobbyte: 10–20%.' },
+      { q: 'Ska jag visa konkurrerande erbjudande?', a: 'Bara om du är beredd att faktiskt byta. Annars är det bluff och du tappar trovärdighet långsiktigt.' },
+      { q: 'Vad gör jag om jag får nej?', a: 'Be om skriftliga kriterier för vad som krävs för höjning, och ett uppföljningsmöte om 3–6 månader. Annars: börja söka externt.' },
+    ],
+  },
+  {
+    slug: 'foraldraledighet-guide',
+    title: 'Föräldraledighet 2026 – dagar, ersättning & jobbet',
+    metaTitle: 'Föräldraledighet 2026: dagar, föräldrapenning & rättigheter | Parium',
+    description: 'Allt om föräldraledighet 2026. Antal dagar, ersättningsnivåer, hur du anmäler, vad arbetsgivaren får och inte får göra, samt vab.',
+    excerpt: '480 dagar per barn – men hur många är på sjukpenningnivå, hur funkar reserverade dagar, och vad händer med jobbet? Här är reglerna 2026 utan krångel.',
+    category: 'Familj',
+    readingMinutes: 7,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Hur många dagar får jag?',
+        body: '480 dagar per barn totalt, delas mellan föräldrarna. 390 dagar på sjukpenningnivå (cirka 80% av SGI, max 1 250 kr/dag 2026), 90 dagar på lägstanivå (250 kr/dag). 90 dagar är reserverade till vardera föräldern och kan inte överlåtas. För tvillingar/flerbarn: extra dagar.',
+      },
+      {
+        heading: 'Hur mycket pengar får jag?',
+        body: 'Föräldrapenning på sjukpenningnivå: 80% av din SGI (sjukpenninggrundande inkomst), max cirka 1 250 kr/dag före skatt 2026 (motsvarar lön på cirka 47 750 kr/mån). Tjänar du mer kompletterar många kollektivavtal upp till 90% under 6 månader. Lägstanivå: 250 kr/dag oavsett tidigare inkomst.',
+      },
+      {
+        heading: 'Så anmäler du',
+        body: '1. Anmäl till arbetsgivaren MINST 2 månader innan ledigheten börjar.\n2. Ansök om föräldrapenning hos Försäkringskassan (forsakringskassan.se eller appen) – tidigast 1 månad innan ledigheten.\n3. Bestäm uttagsnivå: hel, 3/4, halv, 1/4 eller 1/8 dag.\n4. Du kan jobba deltid och ta ut partiell föräldrapenning samtidigt.',
+      },
+      {
+        heading: 'Dina rättigheter på jobbet',
+        body: 'Du har rätt att komma tillbaka till samma eller likvärdig tjänst, samma lön (med löneutveckling) och samma villkor. Arbetsgivaren får inte säga upp dig på grund av föräldraledighet – det är diskriminering. Du har rätt att förkorta arbetstiden 25% tills barnet fyller 8 år. Du har rätt att vara hemma vid sjukdom hos barn (vab) upp till 120 dagar/år och barn.',
+      },
+      {
+        heading: 'Smarta drag de flesta missar',
+        body: '1. Skjut upp dagar – 96 dagar kan sparas tills barnet fyller 12 år.\n2. Dubbeldagar – båda föräldrarna kan ta ut samtidigt under barnets första år (30 dagar var).\n3. Anmäl SGI även om du är arbetslös – annars riskerar du lägre ersättning.\n4. Kolla kollektivavtalet – många ger 10% extra (90% lön) i 6 månader.\n5. Vid byte av jobb under föräldraledigheten – behåll SGI genom att vara sjukskriven/föräldraledig utan avbrott.',
+      },
+    ],
+    faqs: [
+      { q: 'Måste jag ta ut alla 480 dagar innan barnet börjar skolan?', a: 'Nej. 96 dagar kan sparas till efter att barnet fyllt 4 år, och kan tas ut ända tills barnet fyller 12.' },
+      { q: 'Kan arbetsgivaren neka mig föräldraledighet?', a: 'Nej. Du har lagstadgad rätt att vara ledig, men måste anmäla minst 2 månader innan.' },
+      { q: 'Hur funkar vab?', a: 'Vid sjukt barn under 12 år får du tillfällig föräldrapenning, cirka 80% av SGI. Anmäl till Försäkringskassan senast 90 dagar efter.' },
+      { q: 'Påverkar föräldraledighet pensionen?', a: 'Marginellt. Staten ger pensionsrätt även under föräldraledighet, och de fyra första åren räknas extra förmånligt.' },
+    ],
+  },
 ];
 
 
