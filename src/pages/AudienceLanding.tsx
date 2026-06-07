@@ -723,7 +723,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // /auth-route-chunken i bakgrunden så att "Skapa min profil"-CTA känns instant.
   // Helt osynligt — bara modul-prefetch, ingen render, ingen state-mutation.
   useEffect(() => {
-    const w = window as any;
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
     const idle: (cb: () => void) => number =
       typeof w.requestIdleCallback === 'function'
         ? (cb) => w.requestIdleCallback(cb, { timeout: 2500 })
@@ -735,7 +738,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       // Prefetcha /auth-chunken tyst. Fel slukas — det är ren optimering.
       import('@/pages/Auth').catch(() => {});
     });
-    return () => { try { cancel(handle); } catch {} };
+    return () => cancel(handle);
   }, []);
 
   useEffect(() => {
