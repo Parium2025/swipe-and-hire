@@ -23,25 +23,27 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
   const startRef = useRef<number | null>(null);
   const [animating, setAnimating] = useState(false);
 
-  // Re-trigger elastic morph every time footer enters viewport
+  // Trigger elastic morph ONCE when the footer first enters viewport.
+  // Tidigare återställdes path till nedböjd state varje gång sektionen lämnade
+  // viewporten, vilket gjorde att en liten scroll mitt i animationen kunde
+  // "glitcha tillbaka" kurvan. Nu spelas bouncen exakt en gång och behåller
+  // sitt slutläge.
   useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
 
     const scrollRoot = (document.querySelector('[data-landing-scroll-root]') as HTMLElement) ?? null;
-    let wasInside = false;
+    let triggered = false;
 
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting && !wasInside) {
-            wasInside = true;
+          if (entry.isIntersecting && !triggered) {
+            triggered = true;
             startRef.current = null;
             pathRef.current?.setAttribute('d', buildPath(156));
             setAnimating(true);
-          } else if (!entry.isIntersecting && wasInside) {
-            wasInside = false;
-            pathRef.current?.setAttribute('d', buildPath(156));
+            io.disconnect();
           }
         }
       },
@@ -51,6 +53,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
     io.observe(el);
     return () => io.disconnect();
   }, []);
+
 
   useAnimationFrame((t) => {
     if (!animating || !pathRef.current) return;
