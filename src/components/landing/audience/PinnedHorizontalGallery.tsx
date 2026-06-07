@@ -155,6 +155,7 @@ const PinnedHorizontalGallery = () => {
     // uppdateras varje frame — då tävlar den med GSAP-exit-tweenen på de 8 korten
     // och browserns smooth-scroll, och kan ge synligt hack på svagare GPU:er.
     let frozen = false;
+    const isTouchScroll = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
 
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
@@ -194,11 +195,21 @@ const PinnedHorizontalGallery = () => {
       rafRef.current = null;
       if (frozen) return;
       const target = targetProgressRef.current;
-      // Viktigt: ingen eftersläpande lerp här. Om användaren scrollar snabbt ska
-      // kortstrippen alltid ligga exakt på faktisk scrollposition, annars kan
-      // nästa sektion börja synas innan korten visuellt hunnit hela vägen.
-      renderedProgressRef.current = target;
-      applyProgress(target);
+      if (!isTouchScroll || target < 0.002 || target > 0.998) {
+        renderedProgressRef.current = target;
+        applyProgress(target);
+        return;
+      }
+      // Touch-scroll kommer i grövre momentum-steg än mus/trackpad. En liten
+      // visuell smoothing på just coarse pointer tar bort "hack" utan att ändra
+      // desktop-känslan eller låta strippen släpa vid början/slut av pinnen.
+      const current = renderedProgressRef.current;
+      const next = current + (target - current) * 0.38;
+      renderedProgressRef.current = Math.abs(target - next) < 0.001 ? target : next;
+      applyProgress(renderedProgressRef.current);
+      if (Math.abs(target - renderedProgressRef.current) > 0.001 && rafRef.current === null) {
+        rafRef.current = window.requestAnimationFrame(tick);
+      }
     };
 
     // Frys enbart vid 3→2 (gallery-leave). Vid 2→3 återställer vi först till
