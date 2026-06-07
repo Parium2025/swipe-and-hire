@@ -16,6 +16,7 @@ import YrkenHub from "./pages/YrkenHub";
 import YrkePage from "./pages/YrkePage";
 import JobbCityYrke from "./pages/JobbCityYrke";
 import PublicJobPage from "./pages/PublicJobPage";
+import AnnonserHub from "./pages/AnnonserHub";
 import GuiderHub from "./pages/GuiderHub";
 import GuidePage from "./pages/GuidePage";
 import Auth from "./pages/Auth";
