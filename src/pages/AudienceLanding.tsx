@@ -342,12 +342,13 @@ const FixedPhoneLayer = () => {
         <div aria-hidden className="hidden md:block" />
         <div
           data-phone-scroll-forward
-          className={`pointer-events-none transition-opacity duration-[700ms] ease-out ${visible ? 'opacity-100' : 'opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center'}`}
+          className={`pointer-events-none transition-[opacity,transform] duration-[850ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${visible ? 'opacity-100' : 'opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center'}`}
           style={phoneMetrics.isDesktop
-            ? { height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
-            : { top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
+            ? { height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset + (visible ? 0 : 24)}px)` }
+            : { top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translate(-50%, ${visible ? 0 : 28}px)`, willChange: 'opacity, transform' }
           }
         >
+
 
           <SplinePhone
             className="h-full w-full"
