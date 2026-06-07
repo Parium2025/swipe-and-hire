@@ -163,6 +163,83 @@ type HeroIntroStageProps = {
 
 const PHONE_ASPECT = 9 / 19.5;
 
+const getViewportSize = () => ({
+  width: window.visualViewport?.width ?? window.innerWidth,
+  height: window.visualViewport?.height ?? window.innerHeight,
+});
+
+const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
+  if (typeof window === 'undefined') return null;
+  const { width, height } = getViewportSize();
+  if (width < 768) return 'mobile';
+  if (width < 1180 && height > width) return 'portraitTablet';
+  return null;
+};
+
+const calculateInlinePhoneMetrics = () => {
+  if (typeof window === 'undefined') {
+    return { height: 320, width: 320 * PHONE_ASPECT, zoom: 0.44, yOffset: 28 };
+  }
+
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+  const { width, height } = getViewportSize();
+  const placement = getInlinePhonePlacement();
+  const isPortraitTablet = placement === 'portraitTablet';
+  const rawHeight = isPortraitTablet
+    ? clamp(height * 0.44, 340, 520)
+    : clamp(height * 0.4, 220, 360);
+  const maxPhoneWidth = isPortraitTablet
+    ? Math.min(width * 0.36, 270)
+    : Math.min(width * 0.5, 190);
+  const safeHeight = Math.min(rawHeight, maxPhoneWidth / PHONE_ASPECT);
+
+  return {
+    height: safeHeight,
+    width: safeHeight * PHONE_ASPECT,
+    zoom: isPortraitTablet
+      ? clamp((safeHeight / 460) * 0.46, 0.34, 0.62)
+      : clamp((safeHeight / 376) * 0.44, 0.32, 0.58),
+    yOffset: isPortraitTablet ? clamp(height * 0.018, 14, 26) : clamp(height * 0.03, 22, 34),
+  };
+};
+
+const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 'portraitTablet'; className?: string }) => {
+  const [enabled, setEnabled] = useState(() => getInlinePhonePlacement() === placement);
+  const [metrics, setMetrics] = useState(calculateInlinePhoneMetrics);
+
+  useEffect(() => {
+    const sync = () => {
+      setEnabled(getInlinePhonePlacement() === placement);
+      setMetrics(calculateInlinePhoneMetrics());
+    };
+
+    sync();
+    window.addEventListener('resize', sync, { passive: true });
+    window.visualViewport?.addEventListener('resize', sync, { passive: true });
+    return () => {
+      window.removeEventListener('resize', sync);
+      window.visualViewport?.removeEventListener('resize', sync);
+    };
+  }, [placement]);
+
+  if (!enabled) return null;
+
+  return (
+    <div
+      aria-hidden="true"
+      className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-start justify-center overflow-visible ${className}`}
+      style={{ height: `${metrics.height}px`, width: `${metrics.width}px` }}
+    >
+      <SplinePhone
+        className="h-full w-full"
+        style={{ transform: `translateY(-${metrics.yOffset}px)` }}
+        zoom={metrics.zoom}
+        active={enabled}
+      />
+    </div>
+  );
+};
+
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   
@@ -273,10 +350,12 @@ const FixedPhoneLayer = () => {
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
   const [phoneMetrics, setPhoneMetrics] = useState(calculatePhoneMetrics);
+  const [isInlinePhone, setIsInlinePhone] = useState(() => getInlinePhonePlacement() !== null);
   const lastVisibleRef = useRef(true);
 
   useEffect(() => {
     const syncPhoneMetrics = () => {
+      setIsInlinePhone(getInlinePhonePlacement() !== null);
       setPhoneMetrics(calculatePhoneMetrics());
     };
 
@@ -301,20 +380,9 @@ const FixedPhoneLayer = () => {
     };
   }, []);
 
-  // På mobil: telefonen ska scrolla med texten (inte vara fixed). Vi driver
-  // translateY direkt via ref + rAF för att undvika React-state-lag som
-  // orsakar overshoot när användaren snabbt scrollar till toppen (telefonen
-  // hamnar då för högt upp innan staten hinner ifatt).
   const phoneWrapperRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    const isSmallScreen = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const portraitTablet = w >= 768 && w < 1180 && h > w;
-      return w < 768 || portraitTablet;
-    };
-
     const isHeroZone = () => {
       if (!scrollRoot) return true;
       const stage = document.querySelector('[data-hero-intro-stage]') as HTMLElement | null;
@@ -332,40 +400,27 @@ const FixedPhoneLayer = () => {
       setActive(next);
     };
 
-    let rafId = 0;
-    const applyTransform = () => {
+    const syncDesktopVisibility = () => {
       rafId = 0;
-      const wrapper = phoneWrapperRef.current;
-      if (isSmallScreen()) {
-        apply(true);
-        if (wrapper) {
-          // Clampa till >=0 så iOS rubber-band/overscroll inte puttar telefonen uppåt
-          const y = Math.max(0, scrollRoot?.scrollTop ?? 0);
-          wrapper.style.transform = y > 0 ? `translate3d(0, ${-y}px, 0)` : 'translate3d(0,0,0)';
-          wrapper.style.willChange = 'transform';
-        }
-      } else {
-        if (wrapper) {
-          wrapper.style.transform = '';
-          wrapper.style.willChange = '';
-        }
-        apply(isHeroZone());
-      }
+      apply(getInlinePhonePlacement() ? false : isHeroZone());
     };
 
+    let rafId = 0;
     const sync = () => {
       if (rafId) return;
-      rafId = window.requestAnimationFrame(applyTransform);
+      rafId = window.requestAnimationFrame(syncDesktopVisibility);
     };
 
     sync();
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
     window.addEventListener('resize', sync, { passive: true });
+    window.visualViewport?.addEventListener('resize', sync, { passive: true });
 
     return () => {
       if (rafId) window.cancelAnimationFrame(rafId);
       scrollRoot?.removeEventListener('scroll', sync);
       window.removeEventListener('resize', sync);
+      window.visualViewport?.removeEventListener('resize', sync);
     };
   }, []);
 
@@ -373,6 +428,8 @@ const FixedPhoneLayer = () => {
 
 
   const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
+
+  if (isInlinePhone) return null;
 
   return (
     <div
@@ -441,6 +498,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
               headingId="audience-hero-heading-mobile"
             />
           </motion.div>
+          <InlineHeroPhone placement="mobile" className="mt-2" />
         </section>
 
         {/* Desktop / tablet hero */}
@@ -462,7 +520,9 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             >
               <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
             </motion.div>
-            <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
+            <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10">
+              <InlineHeroPhone placement="portraitTablet" />
+            </div>
           </div>
         </section>
       </section>
