@@ -307,7 +307,13 @@ const FixedPhoneLayer = () => {
   const [mobileScrollY, setMobileScrollY] = useState(0);
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    const isSmallScreen = () => window.innerWidth < 768;
+    // Mobil + portrait tablet (där telefonen ligger nedanför texten) ska följa med scrollen
+    const isSmallScreen = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const portraitTablet = w >= 768 && w < 1180 && h > w;
+      return w < 768 || portraitTablet;
+    };
 
     const isHeroZone = () => {
       if (!scrollRoot) return true;
