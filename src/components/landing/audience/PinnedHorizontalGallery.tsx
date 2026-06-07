@@ -334,7 +334,9 @@ const PinnedHorizontalGallery = () => {
           try {
             v.preload = 'auto';
             if (v.readyState < 2) v.load();
-          } catch {}
+          } catch {
+            // Video warmup is best-effort only.
+          }
         }, index * 140));
       });
     };
