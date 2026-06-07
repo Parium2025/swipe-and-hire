@@ -314,23 +314,23 @@ const FixedPhoneLayer = () => {
     const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.48;
     const tablet = width >= 700;
     // Proportional safe areas — scale with viewport height so phone never clips and breathes equally top/bottom.
-    const gap = tablet ? clamp(height * 0.04, 32, 72) : clamp(height * 0.032, 22, 56);
-    const topSafeGap = tablet ? clamp(height * 0.06, 44, 96) : clamp(height * 0.058, 38, 82);
-    const bottomSafe = tablet ? clamp(height * 0.065, 48, 104) : clamp(height * 0.06, 42, 88);
-    const canvasTopBreathingRoom = tablet ? clamp(height * 0.08, 56, 120) : clamp(height * 0.10, 68, 126);
+    const gap = tablet ? clamp(height * 0.035, 28, 64) : clamp(height * 0.024, 16, 44);
+    const topSafeGap = tablet ? clamp(height * 0.055, 40, 88) : clamp(height * 0.045, 30, 68);
+    const bottomSafe = tablet ? clamp(height * 0.06, 44, 96) : clamp(height * 0.048, 34, 72);
+    const canvasTopBreathingRoom = tablet ? clamp(height * 0.085, 60, 124) : clamp(height * 0.115, 76, 138);
     // Maximize canvas area between text and bottom safe area — no hard cap so phone uses all available space.
     const availableHeight = Math.max(220, height - textBottom - gap - bottomSafe);
     const maxCanvasHeight = Math.max(220, height - gap - bottomSafe);
     const visualHeight = availableHeight;
     const finalHeight = Math.min(visualHeight + canvasTopBreathingRoom, maxCanvasHeight);
-    const yOffset = width >= 768 ? 18 : clamp(height * 0.028, 18, 32);
+    const yOffset = width >= 768 ? 18 : clamp(height * 0.024, 14, 28);
     const safeTop = textBottom + topSafeGap + (tablet ? 0 : yOffset);
     const bottomAnchoredTop = height - bottomSafe - visualHeight;
     const top = Math.max(gap, safeTop, bottomAnchoredTop);
     // Reference baseline: at 390×844 finalHeight ≈ 376, zoom 0.44 looks perfect.
     // Scale zoom directly with canvas height so phone fills available area proportionally without clipping.
     const referenceHeight = tablet ? 460 : 376;
-    const baseZoom = tablet ? 0.60 : 0.64;
+    const baseZoom = tablet ? 0.66 : 0.74;
     // Width constraint: phone aspect ≈ 9:19.5. Ensure phone width fits canvas width.
     const canvasWidth = Math.min(width, tablet ? 560 : width);
     const widthLimitedZoom = baseZoom * (canvasWidth / (tablet ? 560 : 390));
@@ -340,7 +340,7 @@ const FixedPhoneLayer = () => {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.42, tablet ? 0.82 : 0.82),
+      zoom: clamp(fluidZoom, 0.46, tablet ? 0.92 : 0.94),
       yOffset,
     };
     lastHeroMetricsRef.current = metrics;
