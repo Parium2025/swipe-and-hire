@@ -178,7 +178,7 @@ const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
 
 const calculateInlinePhoneMetrics = () => {
   if (typeof window === 'undefined') {
-    return { height: 320, width: 320 * PHONE_ASPECT, zoom: 0.44, yOffset: 28 };
+    return { height: 320, width: 320 * PHONE_ASPECT, canvasHeight: 348, zoom: 0.44, topGap: 28 };
   }
 
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
