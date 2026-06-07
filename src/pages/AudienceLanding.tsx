@@ -363,7 +363,6 @@ const FixedPhoneLayer = () => {
     >
       <div
         className={`relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center ${phoneMetrics.isPortraitTablet ? '' : 'md:grid md:h-auto md:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] md:items-start md:gap-10 lg:grid-cols-2 lg:gap-16'} 2xl:max-w-[1440px]`}
-        style={mobileScrollY > 0 ? { transform: `translateY(${-mobileScrollY}px)`, willChange: 'transform' } : undefined}
       >
 
 
