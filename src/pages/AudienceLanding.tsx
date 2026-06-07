@@ -186,17 +186,18 @@ const FixedPhoneLayer = () => {
     if (isPortraitTablet) {
       const anchor = getVisibleAnchor();
       const textBottom = anchor?.getBoundingClientRect().bottom ?? height * 0.52;
-      const gap = clamp(height * 0.032, 30, 44);
-      const bottomSafe = clamp(height * 0.065, 72, 98);
-      const top = Math.min(textBottom + gap, height - bottomSafe - 260);
-      const availableHeight = Math.max(240, height - top - bottomSafe);
-      const safeHeight = Math.min(availableHeight, 480);
+      const gap = clamp(height * 0.028, 24, 40);
+      const bottomSafe = clamp(height * 0.055, 60, 88);
+      const top = Math.min(textBottom + gap, height - bottomSafe - 320);
+      const availableHeight = Math.max(320, height - top - bottomSafe);
+      // Större mockup på surfplatta (portrait) — fyller mer av den lediga ytan
+      const safeHeight = Math.min(availableHeight, 720);
       const metrics = {
         isDesktop: false,
         isPortraitTablet: true,
         top,
         height: safeHeight,
-        zoom: clamp((safeHeight / 460) * 0.39, 0.30, 0.42),
+        zoom: clamp((safeHeight / 460) * 0.46, 0.34, 0.62),
         yOffset: 0,
       };
       lastHeroMetricsRef.current = metrics;
@@ -306,7 +307,13 @@ const FixedPhoneLayer = () => {
   const [mobileScrollY, setMobileScrollY] = useState(0);
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    const isSmallScreen = () => window.innerWidth < 768;
+    // Mobil + portrait tablet (där telefonen ligger nedanför texten) ska följa med scrollen
+    const isSmallScreen = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const portraitTablet = w >= 768 && w < 1180 && h > w;
+      return w < 768 || portraitTablet;
+    };
 
     const isHeroZone = () => {
       if (!scrollRoot) return true;
