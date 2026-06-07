@@ -661,11 +661,17 @@ const PinnedHorizontalGallery = () => {
            rubriken så header/meny inte överlappas, och minskar kortbredden
            något så att hela kompositionen får luft. */
         @media (max-width: 375px) {
-          .phg-header { padding: clamp(36px, 7vh, 56px) 20px clamp(16px, 2.5vh, 28px); }
-          .phg-title { font-size: 2.5rem; line-height: 1.05; }
-          .phg-card { width: 58vw; border-radius: 16px; }
-          .phg-strip { padding: 0 22vw 0 10vw; }
+          /* Push titeln tydligt under den fixerade top-navens (Parium/Meny/Logga in)
+             så den inte kolliderar visuellt. Krymper också korten ytterligare så
+             att rubrik + kortrad + footer ryms inom 100vh på ultra-små viewports. */
+          .phg-sticky { justify-content: flex-start; padding-top: 88px; }
+          .phg-header { padding: 8px 20px 14px; }
+          .phg-title { font-size: 2.25rem; line-height: 1.06; }
+          .phg-strip-wrap { min-height: 0; }
+          .phg-card { width: 56vw; border-radius: 16px; }
+          .phg-strip { padding: 0 24vw 0 10vw; gap: 12px; }
         }
+
 
 
         @media (pointer: coarse) and (min-width: 768px) and (max-width: 1366px) {
