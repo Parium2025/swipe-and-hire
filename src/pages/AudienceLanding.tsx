@@ -342,7 +342,7 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
     >
       {isTabletTouch ? (
         <div className="relative flex h-full w-full items-center justify-center" role="img" aria-label="Parium telefonmockup">
-          <div className="relative aspect-[9/19.5] h-[calc(100%-96px)] max-h-[520px] overflow-hidden rounded-[2.4rem] border border-white/15 bg-background shadow-[0_28px_90px_hsl(var(--background)/0.48)]">
+          <div className="relative aspect-[9/19.5] h-[calc(100%_-_96px)] max-h-[520px] overflow-hidden rounded-[2.4rem] border border-white/15 bg-background shadow-[0_28px_90px_hsl(var(--background)/0.48)]">
             <div className="absolute left-1/2 top-3 h-4 w-24 -translate-x-1/2 rounded-full bg-black/80" />
             <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_50%_42%,hsl(var(--primary)/0.16),transparent_54%)]">
               <img src={pariumLogoRings} alt="" className="h-auto w-[44%] opacity-95" loading="eager" decoding="async" />
