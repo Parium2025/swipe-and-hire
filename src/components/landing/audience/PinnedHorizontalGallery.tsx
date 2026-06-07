@@ -155,7 +155,7 @@ const PinnedHorizontalGallery = () => {
     // uppdateras varje frame — då tävlar den med GSAP-exit-tweenen på de 8 korten
     // och browserns smooth-scroll, och kan ge synligt hack på svagare GPU:er.
     let frozen = false;
-    const isTouchScroll = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    const isTouchScroll = window.matchMedia('(pointer: coarse)').matches;
 
     const applyProgress = (progress: number) => {
       const p = Math.min(1, Math.max(0, progress));
