@@ -301,11 +301,10 @@ const FixedPhoneLayer = () => {
     };
   }, []);
 
-  // På mobil + portrait-tablet: telefonen ska följa med scrollen (aldrig
-  // försvinna) — vi negerar scrollTop via translateY på wrappern så att den
-  // glider upp med innehållet. På desktop/landscape: behåll fade-ut när man
-  // lämnar hero-zonen.
-  const [mobileScrollY, setMobileScrollY] = useState(0);
+  // På mobil + portrait-tablet: telefonen ska alltid vara synlig men låst i
+  // sin beräknade startposition. Den får aldrig kompenseras med scrollTop,
+  // eftersom det kan dra den upp i rubrik/brödtext när man scrollar tillbaka.
+  // På desktop/landscape: behåll fade-ut när man lämnar hero-zonen.
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
 
@@ -335,9 +334,7 @@ const FixedPhoneLayer = () => {
     const sync = () => {
       if (isSmallScreen()) {
         apply(true);
-        setMobileScrollY(scrollRoot?.scrollTop ?? 0);
       } else {
-        setMobileScrollY(0);
         apply(isHeroZone());
       }
     };
