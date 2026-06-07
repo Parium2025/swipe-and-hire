@@ -131,10 +131,16 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
         console.error('Kunde inte ladda Spline-telefonen:', error);
         if (!cancelled) setHasError(true);
       }
-    })();
+    };
 
     return () => {
       cancelled = true;
+      if (idleHandle !== null && typeof w.cancelIdleCallback === 'function') {
+        w.cancelIdleCallback(idleHandle);
+      }
+      if (timeoutHandle !== null) {
+        window.clearTimeout(timeoutHandle);
+      }
       app?.dispose();
       appRef.current = null;
     };
