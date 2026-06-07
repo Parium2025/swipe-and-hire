@@ -22,6 +22,10 @@ export default {
 			fontFamily: {
 				// Premium typography: Inter as primary, with optimized fallback stack
 				'sans': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+				// Display: Bricolage Grotesque — för landningsrubriker (variabel optical sizing, premium karaktär)
+				'display': ['"Bricolage Grotesque"', 'Inter', 'system-ui', 'sans-serif'],
+				// Serif italic: Instrument Serif — för accentord (klassiskt Apple/editorial-grepp)
+				'serif-italic': ['"Instrument Serif"', 'Georgia', 'serif'],
 			},
 			fontSize: {
 				// Premium Typography Scale (Spotify/Airbnb-inspired)
