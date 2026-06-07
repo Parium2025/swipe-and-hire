@@ -14,6 +14,7 @@ import JobbHub from "./pages/JobbHub";
 import JobbCity from "./pages/JobbCity";
 import YrkenHub from "./pages/YrkenHub";
 import YrkePage from "./pages/YrkePage";
+import JobbCityYrke from "./pages/JobbCityYrke";
 import Auth from "./pages/Auth";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
@@ -156,6 +157,7 @@ const AnimatedRoutes = () => {
           <Route path="/arbetsgivare" element={<AudienceLanding audience="employer" />} />
           <Route path="/jobb" element={<JobbHub />} />
           <Route path="/jobb/:citySlug" element={<JobbCity />} />
+          <Route path="/jobb/:citySlug/:occupationSlug" element={<JobbCityYrke />} />
           <Route path="/yrken" element={<YrkenHub />} />
           <Route path="/yrke/:occupationSlug" element={<YrkePage />} />
           <Route path="/auth" element={<Auth />} />

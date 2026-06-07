@@ -169,7 +169,7 @@ const JobbCity = () => {
             {OCCUPATIONS.map((o) => (
               <li key={o.slug}>
                 <Link
-                  to={`/yrke/${o.slug}`}
+                  to={`/jobb/${city.slug}/${o.slug}`}
                   className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white/90 hover:bg-white/10 transition-colors"
                 >
                   {o.name} {city.inForm}
