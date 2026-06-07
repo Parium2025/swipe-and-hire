@@ -902,11 +902,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="max-w-2xl"
               >
                 <span className="text-xs font-bold uppercase tracking-[0.32em] text-secondary/85">Priser</span>
-                <SplitHeadline
-                  as="h2"
-                  text={audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
-                  className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:text-6xl"
-                />
+                <h2 className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:text-6xl">
+                  {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
+                </h2>
                 <p className="mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
                   Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
                 </p>
