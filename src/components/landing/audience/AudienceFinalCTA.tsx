@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { audienceContent, type AudienceRole } from './content';
 import { fadeUp, inView, stagger } from './motionPresets';
 import SplitHeadline from './SplitHeadline';
+import MagneticButton from './MagneticButton';
 
 const AudienceFinalCTA = ({ role }: { role: AudienceRole }) => {
   const navigate = useNavigate();
