@@ -202,6 +202,7 @@ const calculateInlinePhoneMetrics = () => {
     : null;
   const textBottom = textAnchor?.getBoundingClientRect().bottom ?? mobileTextReserve;
   const maxMobileGap = Math.max(18, height - textBottom - canvasHeight - clamp(height * 0.03, 16, 28));
+  const mobileDownShift = isPortraitTablet ? 0 : clamp(height * 0.11, 70, 118);
 
   return {
     height: safeHeight,
@@ -210,7 +211,7 @@ const calculateInlinePhoneMetrics = () => {
     zoom: isPortraitTablet
       ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
       : clamp((safeHeight / 376) * 0.51, 0.34, 0.56),
-    topGap: isPortraitTablet ? clamp(height * 0.11, 92, 140) : maxMobileGap,
+    topGap: isPortraitTablet ? clamp(height * 0.11, 92, 140) : maxMobileGap + mobileDownShift,
   };
 };
 
