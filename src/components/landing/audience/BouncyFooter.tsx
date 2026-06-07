@@ -55,7 +55,9 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
           }
         }
       },
-      { root: scrollRoot, rootMargin: '0px 0px 18% 0px', threshold: 0 }
+      // Shrink top så att "out of view" triggas redan när man scrollar upp en kort bit
+      // (ca 15% av viewporten) — då armas bouncen om snabbare nästa gång man scrollar ner.
+      { root: scrollRoot, rootMargin: '-15% 0px 18% 0px', threshold: 0 }
     );
 
     io.observe(el);
