@@ -252,6 +252,61 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
   );
 };
 
+const calculateMobileHeroMinHeight = () => {
+  if (typeof window === 'undefined' || getInlinePhonePlacement() !== 'mobile') return null;
+
+  const hero = document.querySelector('[data-mobile-hero-section]') as HTMLElement | null;
+  const anchor = hero?.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
+  if (!hero || !anchor) return null;
+
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+  const { height } = getViewportSize();
+  const heroTop = hero.getBoundingClientRect().top;
+  const anchorBottom = anchor.getBoundingClientRect().bottom - heroTop;
+  const metrics = calculateInlinePhoneMetrics();
+  const phoneBlockHeight = (metrics.canvasHeight ?? metrics.height) + (metrics.topGap ?? 0);
+  const bottomSafe = clamp(height * 0.05, 28, 56);
+
+  return Math.ceil(Math.max(height, anchorBottom + phoneBlockHeight + bottomSafe));
+};
+
+const useMobileHeroMinHeight = () => {
+  const [minHeight, setMinHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const sync = () => {
+      frame = 0;
+      setMinHeight(calculateMobileHeroMinHeight());
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(sync);
+    };
+
+    schedule();
+    const timers = [80, 180, 360, 720].map((delay) => window.setTimeout(schedule, delay));
+    const anchor = document.querySelector('[data-mobile-hero-section] [data-hero-phone-anchor]') as HTMLElement | null;
+    const observer = anchor ? new ResizeObserver(schedule) : null;
+    if (anchor) observer?.observe(anchor);
+    document.fonts?.ready.then(schedule).catch(() => undefined);
+    window.addEventListener('resize', schedule, { passive: true });
+    window.visualViewport?.addEventListener('resize', schedule, { passive: true });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      observer?.disconnect();
+      window.removeEventListener('resize', schedule);
+      window.visualViewport?.removeEventListener('resize', schedule);
+    };
+  }, []);
+
+  return minHeight;
+};
+
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   
@@ -482,17 +537,24 @@ const FixedPhoneLayer = () => {
 // data-hero-intro-stage och döljs när användaren scrollar förbi.
 // ─────────────────────────────────────────────────────────────────────────────
 const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
+  const mobileHeroMinHeight = useMobileHeroMinHeight();
+
   return (
     <>
       {/* ─────────── HERO ─────────── */}
       <section
         data-hero-intro-stage
-        className="relative h-[100svh] w-full overflow-hidden"
+        className="relative min-h-[100svh] w-full overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden"
       >
         {/* Mobile hero */}
         <section
-          className="relative h-full w-screen overflow-hidden md:hidden"
-          style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
+          data-mobile-hero-section
+          className="relative min-h-[100svh] w-screen overflow-hidden md:hidden"
+          style={{
+            marginLeft: 'calc(50% - 50vw)',
+            marginRight: 'calc(50% - 50vw)',
+            minHeight: mobileHeroMinHeight ? `${mobileHeroMinHeight}px` : undefined,
+          }}
           aria-labelledby="audience-hero-heading-mobile"
         >
           <motion.div
