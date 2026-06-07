@@ -815,6 +815,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </div>
             {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
             <BouncyFooter audience={audience} onCta={handleStart} />
+            {/* Safety band — garanterar mörkblå bakgrund i iOS safe-area / overscroll */}
+            <div
+              aria-hidden
+              className="w-full bg-primary"
+              style={{ height: 'max(env(safe-area-inset-bottom, 0px), 24px)' }}
+            />
+
 
         </main>
       </div>
