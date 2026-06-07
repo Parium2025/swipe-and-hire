@@ -62,7 +62,7 @@ const SplitHeadline = ({
       variants: container,
       initial: 'hidden',
       whileInView: 'visible',
-      viewport: { once: true, amount },
+      viewport: { once: true, amount, margin: '0px 0px 25% 0px' },
       'aria-label': text,
     },
     words.map((w, i) => (
