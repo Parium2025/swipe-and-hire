@@ -610,9 +610,9 @@ const PinnedHorizontalGallery = () => {
           z-index: 4;
         }
         .phg-progress {
-          width: min(220px, 40vw);
-          height: 2px;
-          background: rgba(255,255,255,0.1);
+          width: min(240px, 56vw);
+          height: 3px;
+          background: rgba(255,255,255,0.12);
           border-radius: 999px;
           overflow: hidden;
           opacity: var(--phg-bar-opacity, 0);
@@ -621,7 +621,8 @@ const PinnedHorizontalGallery = () => {
         .phg-progress > span {
           display: block;
           height: 100%;
-          background: linear-gradient(90deg, hsl(var(--secondary)), #7cc6ff);
+          background: hsl(var(--secondary));
+          box-shadow: 0 0 16px hsl(var(--secondary) / 0.5);
           transform-origin: left center;
           transform: scaleX(var(--phg-progress, 0));
           will-change: transform;
