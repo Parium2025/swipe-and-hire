@@ -57,7 +57,12 @@ const CardItem = ({ item, index }: CardItemProps) => {
   useEffect(() => {
     const v = videoRef.current;
     if (!v || item.type !== 'video' || failed) return;
+    const root = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
     const evaluate = () => {
+      if (document.hidden) {
+        v.pause();
+        return;
+      }
       const rect = v.getBoundingClientRect();
       const vw = window.innerWidth || document.documentElement.clientWidth;
       const vh = window.innerHeight || document.documentElement.clientHeight;
@@ -77,11 +82,15 @@ const CardItem = ({ item, index }: CardItemProps) => {
     window.addEventListener('parium:gallery-progress', onProgress);
     window.addEventListener('resize', evaluate);
     window.addEventListener('scroll', evaluate, { passive: true });
+    root?.addEventListener('scroll', evaluate, { passive: true });
+    document.addEventListener('visibilitychange', evaluate);
     evaluate();
     return () => {
       window.removeEventListener('parium:gallery-progress', onProgress);
       window.removeEventListener('resize', evaluate);
       window.removeEventListener('scroll', evaluate);
+      root?.removeEventListener('scroll', evaluate);
+      document.removeEventListener('visibilitychange', evaluate);
     };
   }, [item.type, failed]);
 
@@ -300,6 +309,7 @@ const PinnedHorizontalGallery = () => {
     // utan att försämra upplevelsen för dem som har snabbt nät.
     const getNetworkProfile = (): 'slim' | 'full' => {
       try {
+        if (window.matchMedia('(pointer: coarse)').matches) return 'slim';
         const nav = navigator as Navigator & {
           connection?: { saveData?: boolean; effectiveType?: string };
         };
@@ -324,7 +334,9 @@ const PinnedHorizontalGallery = () => {
           try {
             v.preload = 'auto';
             if (v.readyState < 2) v.load();
-          } catch {}
+          } catch {
+            // Video warmup is best-effort only.
+          }
         }, index * 140));
       });
     };
@@ -384,8 +396,11 @@ const PinnedHorizontalGallery = () => {
           gsapInstance.set(header, { y: 0, opacity: 1, force3D: true });
         }
       }
-      // Pausa inte videorna vid 3→2 — de är redan varma och ska kännas levande
-      // när användaren går tillbaka igen. Vi stoppar bara eventuell start-timer.
+      const shouldFreeMobileDecode = window.matchMedia('(pointer: coarse)').matches;
+      if (shouldFreeMobileDecode) {
+        const videos = Array.from(strip.querySelectorAll('video')) as HTMLVideoElement[];
+        videos.forEach((video) => video.pause());
+      }
       if (playTimer) { window.clearTimeout(playTimer); playTimer = null; }
     };
 
