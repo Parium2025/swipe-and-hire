@@ -285,7 +285,7 @@ export const CITIES: CityData[] = [
     intro: 'Visby och Gotland behöver året om-personal inom vård, handel och turism, plus säsong sommar.',
   },
   {
-    slug: 'helsingborg-norr',
+    slug: 'angelholm',
     name: 'Ängelholm',
     inForm: 'i Ängelholm',
     county: 'Skåne län',
