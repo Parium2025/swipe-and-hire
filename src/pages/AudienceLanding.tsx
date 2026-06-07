@@ -213,8 +213,7 @@ const calculateInlinePhoneMetrics = () => {
   const textBottom = textAnchor?.getBoundingClientRect().bottom ?? mobileTextReserve;
   const centeredMobileGap = (height - textBottom - canvasHeight) / 2;
   const desiredMobileGap = Math.max(centeredMobileGap, clamp(height * 0.09, 58, 96));
-  const maxMobileGap = Math.max(18, height - textBottom - canvasHeight - clamp(height * 0.03, 16, 28));
-  const mobileTopGap = Math.min(desiredMobileGap, maxMobileGap) - canvasVerticalPadding / 2;
+  const mobileTopGap = Math.max(clamp(height * 0.035, 28, 46), desiredMobileGap - canvasVerticalPadding * 0.18);
 
   return {
     height: safeHeight,
