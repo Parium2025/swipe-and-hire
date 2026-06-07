@@ -24,7 +24,10 @@ Deno.serve(async (req) => {
       .order('created_at', { ascending: false })
       .limit(45000);
 
-    if (error) throw error;
+    if (error) {
+      console.error('sitemap query error', error);
+      throw new Error(error.message || JSON.stringify(error));
+    }
 
     const urls = (data || []).map((j: any) => {
       const lastmod = (j.updated_at || j.created_at || '').toString().slice(0, 10);
