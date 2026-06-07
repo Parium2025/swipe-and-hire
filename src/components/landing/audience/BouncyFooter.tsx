@@ -5,7 +5,6 @@ import { ArrowRight } from 'lucide-react';
 type Props = {
   audience: 'job_seeker' | 'employer';
   onCta: () => void;
-  variant?: 'dark' | 'light';
 };
 
 // Elastic ease-out (matches GSAP elastic.out(1, 0.3) feel)
@@ -18,7 +17,7 @@ const elasticOut = (t: number, amplitude = 1, period = 0.3) => {
 const buildPath = (curveY: number) =>
   `M0-0.3C0-0.3,464,${curveY},1139,${curveY}S2278-0.3,2278-0.3V683H0V-0.3z`;
 
-const BouncyFooter = ({ audience, onCta, variant = 'dark' }: Props) => {
+const BouncyFooter = ({ audience, onCta }: Props) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const startRef = useRef<number | null>(null);
@@ -70,20 +69,15 @@ const BouncyFooter = ({ audience, onCta, variant = 'dark' }: Props) => {
     if (progress >= 1) setAnimating(false);
   });
 
-  const headline =
-    audience === 'job_seeker'
-      ? 'Skapa ett konto nu.'
-      : 'Skapa ett konto nu.';
+  const headline = 'Skapa ett konto nu.';
   const sub =
     audience === 'job_seeker'
       ? 'Vi är här för att ta dig till nästa steg.'
       : 'Vi är här för att ta er till nästa anställning.';
   const cta = audience === 'job_seeker' ? 'Kom igång gratis' : 'Skapa arbetsgivarkonto';
 
-  const isLight = variant === 'light';
-
   return (
-    <div ref={wrapperRef} className={`relative w-full overflow-hidden ${isLight ? 'bg-landing-light' : 'bg-landing-light'}`}>
+    <div ref={wrapperRef} className="relative w-full overflow-hidden bg-landing-light">
       {/* Bouncy gradient wave */}
       <div className="relative w-full">
         <svg
