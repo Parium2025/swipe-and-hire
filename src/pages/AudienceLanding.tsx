@@ -205,21 +205,28 @@ const FixedPhoneLayer = () => {
 
     if (width >= 768) {
       const isCompactLaptop = height <= 820;
+      const isLargeDesktop = width >= 1280;
+      const isXLDesktop = width >= 1536;
+      const isUltraDesktop = width >= 1920;
       const desktopTopPadding = isCompactLaptop ? 148 : 142;
       const desktopBottomPadding = isCompactLaptop ? 104 : 96;
       const safeCanvasHeight = Math.max(300, height - desktopTopPadding - desktopBottomPadding);
-      const phoneColumnWidth = width >= 1280 ? width * 0.28 : width * 0.22;
-      const widthFitHeight = (Math.min(phoneColumnWidth, 390) * 19.5) / 9;
+      // Bredare telefonkolumn på stora skärmar så mockupen inte ser liten ut
+      const columnRatio = isUltraDesktop ? 0.36 : isXLDesktop ? 0.32 : isLargeDesktop ? 0.30 : 0.22;
+      const columnCap = isUltraDesktop ? 560 : isXLDesktop ? 500 : isLargeDesktop ? 450 : 390;
+      const phoneColumnWidth = width * columnRatio;
+      const widthFitHeight = (Math.min(phoneColumnWidth, columnCap) * 19.5) / 9;
       const minH = width < 900 ? 330 : isCompactLaptop ? 300 : 390;
-      const maxH = width < 900 ? 420 : isCompactLaptop ? 430 : 570;
+      const maxH = isUltraDesktop ? 820 : isXLDesktop ? 740 : isLargeDesktop ? 660 : (width < 900 ? 420 : isCompactLaptop ? 430 : 570);
       const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), minH, maxH);
-      const viewportScale = clamp(width / 1440, 0.72, 1);
+      const viewportScale = clamp(width / 1440, 0.72, isUltraDesktop ? 1.3 : isXLDesktop ? 1.18 : isLargeDesktop ? 1.08 : 1);
       const yOffset = isCompactLaptop ? 12 : 26;
+      const zoomCap = isUltraDesktop ? 0.82 : isXLDesktop ? 0.72 : isLargeDesktop ? 0.64 : (isCompactLaptop ? 0.43 : 0.56);
       const metrics = {
         isDesktop: true,
         top: 0,
         height: safeHeight,
-        zoom: clamp((height / safeHeight) * (isCompactLaptop ? 0.35 : 0.42) * viewportScale, 0.32, isCompactLaptop ? 0.43 : 0.56),
+        zoom: clamp((height / safeHeight) * (isCompactLaptop ? 0.35 : 0.42) * viewportScale, 0.32, zoomCap),
         yOffset,
       };
       lastHeroMetricsRef.current = metrics;
