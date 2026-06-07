@@ -415,8 +415,12 @@ const PinnedHorizontalGallery = () => {
         .phg-section {
           position: relative;
           width: 100%;
-          /* Basdistans för desktop/mobil där scrollen redan känns rätt. */
-          height: 520vh;
+          /* Pin-distans = hur mycket vertikal scroll som "kostar" att
+             traversera hela kortstrippen. För högt värde gör att Windows-
+             muskhjul och touch-scroll känns segt (Mac trackpad maskerar det
+             via momentum). 360vh ger smooth känsla på alla enheter utan att
+             korten flyger förbi. */
+          height: 360vh;
         }
         .phg-sticky {
           position: sticky;
@@ -606,9 +610,9 @@ const PinnedHorizontalGallery = () => {
           z-index: 4;
         }
         .phg-progress {
-          width: min(220px, 40vw);
-          height: 2px;
-          background: rgba(255,255,255,0.1);
+          width: min(240px, 56vw);
+          height: 3px;
+          background: rgba(255,255,255,0.12);
           border-radius: 999px;
           overflow: hidden;
           opacity: var(--phg-bar-opacity, 0);
@@ -617,7 +621,8 @@ const PinnedHorizontalGallery = () => {
         .phg-progress > span {
           display: block;
           height: 100%;
-          background: linear-gradient(90deg, hsl(var(--secondary)), #7cc6ff);
+          background: hsl(var(--secondary));
+          box-shadow: 0 0 16px hsl(var(--secondary) / 0.5);
           transform-origin: left center;
           transform: scaleX(var(--phg-progress, 0));
           will-change: transform;
@@ -631,21 +636,19 @@ const PinnedHorizontalGallery = () => {
         }
 
         @media (max-width: 767px) {
-          /* Mobil: korten ligger kvar; jämna ut rubrikens egna andrum så
-             avståndet ovanför och under titeln känns lika mot nav/kort.
-             Rubriken matchar hero ("Hitta rätt människor snabbare!") i
-             storlek och radhöjd så alla tre sektioner känns enhetliga. */
+          /* Mobil: kortare pin = snabbare touchscroll utan tunghet. */
+          .phg-section { height: 280vh; }
           .phg-header { padding: clamp(28px, 5vh, 56px) 24px clamp(20px, 3vh, 36px); }
           .phg-title { font-size: 3.25rem; line-height: 1.04; }
           .phg-strip-wrap { transform: translate3d(0, -5vh, 0); }
           .phg-card { width: 64vw; border-radius: 18px; }
           .phg-strip { padding: 0 18vw 0 8vw; }
-          .phg-footer { padding: 8px 24px 12px; gap: 8px; }
+          .phg-footer { padding: 8px 24px 16px; gap: 8px; }
         }
 
         @media (pointer: coarse) and (min-width: 768px) and (max-width: 1366px) {
-          /* iPad/tablet: kortare pin-distans = mindre fingerarbete och snabbare progressbar. */
-          .phg-section { height: 360vh; }
+          /* iPad/tablet: ännu kortare pin-distans för minimalt fingerarbete. */
+          .phg-section { height: 300vh; }
         }
       `}</style>
 
@@ -661,6 +664,12 @@ const PinnedHorizontalGallery = () => {
               {items.map((item, i) => (
                 <CardItem key={i} item={item} index={i} />
               ))}
+            </div>
+          </div>
+
+          <div className="phg-footer" aria-hidden="true">
+            <div className="phg-progress">
+              <span />
             </div>
           </div>
 
