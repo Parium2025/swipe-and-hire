@@ -657,6 +657,17 @@ const PinnedHorizontalGallery = () => {
           .phg-footer { padding: 8px 24px 16px; gap: 8px; }
         }
 
+        /* Ultra-små skärmar (iPhone SE 1:a/2:a gen, små Android): krymper
+           rubriken så header/meny inte överlappas, och minskar kortbredden
+           något så att hela kompositionen får luft. */
+        @media (max-width: 375px) {
+          .phg-header { padding: clamp(36px, 7vh, 56px) 20px clamp(16px, 2.5vh, 28px); }
+          .phg-title { font-size: 2.5rem; line-height: 1.05; }
+          .phg-card { width: 58vw; border-radius: 16px; }
+          .phg-strip { padding: 0 22vw 0 10vw; }
+        }
+
+
         @media (pointer: coarse) and (min-width: 768px) and (max-width: 1366px) {
           /* iPad/tablet touch: lugn pin för fingerscroll. */
           .phg-section { height: 480vh; }
