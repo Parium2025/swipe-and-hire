@@ -20,6 +20,7 @@ import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWiz
 import { TruncatedText } from '@/components/TruncatedText';
 import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
+import { Helmet } from 'react-helmet-async';
 
 interface JobPosting {
   id: string;
