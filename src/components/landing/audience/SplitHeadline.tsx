@@ -75,7 +75,9 @@ const SplitHeadline = ({
         <motion.span
           variants={word}
           className={`inline-block ${
-            emphasizeLast && i === lastIdx ? 'font-light italic opacity-90' : ''
+            emphasizeLast && i === lastIdx
+              ? 'font-serif-italic font-normal italic opacity-95'
+              : ''
           }`}
         >
           {w}
