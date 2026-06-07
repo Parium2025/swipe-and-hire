@@ -49,51 +49,6 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
     let cancelled = false;
     let app: SplineApplication | null = null;
-    let idleHandle: number | null = null;
-    let timeoutHandle: number | null = null;
-
-    // Vänta tills webbläsaren är idle innan vi börjar ladda Spline-runtime
-    // + scene-fil. På iPad/tablet-klass (coarse pointer, 700–1180px) väntar
-    // vi dessutom på window 'load' + längre idle-timeout — annars blockerar
-    // Spline-init huvudtråden under hela reload och sidan känns superseg.
-    let loadListener: (() => void) | null = null;
-
-    const startLoading = () => {
-      if (cancelled) return;
-      void boot();
-    };
-
-    const w = window as unknown as {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-      cancelIdleCallback?: (h: number) => void;
-    };
-
-    const isCoarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
-    const widthPx = window.innerWidth || 0;
-    const isTabletClass = isCoarse && widthPx >= 700 && widthPx <= 1180;
-    const idleTimeout = isTabletClass ? 3500 : 1200;
-    const fallbackDelay = isTabletClass ? 1200 : 250;
-
-    const scheduleIdle = () => {
-      if (cancelled) return;
-      if (typeof w.requestIdleCallback === 'function') {
-        idleHandle = w.requestIdleCallback(startLoading, { timeout: idleTimeout });
-      } else {
-        timeoutHandle = window.setTimeout(startLoading, fallbackDelay);
-      }
-    };
-
-    // På iPad-klass: vänta på window 'load' (alla bilder/fonts klara) först.
-    // Då blir HTML/CSS/hero-video interaktiva *innan* vi ens börjar parsa
-    // Three.js + Spline-runtime, vilket gör reload markant snabbare.
-    if (isTabletClass && document.readyState !== 'complete') {
-      loadListener = () => scheduleIdle();
-      window.addEventListener('load', loadListener, { once: true });
-      // Säkerhetsnät: om 'load' aldrig fyrar, boota ändå efter 5s.
-      timeoutHandle = window.setTimeout(scheduleIdle, 5000);
-    } else {
-      scheduleIdle();
-    }
 
     const boot = async () => {
       try {
@@ -157,17 +112,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
       }
     };
 
+    void boot();
+
     return () => {
       cancelled = true;
-      if (loadListener) {
-        window.removeEventListener('load', loadListener);
-      }
-      if (idleHandle !== null && typeof w.cancelIdleCallback === 'function') {
-        w.cancelIdleCallback(idleHandle);
-      }
-      if (timeoutHandle !== null) {
-        window.clearTimeout(timeoutHandle);
-      }
       app?.dispose();
       appRef.current = null;
     };

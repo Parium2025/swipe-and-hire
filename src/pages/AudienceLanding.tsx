@@ -199,12 +199,36 @@ const getViewportSize = () => ({
   height: window.visualViewport?.height ?? window.innerHeight,
 });
 
+const isMobileLikeHeroViewport = () => {
+  if (typeof window === 'undefined') return false;
+  const { width } = getViewportSize();
+  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+  return width < 768 || (isCoarse && width <= 1366);
+};
+
 const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
   if (typeof window === 'undefined') return null;
   const { width, height } = getViewportSize();
-  if (width < 768) return 'mobile';
+  if (isMobileLikeHeroViewport()) return 'mobile';
   if (width < 1180 && height > width) return 'portraitTablet';
   return null;
+};
+
+const useIsMobileLikeHeroLayout = () => {
+  const [isMobileLike, setIsMobileLike] = useState(isMobileLikeHeroViewport);
+
+  useEffect(() => {
+    const sync = () => setIsMobileLike(isMobileLikeHeroViewport());
+    sync();
+    window.addEventListener('resize', sync, { passive: true });
+    window.visualViewport?.addEventListener('resize', sync, { passive: true });
+    return () => {
+      window.removeEventListener('resize', sync);
+      window.visualViewport?.removeEventListener('resize', sync);
+    };
+  }, []);
+
+  return isMobileLike;
 };
 
 const calculateInlinePhoneMetrics = () => {
