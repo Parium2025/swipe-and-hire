@@ -31,29 +31,25 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
     const scrollRoot = (document.querySelector('[data-landing-scroll-root]') as HTMLElement) ?? null;
     let wasInside = false;
 
-    const makeObserver = (root: Element | null) =>
-      new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting && !wasInside) {
-              wasInside = true;
-              startRef.current = null;
-              setAnimating(true);
-            } else if (!entry.isIntersecting && wasInside) {
-              wasInside = false;
-            }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && !wasInside) {
+            wasInside = true;
+            startRef.current = null;
+            pathRef.current?.setAttribute('d', buildPath(156));
+            setAnimating(true);
+          } else if (!entry.isIntersecting && wasInside) {
+            wasInside = false;
+            pathRef.current?.setAttribute('d', buildPath(156));
           }
-        },
-        { root, threshold: 0.05 }
-      );
+        }
+      },
+      { root: scrollRoot, threshold: 0.35 }
+    );
 
-    // Observe against both the landing scroll container (if any) and the viewport,
-    // so the elastic bounce always re-triggers when the footer enters view.
-    const observers: IntersectionObserver[] = [];
-    if (scrollRoot) observers.push(makeObserver(scrollRoot));
-    observers.push(makeObserver(null));
-    observers.forEach((o) => o.observe(el));
-    return () => observers.forEach((o) => o.disconnect());
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   useAnimationFrame((t) => {
@@ -77,7 +73,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
   const cta = audience === 'job_seeker' ? 'Kom igång gratis' : 'Skapa arbetsgivarkonto';
 
   return (
-    <div ref={wrapperRef} className="relative w-full overflow-hidden bg-landing-light">
+    <div ref={wrapperRef} className="relative w-full overflow-hidden bg-primary">
       {/* Bouncy gradient wave */}
       <div className="relative w-full">
         <svg
@@ -102,7 +98,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
 
         {/* Content overlay – sits inside the colored bounce */}
           <div className="absolute inset-x-0 bottom-0 top-0 flex items-center justify-center px-6 pb-8 pt-16 sm:pb-10 md:items-end md:pb-28 md:pt-0">
-          <motion.div
+            <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
