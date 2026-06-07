@@ -666,21 +666,24 @@ const PinnedHorizontalGallery = () => {
              kolliderar visuellt. Krymper också korten så att rubrik +
              kortrad + footer ryms inom 100vh utan att klippas. */
           .phg-sticky { justify-content: flex-start; padding-top: 96px; }
-          .phg-header { padding: 8px 20px 14px; }
-          .phg-title { font-size: 2.5rem; line-height: 1.05; }
-          .phg-strip-wrap { min-height: 0; }
-          .phg-card { width: 58vw; border-radius: 16px; }
-          .phg-strip { padding: 0 22vw 0 10vw; gap: 14px; }
+          .phg-header { padding: 8px 20px 32px; }
+          .phg-title { font-size: 2.25rem; line-height: 1.05; }
+          .phg-strip-wrap { min-height: 0; margin-top: 8px; }
+          .phg-card { width: 56vw; border-radius: 16px; }
+          .phg-strip { padding: 0 24vw 0 10vw; gap: 14px; }
         }
 
         @media (max-width: 360px) {
           /* Extra trångt på iPhone SE 1:a/2:a och små Android: ännu mindre
              rubrik och kort så inget klipps eller överlappar. */
           .phg-sticky { padding-top: 84px; }
-          .phg-title { font-size: 2.15rem; line-height: 1.06; }
-          .phg-card { width: 54vw; }
-          .phg-strip { padding: 0 26vw 0 10vw; gap: 12px; }
+          .phg-header { padding: 8px 20px 28px; }
+          .phg-title { font-size: 1.95rem; line-height: 1.06; }
+          .phg-strip-wrap { margin-top: 6px; }
+          .phg-card { width: 52vw; }
+          .phg-strip { padding: 0 28vw 0 10vw; gap: 12px; }
         }
+
 
 
 
