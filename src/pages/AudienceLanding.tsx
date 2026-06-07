@@ -199,7 +199,7 @@ const calculateInlinePhoneMetrics = () => {
   return {
     height: safeHeight,
     width: safeHeight * PHONE_ASPECT,
-    canvasHeight: safeHeight + (isPortraitTablet ? 0 : clamp(height * 0.035, 20, 30)),
+    canvasHeight: safeHeight + (isPortraitTablet ? 0 : clamp(height * 0.05, 28, 44)),
     zoom: isPortraitTablet
       ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
       : clamp((safeHeight / 376) * 0.51, 0.34, 0.56),
@@ -231,7 +231,7 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-start justify-center overflow-visible ${className}`}
+      className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-end justify-center overflow-visible ${className}`}
       style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px` }}
     >
       <SplinePhone
