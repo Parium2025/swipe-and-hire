@@ -47,7 +47,7 @@ const LandingFooter = () => (
           <div className="flex flex-col items-center md:items-start gap-3">
             <img
               src={pariumLogo}
-              alt="Parium logotyp"
+              alt="Parium – Sveriges rekryteringsapp för jobbsökare och arbetsgivare"
               className="h-auto w-24 md:w-28 opacity-40"
               loading="lazy"
               width={128}
