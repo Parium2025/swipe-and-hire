@@ -12,6 +12,7 @@ import SplitHeadline from '@/components/landing/audience/SplitHeadline';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
+import { AudienceSEO } from '@/components/seo/AudienceSEO';
 
 
 type AudienceLandingProps = {
@@ -767,6 +768,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   ];
 
   return (
+    <>
+    <AudienceSEO audience={audience} />
     <div
       data-landing-scroll-root
       className="fixed inset-0 z-0 overflow-y-auto overflow-x-hidden bg-primary text-primary-foreground"
