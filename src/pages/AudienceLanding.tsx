@@ -340,7 +340,7 @@ const FixedPhoneLayer = () => {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.4, tablet ? 0.92 : 0.7),
+      zoom: clamp(fluidZoom, 0.3, tablet ? 0.92 : 0.5),
       yOffset,
     };
     lastHeroMetricsRef.current = metrics;
