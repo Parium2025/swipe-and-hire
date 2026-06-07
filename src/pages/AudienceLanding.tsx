@@ -892,6 +892,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               [data-mobile-feature-prearm] .landing-feature-mobile-in {
                 opacity: 0;
                 transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
+              }
+              [data-mobile-feature-prearm] .landing-feature-mobile-in.is-in-view {
                 animation: landingFeatureMobileIn 760ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 animation-delay: var(--lf-delay, 0ms);
               }
@@ -901,6 +903,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               }
             `}</style>
           )}
+
           <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
             <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
