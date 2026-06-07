@@ -27,4 +27,6 @@ export const stagger = (children = 0.12, delay = 0.05): Variants => ({
   visible: { transition: { staggerChildren: children, delayChildren: delay } },
 });
 
-export const inView = { once: true, amount: 0.25 } as const;
+// Trigga tidigare så innehållet redan är animerat när det syns på mobil
+// (annars upplevs det som att sektionen "måste laddas om" vid scroll).
+export const inView = { once: true, amount: 0.05, margin: '0px 0px 25% 0px' } as const;
