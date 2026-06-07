@@ -223,8 +223,8 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                           : 'border-white/[0.08] bg-white/[0.04] text-white hover:bg-white/[0.08] active:bg-white/[0.10] focus-visible:ring-white/30'
                       }`}
                     >
-                      <span className="whitespace-nowrap max-w-[160px] truncate">
-                        {links.find((l) => l.href.replace('#', '') === activeId)?.label ?? 'Meny'}
+                      <span className="whitespace-nowrap">
+                        Meny
                       </span>
                       <svg
                         width="12" height="12" viewBox="0 0 12 12" fill="none"
