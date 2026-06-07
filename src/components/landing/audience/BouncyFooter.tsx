@@ -69,20 +69,15 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
     if (progress >= 1) setAnimating(false);
   });
 
-  const headline =
-    audience === 'job_seeker'
-      ? 'Skapa ett konto nu.'
-      : 'Skapa ett konto nu.';
+  const headline = 'Skapa ett konto nu.';
   const sub =
     audience === 'job_seeker'
       ? 'Vi är här för att ta dig till nästa steg.'
       : 'Vi är här för att ta er till nästa anställning.';
   const cta = audience === 'job_seeker' ? 'Kom igång gratis' : 'Skapa arbetsgivarkonto';
 
-  const isLight = variant === 'light';
-
   return (
-    <div ref={wrapperRef} className={`relative w-full overflow-hidden ${isLight ? 'bg-landing-light' : 'bg-landing-light'}`}>
+    <div ref={wrapperRef} className="relative w-full overflow-hidden bg-landing-light">
       {/* Bouncy gradient wave */}
       <div className="relative w-full">
         <svg
