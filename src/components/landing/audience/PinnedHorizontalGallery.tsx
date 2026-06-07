@@ -415,8 +415,12 @@ const PinnedHorizontalGallery = () => {
         .phg-section {
           position: relative;
           width: 100%;
-          /* Basdistans för desktop/mobil där scrollen redan känns rätt. */
-          height: 520vh;
+          /* Pin-distans = hur mycket vertikal scroll som "kostar" att
+             traversera hela kortstrippen. För högt värde gör att Windows-
+             muskhjul och touch-scroll känns segt (Mac trackpad maskerar det
+             via momentum). 360vh ger smooth känsla på alla enheter utan att
+             korten flyger förbi. */
+          height: 360vh;
         }
         .phg-sticky {
           position: sticky;
