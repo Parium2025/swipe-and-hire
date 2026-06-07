@@ -304,8 +304,11 @@ const FixedPhoneLayer = () => {
       // Strängare tröskel på iPad/mobil så telefonen göms tidigare och inte rör nästa sektions text.
       // Desktop (≥1180px) behåller den tidigare beteendet eftersom telefonen sitter i sidokolumnen.
       const isDesktop = window.innerWidth >= 1180;
-      const bottomThreshold = isDesktop ? 0.78 : 0.92;
+      // Lossa mobil-tröskeln så telefonen fade:ar mjukt istället för att
+      // "poppa" ut när hero just lämnar viewporten. Matchar desktop-känslan.
+      const bottomThreshold = isDesktop ? 0.78 : 0.78;
       return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * bottomThreshold;
+
     };
 
     const apply = (next: boolean) => {
@@ -339,12 +342,13 @@ const FixedPhoneLayer = () => {
         <div aria-hidden className="hidden md:block" />
         <div
           data-phone-scroll-forward
-          className={`pointer-events-none transition-opacity duration-[700ms] ease-out ${visible ? 'opacity-100' : 'opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center'}`}
+          className={`pointer-events-none transition-[opacity,transform] duration-[850ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${visible ? 'opacity-100' : 'opacity-0'} ${phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center'}`}
           style={phoneMetrics.isDesktop
-            ? { height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
-            : { top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
+            ? { height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset + (visible ? 0 : 24)}px)` }
+            : { top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translate(-50%, ${visible ? 0 : 28}px)`, willChange: 'opacity, transform' }
           }
         >
+
 
           <SplinePhone
             className="h-full w-full"
@@ -815,6 +819,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </div>
             {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
             <BouncyFooter audience={audience} onCta={handleStart} />
+            {/* Safety band — garanterar mörkblå bakgrund i iOS safe-area / overscroll */}
+            <div
+              aria-hidden
+              className="w-full bg-primary"
+              style={{ height: 'max(env(safe-area-inset-bottom, 0px), 24px)' }}
+            />
+
 
         </main>
       </div>

@@ -77,7 +77,19 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
   const cta = audience === 'job_seeker' ? 'Kom igång gratis' : 'Skapa arbetsgivarkonto';
 
   return (
-    <div ref={wrapperRef} className="relative w-full overflow-hidden bg-landing-light">
+    <div
+      ref={wrapperRef}
+      className="relative w-full overflow-hidden"
+      style={{
+        // Top portion matches the section above (landing-light) so the wave's
+        // transparent area blends seamlessly. Bottom is forced to primary so
+        // any iOS overscroll / safe-area / sub-pixel rendering never reveals
+        // a light strip below the dark footer.
+        background:
+          'linear-gradient(to bottom, hsl(var(--landing-light)) 0%, hsl(var(--landing-light)) 28%, hsl(var(--primary)) 28%, hsl(var(--primary)) 100%)',
+      }}
+    >
+
       {/* Bouncy gradient wave */}
       <div className="relative w-full">
         <svg
