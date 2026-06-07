@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { audienceContent, type AudienceRole } from './content';
 import { fadeUp, inView, stagger } from './motionPresets';
+import SplitHeadline from './SplitHeadline';
 
 const AudienceFinalCTA = ({ role }: { role: AudienceRole }) => {
   const navigate = useNavigate();
@@ -23,12 +24,11 @@ const AudienceFinalCTA = ({ role }: { role: AudienceRole }) => {
         variants={stagger(0.15, 0.05)}
         className="relative mx-auto max-w-[920px] overflow-hidden rounded-[2.5rem] border border-white/12 bg-white/[0.04] p-10 text-center backdrop-blur-2xl sm:p-16"
       >
-        <motion.h2
-          variants={fadeUp}
-          className="mx-auto max-w-2xl text-4xl font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl"
-        >
-          {c.title}
-        </motion.h2>
+        <SplitHeadline
+          as="h2"
+          text={c.title}
+          className="mx-auto max-w-2xl text-4xl font-black leading-[1.02] tracking-[-0.03em] text-white sm:text-5xl md:text-6xl"
+        />
         <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
           {c.body}
         </motion.p>

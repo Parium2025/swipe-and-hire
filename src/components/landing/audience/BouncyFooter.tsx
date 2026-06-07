@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { motion, useAnimationFrame } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import SplitHeadline from './SplitHeadline';
 
 type Props = {
   audience: 'job_seeker' | 'employer';
@@ -121,9 +122,13 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
             className="mx-auto max-w-3xl text-center"
           >
-              <h2 className="text-3xl font-black leading-[1.05] tracking-[0] text-background sm:text-5xl md:text-6xl">
-              {headline}
-            </h2>
+              <SplitHeadline
+                as="h2"
+                text={headline}
+                emphasizeLast
+                delay={0.55}
+                className="text-3xl font-black leading-[1.05] tracking-[-0.025em] text-background sm:text-5xl md:text-6xl"
+              />
             <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-7 text-background/80 sm:text-lg">
               {sub}
             </p>
