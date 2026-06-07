@@ -19,13 +19,22 @@ const buildPath = (curveY: number) =>
 
 const BouncyFooter = ({ audience, onCta }: Props) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const startRef = useRef<number | null>(null);
   const [animating, setAnimating] = useState(false);
 
-  // Re-trigger elastic morph every time footer enters viewport
+  const triggerBounce = () => {
+    startRef.current = null;
+    pathRef.current?.setAttribute('d', buildPath(156));
+    setAnimating(true);
+  };
+
+  // Re-trigger elastic morph every time the CTA content enters viewport.
+  // The footer itself enters too early, so using the content keeps the wave
+  // bounce visible right when “Skapa ett konto nu” arrives.
   useEffect(() => {
-    const el = wrapperRef.current;
+    const el = triggerRef.current;
     if (!el) return;
 
     const scrollRoot = (document.querySelector('[data-landing-scroll-root]') as HTMLElement) ?? null;
@@ -37,8 +46,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
           for (const entry of entries) {
             if (entry.isIntersecting && !wasInside) {
               wasInside = true;
-              startRef.current = null;
-              setAnimating(true);
+              triggerBounce();
             } else if (!entry.isIntersecting && wasInside) {
               wasInside = false;
             }
@@ -103,6 +111,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
         {/* Content overlay – sits inside the colored bounce */}
           <div className="absolute inset-x-0 bottom-0 top-0 flex items-center justify-center px-6 pb-8 pt-16 sm:pb-10 md:items-end md:pb-28 md:pt-0">
           <motion.div
+              ref={triggerRef}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
