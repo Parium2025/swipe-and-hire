@@ -690,7 +690,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             </div>
           </section>
 
-          <WaveDivider />
+          
 
           <div className="relative z-10 -mt-px bg-landing-light text-landing-light-foreground">
           {/* ──────────────── PRISER ──────────────── */}
