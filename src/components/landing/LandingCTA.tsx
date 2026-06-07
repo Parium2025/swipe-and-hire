@@ -21,9 +21,11 @@ const LandingCTA = () => {
   return (
     <section ref={sectionRef} className="relative overflow-hidden px-5 py-28 sm:px-6 sm:py-36 md:px-12 lg:px-24" aria-label="Kom igång">
       <motion.div style={{ y, opacity }} className="relative z-10 mx-auto max-w-[1100px] text-center">
-        <h2 className="text-[2.8rem] font-black leading-[0.98] tracking-[-0.03em] text-white sm:text-[4.5rem] md:text-[6.2rem]">
-          Börja med en bättre matchning.
-        </h2>
+        <SplitHeadline
+          text="Börja med en bättre matchning."
+          as="h2"
+          className="text-[2.8rem] font-black leading-[0.98] tracking-[-0.03em] text-white sm:text-[4.5rem] md:text-[6.2rem]"
+        />
         <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-white/55 sm:text-lg">
           Skapa konto gratis och upplev ett renare, snabbare sätt att mötas kring jobb.
         </p>
