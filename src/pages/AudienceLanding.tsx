@@ -330,7 +330,7 @@ const FixedPhoneLayer = () => {
     // Reference baseline: at 390×844 finalHeight ≈ 376, zoom 0.44 looks perfect.
     // Scale zoom directly with canvas height so phone fills available area proportionally without clipping.
     const referenceHeight = tablet ? 460 : 376;
-    const baseZoom = tablet ? 0.66 : 0.74;
+    const baseZoom = tablet ? 0.66 : 0.56;
     // Width constraint: phone aspect ≈ 9:19.5. Ensure phone width fits canvas width.
     const canvasWidth = Math.min(width, tablet ? 560 : width);
     const widthLimitedZoom = baseZoom * (canvasWidth / (tablet ? 560 : 390));
@@ -340,7 +340,7 @@ const FixedPhoneLayer = () => {
       isDesktop: false,
       top,
       height: finalHeight,
-      zoom: clamp(fluidZoom, 0.46, tablet ? 0.92 : 0.94),
+      zoom: clamp(fluidZoom, 0.4, tablet ? 0.92 : 0.7),
       yOffset,
     };
     lastHeroMetricsRef.current = metrics;
