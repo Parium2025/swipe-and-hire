@@ -7,6 +7,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin, Zap, MessageSquare, Search } from 'lucide-react';
 import { CITIES, CITY_BY_SLUG, POPULAR_ROLES } from '@/data/jobCities';
+import { OCCUPATIONS } from '@/data/jobOccupations';
 
 const BASE = 'https://parium.se';
 
@@ -165,15 +166,22 @@ const JobbCity = () => {
             Här är yrken där det ofta finns lediga jobb {city.inForm} just nu.
           </p>
           <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {POPULAR_ROLES.map((role) => (
-              <li
-                key={role}
-                className="rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white/90 hover:bg-white/10 transition-colors"
-              >
-                {role}
+            {OCCUPATIONS.map((o) => (
+              <li key={o.slug}>
+                <Link
+                  to={`/yrke/${o.slug}`}
+                  className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white/90 hover:bg-white/10 transition-colors"
+                >
+                  {o.name} {city.inForm}
+                </Link>
               </li>
             ))}
           </ul>
+          <p className="mt-6 text-center text-white/60 text-sm">
+            <Link to="/yrken" className="underline-offset-4 hover:underline">
+              Se alla yrken →
+            </Link>
+          </p>
         </div>
       </section>
 

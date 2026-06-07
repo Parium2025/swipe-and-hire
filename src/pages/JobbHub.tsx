@@ -6,7 +6,8 @@ import LandingNav from '@/components/LandingNav';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin } from 'lucide-react';
-import { CITIES, POPULAR_ROLES } from '@/data/jobCities';
+import { CITIES } from '@/data/jobCities';
+import { OCCUPATIONS } from '@/data/jobOccupations';
 
 const CANONICAL = 'https://parium.se/jobb';
 const TITLE = 'Lediga jobb i hela Sverige – jobbapp & matchning | Parium';
@@ -119,20 +120,28 @@ const JobbHub = () => {
             Populära yrken på Parium
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-center text-white/70">
-            Oavsett bransch – Parium matchar dig med rätt arbetsgivare.
+            Klicka på ett yrke för att se lediga jobb, lön och vad som krävs.
           </p>
           <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {POPULAR_ROLES.map((role) => (
-              <li
-                key={role}
-                className="rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white/90"
-              >
-                {role}
+            {OCCUPATIONS.map((o) => (
+              <li key={o.slug}>
+                <Link
+                  to={`/yrke/${o.slug}`}
+                  className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white/90 hover:bg-white/[0.10] transition"
+                >
+                  Lediga jobb {o.asForm}
+                </Link>
               </li>
             ))}
           </ul>
+          <p className="mt-6 text-center text-white/60 text-sm">
+            <Link to="/yrken" className="underline-offset-4 hover:underline">
+              Se alla yrken →
+            </Link>
+          </p>
         </div>
       </section>
+
 
       {/* CTA */}
       <section className="px-5 py-20 sm:px-8 md:px-12">

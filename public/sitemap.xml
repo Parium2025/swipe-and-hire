@@ -21,6 +21,11 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://parium.se/yrken</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://parium.se/jobb/stockholm</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -77,6 +82,56 @@
   </url>
   <url>
     <loc>https://parium.se/jobb/lund</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://parium.se/yrke/snickare</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://parium.se/yrke/elektriker</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://parium.se/yrke/underskoterska</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://parium.se/yrke/lagerarbetare</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://parium.se/yrke/restaurang</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://parium.se/yrke/butik</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://parium.se/yrke/chauffor</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://parium.se/yrke/stadare</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://parium.se/yrke/saljare</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://parium.se/yrke/kundservice</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
