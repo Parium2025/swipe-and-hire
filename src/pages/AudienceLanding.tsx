@@ -836,7 +836,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <motion.span
                 initial={{ opacity: 0, x: -40 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.7, ease }}
                 className="block text-xs font-bold uppercase tracking-[0.32em] text-secondary/85"
               >
@@ -846,7 +846,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 id="funktioner-heading"
                 initial={{ opacity: 0, x: -60 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.05 }}
                 className="wave-text mt-4 max-w-3xl text-4xl font-black leading-[1.04] tracking-[0] sm:text-5xl md:text-6xl"
               >
@@ -855,7 +855,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               <motion.p
                 initial={{ opacity: 0, x: 60 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.05, margin: "0px 0px 25% 0px" }}
+                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.15 }}
                 className="wave-text mt-6 max-w-2xl text-base leading-8 opacity-70 sm:text-lg"
               >
