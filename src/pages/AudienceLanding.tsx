@@ -187,10 +187,10 @@ const calculateInlinePhoneMetrics = () => {
   const isPortraitTablet = placement === 'portraitTablet';
   const rawHeight = isPortraitTablet
     ? clamp(height * 0.44, 340, 520)
-    : clamp(height * 0.52, 300, 430);
+    : clamp(height * 0.36, 220, 300);
   const maxPhoneWidth = isPortraitTablet
     ? Math.min(width * 0.36, 270)
-    : Math.min(width * 0.68, 260);
+    : Math.min(width * 0.52, 210);
   const safeHeight = Math.min(rawHeight, maxPhoneWidth / PHONE_ASPECT);
 
   return {
@@ -198,7 +198,7 @@ const calculateInlinePhoneMetrics = () => {
     width: safeHeight * PHONE_ASPECT,
     zoom: isPortraitTablet
       ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
-      : clamp((safeHeight / 376) * 0.58, 0.42, 0.74),
+      : clamp((safeHeight / 376) * 0.44, 0.28, 0.5),
     topGap: isPortraitTablet ? clamp(height * 0.11, 92, 140) : clamp(height * 0.04, 28, 44),
   };
 };
