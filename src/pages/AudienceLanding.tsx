@@ -906,9 +906,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   <motion.div
                     key={i}
                     variants={{
-                      hidden: { opacity: 0 },
-                      visible: { opacity: 1, transition: { duration: 0.9, ease } },
+                      hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
+                      visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: prearmFeatureMotion ? 0 : 0.75, ease } },
                     }}
+                    style={{ willChange: prearmFeatureMotion ? 'auto' : 'opacity, transform' }}
                     className="group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)]"
                   >
                     <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.12),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
