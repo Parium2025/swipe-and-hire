@@ -667,6 +667,12 @@ const PinnedHorizontalGallery = () => {
             </div>
           </div>
 
+          <div className="phg-footer" aria-hidden="true">
+            <div className="phg-progress">
+              <span />
+            </div>
+          </div>
+
         </div>
       </div>
     </>
