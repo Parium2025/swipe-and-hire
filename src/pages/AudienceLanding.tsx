@@ -239,9 +239,14 @@ const calculateInlinePhoneMetrics = () => {
   const canvasVerticalPadding = isPortraitTablet ? clamp(height * 0.08, 72, 118) : clamp(height * 0.18, 96, 160);
   const canvasHeight = safeHeight + canvasVerticalPadding;
   const textAnchor = !isPortraitTablet
-    ? document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null
+    ? document.querySelector('[data-mobile-hero-section] [data-hero-phone-anchor]') as HTMLElement | null
     : null;
-  const textBottom = textAnchor?.getBoundingClientRect().bottom ?? mobileTextReserve;
+  const mobileHero = !isPortraitTablet
+    ? document.querySelector('[data-mobile-hero-section]') as HTMLElement | null
+    : null;
+  const textBottom = textAnchor && mobileHero
+    ? textAnchor.getBoundingClientRect().bottom - mobileHero.getBoundingClientRect().top
+    : mobileTextReserve;
   const centeredMobileGap = (height - textBottom - canvasHeight) / 2;
   const desiredMobileGap = Math.max(centeredMobileGap, clamp(height * 0.09, 58, 96));
   const mobileTopGap = Math.max(clamp(height * 0.035, 28, 46), desiredMobileGap - canvasVerticalPadding * 0.18);
