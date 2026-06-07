@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, useAnimationFrame } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
@@ -21,7 +21,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const startRef = useRef<number | null>(null);
-  const [animating, setAnimating] = useState(false);
+  const animatingRef = useRef(false);
 
   // Trigger elastic morph ONCE when the footer first enters viewport.
   // Tidigare återställdes path till nedböjd state varje gång sektionen lämnade
@@ -35,19 +35,22 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
     const scrollRoot = (document.querySelector('[data-landing-scroll-root]') as HTMLElement) ?? null;
     let triggered = false;
 
+    const triggerBounce = () => {
+      if (triggered) return;
+      triggered = true;
+      startRef.current = null;
+      pathRef.current?.setAttribute('d', buildPath(156));
+      animatingRef.current = true;
+      io.disconnect();
+    };
+
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting && !triggered) {
-            triggered = true;
-            startRef.current = null;
-            pathRef.current?.setAttribute('d', buildPath(156));
-            setAnimating(true);
-            io.disconnect();
-          }
+          if (entry.isIntersecting) triggerBounce();
         }
       },
-      { root: scrollRoot, threshold: 0.35 }
+      { root: scrollRoot, rootMargin: '0px 0px 18% 0px', threshold: 0 }
     );
 
     io.observe(el);
@@ -56,16 +59,19 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
 
 
   useAnimationFrame((t) => {
-    if (!animating || !pathRef.current) return;
+    if (!animatingRef.current || !pathRef.current) return;
     if (startRef.current === null) startRef.current = t;
     const elapsed = (t - startRef.current) / 1000;
-    const duration = 2;
+    const duration = 1.8;
     const progress = Math.min(elapsed / duration, 1);
-    const eased = elasticOut(progress);
+    const eased = elasticOut(progress, 1, 0.38);
     // From 156 (down/bouncy) to 0 (center/flat)
     const y = 156 + (0 - 156) * eased;
     pathRef.current.setAttribute('d', buildPath(y));
-    if (progress >= 1) setAnimating(false);
+    if (progress >= 1) {
+      pathRef.current.setAttribute('d', buildPath(0));
+      animatingRef.current = false;
+    }
   });
 
   const headline = 'Skapa ett konto nu.';
