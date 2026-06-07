@@ -13,6 +13,7 @@ import { audienceContent, type AudienceRole } from '@/components/landing/audienc
 import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
+import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
 
 type AudienceLandingProps = {
@@ -199,12 +200,36 @@ const getViewportSize = () => ({
   height: window.visualViewport?.height ?? window.innerHeight,
 });
 
+const isMobileLikeHeroViewport = () => {
+  if (typeof window === 'undefined') return false;
+  const { width } = getViewportSize();
+  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+  return width < 768 || (isCoarse && width <= 1366);
+};
+
 const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
   if (typeof window === 'undefined') return null;
   const { width, height } = getViewportSize();
-  if (width < 768) return 'mobile';
+  if (isMobileLikeHeroViewport()) return 'mobile';
   if (width < 1180 && height > width) return 'portraitTablet';
   return null;
+};
+
+const useIsMobileLikeHeroLayout = () => {
+  const [isMobileLike, setIsMobileLike] = useState(isMobileLikeHeroViewport);
+
+  useEffect(() => {
+    const sync = () => setIsMobileLike(isMobileLikeHeroViewport());
+    sync();
+    window.addEventListener('resize', sync, { passive: true });
+    window.visualViewport?.addEventListener('resize', sync, { passive: true });
+    return () => {
+      window.removeEventListener('resize', sync);
+      window.visualViewport?.removeEventListener('resize', sync);
+    };
+  }, []);
+
+  return isMobileLike;
 };
 
 const calculateInlinePhoneMetrics = () => {
@@ -273,6 +298,7 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
   const [enabled, setEnabled] = useState(() => getInlinePhonePlacement() === placement);
   const [active, setActive] = useState(() => getInlinePhonePlacement() === placement);
   const [metrics, setMetrics] = useState(calculateInlinePhoneMetrics);
+  const isTabletTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches && getViewportSize().width >= 768;
 
   useEffect(() => {
     const sync = () => {
@@ -314,11 +340,22 @@ const InlineHeroPhone = ({ placement, className = '' }: { placement: 'mobile' | 
       className={`pointer-events-none relative z-0 mx-auto flex shrink-0 items-center justify-center overflow-visible ${className}`}
       style={{ height: `${metrics.canvasHeight ?? metrics.height}px`, width: `${metrics.width}px`, marginTop: `${metrics.topGap}px`, marginBottom: `-${metrics.canvasBottomTrim ?? 0}px` }}
     >
-      <SplinePhone
-        className="h-full w-full"
-        zoom={metrics.zoom}
-        active={enabled && active}
-      />
+      {isTabletTouch ? (
+        <div className="relative flex h-full w-full items-center justify-center" role="img" aria-label="Parium telefonmockup">
+          <div className="relative aspect-[9/19.5] h-[calc(100%_-_96px)] max-h-[520px] overflow-hidden rounded-[2.4rem] border border-white/15 bg-background shadow-[0_28px_90px_hsl(var(--background)/0.48)]">
+            <div className="absolute left-1/2 top-3 h-4 w-24 -translate-x-1/2 rounded-full bg-black/80" />
+            <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_50%_42%,hsl(var(--primary)/0.16),transparent_54%)]">
+              <img src={pariumLogoRings} alt="" className="h-auto w-[44%] opacity-95" loading="eager" decoding="async" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <SplinePhone
+          className="h-full w-full"
+          zoom={metrics.zoom}
+          active={enabled && active}
+        />
+      )}
     </div>
   );
 };
@@ -609,18 +646,19 @@ const FixedPhoneLayer = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   const mobileHeroMinHeight = useMobileHeroMinHeight();
+  const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
 
   return (
     <>
       {/* ─────────── HERO ─────────── */}
       <section
         data-hero-intro-stage
-        className="relative min-h-[100svh] w-full overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden"
+        className={`relative min-h-[100svh] w-full ${isMobileLikeHeroLayout ? 'overflow-visible' : 'overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden'}`}
       >
         {/* Mobile hero */}
         <section
           data-mobile-hero-section
-          className="relative min-h-[100svh] w-screen overflow-hidden md:hidden"
+          className={`relative min-h-[100svh] w-screen overflow-hidden ${isMobileLikeHeroLayout ? 'block' : 'md:hidden'}`}
           style={{
             marginLeft: 'calc(50% - 50vw)',
             marginRight: 'calc(50% - 50vw)',
@@ -647,7 +685,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         </section>
 
         {/* Desktop / tablet hero */}
-        <section className="relative hidden h-full items-center justify-center overflow-hidden pb-16 pt-28 md:flex md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28">
+        <section className={`relative h-full items-center justify-center overflow-hidden pb-16 pt-28 ${isMobileLikeHeroLayout ? 'hidden' : 'hidden md:flex md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28'}`}>
           <motion.div
             aria-hidden
             className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
