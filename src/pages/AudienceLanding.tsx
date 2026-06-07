@@ -537,6 +537,8 @@ const FixedPhoneLayer = () => {
 // data-hero-intro-stage och döljs när användaren scrollar förbi.
 // ─────────────────────────────────────────────────────────────────────────────
 const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
+  const mobileHeroMinHeight = useMobileHeroMinHeight();
+
   return (
     <>
       {/* ─────────── HERO ─────────── */}
@@ -546,8 +548,13 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
       >
         {/* Mobile hero */}
         <section
-          className="relative h-full w-screen overflow-hidden md:hidden"
-          style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
+          data-mobile-hero-section
+          className="relative min-h-[100svh] w-screen overflow-hidden md:hidden"
+          style={{
+            marginLeft: 'calc(50% - 50vw)',
+            marginRight: 'calc(50% - 50vw)',
+            minHeight: mobileHeroMinHeight ? `${mobileHeroMinHeight}px` : undefined,
+          }}
           aria-labelledby="audience-hero-heading-mobile"
         >
           <motion.div
