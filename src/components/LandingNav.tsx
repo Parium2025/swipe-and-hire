@@ -191,7 +191,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
 
             {/* Mobil: dropdown-meny. Från tablet-bredd visas hela list-pillen så layout styrs av tillgänglig bredd, inte enhetsnamn. */}
             {links.length > 0 && (
-              <div className="flex-1 min-w-0 flex justify-center md:hidden">
+              <div className="flex-1 min-w-0 flex justify-center md:hidden -translate-x-3 sm:-translate-x-2">
                 <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button
