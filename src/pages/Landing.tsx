@@ -41,7 +41,7 @@ const Landing = () => {
     setMeta('og:type', 'website', 'property');
     setMeta('og:locale', 'sv_SE', 'property');
     setMeta('og:site_name', 'Parium', 'property');
-    setMeta('og:url', 'https://parium-ab.lovable.app/', 'property');
+    setMeta('og:url', 'https://parium.se/', 'property');
     setMeta('twitter:title', title);
     setMeta('twitter:description', desc);
     setMeta('twitter:card', 'summary_large_image');
