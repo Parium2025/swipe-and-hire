@@ -498,6 +498,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
               headingId="audience-hero-heading-mobile"
             />
           </motion.div>
+          <InlineHeroPhone placement="mobile" className="mt-2" />
         </section>
 
         {/* Desktop / tablet hero */}
@@ -519,7 +520,9 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             >
               <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
             </motion.div>
-            <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10" />
+            <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10">
+              <InlineHeroPhone placement="portraitTablet" />
+            </div>
           </div>
         </section>
       </section>
