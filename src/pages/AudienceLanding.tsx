@@ -867,7 +867,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
             <div className="mx-auto max-w-[1180px]">
               <motion.span
-                initial={prearmFeatureMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -40 }}
+                initial={{ opacity: 0, x: -40 }}
                 animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
                 whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
                 viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
@@ -878,7 +878,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               </motion.span>
               <motion.h2
                 id="funktioner-heading"
-                initial={prearmFeatureMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -60 }}
+                initial={{ opacity: 0, x: -60 }}
                 animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
                 whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
                 viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
@@ -888,7 +888,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 Allt du behöver för att {audience === 'job_seeker' ? 'hitta rätt jobb' : 'hitta rätt person'}.
               </motion.h2>
               <motion.p
-                initial={prearmFeatureMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: 60 }}
+                initial={{ opacity: 0, x: 60 }}
                 animate={prearmFeatureMotion ? { opacity: 1, x: 0 } : undefined}
                 whileInView={prearmFeatureMotion ? undefined : { opacity: 1, x: 0 }}
                 viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
@@ -898,7 +898,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 Platshållartext för funktionsöversikten — fyll med de viktigaste fördelarna.
               </motion.p>
               <motion.div
-                initial={prearmFeatureMotion ? "visible" : "hidden"}
+                initial="hidden"
                 animate={prearmFeatureMotion ? "visible" : undefined}
                 whileInView={prearmFeatureMotion ? undefined : "visible"}
                 viewport={prearmFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
@@ -910,7 +910,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     key={i}
                     variants={{
                       hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
-                      visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: prearmFeatureMotion ? 0 : 0.75, ease } },
+                      visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.75, ease } },
                     }}
                     style={{ willChange: prearmFeatureMotion ? 'auto' : 'opacity, transform' }}
                     className="group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)]"
