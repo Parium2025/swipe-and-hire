@@ -741,12 +741,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   // från sidorna upplevs i takt med scrollen.
   useEffect(() => {
     if (!isMobileFeatureMotion) return;
-    const root = document.querySelector('[data-mobile-feature-prearm]');
-    if (!root) return;
-    const headers = root.querySelectorAll(':scope > .landing-feature-mobile-in');
-    headers.forEach((el) => el.classList.add('is-in-view'));
-    const cards = root.querySelectorAll('.landing-feature-card.landing-feature-mobile-in');
-    if (!cards.length) return;
+    const roots = document.querySelectorAll('[data-mobile-feature-prearm]');
+    if (!roots.length) return;
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -758,7 +754,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       },
       { rootMargin: '0px 0px -10% 0px', threshold: 0.12 },
     );
-    cards.forEach((el) => io.observe(el));
+    roots.forEach((root) => {
+      const headers = root.querySelectorAll(':scope > .landing-feature-mobile-in');
+      headers.forEach((el) => el.classList.add('is-in-view'));
+      const cards = root.querySelectorAll('.landing-feature-card.landing-feature-mobile-in');
+      cards.forEach((el) => io.observe(el));
+    });
     return () => io.disconnect();
   }, [isMobileFeatureMotion]);
 
