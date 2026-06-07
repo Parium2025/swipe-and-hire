@@ -304,8 +304,11 @@ const FixedPhoneLayer = () => {
       // Strängare tröskel på iPad/mobil så telefonen göms tidigare och inte rör nästa sektions text.
       // Desktop (≥1180px) behåller den tidigare beteendet eftersom telefonen sitter i sidokolumnen.
       const isDesktop = window.innerWidth >= 1180;
-      const bottomThreshold = isDesktop ? 0.78 : 0.92;
+      // Lossa mobil-tröskeln så telefonen fade:ar mjukt istället för att
+      // "poppa" ut när hero just lämnar viewporten. Matchar desktop-känslan.
+      const bottomThreshold = isDesktop ? 0.78 : 0.78;
       return rect.top < window.innerHeight * 0.12 && rect.bottom > window.innerHeight * bottomThreshold;
+
     };
 
     const apply = (next: boolean) => {
