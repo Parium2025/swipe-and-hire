@@ -164,6 +164,7 @@ const isMobileAnimationPrearmed = () => {
 
 const useMobilePrearmedMotion = () => {
   const [prearmed, setPrearmed] = useState(isMobileAnimationPrearmed);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 767px), (pointer: coarse)');
@@ -173,7 +174,16 @@ const useMobilePrearmedMotion = () => {
     return () => query.removeEventListener?.('change', sync);
   }, []);
 
-  return prearmed;
+  useEffect(() => {
+    if (!prearmed) {
+      setReady(false);
+      return;
+    }
+    const handle = window.setTimeout(() => setReady(true), 280);
+    return () => window.clearTimeout(handle);
+  }, [prearmed]);
+
+  return prearmed && ready;
 };
 
 const IntroText = ({ paragraphs }: { paragraphs: string[] }) => (
