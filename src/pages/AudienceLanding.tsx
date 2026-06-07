@@ -301,19 +301,10 @@ const FixedPhoneLayer = () => {
     };
   }, []);
 
-  // På mobil: telefonen ska scrolla med texten (inte vara fixed), så vi
-  // negerar scrollTop via translateY på wrappern. På större skärmar behåller
-  // vi det gamla beteendet där telefonen fadar ut när man lämnar hero.
-  const [mobileScrollY, setMobileScrollY] = useState(0);
+  // Telefonen ligger i en fixed overlay och ska ALDRIG flytta sig med scroll —
+  // den behåller alltid sin slot. Vi togglar bara opacity baserat på hero-zone.
   useEffect(() => {
     const scrollRoot = document.querySelector('[data-landing-scroll-root]') as HTMLElement | null;
-    // Mobil + portrait tablet (där telefonen ligger nedanför texten) ska följa med scrollen
-    const isSmallScreen = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const portraitTablet = w >= 768 && w < 1180 && h > w;
-      return w < 768 || portraitTablet;
-    };
 
     const isHeroZone = () => {
       if (!scrollRoot) return true;
@@ -331,16 +322,7 @@ const FixedPhoneLayer = () => {
       setVisible(next);
       setActive(next);
     };
-    const sync = () => {
-      if (isSmallScreen()) {
-        // På mobil: håll alltid visible/active så telefonen följer med scroll
-        apply(true);
-        setMobileScrollY(scrollRoot?.scrollTop ?? 0);
-      } else {
-        setMobileScrollY(0);
-        apply(isHeroZone());
-      }
-    };
+    const sync = () => apply(isHeroZone());
 
     sync();
     scrollRoot?.addEventListener('scroll', sync, { passive: true });
@@ -355,6 +337,7 @@ const FixedPhoneLayer = () => {
 
 
 
+
   const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
 
   return (
@@ -364,8 +347,8 @@ const FixedPhoneLayer = () => {
     >
       <div
         className={`relative mx-auto flex h-full w-full max-w-[1280px] items-start justify-center ${phoneMetrics.isPortraitTablet ? '' : 'md:grid md:h-auto md:grid-cols-[minmax(0,1.1fr)_minmax(220px,0.9fr)] md:items-start md:gap-10 lg:grid-cols-2 lg:gap-16'} 2xl:max-w-[1440px]`}
-        style={mobileScrollY > 0 ? { transform: `translateY(${-mobileScrollY}px)`, willChange: 'transform' } : undefined}
       >
+
         <div aria-hidden className="hidden md:block" />
         <div
           data-phone-scroll-forward
