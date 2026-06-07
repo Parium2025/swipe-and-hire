@@ -951,7 +951,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
                       visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.75, ease } },
                     }}
-                    style={isMobileFeatureMotion ? { ['--lf-delay' as string]: `${340 + i * 70}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
+                    style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '-48px' : '48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${(i - 1) * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
                     className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)]"
                   >
                     <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.12),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
