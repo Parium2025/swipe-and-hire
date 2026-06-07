@@ -730,6 +730,33 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const c = audienceContent[audience];
   const isMobileFeatureMotion = useIsMobileLandingMotion();
 
+  // Mobil: trigga `.landing-feature-mobile-in` när de scrollas in.
+  // Header-elementen (eyebrow/h2/p) animeras direkt vid mount; korten
+  // animeras när användaren faktiskt når sektionen så att slide-in
+  // från sidorna upplevs i takt med scrollen.
+  useEffect(() => {
+    if (!isMobileFeatureMotion) return;
+    const root = document.querySelector('[data-mobile-feature-prearm]');
+    if (!root) return;
+    const headers = root.querySelectorAll(':scope > .landing-feature-mobile-in');
+    headers.forEach((el) => el.classList.add('is-in-view'));
+    const cards = root.querySelectorAll('.landing-feature-card.landing-feature-mobile-in');
+    if (!cards.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-in-view');
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.12 },
+    );
+    cards.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [isMobileFeatureMotion]);
+
   useWaveAwareText();
 
   // Native scroll på /jobbsokare — inga scroll-hijacks, inga snap-låsningar.
