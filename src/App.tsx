@@ -157,6 +157,7 @@ const AnimatedRoutes = () => {
           <Route path="/arbetsgivare" element={<AudienceLanding audience="employer" />} />
           <Route path="/jobb" element={<JobbHub />} />
           <Route path="/jobb/:citySlug" element={<JobbCity />} />
+          <Route path="/jobb/:citySlug/:occupationSlug" element={<JobbCityYrke />} />
           <Route path="/yrken" element={<YrkenHub />} />
           <Route path="/yrke/:occupationSlug" element={<YrkePage />} />
           <Route path="/auth" element={<Auth />} />
