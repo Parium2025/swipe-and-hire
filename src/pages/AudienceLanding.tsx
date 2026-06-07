@@ -273,7 +273,7 @@ const calculateMobileHeroMinHeight = () => {
   const phoneBlockHeight = (metrics.canvasHeight ?? metrics.height) + (metrics.topGap ?? 0);
   const bottomSafe = clamp(height * 0.05, 28, 56);
 
-  return Math.ceil(Math.max(height, anchorBottom + phoneBlockHeight + bottomSafe));
+  return Math.ceil(anchorBottom + phoneBlockHeight + bottomSafe);
 };
 
 const useMobileHeroMinHeight = () => {
