@@ -2,6 +2,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Brain, ShieldCheck, Smartphone, Zap } from 'lucide-react';
 import { useRef } from 'react';
 import { StaggerReveal, StaggerItem } from './ScrollReveal';
+import SplitHeadline from './audience/SplitHeadline';
 
 const features = [
   { title: 'Matchning som känns relevant', description: 'Rekommendationer baserade på roll, plats, erfarenhet och vad båda sidor faktiskt söker.', icon: Brain },
