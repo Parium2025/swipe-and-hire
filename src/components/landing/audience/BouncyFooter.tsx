@@ -5,7 +5,6 @@ import { ArrowRight } from 'lucide-react';
 type Props = {
   audience: 'job_seeker' | 'employer';
   onCta: () => void;
-  variant?: 'dark' | 'light';
 };
 
 // Elastic ease-out (matches GSAP elastic.out(1, 0.3) feel)
@@ -18,7 +17,7 @@ const elasticOut = (t: number, amplitude = 1, period = 0.3) => {
 const buildPath = (curveY: number) =>
   `M0-0.3C0-0.3,464,${curveY},1139,${curveY}S2278-0.3,2278-0.3V683H0V-0.3z`;
 
-const BouncyFooter = ({ audience, onCta, variant = 'dark' }: Props) => {
+const BouncyFooter = ({ audience, onCta }: Props) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const startRef = useRef<number | null>(null);
