@@ -91,7 +91,11 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
   const cta = audience === 'job_seeker' ? 'Kom igång gratis' : 'Skapa arbetsgivarkonto';
 
   return (
-    <div ref={wrapperRef} className="relative w-full overflow-hidden bg-primary">
+    <div
+      ref={wrapperRef}
+      className="relative w-full overflow-hidden bg-primary"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '1px 900px' } as React.CSSProperties}
+    >
       {/* Bouncy gradient wave */}
       <div className="relative w-full">
         <svg
