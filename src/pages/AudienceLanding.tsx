@@ -185,31 +185,35 @@ const calculateInlinePhoneMetrics = () => {
   const { width, height } = getViewportSize();
   const placement = getInlinePhonePlacement();
   const isPortraitTablet = placement === 'portraitTablet';
+  const isWideInlineMobile = !isPortraitTablet && width >= 520;
   const mobileTextReserve = clamp(height * 0.49, 330, 430);
   const mobileBottomReserve = clamp(height * 0.09, 58, 86);
   const mobileAvailableHeight = Math.max(240, height - mobileTextReserve - mobileBottomReserve);
   const rawHeight = isPortraitTablet
-    ? clamp(height * 0.44, 340, 520)
-    : clamp(Math.min(height * 0.405, mobileAvailableHeight), 245, 330);
+    ? clamp(height * 0.54, 430, 680)
+    : isWideInlineMobile
+      ? clamp(Math.min(height * 0.54, mobileAvailableHeight + clamp(height * 0.18, 110, 180)), 360, 520)
+      : clamp(Math.min(height * 0.43, mobileAvailableHeight + 32), 270, 370);
   const maxPhoneWidth = isPortraitTablet
-    ? Math.min(width * 0.36, 270)
-    : Math.min(width * 0.57, 224);
+    ? Math.min(width * 0.48, 380)
+    : isWideInlineMobile
+      ? Math.min(width * 0.5, 330)
+      : Math.min(width * 0.62, 250);
   const safeHeight = Math.min(rawHeight, maxPhoneWidth / PHONE_ASPECT);
 
   // Extra vertical headroom inuti canvasen så att Spline-telefonens topp
   // (kamera/notch) aldrig klipps på små skärmar. Phonen renderas centrerat
   // i canvasen, så vi får lika mycket luft över som under – vi kompenserar
   // sedan marginTop med halva extra-höjden för att hålla samma position.
-  const canvasVerticalPadding = isPortraitTablet ? 0 : clamp(height * 0.18, 96, 160);
+  const canvasVerticalPadding = isPortraitTablet ? clamp(height * 0.08, 72, 118) : clamp(height * 0.18, 96, 160);
   const canvasHeight = safeHeight + canvasVerticalPadding;
   const textAnchor = !isPortraitTablet
     ? document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null
     : null;
   const textBottom = textAnchor?.getBoundingClientRect().bottom ?? mobileTextReserve;
   const centeredMobileGap = (height - textBottom - canvasHeight) / 2;
-  const desiredMobileGap = Math.max(centeredMobileGap, clamp(height * 0.075, 42, 72));
-  const maxMobileGap = Math.max(18, height - textBottom - canvasHeight - clamp(height * 0.03, 16, 28));
-  const mobileTopGap = Math.min(desiredMobileGap, maxMobileGap) - canvasVerticalPadding / 2;
+  const desiredMobileGap = Math.max(centeredMobileGap, clamp(height * 0.09, 58, 96));
+  const mobileTopGap = Math.max(clamp(height * 0.035, 28, 46), desiredMobileGap - canvasVerticalPadding * 0.18);
 
   return {
     height: safeHeight,
@@ -222,9 +226,9 @@ const calculateInlinePhoneMetrics = () => {
       ? 0
       : canvasVerticalPadding * (width <= 375 || height <= 640 ? 0.78 : 0.5),
     zoom: isPortraitTablet
-      ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
-      : clamp((safeHeight / 376) * 0.51, 0.34, 0.56),
-    topGap: isPortraitTablet ? clamp(height * 0.11, 92, 140) : mobileTopGap,
+      ? clamp((safeHeight / 520) * 0.68, 0.5, 0.82)
+      : clamp((safeHeight / 376) * (isWideInlineMobile ? 0.66 : 0.58), 0.42, isWideInlineMobile ? 0.82 : 0.68),
+    topGap: isPortraitTablet ? clamp(height * 0.075, 64, 108) - canvasVerticalPadding / 2 : mobileTopGap,
   };
 };
 
