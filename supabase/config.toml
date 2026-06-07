@@ -86,3 +86,6 @@ schedule = "*/5 * * * *"
 [functions.outreach-dispatch]
 verify_jwt = false
 schedule = "* * * * *"
+
+[functions.public-sitemap]
+verify_jwt = false
