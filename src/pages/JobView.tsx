@@ -642,10 +642,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             name="description"
             content={(job.description || job.pitch || `${job.title} hos ${getDisplayCompanyName(job)}`).replace(/\s+/g, ' ').slice(0, 155)}
           />
-          <link rel="canonical" href={`https://parium-ab.lovable.app/job/${job.id}`} />
+          <link rel="canonical" href={`https://parium.se/job/${job.id}`} />
           <meta property="og:title" content={`${job.title} – ${getDisplayCompanyName(job)}`} />
           <meta property="og:description" content={(job.pitch || job.description || '').replace(/\s+/g, ' ').slice(0, 155)} />
-          <meta property="og:url" content={`https://parium-ab.lovable.app/job/${job.id}`} />
+          <meta property="og:url" content={`https://parium.se/job/${job.id}`} />
           <meta property="og:type" content="website" />
           <script type="application/ld+json">{JSON.stringify({
             '@context': 'https://schema.org',
@@ -690,7 +690,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               : {}),
             ...(job.positions_count ? { totalJobOpenings: job.positions_count } : {}),
             directApply: true,
-            url: `https://parium-ab.lovable.app/job/${job.id}`,
+            url: `https://parium.se/job/${job.id}`,
           })}</script>
         </Helmet>
       )}
