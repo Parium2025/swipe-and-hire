@@ -3,8 +3,6 @@ import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { audienceContent, type AudienceRole } from './content';
 import { fadeUp, inView, stagger } from './motionPresets';
-import { BorderBeam } from '@/components/landing/effects/BorderBeam';
-
 
 const AudienceFinalCTA = ({ role }: { role: AudienceRole }) => {
   const navigate = useNavigate();
@@ -25,9 +23,6 @@ const AudienceFinalCTA = ({ role }: { role: AudienceRole }) => {
         variants={stagger(0.15, 0.05)}
         className="relative mx-auto max-w-[920px] overflow-hidden rounded-[2.5rem] border border-white/12 bg-white/[0.04] p-10 text-center backdrop-blur-2xl sm:p-16"
       >
-        <BorderBeam size={320} duration={11} />
-        <BorderBeam size={320} duration={11} delay={5.5} colorFrom="hsl(var(--secondary) / 0.7)" />
-
         <motion.h2
           variants={fadeUp}
           className="mx-auto max-w-2xl text-4xl font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl"

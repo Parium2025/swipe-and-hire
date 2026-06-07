@@ -1,8 +1,6 @@
 import { motion } from 'framer-motion';
 import { audienceContent, type AudienceRole } from './content';
 import { fadeUp, inView, slideLeft, slideRight, stagger } from './motionPresets';
-import { BorderBeam } from '@/components/landing/effects/BorderBeam';
-
 
 const AudienceFeatures = ({ role }: { role: AudienceRole }) => {
   const c = audienceContent[role];
@@ -37,26 +35,22 @@ const AudienceFeatures = ({ role }: { role: AudienceRole }) => {
           variants={stagger(0.1)}
           className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5"
         >
-          {c.features.map((f, idx) => {
+          {c.features.map((f) => {
             const Icon = f.icon;
             return (
               <motion.div
                 key={f.title}
                 variants={fadeUp}
-                whileHover={{ y: -6 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
                 className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition-colors duration-500 hover:border-secondary/30 hover:bg-white/[0.06]"
               >
-                <BorderBeam size={180} duration={9} delay={idx * 1.6} />
-                <span className="relative inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/25 bg-secondary/[0.08] text-secondary">
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-secondary/25 bg-secondary/[0.08] text-secondary">
                   <Icon className="h-5 w-5" />
                 </span>
-                <h3 className="wave-text relative mt-5 text-lg font-bold">{f.title}</h3>
-                <p className="wave-text relative mt-3 text-sm leading-6 opacity-70">{f.description}</p>
+                <h3 className="wave-text mt-5 text-lg font-bold">{f.title}</h3>
+                <p className="wave-text mt-3 text-sm leading-6 opacity-70">{f.description}</p>
               </motion.div>
             );
           })}
-
         </motion.div>
       </div>
     </section>

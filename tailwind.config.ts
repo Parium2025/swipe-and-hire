@@ -264,15 +264,6 @@ export default {
 					'90%': { opacity: '0.6' },
 					'100%': { transform: 'translateY(600%)', opacity: '0' },
 				},
-				/* Border beam — traveling light around perimeter */
-				'border-beam': {
-					'100%': { 'offset-distance': '100%' },
-				},
-				/* Word fade-in for scroll reveals */
-				'word-rise': {
-					'0%': { opacity: '0', transform: 'translateY(0.5em)' },
-					'100%': { opacity: '1', transform: 'translateY(0)' },
-				},
 			},
 				animation: {
 					'accordion-down': 'accordion-down 0.2s ease-out',
