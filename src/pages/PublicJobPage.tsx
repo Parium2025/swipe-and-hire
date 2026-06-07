@@ -86,7 +86,7 @@ const PublicJobPage = () => {
   if (notFound || !job) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] text-white">
-        <LandingNav />
+        <LandingNav onLoginClick={() => navigate("/auth")} />
         <div className="max-w-2xl mx-auto px-6 py-32 text-center">
           <h1 className="text-3xl font-semibold mb-4">Annonsen är inte längre tillgänglig</h1>
           <p className="text-white/60 mb-8">Den här jobbannonsen kan ha avslutats eller tagits bort.</p>
@@ -191,7 +191,7 @@ const PublicJobPage = () => {
         <script type="application/ld+json">{JSON.stringify(breadcrumbLD)}</script>
       </Helmet>
 
-      <LandingNav />
+      <LandingNav onLoginClick={() => navigate("/auth")} />
 
       <main className="max-w-3xl mx-auto px-6 pt-28 pb-24">
         <nav className="text-sm text-white/50 mb-6 flex items-center gap-2 flex-wrap" aria-label="Brödsmulor">
