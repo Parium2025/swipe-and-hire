@@ -10,6 +10,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 // lockouts after deploys when an old cached bundle still points to stale lazy chunks.
 import Landing from "./pages/Landing";
 import AudienceLanding from "./pages/AudienceLanding";
+import JobbStockholm from "./pages/JobbStockholm";
 import Auth from "./pages/Auth";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
@@ -150,6 +151,7 @@ const AnimatedRoutes = () => {
           <Route path="/" element={<Landing />} />
           <Route path="/jobbsokare" element={<AudienceLanding audience="job_seeker" />} />
           <Route path="/arbetsgivare" element={<AudienceLanding audience="employer" />} />
+          <Route path="/jobb/stockholm" element={<JobbStockholm />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/home" element={<Index />} />
           <Route path="/index" element={<Index />} />
