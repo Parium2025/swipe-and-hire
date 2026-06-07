@@ -215,7 +215,12 @@ const calculateInlinePhoneMetrics = () => {
     height: safeHeight,
     width: safeHeight * PHONE_ASPECT,
     canvasHeight,
-    canvasBottomTrim: isPortraitTablet ? 0 : canvasVerticalPadding / 2,
+    // Trimma bort en större andel av bottenpadding på ultra-små skärmar
+    // (≤375px / låga höjder) så att nästa sektion kommer upp tätt under
+    // telefonen utan att toppen klipps – topp-headroom är orörd.
+    canvasBottomTrim: isPortraitTablet
+      ? 0
+      : canvasVerticalPadding * (width <= 375 || height <= 640 ? 0.78 : 0.5),
     zoom: isPortraitTablet
       ? clamp((safeHeight / 460) * 0.4, 0.3, 0.54)
       : clamp((safeHeight / 376) * 0.51, 0.34, 0.56),
