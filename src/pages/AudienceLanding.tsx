@@ -190,19 +190,25 @@ const calculateInlinePhoneMetrics = () => {
     ? document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null
     : null;
   const textBottom = textAnchor?.getBoundingClientRect().bottom ?? mobileTextReserve;
-  const mobileGap = clamp(height * 0.03, 12, 26);
-  const mobileBottomReserve = clamp(height * 0.035, 16, 32);
-  const mobileCanvasPadding = clamp(height * 0.035, 14, 30);
-  const mobileViewportBottom = height - mobileBottomReserve;
+  const stageBottom = !isPortraitTablet
+    ? (document.querySelector('[data-hero-intro-stage]') as HTMLElement | null)?.getBoundingClientRect().bottom
+    : null;
+  const mobileUsableBottom = !isPortraitTablet && stageBottom
+    ? Math.max(height, Math.min(window.innerHeight, stageBottom))
+    : height;
+  const mobileGap = clamp(mobileUsableBottom * 0.032, 14, 28);
+  const mobileBottomReserve = clamp(mobileUsableBottom * 0.028, 14, 30);
+  const mobileCanvasPadding = clamp(mobileUsableBottom * 0.022, 10, 22);
+  const mobileViewportBottom = mobileUsableBottom - mobileBottomReserve;
   const mobileAvailableCanvasHeight = Math.max(
     36,
-    height - textBottom - mobileGap - mobileBottomReserve,
+    mobileUsableBottom - textBottom - mobileGap - mobileBottomReserve,
   );
-  const mobileMaxVisualHeight = Math.max(36, mobileViewportBottom - textBottom - mobileGap - mobileCanvasPadding);
+  const mobileMaxVisualHeight = Math.max(36, mobileAvailableCanvasHeight - mobileCanvasPadding);
   const rawHeight = isPortraitTablet
     ? clamp(height * 0.44, 340, 520)
     : Math.min(
-      clamp(height * 0.405, 36, 330),
+      clamp(mobileUsableBottom * 0.405, 36, 330),
       mobileMaxVisualHeight,
     );
   const maxPhoneWidth = isPortraitTablet
