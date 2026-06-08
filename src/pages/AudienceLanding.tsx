@@ -323,12 +323,12 @@ const calculateInlinePhoneMetrics = () => {
   const mobileBottomReserve = clamp(height * 0.09, 58, 86);
   const mobileAvailableHeight = Math.max(240, height - mobileTextReserve - mobileBottomReserve);
   const rawHeight = isPortraitTablet
-    ? clamp(height * 0.54, 430, 680)
+    ? clamp(height * 0.46, 380, 580)
     : isWideInlineMobile
       ? clamp(Math.min(height * 0.54, mobileAvailableHeight + clamp(height * 0.18, 110, 180)), 360, 520)
       : clamp(Math.min(height * 0.43, mobileAvailableHeight + 32), 270, 370);
   const maxPhoneWidth = isPortraitTablet
-    ? Math.min(width * 0.48, 380)
+    ? Math.min(width * 0.40, 320)
     : isWideInlineMobile
       ? Math.min(width * 0.5, 330)
       : Math.min(width * 0.62, 250);
