@@ -504,28 +504,36 @@ const FixedPhoneLayer = () => {
       : false;
     const isPortraitTablet = width >= 768 && width < 1180 && height > width;
     // iPad / surfplatta i LIGGANDE läge: bred touch-enhet med begränsad höjd.
-    // Här vill vi fylla ut den högra ytan rejält så telefonen inte ser liten ut.
-    const isLandscapeTablet = isCoarse && width >= 1024 && width <= 1400 && width > height;
+    // Täcker iPad mini → iPad Pro 12.9" (1366×1024) samt Android-tablets upp
+    // till ~1600px breda. Vi använder pointer:coarse + landskap som signal
+    // så att vanliga laptops aldrig råkar in i den här grenen.
+    const isLandscapeTablet = isCoarse && width >= 1024 && width <= 1600 && width > height;
 
     if (isLandscapeTablet) {
-      const topPad = 132;
-      const bottomPad = 88;
+      // Skala padding och kolumnbredd proportionellt mot skärmstorleken så
+      // att telefonen aldrig kapas — varken på iPad Air (1180×820) eller
+      // iPad Pro 12.9" (1366×1024).
+      const topPad = clamp(height * 0.16, 116, 168);
+      const bottomPad = clamp(height * 0.11, 80, 120);
       const safeCanvasHeight = Math.max(360, height - topPad - bottomPad);
-      // Telefonkolumnen tar nästan halva bredden så mockupen får ordentlig närvaro.
-      const columnWidth = Math.min(width * 0.46, 620);
+      // Telefonkolumnen tar ~46% av bredden (cap 660px) så mockupen får
+      // ordentlig premium-närvaro utan att krocka med rubrikkolumnen.
+      const columnWidth = Math.min(width * 0.46, 660);
       const widthFitHeight = (columnWidth * 19.5) / 9;
-      const safeHeight = Math.min(safeCanvasHeight, widthFitHeight, 760);
+      const safeHeight = Math.min(safeCanvasHeight, widthFitHeight, 820);
       const metrics = {
         isDesktop: true,
         top: 0,
         height: safeHeight,
-        // Större zoom-cap för att telefonen ska kännas premium och fylla ytan.
-        zoom: clamp((safeHeight / 460) * 0.6, 0.5, 0.86),
-        yOffset: 18,
+        // Zoom skalar med canvas-höjden så telefonen alltid fyller ytan
+        // proportionellt, oavsett iPad-storlek, utan att klippas.
+        zoom: clamp((safeHeight / 460) * 0.62, 0.5, 0.9),
+        yOffset: clamp(height * 0.022, 14, 24),
       };
       lastHeroMetricsRef.current = metrics;
       return metrics;
     }
+
 
     if (isPortraitTablet) {
       const anchor = getVisibleAnchor();
