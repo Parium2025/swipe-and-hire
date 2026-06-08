@@ -197,35 +197,37 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
 
       {/* Stacked hero: heading → CTAs */}
       <motion.div
-        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-end px-5 pb-[42svh] text-center sm:px-6 sm:pb-[40svh] md:px-12 md:pb-[36svh] lg:px-24 lg:pb-[34svh]"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-between px-5 pb-[10svh] pt-[30svh] text-center sm:px-6 sm:pb-[12svh] sm:pt-[28svh] md:px-12 md:pb-[14svh] md:pt-[26svh] lg:px-24 lg:pb-[14svh] lg:pt-[24svh]"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        <motion.h1
-          id="landing-hero-heading"
-          initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ duration: 1.4, ease, delay: 0.4 }}
-          className="max-w-3xl text-balance text-[2rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.25rem]"
-        >
-          Välkommen till Parium
-        </motion.h1>
+        <div className="flex flex-col items-center">
+          <motion.h1
+            id="landing-hero-heading"
+            initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 1.4, ease, delay: 0.4 }}
+            className="max-w-3xl text-balance text-[2rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.25rem]"
+          >
+            Välkommen till Parium
+          </motion.h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease, delay: 0.9 }}
-          className="mt-6 max-w-[min(92vw,80rem)] font-normal leading-[1.32] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] sm:whitespace-nowrap"
-          style={{ color: '#ffffff', fontSize: 'clamp(1.25rem, 0.45vw + 1.1rem, 1.625rem)' }}
-        >
-          Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
-        </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease, delay: 0.9 }}
+            className="mt-6 max-w-[min(92vw,80rem)] font-normal leading-[1.32] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] sm:whitespace-nowrap"
+            style={{ color: '#ffffff', fontSize: 'clamp(1.25rem, 0.45vw + 1.1rem, 1.625rem)' }}
+          >
+            Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
+          </motion.p>
+        </div>
 
         {/* CTAs */}
 
         <motion.div
-          className="pointer-events-auto mt-10 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
+          className="pointer-events-auto flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
           initial="hidden"
           animate="show"
           variants={{
