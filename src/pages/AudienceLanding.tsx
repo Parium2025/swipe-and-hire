@@ -499,7 +499,33 @@ const FixedPhoneLayer = () => {
     const width = window.visualViewport?.width ?? window.innerWidth;
     const height = window.visualViewport?.height ?? window.innerHeight;
 
+    const isCoarse = typeof window.matchMedia === 'function'
+      ? window.matchMedia('(pointer: coarse)').matches
+      : false;
     const isPortraitTablet = width >= 768 && width < 1180 && height > width;
+    // iPad / surfplatta i LIGGANDE läge: bred touch-enhet med begränsad höjd.
+    // Här vill vi fylla ut den högra ytan rejält så telefonen inte ser liten ut.
+    const isLandscapeTablet = isCoarse && width >= 1024 && width <= 1400 && width > height;
+
+    if (isLandscapeTablet) {
+      const topPad = 132;
+      const bottomPad = 88;
+      const safeCanvasHeight = Math.max(360, height - topPad - bottomPad);
+      // Telefonkolumnen tar nästan halva bredden så mockupen får ordentlig närvaro.
+      const columnWidth = Math.min(width * 0.46, 620);
+      const widthFitHeight = (columnWidth * 19.5) / 9;
+      const safeHeight = Math.min(safeCanvasHeight, widthFitHeight, 760);
+      const metrics = {
+        isDesktop: true,
+        top: 0,
+        height: safeHeight,
+        // Större zoom-cap för att telefonen ska kännas premium och fylla ytan.
+        zoom: clamp((safeHeight / 460) * 0.6, 0.5, 0.86),
+        yOffset: 18,
+      };
+      lastHeroMetricsRef.current = metrics;
+      return metrics;
+    }
 
     if (isPortraitTablet) {
       const anchor = getVisibleAnchor();
@@ -521,6 +547,7 @@ const FixedPhoneLayer = () => {
       lastHeroMetricsRef.current = metrics;
       return metrics;
     }
+
 
     if (width >= 768) {
       const isCompactLaptop = height <= 820;
