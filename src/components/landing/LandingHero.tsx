@@ -197,7 +197,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
 
       {/* Stacked hero: heading → CTAs */}
       <motion.div
-        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-end px-5 pb-[8svh] pt-24 text-center sm:px-6 sm:pb-[10svh] sm:pt-28 md:px-12 md:pb-[10svh] md:[@media_(orientation:portrait)]:pb-[30svh] lg:px-24 lg:pb-[12svh] lg:[@media_(orientation:portrait)]:pb-[26svh] xl:pb-[14svh]"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-center px-5 text-center sm:px-6 md:px-12 lg:px-24"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
@@ -207,9 +207,9 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 1.4, ease, delay: 0.4 }}
-          className="max-w-4xl text-balance text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
+          className="max-w-3xl text-balance text-[2rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.25rem]"
         >
-          Hitta jobb och rekrytera smartare med Parium
+          Välkommen till Parium
         </motion.h1>
 
         <motion.p
