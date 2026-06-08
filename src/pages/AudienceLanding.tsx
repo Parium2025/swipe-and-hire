@@ -323,12 +323,12 @@ const calculateInlinePhoneMetrics = () => {
   const mobileBottomReserve = clamp(height * 0.09, 58, 86);
   const mobileAvailableHeight = Math.max(240, height - mobileTextReserve - mobileBottomReserve);
   const rawHeight = isPortraitTablet
-    ? clamp(height * 0.54, 430, 680)
+    ? clamp(height * 0.46, 380, 580)
     : isWideInlineMobile
       ? clamp(Math.min(height * 0.54, mobileAvailableHeight + clamp(height * 0.18, 110, 180)), 360, 520)
       : clamp(Math.min(height * 0.43, mobileAvailableHeight + 32), 270, 370);
   const maxPhoneWidth = isPortraitTablet
-    ? Math.min(width * 0.48, 380)
+    ? Math.min(width * 0.40, 320)
     : isWideInlineMobile
       ? Math.min(width * 0.5, 330)
       : Math.min(width * 0.62, 250);
@@ -1056,13 +1056,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
           {/* ──────────────── 3. STATEMENT ──────────────── */}
           <section className="relative overflow-hidden px-5 py-8 sm:px-6 sm:py-12 md:px-12 md:py-16 lg:px-24">
-            <div className="mx-auto grid max-w-[1180px] gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
+            <div className="mx-auto grid max-w-[1180px] gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end md:[@media_(orientation:portrait)]:block md:[@media_(orientation:portrait)]:max-w-[820px] lg:[@media_(orientation:portrait)]:grid">
               <motion.h2
                 initial={{ opacity: 0, x: -80 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 1, ease }}
-                className="wave-text text-4xl font-black leading-[1.02] tracking-[0] sm:text-5xl md:text-6xl lg:text-[4.75rem]"
+                className="wave-text text-4xl font-black leading-[1.02] tracking-[0] sm:text-5xl md:text-6xl md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0] lg:text-[4.75rem] lg:[@media_(orientation:portrait)]:text-[5.25rem]"
               >
                 En lugnare väg till nästa steg.
               </motion.h2>
@@ -1071,7 +1071,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 1, ease, delay: 0.1 }}
-                className="wave-text text-base leading-8 opacity-70 sm:text-lg"
+                className="wave-text text-base leading-8 opacity-70 sm:text-lg md:[@media_(orientation:portrait)]:mt-6 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
               >
                 Platshållartext. Här kan en lugnare brödtext landa efter den intensiva resan — rytm är viktigt.
               </motion.p>
@@ -1100,7 +1100,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             `}</style>
           )}
 
-          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
+          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 md:[@media_(orientation:portrait)]:pt-8 lg:px-24 lg:[@media_(orientation:portrait)]:pt-20">
             <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
                 initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
