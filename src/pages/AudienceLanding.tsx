@@ -1100,7 +1100,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             `}</style>
           )}
 
-          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24">
+          <section id="funktioner" aria-labelledby="funktioner-heading" className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 md:[@media_(orientation:portrait)]:pt-8 lg:px-24 lg:[@media_(orientation:portrait)]:pt-20">
             <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
                 initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
