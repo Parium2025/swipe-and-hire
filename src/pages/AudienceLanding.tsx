@@ -241,6 +241,48 @@ const useIsMobileLikeHeroLayout = () => {
   return isMobileLike;
 };
 
+/**
+ * Mäter nav-pillrets verkliga bottenkant i runtime och returnerar en
+ * padding-top i px som garanterar att hero-rubriken aldrig kan hamna
+ * under pillret — oavsett enhet, orientering eller framtida nav-höjd.
+ *
+ * Resultatet kombineras med den responsiva clamp()-paddingen via
+ * Math.max() på callsite, så utseendet är 100% oförändrat så länge
+ * den befintliga clampen redan är tillräckligt stor. Är navet större
+ * (t.ex. nya menyrader) tar mätvärdet över och håller rubriken fri.
+ */
+const useHeroSafeTopPadding = () => {
+  const [minTopPx, setMinTopPx] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const GAP_PX = 16;
+    const measure = () => {
+      const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
+      if (!nav) return;
+      const rect = nav.getBoundingClientRect();
+      setMinTopPx(Math.ceil(rect.bottom + GAP_PX));
+    };
+    measure();
+    const ro = 'ResizeObserver' in window ? new ResizeObserver(measure) : null;
+    const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
+    if (nav && ro) ro.observe(nav);
+    window.addEventListener('resize', measure, { passive: true });
+    window.addEventListener('orientationchange', measure, { passive: true });
+    window.visualViewport?.addEventListener('resize', measure, { passive: true });
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('orientationchange', measure);
+      window.visualViewport?.removeEventListener('resize', measure);
+    };
+  }, []);
+
+  return minTopPx;
+};
+
+
+
 const calculateInlinePhoneMetrics = () => {
   if (typeof window === 'undefined') {
     return { height: 320, width: 320 * PHONE_ASPECT, zoom: 0.44, yOffset: 28 };
