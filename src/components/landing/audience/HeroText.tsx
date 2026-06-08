@@ -23,7 +23,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
 
   const eyebrowClass = isMobile
     ? 'text-xs font-bold uppercase tracking-[0.28em] text-secondary [text-indent:0.28em]'
-    : 'text-xs font-bold uppercase tracking-[0.28em] text-secondary/80';
+    : 'text-xs font-bold uppercase tracking-[0.28em] text-secondary/80 md:[@media_(orientation:portrait)]:text-sm md:[@media_(orientation:portrait)]:tracking-[0.36em]';
 
   const headlineClass = isMobile
     ? 'mt-5 max-w-4xl text-[2.5rem] font-black leading-[1.05] tracking-[0] min-[376px]:mt-6 min-[376px]:text-[3.25rem] min-[376px]:leading-[1.04] sm:text-[3.5rem] md:text-[3.75rem]'
@@ -32,7 +32,7 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: He
   // Följer samma vågmask som bakgrunden: vit på blått, blå på vitt.
   const subtitleClass = isMobile
     ? 'wave-text mt-7 max-w-xl text-base leading-8 font-medium'
-    : 'wave-text mt-7 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-xl md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-9 md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:max-w-2xl md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)]';
+    : 'wave-text mt-7 max-w-xl text-lg leading-8 font-medium md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-xl md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-9 md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:max-w-2xl md:[@media_(orientation:portrait)]:mx-auto md:[@media_(orientation:portrait)]:mt-10 md:[@media_(orientation:portrait)]:max-w-[min(82vw,46rem)] md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9';
 
   // Premium-entré: enbart opacity. Ingen blur, ingen skugga, ingen translate.
   // Långsam, lugn ease (Apple-style) med en mjuk stagger rad-för-rad.
