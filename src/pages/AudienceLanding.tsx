@@ -481,10 +481,21 @@ const useMobileHeroMinHeight = () => {
   return minHeight;
 };
 
+type HeroPhoneMetrics = {
+  isDesktop: boolean;
+  isPortraitTablet?: boolean;
+  pinToViewport?: boolean;
+  right?: string;
+  top: number;
+  height: number;
+  zoom: number;
+  yOffset: number;
+};
+
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   
-  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; isPortraitTablet?: boolean; pinToViewport?: boolean; right?: string; top: number; height: number; zoom: number; yOffset: number } | null>(null);
+  const lastHeroMetricsRef = useRef<HeroPhoneMetrics | null>(null);
   const getVisibleAnchor = () => {
     const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const anchors = Array.from(document.querySelectorAll('[data-hero-phone-anchor]')) as HTMLElement[];
@@ -493,7 +504,7 @@ const FixedPhoneLayer = () => {
       return rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < viewportHeight;
     }) ?? null;
   };
-  const calculatePhoneMetrics = () => {
+  const calculatePhoneMetrics = (): HeroPhoneMetrics => {
     if (typeof window === 'undefined') return { isDesktop: true, top: 0, height: 660, zoom: 0.68, yOffset: 0 };
     if (lastHeroMetricsRef.current && !document.querySelector('[data-hero-intro-stage]')) return lastHeroMetricsRef.current;
     const width = window.visualViewport?.width ?? window.innerWidth;
