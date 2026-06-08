@@ -687,6 +687,8 @@ const FixedPhoneLayer = () => {
 const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   const mobileHeroMinHeight = useMobileHeroMinHeight();
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
+  const heroSafeTopPx = useHeroSafeTopPadding();
+
 
   return (
     <>
