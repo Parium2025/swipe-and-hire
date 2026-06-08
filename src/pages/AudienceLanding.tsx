@@ -229,9 +229,11 @@ const useIsMobileLikeHeroLayout = () => {
     const sync = () => setIsMobileLike(isMobileLikeHeroViewport());
     sync();
     window.addEventListener('resize', sync, { passive: true });
+    window.addEventListener('orientationchange', sync, { passive: true });
     window.visualViewport?.addEventListener('resize', sync, { passive: true });
     return () => {
       window.removeEventListener('resize', sync);
+      window.removeEventListener('orientationchange', sync);
       window.visualViewport?.removeEventListener('resize', sync);
     };
   }, []);
