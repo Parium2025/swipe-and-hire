@@ -534,7 +534,10 @@ const FixedPhoneLayer = () => {
         pinToViewport: true,
         top,
         height: safeHeight,
-        zoom: clamp((safeHeight / 460) * 0.7, 0.56, 0.96),
+        // Spline-scenen klipper sin egen topp om zoom går för högt även när
+        // DOM-lagret har fri yta. Det här taket är därför konservativt: stor
+        // iPad-närvaro, men alltid hela telefonens topp/notch synlig.
+        zoom: clamp((safeHeight / 460) * 0.52, 0.48, 0.68),
         yOffset: 0,
         right: 'clamp(2.5rem, 13vw, 13rem)',
       };
