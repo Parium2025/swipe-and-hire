@@ -490,6 +490,10 @@ const PinnedHorizontalGallery = () => {
           font-weight: 900;
         }
         @media (min-width: 1536px) { .phg-title { font-size: clamp(3.75rem, 4vw, 5.5rem); } }
+        @media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
+          .phg-header { padding: clamp(36px, 5vh, 56px) 24px clamp(8px, 1.2vh, 16px); }
+          .phg-title { font-size: 5.25rem; line-height: 1.0; max-width: min(92vw, 14ch); }
+        }
         .phg-sub {
           margin: 22px auto 0;
           font-size: clamp(1rem, 1.2vw, 1.125rem);
