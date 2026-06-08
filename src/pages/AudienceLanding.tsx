@@ -723,8 +723,8 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         >
           <motion.div
             data-hero-phone-anchor
-            className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center px-5 pt-[clamp(5.25rem,12svh,6rem)] text-center sm:pt-[clamp(6.5rem,14svh,8rem)] md:pt-[clamp(7.5rem,16svh,9.5rem)]"
-            style={{ paddingTop: `max(var(--hero-pt-base, 0px), ${heroSafeTopPx}px)`, ['--hero-pt-base' as string]: '0px' }}
+            className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center px-5 text-center"
+            style={heroSafeTopPx ? { paddingTop: `${heroSafeTopPx}px` } : undefined}
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
