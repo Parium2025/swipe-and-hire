@@ -652,6 +652,13 @@ const FixedPhoneLayer = () => {
     const anchor = document.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
     const observer = anchor ? new ResizeObserver(syncPhoneMetrics) : null;
     if (anchor) observer?.observe(anchor);
+    // Live-spåra navbarens höjd — om Logga in-knappen wrappar, fonten laddar
+    // sent eller språk byts kan navbarens bottom-koordinat ändras utan att
+    // window resizes. Då måste vi räkna om phone top så telefonen aldrig
+    // kapas av navbaren på iPad landscape.
+    const navEl = document.querySelector('nav[aria-label="Huvudnavigation"]') as HTMLElement | null;
+    const navObserver = navEl ? new ResizeObserver(syncPhoneMetrics) : null;
+    if (navEl) navObserver?.observe(navEl);
     const mutationObserver = new MutationObserver(syncPhoneMetrics);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
     document.fonts?.ready.then(syncPhoneMetrics).catch(() => undefined);
@@ -661,6 +668,7 @@ const FixedPhoneLayer = () => {
       window.cancelAnimationFrame(frame);
       timers.forEach((timer) => window.clearTimeout(timer));
       observer?.disconnect();
+      navObserver?.disconnect();
       mutationObserver.disconnect();
       window.removeEventListener('resize', syncPhoneMetrics);
       window.visualViewport?.removeEventListener('resize', syncPhoneMetrics);
