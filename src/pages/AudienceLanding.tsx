@@ -1056,13 +1056,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
           {/* ──────────────── 3. STATEMENT ──────────────── */}
           <section className="relative overflow-hidden px-5 py-8 sm:px-6 sm:py-12 md:px-12 md:py-16 lg:px-24">
-            <div className="mx-auto grid max-w-[1180px] gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
+            <div className="mx-auto grid max-w-[1180px] gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end md:[@media_(orientation:portrait)]:block md:[@media_(orientation:portrait)]:max-w-[820px] lg:[@media_(orientation:portrait)]:grid">
               <motion.h2
                 initial={{ opacity: 0, x: -80 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 1, ease }}
-                className="wave-text text-4xl font-black leading-[1.02] tracking-[0] sm:text-5xl md:text-6xl lg:text-[4.75rem]"
+                className="wave-text text-4xl font-black leading-[1.02] tracking-[0] sm:text-5xl md:text-6xl md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0] lg:text-[4.75rem] lg:[@media_(orientation:portrait)]:text-[5.25rem]"
               >
                 En lugnare väg till nästa steg.
               </motion.h2>
@@ -1071,7 +1071,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 1, ease, delay: 0.1 }}
-                className="wave-text text-base leading-8 opacity-70 sm:text-lg"
+                className="wave-text text-base leading-8 opacity-70 sm:text-lg md:[@media_(orientation:portrait)]:mt-6 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
               >
                 Platshållartext. Här kan en lugnare brödtext landa efter den intensiva resan — rytm är viktigt.
               </motion.p>
