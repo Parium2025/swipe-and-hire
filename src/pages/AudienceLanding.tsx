@@ -252,16 +252,28 @@ const useIsMobileLikeHeroLayout = () => {
  * (t.ex. nya menyrader) tar mätvärdet över och håller rubriken fri.
  */
 const useHeroSafeTopPadding = () => {
-  const [minTopPx, setMinTopPx] = useState(0);
+  const [topPx, setTopPx] = useState(0);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const GAP_PX = 16;
     const measure = () => {
       const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
-      if (!nav) return;
-      const rect = nav.getBoundingClientRect();
-      setMinTopPx(Math.ceil(rect.bottom + GAP_PX));
+      const navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
+      const w = window.innerWidth;
+      const h = window.visualViewport?.height ?? window.innerHeight;
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      // Speglar Tailwind-clampen för att bevara nuvarande utseende:
+      // base:  clamp(5.25rem, 12svh, 6rem)
+      // sm:    clamp(6.5rem,  14svh, 8rem)
+      // md:    clamp(7.5rem,  16svh, 9.5rem)
+      const clamp = (min: number, pref: number, max: number) =>
+        Math.max(min, Math.min(max, pref));
+      let responsive: number;
+      if (w >= 768) responsive = clamp(7.5 * rem, 0.16 * h, 9.5 * rem);
+      else if (w >= 640) responsive = clamp(6.5 * rem, 0.14 * h, 8 * rem);
+      else responsive = clamp(5.25 * rem, 0.12 * h, 6 * rem);
+      setTopPx(Math.ceil(Math.max(responsive, navBottom + GAP_PX)));
     };
     measure();
     const ro = 'ResizeObserver' in window ? new ResizeObserver(measure) : null;
@@ -278,8 +290,9 @@ const useHeroSafeTopPadding = () => {
     };
   }, []);
 
-  return minTopPx;
+  return topPx;
 };
+
 
 
 
