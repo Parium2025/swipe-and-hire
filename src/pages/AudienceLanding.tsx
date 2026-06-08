@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
@@ -240,6 +240,74 @@ const useIsMobileLikeHeroLayout = () => {
 
   return isMobileLike;
 };
+
+/**
+ * Mäter nav-pillrets verkliga bottenkant i runtime och returnerar en
+ * padding-top i px som garanterar att hero-rubriken aldrig kan hamna
+ * under pillret — oavsett enhet, orientering eller framtida nav-höjd.
+ *
+ * Resultatet kombineras med den responsiva clamp()-paddingen via
+ * Math.max() på callsite, så utseendet är 100% oförändrat så länge
+ * den befintliga clampen redan är tillräckligt stor. Är navet större
+ * (t.ex. nya menyrader) tar mätvärdet över och håller rubriken fri.
+ */
+const useHeroSafeTopPadding = () => {
+  // Lazy initializer: kör en synkron baseline-beräkning av den responsiva
+  // clampen vid första render så vi aldrig får en frame utan padding.
+  // Nav-mätningen läggs ovanpå i useLayoutEffect innan paint.
+  const [topPx, setTopPx] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0;
+    const w = window.innerWidth;
+    const h = window.visualViewport?.height ?? window.innerHeight;
+    const rem = 16;
+    const clamp = (min: number, pref: number, max: number) =>
+      Math.max(min, Math.min(max, pref));
+    if (w >= 768) return Math.ceil(clamp(7.5 * rem, 0.16 * h, 9.5 * rem));
+    if (w >= 640) return Math.ceil(clamp(6.5 * rem, 0.14 * h, 8 * rem));
+    return Math.ceil(clamp(5.25 * rem, 0.12 * h, 6 * rem));
+  });
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    const GAP_PX = 16;
+    const measure = () => {
+      const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
+      const navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
+      const w = window.innerWidth;
+      const h = window.visualViewport?.height ?? window.innerHeight;
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      // Speglar Tailwind-clampen för att bevara nuvarande utseende:
+      // base:  clamp(5.25rem, 12svh, 6rem)
+      // sm:    clamp(6.5rem,  14svh, 8rem)
+      // md:    clamp(7.5rem,  16svh, 9.5rem)
+      const clamp = (min: number, pref: number, max: number) =>
+        Math.max(min, Math.min(max, pref));
+      let responsive: number;
+      if (w >= 768) responsive = clamp(7.5 * rem, 0.16 * h, 9.5 * rem);
+      else if (w >= 640) responsive = clamp(6.5 * rem, 0.14 * h, 8 * rem);
+      else responsive = clamp(5.25 * rem, 0.12 * h, 6 * rem);
+      setTopPx(Math.ceil(Math.max(responsive, navBottom + GAP_PX)));
+    };
+    measure();
+    const ro = 'ResizeObserver' in window ? new ResizeObserver(measure) : null;
+    const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
+    if (nav && ro) ro.observe(nav);
+    window.addEventListener('resize', measure, { passive: true });
+    window.addEventListener('orientationchange', measure, { passive: true });
+    window.visualViewport?.addEventListener('resize', measure, { passive: true });
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('orientationchange', measure);
+      window.visualViewport?.removeEventListener('resize', measure);
+    };
+  }, []);
+
+  return topPx;
+};
+
+
+
 
 const calculateInlinePhoneMetrics = () => {
   if (typeof window === 'undefined') {
@@ -645,6 +713,8 @@ const FixedPhoneLayer = () => {
 const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   const mobileHeroMinHeight = useMobileHeroMinHeight();
   const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
+  const heroSafeTopPx = useHeroSafeTopPadding();
+
 
   return (
     <>
@@ -666,7 +736,8 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         >
           <motion.div
             data-hero-phone-anchor
-            className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center px-5 pt-[clamp(5.25rem,12svh,6rem)] text-center sm:pt-[clamp(6.5rem,14svh,8rem)] md:pt-[clamp(7.5rem,16svh,9.5rem)]"
+            className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center px-5 text-center"
+            style={heroSafeTopPx ? { paddingTop: `${heroSafeTopPx}px` } : undefined}
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
