@@ -252,9 +252,22 @@ const useIsMobileLikeHeroLayout = () => {
  * (t.ex. nya menyrader) tar mätvärdet över och håller rubriken fri.
  */
 const useHeroSafeTopPadding = () => {
-  const [topPx, setTopPx] = useState(0);
+  // Lazy initializer: kör en synkron baseline-beräkning av den responsiva
+  // clampen vid första render så vi aldrig får en frame utan padding.
+  // Nav-mätningen läggs ovanpå i useLayoutEffect innan paint.
+  const [topPx, setTopPx] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0;
+    const w = window.innerWidth;
+    const h = window.visualViewport?.height ?? window.innerHeight;
+    const rem = 16;
+    const clamp = (min: number, pref: number, max: number) =>
+      Math.max(min, Math.min(max, pref));
+    if (w >= 768) return Math.ceil(clamp(7.5 * rem, 0.16 * h, 9.5 * rem));
+    if (w >= 640) return Math.ceil(clamp(6.5 * rem, 0.14 * h, 8 * rem));
+    return Math.ceil(clamp(5.25 * rem, 0.12 * h, 6 * rem));
+  });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
     const GAP_PX = 16;
     const measure = () => {
