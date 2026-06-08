@@ -1118,7 +1118,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
                 viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.05 }}
-                className="landing-feature-mobile-in wave-text mt-4 max-w-3xl text-4xl font-black leading-[1.04] tracking-[0] sm:text-5xl md:text-6xl"
+                className="landing-feature-mobile-in wave-text mt-4 max-w-3xl text-4xl font-black leading-[1.04] tracking-[0] sm:text-5xl md:text-6xl md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0] md:[@media_(orientation:portrait)]:max-w-[min(92vw,60rem)]"
                 style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '180ms' } : undefined}
               >
                 Allt du behöver för att {audience === 'job_seeker' ? 'hitta rätt jobb' : 'hitta rätt person'}.
