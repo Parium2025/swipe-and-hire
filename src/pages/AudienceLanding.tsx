@@ -202,9 +202,16 @@ const getViewportSize = () => ({
 
 const isMobileLikeHeroViewport = () => {
   if (typeof window === 'undefined') return false;
-  const { width } = getViewportSize();
+  const { width, height } = getViewportSize();
   const isCoarse = window.matchMedia('(pointer: coarse)').matches;
-  return width < 768 || (isCoarse && width <= 1366);
+  // Mobil-layout (stackad: text överst, telefon under) används endast på
+  // riktiga små skärmar OCH på pekplattor i PORTRÄTT. På iPad i landskap
+  // (bred + låg höjd) klipps rubriken — där använder vi istället den
+  // delade desktop-vyn (text vänster, telefon höger) som är designad för
+  // bredformat. Spline-runtime är samma komponent i båda layouts.
+  if (width < 768) return true;
+  if (isCoarse && height >= width && width <= 1024) return true;
+  return false;
 };
 
 const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
@@ -222,9 +229,11 @@ const useIsMobileLikeHeroLayout = () => {
     const sync = () => setIsMobileLike(isMobileLikeHeroViewport());
     sync();
     window.addEventListener('resize', sync, { passive: true });
+    window.addEventListener('orientationchange', sync, { passive: true });
     window.visualViewport?.addEventListener('resize', sync, { passive: true });
     return () => {
       window.removeEventListener('resize', sync);
+      window.removeEventListener('orientationchange', sync);
       window.visualViewport?.removeEventListener('resize', sync);
     };
   }, []);
