@@ -484,7 +484,7 @@ const useMobileHeroMinHeight = () => {
 const FixedPhoneLayer = () => {
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   
-  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; isPortraitTablet?: boolean; top: number; height: number; zoom: number; yOffset: number } | null>(null);
+  const lastHeroMetricsRef = useRef<{ isDesktop: boolean; isPortraitTablet?: boolean; pinToViewport?: boolean; right?: string; top: number; height: number; zoom: number; yOffset: number } | null>(null);
   const getVisibleAnchor = () => {
     const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const anchors = Array.from(document.querySelectorAll('[data-hero-phone-anchor]')) as HTMLElement[];
@@ -507,28 +507,25 @@ const FixedPhoneLayer = () => {
     // Täcker iPad mini → iPad Pro 12.9" (1366×1024) samt Android-tablets upp
     // till ~1600px breda. Vi använder pointer:coarse + landskap som signal
     // så att vanliga laptops aldrig råkar in i den här grenen.
-    const isLandscapeTablet = isCoarse && width >= 1024 && width <= 1600 && width > height;
+    const isLandscapeTablet = width >= 900 && width <= 1400 && width > height && height <= 1050;
 
     if (isLandscapeTablet) {
-      // Skala padding och kolumnbredd proportionellt mot skärmstorleken så
-      // att telefonen aldrig kapas — varken på iPad Air (1180×820) eller
-      // iPad Pro 12.9" (1366×1024).
-      const topPad = clamp(height * 0.16, 116, 168);
-      const bottomPad = clamp(height * 0.11, 80, 120);
-      const safeCanvasHeight = Math.max(360, height - topPad - bottomPad);
-      // Telefonkolumnen tar ~46% av bredden (cap 660px) så mockupen får
-      // ordentlig premium-närvaro utan att krocka med rubrikkolumnen.
-      const columnWidth = Math.min(width * 0.46, 660);
+      const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
+      const navBottom = nav?.getBoundingClientRect().bottom ?? clamp(height * 0.12, 78, 112);
+      const top = Math.ceil(navBottom + clamp(height * 0.06, 46, 68));
+      const bottomSafe = clamp(height * 0.085, 64, 96);
+      const safeCanvasHeight = Math.max(340, height - top - bottomSafe);
+      const columnWidth = Math.min(width * 0.48, 620);
       const widthFitHeight = (columnWidth * 19.5) / 9;
-      const safeHeight = Math.min(safeCanvasHeight, widthFitHeight, 820);
+      const safeHeight = Math.min(safeCanvasHeight, widthFitHeight, 760);
       const metrics = {
         isDesktop: true,
-        top: 0,
+        pinToViewport: true,
+        top,
         height: safeHeight,
-        // Zoom skalar med canvas-höjden så telefonen alltid fyller ytan
-        // proportionellt, oavsett iPad-storlek, utan att klippas.
-        zoom: clamp((safeHeight / 460) * 0.62, 0.5, 0.9),
-        yOffset: clamp(height * 0.022, 14, 24),
+        zoom: clamp((safeHeight / 460) * 0.7, 0.56, 0.96),
+        yOffset: 0,
+        right: 'clamp(2.5rem, 13vw, 13rem)',
       };
       lastHeroMetricsRef.current = metrics;
       return metrics;
