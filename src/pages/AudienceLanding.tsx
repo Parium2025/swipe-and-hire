@@ -1249,7 +1249,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 <SplitHeadline
                   as="h2"
                   text="Frågor & svar"
-                  className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl"
+                  className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-[clamp(3.25rem,5.4vw,4.75rem)] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-[1.02] md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0]"
                 />
               </motion.div>
               <motion.div
