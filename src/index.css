@@ -1931,3 +1931,29 @@ video::-webkit-media-controls-overlay-play-button {
 video::-webkit-media-controls {
   display: none !important;
 }
+
+@media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
+  .audience-ipad-heading {
+    max-width: min(92vw, 60rem);
+    font-size: 5.25rem !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    text-wrap: balance;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1180px) and (orientation: landscape) {
+  .audience-ipad-heading {
+    max-width: min(92vw, 60rem);
+    font-size: clamp(4.9rem, 8.2vw, 5.25rem) !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    text-wrap: balance;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1180px) {
+  .audience-ipad-heading .split-headline-word {
+    padding-bottom: 0.02em;
+  }
+}
