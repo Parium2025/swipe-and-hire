@@ -213,7 +213,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
               initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{ duration: 1.4, ease, delay: 0.4 }}
-              className="whitespace-nowrap text-balance font-semibold leading-[1.1] tracking-tight text-white text-[clamp(1.6rem,7.2vw,3.25rem)] md:text-[clamp(3rem,5.4vw,4rem)] lg:text-[clamp(3.25rem,4.4vw,4rem)]"
+              className="whitespace-nowrap text-balance font-semibold leading-[1.1] tracking-tight text-white text-[clamp(1.6rem,7.2vw,3.25rem)] md:text-[clamp(3rem,6vw,4.75rem)]"
             >
               Välkommen till Parium
             </motion.h1>
@@ -222,7 +222,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, ease, delay: 0.9 }}
-              className="max-w-[21rem] font-normal leading-[1.22] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] min-[390px]:max-w-[38rem] sm:max-w-none sm:whitespace-nowrap text-[clamp(1.12rem,calc(0.75vw+0.96rem),1.625rem)] md:text-[clamp(1.35rem,calc(1.1vw+0.9rem),1.75rem)] lg:text-[clamp(1.4rem,calc(0.9vw+1rem),1.75rem)]"
+              className="max-w-[21rem] font-normal leading-[1.22] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] min-[390px]:max-w-[38rem] sm:max-w-none sm:whitespace-nowrap text-[clamp(1.12rem,calc(0.75vw+0.96rem),1.625rem)] md:text-[clamp(1.4rem,calc(1.4vw+0.8rem),1.9rem)]"
               style={{ color: '#ffffff' }}
             >
               Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
