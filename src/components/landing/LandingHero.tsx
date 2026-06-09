@@ -197,7 +197,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
 
       {/* Stacked hero: heading → CTAs */}
       <motion.div
-        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-between px-5 pb-[10svh] pt-[44svh] text-center sm:px-6 sm:pb-[12svh] sm:pt-[42svh] md:px-12 md:pb-[14svh] md:pt-[38svh] lg:px-24 lg:pb-[14svh] lg:pt-[34svh]"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-end gap-8 px-5 pb-[10svh] pt-[20svh] text-center sm:gap-10 sm:px-6 sm:pb-[12svh] md:px-12 md:pb-[14svh] lg:px-24 lg:pb-[14svh]"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
