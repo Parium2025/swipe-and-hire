@@ -195,61 +195,64 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           regeln i index.css — den färgar body grå så Safari samplar grått. */}
 
 
-      {/* Stacked hero: heading/text sits directly above CTAs */}
+      {/* Stacked hero: heading anchored at chin level → CTAs at bottom */}
       <motion.div
-        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-end px-5 pb-[10svh] pt-[20svh] text-center sm:px-6 sm:pb-[12svh] sm:pt-[20svh] md:px-12 md:pb-[14svh] md:pt-[20svh] lg:px-24 lg:pb-[14svh] lg:pt-[20svh]"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-end px-5 pb-[10svh] text-center sm:px-6 sm:pb-[12svh] md:px-12 md:pb-[14svh] lg:px-24 lg:pb-[14svh]"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        <div className="flex w-full flex-col items-center gap-4 sm:gap-5">
-          <div className="flex flex-col items-center gap-1.5 sm:gap-2">
-            <motion.h1
-              id="landing-hero-heading"
-              initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              transition={{ duration: 1.4, ease, delay: 0.4 }}
-              className="max-w-3xl text-balance text-[2rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.25rem]"
-            >
-              Välkommen till Parium
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, ease, delay: 0.9 }}
-              className="max-w-[min(92vw,80rem)] font-normal leading-[1.22] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] sm:whitespace-nowrap"
-              style={{ color: '#ffffff', fontSize: 'clamp(1.25rem, 0.45vw + 1.1rem, 1.625rem)' }}
-            >
-              Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
-            </motion.p>
-          </div>
-
-          {/* CTAs */}
-
-          <motion.div
-            className="pointer-events-auto flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
-            initial="hidden"
-            animate="show"
-            variants={{
-              hidden: {},
-              show: { transition: { staggerChildren: 0.18, delayChildren: 1.2 } },
-            }}
+        {/* Heading + subtitle anchored to the chin of the people in the video.
+            Chin sits at ~52svh on every device since the video is object-cover. */}
+        <div
+          className="absolute left-1/2 flex w-full max-w-[min(92vw,80rem)] -translate-x-1/2 flex-col items-center gap-1.5 px-5 sm:gap-2 sm:px-6 md:px-12 lg:px-24"
+          style={{ top: '52svh' }}
+        >
+          <motion.h1
+            id="landing-hero-heading"
+            initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 1.4, ease, delay: 0.4 }}
+            className="max-w-3xl text-balance text-[2rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.25rem]"
           >
-            {audienceOptions.map((option) => (
-              <AudienceCard
-                key={option.role}
-                label={option.label}
-                sublabel={option.sublabel}
-                role={option.role}
-                icon={option.icon}
-                selectedRole={selectedRole}
-                onChoose={handleChoice}
-              />
-            ))}
-          </motion.div>
+            Välkommen till Parium
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease, delay: 0.9 }}
+            className="font-normal leading-[1.22] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] sm:whitespace-nowrap"
+            style={{ color: '#ffffff', fontSize: 'clamp(1.25rem, 0.45vw + 1.1rem, 1.625rem)' }}
+          >
+            Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
+          </motion.p>
         </div>
+
+        {/* CTAs */}
+        <motion.div
+          className="pointer-events-auto flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: {},
+            show: { transition: { staggerChildren: 0.18, delayChildren: 1.2 } },
+          }}
+        >
+          {audienceOptions.map((option) => (
+            <AudienceCard
+              key={option.role}
+              label={option.label}
+              sublabel={option.sublabel}
+              role={option.role}
+              icon={option.icon}
+              selectedRole={selectedRole}
+              onChoose={handleChoice}
+            />
+          ))}
+        </motion.div>
       </motion.div>
+
     </section>
   );
 };
