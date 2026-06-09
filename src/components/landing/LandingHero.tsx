@@ -195,62 +195,63 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           regeln i index.css — den färgar body grå så Safari samplar grått. */}
 
 
-      {/* Stacked hero: heading anchored at chin level → CTAs at bottom */}
+      {/* Stacked hero: heading/text/CTAs stay in one responsive flow */}
       <motion.div
-        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-end px-5 pb-[10svh] text-center sm:px-6 sm:pb-[12svh] md:px-12 md:pb-[14svh] lg:px-24 lg:pb-[14svh]"
+        className="pointer-events-none relative z-10 mx-auto min-h-[100svh] max-w-[1180px] px-5 text-center sm:px-6 md:px-12 lg:px-24"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        {/* Heading + subtitle anchored to the chin of the people in the video.
-            Chin sits at ~52svh on every device since the video is object-cover. */}
+        {/* Heading starts near chin level, but lifts on ultra-small screens so text never collides with CTAs. */}
         <div
-          className="absolute left-1/2 flex w-full max-w-[min(92vw,80rem)] -translate-x-1/2 flex-col items-center gap-1.5 px-5 sm:gap-2 sm:px-6 md:px-12 lg:px-24"
-          style={{ top: '52svh' }}
+          className="absolute left-1/2 flex w-full max-w-[min(92vw,80rem)] -translate-x-1/2 flex-col items-center px-5 sm:px-6 md:px-12 lg:px-24"
+          style={{ top: 'max(11rem, min(52svh, calc(100svh - 21rem)))' }}
         >
-          <motion.h1
-            id="landing-hero-heading"
-            initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            transition={{ duration: 1.4, ease, delay: 0.4 }}
-            className="max-w-3xl text-balance text-[2rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.25rem]"
-          >
-            Välkommen till Parium
-          </motion.h1>
+          <div className="flex w-full flex-col items-center gap-1.5 sm:gap-2">
+            <motion.h1
+              id="landing-hero-heading"
+              initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ duration: 1.4, ease, delay: 0.4 }}
+              className="max-w-3xl text-balance text-[clamp(1.75rem,8.2vw,2.2rem)] font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.25rem]"
+            >
+              Välkommen till Parium
+            </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease, delay: 0.9 }}
-            className="font-normal leading-[1.22] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] sm:whitespace-nowrap"
-            style={{ color: '#ffffff', fontSize: 'clamp(1.25rem, 0.45vw + 1.1rem, 1.625rem)' }}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease, delay: 0.9 }}
+              className="max-w-[21rem] font-normal leading-[1.22] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] min-[390px]:max-w-[38rem] sm:max-w-none sm:whitespace-nowrap"
+              style={{ color: '#ffffff', fontSize: 'clamp(1.12rem, 0.75vw + 0.96rem, 1.625rem)' }}
+            >
+              Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
+            </motion.p>
+          </div>
+
+          {/* CTAs */}
+          <motion.div
+            className="pointer-events-auto mt-6 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
+            initial="hidden"
+            animate="show"
+            variants={{
+              hidden: {},
+              show: { transition: { staggerChildren: 0.18, delayChildren: 1.2 } },
+            }}
           >
-            Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
-          </motion.p>
+            {audienceOptions.map((option) => (
+              <AudienceCard
+                key={option.role}
+                label={option.label}
+                sublabel={option.sublabel}
+                role={option.role}
+                icon={option.icon}
+                selectedRole={selectedRole}
+                onChoose={handleChoice}
+              />
+            ))}
+          </motion.div>
         </div>
-
-        {/* CTAs */}
-        <motion.div
-          className="pointer-events-auto flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
-          initial="hidden"
-          animate="show"
-          variants={{
-            hidden: {},
-            show: { transition: { staggerChildren: 0.18, delayChildren: 1.2 } },
-          }}
-        >
-          {audienceOptions.map((option) => (
-            <AudienceCard
-              key={option.role}
-              label={option.label}
-              sublabel={option.sublabel}
-              role={option.role}
-              icon={option.icon}
-              selectedRole={selectedRole}
-              onChoose={handleChoice}
-            />
-          ))}
-        </motion.div>
       </motion.div>
 
     </section>
