@@ -69,7 +69,7 @@ const SplitHeadline = ({
       <span
         key={`${w}-${i}`}
         aria-hidden
-        className="inline-block overflow-hidden align-baseline pb-[0.08em]"
+        className="split-headline-word inline-block overflow-hidden align-baseline pb-[0.08em]"
         style={{ marginRight: i === lastIdx ? 0 : '0.28em' }}
       >
         <motion.span
