@@ -213,7 +213,8 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
               initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{ duration: 1.4, ease, delay: 0.4 }}
-              className="max-w-3xl text-balance text-[clamp(1.75rem,8.2vw,2.2rem)] font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.25rem]"
+              className="whitespace-nowrap text-balance font-semibold leading-[1.1] tracking-tight text-white"
+              style={{ fontSize: 'clamp(1.6rem, 7.2vw, 3.25rem)' }}
             >
               Välkommen till Parium
             </motion.h1>
