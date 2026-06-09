@@ -1936,7 +1936,7 @@ video::-webkit-media-controls {
   .audience-ipad-heading {
     max-width: min(92vw, 60rem);
     font-size: 5.25rem !important;
-    line-height: 1 !important;
+    line-height: 1.06 !important;
     letter-spacing: 0 !important;
     text-wrap: balance;
   }
@@ -1945,15 +1945,23 @@ video::-webkit-media-controls {
 @media (min-width: 900px) and (max-width: 1180px) and (orientation: landscape) {
   .audience-ipad-heading {
     max-width: min(92vw, 60rem);
-    font-size: clamp(4.9rem, 8.2vw, 5.25rem) !important;
-    line-height: 1 !important;
+    font-size: clamp(4.5rem, 7.6vw, 5rem) !important;
+    line-height: 1.06 !important;
     letter-spacing: 0 !important;
     text-wrap: balance;
   }
+  /* Specialfall: BouncyFooter-rubriken ska få plats på en rad */
+  .audience-ipad-heading.audience-ipad-heading--single-line {
+    font-size: clamp(3rem, 4.8vw, 3.75rem) !important;
+    max-width: min(96vw, 56rem);
+    white-space: nowrap;
+  }
 }
 
+/* Säkerställ att descenders (G, g, p, y) aldrig klipps i SplitHeadline-ord
+   trots overflow-hidden på iPad. */
 @media (min-width: 768px) and (max-width: 1180px) {
   .audience-ipad-heading .split-headline-word {
-    padding-bottom: 0.02em;
+    padding-bottom: 0.22em;
   }
 }
