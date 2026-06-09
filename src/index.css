@@ -1950,10 +1950,11 @@ video::-webkit-media-controls {
     letter-spacing: 0 !important;
     text-wrap: balance;
   }
-  /* Specialfall: BouncyFooter-rubriken ska få plats på en rad */
+  /* Specialfall: BouncyFooter-rubriken ska få plats på en rad och skalar med skärmen */
   .audience-ipad-heading.audience-ipad-heading--single-line {
-    font-size: clamp(3rem, 4.8vw, 3.75rem) !important;
-    max-width: min(96vw, 56rem);
+    /* Auto-skalar så "Skapa ett konto nu." alltid passar på en rad i landscape iPad-spannet */
+    font-size: clamp(3.25rem, 6.4vw, 4.75rem) !important;
+    max-width: min(98vw, 64rem);
     white-space: nowrap;
   }
 }

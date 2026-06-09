@@ -494,6 +494,10 @@ const PinnedHorizontalGallery = () => {
           .phg-header { padding: clamp(36px, 5vh, 56px) 24px clamp(8px, 1.2vh, 16px); }
           .phg-title { font-size: 5.25rem; line-height: 1.0; max-width: min(92vw, 14ch); }
         }
+        @media (min-width: 900px) and (max-width: 1180px) and (orientation: landscape) {
+          /* iPad liggandes: matcha övriga sektioners rubrikstorlek så allt skalar likadant. */
+          .phg-title { font-size: clamp(4.5rem, 7.6vw, 5rem); line-height: 1.04; max-width: min(92vw, 18ch); }
+        }
         .phg-sub {
           margin: 22px auto 0;
           font-size: clamp(1rem, 1.2vw, 1.125rem);
