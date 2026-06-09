@@ -1954,7 +1954,7 @@ video::-webkit-media-controls {
   .audience-ipad-heading.audience-ipad-heading--single-line {
     font-size: clamp(3rem, 4.8vw, 3.75rem) !important;
     max-width: min(96vw, 56rem);
-    text-wrap: nowrap;
+    white-space: nowrap;
   }
 }
 
