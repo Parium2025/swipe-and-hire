@@ -195,14 +195,19 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           regeln i index.css — den färgar body grå så Safari samplar grått. */}
 
 
-      {/* Stacked hero: heading → CTAs */}
+      {/* Stacked hero: heading anchored at chin level → CTAs at bottom */}
       <motion.div
-        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-between px-5 pb-[10svh] pt-[44svh] text-center sm:px-6 sm:pb-[12svh] sm:pt-[42svh] md:px-12 md:pb-[14svh] md:pt-[38svh] lg:px-24 lg:pb-[14svh] lg:pt-[34svh]"
+        className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] max-w-[1180px] flex-col items-center justify-end px-5 pb-[10svh] text-center sm:px-6 sm:pb-[12svh] md:px-12 md:pb-[14svh] lg:px-24 lg:pb-[14svh]"
         animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
-        <div className="flex flex-col items-center">
+        {/* Heading + subtitle anchored to the chin of the people in the video.
+            Chin sits at ~52svh on every device since the video is object-cover. */}
+        <div
+          className="absolute left-1/2 flex w-full max-w-[min(92vw,80rem)] -translate-x-1/2 flex-col items-center gap-1.5 px-5 sm:gap-2 sm:px-6 md:px-12 lg:px-24"
+          style={{ top: '52svh' }}
+        >
           <motion.h1
             id="landing-hero-heading"
             initial={{ opacity: 0, y: 32, filter: 'blur(14px)' }}
@@ -217,7 +222,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease, delay: 0.9 }}
-            className="mt-6 max-w-[min(92vw,80rem)] font-normal leading-[1.32] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] sm:whitespace-nowrap"
+            className="font-normal leading-[1.22] text-white opacity-100 drop-shadow-[0_2px_14px_rgb(0_0_0/0.55)] sm:whitespace-nowrap"
             style={{ color: '#ffffff', fontSize: 'clamp(1.25rem, 0.45vw + 1.1rem, 1.625rem)' }}
           >
             Oavsett om du söker jobb eller rekryterar så finns vi här för dig!
@@ -225,7 +230,6 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
         </div>
 
         {/* CTAs */}
-
         <motion.div
           className="pointer-events-auto flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
           initial="hidden"
@@ -248,6 +252,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
           ))}
         </motion.div>
       </motion.div>
+
     </section>
   );
 };
