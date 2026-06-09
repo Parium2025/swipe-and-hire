@@ -1186,7 +1186,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
                 viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.05 }}
-                className="landing-feature-mobile-in mt-4 max-w-2xl text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:text-6xl"
+                className="landing-feature-mobile-in mt-4 max-w-2xl text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:text-6xl md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-[clamp(3.25rem,5.4vw,4.75rem)] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-[1.02] md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0] md:[@media_(orientation:portrait)]:max-w-[min(92vw,60rem)]"
                 style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '180ms' } : undefined}
               >
                 {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
