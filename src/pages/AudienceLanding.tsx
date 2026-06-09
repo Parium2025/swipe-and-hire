@@ -1300,7 +1300,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 as="h2"
                 text="Vi finns här för dig."
                 emphasizeLast
-                className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl"
+                className="mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-[clamp(3.25rem,5.4vw,4.75rem)] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-[1.02] md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0]"
               />
               <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
                 Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.
