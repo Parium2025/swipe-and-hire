@@ -98,6 +98,7 @@ function normalizeJobPostingShape(input: unknown): JobPostingShape | null {
     workplace_county: asNullableString(record.workplace_county),
     employment_type: asNullableString(record.employment_type),
     job_image_url: asNullableString(record.job_image_url),
+    job_image_desktop_url: asNullableString(record.job_image_desktop_url),
     is_active: typeof record.is_active === 'boolean' ? record.is_active : false,
     created_at: createdAt,
     expires_at: asNullableString(record.expires_at),
