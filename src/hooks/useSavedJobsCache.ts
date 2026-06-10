@@ -193,6 +193,7 @@ const SAVED_SELECT = `
     workplace_county,
     employment_type,
     job_image_url,
+    job_image_desktop_url,
     is_active,
     created_at,
     expires_at,
