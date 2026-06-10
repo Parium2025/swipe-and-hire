@@ -75,7 +75,7 @@ const BottomChromeStrip = () => {
     const root = document.documentElement;
     const shouldReserveChrome = isTouch && !isAuthPath(location.pathname);
     if (shouldReserveChrome) {
-      const basePx = isTabletLandscape ? 168 : 68;
+      const basePx = isTabletLandscape ? 120 : 68;
       root.dataset.touchChrome = 'true';
       root.style.setProperty(
         '--chrome-strip-pad',
