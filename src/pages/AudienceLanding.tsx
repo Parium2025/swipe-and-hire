@@ -910,6 +910,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const c = audienceContent[audience];
   const isMobileFeatureMotion = useIsMobileLandingMotion();
 
+  // Smooth scroll för desktop med mus (auto-av på touch + reduced motion)
+  useSmoothScroll(true);
+
+
   // Mobil: trigga `.landing-feature-mobile-in` när de scrollas in.
   // Header-elementen (eyebrow/h2/p) animeras direkt vid mount; korten
   // animeras när användaren faktiskt når sektionen så att slide-in
