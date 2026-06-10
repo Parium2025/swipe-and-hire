@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
 import AuthDesktop from '@/components/AuthDesktop';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
