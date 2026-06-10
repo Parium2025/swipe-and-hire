@@ -618,8 +618,8 @@ const AuthMobile = ({
         minHeight: '100svh'
       }}
     >
-      {/* Decorative bubbles only. /auth keeps a dark, readable form surface and must not create a false white zone behind controls. */}
-      <AnimatedBackground showGlow={false} />
+      {/* Bubblor renderas på Auth.tsx-nivå (viewport-fixed) för att alltid synas oavsett scroll */}
+
 
       <div 
         ref={containerRef} 
