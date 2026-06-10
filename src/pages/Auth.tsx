@@ -674,6 +674,11 @@ const Auth = () => {
   return (
     <div className="relative h-screen w-full overflow-hidden" style={authBackdropStyle}>
       <AuthBackdrop />
+      {/* Dekorativa bubblor — fixed mot viewport, följer ALDRIG med scroll */}
+      <div className="fixed inset-0 z-[5] pointer-events-none">
+        <AnimatedBackground showGlow={false} variant="viewport" />
+      </div>
+
       {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
       <main
         className="h-full w-full min-h-0 overflow-y-auto overflow-x-hidden relative z-10"
