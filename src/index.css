@@ -952,6 +952,10 @@ All colors MUST be HSL.
     main[data-main-scroll-container="true"]:not(.no-chrome-pad) {
       scroll-padding-bottom: var(--chrome-strip-pad) !important;
     }
+    .responsive-container-wide:not(.no-chrome-pad),
+    .jobview-container:not(.no-chrome-pad) {
+      padding-bottom: max(var(--chrome-strip-pad), calc(env(safe-area-inset-bottom, 0px) + 50px)) !important;
+    }
   }
 
   /* Dashboard layout system */
