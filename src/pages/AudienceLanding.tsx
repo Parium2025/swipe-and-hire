@@ -488,6 +488,7 @@ type HeroPhoneMetrics = {
   right?: string;
   top: number;
   height: number;
+  canvasHeight?: number;
   zoom: number;
   yOffset: number;
 };
@@ -518,7 +519,7 @@ const FixedPhoneLayer = () => {
     // Täcker iPad mini → iPad Pro 12.9" (1366×1024) samt Android-tablets upp
     // till ~1600px breda. Vi använder pointer:coarse + landskap som signal
     // så att vanliga laptops aldrig råkar in i den här grenen.
-    const isLandscapeTablet = width >= 900 && width <= 1400 && width > height && height <= 1050;
+    const isLandscapeTablet = isCoarse && width >= 900 && width <= 1400 && width > height && height <= 1050;
 
     if (isLandscapeTablet) {
       const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
@@ -529,11 +530,13 @@ const FixedPhoneLayer = () => {
       const columnWidth = Math.min(width * 0.48, 620);
       const widthFitHeight = (columnWidth * 19.5) / 9;
       const safeHeight = Math.min(safeCanvasHeight, widthFitHeight, 760);
+      const canvasHeadroom = clamp(safeHeight * 0.2, 96, 150);
       const metrics = {
         isDesktop: true,
         pinToViewport: true,
         top,
         height: safeHeight,
+        canvasHeight: safeHeight + canvasHeadroom,
         // Spline-scenen klipper sin egen topp om zoom går för högt även när
         // DOM-lagret har fri yta. Det här taket är därför konservativt: stor
         // iPad-närvaro, men alltid hela telefonens topp/notch synlig.
@@ -584,6 +587,7 @@ const FixedPhoneLayer = () => {
       const minH = width < 900 ? 330 : isCompactLaptop ? 300 : 390;
       const maxH = isUltraDesktop ? 820 : isXLDesktop ? 740 : isLargeDesktop ? 660 : (width < 900 ? 420 : isCompactLaptop ? 430 : 570);
       const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), minH, maxH);
+      const canvasHeadroom = clamp(safeHeight * 0.2, 88, 150);
       const viewportScale = clamp(width / 1440, 0.72, isUltraDesktop ? 1.3 : isXLDesktop ? 1.18 : isLargeDesktop ? 1.08 : 1);
       const yOffset = isCompactLaptop ? 12 : 26;
       const zoomCap = isUltraDesktop ? 0.7 : isXLDesktop ? 0.62 : isLargeDesktop ? 0.56 : (isCompactLaptop ? 0.4 : 0.5);
@@ -591,6 +595,7 @@ const FixedPhoneLayer = () => {
         isDesktop: true,
         top: 0,
         height: safeHeight,
+        canvasHeight: safeHeight + canvasHeadroom,
         zoom: clamp((height / safeHeight) * (isCompactLaptop ? 0.35 : 0.42) * viewportScale, 0.32, zoomCap),
         yOffset,
       };
@@ -723,6 +728,8 @@ const FixedPhoneLayer = () => {
 
 
   const phoneWidth = phoneMetrics.height * PHONE_ASPECT;
+  const phoneCanvasHeight = phoneMetrics.canvasHeight ?? phoneMetrics.height;
+  const phoneCanvasLift = Math.max(0, (phoneCanvasHeight - phoneMetrics.height) / 2);
 
   if (isInlinePhone) return null;
 
@@ -740,10 +747,10 @@ const FixedPhoneLayer = () => {
           data-phone-scroll-forward
           className={`pointer-events-none transition-opacity duration-[700ms] ease-out ${visible ? 'opacity-100' : 'opacity-0'} ${phoneMetrics.pinToViewport ? 'fixed flex w-fit items-start justify-center' : phoneMetrics.isDesktop ? 'relative ml-auto mr-[clamp(2rem,8vw,8rem)] flex w-fit items-center justify-center' : 'absolute left-1/2 flex w-fit -translate-x-1/2 items-start justify-center'}`}
           style={phoneMetrics.pinToViewport
-            ? { top: `${phoneMetrics.top}px`, right: phoneMetrics.right, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
+            ? { top: `${phoneMetrics.top - phoneCanvasLift}px`, right: phoneMetrics.right, height: `${phoneCanvasHeight}px`, width: `${phoneWidth}px` }
             : phoneMetrics.isDesktop
-              ? { height: `${phoneMetrics.height}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset}px)` }
-              : { top: `${phoneMetrics.top}px`, height: `${phoneMetrics.height}px`, width: `${phoneWidth}px` }
+              ? { height: `${phoneCanvasHeight}px`, width: `${phoneWidth}px`, transform: `translateY(${phoneMetrics.yOffset - phoneCanvasLift}px)` }
+              : { top: `${phoneMetrics.top}px`, height: `${phoneCanvasHeight}px`, width: `${phoneWidth}px` }
           }
         >
 
