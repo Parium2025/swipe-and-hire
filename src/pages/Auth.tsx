@@ -619,19 +619,9 @@ const Auth = () => {
       aria-hidden
       className="fixed inset-x-0 top-0 z-0 h-[calc(100dvh+var(--chrome-strip-pad,0px))] overflow-hidden pointer-events-none"
       style={authBackdropStyle}
-    >
-      <svg
-        className="absolute inset-x-0 bottom-0 h-[50%] w-full"
-        viewBox="0 0 1440 600"
-        preserveAspectRatio="none"
-      >
-        <path
-          d="M0,80 C200,120 380,110 560,80 C760,46 940,44 1120,72 C1270,96 1360,100 1440,82 L1440,600 L0,600 Z"
-          fill="hsl(var(--landing-light))"
-        />
-      </svg>
-    </div>
+    />
   );
+
 
   if (device === 'mobile') {
     return (
