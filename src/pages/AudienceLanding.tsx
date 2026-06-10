@@ -589,7 +589,11 @@ const FixedPhoneLayer = () => {
       const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), minH, maxH);
       const canvasHeadroom = clamp(safeHeight * 0.2, 88, 150);
       const viewportScale = clamp(width / 1440, 0.72, isUltraDesktop ? 1.3 : isXLDesktop ? 1.18 : isLargeDesktop ? 1.08 : 1);
-      const yOffset = isCompactLaptop ? 34 : 52;
+      // Telefonens topp ska linjera med rubrikens topp ("Hitta jobb"). Skalar med viewport-höjd
+      // så att det håller från liten laptop upp till stor iMac/5K-skärm.
+      const yOffset = isCompactLaptop
+        ? clamp(height * 0.075, 52, 110)
+        : clamp(height * 0.11, 84, 200);
       const zoomCap = isUltraDesktop ? 0.7 : isXLDesktop ? 0.62 : isLargeDesktop ? 0.56 : (isCompactLaptop ? 0.4 : 0.5);
       const metrics = {
         isDesktop: true,
