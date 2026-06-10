@@ -550,8 +550,8 @@ const AuthDesktop = ({
     <div 
       className="flex flex-col relative auth-dark" 
     >
-      {/* Decorative bubbles only. /auth keeps a dark, readable form surface and must not create a false white zone behind controls. */}
-      <AnimatedBackground showGlow={false} />
+      {/* Bubblor renderas på Auth.tsx-nivå (viewport-fixed) för att alltid synas oavsett scroll */}
+
 
       <div className="relative z-10 flex flex-col min-h-full py-8 px-6">
         {/* Header med logo och text */}
