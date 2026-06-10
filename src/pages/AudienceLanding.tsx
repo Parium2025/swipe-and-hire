@@ -1069,7 +1069,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 1, ease }}
-                className="audience-ipad-heading wave-text text-4xl font-black leading-[1.02] tracking-[0] sm:text-5xl md:text-6xl md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0] lg:text-[4.75rem] lg:[@media_(orientation:portrait)]:text-[5.25rem]"
+                className="landing-h2 wave-text"
               >
                 En lugnare väg till nästa steg.
               </motion.h2>
