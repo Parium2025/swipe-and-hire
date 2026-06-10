@@ -1032,6 +1032,16 @@ All colors MUST be HSL.
     to { opacity: 1; }
   }
 
+  /* Centrera ett ensamt kort på 2-kolumns-grid (sm: iPad porträtt etc.) */
+  @media (min-width: 640px) and (max-width: 1023.98px) {
+    .job-card-grid-single > .job-card-mobile-shell:first-child {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: 100%;
+      max-width: calc((100% - 1rem) / 2);
+    }
+  }
+
   @media (min-width: 1024px) {
     .search-jobs-grid-single-desktop > .job-card-mobile-shell:first-child {
       grid-column: 2;
