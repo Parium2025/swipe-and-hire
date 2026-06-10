@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
 import AuthDesktop from '@/components/AuthDesktop';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -627,6 +628,11 @@ const Auth = () => {
     return (
       <div className="relative h-dvh min-h-dvh w-full max-w-full overflow-hidden" style={authBackdropStyle}>
         <AuthBackdrop />
+        {/* Dekorativa bubblor — fixed mot viewport, följer ALDRIG med scroll */}
+        <div className="fixed inset-0 z-[5] pointer-events-none">
+          <AnimatedBackground showGlow={false} variant="viewport" />
+        </div>
+
         {/* Bottom safe-area blend to eliminate iOS seam */}
         <div
           className="fixed inset-x-0 bottom-0 pointer-events-none z-40"
@@ -668,6 +674,11 @@ const Auth = () => {
   return (
     <div className="relative h-screen w-full overflow-hidden" style={authBackdropStyle}>
       <AuthBackdrop />
+      {/* Dekorativa bubblor — fixed mot viewport, följer ALDRIG med scroll */}
+      <div className="fixed inset-0 z-[5] pointer-events-none">
+        <AnimatedBackground showGlow={false} variant="viewport" />
+      </div>
+
       {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
       <main
         className="h-full w-full min-h-0 overflow-y-auto overflow-x-hidden relative z-10"

@@ -550,8 +550,8 @@ const AuthDesktop = ({
     <div 
       className="flex flex-col relative auth-dark" 
     >
-      {/* Decorative bubbles only. /auth keeps a dark, readable form surface and must not create a false white zone behind controls. */}
-      <AnimatedBackground showGlow={false} />
+      {/* Bubblor renderas på Auth.tsx-nivå (viewport-fixed) för att alltid synas oavsett scroll */}
+
 
       <div className="relative z-10 flex flex-col min-h-full py-8 px-6">
         {/* Header med logo och text */}
@@ -588,7 +588,7 @@ const AuthDesktop = ({
 
           {/* Auth form */}
           <div className="w-full max-w-md">
-            <Card className="bg-primary/85 backdrop-blur-xl border-white/20 shadow-2xl rounded-2xl overflow-hidden">
+            <Card className="bg-white/[0.06] backdrop-blur-2xl border border-white/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.55)] rounded-2xl overflow-hidden">
               <CardContent className="p-6">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <SlidingTabs isLogin={isLogin} onTabChange={handleTabChange} />
