@@ -13,7 +13,7 @@ const AudienceHowItWorks = ({ role }: { role: AudienceRole }) => {
             <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-secondary/70">
               Så fungerar det
             </span>
-            <h2 className="wave-text mt-5 text-4xl font-black leading-[0.98] tracking-[0] sm:text-5xl md:text-6xl lg:text-[4.75rem] xl:text-[5.25rem]">
+            <h2 className="landing-h2 wave-text mt-5">
               {role === 'job_seeker' ? 'Från profil till jobb.' : 'Från roll till anställd.'}
             </h2>
             <p className="wave-text mt-6 max-w-md text-base leading-8 opacity-75 sm:text-lg">
