@@ -464,7 +464,7 @@ const PinnedHorizontalGallery = () => {
           /* Mer luftigt avstånd ovan/under rubriken på alla skärmar — håller
              professionellt andrum mellan topp-nav (Parium-logo) och titel,
              samt mellan titel och kortrad. */
-          padding: clamp(48px, 7vh, 80px) 24px clamp(20px, 3vh, 40px);
+          padding: clamp(64px, 9vh, 104px) 24px clamp(24px, 3.8vh, 48px);
           text-align: center;
           z-index: 3;
           will-change: transform, opacity;
@@ -474,7 +474,7 @@ const PinnedHorizontalGallery = () => {
              Skalar fortfarande fluid utan breakpoint-hopp.
              Höjt min från 1.75rem → 2.75rem så rubriken har samma tyngd som
              hero-rubriken på mobil (annars blir det mycket död yta). */
-          font-size: clamp(2.75rem, 5.2vw, 5.25rem);
+          font-size: clamp(2.75rem, 5.2vw, 7rem);
           font-weight: 900;
           line-height: 1.04;
           letter-spacing: -0.025em;
@@ -489,8 +489,8 @@ const PinnedHorizontalGallery = () => {
           color: inherit;
           font-weight: 900;
         }
-        @media (min-width: 1280px) { .phg-title { font-size: 4.75rem; } }
-        @media (min-width: 1536px) { .phg-title { font-size: 5.25rem; } }
+        @media (min-width: 1280px) { .phg-title { font-size: clamp(2.75rem, 5.2vw, 7rem); } }
+        @media (min-width: 1536px) { .phg-title { font-size: clamp(2.75rem, 5.2vw, 7rem); } }
         @media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
           .phg-header { padding: clamp(36px, 5vh, 56px) 24px clamp(8px, 1.2vh, 16px); }
           .phg-title { font-size: 5.25rem; line-height: 1.0; max-width: min(92vw, 14ch); }
@@ -530,7 +530,7 @@ const PinnedHorizontalGallery = () => {
           flex: 0 0 auto;
           /* Något mindre kort på laptop-bredder (1000–1400) så helheten
              känns mer luftig och proportionerlig mot rubrik + chrome. */
-          width: clamp(240px, 22vw, 360px);
+          width: clamp(220px, 19vw, 330px);
           aspect-ratio: 4 / 5;
           border-radius: 26px;
           overflow: hidden;
