@@ -73,19 +73,23 @@ const BottomChromeStrip = () => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (isTouch) {
+    const shouldReserveChrome = isTouch && !isAuthPath(location.pathname);
+    if (shouldReserveChrome) {
       const basePx = isTabletLandscape ? 168 : 68;
+      root.dataset.touchChrome = 'true';
       root.style.setProperty(
         '--chrome-strip-pad',
         `calc(env(safe-area-inset-bottom, 0px) + ${basePx}px)`
       );
     } else {
+      delete root.dataset.touchChrome;
       root.style.removeProperty('--chrome-strip-pad');
     }
     return () => {
+      delete root.dataset.touchChrome;
       root.style.removeProperty('--chrome-strip-pad');
     };
-  }, [isTouch, isTabletLandscape]);
+  }, [isTouch, isTabletLandscape, location.pathname]);
 
   if (!isTouch || isAuthPath(location.pathname)) return null;
 
