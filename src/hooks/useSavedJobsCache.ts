@@ -27,6 +27,7 @@ interface JobPostingShape {
   workplace_county: string | null;
   employment_type: string | null;
   job_image_url: string | null;
+  job_image_desktop_url: string | null;
   is_active: boolean;
   created_at: string;
   expires_at: string | null;
