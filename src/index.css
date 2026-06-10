@@ -925,7 +925,7 @@ All colors MUST be HSL.
        än på telefon. Lägg på extra andrum så inget kort/knapp klipps. */
     @media (orientation: landscape) and (min-width: 768px) and (max-width: 1366px) {
       :root {
-        --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 168px);
+        --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 120px);
       }
     }
     body,
