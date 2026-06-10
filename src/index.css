@@ -1975,3 +1975,77 @@ video::-webkit-media-controls {
     padding-bottom: 0.22em;
   }
 }
+
+/* =====================================================================
+   MASTER LANDING HEADING SYSTEM
+   En enda röd tråd. Alla H2/hero-rubriker på landningssidan använder
+   .landing-h2 och får exakt samma skala oavsett enhet eller orientering.
+   Lokala overrides är förbjudna – justera bara HÄR.
+   ===================================================================== */
+.landing-h2 {
+  font-weight: 900 !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.005em !important;
+  text-wrap: balance;
+  /* Mobil baseline (<640px) */
+  font-size: clamp(2.5rem, 11.5vw, 3.5rem) !important;
+}
+
+/* Liten tablet / stor mobil */
+@media (min-width: 640px) and (max-width: 767px) {
+  .landing-h2 { font-size: clamp(3rem, 8vw, 4rem) !important; line-height: 1.03 !important; }
+}
+
+/* iPad portrait */
+@media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
+  .landing-h2 {
+    font-size: clamp(4.5rem, 9.5vw, 5.25rem) !important;
+    line-height: 1.04 !important;
+    max-width: min(92vw, 60rem);
+  }
+}
+
+/* iPad / liten laptop landscape */
+@media (min-width: 900px) and (max-width: 1180px) and (orientation: landscape) {
+  .landing-h2 {
+    font-size: clamp(4rem, 6.6vw, 5rem) !important;
+    line-height: 1.04 !important;
+    max-width: min(94vw, 64rem);
+  }
+}
+
+/* Standard laptop */
+@media (min-width: 1181px) and (max-width: 1440px) {
+  .landing-h2 {
+    font-size: clamp(4.5rem, 5.4vw, 5.25rem) !important;
+    line-height: 1.03 !important;
+  }
+}
+
+/* Stor desktop */
+@media (min-width: 1441px) {
+  .landing-h2 {
+    font-size: 5.25rem !important;
+    line-height: 1.02 !important;
+  }
+}
+
+/* Single-line variant (BouncyFooter "Skapa ett konto nu.") */
+.landing-h2.landing-h2--single-line {
+  text-wrap: nowrap;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .landing-h2.landing-h2--single-line {
+    font-size: clamp(2.25rem, 10.5vw, 3rem) !important;
+  }
+}
+@media (min-width: 900px) and (max-width: 1180px) and (orientation: landscape) {
+  .landing-h2.landing-h2--single-line {
+    font-size: clamp(3.25rem, 6.4vw, 4.75rem) !important;
+  }
+}
+
+/* Descenders ska aldrig klippas i SplitHeadline */
+.landing-h2 .split-headline-word { padding-bottom: 0.22em; }
+
