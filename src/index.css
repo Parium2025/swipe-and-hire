@@ -921,6 +921,13 @@ All colors MUST be HSL.
     :root {
       --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 68px);
     }
+    /* Tablet i liggande läge: fodralets/ramens nederkant döljer mer
+       än på telefon. Lägg på extra andrum så inget kort/knapp klipps. */
+    @media (orientation: landscape) and (min-width: 768px) {
+      :root {
+        --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 112px);
+      }
+    }
     body,
     #root {
       padding-bottom: var(--chrome-strip-pad) !important;

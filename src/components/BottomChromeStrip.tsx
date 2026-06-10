@@ -22,15 +22,26 @@ const isAuthPath = (pathname: string) => pathname === '/auth';
 const BottomChromeStrip = () => {
   const location = useLocation();
   const [isTouch, setIsTouch] = useState(false);
+  const [isTabletLandscape, setIsTabletLandscape] = useState(false);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(pointer: coarse)');
-    const apply = () => setIsTouch(mq.matches);
+    const mqTouch = window.matchMedia('(pointer: coarse)');
+    const mqTablet = window.matchMedia(
+      '(pointer: coarse) and (orientation: landscape) and (min-width: 768px)'
+    );
+    const apply = () => {
+      setIsTouch(mqTouch.matches);
+      setIsTabletLandscape(mqTablet.matches);
+    };
     apply();
-    mq.addEventListener?.('change', apply);
-    return () => mq.removeEventListener?.('change', apply);
+    mqTouch.addEventListener?.('change', apply);
+    mqTablet.addEventListener?.('change', apply);
+    return () => {
+      mqTouch.removeEventListener?.('change', apply);
+      mqTablet.removeEventListener?.('change', apply);
+    };
   }, []);
 
   const color = isLandingVideoPath(location.pathname)
@@ -57,13 +68,15 @@ const BottomChromeStrip = () => {
 
   // Sync CSS variable so scroll containers always reserve space
   // matching the strip — independent of @media (pointer: coarse).
+  // Tablet i landskap: ramen/fodralet täcker mer → extra andrum.
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
     if (isTouch) {
+      const basePx = isTabletLandscape ? 112 : 68;
       root.style.setProperty(
         '--chrome-strip-pad',
-        'calc(env(safe-area-inset-bottom, 0px) + 68px)'
+        `calc(env(safe-area-inset-bottom, 0px) + ${basePx}px)`
       );
     } else {
       root.style.removeProperty('--chrome-strip-pad');
@@ -71,7 +84,7 @@ const BottomChromeStrip = () => {
     return () => {
       root.style.removeProperty('--chrome-strip-pad');
     };
-  }, [isTouch]);
+  }, [isTouch, isTabletLandscape]);
 
   if (!isTouch || isAuthPath(location.pathname)) return null;
 
