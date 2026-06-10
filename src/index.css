@@ -1932,49 +1932,8 @@ video::-webkit-media-controls {
   display: none !important;
 }
 
-@media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
-  .audience-ipad-heading {
-    max-width: min(92vw, 60rem);
-    font-size: 5.25rem !important;
-    line-height: 1.06 !important;
-    letter-spacing: 0 !important;
-    text-wrap: balance;
-  }
-}
+/* Dead .audience-ipad-heading CSS removed — ersatt av .landing-h2 master-system nedan. */
 
-@media (min-width: 900px) and (max-width: 1180px) and (orientation: landscape) {
-  .audience-ipad-heading {
-    max-width: min(92vw, 60rem);
-    font-size: clamp(4.5rem, 7.6vw, 5rem) !important;
-    line-height: 1.06 !important;
-    letter-spacing: 0 !important;
-    text-wrap: balance;
-  }
-  /* Specialfall: BouncyFooter-rubriken ska få plats på en rad och skalar med skärmen */
-  .audience-ipad-heading.audience-ipad-heading--single-line {
-    /* Auto-skalar så "Skapa ett konto nu." alltid passar på en rad i landscape iPad-spannet */
-    font-size: clamp(3.25rem, 6.4vw, 4.75rem) !important;
-    max-width: min(98vw, 64rem);
-    white-space: nowrap;
-  }
-}
-
-@media (min-width: 1181px) and (max-width: 1400px) and (orientation: landscape) and (pointer: fine) {
-  .audience-ipad-heading {
-    font-size: clamp(4.5rem, 5.2vw, 5.25rem) !important;
-    line-height: 1.04 !important;
-    letter-spacing: 0 !important;
-    text-wrap: balance;
-  }
-}
-
-/* Säkerställ att descenders (G, g, p, y) aldrig klipps i SplitHeadline-ord
-   trots overflow-hidden på iPad. */
-@media (min-width: 768px) and (max-width: 1180px) {
-  .audience-ipad-heading .split-headline-word {
-    padding-bottom: 0.22em;
-  }
-}
 
 /* =====================================================================
    MASTER LANDING HEADING SYSTEM
