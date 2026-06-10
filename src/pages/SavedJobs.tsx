@@ -333,6 +333,7 @@ const SavedJobs = () => {
                           created_at: job.created_at,
                           expires_at: job.expires_at || undefined,
                           job_image_url: job.job_image_url || undefined,
+                          job_image_desktop_url: job.job_image_desktop_url || undefined,
                           image_focus_position: job.image_focus_position || undefined,
                           company_name: companyName,
                           company_logo_url: job.company_logo_url || undefined,
