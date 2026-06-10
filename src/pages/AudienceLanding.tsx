@@ -859,7 +859,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
             transition={{ duration: 1.1, ease, delay: 0.05 }}
-            className="audience-ipad-heading wave-text mb-5 max-w-[min(92vw,52rem)] text-[2.5rem] leading-[1.02] min-[376px]:text-[3.25rem] min-[376px]:leading-[1.02] font-black tracking-[0] sm:mb-8 sm:text-[clamp(2.75rem,4.4vw,4.75rem)] sm:leading-[1.04] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-[clamp(3.25rem,5.4vw,4.75rem)] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-[1.02] md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0] md:[@media_(orientation:portrait)]:max-w-[min(92vw,60rem)]"
+            className="landing-h2 wave-text mb-5 sm:mb-8 max-w-[min(92vw,52rem)]"
           >
             Vi har gjort det enkelt för alla!
           </motion.h2>
@@ -1069,7 +1069,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 1, ease }}
-                className="audience-ipad-heading wave-text text-4xl font-black leading-[1.02] tracking-[0] sm:text-5xl md:text-6xl md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0] lg:text-[4.75rem] lg:[@media_(orientation:portrait)]:text-[5.25rem]"
+                className="landing-h2 wave-text"
               >
                 En lugnare väg till nästa steg.
               </motion.h2>
@@ -1125,7 +1125,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
                 viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.05 }}
-                className="audience-ipad-heading landing-feature-mobile-in wave-text mt-4 max-w-3xl text-4xl font-black leading-[1.04] tracking-[0] sm:text-5xl md:text-6xl md:[@media_(orientation:portrait)]:mt-6 md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0] md:[@media_(orientation:portrait)]:max-w-[min(92vw,60rem)]"
+                className="landing-h2 landing-feature-mobile-in wave-text mt-4 max-w-3xl md:[@media_(orientation:portrait)]:mt-6"
                 style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '180ms' } : undefined}
               >
                 Allt du behöver för att {audience === 'job_seeker' ? 'hitta rätt jobb' : 'hitta rätt person'}.
@@ -1193,7 +1193,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
                 viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.05 }}
-                className="audience-ipad-heading landing-feature-mobile-in mt-4 max-w-2xl text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:text-6xl md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-[clamp(3.25rem,5.4vw,4.75rem)] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-[1.02] md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0] md:[@media_(orientation:portrait)]:max-w-[min(92vw,60rem)]"
+                className="landing-h2 landing-feature-mobile-in mt-4 max-w-2xl text-white"
                 style={isMobileFeatureMotion ? { ['--lf-x' as string]: '-60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '180ms' } : undefined}
               >
                 {audience === 'job_seeker' ? 'Gratis för dig som söker jobb.' : 'Transparenta priser. Inga överraskningar.'}
@@ -1256,7 +1256,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 <SplitHeadline
                   as="h2"
                   text="Frågor & svar"
-                  className="audience-ipad-heading mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-[clamp(3.25rem,5.4vw,4.75rem)] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-[1.02] md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0]"
+                  className="landing-h2 mt-4 text-white"
                 />
               </motion.div>
               <motion.div
@@ -1307,7 +1307,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 as="h2"
                 text="Vi finns här för dig."
                 emphasizeLast
-                className="audience-ipad-heading mt-4 text-4xl font-black leading-[1.04] tracking-[-0.03em] text-white sm:text-5xl md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-[clamp(3.25rem,5.4vw,4.75rem)] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-[1.02] md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.0]"
+                className="landing-h2 mt-4 text-white"
               />
               <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
                 Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.

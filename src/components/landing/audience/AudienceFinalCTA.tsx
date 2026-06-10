@@ -28,7 +28,7 @@ const AudienceFinalCTA = ({ role }: { role: AudienceRole }) => {
         <SplitHeadline
           as="h2"
           text={c.title}
-          className="mx-auto max-w-2xl text-4xl font-black leading-[1.02] tracking-[-0.03em] text-white sm:text-5xl md:text-6xl lg:text-[4.75rem] xl:text-[5.25rem]"
+          className="landing-h2 mx-auto max-w-2xl text-white"
         />
         <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/60 sm:text-lg">
           {c.body}

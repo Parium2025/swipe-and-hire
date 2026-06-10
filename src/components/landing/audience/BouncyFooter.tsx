@@ -131,7 +131,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
                 text={headline}
                 emphasizeLast
                 delay={0.55}
-                className="audience-ipad-heading audience-ipad-heading--single-line text-3xl font-black leading-[1.05] tracking-[-0.025em] text-background sm:text-5xl md:text-6xl lg:text-[4.75rem] xl:text-[5.25rem] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:text-[clamp(3rem,4.8vw,3.75rem)] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:leading-[1.05] md:[@media_(orientation:landscape)_and_(min-width:900px)_and_(max-width:1400px)]:whitespace-nowrap md:[@media_(orientation:portrait)]:text-[5.25rem] md:[@media_(orientation:portrait)]:leading-[1.05]"
+                className="landing-h2 landing-h2--single-line text-background"
               />
             <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-7 text-background/80 sm:text-lg">
               {sub}
