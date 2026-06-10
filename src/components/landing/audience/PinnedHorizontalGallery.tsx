@@ -474,7 +474,7 @@ const PinnedHorizontalGallery = () => {
              Skalar fortfarande fluid utan breakpoint-hopp.
              Höjt min från 1.75rem → 2.75rem så rubriken har samma tyngd som
              hero-rubriken på mobil (annars blir det mycket död yta). */
-          font-size: clamp(2.75rem, 4.4vw, 4.75rem);
+          font-size: clamp(2.75rem, 5.2vw, 5.25rem);
           font-weight: 900;
           line-height: 1.04;
           letter-spacing: -0.025em;
@@ -489,7 +489,8 @@ const PinnedHorizontalGallery = () => {
           color: inherit;
           font-weight: 900;
         }
-        @media (min-width: 1536px) { .phg-title { font-size: clamp(3.75rem, 4vw, 5.5rem); } }
+        @media (min-width: 1280px) { .phg-title { font-size: 4.75rem; } }
+        @media (min-width: 1536px) { .phg-title { font-size: 5.25rem; } }
         @media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
           .phg-header { padding: clamp(36px, 5vh, 56px) 24px clamp(8px, 1.2vh, 16px); }
           .phg-title { font-size: 5.25rem; line-height: 1.0; max-width: min(92vw, 14ch); }

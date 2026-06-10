@@ -586,7 +586,7 @@ const FixedPhoneLayer = () => {
       const safeHeight = clamp(Math.min(safeCanvasHeight, widthFitHeight), minH, maxH);
       const viewportScale = clamp(width / 1440, 0.72, isUltraDesktop ? 1.3 : isXLDesktop ? 1.18 : isLargeDesktop ? 1.08 : 1);
       const yOffset = isCompactLaptop ? 12 : 26;
-      const zoomCap = isUltraDesktop ? 0.82 : isXLDesktop ? 0.72 : isLargeDesktop ? 0.64 : (isCompactLaptop ? 0.43 : 0.56);
+      const zoomCap = isUltraDesktop ? 0.7 : isXLDesktop ? 0.62 : isLargeDesktop ? 0.56 : (isCompactLaptop ? 0.4 : 0.5);
       const metrics = {
         isDesktop: true,
         top: 0,
