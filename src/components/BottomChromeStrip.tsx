@@ -22,15 +22,26 @@ const isAuthPath = (pathname: string) => pathname === '/auth';
 const BottomChromeStrip = () => {
   const location = useLocation();
   const [isTouch, setIsTouch] = useState(false);
+  const [isTabletLandscape, setIsTabletLandscape] = useState(false);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(pointer: coarse)');
-    const apply = () => setIsTouch(mq.matches);
+    const mqTouch = window.matchMedia('(pointer: coarse)');
+    const mqTablet = window.matchMedia(
+      '(pointer: coarse) and (orientation: landscape) and (min-width: 768px)'
+    );
+    const apply = () => {
+      setIsTouch(mqTouch.matches);
+      setIsTabletLandscape(mqTablet.matches);
+    };
     apply();
-    mq.addEventListener?.('change', apply);
-    return () => mq.removeEventListener?.('change', apply);
+    mqTouch.addEventListener?.('change', apply);
+    mqTablet.addEventListener?.('change', apply);
+    return () => {
+      mqTouch.removeEventListener?.('change', apply);
+      mqTablet.removeEventListener?.('change', apply);
+    };
   }, []);
 
   const color = isLandingVideoPath(location.pathname)
