@@ -68,13 +68,15 @@ const BottomChromeStrip = () => {
 
   // Sync CSS variable so scroll containers always reserve space
   // matching the strip — independent of @media (pointer: coarse).
+  // Tablet i landskap: ramen/fodralet täcker mer → extra andrum.
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
     if (isTouch) {
+      const basePx = isTabletLandscape ? 112 : 68;
       root.style.setProperty(
         '--chrome-strip-pad',
-        'calc(env(safe-area-inset-bottom, 0px) + 68px)'
+        `calc(env(safe-area-inset-bottom, 0px) + ${basePx}px)`
       );
     } else {
       root.style.removeProperty('--chrome-strip-pad');
@@ -82,7 +84,7 @@ const BottomChromeStrip = () => {
     return () => {
       root.style.removeProperty('--chrome-strip-pad');
     };
-  }, [isTouch]);
+  }, [isTouch, isTabletLandscape]);
 
   if (!isTouch || isAuthPath(location.pathname)) return null;
 
