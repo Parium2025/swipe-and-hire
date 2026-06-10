@@ -122,6 +122,7 @@ export function useMyApplicationsCache() {
             applications_count,
             views_count,
             job_image_url,
+            job_image_desktop_url,
             positions_count,
             workplace_name,
             company_logo_url,
