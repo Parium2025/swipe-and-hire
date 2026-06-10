@@ -13,7 +13,7 @@ const AudienceFeatures = ({ role }: { role: AudienceRole }) => {
               <span className="h-px w-12 bg-gradient-to-r from-secondary to-transparent" />
               Funktioner
             </span>
-            <h2 className="wave-text mt-5 text-4xl font-black tracking-[0] sm:text-5xl md:text-6xl">
+            <h2 className="wave-text mt-5 text-4xl font-black tracking-[0] sm:text-5xl md:text-6xl lg:text-[4.75rem] xl:text-[5.25rem]">
               Allt hänger ihop.
             </h2>
           </motion.div>
