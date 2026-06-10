@@ -917,15 +917,15 @@ All colors MUST be HSL.
   :root {
     --chrome-strip-pad: 0px;
   }
-  @media (pointer: coarse) {
+  @media (any-pointer: coarse), (hover: none), (any-hover: none) {
     :root {
       --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 68px);
     }
     /* Tablet i liggande läge: fodralets/ramens nederkant döljer mer
        än på telefon. Lägg på extra andrum så inget kort/knapp klipps. */
-    @media (orientation: landscape) and (min-width: 768px) {
+    @media (orientation: landscape) and (min-width: 768px) and (max-width: 1366px) {
       :root {
-        --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 112px);
+        --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 168px);
       }
     }
     body,
