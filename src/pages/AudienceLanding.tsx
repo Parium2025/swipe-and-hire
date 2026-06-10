@@ -14,7 +14,7 @@ import { SplinePhone } from '@/components/landing/SplinePhone';
 import { HeroText } from '@/components/landing/audience/HeroText';
 import { AudienceSEO } from '@/components/seo/AudienceSEO';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
-import { useSmoothScroll } from '@/hooks/useSmoothScroll';
+
 
 
 type AudienceLandingProps = {
@@ -910,8 +910,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const c = audienceContent[audience];
   const isMobileFeatureMotion = useIsMobileLandingMotion();
 
-  // Smooth scroll för desktop med mus (auto-av på touch + reduced motion)
-  useSmoothScroll(true);
+  // Smooth scroll inaktiverad — Lenis låste scrollen i produktion. Native scroll används istället.
+
 
 
   // Mobil: trigga `.landing-feature-mobile-in` när de scrollas in.
