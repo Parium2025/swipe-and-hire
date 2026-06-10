@@ -917,15 +917,15 @@ All colors MUST be HSL.
   :root {
     --chrome-strip-pad: 0px;
   }
-  @media (pointer: coarse) {
+  @media (any-pointer: coarse), (hover: none), (any-hover: none) {
     :root {
       --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 68px);
     }
     /* Tablet i liggande läge: fodralets/ramens nederkant döljer mer
        än på telefon. Lägg på extra andrum så inget kort/knapp klipps. */
-    @media (orientation: landscape) and (min-width: 768px) {
+    @media (orientation: landscape) and (min-width: 768px) and (max-width: 1366px) {
       :root {
-        --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 112px);
+        --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 168px);
       }
     }
     body,
@@ -952,6 +952,39 @@ All colors MUST be HSL.
     main[data-main-scroll-container="true"]:not(.no-chrome-pad) {
       scroll-padding-bottom: var(--chrome-strip-pad) !important;
     }
+    main[data-main-scroll-container="true"] .responsive-container-wide:not(.no-chrome-pad),
+    .jobview-container:not(.no-chrome-pad) {
+      padding-bottom: max(var(--chrome-strip-pad), calc(env(safe-area-inset-bottom, 0px) + 50px)) !important;
+    }
+  }
+
+  :root[data-touch-chrome="true"] body,
+  :root[data-touch-chrome="true"] #root {
+    padding-bottom: var(--chrome-strip-pad) !important;
+  }
+
+  :root[data-touch-chrome="true"] .overflow-y-auto:not(.no-chrome-pad)::after,
+  :root[data-touch-chrome="true"] .overflow-y-scroll:not(.no-chrome-pad)::after,
+  :root[data-touch-chrome="true"] .overflow-auto:not(.no-chrome-pad)::after,
+  :root[data-touch-chrome="true"] main[data-main-scroll-container="true"]:not(.no-chrome-pad)::after {
+    content: '';
+    display: block;
+    flex-shrink: 0;
+    width: 100%;
+    height: var(--chrome-strip-pad);
+    pointer-events: none;
+  }
+
+  :root[data-touch-chrome="true"] .overflow-y-auto:not(.no-chrome-pad),
+  :root[data-touch-chrome="true"] .overflow-y-scroll:not(.no-chrome-pad),
+  :root[data-touch-chrome="true"] .overflow-auto:not(.no-chrome-pad),
+  :root[data-touch-chrome="true"] main[data-main-scroll-container="true"]:not(.no-chrome-pad) {
+    scroll-padding-bottom: var(--chrome-strip-pad) !important;
+  }
+
+  :root[data-touch-chrome="true"] main[data-main-scroll-container="true"] .responsive-container-wide:not(.no-chrome-pad),
+  :root[data-touch-chrome="true"] .jobview-container:not(.no-chrome-pad) {
+    padding-bottom: max(var(--chrome-strip-pad), calc(env(safe-area-inset-bottom, 0px) + 50px)) !important;
   }
 
   /* Dashboard layout system */

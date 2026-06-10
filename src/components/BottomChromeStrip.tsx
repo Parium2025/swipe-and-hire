@@ -27,13 +27,14 @@ const BottomChromeStrip = () => {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const mqTouch = window.matchMedia('(pointer: coarse)');
+    const mqTouch = window.matchMedia('(any-pointer: coarse), (hover: none), (any-hover: none)');
     const mqTablet = window.matchMedia(
-      '(pointer: coarse) and (orientation: landscape) and (min-width: 768px)'
+      '(orientation: landscape) and (min-width: 768px) and (max-width: 1366px)'
     );
     const apply = () => {
-      setIsTouch(mqTouch.matches);
-      setIsTabletLandscape(mqTablet.matches);
+      const hasTouch = mqTouch.matches || navigator.maxTouchPoints > 0;
+      setIsTouch(hasTouch);
+      setIsTabletLandscape(hasTouch && mqTablet.matches);
     };
     apply();
     mqTouch.addEventListener?.('change', apply);
@@ -72,19 +73,23 @@ const BottomChromeStrip = () => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (isTouch) {
-      const basePx = isTabletLandscape ? 112 : 68;
+    const shouldReserveChrome = isTouch && !isAuthPath(location.pathname);
+    if (shouldReserveChrome) {
+      const basePx = isTabletLandscape ? 168 : 68;
+      root.dataset.touchChrome = 'true';
       root.style.setProperty(
         '--chrome-strip-pad',
         `calc(env(safe-area-inset-bottom, 0px) + ${basePx}px)`
       );
     } else {
+      delete root.dataset.touchChrome;
       root.style.removeProperty('--chrome-strip-pad');
     }
     return () => {
+      delete root.dataset.touchChrome;
       root.style.removeProperty('--chrome-strip-pad');
     };
-  }, [isTouch, isTabletLandscape]);
+  }, [isTouch, isTabletLandscape, location.pathname]);
 
   if (!isTouch || isAuthPath(location.pathname)) return null;
 

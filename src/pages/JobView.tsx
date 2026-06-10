@@ -526,7 +526,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       <div
         className={
           asOverlay
-            ? 'fixed inset-0 z-50 h-[100dvh] overflow-y-auto overscroll-contain bg-[hsl(215_100%_12%)] bg-parium-gradient no-chrome-pad'
+            ? 'fixed inset-0 z-50 h-[100dvh] overflow-y-auto overscroll-contain bg-[hsl(215_100%_12%)] bg-parium-gradient'
             : 'min-h-[100dvh] overflow-y-auto bg-[hsl(215_100%_12%)] bg-parium-gradient'
         }
         style={{ isolation: 'isolate' }}
@@ -621,8 +621,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       onTouchCancel={handlePullTouchEnd}
       className={
         asOverlay
-          ? 'fixed inset-0 z-50 h-[100dvh] overflow-x-hidden overflow-y-auto overscroll-contain bg-[hsl(215_100%_12%)] bg-parium-gradient [touch-action:pan-y_pinch-zoom] [scroll-behavior:auto] [-webkit-overflow-scrolling:touch] no-chrome-pad'
-          : 'h-[100dvh] overflow-x-hidden overflow-y-auto overscroll-contain [touch-action:pan-y_pinch-zoom] [scroll-behavior:auto] [-webkit-overflow-scrolling:touch] no-chrome-pad'
+          ? 'fixed inset-0 z-50 h-[100dvh] overflow-x-hidden overflow-y-auto overscroll-contain bg-[hsl(215_100%_12%)] bg-parium-gradient [touch-action:pan-y_pinch-zoom] [scroll-behavior:auto] [-webkit-overflow-scrolling:touch]'
+          : 'h-[100dvh] overflow-x-hidden overflow-y-auto overscroll-contain [touch-action:pan-y_pinch-zoom] [scroll-behavior:auto] [-webkit-overflow-scrolling:touch]'
       }
       style={{
         isolation: 'isolate',
