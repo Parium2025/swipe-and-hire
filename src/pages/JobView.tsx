@@ -119,7 +119,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isCompanyUser, userRole } = useAuth();
+  const { user, isCompanyUser, userRole, loading: authLoading } = useAuth();
   const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || userRole?.role === 'employer');
   const { getPrefetchedJob } = useJobPrefetchCache();
   const navigationImageState = (location.state ?? {}) as {
@@ -222,10 +222,13 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   });
   
   useEffect(() => {
-    if (jobId) {
-      fetchJob();
-    }
-  }, [jobId]);
+    if (!jobId) return;
+    // Wait for auth to resolve before fetching — otherwise an anon query
+    // can return "not found" for expired/applied/saved jobs that require
+    // a user-scoped RLS policy (Applicants/Saved/Org members).
+    if (authLoading) return;
+    fetchJob();
+  }, [jobId, authLoading, user?.id]);
 
   const fetchJob = async (retryCount = 0) => {
     try {
