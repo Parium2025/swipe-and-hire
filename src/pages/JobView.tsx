@@ -222,10 +222,13 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   });
   
   useEffect(() => {
-    if (jobId) {
-      fetchJob();
-    }
-  }, [jobId]);
+    if (!jobId) return;
+    // Wait for auth to resolve before fetching — otherwise an anon query
+    // can return "not found" for expired/applied/saved jobs that require
+    // a user-scoped RLS policy (Applicants/Saved/Org members).
+    if (authLoading) return;
+    fetchJob();
+  }, [jobId, authLoading, user?.id]);
 
   const fetchJob = async (retryCount = 0) => {
     try {
