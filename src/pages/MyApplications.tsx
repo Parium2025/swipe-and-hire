@@ -54,6 +54,7 @@ interface Application {
     applications_count: number | null;
     views_count: number | null;
     job_image_url: string | null;
+    job_image_desktop_url: string | null;
     positions_count: number | null;
       overlay_text_color: string | null;
     profiles: {
