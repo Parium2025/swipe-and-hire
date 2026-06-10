@@ -628,6 +628,11 @@ const Auth = () => {
     return (
       <div className="relative h-dvh min-h-dvh w-full max-w-full overflow-hidden" style={authBackdropStyle}>
         <AuthBackdrop />
+        {/* Dekorativa bubblor — fixed mot viewport, följer ALDRIG med scroll */}
+        <div className="fixed inset-0 z-[5] pointer-events-none">
+          <AnimatedBackground showGlow={false} variant="viewport" />
+        </div>
+
         {/* Bottom safe-area blend to eliminate iOS seam */}
         <div
           className="fixed inset-x-0 bottom-0 pointer-events-none z-40"
