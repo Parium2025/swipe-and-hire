@@ -474,7 +474,7 @@ const PinnedHorizontalGallery = () => {
              Skalar fortfarande fluid utan breakpoint-hopp.
              Höjt min från 1.75rem → 2.75rem så rubriken har samma tyngd som
              hero-rubriken på mobil (annars blir det mycket död yta). */
-          font-size: clamp(2.75rem, 4.4vw, 4.75rem);
+          font-size: clamp(2.75rem, 5.2vw, 5.25rem);
           font-weight: 900;
           line-height: 1.04;
           letter-spacing: -0.025em;
