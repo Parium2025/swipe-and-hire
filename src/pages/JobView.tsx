@@ -119,7 +119,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isCompanyUser, userRole } = useAuth();
+  const { user, isCompanyUser, userRole, loading: authLoading } = useAuth();
   const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || userRole?.role === 'employer');
   const { getPrefetchedJob } = useJobPrefetchCache();
   const navigationImageState = (location.state ?? {}) as {
