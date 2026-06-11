@@ -1150,7 +1150,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="landing-feature-mobile-in wave-text mt-6 max-w-2xl text-base leading-8 opacity-70 sm:text-lg md:[@media_(orientation:portrait)]:mt-8 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
                 style={isMobileFeatureMotion ? { ['--lf-x' as string]: '60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '260ms' } : undefined}
               >
-                Platshållartext för funktionsöversikten — fyll med de viktigaste fördelarna.
+                {c.featuresIntro}
               </motion.p>
               <motion.div
                 initial={isMobileFeatureMotion ? false : "hidden"}
