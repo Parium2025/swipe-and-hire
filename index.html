@@ -25,10 +25,30 @@
           document.documentElement.style.backgroundColor = chromeColor;
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: light)">');
           document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: dark)">');
+          // KRITISKT: Injicera en inline <style> som tvingar html/body till rätt
+          // bakgrundsfärg vid FÖRSTA paint. Utan denna samplar iOS Safari sin
+          // bottenverktygsbar mot CSS-defaulten (mörkblå) på landningssidan,
+          // vilket gör att bottenbaren blir BLÅ vid refresh trots att toppen
+          // och vår BottomChromeStrip är grå. Sätts INNAN body parsas så att
+          // Safari aldrig hinner sampla fel färg.
+          document.write(
+            '<style id="parium-initial-chrome-bg">html,body{background-color:' +
+            chromeColor + ' !important;' +
+            (isLandingVideoRoute ? 'background-image:none !important;' : '') +
+            '}</style>'
+          );
           document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.toggle('landing-video-chrome', isLandingVideoRoute);
             document.body.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
             document.body.style.backgroundColor = chromeColor;
+            // Ta bort tvångs-stylen så att resten av appens CSS (gradienter på
+            // icke-landningssidor) kan ta över när React har mounted.
+            // På landningssidan låter vi den ligga kvar — body.landing-video-chrome
+            // har samma färg så det blir ingen visuell skillnad.
+            if (!isLandingVideoRoute) {
+              var initial = document.getElementById('parium-initial-chrome-bg');
+              if (initial) initial.remove();
+            }
           }, { once: true });
         } catch (e) {
           document.write('<meta name="theme-color" content="#001935">');
