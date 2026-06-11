@@ -1083,7 +1083,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 transition={{ duration: 1, ease }}
                 className="landing-h2 wave-text"
               >
-                En lugnare väg till nästa steg.
+                {c.statement.title}
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, x: 80 }}
@@ -1092,7 +1092,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 transition={{ duration: 1, ease, delay: 0.1 }}
                 className="wave-text text-base leading-8 opacity-70 sm:text-lg md:[@media_(orientation:portrait)]:mt-6 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
               >
-                Platshållartext. Här kan en lugnare brödtext landa efter den intensiva resan — rytm är viktigt.
+                {c.statement.body}
               </motion.p>
             </div>
           </section>
@@ -1150,7 +1150,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="landing-feature-mobile-in wave-text mt-6 max-w-2xl text-base leading-8 opacity-70 sm:text-lg md:[@media_(orientation:portrait)]:mt-8 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
                 style={isMobileFeatureMotion ? { ['--lf-x' as string]: '60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '260ms' } : undefined}
               >
-                Platshållartext för funktionsöversikten — fyll med de viktigaste fördelarna.
+                {c.featuresIntro}
               </motion.p>
               <motion.div
                 initial={isMobileFeatureMotion ? false : "hidden"}
@@ -1159,9 +1159,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
                 className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
-                {[1, 2, 3, 4, 5, 6].map((i) => (
+                {c.features.map((feature, idx) => {
+                  const i = idx + 1;
+                  const Icon = feature.icon;
+                  return (
                   <motion.div
-                    key={i}
+                    key={feature.title}
                     variants={{
                       hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
                       visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.75, ease } },
@@ -1171,14 +1174,16 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   >
                     <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.12),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                     <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
-                      <span className="text-sm font-bold">0{i}</span>
+                      <Icon className="h-5 w-5" strokeWidth={2} />
                     </div>
-                    <h3 className="wave-text text-lg font-bold">Funktion {i}</h3>
+                    <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-secondary/70">0{i}</div>
+                    <h3 className="wave-text mt-1 text-lg font-bold">{feature.title}</h3>
                     <p className="wave-text mt-2 text-sm leading-7 opacity-70">
-                      Platshållartext som beskriver funktionen kort och tydligt.
+                      {feature.description}
                     </p>
                   </motion.div>
-                ))}
+                  );
+                })}
               </motion.div>
             </div>
           </section>
