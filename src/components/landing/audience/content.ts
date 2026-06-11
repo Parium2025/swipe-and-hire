@@ -81,7 +81,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     ],
     proof: [
       { value: 'Mobilt urval', label: 'rekrytera vart ni än är' },
-      { value: 'Beslut i team', description: 'tillsammans i en delad vy', label: 'tillsammans i en delad vy' },
+      { value: 'Beslut i team', label: 'tillsammans i en delad vy' },
       { value: 'Insikter live', label: 'följ flödet i realtid' },
     ],
     finalCta: {
