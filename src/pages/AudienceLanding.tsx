@@ -1083,7 +1083,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 transition={{ duration: 1, ease }}
                 className="landing-h2 wave-text"
               >
-                En lugnare väg till nästa steg.
+                {c.statement.title}
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, x: 80 }}
@@ -1092,7 +1092,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 transition={{ duration: 1, ease, delay: 0.1 }}
                 className="wave-text text-base leading-8 opacity-70 sm:text-lg md:[@media_(orientation:portrait)]:mt-6 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
               >
-                Platshållartext. Här kan en lugnare brödtext landa efter den intensiva resan — rytm är viktigt.
+                {c.statement.body}
               </motion.p>
             </div>
           </section>
