@@ -1178,7 +1178,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     </div>
                     <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-secondary/70">0{i}</div>
                     <h3 className="wave-text mt-1 text-lg font-bold">{feature.title}</h3>
-                    <p className="wave-text mt-2 text-sm leading-7 opacity-70">
+                    <p className="wave-text mt-2 text-sm leading-7 text-white">
                       {feature.description}
                     </p>
                   </motion.div>
