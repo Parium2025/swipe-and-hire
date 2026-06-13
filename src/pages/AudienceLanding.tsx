@@ -1171,7 +1171,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
           <div className="relative z-10 -mt-px text-white">
           {/* ──────────────── PRISER ──────────────── */}
-          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-hidden px-5 pb-16 pt-12 sm:px-6 md:px-12 md:pb-20 md:pt-16 lg:px-24">
+          <section id="priser" aria-labelledby="priser-heading" className="relative scroll-mt-24 overflow-visible px-5 pb-20 pt-12 sm:px-6 md:px-12 md:pb-28 md:pt-16 lg:px-24">
             <div className="mx-auto max-w-[1180px]" data-mobile-feature-prearm={isMobileFeatureMotion ? true : undefined}>
               <motion.span
                 initial={isMobileFeatureMotion ? false : { opacity: 0, x: -40 }}
@@ -1264,13 +1264,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
                     className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
                       isActive
-                        ? 'border-secondary/55 bg-gradient-to-br from-secondary/20 to-white/5 shadow-[0_34px_110px_-18px_hsl(var(--secondary)/0.62)]'
+                        ? 'border-secondary/55 bg-gradient-to-br from-secondary/20 to-white/5 shadow-[0_28px_90px_-34px_hsl(var(--secondary)/0.52)]'
                         : 'border-white/15 bg-white/5 hover:border-secondary/25'
                     }`}
                   >
                     <div
                       aria-hidden="true"
-                      className={`pointer-events-none absolute -inset-x-12 -bottom-20 top-8 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,hsl(var(--secondary)/0.42)_0%,hsl(var(--secondary)/0.22)_34%,transparent_72%)] blur-[64px] transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}
+                      className={`pointer-events-none absolute -inset-x-24 -bottom-44 top-10 rounded-[3rem] bg-[radial-gradient(ellipse_at_center,hsl(var(--secondary)/0.34)_0%,hsl(var(--secondary)/0.18)_32%,hsl(var(--secondary)/0.07)_56%,transparent_82%)] blur-[88px] transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}
                     />
                     <div
                       aria-hidden="true"
