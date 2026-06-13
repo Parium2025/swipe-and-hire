@@ -334,6 +334,9 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
 
       toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats` });
 
+      // Uppdatera kvot-counter direkt
+      refreshQuota();
+
       setTimeout(() => {
         onApplied();
       }, 1500);
@@ -353,7 +356,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
     } finally {
       setSubmitting(false);
     }
-  }, [user, jobId, answers, submitting, companyName, jobTitle, onApplied, queryClient]);
+  }, [user, jobId, answers, submitting, companyName, jobTitle, onApplied, queryClient, quota.allowed, quota.is_premium, refreshQuota]);
 
   return (
     <AnimatePresence>
