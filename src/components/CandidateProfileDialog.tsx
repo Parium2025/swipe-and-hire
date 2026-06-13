@@ -220,6 +220,11 @@ export const CandidateProfileDialog = ({
     if (open && activeApplication && user) {
       notesHook.fetchNotes();
       fetchJobQuestions();
+      // 📈 Logga profilvisning (server-dedupar 1h per viewer+candidate). Fire-and-forget.
+      const appId = activeApplication.id;
+      if (appId) {
+        supabase.rpc('log_profile_view' as any, { p_application_id: appId }).then(() => {}, () => {});
+      }
     }
   }, [open, activeApplication?.id, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 

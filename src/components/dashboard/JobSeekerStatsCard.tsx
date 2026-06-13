@@ -1,10 +1,11 @@
 import { memo, useMemo, useEffect } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
-import { Send, Calendar, Heart, MessageSquare } from 'lucide-react';
+import { Send, Calendar, Heart, MessageSquare, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StatsCarousel } from './StatsCarousel';
+import { useProfileViewStats } from '@/hooks/useProfileViewStats';
 import type { StatData } from './StatsCarousel';
 
 const STATS_CACHE_KEY = 'parium-jobseeker-stats';
@@ -33,6 +34,9 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readCachedStats(), []);
+  const { stats: viewStats } = useProfileViewStats();
+  const profileViewsCount = viewStats.unique_viewers_30d;
+  useEffect(() => { writeCachedStats('profile_views', profileViewsCount); }, [profileViewsCount]);
 
   const { data: dashStats, isSuccess } = useQuery({
     queryKey: ['jobseeker-dashboard-stats', user?.id],
@@ -94,9 +98,10 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const statsArray: StatData[] = useMemo(() => [
     { icon: Send, label: 'Skickade ansökningar', value: applicationsCount, description: 'Dina jobbansökningar', link: '/my-applications', emptyHint: 'Börja söka jobb!' },
     { icon: Calendar, label: 'Bokade intervjuer', value: interviewsCount, description: 'Kommande intervjuer', emptyHint: 'Inga bokade än' },
+    { icon: Eye, label: 'Profilvisningar', value: profileViewsCount, description: 'Arbetsgivare senaste 30 dagarna', emptyHint: 'Ingen har sett din profil än' },
     { icon: Heart, label: 'Sparade jobb', value: savedJobsCount, description: 'Jobb du sparat', link: '/saved-jobs', emptyHint: 'Spara jobb du gillar' },
     { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden', link: '/messages', emptyHint: 'Inga olästa' },
-  ], [applicationsCount, interviewsCount, savedJobsCount, unreadMessagesCount]);
+  ], [applicationsCount, interviewsCount, profileViewsCount, savedJobsCount, unreadMessagesCount]);
 
   return (
     <StatsCarousel
