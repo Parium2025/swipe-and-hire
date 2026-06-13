@@ -39,7 +39,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
       { title: 'Sök smart', description: 'Filtrera på plats, roll och erfarenhet. Hitta rätt jobb utan att scrolla i evighet.', icon: Brain },
       { title: 'Swipa & spara', description: 'Bläddra jobben med ett svep. Spara de du gillar och återvänd när du vill.', icon: Heart },
       { title: 'Jobbevakningar', description: 'Spara din sökning och få notis när en ny roll matchar.', icon: Bell },
-      { title: 'Direkt dialog', description: 'När båda visar intresse öppnas chatten direkt med arbetsgivaren.', icon: MessageCircle },
+      { title: 'Bli kontaktad direkt', description: 'Arbetsgivare som vill gå vidare når dig direkt i appen. Du slipper jaga svar i mejlen.', icon: MessageCircle },
     ],
     proof: [
       { value: 'En profil', label: 'för alla ansökningar' },
