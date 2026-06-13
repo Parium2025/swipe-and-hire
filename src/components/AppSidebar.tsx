@@ -247,28 +247,6 @@ export function AppSidebar() {
 
         <SidebarSeparator className="bg-white/20 mx-4" />
 
-        {/* Bli Premium CTA - egen rad, endast för icke-premium */}
-        {!collapsed && !(profile as any)?.is_premium && (
-          <div className="px-3 pt-3">
-            <button
-              onClick={() => {
-                try { sessionStorage.setItem('parium-pending-plan', 'premium'); } catch {}
-                if (isMobile) {
-                  setOpenMobile(false);
-                  startTransition(() => navigate('/checkout'));
-                } else {
-                  navigate('/checkout');
-                }
-              }}
-              className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-full bg-secondary px-4 text-sm font-bold tracking-wide text-white shadow-[0_10px_28px_-12px_hsl(var(--secondary)/0.7)] transition-all duration-200 hover:bg-secondary/90 active:scale-[0.98]"
-              aria-label="Bli Premium"
-            >
-              <Crown className="h-4 w-4" />
-              Bli Premium
-            </button>
-          </div>
-        )}
-
         {/* Navigation Groups */}
         {/* Main Section */}
         <SidebarGroup>

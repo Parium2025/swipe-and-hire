@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const Subscription = () => {
   const { profile, user } = useAuth();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [currentPlan, setCurrentPlan] = useState<'basic' | 'premium'>('basic'); // This would come from your subscription state
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>(currentPlan);
@@ -162,13 +164,8 @@ const Subscription = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       if (plan.id === 'premium' && !isCurrent) {
-                        if (isMobile) {
-                          // App-version (mobilvy): visa dialog med parium.se
-                          setShowUpgradeDialog(true);
-                        } else {
-                          // Webb: Direkt till Stripe (placeholder tills vi kopplar Stripe)
-                          alert('Öppnar Stripe (webb)');
-                        }
+                        try { sessionStorage.setItem('parium-pending-plan', 'premium'); } catch {}
+                        navigate('/checkout');
                       }
                     }}
                   >
