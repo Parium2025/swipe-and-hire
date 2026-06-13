@@ -172,7 +172,7 @@ const Subscription = () => {
                 <p className="font-semibold text-white truncate">
                   {plans.find((p) => p.id === currentPlan)?.name} Plan
                 </p>
-                <p className="text-xs text-white/70 truncate">
+                <p className="text-xs text-white truncate">
                   {user?.created_at
                     ? `Konto skapat ${new Date(user.created_at).toLocaleDateString('sv-SE', {
                         year: 'numeric',
@@ -181,6 +181,7 @@ const Subscription = () => {
                       })}`
                     : 'Aktivt konto'}
                 </p>
+
               </div>
 
               {isPremium && (
