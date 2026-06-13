@@ -3,6 +3,10 @@ import { useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { safeSetItem } from '@/lib/safeStorage';
+import { useIsPremium } from '@/hooks/useIsPremium';
+import { emitSavedJobsLimit } from '@/lib/premiumEvents';
+
+const SAVED_JOBS_FREE_LIMIT = 3;
 
 /**
  * 🚇 useSavedJobsCache — speglar useMyApplicationsCache-mönstret.
