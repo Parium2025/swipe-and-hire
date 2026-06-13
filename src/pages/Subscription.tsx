@@ -27,6 +27,7 @@ const Subscription = () => {
         'Sökfilter på plats, roll och erfarenhet',
         'Visa intresse för upp till 3 jobb i veckan',
         'Spara upp till 3 jobb samtidigt',
+        'Chatta med arbetsgivaren i appen',
       ],
       icon: Star,
       buttonText: 'Nuvarande plan',
@@ -45,7 +46,6 @@ const Subscription = () => {
         'Visa intresse för hur många jobb du vill',
         'Spara obegränsat antal jobb',
         'Se vilka företag som tittat på din profil',
-        'Se vilka arbetsgivare som visat intresse tillbaka',
         'Direktkontakt till arbetsgivaren via mejl',
         'Chatta med arbetsgivaren i appen',
         'Statistik över profilvisningar senaste 30 dagarna'

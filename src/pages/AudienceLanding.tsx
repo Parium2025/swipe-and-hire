@@ -911,6 +911,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   const navigate = useNavigate();
   const c = audienceContent[audience];
   const isMobileFeatureMotion = useIsMobileLandingMotion();
+  const [selectedPlan, setSelectedPlan] = useState<'start' | 'premium'>('premium');
 
   // Mjuk musscroll på Windows/desktop. Inaktiv på touch, trackpad, reduced-motion.
   useWheelSmoother(true);
@@ -1214,6 +1215,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               >
                 {[
                   {
+                    id: 'start' as const,
                     name: 'Start',
                     price: '0',
                     tagline: 'Allt du behöver för att börja söka jobb.',
@@ -1223,9 +1225,11 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       'Sökfilter på plats, roll och erfarenhet',
                       'Visa intresse för upp till 3 jobb i veckan',
                       'Spara upp till 3 jobb samtidigt',
+                      'Chatta med arbetsgivaren i appen',
                     ],
                   },
                   {
+                    id: 'premium' as const,
                     name: 'Premium',
                     price: '29',
                     tagline: 'För dig som menar allvar med jobbsökandet.',
@@ -1236,38 +1240,43 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       'Visa intresse för hur många jobb du vill',
                       'Spara obegränsat antal jobb',
                       'Se vilka företag som tittat på din profil',
-                      'Se vilka arbetsgivare som visat intresse tillbaka',
                       'Direktkontakt till arbetsgivaren via mejl',
                       'Chatta med arbetsgivaren i appen',
                       'Statistik över profilvisningar senaste 30 dagarna',
                     ],
                   },
-                ].map((plan, i) => (
+                ].map((plan, i) => {
+                  const isActive = selectedPlan === plan.id;
+                  return (
                   <motion.div
                     key={plan.name}
                     variants={{
                       hidden: { opacity: 0 },
                       visible: { opacity: 1, transition: { duration: 0.9, ease } },
                     }}
+                    onClick={() => setSelectedPlan(plan.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
-                    className={`landing-feature-card landing-feature-mobile-in relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 ${
-                      i === 1
+                    className={`landing-feature-card landing-feature-mobile-in relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer ${
+                      isActive
                         ? 'border-secondary/40 bg-gradient-to-br from-secondary/20 to-white/5 shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.35)]'
                         : 'border-white/15 bg-white/5 hover:border-secondary/25'
                     }`}
                   >
-                    {i === 1 && (
+                    {plan.id === 'premium' && (
                       <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">
                         Populär
                       </span>
                     )}
                     <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                     <p className="mt-2 text-4xl font-black text-white">
-                      {plan.price} kr<span className="text-sm font-medium text-white/70">/mån</span>
+                      {plan.price} kr<span className="text-sm font-medium text-white">/mån</span>
                     </p>
-                    <p className="mt-4 text-sm leading-7 text-white/70">{plan.tagline}</p>
+                    <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
 
-                    <details className="group/plan mt-6 border-t border-white/10 pt-5">
+                    <details className="group/plan mt-6 border-t border-white/10 pt-5" onClick={(e) => e.stopPropagation()}>
                       <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between text-sm font-semibold text-white">
                         <span>Se alla funktioner</span>
                         <span className="ml-4 text-secondary transition-transform duration-300 group-open/plan:rotate-45">+</span>
@@ -1278,7 +1287,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                             <svg
                               aria-hidden="true"
                               viewBox="0 0 20 20"
-                              className={`mt-0.5 h-4 w-4 flex-shrink-0 ${i === 1 ? 'text-secondary' : 'text-white/70'}`}
+                              className={`mt-0.5 h-4 w-4 flex-shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`}
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2.5"
@@ -1293,7 +1302,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       </ul>
                     </details>
                   </motion.div>
-                ))}
+                  );
+                })}
               </motion.div>
 
             </div>
