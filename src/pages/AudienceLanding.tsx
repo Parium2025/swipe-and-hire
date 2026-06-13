@@ -1276,7 +1276,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     </p>
                     <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
 
-                    <details className="group/plan mt-6 border-t border-white/10 pt-5" onClick={(e) => e.stopPropagation()}>
+                    <details className="group/plan mt-6 border-t border-white/10 pt-5" onClick={() => setSelectedPlan(plan.id)}>
                       <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between text-sm font-semibold text-white">
                         <span>Se alla funktioner</span>
                         <span className="ml-4 text-secondary transition-transform duration-300 group-open/plan:rotate-45">+</span>
