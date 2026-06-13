@@ -1268,7 +1268,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
                     className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
                       isActive
-                        ? 'border-secondary bg-gradient-to-br from-secondary/25 to-white/5 shadow-[0_0_0_1px_hsl(var(--secondary)/0.75),0_42px_110px_-52px_hsl(var(--secondary)/0.75)]'
+                        ? 'border-secondary bg-gradient-to-br from-secondary/30 to-white/5 shadow-[0_42px_110px_-52px_hsl(var(--secondary)/0.75)]'
                         : 'border border-white/15 bg-white/5 hover:border-secondary/25'
                     }`}
                   >
