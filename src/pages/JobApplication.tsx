@@ -76,6 +76,8 @@ const JobApplication = () => {
   const [questions, setQuestions] = useState<JobQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const { quota, refresh: refreshQuota } = useApplicationQuota();
   const [draftRestored, setDraftRestored] = useState(false);
   const [initialFormData, setInitialFormData] = useState<any>(null);
   
