@@ -73,7 +73,12 @@ export default function Checkout() {
       <div className="mx-auto flex w-full max-w-[560px] flex-col">
         <motion.button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            // Rensa pending-plan så att /auth inte skickar tillbaka hit i en loop
+            try { sessionStorage.removeItem(PENDING_PLAN_KEY); } catch {}
+            // Inloggad → tillbaka till insidan. Annars → tillbaka till landningen.
+            navigate(user ? '/home' : '/', { replace: true });
+          }}
           className="mb-8 inline-flex h-10 items-center gap-2 self-start rounded-full border border-white/20 bg-white/5 px-5 text-sm font-medium text-white backdrop-blur-[2px] transition-colors hover:bg-white/10 active:scale-[0.97]"
           initial={{ opacity: 0, x: -8 }}
           animate={{ opacity: 1, x: 0 }}
