@@ -1287,10 +1287,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
                 className="relative mt-8 grid gap-5 md:grid-cols-2"
               >
-                <div
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-[110%] w-[80%] rounded-full bg-secondary/35 blur-[110px] transition-[left,opacity] duration-300 ease-out md:w-[48%] ${selectedPlan === 'premium' ? 'left-[44%] opacity-100' : 'left-[-6%] opacity-100'}`}
-                />
+
                 {[
                   {
                     id: 'start' as const,
