@@ -129,6 +129,7 @@ function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDeta
 export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { quota, refresh: refreshQuota } = useApplicationQuota();
   const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -138,8 +139,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
   const [extraDetails, setExtraDetails] = useState<ExtraJobDetails | null>(null);
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-
-  useEffect(() => {
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
     if (open) {
       setIsClosing(false);
     }
