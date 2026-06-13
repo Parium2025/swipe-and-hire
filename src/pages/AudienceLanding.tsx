@@ -1300,7 +1300,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       'Sökfilter på plats, roll och erfarenhet',
                       'Visa intresse för upp till 3 jobb i veckan',
                       'Spara upp till 3 jobb samtidigt',
-                      'Chatta med arbetsgivaren i appen',
+                      'Chatta med arbetsgivare',
                     ],
                   },
                   {
@@ -1314,9 +1314,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       'Sökfilter på plats, roll och erfarenhet',
                       'Visa intresse för hur många jobb du vill',
                       'Spara obegränsat antal jobb',
+                      'Chatta med arbetsgivare',
                       'Se vilka företag som tittat på din profil',
                       'Direktkontakt till arbetsgivaren via mejl',
-                      'Chatta med arbetsgivaren i appen',
+
                       'Statistik över profilvisningar senaste 30 dagarna',
                     ],
                   },
