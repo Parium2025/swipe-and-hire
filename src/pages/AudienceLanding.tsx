@@ -1406,7 +1406,44 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } } }}
                 className="mt-10 space-y-3"
               >
-                {['Hur fungerar Parium?', 'Vad kostar det?', 'Är mina uppgifter säkra?', 'Vilka företag finns här?'].map((q) => (
+                {(audience === 'job_seeker'
+                  ? [
+                      {
+                        q: 'Hur fungerar Parium?',
+                        a: 'Du skapar en profil med CV, video och dina önskemål, swipar bland aktuella jobb och visar intresse för det som passar. När arbetsgivaren också är intresserad öppnas en chatt direkt i appen — utan långa formulär eller personliga brev.',
+                      },
+                      {
+                        q: 'Vad kostar det?',
+                        a: 'Parium är helt gratis att använda. Vill du ta nästa steg kan du uppgradera till Premium för 29 kr/mån — då får du obegränsat antal intresseanmälningar, obegränsat antal sparade jobb, direktkontakt via mejl och statistik över vilka företag som tittat på din profil. Du säger upp när du vill, utan bindningstid.',
+                      },
+                      {
+                        q: 'Är mina uppgifter säkra?',
+                        a: 'Ja. All data lagras krypterat hos europeiska leverantörer, och endast arbetsgivare du själv visat intresse för kan se din fullständiga profil. Du äger din data och kan när som helst exportera eller radera ditt konto från inställningarna.',
+                      },
+                      {
+                        q: 'Vilka företag finns här?',
+                        a: 'Allt från lokala restauranger och butiker till växande techbolag och etablerade arbetsgivare runt om i Sverige. Vi lägger till nya företag löpande och prioriterar arbetsgivare som svarar snabbt och håller hög kvalitet på sina annonser.',
+                      },
+                    ]
+                  : [
+                      {
+                        q: 'Hur fungerar Parium för arbetsgivare?',
+                        a: 'Ni publicerar jobb på minuter, kandidater visar intresse direkt i appen och ni får en överblick med video, CV och svar på era egna frågor. När ni matchar tillbaka öppnas en chatt — inga mejltrådar, inga betalda annonser som försvinner.',
+                      },
+                      {
+                        q: 'Vad kostar det att rekrytera?',
+                        a: 'Skapa konto och första annonsen är gratis. Därefter har vi transparent prissättning baserat på antal aktiva annonser och teamstorlek — inga dolda avgifter, inga långa bindningstider. Kontakta oss så ger vi er ett pris som passar er volym.',
+                      },
+                      {
+                        q: 'Hur kvalitetssäkras kandidaterna?',
+                        a: 'Varje kandidat har en verifierad profil med video, erfarenhet och tydliga önskemål kring roll, ort och lön. Ni ser allt innan ni matchar, vilket minimerar tiden ni lägger på irrelevanta ansökningar.',
+                      },
+                      {
+                        q: 'Hur hanteras GDPR och kandidatdata?',
+                        a: 'All data lagras inom EU enligt GDPR. Kandidater äger sin egen data och delar bara fullständig profil med er när de aktivt visat intresse. Ni kan exportera, anonymisera och radera kandidatdata direkt från dashboarden.',
+                      },
+                    ]
+                ).map(({ q, a }) => (
                   <motion.details
                     key={q}
                     variants={{
@@ -1419,11 +1456,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       {q}
                       <span className="ml-4 text-secondary transition-transform duration-300 group-open:rotate-45">+</span>
                     </summary>
-                    <p className="mt-4 text-sm leading-7 text-white/70">
-                      Platshållarsvar — fyll på med den faktiska informationen.
+                    <p className="mt-4 text-sm leading-7 text-white">
+                      {a}
                     </p>
                   </motion.details>
                 ))}
+
               </motion.div>
             </div>
           </section>
