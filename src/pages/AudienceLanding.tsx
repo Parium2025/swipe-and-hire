@@ -1211,8 +1211,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={isMobileFeatureMotion ? undefined : "visible"}
                 viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
-                className="mt-8 grid gap-5 md:grid-cols-2"
+                className="relative mt-8 grid gap-5 md:grid-cols-2"
               >
+                <div
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute -bottom-28 h-80 w-[72%] rounded-full bg-secondary/30 blur-[96px] transition-[left,opacity] duration-300 ease-out md:w-[46%] ${selectedPlan === 'premium' ? 'left-[42%] opacity-100' : 'left-[-8%] opacity-100'}`}
+                />
                 {[
                   {
                     id: 'start' as const,
@@ -1264,14 +1268,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
                     className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
                       isActive
-                        ? 'border-secondary/55 bg-gradient-to-br from-secondary/20 to-white/5 shadow-[0_36px_120px_-58px_hsl(var(--secondary)/0.5)]'
+                        ? 'border-secondary/55 bg-gradient-to-br from-secondary/20 to-white/5 shadow-[0_42px_110px_-52px_hsl(var(--secondary)/0.62)]'
                         : 'border-white/15 bg-white/5 hover:border-secondary/25'
                     }`}
                   >
-                    <div
-                      aria-hidden="true"
-                      className={`pointer-events-none absolute -inset-x-36 -bottom-72 h-[30rem] rounded-full bg-[radial-gradient(ellipse_at_50%_34%,hsl(var(--secondary)/0.34)_0%,hsl(var(--secondary)/0.17)_30%,hsl(var(--secondary)/0.06)_52%,transparent_76%)] [mask-image:radial-gradient(ellipse_at_center,black_0%,black_52%,transparent_82%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_0%,black_52%,transparent_82%)] transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}
-                    />
                     <div
                       aria-hidden="true"
                       className={`pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_50%_115%,hsl(var(--secondary)/0.18),transparent_58%)] transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}
