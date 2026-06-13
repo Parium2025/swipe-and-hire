@@ -10,6 +10,8 @@ import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWiz
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
+import { useApplicationQuota } from '@/hooks/useApplicationQuota';
+import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
 import type { JobQuestion } from '@/types/jobWizard';
 import type { SwipeJob } from './types';
 
