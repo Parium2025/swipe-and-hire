@@ -1222,8 +1222,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       'Bläddra bland alla jobb',
                       'Sökfilter på plats, roll och erfarenhet',
                       'Visa intresse för upp till 3 jobb i veckan',
-                      'Notis när någon tittat på din profil',
-                      'Notis när en arbetsgivare visat intresse tillbaka',
+                      'Spara upp till 3 jobb samtidigt',
                     ],
                   },
                   {
