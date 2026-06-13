@@ -5,6 +5,17 @@ import { Crown, Star } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { PremiumUpgradeDialog } from '@/components/PremiumUpgradeDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
