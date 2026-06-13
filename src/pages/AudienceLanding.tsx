@@ -1073,29 +1073,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             <PinnedHorizontalGallery />
           </section>
 
-          {/* ──────────────── 3. STATEMENT ──────────────── */}
-          <section className="relative overflow-hidden px-5 py-8 sm:px-6 sm:py-12 md:px-12 md:py-16 lg:px-24">
-            <div className="mx-auto grid max-w-[1180px] gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end md:[@media_(orientation:portrait)]:block md:[@media_(orientation:portrait)]:max-w-[820px] lg:[@media_(orientation:portrait)]:grid">
-              <motion.h2
-                initial={{ opacity: 0, x: -80 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
-                transition={{ duration: 1, ease }}
-                className="landing-h2 wave-text"
-              >
-                {c.statement.title}
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0, x: 80 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
-                transition={{ duration: 1, ease, delay: 0.1 }}
-                className="wave-text text-base leading-8 opacity-70 sm:text-lg md:[@media_(orientation:portrait)]:mt-6 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
-              >
-                {c.statement.body}
-              </motion.p>
-            </div>
-          </section>
 
           {/* ──────────────── FUNKTIONER ──────────────── */}
           {isMobileFeatureMotion && (
