@@ -1052,9 +1052,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         WebkitOverflowScrolling: 'touch',
         scrollBehavior: 'smooth',
         backgroundImage:
-          'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 100%)',
+          'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 65svh, hsl(var(--primary)) 100%)',
         backgroundAttachment: 'scroll',
-        backgroundSize: '100% 100svh',
+        backgroundSize: '100% 100%',
         backgroundRepeat: 'no-repeat',
         backgroundColor: 'hsl(var(--primary))',
       }}
