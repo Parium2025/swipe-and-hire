@@ -123,8 +123,8 @@ select:focus,
 select:focus-visible,
 video:focus,
 video:focus-visible,
-[tabindex]:focus,
-[tabindex]:focus-visible {
+[tabindex]:not([data-allow-focus-shadow="true"]):focus,
+[tabindex]:not([data-allow-focus-shadow="true"]):focus-visible {
   outline: none !important;
   box-shadow: none !important;
   --tw-ring-offset-width: 0px !important;
