@@ -1222,7 +1222,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       'Bläddra bland alla jobb',
                       'Sökfilter på plats, roll och erfarenhet',
                       'Visa intresse för upp till 3 jobb i veckan',
-                      'Spara upp till 3 jobb samtidigt',
                       'Notis när någon tittat på din profil',
                       'Notis när en arbetsgivare visat intresse tillbaka',
                     ],
@@ -1232,6 +1231,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     price: '29',
                     tagline: 'För dig som menar allvar med jobbsökandet.',
                     features: [
+                      'Skapa profil med CV och videopresentation',
+                      'Bläddra bland alla jobb',
+                      'Sökfilter på plats, roll och erfarenhet',
                       'Visa intresse för hur många jobb du vill',
                       'Spara obegränsat antal jobb',
                       'Se vilka företag som tittat på din profil',
