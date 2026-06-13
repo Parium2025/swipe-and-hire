@@ -1273,7 +1273,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       </summary>
                       <ul className="mt-4 space-y-3">
                         {plan.features.map((feature) => (
-                          <li key={feature} className="flex items-start gap-3 text-sm leading-6 text-white/80">
+                          <li key={feature} className="flex items-start gap-3 text-sm leading-6 text-white">
                             <svg
                               aria-hidden="true"
                               viewBox="0 0 20 20"
