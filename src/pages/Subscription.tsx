@@ -199,7 +199,7 @@ const Subscription = () => {
               }`}
             >
               {plan.id === 'premium' && (
-                <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">
+                <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
                   Populär
                 </span>
               )}
