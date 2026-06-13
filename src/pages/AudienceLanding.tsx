@@ -1488,7 +1488,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="landing-h2 mt-4 text-white"
               />
               <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white sm:text-lg">
-                Vid frågor, kontakta oss gärna.
+                Kontakta oss gärna om du har någon fundering.
               </p>
               <a
                 href="mailto:hej@parium.se"
