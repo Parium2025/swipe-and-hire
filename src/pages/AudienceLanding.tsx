@@ -1135,7 +1135,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={isMobileFeatureMotion ? undefined : "visible"}
                 viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
-                className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+                className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {c.features.map((feature, idx) => {
                   const i = idx + 1;
