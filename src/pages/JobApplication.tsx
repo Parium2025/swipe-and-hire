@@ -18,6 +18,8 @@ import { ArrowLeft, Upload, Send } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import FileUpload from '@/components/FileUpload';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
+import { useApplicationQuota } from '@/hooks/useApplicationQuota';
+import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
 
 // Draft key for localStorage
 const JOB_APPLICATION_DRAFT_PREFIX = 'parium_draft_job-application-';
