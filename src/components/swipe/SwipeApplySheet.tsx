@@ -492,6 +492,13 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
           </motion.div>
         </>
       )}
+      <ApplicationLimitDialog
+        open={showLimitDialog}
+        onClose={() => setShowLimitDialog(false)}
+        used={quota.used}
+        limit={quota.limit}
+        resetAt={quota.reset_at}
+      />
     </AnimatePresence>
   );
 }
