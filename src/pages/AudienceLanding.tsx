@@ -1363,6 +1363,23 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
                     <PlanFeatures features={plan.features} isActive={isActive} />
 
+                    <button
+                      type="button"
+                      onPointerDown={(e) => { e.stopPropagation(); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate('/auth', { state: { mode: 'register', role: audience, plan: plan.id } });
+                      }}
+                      className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] ${
+                        plan.id === 'premium'
+                          ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))] hover:-translate-y-0.5'
+                          : 'bg-white/10 text-white border border-white/20 hover:bg-white/15 hover:border-white/30'
+                      }`}
+                    >
+                      {plan.id === 'premium' ? 'Bli Premium' : 'Kom igång gratis'}
+                    </button>
+
+
                   </motion.div>
                   );
                 })}
