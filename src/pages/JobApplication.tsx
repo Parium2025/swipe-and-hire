@@ -18,6 +18,8 @@ import { ArrowLeft, Upload, Send } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import FileUpload from '@/components/FileUpload';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
+import { useApplicationQuota } from '@/hooks/useApplicationQuota';
+import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
 
 // Draft key for localStorage
 const JOB_APPLICATION_DRAFT_PREFIX = 'parium_draft_job-application-';
@@ -74,6 +76,8 @@ const JobApplication = () => {
   const [questions, setQuestions] = useState<JobQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const { quota, refresh: refreshQuota } = useApplicationQuota();
   const [draftRestored, setDraftRestored] = useState(false);
   const [initialFormData, setInitialFormData] = useState<any>(null);
   
@@ -258,6 +262,12 @@ const JobApplication = () => {
       return;
     }
 
+    // 🔒 Premium-gate: max 3 ansökningar/vecka på gratisplan.
+    if (!quota.allowed && !quota.is_premium) {
+      setShowLimitDialog(true);
+      return;
+    }
+
     setSubmitting(true);
 
     // Build the application payload
@@ -369,6 +379,7 @@ const JobApplication = () => {
       queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
       queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
+      refreshQuota();
 
       toast({
         title: "Ansökan skickad!",
@@ -919,6 +930,13 @@ const JobApplication = () => {
           Bemanning AB får lagra mina personuppgifter för att kunna hantera min ansökan.
         </p>
       </div>
+      <ApplicationLimitDialog
+        open={showLimitDialog}
+        onClose={() => setShowLimitDialog(false)}
+        used={quota.used}
+        limit={quota.limit}
+        resetAt={quota.reset_at}
+      />
     </div>
   );
 };

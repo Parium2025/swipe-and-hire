@@ -10,6 +10,8 @@ import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWiz
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
+import { useApplicationQuota } from '@/hooks/useApplicationQuota';
+import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
 import type { JobQuestion } from '@/types/jobWizard';
 import type { SwipeJob } from './types';
 
@@ -127,6 +129,7 @@ function JobDetailsSection({ job, extra }: { job: SwipeJob; extra?: ExtraJobDeta
 export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { quota, refresh: refreshQuota } = useApplicationQuota();
   const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -136,6 +139,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
   const [extraDetails, setExtraDetails] = useState<ExtraJobDetails | null>(null);
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -248,6 +252,12 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
   const handleSubmit = useCallback(async () => {
     if (!user || submitting) return;
 
+    // 🔒 Premium-gate: max 3 ansökningar/vecka på gratisplan.
+    if (!quota.allowed && !quota.is_premium) {
+      setShowLimitDialog(true);
+      return;
+    }
+
     // 🚀 Optimistic UI: visa "Skickad!" omedelbart — användaren ska aldrig
     // vänta på networken för en så viktig handling. Vi rullar tillbaka om
     // insert misslyckas.
@@ -324,6 +334,9 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
 
       toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats` });
 
+      // Uppdatera kvot-counter direkt
+      refreshQuota();
+
       setTimeout(() => {
         onApplied();
       }, 1500);
@@ -343,7 +356,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
     } finally {
       setSubmitting(false);
     }
-  }, [user, jobId, answers, submitting, companyName, jobTitle, onApplied, queryClient]);
+  }, [user, jobId, answers, submitting, companyName, jobTitle, onApplied, queryClient, quota.allowed, quota.is_premium, refreshQuota]);
 
   return (
     <AnimatePresence>
@@ -479,6 +492,13 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
           </motion.div>
         </>
       )}
+      <ApplicationLimitDialog
+        open={showLimitDialog}
+        onClose={() => setShowLimitDialog(false)}
+        used={quota.used}
+        limit={quota.limit}
+        resetAt={quota.reset_at}
+      />
     </AnimatePresence>
   );
 }

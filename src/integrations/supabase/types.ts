@@ -2646,6 +2646,7 @@ export type Database = {
           video_url: string
         }[]
       }
+      get_application_quota: { Args: { p_user_id: string }; Returns: Json }
       get_consented_profile_for_employer: {
         Args: { p_employer_id: string; p_profile_id: string }
         Returns: {
