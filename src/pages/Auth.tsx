@@ -612,6 +612,11 @@ const Auth = () => {
   if (user && profile && !loading && confirmationStatus === 'none' && recoveryStatus === 'none' && !isPasswordReset) {
     const role = (profile as any)?.role;
     if (role) {
+      // Om användaren kom hit via en prisknapp ("Bli Premium") — skicka vidare till checkout
+      const pendingPlan = typeof window !== 'undefined' ? sessionStorage.getItem('parium-pending-plan') : null;
+      if (pendingPlan) {
+        return <Navigate to="/checkout" replace />;
+      }
       // Alla roller landar på /home efter inloggning
       return <Navigate to="/home" replace />;
     }
