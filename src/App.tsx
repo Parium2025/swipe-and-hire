@@ -91,6 +91,7 @@ import { AppFailureMonitor } from "@/components/AppFailureMonitor";
 import { syncBrowserChrome, mountChromePopstateGuard, noteChromePath } from "@/lib/browserChrome";
 import BottomChromeStrip from "@/components/BottomChromeStrip";
 import TopChromeStrip from "@/components/TopChromeStrip";
+import { PremiumLimitListener } from "@/components/premium/PremiumLimitListener";
 
 // Run draft cleanup once on app load (removes drafts older than 1 day)
 // Defer to idle time to avoid blocking first paint
