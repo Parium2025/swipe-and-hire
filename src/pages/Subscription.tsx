@@ -1,28 +1,101 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Crown, Check, Star, CreditCard, Calendar } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Crown, Star } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { PremiumUpgradeDialog } from '@/components/PremiumUpgradeDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+const ease = [0.16, 1, 0.3, 1] as const;
+
+function PlanFeatures({ features, isActive }: { features: string[]; isActive: boolean }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-6 border-t border-white/10 pt-5">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+        className="flex w-full min-h-[44px] cursor-pointer items-center justify-between text-sm font-semibold text-white"
+      >
+        <span>Se alla funktioner</span>
+        <motion.span
+          className="ml-4 text-secondary"
+          animate={{ rotate: open ? 45 : 0 }}
+          transition={{ duration: 0.35, ease }}
+        >
+          +
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: { duration: 0.45, ease },
+              opacity: { duration: 0.3, ease, delay: open ? 0.08 : 0 },
+            }}
+            className="overflow-hidden"
+          >
+            <motion.ul
+              className="mt-4 space-y-3"
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.045, delayChildren: 0.08 } },
+              }}
+            >
+              {features.map((feature) => (
+                <motion.li
+                  key={feature}
+                  variants={{
+                    hidden: { opacity: 0, y: -6 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease } },
+                  }}
+                  className="flex items-start gap-3 text-sm leading-6 text-white"
+                >
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 20 20"
+                    className={`mt-0.5 h-4 w-4 flex-shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="4 10 8.5 14.5 16 6.5" />
+                  </svg>
+                  <span>{feature}</span>
+                </motion.li>
+              ))}
+            </motion.ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 const Subscription = () => {
-  const { profile, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [currentPlan, setCurrentPlan] = useState<'basic' | 'premium'>('basic'); // This would come from your subscription state
-  const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>(currentPlan);
+  const [currentPlan] = useState<'basic' | 'premium'>('basic');
+  const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('premium');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const plans = [
     {
-      id: 'basic',
+      id: 'basic' as const,
       name: 'Start',
       price: '0',
-      period: 'månad',
-      description: 'Allt du behöver för att komma igång',
+      tagline: 'Allt du behöver för att börja söka jobb.',
       features: [
         'Skapa profil med CV och videopresentation',
         'Bläddra bland alla jobb',
@@ -32,15 +105,12 @@ const Subscription = () => {
         'Chatta med arbetsgivaren i appen',
       ],
       icon: Star,
-      buttonText: 'Nuvarande plan',
-      recommended: false
     },
     {
-      id: 'premium',
+      id: 'premium' as const,
       name: 'Premium',
       price: '29',
-      period: 'månad',
-      description: 'För dig som menar allvar med jobbsökandet',
+      tagline: 'För dig som menar allvar med jobbsökandet.',
       features: [
         'Skapa profil med CV och videopresentation',
         'Bläddra bland alla jobb',
@@ -50,142 +120,138 @@ const Subscription = () => {
         'Se vilka företag som tittat på din profil',
         'Direktkontakt till arbetsgivaren via mejl',
         'Chatta med arbetsgivaren i appen',
-        'Statistik över profilvisningar senaste 30 dagarna'
+        'Statistik över profilvisningar senaste 30 dagarna',
       ],
       icon: Crown,
-      buttonText: 'Uppgradera till Premium',
-      recommended: true
-    }
+    },
   ];
 
   return (
-     <div className="responsive-container-wide space-y-6 animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
-      <div className="text-center mb-6">
+    <div className="responsive-container-wide space-y-8 animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+      <div className="text-center mb-2">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Abonnemang</h1>
-        <p className="text-sm text-white mt-1">
+        <p className="text-sm text-white/70 mt-1">
           Hantera ditt abonnemang och uppgradera din plan
         </p>
       </div>
 
-       <div className="pb-6">
-        {/* Current Plan Status */}
-        <div className="pt-4 mb-6">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3 mb-3">
-                {currentPlan === 'premium' ? (
-                  <Crown className="h-5 w-5 text-white" />
-                ) : (
-                  <Star className="h-5 w-5 text-white" />
-                )}
-                <span className="font-medium text-white">Din nuvarande plan</span>
-              </div>
-               <div className="flex items-center justify-between">
-                 <div>
-                   <p className="font-semibold text-white">
-                     {plans.find(p => p.id === currentPlan)?.name} Plan
-                   </p>
-                  <p className="text-sm text-white">
-                    {user?.created_at ? `Aktiv sedan ${new Date(user.created_at).toLocaleDateString('sv-SE', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}` : 'Aktiv plan'}
-                  </p>
-                </div>
-                <Badge variant="secondary" className="bg-white/20 text-white">
-                  Aktiv
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Current Plan Status */}
+      <div className="rounded-3xl border border-white/15 bg-white/5 backdrop-blur-xl p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            {currentPlan === 'premium' ? (
+              <Crown className="h-5 w-5 text-white shrink-0" />
+            ) : (
+              <Star className="h-5 w-5 text-white shrink-0" />
+            )}
+            <div className="min-w-0">
+              <p className="font-semibold text-white truncate">
+                {plans.find((p) => p.id === currentPlan)?.name} Plan
+              </p>
+              <p className="text-xs text-white/70 truncate">
+                {user?.created_at
+                  ? `Aktiv sedan ${new Date(user.created_at).toLocaleDateString('sv-SE', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}`
+                  : 'Aktiv plan'}
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+            Aktiv
+          </span>
         </div>
-
-        {/* Available Plans */}
-        <div className="space-y-4 mb-6">
-          <h2 className="text-lg font-semibold text-white">Tillgängliga abonnemang</h2>
-          
-          {plans.map((plan) => {
-            const Icon = plan.icon;
-            const isCurrent = plan.id === currentPlan;
-            
-            return (
-              <Card 
-                key={plan.id}
-                onClick={() => setSelectedPlan(plan.id as 'basic' | 'premium')}
-                className={`relative cursor-pointer rounded-3xl border backdrop-blur-xl transition-all duration-300 ${
-                  plan.recommended
-                    ? 'border-white/15 bg-white/5 shadow-[0_42px_110px_-52px_hsl(var(--secondary)/0.6)]'
-                    : 'border-white/20 bg-white/10'
-                } ${
-                  selectedPlan === plan.id && !plan.recommended ? 'border-green-500 shadow-lg shadow-green-500/20' : ''
-                }`}
-              >
-                {plan.recommended && (
-                  <div className="absolute top-3 left-4">
-                    <span className="inline-flex rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-                      Rekommenderad
-                    </span>
-                  </div>
-                )}
-                
-                <CardContent className={`p-4 ${plan.recommended ? 'pt-14' : 'pt-6'}`}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Icon className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg text-white">{plan.name}</h3>
-                        <p className="text-sm text-white">{plan.description}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-white whitespace-nowrap">
-                        {plan.price} kr
-                      </div>
-                      <div className="text-sm text-white">
-                        /{plan.period}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2 mb-4">
-                    {plan.features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        <span className="text-sm text-white">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <Button 
-                    className={`w-full ${
-                      plan.id === 'premium' && !isCurrent
-                        ? 'bg-secondary text-white hover:bg-secondary/90 shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.45)] font-bold tracking-wide rounded-2xl min-h-[48px]'
-                        : ''
-                    }`}
-                    disabled={isCurrent}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (plan.id === 'premium' && !isCurrent) {
-                        try { sessionStorage.setItem('parium-pending-plan', 'premium'); } catch {}
-                        try { sessionStorage.setItem('parium-checkout-origin', 'subscription'); } catch {}
-                        navigate('/checkout');
-                      }
-                    }}
-                  >
-                    {isCurrent ? 'Nuvarande plan' : plan.buttonText}
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
       </div>
 
-      <PremiumUpgradeDialog 
+      {/* Plans header */}
+      <div>
+        <h2 className="text-lg font-semibold text-white">Tillgängliga abonnemang</h2>
+      </div>
+
+      {/* Plans grid — matchar landningssidan */}
+      <div className="relative grid gap-5 md:grid-cols-2">
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-[110%] w-[80%] rounded-full bg-secondary/35 blur-[110px] transition-[left,opacity] duration-300 ease-out md:w-[48%] ${
+            selectedPlan === 'premium' ? 'md:left-[44%] left-[10%] opacity-100' : 'md:left-[-6%] left-[10%] opacity-100'
+          }`}
+        />
+        {plans.map((plan) => {
+          const isActive = selectedPlan === plan.id;
+          const isCurrent = plan.id === currentPlan;
+          return (
+            <motion.div
+              key={plan.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease }}
+              onPointerDownCapture={() => setSelectedPlan(plan.id)}
+              onFocusCapture={() => setSelectedPlan(plan.id)}
+              onClick={() => setSelectedPlan(plan.id)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedPlan(plan.id);
+                }
+              }}
+              className={`relative isolate cursor-pointer rounded-3xl border p-6 sm:p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 ${
+                isActive
+                  ? 'border-secondary bg-gradient-to-br from-secondary/30 to-white/5 shadow-[0_42px_110px_-52px_hsl(var(--secondary)/0.75)]'
+                  : 'border-white/15 bg-white/5 hover:border-secondary/25'
+              }`}
+            >
+              <div
+                aria-hidden="true"
+                className={`pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_50%_115%,hsl(var(--secondary)/0.18),transparent_58%)] transition-opacity duration-300 ${
+                  isActive ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+              {plan.id === 'premium' && (
+                <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">
+                  Populär
+                </span>
+              )}
+
+              <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+              <p className="mt-2 text-4xl font-black text-white">
+                {plan.price} kr<span className="text-sm font-medium text-white">/mån</span>
+              </p>
+              <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
+
+              <PlanFeatures features={plan.features} isActive={isActive} />
+
+              <button
+                type="button"
+                disabled={isCurrent}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (plan.id === 'premium' && !isCurrent) {
+                    try { sessionStorage.setItem('parium-pending-plan', 'premium'); } catch {}
+                    try { sessionStorage.setItem('parium-checkout-origin', 'subscription'); } catch {}
+                    navigate('/checkout');
+                  }
+                }}
+                className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${
+                  isCurrent
+                    ? 'bg-white/10 text-white border border-white/20'
+                    : plan.id === 'premium'
+                    ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))] hover:-translate-y-0.5'
+                    : 'bg-white/10 text-white border border-white/20 hover:bg-white/15 hover:border-white/30'
+                }`}
+              >
+                {isCurrent ? 'Nuvarande plan' : plan.id === 'premium' ? 'Bli Premium' : 'Kom igång gratis'}
+              </button>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      <PremiumUpgradeDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
         isAppOverride={isMobile}
