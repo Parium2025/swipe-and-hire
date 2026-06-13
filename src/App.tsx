@@ -20,6 +20,7 @@ import AnnonserHub from "./pages/AnnonserHub";
 import GuiderHub from "./pages/GuiderHub";
 import GuidePage from "./pages/GuidePage";
 import Auth from "./pages/Auth";
+import Checkout from "./pages/Checkout";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
