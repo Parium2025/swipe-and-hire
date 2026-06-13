@@ -169,7 +169,9 @@ const Subscription = () => {
                 {plans.find((p) => p.id === currentPlan)?.name} Plan
               </p>
               <p className="text-xs text-white/70 truncate">
-                {user?.created_at
+                {isPremium
+                  ? `Aktiv sedan ${user?.created_at ? new Date(user.created_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'} · Nästa betalning ${nextBillingDate}`
+                  : user?.created_at
                   ? `Aktiv sedan ${new Date(user.created_at).toLocaleDateString('sv-SE', {
                       year: 'numeric',
                       month: 'long',
@@ -177,6 +179,7 @@ const Subscription = () => {
                     })}`
                   : 'Aktiv plan'}
               </p>
+
             </div>
           </div>
           <span className="inline-flex rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
