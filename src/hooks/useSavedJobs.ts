@@ -6,6 +6,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useOfflineSavedJobsQueue } from '@/hooks/useOfflineSavedJobsQueue';
+import { useIsPremium } from '@/hooks/useIsPremium';
+import { emitSavedJobsLimit } from '@/lib/premiumEvents';
+
+const SAVED_JOBS_FREE_LIMIT = 3;
 
 const CACHE_KEY = 'parium_saved_jobs_cache';
 // No TTL - always use cache for instant load, background sync keeps fresh
