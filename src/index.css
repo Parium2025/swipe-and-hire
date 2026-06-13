@@ -133,6 +133,11 @@ video:focus-visible,
   --tw-ring-offset-color: transparent !important;
 }
 
+[data-allow-focus-shadow="true"]:focus,
+[data-allow-focus-shadow="true"]:focus-visible {
+  outline: none !important;
+}
+
 .video-text-shadow {
   text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8);
 }

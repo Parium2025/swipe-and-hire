@@ -1259,6 +1259,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     onClick={() => setSelectedPlan(plan.id)}
                     role="button"
                     tabIndex={0}
+                    data-allow-focus-shadow="true"
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
                     className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
