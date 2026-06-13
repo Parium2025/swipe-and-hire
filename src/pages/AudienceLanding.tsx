@@ -1287,31 +1287,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     </p>
                     <p className="mt-4 text-sm leading-7 text-white">{plan.tagline}</p>
 
-                    <details className="group/plan mt-6 border-t border-white/10 pt-5">
-                      <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between text-sm font-semibold text-white">
-                        <span>Se alla funktioner</span>
-                        <span className="ml-4 text-secondary transition-transform duration-300 group-open/plan:rotate-45">+</span>
-                      </summary>
-                      <ul className="mt-4 space-y-3">
-                        {plan.features.map((feature) => (
-                          <li key={feature} className="flex items-start gap-3 text-sm leading-6 text-white">
-                            <svg
-                              aria-hidden="true"
-                              viewBox="0 0 20 20"
-                              className={`mt-0.5 h-4 w-4 flex-shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`}
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="4 10 8.5 14.5 16 6.5" />
-                            </svg>
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
+                    <PlanFeatures features={plan.features} isActive={isActive} />
+
                   </motion.div>
                   );
                 })}
