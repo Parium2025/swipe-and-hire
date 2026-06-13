@@ -1259,14 +1259,23 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     onClick={() => setSelectedPlan(plan.id)}
                     role="button"
                     tabIndex={0}
+                    data-allow-focus-shadow="true"
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
-                    className={`landing-feature-card landing-feature-mobile-in relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer ${
+                    className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
                       isActive
-                        ? 'border-secondary/40 bg-gradient-to-br from-secondary/20 to-white/5 shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.35)]'
+                        ? 'border-secondary/55 bg-gradient-to-br from-secondary/20 to-white/5 shadow-[0_34px_110px_-18px_hsl(var(--secondary)/0.62)]'
                         : 'border-white/15 bg-white/5 hover:border-secondary/25'
                     }`}
                   >
+                    <div
+                      aria-hidden="true"
+                      className={`pointer-events-none absolute -inset-x-12 -bottom-20 top-8 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,hsl(var(--secondary)/0.42)_0%,hsl(var(--secondary)/0.22)_34%,transparent_72%)] blur-[64px] transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}
+                    />
+                    <div
+                      aria-hidden="true"
+                      className={`pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_50%_115%,hsl(var(--secondary)/0.18),transparent_58%)] transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}
+                    />
                     {plan.id === 'premium' && (
                       <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">
                         Populär

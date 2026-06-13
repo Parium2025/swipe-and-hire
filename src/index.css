@@ -113,8 +113,8 @@ button:focus,
 button:focus-visible,
 a:focus,
 a:focus-visible,
-[role="button"]:focus,
-[role="button"]:focus-visible,
+[role="button"]:not([data-allow-focus-shadow="true"]):focus,
+[role="button"]:not([data-allow-focus-shadow="true"]):focus-visible,
 input:focus,
 input:focus-visible,
 textarea:focus,
@@ -131,6 +131,11 @@ video:focus-visible,
   --tw-ring-width: 0px !important;
   --tw-ring-color: transparent !important;
   --tw-ring-offset-color: transparent !important;
+}
+
+[data-allow-focus-shadow="true"]:focus,
+[data-allow-focus-shadow="true"]:focus-visible {
+  outline: none !important;
 }
 
 .video-text-shadow {
