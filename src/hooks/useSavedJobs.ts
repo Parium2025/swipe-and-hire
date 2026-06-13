@@ -6,6 +6,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useOfflineSavedJobsQueue } from '@/hooks/useOfflineSavedJobsQueue';
+import { useIsPremium } from '@/hooks/useIsPremium';
+import { emitSavedJobsLimit } from '@/lib/premiumEvents';
+
+const SAVED_JOBS_FREE_LIMIT = 3;
 
 const CACHE_KEY = 'parium_saved_jobs_cache';
 // No TTL - always use cache for instant load, background sync keeps fresh
@@ -155,6 +159,7 @@ export const useSavedJobs = () => {
 
   const { isOnline, showOfflineToast } = useOnline();
   const { enqueue } = useOfflineSavedJobsQueue(user?.id);
+  const { isPremium } = useIsPremium();
 
   const toggleSaveJob = useCallback(async (jobId: string) => {
     if (!user) {
@@ -163,6 +168,12 @@ export const useSavedJobs = () => {
     }
 
     const isSaved = savedJobIds.has(jobId);
+
+    // 🔒 Premium-gate: max 3 sparade jobb samtidigt på gratisplan.
+    if (!isSaved && !isPremium && savedJobIds.size >= SAVED_JOBS_FREE_LIMIT) {
+      emitSavedJobsLimit({ limit: SAVED_JOBS_FREE_LIMIT });
+      return;
+    }
 
     // Optimistic update (works both online and offline)
     setSavedJobIds(prev => {
@@ -228,7 +239,7 @@ export const useSavedJobs = () => {
       console.error('Error toggling saved job:', err);
       toast.error(isSaved ? 'Kunde inte ta bort jobbet' : 'Kunde inte spara jobbet');
     }
-  }, [user, savedJobIds, isOnline, enqueue, queryClient]);
+  }, [user, savedJobIds, isOnline, enqueue, queryClient, isPremium]);
 
   // Explicit unsave - always deletes, no toggle logic
   const unsaveJob = useCallback(async (jobId: string) => {

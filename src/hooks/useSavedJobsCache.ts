@@ -3,6 +3,10 @@ import { useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { safeSetItem } from '@/lib/safeStorage';
+import { useIsPremium } from '@/hooks/useIsPremium';
+import { emitSavedJobsLimit } from '@/lib/premiumEvents';
+
+const SAVED_JOBS_FREE_LIMIT = 3;
 
 /**
  * 🚇 useSavedJobsCache — speglar useMyApplicationsCache-mönstret.
@@ -356,10 +360,18 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     });
   }, [user?.id, queryClient]);
 
+  const { isPremium } = useIsPremium();
+
   const toggleSavedJob = useCallback(async (jobId: string, jobPosting?: JobPostingInput) => {
     if (!user?.id) return;
 
     const wasSaved = savedJobIds.has(jobId);
+
+    // 🔒 Premium-gate: max 3 sparade jobb samtidigt på gratisplan.
+    if (!wasSaved && !isPremium && savedJobIds.size >= SAVED_JOBS_FREE_LIMIT) {
+      emitSavedJobsLimit({ limit: SAVED_JOBS_FREE_LIMIT });
+      return;
+    }
 
     queryClient.setQueryData(['saved-jobs', user.id], (old: SavedJob[] | undefined) => {
       const current = sanitizeSavedJobsList<SavedJob>(old);
@@ -407,7 +419,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
       queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
       throw error;
     }
-  }, [user?.id, queryClient, savedJobIds]);
+  }, [user?.id, queryClient, savedJobIds, isPremium]);
 
   const restoreSkippedJob = useCallback(async (jobId: string) => {
     if (!user?.id) return;
