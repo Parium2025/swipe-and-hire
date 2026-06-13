@@ -113,17 +113,19 @@ const Subscription = () => {
               <Card 
                 key={plan.id}
                 onClick={() => setSelectedPlan(plan.id as 'basic' | 'premium')}
-                className={`bg-white/10 backdrop-blur-sm border-white/20 relative cursor-pointer transition-all duration-200 border-2 ${
-                  plan.recommended ? 'border-primary' : ''
+                className={`relative cursor-pointer rounded-3xl border backdrop-blur-xl transition-all duration-300 ${
+                  plan.recommended
+                    ? 'border-white/15 bg-white/5 shadow-[0_42px_110px_-52px_hsl(var(--secondary)/0.6)]'
+                    : 'border-white/20 bg-white/10'
                 } ${
-                  selectedPlan === plan.id ? 'border-green-500 shadow-lg shadow-green-500/20' : ''
+                  selectedPlan === plan.id && !plan.recommended ? 'border-green-500 shadow-lg shadow-green-500/20' : ''
                 }`}
               >
                 {plan.recommended && (
-                  <div className="absolute top-2 left-4">
-                    <Badge className="bg-white/20 text-white text-sm">
+                  <div className="absolute top-3 left-4">
+                    <span className="inline-flex rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
                       Rekommenderad
-                    </Badge>
+                    </span>
                   </div>
                 )}
                 
