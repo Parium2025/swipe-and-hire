@@ -241,6 +241,7 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
           </div>
         </div>
       </UnsavedChangesProvider>
+      <PremiumLimitListener />
     </>
   );
 };
