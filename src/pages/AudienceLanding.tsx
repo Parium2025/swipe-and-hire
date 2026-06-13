@@ -1229,7 +1229,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
                       <Icon className="h-5 w-5" strokeWidth={2} />
                     </div>
-                    <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-secondary/70">0{i}</div>
+                    <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-secondary/70">{i}</div>
                     <h3 className="wave-text mt-1 text-lg font-bold">{feature.title}</h3>
                     <p className="wave-text mt-2 text-sm leading-7 text-white">
                       {feature.description}
