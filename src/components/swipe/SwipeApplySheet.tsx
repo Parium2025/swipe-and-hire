@@ -140,6 +140,8 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [showLimitDialog, setShowLimitDialog] = useState(false);
+
+  useEffect(() => {
     if (open) {
       setIsClosing(false);
     }
