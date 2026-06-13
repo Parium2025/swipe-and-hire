@@ -165,6 +165,7 @@ const Subscription = () => {
                       e.stopPropagation();
                       if (plan.id === 'premium' && !isCurrent) {
                         try { sessionStorage.setItem('parium-pending-plan', 'premium'); } catch {}
+                        try { sessionStorage.setItem('parium-checkout-origin', 'subscription'); } catch {}
                         navigate('/checkout');
                       }
                     }}
