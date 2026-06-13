@@ -171,6 +171,7 @@ const AnimatedRoutes = () => {
           <Route path="/guider" element={<GuiderHub />} />
           <Route path="/guider/:slug" element={<GuidePage />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/home" element={<Index />} />
           <Route path="/index" element={<Index />} />
           <Route path="/consent" element={<Index />} />
