@@ -115,7 +115,7 @@ export default function Checkout() {
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 20 20"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-white"
+                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-secondary"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -134,7 +134,7 @@ export default function Checkout() {
             type="button"
             disabled={processing}
             onClick={handleCheckout}
-            className="mt-8 flex w-full min-h-[54px] items-center justify-center rounded-2xl bg-white px-6 text-sm font-bold tracking-wide text-[hsl(215_100%_12%)] shadow-[0_18px_45px_-18px_rgba(255,255,255,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/95 active:scale-[0.98] disabled:opacity-70"
+            className="mt-8 flex w-full min-h-[54px] items-center justify-center rounded-2xl bg-secondary px-6 text-sm font-bold tracking-wide text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-secondary/90 active:scale-[0.98] disabled:opacity-70"
           >
             {processing ? 'Förbereder betalning…' : 'Betala med kort'}
           </button>
