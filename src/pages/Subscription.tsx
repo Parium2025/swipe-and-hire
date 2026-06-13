@@ -194,8 +194,10 @@ const Subscription = () => {
       </div>
 
       {/* Plans grid — matchar landningssidan */}
-      <div className="relative grid gap-5 md:grid-cols-2">
-        {plans.map((plan) => {
+      <div className={`relative grid gap-5 ${isPremium ? 'md:grid-cols-1 max-w-[560px] mx-auto w-full' : 'md:grid-cols-2'}`}>
+        {plans
+          .filter((plan) => (isPremium ? plan.id === 'premium' : true))
+          .map((plan) => {
           const isActive = selectedPlan === plan.id;
           const isCurrent = plan.id === currentPlan;
           return (
@@ -238,30 +240,72 @@ const Subscription = () => {
 
               <button
                 type="button"
-                disabled={isCurrent}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (plan.id === 'premium' && isCurrent) {
+                    setShowCancelDialog(true);
+                    return;
+                  }
                   if (plan.id === 'premium' && !isCurrent) {
                     try { sessionStorage.setItem('parium-pending-plan', 'premium'); } catch {}
                     try { sessionStorage.setItem('parium-checkout-origin', 'subscription'); } catch {}
                     navigate('/checkout');
                   }
                 }}
-                className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${
-                  isCurrent
+                className={`mt-7 flex w-full min-h-[52px] items-center justify-center rounded-2xl px-6 text-sm font-bold tracking-wide transition-all duration-300 active:scale-[0.98] ${
+                  plan.id === 'premium' && isCurrent
+                    ? 'bg-transparent text-red-400 border border-red-400/50 hover:bg-red-500/10 hover:border-red-400'
+                    : isCurrent
                     ? 'bg-white/10 text-white border border-white/20'
                     : plan.id === 'premium'
                     ? 'bg-secondary text-white shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.9)] hover:shadow-[0_22px_55px_-18px_hsl(var(--secondary))] hover:-translate-y-0.5'
                     : 'bg-white/10 text-white border border-white/20 hover:bg-white/15 hover:border-white/30'
                 }`}
               >
-                {isCurrent ? 'Nuvarande plan' : plan.id === 'premium' ? 'Bli Premium' : 'Kom igång gratis'}
+                {plan.id === 'premium' && isCurrent
+                  ? 'Avbryt prenumeration'
+                  : isCurrent
+                  ? 'Nuvarande plan'
+                  : plan.id === 'premium'
+                  ? 'Bli Premium'
+                  : 'Kom igång gratis'}
               </button>
+
+              {plan.id === 'premium' && isCurrent && (
+                <button
+                  type="button"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => { e.stopPropagation(); }}
+                  className="mt-4 w-full text-center text-xs font-medium text-white/60 underline-offset-4 hover:text-white hover:underline transition-colors"
+                >
+                  Hantera betalmetod
+                </button>
+              )}
             </motion.div>
           );
         })}
       </div>
+
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent className="bg-primary border-white/15 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Avbryt Premium?</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/70">
+              Din Premium-prenumeration förblir aktiv fram till {nextBillingDate}. Därefter återgår ditt konto till Start-planen. Du kan när som helst återaktivera Premium.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/15 hover:text-white">
+              Behåll Premium
+            </AlertDialogCancel>
+            <AlertDialogAction className="bg-red-500/90 text-white hover:bg-red-500 border-0">
+              Avbryt prenumeration
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       <PremiumUpgradeDialog
         open={showUpgradeDialog}
