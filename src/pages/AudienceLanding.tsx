@@ -1287,10 +1287,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
                 className="relative mt-8 grid gap-5 md:grid-cols-2"
               >
-                <div
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-[110%] w-[80%] rounded-full bg-secondary/35 blur-[110px] transition-[left,opacity] duration-300 ease-out md:w-[48%] ${selectedPlan === 'premium' ? 'left-[44%] opacity-100' : 'left-[-6%] opacity-100'}`}
-                />
+
                 {[
                   {
                     id: 'start' as const,
@@ -1303,7 +1300,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       'Sökfilter på plats, roll och erfarenhet',
                       'Visa intresse för upp till 3 jobb i veckan',
                       'Spara upp till 3 jobb samtidigt',
-                      'Chatta med arbetsgivaren i appen',
+                      'Chatta med arbetsgivare',
                     ],
                   },
                   {
@@ -1317,9 +1314,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       'Sökfilter på plats, roll och erfarenhet',
                       'Visa intresse för hur många jobb du vill',
                       'Spara obegränsat antal jobb',
+                      'Chatta med arbetsgivare',
                       'Se vilka företag som tittat på din profil',
                       'Direktkontakt till arbetsgivaren via mejl',
-                      'Chatta med arbetsgivaren i appen',
+
                       'Statistik över profilvisningar senaste 30 dagarna',
                     ],
                   },
@@ -1342,19 +1340,16 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
                     className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
                       isActive
-                        ? 'border-secondary bg-gradient-to-br from-secondary/30 to-white/5 shadow-[0_42px_110px_-52px_hsl(var(--secondary)/0.75)]'
+                        ? 'border-secondary bg-white/5'
                         : 'border border-white/15 bg-white/5 hover:border-secondary/25'
                     }`}
                   >
-                    <div
-                      aria-hidden="true"
-                      className={`pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_50%_115%,hsl(var(--secondary)/0.18),transparent_58%)] transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}
-                    />
                     {plan.id === 'premium' && (
-                      <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">
+                      <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
                         Populär
                       </span>
                     )}
+
                     <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                     <p className="mt-2 text-4xl font-black text-white">
                       {plan.price} kr<span className="text-sm font-medium text-white">/mån</span>
