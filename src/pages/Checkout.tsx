@@ -74,7 +74,7 @@ export default function Checkout() {
         <motion.button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-8 inline-flex items-center gap-2 self-start text-sm font-medium text-white/70 transition-colors hover:text-white"
+          className="mb-8 inline-flex h-10 items-center gap-2 self-start rounded-full border border-white/20 bg-white/5 px-5 text-sm font-medium text-white backdrop-blur-[2px] transition-colors hover:bg-white/10 active:scale-[0.97]"
           initial={{ opacity: 0, x: -8 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
@@ -88,25 +88,25 @@ export default function Checkout() {
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="rounded-3xl border border-white/15 bg-white/5 p-8 backdrop-blur-xl shadow-[0_42px_110px_-52px_hsl(var(--secondary)/0.6)]"
         >
-          <span className="inline-flex rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">
+          <span className="inline-flex rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
             Slutför prenumeration
           </span>
 
           <h1 className="mt-5 text-3xl font-black text-white sm:text-4xl">
             Bli {plan.name}
           </h1>
-          <p className="mt-2 text-sm text-white/70">
+          <p className="mt-2 text-sm text-white">
             Hej {displayName} — ett steg kvar.
           </p>
 
           <div className="mt-7 flex items-baseline gap-2">
             <span className="text-5xl font-black text-white">{plan.price.split('/')[0]}</span>
-            <span className="text-sm font-medium text-white/70">/{plan.price.split('/')[1]}</span>
+            <span className="text-sm font-medium text-white">/{plan.price.split('/')[1]}</span>
           </div>
-          <p className="mt-3 text-sm leading-7 text-white/80">{plan.tagline}</p>
+          <p className="mt-3 text-sm leading-7 text-white">{plan.tagline}</p>
 
           <div className="mt-7 border-t border-white/10 pt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white">
               Det här ingår
             </p>
             <ul className="mt-4 space-y-3">
@@ -115,7 +115,7 @@ export default function Checkout() {
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 20 20"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-secondary"
+                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-white"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -139,7 +139,7 @@ export default function Checkout() {
             {processing ? 'Förbereder betalning…' : 'Betala med kort'}
           </button>
 
-          <p className="mt-4 text-center text-xs text-white/55">
+          <p className="mt-4 text-center text-xs text-white">
             Säker betalning via Stripe. Avsluta när du vill.
           </p>
         </motion.div>
