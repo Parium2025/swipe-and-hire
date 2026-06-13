@@ -1201,7 +1201,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 className="landing-feature-mobile-in mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg"
                 style={isMobileFeatureMotion ? { ['--lf-x' as string]: '60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '260ms' } : undefined}
               >
-                Platshållartext för prismodellen. Lägg in planer eller "från X kr/mån".
+                {audience === 'job_seeker'
+                  ? 'Kom igång helt gratis. Uppgradera till Premium när du vill ta nästa steg — säg upp när du vill.'
+                  : 'Transparenta priser. Inga överraskningar.'}
               </motion.p>
               <motion.div
                 initial={isMobileFeatureMotion ? false : "hidden"}
@@ -1210,9 +1212,39 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
                 className="mt-8 grid gap-5 md:grid-cols-2"
               >
-                {['Start', 'Premium'].map((plan, i) => (
+                {[
+                  {
+                    name: 'Start',
+                    price: '0',
+                    tagline: 'Allt du behöver för att börja söka jobb.',
+                    features: [
+                      'Skapa profil med CV och videopresentation',
+                      'Bläddra bland alla jobb',
+                      'Sökfilter på plats, roll och erfarenhet',
+                      'Visa intresse för upp till 3 jobb i veckan',
+                      'Spara upp till 3 jobb samtidigt',
+                      'Notis när någon tittat på din profil',
+                      'Notis när en arbetsgivare visat intresse tillbaka',
+                    ],
+                  },
+                  {
+                    name: 'Premium',
+                    price: '29',
+                    tagline: 'För dig som menar allvar med jobbsökandet.',
+                    features: [
+                      'Allt i Start',
+                      'Visa intresse för obegränsat antal jobb',
+                      'Spara obegränsat antal jobb',
+                      'Se vilka företag som tittat på din profil',
+                      'Se vilka arbetsgivare som visat intresse tillbaka',
+                      'Direktkontakt till arbetsgivaren via mejl',
+                      'Chatta direkt med arbetsgivaren i appen',
+                      'Statistik över profilvisningar senaste 30 dagarna',
+                    ],
+                  },
+                ].map((plan, i) => (
                   <motion.div
-                    key={plan}
+                    key={plan.name}
                     variants={{
                       hidden: { opacity: 0 },
                       visible: { opacity: 1, transition: { duration: 0.9, ease } },
@@ -1229,12 +1261,41 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                         Populär
                       </span>
                     )}
-                    <h3 className="text-xl font-bold text-white">{plan}</h3>
-                    <p className="mt-2 text-3xl font-black text-white">— kr<span className="text-sm font-medium text-white/70">/mån</span></p>
-                    <p className="mt-4 text-sm leading-7 text-white/70">Platshållare för planbeskrivning.</p>
+                    <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                    <p className="mt-2 text-4xl font-black text-white">
+                      {plan.price} kr<span className="text-sm font-medium text-white/70">/mån</span>
+                    </p>
+                    <p className="mt-4 text-sm leading-7 text-white/70">{plan.tagline}</p>
+
+                    <details className="group/plan mt-6 border-t border-white/10 pt-5">
+                      <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between text-sm font-semibold text-white">
+                        <span>Se alla funktioner</span>
+                        <span className="ml-4 text-secondary transition-transform duration-300 group-open/plan:rotate-45">+</span>
+                      </summary>
+                      <ul className="mt-4 space-y-3">
+                        {plan.features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-3 text-sm leading-6 text-white/80">
+                            <svg
+                              aria-hidden="true"
+                              viewBox="0 0 20 20"
+                              className={`mt-0.5 h-4 w-4 flex-shrink-0 ${i === 1 ? 'text-secondary' : 'text-white/70'}`}
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="4 10 8.5 14.5 16 6.5" />
+                            </svg>
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
                   </motion.div>
                 ))}
               </motion.div>
+
             </div>
           </section>
 
