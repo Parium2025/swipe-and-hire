@@ -24,6 +24,80 @@ type AudienceLandingProps = {
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
+function PlanFeatures({ features, isActive }: { features: string[]; isActive: boolean }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-6 border-t border-white/10 pt-5">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full min-h-[44px] cursor-pointer items-center justify-between text-sm font-semibold text-white"
+      >
+        <span>Se alla funktioner</span>
+        <motion.span
+          className="ml-4 text-secondary"
+          animate={{ rotate: open ? 45 : 0 }}
+          transition={{ duration: 0.35, ease }}
+        >
+          +
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: { duration: 0.45, ease },
+              opacity: { duration: 0.3, ease, delay: open ? 0.08 : 0 },
+            }}
+            className="overflow-hidden"
+          >
+            <motion.ul
+              className="mt-4 space-y-3"
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.045, delayChildren: 0.08 } },
+              }}
+            >
+              {features.map((feature) => (
+                <motion.li
+                  key={feature}
+                  variants={{
+                    hidden: { opacity: 0, y: -6 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease } },
+                  }}
+                  className="flex items-start gap-3 text-sm leading-6 text-white"
+                >
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 20 20"
+                    className={`mt-0.5 h-4 w-4 flex-shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="4 10 8.5 14.5 16 6.5" />
+                  </svg>
+                  <span>{feature}</span>
+                </motion.li>
+              ))}
+            </motion.ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 const WAVE_VIEWBOX_WIDTH = 1440;
 const WAVE_VIEWBOX_HEIGHT = 600;
 const WAVE_SEGMENTS = [
