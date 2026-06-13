@@ -10,6 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const Subscription = () => {
   const { profile, user } = useAuth();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [currentPlan, setCurrentPlan] = useState<'basic' | 'premium'>('basic'); // This would come from your subscription state
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>(currentPlan);
