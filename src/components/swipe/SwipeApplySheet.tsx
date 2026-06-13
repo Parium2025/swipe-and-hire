@@ -252,6 +252,12 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, job, open, onClo
   const handleSubmit = useCallback(async () => {
     if (!user || submitting) return;
 
+    // 🔒 Premium-gate: max 3 ansökningar/vecka på gratisplan.
+    if (!quota.allowed && !quota.is_premium) {
+      setShowLimitDialog(true);
+      return;
+    }
+
     // 🚀 Optimistic UI: visa "Skickad!" omedelbart — användaren ska aldrig
     // vänta på networken för en så viktig handling. Vi rullar tillbaka om
     // insert misslyckas.
