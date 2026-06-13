@@ -35,7 +35,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     featuresIntro: 'En genomtänkt upplevelse, designad för alla enheter — så att du alltid kan upptäcka möjligheter, skapa kontakter och ta nästa steg, oavsett var du befinner dig i din karriär.',
     features: [
       { title: 'Du bestämmer', description: 'Din profil, dina villkor. Du väljer vad som visas.', icon: ShieldCheck },
-      { title: 'Profil framför CV', description: 'Visa vem du är med video, bilder och egna ord. En modernare bild av dig än ett PDF.', icon: Sparkles },
+      { title: 'Profil framför CV', description: 'Visa vem du är med video, bilder och egna ord — en levande profil som kompletterar ditt CV.', icon: Sparkles },
       { title: 'Smart matchning', description: 'Du får roller som passar din erfarenhet, dina mål och din plats.', icon: Brain },
       { title: 'Swipa & spara', description: 'Bläddra jobben med ett svep. Spara de du gillar och återvänd när du vill.', icon: Heart },
       { title: 'Jobbevakningar', description: 'Spara din sökning och få notis när en ny roll matchar.', icon: Bell },
