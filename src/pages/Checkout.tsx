@@ -5,6 +5,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 const PENDING_PLAN_KEY = 'parium-pending-plan';
+const CHECKOUT_ORIGIN_KEY = 'parium-checkout-origin';
+// Origins: 'subscription' (från Ekonomi → Abonnemang), 'landing' (icke-inloggad CTA),
+// 'signup' (kom hit direkt efter konto-skapande). Default → 'home'.
 
 const PLAN_DETAILS: Record<string, { name: string; price: string; tagline: string; perks: string[] }> = {
   premium: {
