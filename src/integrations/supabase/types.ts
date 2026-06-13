@@ -1988,6 +1988,58 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_views: {
+        Row: {
+          application_id: string | null
+          id: string
+          job_id: string | null
+          viewed_at: string
+          viewed_user_id: string
+          viewer_org_id: string | null
+          viewer_user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          id?: string
+          job_id?: string | null
+          viewed_at?: string
+          viewed_user_id: string
+          viewer_org_id?: string | null
+          viewer_user_id: string
+        }
+        Update: {
+          application_id?: string | null
+          id?: string
+          job_id?: string | null
+          viewed_at?: string
+          viewed_user_id?: string
+          viewer_org_id?: string | null
+          viewer_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_views_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_views_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_views_viewer_org_id_fkey"
+            columns: ["viewer_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -2730,6 +2782,7 @@ export type Database = {
           template_id: string
         }[]
       }
+      get_profile_view_stats: { Args: { p_user_id: string }; Returns: Json }
       get_user_organization_id: { Args: { p_user_id: string }; Returns: string }
       has_applied_to_employer: {
         Args: { p_applicant_id: string; p_employer_id: string }
@@ -2756,6 +2809,10 @@ export type Database = {
       is_org_admin: { Args: { p_user_id: string }; Returns: boolean }
       is_session_valid: { Args: { p_session_token: string }; Returns: boolean }
       kick_session: { Args: { p_session_id: string }; Returns: boolean }
+      log_profile_view: {
+        Args: { p_application_id: string }
+        Returns: undefined
+      }
       queue_cv_analysis: {
         Args: {
           p_applicant_id: string
