@@ -100,6 +100,15 @@ const Subscription = () => {
   const [currentPlan] = useState<'basic' | 'premium'>('basic');
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('premium');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  const isPremium = currentPlan === 'premium';
+  const nextBillingDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toLocaleDateString('sv-SE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
 
   const plans = [
     {
