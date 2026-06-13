@@ -1266,9 +1266,9 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     data-allow-focus-shadow="true"
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '48px' : '-48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${i * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
-                    className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
+                    className={`landing-feature-card landing-feature-mobile-in relative isolate rounded-3xl border p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
                       isActive
-                        ? 'border-2 border-secondary bg-gradient-to-br from-secondary/25 to-white/5 ring-4 ring-secondary/30 shadow-[0_42px_110px_-52px_hsl(var(--secondary)/0.75)]'
+                        ? 'border-secondary bg-gradient-to-br from-secondary/25 to-white/5 shadow-[0_0_0_1px_hsl(var(--secondary)/0.75),0_42px_110px_-52px_hsl(var(--secondary)/0.75)]'
                         : 'border border-white/15 bg-white/5 hover:border-secondary/25'
                     }`}
                   >
