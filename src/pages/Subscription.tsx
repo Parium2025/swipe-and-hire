@@ -47,7 +47,7 @@ const Subscription = () => {
         'Se vilka företag som tittat på din profil',
         'Se vilka arbetsgivare som visat intresse tillbaka',
         'Direktkontakt till arbetsgivaren via mejl',
-        'Chatta direkt med arbetsgivaren i appen',
+        'Chatta med arbetsgivaren i appen',
         'Statistik över profilvisningar senaste 30 dagarna'
       ],
       icon: Crown,
