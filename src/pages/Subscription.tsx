@@ -41,8 +41,7 @@ const Subscription = () => {
       period: 'månad',
       description: 'För dig som menar allvar med jobbsökandet',
       features: [
-        'Allt i Start',
-        'Visa intresse för obegränsat antal jobb',
+        'Visa intresse för hur många jobb du vill',
         'Spara obegränsat antal jobb',
         'Se vilka företag som tittat på din profil',
         'Se vilka arbetsgivare som visat intresse tillbaka',
