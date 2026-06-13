@@ -61,6 +61,15 @@ const Auth = () => {
   // Read initial state from navigation (from Landing page)
   const initialMode = (location.state as any)?.mode;
   const initialRole = (location.state as any)?.role;
+  const initialPlan = (location.state as any)?.plan;
+
+  // Persist pending plan across signup/login/OAuth roundtrips so we can
+  // redirect to /checkout once a session is established.
+  useEffect(() => {
+    if (initialPlan && typeof window !== 'undefined') {
+      try { sessionStorage.setItem('parium-pending-plan', String(initialPlan)); } catch {}
+    }
+  }, [initialPlan]);
 
   // Failsafe: rensa ev. fastnade scroll-lås från äldre versioner.
   // (Vi använder inte scroll-låsning på /auth längre.)
