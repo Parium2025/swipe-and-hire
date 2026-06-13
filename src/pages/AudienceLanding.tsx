@@ -1457,7 +1457,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       <span className="ml-4 text-secondary transition-transform duration-300 group-open:rotate-45">+</span>
                     </summary>
                     <p className="mt-4 text-sm leading-7 text-white">
-                      {a}
+                      <span className="font-semibold text-secondary">Svar: </span>{a}
                     </p>
                   </motion.details>
                 ))}
