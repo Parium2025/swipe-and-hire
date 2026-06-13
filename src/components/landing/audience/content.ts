@@ -32,7 +32,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
       { title: 'Visa intresse', description: 'Ett tryck räcker. Är intresset ömsesidigt öppnas dialogen direkt.' },
       { title: 'Ta nästa steg', description: 'Chatta med arbetsgivaren och kom till ett samtal — utan mellanled.' },
     ],
-    featuresIntro: 'En genomtänkt upplevelse, byggd för alla enheter — så att du kan söka, jämföra och svara där livet händer.',
+    featuresIntro: 'En genomtänkt upplevelse, designad för alla enheter — så att du alltid kan upptäcka möjligheter, skapa kontakter och ta nästa steg, oavsett var du befinner dig i din karriär.',
     features: [
       { title: 'Du bestämmer', description: 'Din profil, dina villkor. Du väljer vad som visas, för vem och när.', icon: ShieldCheck },
       { title: 'Profil framför CV', description: 'Visa vem du är med video, bilder och egna ord. En modernare bild av dig än ett PDF.', icon: Sparkles },
