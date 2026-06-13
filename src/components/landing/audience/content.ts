@@ -34,12 +34,12 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     ],
     featuresIntro: 'En genomtänkt upplevelse, byggd för mobilen — så att du kan söka, jämföra och svara där livet händer.',
     features: [
-      { title: 'Smart matchning', description: 'Vi förstår mer än nyckelord. Du får roller som ligger nära din erfarenhet, dina mål och din plats.', icon: Brain },
-      { title: 'Swipa & spara', description: 'Bläddra genom jobben med ett svep. Spara de intressanta och återvänd när du är redo.', icon: Heart },
-      { title: 'Profil framför CV', description: 'Visa personlighet med profilvideo, bilder och egna ord. En modernare bild av dig än ett PDF-CV.', icon: Sparkles },
-      { title: 'Direkt dialog', description: 'När båda visar intresse öppnas chatten direkt med arbetsgivaren. Inga mellanled — bara ett samtal.', icon: MessageCircle },
-      { title: 'Jobbevakningar', description: 'Spara din sökning och få notis när en ny roll matchar. Du missar inget — utan att leta dagligen.', icon: Bell },
-      { title: 'Du bestämmer', description: 'Din profil, dina villkor. Bestäm vad som visas, för vem och när. Avsluta eller pausa när du vill.', icon: ShieldCheck },
+      { title: 'Du bestämmer', description: 'Din profil, dina villkor. Du väljer vad som visas, för vem och när.', icon: ShieldCheck },
+      { title: 'Profil framför CV', description: 'Visa vem du är med video, bilder och egna ord. En modernare bild av dig än ett PDF.', icon: Sparkles },
+      { title: 'Smart matchning', description: 'Du får roller som passar din erfarenhet, dina mål och din plats.', icon: Brain },
+      { title: 'Swipa & spara', description: 'Bläddra jobben med ett svep. Spara de du gillar och återvänd när du vill.', icon: Heart },
+      { title: 'Jobbevakningar', description: 'Spara din sökning och få notis när en ny roll matchar.', icon: Bell },
+      { title: 'Direkt dialog', description: 'När båda visar intresse öppnas chatten direkt med arbetsgivaren.', icon: MessageCircle },
     ],
     proof: [
       { value: 'En profil', label: 'för alla ansökningar' },
