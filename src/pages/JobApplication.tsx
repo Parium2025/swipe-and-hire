@@ -930,6 +930,13 @@ const JobApplication = () => {
           Bemanning AB får lagra mina personuppgifter för att kunna hantera min ansökan.
         </p>
       </div>
+      <ApplicationLimitDialog
+        open={showLimitDialog}
+        onClose={() => setShowLimitDialog(false)}
+        used={quota.used}
+        limit={quota.limit}
+        resetAt={quota.reset_at}
+      />
     </div>
   );
 };
