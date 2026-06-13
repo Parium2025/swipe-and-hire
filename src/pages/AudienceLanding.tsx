@@ -1487,8 +1487,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 emphasizeLast
                 className="landing-h2 mt-4 text-white"
               />
-              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
-                Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.
+              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white sm:text-lg">
+                Vid frågor, kontakta oss gärna.
               </p>
               <a
                 href="mailto:hej@parium.se"
