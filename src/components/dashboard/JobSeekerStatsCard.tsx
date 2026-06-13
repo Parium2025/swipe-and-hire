@@ -34,6 +34,9 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readCachedStats(), []);
+  const { stats: viewStats } = useProfileViewStats();
+  const profileViewsCount = viewStats.unique_viewers_30d;
+  useEffect(() => { writeCachedStats('profile_views', profileViewsCount); }, [profileViewsCount]);
 
   const { data: dashStats, isSuccess } = useQuery({
     queryKey: ['jobseeker-dashboard-stats', user?.id],
