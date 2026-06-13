@@ -360,10 +360,18 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     });
   }, [user?.id, queryClient]);
 
+  const { isPremium } = useIsPremium();
+
   const toggleSavedJob = useCallback(async (jobId: string, jobPosting?: JobPostingInput) => {
     if (!user?.id) return;
 
     const wasSaved = savedJobIds.has(jobId);
+
+    // 🔒 Premium-gate: max 3 sparade jobb samtidigt på gratisplan.
+    if (!wasSaved && !isPremium && savedJobIds.size >= SAVED_JOBS_FREE_LIMIT) {
+      emitSavedJobsLimit({ limit: SAVED_JOBS_FREE_LIMIT });
+      return;
+    }
 
     queryClient.setQueryData(['saved-jobs', user.id], (old: SavedJob[] | undefined) => {
       const current = sanitizeSavedJobsList<SavedJob>(old);
