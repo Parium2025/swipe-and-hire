@@ -172,12 +172,6 @@ const Subscription = () => {
 
       {/* Plans grid — matchar landningssidan */}
       <div className="relative grid gap-5 md:grid-cols-2">
-        <div
-          aria-hidden="true"
-          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-[110%] w-[80%] rounded-full bg-secondary/35 blur-[110px] transition-[left,opacity] duration-300 ease-out md:w-[48%] ${
-            selectedPlan === 'premium' ? 'md:left-[44%] left-[10%] opacity-100' : 'md:left-[-6%] left-[10%] opacity-100'
-          }`}
-        />
         {plans.map((plan) => {
           const isActive = selectedPlan === plan.id;
           const isCurrent = plan.id === currentPlan;
@@ -200,21 +194,16 @@ const Subscription = () => {
               }}
               className={`relative isolate cursor-pointer rounded-3xl border p-6 sm:p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 ${
                 isActive
-                  ? 'border-secondary bg-gradient-to-br from-secondary/30 to-white/5 shadow-[0_42px_110px_-52px_hsl(var(--secondary)/0.75)]'
+                  ? 'border-secondary bg-white/5'
                   : 'border-white/15 bg-white/5 hover:border-secondary/25'
               }`}
             >
-              <div
-                aria-hidden="true"
-                className={`pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_50%_115%,hsl(var(--secondary)/0.18),transparent_58%)] transition-opacity duration-300 ${
-                  isActive ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
               {plan.id === 'premium' && (
                 <span className="absolute right-6 top-6 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">
                   Populär
                 </span>
               )}
+
 
               <h3 className="text-xl font-bold text-white">{plan.name}</h3>
               <p className="mt-2 text-4xl font-black text-white">
