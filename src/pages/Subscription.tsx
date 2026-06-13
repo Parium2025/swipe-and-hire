@@ -17,15 +17,18 @@ const Subscription = () => {
   const plans = [
     {
       id: 'basic',
-      name: 'Basic',
+      name: 'Start',
       price: '0',
       period: 'månad',
-      description: 'Perfekt för att komma igång',
+      description: 'Allt du behöver för att komma igång',
       features: [
-        'Skapa profil & ladda upp CV',
-        'Välj inriktning och se matchade jobb',
-        'Swipea jobb - 5 per vecka',
-        'Grundläggande funktionalitet'
+        'Skapa profil med CV och videopresentation',
+        'Bläddra bland alla jobb',
+        'Sökfilter på plats, roll och erfarenhet',
+        'Visa intresse för upp till 3 jobb i veckan',
+        'Spara upp till 3 jobb samtidigt',
+        'Notis när någon tittat på din profil',
+        'Notis när en arbetsgivare visat intresse tillbaka'
       ],
       icon: Star,
       buttonText: 'Nuvarande plan',
@@ -36,17 +39,16 @@ const Subscription = () => {
       name: 'Premium',
       price: '29',
       period: 'månad',
-      description: 'För seriösa jobbsökare',
+      description: 'För dig som menar allvar med jobbsökandet',
       features: [
-        'Skapa profil & ladda upp CV',
-        'Välj inriktning och se matchade jobb',
-        'Swipea jobb - Obegränsat',
-        'Videopresentation',
-        'Pushnotiser för relevanta jobb',
-        'Direktkontakt till arbetsgivare (e-post)',
-        'Se vilka arbetsgivare visat intresse',
-        'Prioriterad synlighet i arbetsgivarens lista',
-        'Annonsfri upplevelse'
+        'Allt i Start',
+        'Visa intresse för obegränsat antal jobb',
+        'Spara obegränsat antal jobb',
+        'Se vilka företag som tittat på din profil',
+        'Se vilka arbetsgivare som visat intresse tillbaka',
+        'Direktkontakt till arbetsgivaren via mejl',
+        'Chatta direkt med arbetsgivaren i appen',
+        'Statistik över profilvisningar senaste 30 dagarna'
       ],
       icon: Crown,
       buttonText: 'Uppgradera till Premium',
