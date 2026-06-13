@@ -877,9 +877,10 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           >
             <IntroText
               paragraphs={[
-                'Med Parium hittar du jobbannonser från arbetsgivare över hela Sverige. Du ansöker snabbt och smidigt direkt i appen eller på webben.',
-                'Ditt CV och din profil — på ett och samma ställe. Lägg upp din grund en gång: erfarenhet, utbildning och det som gör dig till dig. Sedan skapar du en presentation för olika roller — rätt video, rätt bild, rätt ord till rätt arbetsgivare.',
-                'I nästa sektion ser du olika exempel på yrken som tar Sverige framåt!',
+                'Med Parium hittar du jobbannonser från hela Sverige. Sök och ansök snabbt — i appen eller på webben.',
+                'Samla erfarenhet, utbildning och personlighet. Ditt CV och din profil — på ett och samma ställe. Lägg upp din grund en gång.',
+                'Skapa sedan olika presentationer med rätt bild, video och budskap för varje roll du vill söka. Rätt intryck till rätt arbetsgivare — varje gång.',
+                'I nästa sektion ser du exempel på yrken som tar Sverige framåt.',
               ]}
             />
           </motion.div>
