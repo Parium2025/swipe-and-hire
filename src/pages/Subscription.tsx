@@ -162,13 +162,8 @@ const Subscription = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       if (plan.id === 'premium' && !isCurrent) {
-                        if (isMobile) {
-                          // App-version (mobilvy): visa dialog med parium.se
-                          setShowUpgradeDialog(true);
-                        } else {
-                          // Webb: Direkt till Stripe (placeholder tills vi kopplar Stripe)
-                          alert('Öppnar Stripe (webb)');
-                        }
+                        try { sessionStorage.setItem('parium-pending-plan', 'premium'); } catch {}
+                        navigate('/checkout');
                       }
                     }}
                   >
