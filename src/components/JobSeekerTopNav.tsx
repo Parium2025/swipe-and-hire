@@ -319,6 +319,23 @@ function JobSeekerTopNav() {
           {/* Notification Center */}
           <NotificationCenter variant="rect" />
 
+          {/* Bli Premium CTA - visas endast för icke-premium användare */}
+          {!(profile as any)?.is_premium && (
+            <button
+              onClick={() => {
+                try { sessionStorage.setItem('parium-pending-plan', 'premium'); } catch {}
+                navigate('/checkout');
+              }}
+              className="ml-1 inline-flex h-9 items-center gap-1.5 rounded-full bg-secondary px-3.5 text-xs font-bold tracking-wide text-white shadow-[0_8px_24px_-10px_hsl(var(--secondary)/0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-secondary/90 active:scale-[0.97]"
+              aria-label="Bli Premium"
+            >
+              <Crown className="h-3.5 w-3.5" />
+              Bli Premium
+            </button>
+          )}
+
+
+
           {/* Profil Dropdown - after Support, with avatar/video */}
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>
