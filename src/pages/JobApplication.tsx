@@ -262,6 +262,12 @@ const JobApplication = () => {
       return;
     }
 
+    // 🔒 Premium-gate: max 3 ansökningar/vecka på gratisplan.
+    if (!quota.allowed && !quota.is_premium) {
+      setShowLimitDialog(true);
+      return;
+    }
+
     setSubmitting(true);
 
     // Build the application payload
