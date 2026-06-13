@@ -5,6 +5,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 const PENDING_PLAN_KEY = 'parium-pending-plan';
+const CHECKOUT_ORIGIN_KEY = 'parium-checkout-origin';
+// Origins: 'subscription' (från Ekonomi → Abonnemang), 'landing' (icke-inloggad CTA),
+// 'signup' (kom hit direkt efter konto-skapande). Default → 'home'.
 
 const PLAN_DETAILS: Record<string, { name: string; price: string; tagline: string; perks: string[] }> = {
   premium: {
@@ -76,8 +79,21 @@ export default function Checkout() {
           onClick={() => {
             // Rensa pending-plan så att /auth inte skickar tillbaka hit i en loop
             try { sessionStorage.removeItem(PENDING_PLAN_KEY); } catch {}
-            // Inloggad → tillbaka till insidan. Annars → tillbaka till landningen.
-            navigate(user ? '/home' : '/', { replace: true });
+            let origin: string | null = null;
+            try { origin = sessionStorage.getItem(CHECKOUT_ORIGIN_KEY); } catch {}
+            try { sessionStorage.removeItem(CHECKOUT_ORIGIN_KEY); } catch {}
+
+            if (!user) {
+              navigate('/', { replace: true });
+              return;
+            }
+            // Inloggad: route baserat på var man kom ifrån
+            if (origin === 'subscription') {
+              navigate('/subscription', { replace: true });
+            } else {
+              // 'signup', 'landing', eller okänt → home (WelcomeTunnel fångar nya konton)
+              navigate('/home', { replace: true });
+            }
           }}
           className="mb-8 inline-flex h-10 items-center gap-2 self-start rounded-full border border-white/20 bg-white/5 px-5 text-sm font-medium text-white backdrop-blur-[2px] transition-colors hover:bg-white/10 active:scale-[0.97]"
           initial={{ opacity: 0, x: -8 }}
