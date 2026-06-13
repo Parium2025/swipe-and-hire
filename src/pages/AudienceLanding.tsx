@@ -1005,6 +1005,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
+            entry.target.setAttribute('data-lf-shown', 'true');
             entry.target.classList.add('is-in-view');
             io.unobserve(entry.target);
           }
@@ -1014,7 +1015,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     );
     roots.forEach((root) => {
       const headers = root.querySelectorAll(':scope > .landing-feature-mobile-in');
-      headers.forEach((el) => el.classList.add('is-in-view'));
+      headers.forEach((el) => {
+        el.setAttribute('data-lf-shown', 'true');
+        el.classList.add('is-in-view');
+      });
       const cards = root.querySelectorAll('.landing-feature-card.landing-feature-mobile-in');
       cards.forEach((el) => io.observe(el));
     });
@@ -1161,7 +1165,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 opacity: 0;
                 transform: translate3d(var(--lf-x, 0), var(--lf-y, 18px), 0);
               }
-              [data-mobile-feature-prearm] .landing-feature-mobile-in.is-in-view {
+              [data-mobile-feature-prearm] .landing-feature-mobile-in.is-in-view,
+              [data-mobile-feature-prearm] .landing-feature-mobile-in[data-lf-shown="true"] {
                 animation: landingFeatureMobileIn 760ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 animation-delay: var(--lf-delay, 0ms);
               }
