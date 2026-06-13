@@ -1135,7 +1135,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={isMobileFeatureMotion ? undefined : "visible"}
                 viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } } }}
-                className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+                className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
               >
                 {c.features.map((feature, idx) => {
                   const i = idx + 1;
@@ -1148,7 +1148,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.75, ease } },
                     }}
                     style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 1 ? '-48px' : '48px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${(i - 1) * 90}ms`, willChange: 'auto' } : { willChange: 'opacity, transform' }}
-                    className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)]"
+                    className="landing-feature-card landing-feature-mobile-in group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-30px_hsl(var(--secondary)/0.4)] xl:col-span-2 xl:[&:nth-child(4)]:col-start-1"
                   >
                     <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.12),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                     <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">

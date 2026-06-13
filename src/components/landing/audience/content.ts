@@ -48,7 +48,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     ],
     finalCta: {
       title: 'Din nästa roll börjar här.',
-      body: 'Skapa din profil idag — det är gratis, och ditt nästa jobb är bara en swipe bort.',
+      body: 'Skapa din profil idag — det är gratis. Ditt nästa jobb är bara en swipe bort.',
       cta: 'Kom igång gratis',
     },
   },
