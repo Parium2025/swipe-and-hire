@@ -379,6 +379,7 @@ const JobApplication = () => {
       queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
       queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
+      refreshQuota();
 
       toast({
         title: "Ansökan skickad!",
