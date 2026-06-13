@@ -20,6 +20,7 @@ import AnnonserHub from "./pages/AnnonserHub";
 import GuiderHub from "./pages/GuiderHub";
 import GuidePage from "./pages/GuidePage";
 import Auth from "./pages/Auth";
+import Checkout from "./pages/Checkout";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
@@ -170,6 +171,7 @@ const AnimatedRoutes = () => {
           <Route path="/guider" element={<GuiderHub />} />
           <Route path="/guider/:slug" element={<GuidePage />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/home" element={<Index />} />
           <Route path="/index" element={<Index />} />
           <Route path="/consent" element={<Index />} />

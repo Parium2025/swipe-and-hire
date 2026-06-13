@@ -61,6 +61,15 @@ const Auth = () => {
   // Read initial state from navigation (from Landing page)
   const initialMode = (location.state as any)?.mode;
   const initialRole = (location.state as any)?.role;
+  const initialPlan = (location.state as any)?.plan;
+
+  // Persist pending plan across signup/login/OAuth roundtrips so we can
+  // redirect to /checkout once a session is established.
+  useEffect(() => {
+    if (initialPlan && typeof window !== 'undefined') {
+      try { sessionStorage.setItem('parium-pending-plan', String(initialPlan)); } catch {}
+    }
+  }, [initialPlan]);
 
   // Failsafe: rensa ev. fastnade scroll-lås från äldre versioner.
   // (Vi använder inte scroll-låsning på /auth längre.)
@@ -603,6 +612,11 @@ const Auth = () => {
   if (user && profile && !loading && confirmationStatus === 'none' && recoveryStatus === 'none' && !isPasswordReset) {
     const role = (profile as any)?.role;
     if (role) {
+      // Om användaren kom hit via en prisknapp ("Bli Premium") — skicka vidare till checkout
+      const pendingPlan = typeof window !== 'undefined' ? sessionStorage.getItem('parium-pending-plan') : null;
+      if (pendingPlan) {
+        return <Navigate to="/checkout" replace />;
+      }
       // Alla roller landar på /home efter inloggning
       return <Navigate to="/home" replace />;
     }
