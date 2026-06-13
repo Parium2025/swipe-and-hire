@@ -239,7 +239,7 @@ export const useSavedJobs = () => {
       console.error('Error toggling saved job:', err);
       toast.error(isSaved ? 'Kunde inte ta bort jobbet' : 'Kunde inte spara jobbet');
     }
-  }, [user, savedJobIds, isOnline, enqueue, queryClient]);
+  }, [user, savedJobIds, isOnline, enqueue, queryClient, isPremium]);
 
   // Explicit unsave - always deletes, no toggle logic
   const unsaveJob = useCallback(async (jobId: string) => {
