@@ -1326,7 +1326,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                   return (
                   <motion.div
                     key={plan.name}
-                    variants={{
+                    initial={isMobileFeatureMotion ? false : undefined}
+                    variants={isMobileFeatureMotion ? undefined : {
                       hidden: { opacity: 0 },
                       visible: { opacity: 1, transition: { duration: 0.9, ease } },
                     }}
