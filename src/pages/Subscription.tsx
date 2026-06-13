@@ -158,8 +158,11 @@ const Subscription = () => {
                   </div>
                   
                   <Button 
-                    className="w-full" 
-                    variant="default"
+                    className={`w-full ${
+                      plan.id === 'premium' && !isCurrent
+                        ? 'bg-secondary text-white hover:bg-secondary/90 shadow-[0_18px_45px_-18px_hsl(var(--secondary)/0.45)] font-bold tracking-wide rounded-2xl min-h-[48px]'
+                        : ''
+                    }`}
                     disabled={isCurrent}
                     onClick={(e) => {
                       e.stopPropagation();
