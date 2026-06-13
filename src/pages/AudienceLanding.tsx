@@ -1147,7 +1147,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 whileInView={isMobileFeatureMotion ? undefined : { opacity: 1, x: 0 }}
                 viewport={isMobileFeatureMotion ? undefined : { once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
                 transition={{ duration: 0.9, ease, delay: 0.15 }}
-                className="landing-feature-mobile-in wave-text mt-6 max-w-2xl text-base leading-8 opacity-70 sm:text-lg md:[@media_(orientation:portrait)]:mt-8 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
+                className="landing-feature-mobile-in wave-text mt-6 max-w-2xl text-base leading-8 text-white sm:text-lg md:[@media_(orientation:portrait)]:mt-8 md:[@media_(orientation:portrait)]:text-2xl md:[@media_(orientation:portrait)]:leading-9 md:[@media_(orientation:portrait)]:max-w-[640px]"
                 style={isMobileFeatureMotion ? { ['--lf-x' as string]: '60px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: '260ms' } : undefined}
               >
                 {c.featuresIntro}
@@ -1178,7 +1178,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     </div>
                     <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-secondary/70">0{i}</div>
                     <h3 className="wave-text mt-1 text-lg font-bold">{feature.title}</h3>
-                    <p className="wave-text mt-2 text-sm leading-7 opacity-70">
+                    <p className="wave-text mt-2 text-sm leading-7 text-white">
                       {feature.description}
                     </p>
                   </motion.div>
