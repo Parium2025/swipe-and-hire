@@ -98,9 +98,10 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const statsArray: StatData[] = useMemo(() => [
     { icon: Send, label: 'Skickade ansökningar', value: applicationsCount, description: 'Dina jobbansökningar', link: '/my-applications', emptyHint: 'Börja söka jobb!' },
     { icon: Calendar, label: 'Bokade intervjuer', value: interviewsCount, description: 'Kommande intervjuer', emptyHint: 'Inga bokade än' },
+    { icon: Eye, label: 'Profilvisningar', value: profileViewsCount, description: 'Arbetsgivare senaste 30 dagarna', emptyHint: 'Ingen har sett din profil än' },
     { icon: Heart, label: 'Sparade jobb', value: savedJobsCount, description: 'Jobb du sparat', link: '/saved-jobs', emptyHint: 'Spara jobb du gillar' },
     { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden', link: '/messages', emptyHint: 'Inga olästa' },
-  ], [applicationsCount, interviewsCount, savedJobsCount, unreadMessagesCount]);
+  ], [applicationsCount, interviewsCount, profileViewsCount, savedJobsCount, unreadMessagesCount]);
 
   return (
     <StatsCarousel
