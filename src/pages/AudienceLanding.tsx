@@ -1215,7 +1215,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               >
                 <div
                   aria-hidden="true"
-                  className={`pointer-events-none absolute -bottom-28 h-80 w-[72%] rounded-full bg-secondary/30 blur-[96px] transition-[left,opacity] duration-300 ease-out md:w-[46%] ${selectedPlan === 'premium' ? 'left-[42%] opacity-100' : 'left-[-8%] opacity-100'}`}
+                  className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-[110%] w-[80%] rounded-full bg-secondary/35 blur-[110px] transition-[left,opacity] duration-300 ease-out md:w-[48%] ${selectedPlan === 'premium' ? 'left-[44%] opacity-100' : 'left-[-6%] opacity-100'}`}
                 />
                 {[
                   {
