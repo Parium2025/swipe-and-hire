@@ -2017,6 +2017,7 @@ export type Database = {
           interview_office_instructions: string | null
           interview_video_default_message: string | null
           interview_video_link: string | null
+          is_premium: boolean
           is_profile_video: boolean | null
           last_active_at: string | null
           last_name: string | null
@@ -2028,6 +2029,7 @@ export type Database = {
           organization_id: string | null
           phone: string | null
           postal_code: string | null
+          premium_until: string | null
           profile_file_name: string | null
           profile_image_url: string | null
           role: Database["public"]["Enums"]["user_role"]
@@ -2067,6 +2069,7 @@ export type Database = {
           interview_office_instructions?: string | null
           interview_video_default_message?: string | null
           interview_video_link?: string | null
+          is_premium?: boolean
           is_profile_video?: boolean | null
           last_active_at?: string | null
           last_name?: string | null
@@ -2078,6 +2081,7 @@ export type Database = {
           organization_id?: string | null
           phone?: string | null
           postal_code?: string | null
+          premium_until?: string | null
           profile_file_name?: string | null
           profile_image_url?: string | null
           role: Database["public"]["Enums"]["user_role"]
@@ -2117,6 +2121,7 @@ export type Database = {
           interview_office_instructions?: string | null
           interview_video_default_message?: string | null
           interview_video_link?: string | null
+          is_premium?: boolean
           is_profile_video?: boolean | null
           last_active_at?: string | null
           last_name?: string | null
@@ -2128,6 +2133,7 @@ export type Database = {
           organization_id?: string | null
           phone?: string | null
           postal_code?: string | null
+          premium_until?: string | null
           profile_file_name?: string | null
           profile_image_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
@@ -2728,6 +2734,7 @@ export type Database = {
         Args: { p_applicant_id: string; p_employer_id: string }
         Returns: boolean
       }
+      has_premium: { Args: { p_user_id: string }; Returns: boolean }
       heartbeat_session: { Args: { p_session_token: string }; Returns: boolean }
       increment_app_exception_count: {
         Args: { _fingerprint: string; _owner_user_id: string }
