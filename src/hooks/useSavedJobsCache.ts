@@ -419,7 +419,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
       queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
       throw error;
     }
-  }, [user?.id, queryClient, savedJobIds]);
+  }, [user?.id, queryClient, savedJobIds, isPremium]);
 
   const restoreSkippedJob = useCallback(async (jobId: string) => {
     if (!user?.id) return;
