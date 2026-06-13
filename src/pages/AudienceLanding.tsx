@@ -1457,7 +1457,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       <span className="ml-4 text-secondary transition-transform duration-300 group-open:rotate-45">+</span>
                     </summary>
                     <p className="mt-4 text-sm leading-7 text-white">
-                      {a}
+                      <span className="font-semibold text-secondary">Svar: </span>{a}
                     </p>
                   </motion.details>
                 ))}
@@ -1487,8 +1487,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                 emphasizeLast
                 className="landing-h2 mt-4 text-white"
               />
-              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
-                Hör av dig så svarar vi snabbt — vi hjälper både kandidater och arbetsgivare.
+              <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-white sm:text-lg">
+                Vid frågor, kontakta oss gärna.
               </p>
               <a
                 href="mailto:hej@parium.se"
