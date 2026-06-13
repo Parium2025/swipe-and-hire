@@ -68,6 +68,8 @@ const Auth = () => {
   useEffect(() => {
     if (initialPlan && typeof window !== 'undefined') {
       try { sessionStorage.setItem('parium-pending-plan', String(initialPlan)); } catch {}
+      // Markera att checkout nås via signup-flöde (back ska gå till /home, inte /subscription)
+      try { sessionStorage.setItem('parium-checkout-origin', 'signup'); } catch {}
     }
   }, [initialPlan]);
 
