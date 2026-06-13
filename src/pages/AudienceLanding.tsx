@@ -1232,8 +1232,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                     price: '29',
                     tagline: 'För dig som menar allvar med jobbsökandet.',
                     features: [
-                      'Allt i Start',
-                      'Visa intresse för obegränsat antal jobb',
+                      'Visa intresse för hur många jobb du vill',
                       'Spara obegränsat antal jobb',
                       'Se vilka företag som tittat på din profil',
                       'Se vilka arbetsgivare som visat intresse tillbaka',
@@ -1274,7 +1273,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       </summary>
                       <ul className="mt-4 space-y-3">
                         {plan.features.map((feature) => (
-                          <li key={feature} className="flex items-start gap-3 text-sm leading-6 text-white/80">
+                          <li key={feature} className="flex items-start gap-3 text-sm leading-6 text-white">
                             <svg
                               aria-hidden="true"
                               viewBox="0 0 20 20"
