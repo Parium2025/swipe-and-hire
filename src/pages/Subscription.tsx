@@ -150,9 +150,10 @@ const Subscription = () => {
     <div className="responsive-container-wide space-y-8 animate-fade-in [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       <div className="text-center mb-2">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Abonnemang</h1>
-        <p className="text-sm text-white/70 mt-1">
+        <p className="text-sm text-white mt-1">
           Hantera ditt abonnemang och uppgradera din plan
         </p>
+
       </div>
 
       {/* Current Plan Status — kumulativ tidslinje */}
