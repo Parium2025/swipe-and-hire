@@ -155,38 +155,52 @@ const Subscription = () => {
         </p>
       </div>
 
-      {/* Current Plan Status */}
+      {/* Current Plan Status — kumulativ tidslinje */}
       <div className="rounded-3xl border border-white/15 bg-white/5 backdrop-blur-xl p-5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            {currentPlan === 'premium' ? (
-              <Crown className="h-5 w-5 text-white shrink-0" />
-            ) : (
-              <Star className="h-5 w-5 text-white shrink-0" />
-            )}
-            <div className="min-w-0">
-              <p className="font-semibold text-white truncate">
-                {plans.find((p) => p.id === currentPlan)?.name} Plan
-              </p>
-              <p className="text-xs text-white/70 truncate">
-                {isPremium
-                  ? `Aktiv sedan ${user?.created_at ? new Date(user.created_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'} · Nästa betalning ${nextBillingDate}`
-                  : user?.created_at
-                  ? `Aktiv sedan ${new Date(user.created_at).toLocaleDateString('sv-SE', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}`
-                  : 'Aktiv plan'}
-              </p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className="mt-0.5 shrink-0">
+              {isPremium ? (
+                <Crown className="h-5 w-5 text-white" />
+              ) : (
+                <Star className="h-5 w-5 text-white" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1 space-y-2">
+              <div>
+                <p className="font-semibold text-white truncate">
+                  {plans.find((p) => p.id === currentPlan)?.name} Plan
+                </p>
+                <p className="text-xs text-white/70 truncate">
+                  {user?.created_at
+                    ? `Konto skapat ${new Date(user.created_at).toLocaleDateString('sv-SE', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}`
+                    : 'Aktivt konto'}
+                </p>
+              </div>
 
+              {isPremium && (
+                <div className="pt-2 border-t border-white/10">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-3.5 w-3.5 text-secondary shrink-0" />
+                    <p className="text-xs font-semibold text-white">Premium</p>
+                  </div>
+                  <p className="text-xs text-white/70 mt-0.5">
+                    Aktiv sedan {new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })} · Förnyas {nextBillingDate}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
-          <span className="inline-flex rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+          <span className="inline-flex shrink-0 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
             Aktiv
           </span>
         </div>
       </div>
+
 
       {/* Plans header */}
       <div>
