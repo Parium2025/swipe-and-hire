@@ -28,7 +28,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     },
     steps: [
       { title: 'Skapa din profil', description: 'Visa vem du är, vad du kan och vad du söker — utan långrandiga formulär.' },
-      { title: 'Få matchningar', description: 'Vi visar roller som passar din erfarenhet, dina mål och din plats.' },
+      { title: 'Utforska alla jobb', description: 'Bläddra bland alla lediga roller och filtrera efter det som är viktigt för dig.' },
       { title: 'Visa intresse', description: 'Ett tryck räcker. Är intresset ömsesidigt öppnas dialogen direkt.' },
       { title: 'Ta nästa steg', description: 'Chatta med arbetsgivaren och kom till ett samtal — utan mellanled.' },
     ],
@@ -36,7 +36,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     features: [
       { title: 'Du bestämmer', description: 'Din profil, dina villkor. Du väljer vad som visas.', icon: ShieldCheck },
       { title: 'Profil framför CV', description: 'Visa vem du är med video, bilder och egna ord — en levande profil som kompletterar ditt CV.', icon: Sparkles },
-      { title: 'Smart matchning', description: 'Du får roller som passar din erfarenhet, dina mål och din plats.', icon: Brain },
+      { title: 'Sök smart', description: 'Filtrera på plats, roll och erfarenhet. Hitta rätt jobb utan att scrolla i evighet.', icon: Brain },
       { title: 'Swipa & spara', description: 'Bläddra jobben med ett svep. Spara de du gillar och återvänd när du vill.', icon: Heart },
       { title: 'Jobbevakningar', description: 'Spara din sökning och få notis när en ny roll matchar.', icon: Bell },
       { title: 'Direkt dialog', description: 'När båda visar intresse öppnas chatten direkt med arbetsgivaren.', icon: MessageCircle },
@@ -48,7 +48,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
     ],
     finalCta: {
       title: 'Din nästa roll börjar här.',
-      body: 'Skapa din profil idag — det är gratis, och första matchningen är bara en swipe bort.',
+      body: 'Skapa din profil idag — det är gratis, och ditt nästa jobb är bara en swipe bort.',
       cta: 'Kom igång gratis',
     },
   },
