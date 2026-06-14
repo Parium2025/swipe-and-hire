@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
+import FaqAccordion from '@/components/seo/FaqAccordion';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, CheckCircle2, MapPin, Zap } from 'lucide-react';
@@ -106,7 +107,7 @@ const YrkePage = () => {
         <script type="application/ld+json">{JSON.stringify(occupationLd)}</script>
       </Helmet>
 
-      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
+      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         {/* Hero */}
@@ -228,17 +229,9 @@ const YrkePage = () => {
             <h2 className="text-center text-3xl font-semibold tracking-tight sm:text-4xl">
               Vanliga frågor om jobb {occ.asForm}
             </h2>
-            <div className="mt-10 space-y-4">
+            <div className="mt-10 space-y-3">
               {faqs.map((f) => (
-                <details
-                  key={f.q}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-md"
-                >
-                  <summary className="cursor-pointer list-none text-lg font-medium text-white">
-                    {f.q}
-                  </summary>
-                  <p className="mt-3 text-white">{f.a}</p>
-                </details>
+                <FaqAccordion key={f.q} q={f.q} a={f.a} />
               ))}
             </div>
           </div>

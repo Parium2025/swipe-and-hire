@@ -4,13 +4,14 @@ import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
+import FaqAccordion from '@/components/seo/FaqAccordion';
 import {
   SeoOtherOccupationsInCity,
   SeoOccupationInOtherCities,
 } from '@/components/seo/SeoFooterLinks';
 import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import { CheckCircle2, MapPin, Zap, ChevronRight } from 'lucide-react';
+import { CheckCircle2, MapPin, Zap } from 'lucide-react';
 import { CITY_BY_SLUG, CITIES } from '@/data/jobCities';
 import { OCCUPATION_BY_SLUG, OCCUPATIONS } from '@/data/jobOccupations';
 
@@ -126,7 +127,7 @@ const JobbCityYrke = () => {
         <script type="application/ld+json">{JSON.stringify(occupationLd)}</script>
       </Helmet>
 
-      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
+      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         {/* ─── HERO ─── */}
@@ -243,18 +244,9 @@ const JobbCityYrke = () => {
             <h2 className="text-center text-xl font-semibold tracking-tight sm:text-2xl text-white">
               Vanliga frågor
             </h2>
-            <div className="mt-6 space-y-2">
+            <div className="mt-6 space-y-3">
               {faqs.map((f) => (
-                <details
-                  key={f.q}
-                  className="group rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-md transition-colors hover:bg-white/[0.06]"
-                >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-medium text-white">
-                    <span>{f.q}</span>
-                    <ChevronRight className="h-4 w-4 text-white transition-transform group-open:rotate-90" />
-                  </summary>
-                  <p className="px-5 pb-5 pt-0 text-sm text-white leading-relaxed">{f.a}</p>
-                </details>
+                <FaqAccordion key={f.q} q={f.q} a={f.a} />
               ))}
             </div>
           </div>

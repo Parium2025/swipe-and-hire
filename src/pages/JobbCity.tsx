@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
+import FaqAccordion from '@/components/seo/FaqAccordion';
 import SeoFooterLinks, {
   SeoOtherOccupationsInCity,
 } from '@/components/seo/SeoFooterLinks';
@@ -25,11 +26,8 @@ type PublicJobRow = {
   employment_type: string | null;
 };
 
-const sampleJobsForCity = (cityName: string) => [
-  { id: 'profile', title: 'Butiksmedarbetare', company: 'Retail & Service', type: 'Deltid', location: cityName },
-  { id: 'profile-2', title: 'Lagerarbetare', company: 'Logistikpartner', type: 'Heltid', location: cityName },
-  { id: 'profile-3', title: 'Restaurangpersonal', company: 'Restauranggrupp', type: 'Extra', location: cityName },
-];
+// (Inga mock-/sample-jobs – vi visar bara riktiga aktiva annonser.)
+
 
 const BASE = 'https://parium.se';
 
@@ -128,15 +126,14 @@ const JobbCity = () => {
 
   // Länka till 4 andra städer (intern länkning)
   const otherCities = CITIES.filter((c) => c.slug !== city.slug).slice(0, 6);
-  const displayedJobs = jobs.length > 0
-    ? jobs.map((job) => ({
-        id: job.id,
-        title: job.title,
-        company: job.workplace_name || 'Arbetsgivare',
-        type: job.employment_type || 'Jobb',
-        location: job.workplace_city || city.name,
-      }))
-    : sampleJobsForCity(city.name);
+  const displayedJobs = jobs.map((job) => ({
+    id: job.id,
+    title: job.title,
+    company: job.workplace_name || 'Arbetsgivare',
+    type: job.employment_type || 'Jobb',
+    location: job.workplace_city || city.name,
+  }));
+
 
   return (
     <div data-seo-scroll-root className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
@@ -205,49 +202,59 @@ const JobbCity = () => {
               }}
             />
 
-            <Link
-              to="/annonser"
-              className="min-h-11 inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 backdrop-blur-md px-7 text-sm font-medium hover:bg-white/15 transition-colors"
-            >
-              Alla jobb {city.inForm}
-            </Link>
+            <SeoCTAButton
+              variant="ghost"
+              showArrow={false}
+              label="Bevaka denna sökning"
+              onClick={() => {
+                persistSavedSearchIntent({
+                  city: city.name,
+                  citySlug: city.slug,
+                  returnTo: `/jobb/${city.slug}`,
+                });
+                navigate('/auth', { state: { mode: 'signup' } });
+              }}
+            />
           </motion.div>
         </div>
       </section>
 
-      <section id="alla-jobb" className="scroll-mt-24 px-5 pb-12 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-5 flex items-end justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Alla jobb {city.inForm}</h2>
-              <p className="mt-2 text-sm text-white/70">{jobsLoading ? 'Hämtar aktiva annonser…' : jobs.length > 0 ? 'Riktiga annonser som går att öppna direkt.' : 'Skapa profil för att se fler matchande jobb i appen.'}</p>
+      {jobs.length > 0 && (
+        <section id="alla-jobb" className="scroll-mt-24 px-5 pb-12 sm:px-8 md:px-12">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-5 flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">Lediga jobb {city.inForm}</h2>
+                <p className="mt-2 text-sm text-white">Riktiga annonser som går att öppna direkt.</p>
+              </div>
+              <Link to="/annonser" className="hidden text-sm font-medium text-white underline-offset-4 hover:underline sm:inline-flex">Visa senaste jobb</Link>
             </div>
-            <Link to="/annonser" className="hidden text-sm font-medium text-white/80 underline-offset-4 hover:underline sm:inline-flex">Visa senaste jobb</Link>
-          </div>
-          <ul className="grid gap-3 md:grid-cols-3">
-            {displayedJobs.map((job) => (
-              <li key={job.title}>
-                <button
-                  type="button"
-                  onPointerDown={() => navigate(jobs.length > 0 ? `/annons/${job.id}` : '/auth')}
-                  className="group flex min-h-[150px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.10]"
-                >
-                  <div>
-                    <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                      <Briefcase className="h-5 w-5" aria-hidden="true" />
+            <ul className="grid gap-3 md:grid-cols-3">
+              {displayedJobs.map((job) => (
+                <li key={job.id}>
+                  <button
+                    type="button"
+                    onPointerDown={() => navigate(`/annons/${job.id}`)}
+                    className="group flex min-h-[150px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.10]"
+                  >
+                    <div>
+                      <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                        <Briefcase className="h-5 w-5 text-white" aria-hidden="true" />
+                      </div>
+                      <h3 className="text-lg font-semibold leading-snug text-white">{job.title}</h3>
                     </div>
-                    <h3 className="text-lg font-semibold leading-snug text-white">{job.title}</h3>
-                  </div>
-                  <div className="mt-5 space-y-2 text-sm text-white/75">
-                    <p className="flex items-center gap-2"><Building2 className="h-4 w-4" aria-hidden="true" />{job.company}</p>
-                    <p className="flex items-center gap-2"><MapPin className="h-4 w-4" aria-hidden="true" />{job.location} · {job.type}</p>
-                  </div>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+                    <div className="mt-5 space-y-2 text-sm text-white">
+                      <p className="flex items-center gap-2"><Building2 className="h-4 w-4 text-white" aria-hidden="true" />{job.company}</p>
+                      <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-white" aria-hidden="true" />{job.location} · {job.type}</p>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
 
       {/* Populära yrken (intern länkning med äkta siffror) */}
       {city && (
@@ -311,13 +318,7 @@ const JobbCity = () => {
           </h2>
           <div className="mt-10 space-y-3">
             {faqs.map((f) => (
-              <details key={f.q} className="group rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-5 open:bg-white/[0.08]">
-                <summary className="cursor-pointer list-none font-semibold text-white flex items-center justify-between gap-4">
-                  <span>{f.q}</span>
-                  <span className="text-white/50 transition-transform group-open:rotate-45 text-xl leading-none">+</span>
-                </summary>
-                <p className="mt-3 text-sm leading-relaxed text-white/80">{f.a}</p>
-              </details>
+              <FaqAccordion key={f.q} q={f.q} a={f.a} />
             ))}
           </div>
         </div>
