@@ -274,6 +274,44 @@ export const GUIDES: GuideData[] = [
       { q: 'Får jag fråga om lön på första intervjun?', a: 'Vänta tills de tar upp det eller andra intervjun. Att fråga för tidigt kan signalera att lön är viktigast.' },
     ],
   },
+  {
+    slug: 'personligt-brev-2026',
+    title: 'Personligt brev 2026 – mall, exempel och vad rekryterare faktiskt läser',
+    metaTitle: 'Personligt brev 2026: mall, exempel & tips | Parium',
+    description: 'Så skriver du ett personligt brev 2026 som rekryteraren faktiskt läser klart. Gratis mall, konkreta exempel och de 5 vanligaste misstagen att undvika.',
+    excerpt: 'Rekryteraren ger ditt brev 8 sekunder. Här är formeln som får dem att läsa hela – plus en mall du kan kopiera direkt.',
+    category: 'Jobbsökning',
+    readingMinutes: 6,
+    updated: '2026-06-01',
+    sections: [
+      {
+        heading: 'Behövs personligt brev 2026?',
+        body: 'Ja – men inte alltid. Klassiska kontorsjobb, vård och offentlig sektor förväntar sig fortfarande ett brev. I många moderna jobbappar (inkl. Parium) ersätts brevet av en kort profiltext och video. Tumregel: om ansökan har ett fält för personligt brev, skriv ett. Att hoppa över det signalerar lathet.',
+      },
+      {
+        heading: 'Strukturen som funkar (4 stycken)',
+        body: '1. Krok – en mening som visar varför just det här jobbet, inte ett generiskt "jag söker härmed".\n2. Värdebevis – 2–3 konkreta resultat från tidigare jobb med siffror.\n3. Matchning – koppla din erfarenhet direkt till deras annons (citera 1–2 nyckelord).\n4. Avslut – tydlig call-to-action: "Jag vill gärna berätta mer i ett samtal."\n\nMaxlängd: 250–350 ord. En A4-sida räcker mer än väl.',
+      },
+      {
+        heading: 'Mall du kan kopiera',
+        body: '"Hej [namn på rekryterare],\n\nNär jag läste er annons om [tjänst] fastnade jag direkt vid [konkret detalj från annonsen]. Det är precis den typen av utmaning jag vill jobba med.\n\nDe senaste [X] åren har jag arbetat som [roll] på [företag], där jag bland annat [resultat 1 med siffra] och [resultat 2 med siffra]. Min styrka är [kompetens som matchar annonsen] – något jag tror skulle göra skillnad i er roll.\n\nJag drivs av [värde/mål som matchar företaget] och tror starkt på [företagets vision/produkt]. Det skulle vara fantastiskt att få bidra till [konkret område hos dem].\n\nJag berättar gärna mer i ett samtal.\n\nVänliga hälsningar,\n[Namn] · [telefon] · [e-post]"',
+      },
+      {
+        heading: 'De 5 vanligaste misstagen',
+        body: '1. Skriva samma brev till alla jobb – rekryterare ser igenom det direkt.\n2. Upprepa CV:t istället för att förklara värde och drivkraft.\n3. Börja med "Jag heter X och söker härmed tjänsten…" – ingen läser vidare.\n4. Stavfel och fel företagsnamn – brevets dödsstöt.\n5. Avsluta med "Hoppas på snabbt svar" istället för en tydlig nästa-steg-fråga.',
+      },
+      {
+        heading: 'Anpassa brevet på 5 minuter',
+        body: 'Spara en bas-mall. Inför varje ansökan: byt företagsnamn, rekryterarens namn, en specifik mening om varför just dem, och 1–2 nyckelord från annonsen. Klart. Det räcker för att brevet ska kännas skräddarsytt – och tar inte 2 timmar per ansökan.',
+      },
+    ],
+    faqs: [
+      { q: 'Hur långt ska ett personligt brev vara?', a: '250–350 ord, max en A4. Längre läses sällan klart.' },
+      { q: 'Ska jag bifoga personligt brev om det inte krävs?', a: 'I korta jobbappar – nej, en bra profil räcker. I formella ansökningar – ja, alltid.' },
+      { q: 'Får jag använda AI för att skriva brevet?', a: 'Som utkast: ja. Som färdig produkt: nej. Rekryterare känner igen AI-fluff direkt – du måste lägga in dina egna konkreta resultat och röst.' },
+      { q: 'Ska jag skriva lönekrav i brevet?', a: 'Bara om annonsen explicit ber om det. Annars: vänta tills intervjun.' },
+    ],
+  },
 ];
 
 
