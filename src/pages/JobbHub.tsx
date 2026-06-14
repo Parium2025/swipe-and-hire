@@ -152,11 +152,15 @@ const JobbHub = () => {
               );
             })}
           </ul>
-          <p className="mt-6 text-center text-white text-sm">
-            <Link to="/yrken" className="underline-offset-4 hover:underline">
-              Se alla yrken →
+          <div className="mt-8 flex justify-center">
+            <Link
+              to="/yrken"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white/[0.14] hover:border-white/30"
+            >
+              Se alla yrken
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
-          </p>
+          </div>
         </div>
       </section>
 
@@ -169,12 +173,15 @@ const JobbHub = () => {
           <p className="mx-auto mt-3 max-w-2xl text-white">
             Lönerapport, intervjutips och checklista för jobbyte – uppdaterat för 2026.
           </p>
-          <Link
-            to="/guider"
-            className="mt-6 inline-flex items-center gap-1.5 text-white hover:opacity-80 underline-offset-4 hover:underline"
-          >
-            Läs alla guider →
-          </Link>
+          <div className="mt-8 flex justify-center">
+            <Link
+              to="/guider"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white/[0.14] hover:border-white/30"
+            >
+              Läs alla guider
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
         </div>
       </section>
 
