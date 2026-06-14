@@ -123,7 +123,7 @@ const YrkePage = () => {
             }}
           />
           <div className="mx-auto max-w-4xl text-center">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white/80 backdrop-blur">
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white backdrop-blur">
               <Briefcase className="h-3.5 w-3.5" /> {occ.category}
             </p>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
