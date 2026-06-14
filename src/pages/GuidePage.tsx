@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
+import SeoBubbles from '@/components/seo/SeoBubbles';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Clock, Calendar } from 'lucide-react';
@@ -124,14 +125,15 @@ const GuidePage = () => {
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         {/* Header */}
-        <article className="px-5 pt-28 pb-12 sm:px-8 md:px-12">
-          <div className="mx-auto max-w-3xl">
-            <nav aria-label="Brödsmulor" className="mb-6 text-xs text-white/60">
-              <Link to="/guider" className="hover:text-white/90">Guider</Link>
+        <article className="relative overflow-hidden px-5 pt-28 pb-12 sm:px-8 md:px-12">
+          <SeoBubbles />
+          <div className="relative z-10 mx-auto max-w-3xl">
+            <nav aria-label="Brödsmulor" className="mb-6 text-xs text-white">
+              <Link to="/guider" className="hover:opacity-80">Guider</Link>
               <span className="mx-1.5">/</span>
-              <span className="text-white/80">{guide.category}</span>
+              <span className="text-white">{guide.category}</span>
             </nav>
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white/80 backdrop-blur">
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white backdrop-blur">
               {guide.category}
             </p>
             <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
