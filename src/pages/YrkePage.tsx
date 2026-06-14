@@ -229,17 +229,9 @@ const YrkePage = () => {
             <h2 className="text-center text-3xl font-semibold tracking-tight sm:text-4xl">
               Vanliga frågor om jobb {occ.asForm}
             </h2>
-            <div className="mt-10 space-y-4">
+            <div className="mt-10 space-y-3">
               {faqs.map((f) => (
-                <details
-                  key={f.q}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-md"
-                >
-                  <summary className="cursor-pointer list-none text-lg font-medium text-white">
-                    {f.q}
-                  </summary>
-                  <p className="mt-3 text-white">{f.a}</p>
-                </details>
+                <FaqAccordion key={f.q} q={f.q} a={f.a} />
               ))}
             </div>
           </div>
