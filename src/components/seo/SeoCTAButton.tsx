@@ -32,6 +32,7 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
       showArrow = true,
       size = 'lg',
       variant = 'primary',
+      navState,
       className,
       onClick,
       ...rest
