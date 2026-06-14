@@ -13,6 +13,7 @@ const GuiderHub = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
+    window.scrollTo(0, 0);
   }, []);
 
   const canonical = `${BASE}/guider`;

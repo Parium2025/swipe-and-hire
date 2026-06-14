@@ -18,6 +18,7 @@ const JobbHub = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
+    window.scrollTo(0, 0);
   }, []);
 
   const itemListLd = {
