@@ -62,6 +62,17 @@ const Auth = () => {
   const initialMode = (location.state as any)?.mode;
   const initialRole = (location.state as any)?.role;
   const initialPlan = (location.state as any)?.plan;
+  const initialSavedSearchIntent = (location.state as any)?.savedSearchIntent;
+
+  // Persistera "Bevaka denna sökning"-intent från SEO-sidor så den överlever
+  // signup/login/email-confirm-roundtrips.
+  useEffect(() => {
+    if (initialSavedSearchIntent) {
+      import('@/lib/savedSearchIntent').then(({ persistIntent }) =>
+        persistIntent(initialSavedSearchIntent)
+      );
+    }
+  }, [initialSavedSearchIntent]);
 
   // Persist pending plan across signup/login/OAuth roundtrips so we can
   // redirect to /checkout once a session is established.
@@ -619,6 +630,22 @@ const Auth = () => {
       if (pendingPlan) {
         return <Navigate to="/checkout" replace />;
       }
+      // Om användaren kom hit via "Bevaka denna sökning" på en SEO-sida:
+      // skapa saved_search + slussa till returnTo. Fire-and-forget för att
+      // inte blockera renderingen – Navigate sker direkt till returnTo.
+      try {
+        const raw = typeof window !== 'undefined' ? sessionStorage.getItem('parium-saved-search-intent') : null;
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const returnTo = parsed?.returnTo;
+          import('@/lib/savedSearchIntent').then(({ consumeIntent }) => {
+            consumeIntent(user.id).catch(() => {});
+          });
+          if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('/')) {
+            return <Navigate to={returnTo} replace />;
+          }
+        }
+      } catch { /* fortsätt till /home */ }
       // Alla roller landar på /home efter inloggning
       return <Navigate to="/home" replace />;
     }
