@@ -53,19 +53,12 @@ const YrkenHub = () => {
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         <section className="relative overflow-hidden px-5 pt-28 pb-12 sm:px-8 md:px-12">
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10 opacity-60"
-            style={{
-              background:
-                'radial-gradient(70% 60% at 50% 0%, rgba(70,130,255,0.30) 0%, rgba(70,130,255,0) 70%)',
-            }}
-          />
+          <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
               Lediga jobb per yrke
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 sm:text-xl">
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">
               Hitta lediga jobb inom Sveriges mest efterfrågade yrken. Skapa min profil idag och
               matcha med arbetsgivare över hela landet.
             </p>
@@ -81,15 +74,15 @@ const YrkenHub = () => {
                   className="block rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-6 hover:bg-white/[0.10] transition"
                 >
                   <div className="flex items-center gap-3">
-                    <Briefcase className="h-5 w-5 text-white/70" />
-                    <span className="text-xs uppercase tracking-wider text-white/60">
+                    <Briefcase className="h-5 w-5 text-white" />
+                    <span className="text-xs uppercase tracking-wider text-white">
                       {o.category}
                     </span>
                   </div>
                   <h2 className="mt-3 text-xl font-semibold text-white">
                     Lediga jobb {o.asForm}
                   </h2>
-                  <p className="mt-2 text-sm text-white/70 line-clamp-2">{o.intro}</p>
+                  <p className="mt-2 text-sm text-white line-clamp-2">{o.intro}</p>
                 </Link>
               </li>
             ))}
@@ -98,10 +91,10 @@ const YrkenHub = () => {
 
         <section className="px-5 py-20 sm:px-8 md:px-12">
           <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-10 text-center">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
               Hitta ditt nästa jobb idag
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-white/80">
+            <p className="mx-auto mt-4 max-w-xl text-white">
               Skapa min profil idag – matcha med arbetsgivare i hela Sverige.
             </p>
             <Button
