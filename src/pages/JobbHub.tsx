@@ -119,10 +119,10 @@ const JobbHub = () => {
       {/* Yrken */}
       <section className="px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl">
-          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl text-white">
             Populära yrken på Parium
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-white/70">
+          <p className="mx-auto mt-3 max-w-2xl text-center text-white">
             Klicka på ett yrke för att se lediga jobb, lön och vad som krävs.
           </p>
           <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
@@ -130,14 +130,14 @@ const JobbHub = () => {
               <li key={o.slug}>
                 <Link
                   to={`/yrke/${o.slug}`}
-                  className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white/90 hover:bg-white/[0.10] transition"
+                  className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.10] transition"
                 >
                   Lediga jobb {o.asForm}
                 </Link>
               </li>
             ))}
           </ul>
-          <p className="mt-6 text-center text-white/60 text-sm">
+          <p className="mt-6 text-center text-white text-sm">
             <Link to="/yrken" className="underline-offset-4 hover:underline">
               Se alla yrken →
             </Link>
@@ -148,15 +148,15 @@ const JobbHub = () => {
       {/* Guider */}
       <section className="px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl text-center">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
             Guider för dig som söker jobb
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-white/70">
-            CV-mall, lönerapport, intervjutips och checklista för jobbyte – uppdaterat för 2026.
+          <p className="mx-auto mt-3 max-w-2xl text-white">
+            Lönerapport, intervjutips och checklista för jobbyte – uppdaterat för 2026.
           </p>
           <Link
             to="/guider"
-            className="mt-6 inline-flex items-center gap-1.5 text-white/80 hover:text-white underline-offset-4 hover:underline"
+            className="mt-6 inline-flex items-center gap-1.5 text-white hover:opacity-80 underline-offset-4 hover:underline"
           >
             Läs alla guider →
           </Link>
