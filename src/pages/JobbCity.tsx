@@ -35,6 +35,7 @@ const JobbCity = () => {
   const { citySlug } = useParams<{ citySlug: string }>();
   const navigate = useNavigate();
   const city = citySlug ? CITY_BY_SLUG[citySlug] : null;
+  const { data: counts } = useJobCounts();
   const [jobs, setJobs] = useState<PublicJobRow[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
 
@@ -237,32 +238,16 @@ const JobbCity = () => {
 
       {/* Populära yrken */}
       <section className="px-5 py-16 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-            Populära yrken {city.inForm}
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-white/70">
-            Här är yrken där det ofta finns lediga jobb {city.inForm} just nu.
-          </p>
-          <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {OCCUPATIONS.map((o) => (
-              <li key={o.slug}>
-                <Link
-                  to={`/jobb/${city.slug}/${o.slug}`}
-                  className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white/90 hover:bg-white/10 transition-colors"
-                >
-                  {o.name} {city.inForm}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-6 text-center text-white/60 text-sm">
-            <Link to="/yrken" className="underline-offset-4 hover:underline">
-              Se alla yrken →
-            </Link>
-          </p>
-        </div>
-      </section>
+      {/* Populära yrken (intern länkning med äkta siffror) */}
+      {city && (
+        <SeoOtherOccupationsInCity
+          citySlug={city.slug}
+          cityName={city.name}
+          cityInForm={city.inForm}
+          occupations={OCCUPATIONS}
+          limit={12}
+        />
+      )}
 
       {/* Så fungerar det */}
       <section className="px-5 py-16 sm:px-8 md:px-12">
