@@ -193,9 +193,9 @@ const YrkePage = () => {
                 <li key={c.slug}>
                   <Link
                     to={`/jobb/${c.slug}`}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white/90 hover:bg-white/10 transition"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/10 transition"
                   >
-                    <MapPin className="h-4 w-4 text-white/60" />
+                    <MapPin className="h-4 w-4 text-white" />
                     Jobb i {c.name}
                   </Link>
                 </li>
