@@ -161,21 +161,19 @@ const AnnonserHub = () => {
           </div>
         </section>
 
-        <div className="mt-16 p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-white/[0.12] via-white/[0.06] to-white/[0.02] border border-white/15 backdrop-blur-md text-center sm:text-left">
-          <div className="sm:flex sm:items-center sm:justify-between sm:gap-8">
-            <div>
-              <h2 className="text-2xl font-semibold mb-2 text-white tracking-tight">Ladda ner Parium-appen</h2>
-              <p className="text-white max-w-xl">Få notiser om nya jobb som matchar din profil. Ansök på 30 sekunder.</p>
+        <section className="mt-16">
+          <div className="mx-auto max-w-2xl rounded-3xl border border-white/15 bg-white/[0.05] backdrop-blur-md p-8 sm:p-10 text-center">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
+              Ladda ner Parium-appen
+            </h2>
+            <p className="mx-auto mt-3 max-w-lg text-white">
+              Få notiser om nya jobb som matchar din profil. Ansök på 30 sekunder.
+            </p>
+            <div className="mt-7 flex justify-center">
+              <SeoCTAButton label="Skapa min profil idag" to="/auth" navState={{ mode: 'signup' }} />
             </div>
-            <Button
-              asChild
-              size="lg"
-              className="mt-6 sm:mt-0 min-h-12 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7 font-semibold flex-shrink-0"
-            >
-              <Link to="/auth">Skapa min profil idag <ArrowRight className="w-4 h-4 ml-1" /></Link>
-            </Button>
           </div>
-        </div>
+        </section>
       </main>
       <MobileStickyCTA />
     </div>
