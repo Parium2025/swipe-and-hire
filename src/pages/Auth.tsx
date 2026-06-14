@@ -13,6 +13,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { consumePendingJobPath } from '@/lib/pendingJobIntent';
+
 
 // Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
