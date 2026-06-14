@@ -317,13 +317,7 @@ const JobbCity = () => {
           </h2>
           <div className="mt-10 space-y-3">
             {faqs.map((f) => (
-              <details key={f.q} className="group rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-5 open:bg-white/[0.08]">
-                <summary className="cursor-pointer list-none font-semibold text-white flex items-center justify-between gap-4">
-                  <span>{f.q}</span>
-                  <span className="text-white/50 transition-transform group-open:rotate-45 text-xl leading-none">+</span>
-                </summary>
-                <p className="mt-3 text-sm leading-relaxed text-white/80">{f.a}</p>
-              </details>
+              <FaqAccordion key={f.q} q={f.q} a={f.a} />
             ))}
           </div>
         </div>
