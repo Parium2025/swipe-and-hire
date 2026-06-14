@@ -4,10 +4,15 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
+import {
+  SeoOtherOccupationsInCity,
+  SeoFooterLinks,
+} from '@/components/seo/SeoFooterLinks';
+import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, MapPin, Zap, MessageSquare, Search, Briefcase, Building2 } from 'lucide-react';
+import { MapPin, Zap, MessageSquare, Search, Briefcase, Building2 } from 'lucide-react';
 import { CITIES, CITY_BY_SLUG, POPULAR_ROLES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 
