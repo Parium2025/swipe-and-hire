@@ -133,16 +133,24 @@ const JobbHub = () => {
             Klicka på ett yrke för att se lediga jobb, lön och vad som krävs.
           </p>
           <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {OCCUPATIONS.map((o) => (
-              <li key={o.slug}>
-                <Link
-                  to={`/yrke/${o.slug}`}
-                  className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.10] transition"
-                >
-                  Lediga jobb {o.asForm}
-                </Link>
-              </li>
-            ))}
+            {OCCUPATIONS.map((o) => {
+              const label = `Lediga jobb ${o.asForm}`;
+              return (
+                <li key={o.slug}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link
+                        to={`/yrke/${o.slug}`}
+                        className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.10] transition"
+                      >
+                        <span className="block w-full truncate">{label}</span>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>{label}</TooltipContent>
+                  </Tooltip>
+                </li>
+              );
+            })}
           </ul>
           <p className="mt-6 text-center text-white text-sm">
             <Link to="/yrken" className="underline-offset-4 hover:underline">
