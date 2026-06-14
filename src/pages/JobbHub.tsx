@@ -79,7 +79,7 @@ const JobbHub = () => {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl"
           >
-            Välj din stad och hitta lediga jobb som matchar dig. Skapa en profil gratis och börja matcha med arbetsgivare direkt.
+            Välj din stad och hitta lediga jobb som matchar dig. Skapa min profil idag och börja matcha med arbetsgivare direkt.
           </motion.p>
         </div>
       </section>
@@ -171,14 +171,14 @@ const JobbHub = () => {
             Hitta ditt nästa jobb idag
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white/80">
-            Skapa en profil gratis. Inga oändliga listor – bara jobb som passar dig.
+            Skapa min profil idag. Inga oändliga listor – bara jobb som passar dig.
           </p>
           <Button
             size="lg"
             onClick={() => navigate('/auth')}
-            className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
+            className="mt-8 min-h-11 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7"
           >
-            Skapa en profil gratis
+            Skapa min profil idag
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </div>

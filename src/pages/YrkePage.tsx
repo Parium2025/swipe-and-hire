@@ -24,7 +24,7 @@ const YrkePage = () => {
 
   const canonical = `${BASE}/yrke/${occ.slug}`;
   const title = `Lediga jobb ${occ.asForm} – sök ${occ.plural}jobb med Parium`;
-  const description = `Hitta lediga jobb ${occ.asForm} i hela Sverige. Se vanliga arbetsuppgifter, krav och lön. Skapa profil gratis i Parium och matcha direkt med arbetsgivare.`;
+  const description = `Hitta lediga jobb ${occ.asForm} i hela Sverige. Se vanliga arbetsuppgifter, krav och lön. Skapa min profil idag i Parium och matcha direkt med arbetsgivare.`;
 
   // Top 5 städer för cross-linking
   const topCities = CITIES.slice(0, 5);
@@ -129,9 +129,9 @@ const YrkePage = () => {
               <Button
                 size="lg"
                 onClick={() => navigate('/auth')}
-                className="min-h-12 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-8 text-base font-semibold"
+                className="min-h-12 rounded-full bg-secondary text-white hover:bg-secondary/90 px-8 text-base font-semibold"
               >
-                Skapa en profil gratis
+                Skapa min profil idag
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
               <Button
@@ -241,14 +241,14 @@ const YrkePage = () => {
               Sök ditt nästa jobb {occ.asForm} idag
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/80">
-              Skapa en profil gratis. Inga oändliga ansökningar – bara jobb som passar dig.
+              Skapa min profil idag. Inga oändliga ansökningar – bara jobb som passar dig.
             </p>
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
-              className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
+              className="mt-8 min-h-11 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7"
             >
-              Skapa en profil gratis
+              Skapa min profil idag
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>

@@ -91,7 +91,7 @@ const PublicJobPage = () => {
         <div className="max-w-2xl mx-auto px-6 py-32 text-center">
           <h1 className="text-3xl font-semibold mb-4">Annonsen är inte längre tillgänglig</h1>
           <p className="text-white/60 mb-8">Den här jobbannonsen kan ha avslutats eller tagits bort.</p>
-          <Button asChild className="bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90">
+          <Button asChild className="bg-secondary text-white hover:bg-secondary/90">
             <Link to="/jobb">Bläddra lediga jobb</Link>
           </Button>
         </div>
@@ -227,7 +227,7 @@ const PublicJobPage = () => {
         <div className="flex flex-col sm:flex-row gap-3 mb-12">
           <Button
             onClick={() => navigate(`/job-application/${job.id}`)}
-            className="bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 h-12 px-6 text-base font-medium"
+            className="bg-secondary text-white hover:bg-secondary/90 h-12 px-6 text-base font-medium"
           >
             Ansök nu
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -289,7 +289,7 @@ const PublicJobPage = () => {
           <p className="text-white/70 mb-4">Skapa profil på under en minut. Chatta direkt med arbetsgivaren och få snabbare svar.</p>
           <Button
             onClick={() => navigate(`/job-application/${job.id}`)}
-            className="bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90"
+            className="bg-secondary text-white hover:bg-secondary/90"
           >
             Skicka ansökan <ArrowRight className="w-4 h-4 ml-2" />
           </Button>

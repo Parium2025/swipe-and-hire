@@ -4,10 +4,14 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
+import SeoFooterLinks, {
+  SeoOtherOccupationsInCity,
+} from '@/components/seo/SeoFooterLinks';
+import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, MapPin, Zap, MessageSquare, Search, Briefcase, Building2 } from 'lucide-react';
+import { MapPin, Zap, MessageSquare, Search, Briefcase, Building2 } from 'lucide-react';
 import { CITIES, CITY_BY_SLUG, POPULAR_ROLES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 
@@ -31,6 +35,7 @@ const JobbCity = () => {
   const { citySlug } = useParams<{ citySlug: string }>();
   const navigate = useNavigate();
   const city = citySlug ? CITY_BY_SLUG[citySlug] : null;
+  const { data: counts } = useJobCounts();
   const [jobs, setJobs] = useState<PublicJobRow[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
 
@@ -63,7 +68,7 @@ const JobbCity = () => {
 
   const canonical = `${BASE}/jobb/${city.slug}`;
   const title = `Lediga jobb ${city.inForm} – sök jobb snabbt med Parium`;
-  const description = `Hitta lediga jobb ${city.inForm} som passar dig. Skapa profil gratis, matcha med arbetsgivare ${city.inForm} och chatta direkt i jobbappen Parium.`;
+  const description = `Hitta lediga jobb ${city.inForm} som passar dig. Skapa min profil idag, matcha med arbetsgivare ${city.inForm} och chatta direkt i jobbappen Parium.`;
 
   const faqs = [
     {
@@ -178,7 +183,7 @@ const JobbCity = () => {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl"
           >
-            {city.intro} Skapa en profil gratis och matcha med arbetsgivare {city.inForm} direkt i appen.
+            {city.intro} Skapa min profil idag och matcha med arbetsgivare {city.inForm} direkt i appen.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -186,14 +191,7 @@ const JobbCity = () => {
             transition={{ duration: 0.7, delay: 0.25 }}
             className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
-            <Button
-              size="lg"
-              onClick={() => navigate('/auth')}
-              className="min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
-            >
-              Skapa en profil gratis
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+            <SeoCTAButton label="Skapa min profil idag" to="/auth" />
             <Link
               to="/annonser"
               className="min-h-11 inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 backdrop-blur-md px-7 text-sm font-medium hover:bg-white/15 transition-colors"
@@ -238,34 +236,16 @@ const JobbCity = () => {
         </div>
       </section>
 
-      {/* Populära yrken */}
-      <section className="px-5 py-16 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-            Populära yrken {city.inForm}
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-white/70">
-            Här är yrken där det ofta finns lediga jobb {city.inForm} just nu.
-          </p>
-          <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {OCCUPATIONS.map((o) => (
-              <li key={o.slug}>
-                <Link
-                  to={`/jobb/${city.slug}/${o.slug}`}
-                  className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white/90 hover:bg-white/10 transition-colors"
-                >
-                  {o.name} {city.inForm}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-6 text-center text-white/60 text-sm">
-            <Link to="/yrken" className="underline-offset-4 hover:underline">
-              Se alla yrken →
-            </Link>
-          </p>
-        </div>
-      </section>
+      {/* Populära yrken (intern länkning med äkta siffror) */}
+      {city && (
+        <SeoOtherOccupationsInCity
+          citySlug={city.slug}
+          cityName={city.name}
+          cityInForm={city.inForm}
+          occupations={OCCUPATIONS}
+          limit={12}
+        />
+      )}
 
       {/* Så fungerar det */}
       <section className="px-5 py-16 sm:px-8 md:px-12">
@@ -330,34 +310,20 @@ const JobbCity = () => {
         </div>
       </section>
 
-      {/* Andra städer (intern länkning) */}
-      <section className="px-5 py-16 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-            Lediga jobb i andra städer
-          </h2>
-          <ul className="mt-8 flex flex-wrap justify-center gap-2">
-            {otherCities.map((c) => (
-              <li key={c.slug}>
-                <Link
-                  to={`/jobb/${c.slug}`}
-                  className="rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-md px-4 py-2 text-sm text-white/85 hover:bg-white/15 transition-colors inline-block"
-                >
-                  Jobb {c.inForm}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link
-                to="/jobb"
-                className="rounded-full border border-white/25 bg-white/15 backdrop-blur-md px-4 py-2 text-sm text-white font-medium hover:bg-white/25 transition-colors inline-block"
-              >
-                Se alla städer →
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {/* Andra städer (intern länkning, äkta siffror) */}
+      <SeoFooterLinks
+        title="Lediga jobb i andra städer"
+        icon="city"
+        items={CITIES.filter((c) => c.slug !== city.slug)
+          .map((c) => ({
+            slug: c.slug,
+            label: `Jobb ${c.inForm}`,
+            to: `/jobb/${c.slug}`,
+            count: getJobCount(counts, { citySlug: c.slug }),
+          }))
+          .sort((a, b) => (b.count || 0) - (a.count || 0))
+          .slice(0, 9)}
+      />
 
       {/* CTA */}
       <section className="px-5 py-20 sm:px-8 md:px-12">
@@ -366,16 +332,11 @@ const JobbCity = () => {
             Redo att hitta ditt nästa jobb {city.inForm}?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white/80">
-            Skapa en profil gratis och börja matcha med arbetsgivare {city.inForm} idag.
+            Skapa min profil idag och börja matcha med arbetsgivare {city.inForm} idag.
           </p>
-          <Button
-            size="lg"
-            onClick={() => navigate('/auth')}
-            className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
-          >
-            Skapa en profil gratis
-            <ArrowRight className="ml-1 h-4 w-4" />
-          </Button>
+          <div className="mt-7 flex justify-center">
+            <SeoCTAButton label="Skapa min profil idag" to="/auth" />
+          </div>
         </div>
       </section>
       <MobileStickyCTA />

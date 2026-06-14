@@ -145,14 +145,14 @@ const GuidePage = () => {
               Klar att ta nästa steg?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/80">
-              Skapa en profil gratis i Parium – matcha med arbetsgivare direkt.
+              Skapa min profil idag i Parium – matcha med arbetsgivare direkt.
             </p>
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
-              className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
+              className="mt-8 min-h-11 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7"
             >
-              Skapa en profil gratis
+              Skapa min profil idag
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>

@@ -94,7 +94,7 @@ const AnnonserHub = () => {
             Senaste lediga jobben i Sverige
           </h1>
           <p className="text-white/70 text-lg max-w-2xl">
-            Nya jobb varje dag från arbetsgivare i hela landet. Skapa en profil gratis och ansök direkt i Parium-appen.
+            Nya jobb varje dag från arbetsgivare i hela landet. Skapa min profil idag och ansök direkt i Parium-appen.
           </p>
         </motion.header>
 
@@ -164,8 +164,8 @@ const AnnonserHub = () => {
         <div className="mt-16 p-6 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/10">
           <h2 className="text-xl font-semibold mb-2">Ladda ner Parium-appen</h2>
           <p className="text-white/70 mb-4">Få notiser om nya jobb som matchar din profil. Ansök på 30 sekunder.</p>
-          <Button asChild className="bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90">
-            <Link to="/auth">Skapa en profil gratis <ArrowRight className="w-4 h-4 ml-2" /></Link>
+          <Button asChild className="bg-secondary text-white hover:bg-secondary/90">
+            <Link to="/auth">Skapa min profil idag <ArrowRight className="w-4 h-4 ml-2" /></Link>
           </Button>
         </div>
       </main>
