@@ -103,7 +103,7 @@ const JobbCityYrke = () => {
         <script type="application/ld+json">{JSON.stringify(occupationLd)}</script>
       </Helmet>
 
-      <div className="min-h-[100dvh] w-full pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
+      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         {/* Hero */}
@@ -139,7 +139,7 @@ const JobbCityYrke = () => {
                 onClick={() => navigate('/auth')}
                 className="min-h-12 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-8 text-base font-semibold"
               >
-                Skapa profil gratis
+                Skapa en profil gratis
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
               <Button
@@ -282,14 +282,14 @@ const JobbCityYrke = () => {
               Sök jobb {occ.asForm} {city.inForm} idag
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/80">
-              Skapa profil gratis. Matcha med arbetsgivare {city.inForm} på sekunder.
+              Skapa en profil gratis. Matcha med arbetsgivare {city.inForm} på sekunder.
             </p>
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
               className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
             >
-              Skapa profil gratis
+              Skapa en profil gratis
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>

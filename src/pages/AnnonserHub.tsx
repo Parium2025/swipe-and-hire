@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import LandingNav from '@/components/LandingNav';
+import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { Button } from '@/components/ui/button';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { ArrowRight, MapPin, Briefcase, Loader2 } from 'lucide-react';
@@ -67,7 +68,7 @@ const AnnonserHub = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full pb-28 md:pb-0 bg-[#0a0a0a] text-white">
+    <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -93,7 +94,7 @@ const AnnonserHub = () => {
             Senaste lediga jobben i Sverige
           </h1>
           <p className="text-white/70 text-lg max-w-2xl">
-            Nya jobb varje dag från arbetsgivare i hela landet. Skapa profil gratis och ansök direkt i Parium-appen.
+            Nya jobb varje dag från arbetsgivare i hela landet. Skapa en profil gratis och ansök direkt i Parium-appen.
           </p>
         </motion.header>
 
@@ -164,10 +165,11 @@ const AnnonserHub = () => {
           <h2 className="text-xl font-semibold mb-2">Ladda ner Parium-appen</h2>
           <p className="text-white/70 mb-4">Få notiser om nya jobb som matchar din profil. Ansök på 30 sekunder.</p>
           <Button asChild className="bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90">
-            <Link to="/jobbsokare">Kom igång gratis <ArrowRight className="w-4 h-4 ml-2" /></Link>
+            <Link to="/auth">Skapa en profil gratis <ArrowRight className="w-4 h-4 ml-2" /></Link>
           </Button>
         </div>
       </main>
+      <MobileStickyCTA />
     </div>
   );
 };

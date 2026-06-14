@@ -48,7 +48,7 @@ const YrkenHub = () => {
         <script type="application/ld+json">{JSON.stringify(itemListLd)}</script>
       </Helmet>
 
-      <div className="min-h-[100dvh] w-full pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
+      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         <section className="relative overflow-hidden px-5 pt-28 pb-12 sm:px-8 md:px-12">
@@ -65,7 +65,7 @@ const YrkenHub = () => {
               Lediga jobb per yrke
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 sm:text-xl">
-              Hitta lediga jobb inom Sveriges mest efterfrågade yrken. Skapa profil gratis och
+              Hitta lediga jobb inom Sveriges mest efterfrågade yrken. Skapa en profil gratis och
               matcha med arbetsgivare över hela landet.
             </p>
           </div>
@@ -101,14 +101,14 @@ const YrkenHub = () => {
               Hitta ditt nästa jobb idag
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/80">
-              Skapa profil gratis – matcha med arbetsgivare i hela Sverige.
+              Skapa en profil gratis – matcha med arbetsgivare i hela Sverige.
             </p>
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
               className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
             >
-              Skapa profil gratis
+              Skapa en profil gratis
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>

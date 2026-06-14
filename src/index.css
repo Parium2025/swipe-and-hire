@@ -658,6 +658,18 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
+  .seo-scroll-page {
+    position: fixed;
+    inset: 0;
+    height: 100dvh;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y pinch-zoom;
+  }
+
   /* Global background gradient.
      IMPORTANT: background-color (solid mörkblå) sätts som fallback under
      gradienten. iOS Safari samplar färgen från sidans nedersta pixel för

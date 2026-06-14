@@ -1,14 +1,29 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { syncBrowserChrome } from '@/lib/browserChrome';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MapPin, Zap, MessageSquare, Search } from 'lucide-react';
+import { ArrowRight, MapPin, Zap, MessageSquare, Search, Briefcase, Building2 } from 'lucide-react';
 import { CITIES, CITY_BY_SLUG, POPULAR_ROLES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
+
+type PublicJobRow = {
+  id: string;
+  title: string;
+  workplace_city: string | null;
+  workplace_name: string | null;
+  employment_type: string | null;
+};
+
+const sampleJobsForCity = (cityName: string) => [
+  { id: 'profile', title: 'Butiksmedarbetare', company: 'Retail & Service', type: 'Deltid', location: cityName },
+  { id: 'profile-2', title: 'Lagerarbetare', company: 'Logistikpartner', type: 'Heltid', location: cityName },
+  { id: 'profile-3', title: 'Restaurangpersonal', company: 'Restauranggrupp', type: 'Extra', location: cityName },
+];
 
 const BASE = 'https://parium.se';
 
@@ -16,10 +31,33 @@ const JobbCity = () => {
   const { citySlug } = useParams<{ citySlug: string }>();
   const navigate = useNavigate();
   const city = citySlug ? CITY_BY_SLUG[citySlug] : null;
+  const [jobs, setJobs] = useState<PublicJobRow[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
   }, []);
+
+  useEffect(() => {
+    if (!city) return;
+    let cancelled = false;
+    setJobsLoading(true);
+    (async () => {
+      const { data } = await supabase
+        .from('job_postings')
+        .select('id,title,workplace_city,workplace_name,employment_type')
+        .eq('is_active', true)
+        .is('deleted_at', null)
+        .ilike('workplace_city', `%${city.name}%`)
+        .order('created_at', { ascending: false })
+        .limit(6);
+      if (!cancelled) {
+        setJobs((data as PublicJobRow[]) || []);
+        setJobsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [city]);
 
   if (!city) return <Navigate to="/jobb" replace />;
 
@@ -83,9 +121,18 @@ const JobbCity = () => {
 
   // Länka till 4 andra städer (intern länkning)
   const otherCities = CITIES.filter((c) => c.slug !== city.slug).slice(0, 6);
+  const displayedJobs = jobs.length > 0
+    ? jobs.map((job) => ({
+        id: job.id,
+        title: job.title,
+        company: job.workplace_name || 'Arbetsgivare',
+        type: job.employment_type || 'Jobb',
+        location: job.workplace_city || city.name,
+      }))
+    : sampleJobsForCity(city.name);
 
   return (
-    <div className="min-h-[100dvh] w-full pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+    <div data-seo-scroll-root className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -107,7 +154,7 @@ const JobbCity = () => {
 
       {/* Hero */}
       <section className="relative px-5 pt-32 pb-16 sm:px-8 sm:pt-40 sm:pb-24 md:px-12">
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="mx-auto max-w-5xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -131,7 +178,7 @@ const JobbCity = () => {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl"
           >
-            {city.intro} Skapa profil gratis och matcha med arbetsgivare {city.inForm} direkt i appen.
+            {city.intro} Skapa en profil gratis och matcha med arbetsgivare {city.inForm} direkt i appen.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -144,16 +191,50 @@ const JobbCity = () => {
               onClick={() => navigate('/auth')}
               className="min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
             >
-              Skapa profil gratis
+              Skapa en profil gratis
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
             <Link
-              to="/jobbsokare"
+              to="/annonser"
               className="min-h-11 inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 backdrop-blur-md px-7 text-sm font-medium hover:bg-white/15 transition-colors"
             >
-              Läs mer om Parium
+              Alla jobb {city.inForm}
             </Link>
           </motion.div>
+        </div>
+      </section>
+
+      <section id="alla-jobb" className="scroll-mt-24 px-5 pb-12 sm:px-8 md:px-12">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Alla jobb {city.inForm}</h2>
+              <p className="mt-2 text-sm text-white/70">{jobsLoading ? 'Hämtar aktiva annonser…' : jobs.length > 0 ? 'Riktiga annonser som går att öppna direkt.' : 'Skapa profil för att se fler matchande jobb i appen.'}</p>
+            </div>
+            <Link to="/annonser" className="hidden text-sm font-medium text-white/80 underline-offset-4 hover:underline sm:inline-flex">Visa senaste jobb</Link>
+          </div>
+          <ul className="grid gap-3 md:grid-cols-3">
+            {displayedJobs.map((job) => (
+              <li key={job.title}>
+                <button
+                  type="button"
+                  onPointerDown={() => navigate(jobs.length > 0 ? `/annons/${job.id}` : '/auth')}
+                  className="group flex min-h-[150px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.10]"
+                >
+                  <div>
+                    <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                      <Briefcase className="h-5 w-5" aria-hidden="true" />
+                    </div>
+                    <h3 className="text-lg font-semibold leading-snug text-white">{job.title}</h3>
+                  </div>
+                  <div className="mt-5 space-y-2 text-sm text-white/75">
+                    <p className="flex items-center gap-2"><Building2 className="h-4 w-4" aria-hidden="true" />{job.company}</p>
+                    <p className="flex items-center gap-2"><MapPin className="h-4 w-4" aria-hidden="true" />{job.location} · {job.type}</p>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -161,7 +242,7 @@ const JobbCity = () => {
       <section className="px-5 py-16 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-            Populära yrken med lediga jobb {city.inForm}
+            Populära yrken {city.inForm}
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-center text-white/70">
             Här är yrken där det ofta finns lediga jobb {city.inForm} just nu.
@@ -285,14 +366,14 @@ const JobbCity = () => {
             Redo att hitta ditt nästa jobb {city.inForm}?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white/80">
-            Skapa profil gratis och börja matcha med arbetsgivare {city.inForm} idag.
+            Skapa en profil gratis och börja matcha med arbetsgivare {city.inForm} idag.
           </p>
           <Button
             size="lg"
             onClick={() => navigate('/auth')}
             className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
           >
-            Skapa profil gratis
+            Skapa en profil gratis
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </div>

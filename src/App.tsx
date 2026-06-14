@@ -142,6 +142,16 @@ const LazyFallback = () => (
 );
 
 const LIGHTWEIGHT_ROUTES = ['/', '/auth', '/jobbsokare', '/arbetsgivare'];
+const isPublicLightweightPath = (pathname: string) =>
+  LIGHTWEIGHT_ROUTES.includes(pathname) ||
+  pathname === '/jobb' ||
+  pathname.startsWith('/jobb/') ||
+  pathname === '/yrken' ||
+  pathname.startsWith('/yrke/') ||
+  pathname === '/annonser' ||
+  pathname.startsWith('/annons/') ||
+  pathname === '/guider' ||
+  pathname.startsWith('/guider/');
 
 // Routes without animations for instant navigation
 const AnimatedRoutes = () => {
@@ -219,7 +229,7 @@ const AnimatedRoutes = () => {
 
 const AppShell = ({ showHeader }: { showHeader: boolean }) => {
   const location = useLocation();
-  const isLightweightRoute = LIGHTWEIGHT_ROUTES.includes(location.pathname);
+  const isLightweightRoute = isPublicLightweightPath(location.pathname);
 
   return (
     <>
@@ -255,7 +265,7 @@ const App = () => {
   // Viktigt: på publika landningssidor vill vi INTE starta tunga app-preloads
   // som konkurrerar med hero/3D/videons first paint.
   const preloadEnabled = typeof window !== 'undefined'
-    ? !LIGHTWEIGHT_ROUTES.includes(window.location.pathname)
+    ? !isPublicLightweightPath(window.location.pathname)
     : true;
   useGlobalImagePreloader(preloadEnabled);
 
