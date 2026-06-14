@@ -7,6 +7,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CITIES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 
@@ -91,27 +92,33 @@ const JobbHub = () => {
         <div className="mx-auto max-w-5xl">
           <h2 className="sr-only">Välj stad</h2>
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {CITIES.map((c) => (
-              <li key={c.slug}>
-                <Link
-                  to={`/jobb/${c.slug}`}
-                  className="group block rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-5 hover:bg-white/10 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10">
+            {CITIES.map((c) => {
+              const title = `Lediga jobb ${c.inForm}`;
+              return (
+                <li key={c.slug}>
+                  <Link
+                    to={`/jobb/${c.slug}`}
+                    className="group flex h-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-5 hover:bg-white/10 transition-colors"
+                  >
+                    <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10">
                       <MapPin className="h-4 w-4" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-lg font-semibold text-white">
-                        Lediga jobb {c.inForm}
-                      </h3>
-                      <p className="mt-1 text-sm text-white">{c.county}</p>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <h3 className="truncate text-lg font-semibold text-white">
+                            {title}
+                          </h3>
+                        </TooltipTrigger>
+                        <TooltipContent>{title}</TooltipContent>
+                      </Tooltip>
+                      <p className="mt-1 truncate text-sm text-white/80">{c.county}</p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all mt-3" aria-hidden="true" />
-                  </div>
-                </Link>
-              </li>
-            ))}
+                    <ArrowRight className="h-4 w-4 shrink-0 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </section>
@@ -126,16 +133,24 @@ const JobbHub = () => {
             Klicka på ett yrke för att se lediga jobb, lön och vad som krävs.
           </p>
           <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {OCCUPATIONS.map((o) => (
-              <li key={o.slug}>
-                <Link
-                  to={`/yrke/${o.slug}`}
-                  className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.10] transition"
-                >
-                  Lediga jobb {o.asForm}
-                </Link>
-              </li>
-            ))}
+            {OCCUPATIONS.map((o) => {
+              const label = `Lediga jobb ${o.asForm}`;
+              return (
+                <li key={o.slug}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link
+                        to={`/yrke/${o.slug}`}
+                        className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.10] transition"
+                      >
+                        <span className="block w-full truncate">{label}</span>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>{label}</TooltipContent>
+                  </Tooltip>
+                </li>
+              );
+            })}
           </ul>
           <p className="mt-6 text-center text-white text-sm">
             <Link to="/yrken" className="underline-offset-4 hover:underline">
