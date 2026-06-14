@@ -14,6 +14,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import { CheckCircle2, MapPin, Zap } from 'lucide-react';
 import { CITY_BY_SLUG, CITIES } from '@/data/jobCities';
 import { OCCUPATION_BY_SLUG, OCCUPATIONS } from '@/data/jobOccupations';
+import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
 
 const BASE = 'https://parium.se';
 
@@ -165,28 +166,35 @@ const JobbCityYrke = () => {
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <SeoCTAButton
                 label="Skapa min profil idag"
-                to="/auth"
-                navState={{ mode: 'signup' }}
+                onClick={() => {
+                  persistSavedSearchIntent({
+                    city: city.name,
+                    citySlug: city.slug,
+                    occupation: occ.name,
+                    occupationSlug: occ.slug,
+                    returnTo: `/jobb/${city.slug}/${occ.slug}`,
+                  });
+                  navigate('/auth', { state: { mode: 'signup' } });
+                }}
               />
               <SeoCTAButton
                 variant="ghost"
                 showArrow={false}
                 label={secondaryLabel}
-                to={hasJobs ? `/jobb/${city.slug}` : '/auth'}
-                navState={
-                  hasJobs
-                    ? undefined
-                    : {
-                        mode: 'signup',
-                        savedSearchIntent: {
-                          city: city.name,
-                          citySlug: city.slug,
-                          occupation: occ.name,
-                          occupationSlug: occ.slug,
-                          returnTo: `/jobb/${city.slug}/${occ.slug}`,
-                        },
-                      }
-                }
+                onClick={() => {
+                  if (hasJobs) {
+                    navigate(`/jobb/${city.slug}`);
+                    return;
+                  }
+                  persistSavedSearchIntent({
+                    city: city.name,
+                    citySlug: city.slug,
+                    occupation: occ.name,
+                    occupationSlug: occ.slug,
+                    returnTo: `/jobb/${city.slug}/${occ.slug}`,
+                  });
+                  navigate('/auth', { state: { mode: 'signup' } });
+                }}
               />
             </div>
           </div>

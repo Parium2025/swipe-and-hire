@@ -182,7 +182,7 @@ const JobbCity = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
-            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl"
+            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white sm:text-xl"
           >
             {city.intro} Skapa min profil idag och matcha med arbetsgivare {city.inForm} direkt i appen.
           </motion.p>
@@ -283,7 +283,7 @@ const JobbCity = () => {
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <h3 className="text-lg font-semibold">{t}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/75">{body}</p>
+                <p className="mt-2 text-sm leading-relaxed text-white">{body}</p>
               </div>
             ))}
           </div>
@@ -296,12 +296,12 @@ const JobbCity = () => {
           <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
             Jobb {city.inForm}s stadsdelar och kringkommuner
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-white/70">
+          <p className="mx-auto mt-3 max-w-2xl text-center text-white">
             Oavsett var i {city.name}-området du vill jobba – Parium matchar dig med arbetsgivare nära dig.
           </p>
           <ul className="mt-8 flex flex-wrap justify-center gap-2">
             {city.areas.map((area) => (
-              <li key={area} className="rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-md px-4 py-2 text-sm text-white/85">
+              <li key={area} className="rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-md px-4 py-2 text-sm text-white">
                 {area}
               </li>
             ))}
@@ -344,7 +344,7 @@ const JobbCity = () => {
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             Redo att hitta ditt nästa jobb {city.inForm}?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-white/80">
+          <p className="mx-auto mt-4 max-w-xl text-white">
             Skapa min profil idag och börja matcha med arbetsgivare {city.inForm} idag.
           </p>
           <div className="mt-7 flex justify-center">
