@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
-import { Button } from '@/components/ui/button';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { ArrowRight, MapPin, Briefcase, Loader2 } from 'lucide-react';
 import { CITIES } from '@/data/jobCities';
