@@ -125,15 +125,14 @@ const JobbCity = () => {
 
   // Länka till 4 andra städer (intern länkning)
   const otherCities = CITIES.filter((c) => c.slug !== city.slug).slice(0, 6);
-  const displayedJobs = jobs.length > 0
-    ? jobs.map((job) => ({
-        id: job.id,
-        title: job.title,
-        company: job.workplace_name || 'Arbetsgivare',
-        type: job.employment_type || 'Jobb',
-        location: job.workplace_city || city.name,
-      }))
-    : sampleJobsForCity(city.name);
+  const displayedJobs = jobs.map((job) => ({
+    id: job.id,
+    title: job.title,
+    company: job.workplace_name || 'Arbetsgivare',
+    type: job.employment_type || 'Jobb',
+    location: job.workplace_city || city.name,
+  }));
+
 
   return (
     <div data-seo-scroll-root className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
