@@ -1,14 +1,19 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate, Navigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
-import { supabase } from '@/integrations/supabase/client';
-import LandingNav from '@/components/LandingNav';
-import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
-import { Button } from '@/components/ui/button';
-import { syncBrowserChrome } from '@/lib/browserChrome';
-import { ArrowRight, MapPin, Briefcase, Clock, Building2, Loader2 } from 'lucide-react';
-import { CITIES } from '@/data/jobCities';
+ import { useEffect, useState } from 'react';
+ import { Link, useParams, useNavigate, Navigate } from 'react-router-dom';
+ import { Helmet } from 'react-helmet-async';
+ import { motion } from 'framer-motion';
+ import { supabase } from '@/integrations/supabase/client';
+ import LandingNav from '@/components/LandingNav';
+ import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
+ import { Button } from '@/components/ui/button';
+ import { syncBrowserChrome } from '@/lib/browserChrome';
+ import { ArrowRight, MapPin, Briefcase, Clock, Building2, Loader2 } from 'lucide-react';
+ import { CITIES } from '@/data/jobCities';
+ import { useAuth } from '@/hooks/useAuth';
+ import { setPendingJob } from '@/lib/pendingJobIntent';
+ import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
+ import { OCCUPATIONS } from '@/data/jobOccupations';
+ 
 
 const BASE = 'https://parium.se';
 
