@@ -97,6 +97,11 @@ export default {
 				'parium-navy': 'hsl(215 100% 12%)',
 				'parium-blue': 'hsl(200 100% 60%)',
 				'parium-light': 'hsl(200 100% 95%)',
+				// Brand "kritvit" – warm off-white used for primary CTAs on landing/SEO pages
+				chalk: {
+					DEFAULT: 'hsl(36 33% 97%)',
+					foreground: 'hsl(215 100% 12%)',
+				},
 				// Semantic pure colors (from design tokens)
 				pure: {
 					white: 'hsl(var(--pure-white))'
