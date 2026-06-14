@@ -656,11 +656,11 @@ const Auth = () => {
       try {
         const onboardingDone = (profile as any)?.onboarding_completed === true;
         if (role === 'job_seeker' && onboardingDone) {
-          const { consumePendingJobPath } = require('@/lib/pendingJobIntent');
-          const path: string | null = consumePendingJobPath();
+          const path = consumePendingJobPath();
           if (path) return <Navigate to={path} replace />;
         }
       } catch { /* fortsätt */ }
+
 
       // Alla roller landar på /home efter inloggning
       return <Navigate to="/home" replace />;
