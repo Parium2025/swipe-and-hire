@@ -157,6 +157,7 @@ const JobbCity = () => {
       </Helmet>
 
       <LandingNav onLoginClick={() => navigate('/auth')} />
+      <SeoBackButton fallback="/jobb" />
 
       {/* Hero */}
       <section className="relative overflow-hidden px-5 pt-32 pb-16 sm:px-8 sm:pt-40 sm:pb-24 md:px-12">
