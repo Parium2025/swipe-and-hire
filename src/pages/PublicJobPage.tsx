@@ -87,11 +87,17 @@ const PublicJobPage = () => {
   if (notFound || !job) {
     return (
       <div className="seo-scroll-page bg-[hsl(215_100%_12%)] text-white">
+        {/* Signalerar till Google: avindexera URL men följ länkar vidare. */}
+        <Helmet>
+          <title>Annonsen är inte längre tillgänglig | Parium</title>
+          <meta name="robots" content="noindex,follow" />
+          <link rel="canonical" href={`${BASE}/jobb`} />
+        </Helmet>
         <LandingNav onLoginClick={() => navigate("/auth")} />
         <div className="max-w-2xl mx-auto px-6 py-32 text-center">
-          <h1 className="text-3xl font-semibold mb-4">Annonsen är inte längre tillgänglig</h1>
-          <p className="text-white/60 mb-8">Den här jobbannonsen kan ha avslutats eller tagits bort.</p>
-          <Button asChild className="bg-secondary text-white hover:bg-secondary/90">
+          <h1 className="text-3xl font-semibold mb-4 text-white">Annonsen är inte längre tillgänglig</h1>
+          <p className="text-white mb-8">Den här jobbannonsen kan ha avslutats eller tagits bort. Hitta liknande lediga jobb nedan.</p>
+          <Button asChild className="bg-secondary text-white hover:bg-secondary/90 rounded-full h-12 px-8">
             <Link to="/jobb">Bläddra lediga jobb</Link>
           </Button>
         </div>
