@@ -25,11 +25,8 @@ type PublicJobRow = {
   employment_type: string | null;
 };
 
-const sampleJobsForCity = (cityName: string) => [
-  { id: 'profile', title: 'Butiksmedarbetare', company: 'Retail & Service', type: 'Deltid', location: cityName },
-  { id: 'profile-2', title: 'Lagerarbetare', company: 'Logistikpartner', type: 'Heltid', location: cityName },
-  { id: 'profile-3', title: 'Restaurangpersonal', company: 'Restauranggrupp', type: 'Extra', location: cityName },
-];
+// (Inga mock-/sample-jobs – vi visar bara riktiga aktiva annonser.)
+
 
 const BASE = 'https://parium.se';
 
