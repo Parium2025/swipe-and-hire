@@ -41,7 +41,8 @@ const JobbCity = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
-  }, []);
+    window.scrollTo(0, 0);
+  }, [citySlug]);
 
   useEffect(() => {
     if (!city) return;
