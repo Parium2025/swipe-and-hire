@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Briefcase, MapPin, Search } from 'lucide-react';
 import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 type Item = {
@@ -55,9 +56,12 @@ const SeoFooterLinks = ({
                   >
                     <span className="flex min-w-0 flex-1 items-center gap-2 text-white">
                       <Icon className="h-4 w-4 shrink-0 text-white" />
-                      <span className="truncate" title={item.label}>
-                        {item.label}
-                      </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="truncate">{item.label}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>{item.label}</TooltipContent>
+                      </Tooltip>
                     </span>
                     <Link
                       to={fallbackTo}
@@ -81,7 +85,12 @@ const SeoFooterLinks = ({
                 >
                   <span className="flex min-w-0 flex-1 items-center gap-2">
                     <Icon className="h-4 w-4 text-white shrink-0" />
-                    <span className="truncate">{item.label}</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="truncate">{item.label}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{item.label}</TooltipContent>
+                    </Tooltip>
                   </span>
                   <span className="shrink-0 rounded-full bg-secondary/20 text-white px-2 py-0.5 text-[11px] font-semibold">
                     {countLabel}

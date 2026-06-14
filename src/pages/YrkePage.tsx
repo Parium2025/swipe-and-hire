@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
 import FaqAccordion from '@/components/seo/FaqAccordion';
 import SeoBubbles from '@/components/seo/SeoBubbles';
+import SeoBackButton from '@/components/seo/SeoBackButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, CheckCircle2, MapPin, Zap } from 'lucide-react';
@@ -110,6 +111,8 @@ const YrkePage = () => {
 
       <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
+        <SeoBackButton fallback="/yrken" />
+
 
         {/* Hero */}
         <section className="relative overflow-hidden px-5 pt-28 pb-16 sm:px-8 md:px-12">

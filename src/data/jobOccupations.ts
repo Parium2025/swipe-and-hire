@@ -312,6 +312,17 @@ export const OCCUPATIONS: OccupationData[] = [
     skills: ['Yrkesbevis maskinförare (TYA)', 'B-körkort, gärna BE/C', 'Erfarenhet av specifika maskintyper', 'Noggrannhet och säkerhetsmedveten'],
     salary: 'Genomsnittlig lön för maskinförare är cirka 32 000–38 000 kr/månad.',
   },
+  {
+    slug: 'bagare',
+    name: 'Bagare',
+    plural: 'bagare',
+    asForm: 'som bagare',
+    category: 'Hotell & restaurang',
+    intro: 'Bagare och konditorer söks till bagerier, caféer och butiker runt om i Sverige – tidiga morgnar men kreativt hantverk.',
+    tasks: ['Baka bröd, bullar och konditorivaror', 'Förbereda degar och fyllningar', 'Sköta ugnar och bageriutrustning', 'Hygien och egenkontroll', 'Produktutveckling och receptarbete'],
+    skills: ['Utbildning inom bageri/konditori eller motsvarande erfarenhet', 'Hantverksskicklighet', 'Tidig morgon (start ofta 04–05)', 'Noggrann med hygien'],
+    salary: 'Genomsnittlig lön för bagare är cirka 27 000–32 000 kr/månad.',
+  },
 ];
 
 export const OCCUPATION_BY_SLUG: Record<string, OccupationData> = OCCUPATIONS.reduce(

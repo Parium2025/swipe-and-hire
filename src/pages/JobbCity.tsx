@@ -6,6 +6,7 @@ import LandingNav from '@/components/LandingNav';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import FaqAccordion from '@/components/seo/FaqAccordion';
 import SeoBubbles from '@/components/seo/SeoBubbles';
+import SeoBackButton from '@/components/seo/SeoBackButton';
 import SeoFooterLinks, {
   SeoOtherOccupationsInCity,
 } from '@/components/seo/SeoFooterLinks';
@@ -156,6 +157,7 @@ const JobbCity = () => {
       </Helmet>
 
       <LandingNav onLoginClick={() => navigate('/auth')} />
+      <SeoBackButton fallback="/jobb" />
 
       {/* Hero */}
       <section className="relative overflow-hidden px-5 pt-32 pb-16 sm:px-8 sm:pt-40 sm:pb-24 md:px-12">
@@ -275,8 +277,8 @@ const JobbCity = () => {
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
               { icon: Search, title: 'Skapa profil', body: `Ange ${city.name} som plats och vilka yrken du är intresserad av. Gratis och tar någon minut.` },
-              { icon: Zap, title: 'Matcha smart', body: `Parium visar lediga jobb ${city.inForm} som passar din profil – inga oändliga listor.` },
-              { icon: MessageSquare, title: 'Chatta direkt', body: `När du matchar med en arbetsgivare ${city.inForm} kan ni prata direkt i appen.` },
+              { icon: Zap, title: 'Ansök smart', body: `Parium visar lediga jobb ${city.inForm} som passar din profil.` },
+              { icon: MessageSquare, title: 'Chatta direkt', body: `När du har matchat med en arbetsgivare ${city.inForm} och de väljer att kontakta dig kan ni börja chatta direkt i appen.` },
             ].map(({ icon: Icon, title: t, body }) => (
               <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-6">
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 mb-4">
