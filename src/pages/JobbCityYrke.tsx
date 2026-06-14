@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
-import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import FaqAccordion from '@/components/seo/FaqAccordion';
+import SeoBubbles from '@/components/seo/SeoBubbles';
 import {
   SeoOtherOccupationsInCity,
   SeoOccupationInOtherCities,
@@ -26,7 +26,8 @@ const JobbCityYrke = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
-  }, []);
+    window.scrollTo(0, 0);
+  }, [citySlug, occupationSlug]);
 
   if (!city || !occ) return <Navigate to="/jobb" replace />;
 
@@ -127,11 +128,14 @@ const JobbCityYrke = () => {
         <script type="application/ld+json">{JSON.stringify(occupationLd)}</script>
       </Helmet>
 
-      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+      <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
+
+
 
         {/* ─── HERO ─── */}
         <section className="relative overflow-hidden px-5 pt-28 pb-14 sm:px-8 md:px-12">
+          <SeoBubbles />
           <div
             aria-hidden
             className="absolute inset-0 -z-10 opacity-60"
@@ -283,8 +287,6 @@ const JobbCityYrke = () => {
             </div>
           </div>
         </section>
-
-        <MobileStickyCTA />
       </div>
     </>
   );

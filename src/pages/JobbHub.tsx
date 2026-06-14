@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
-import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin } from 'lucide-react';
@@ -19,6 +18,7 @@ const JobbHub = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
+    window.scrollTo(0, 0);
   }, []);
 
   const itemListLd = {
@@ -43,7 +43,7 @@ const JobbHub = () => {
   };
 
   return (
-    <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+    <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
       <Helmet>
         <title>{TITLE}</title>
         <meta name="description" content={DESCRIPTION} />
@@ -135,12 +135,9 @@ const JobbHub = () => {
               </li>
             ))}
           </ul>
-          <p className="mt-6 text-center text-white/60 text-sm flex flex-wrap justify-center gap-x-4 gap-y-2">
+          <p className="mt-6 text-center text-white/60 text-sm">
             <Link to="/yrken" className="underline-offset-4 hover:underline">
               Se alla yrken →
-            </Link>
-            <Link to="/annonser" className="underline-offset-4 hover:underline">
-              Se senaste annonser →
             </Link>
           </p>
         </div>
@@ -183,7 +180,6 @@ const JobbHub = () => {
           </Button>
         </div>
       </section>
-      <MobileStickyCTA />
     </div>
   );
 };

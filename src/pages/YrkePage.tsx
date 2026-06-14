@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
-import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import FaqAccordion from '@/components/seo/FaqAccordion';
+import SeoBubbles from '@/components/seo/SeoBubbles';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, CheckCircle2, MapPin, Zap } from 'lucide-react';
@@ -21,7 +21,8 @@ const YrkePage = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
-  }, []);
+    window.scrollTo(0, 0);
+  }, [occupationSlug]);
 
   if (!occ) return <Navigate to="/yrken" replace />;
 
@@ -107,11 +108,12 @@ const YrkePage = () => {
         <script type="application/ld+json">{JSON.stringify(occupationLd)}</script>
       </Helmet>
 
-      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+      <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         {/* Hero */}
         <section className="relative overflow-hidden px-5 pt-28 pb-16 sm:px-8 md:px-12">
+          <SeoBubbles />
           <div
             aria-hidden
             className="absolute inset-0 -z-10 opacity-60"
@@ -264,7 +266,7 @@ const YrkePage = () => {
 
           </div>
         </section>
-        <MobileStickyCTA />
+        
       </div>
     </>
   );

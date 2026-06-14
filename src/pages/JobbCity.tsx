@@ -3,9 +3,9 @@ import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
-import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import FaqAccordion from '@/components/seo/FaqAccordion';
+import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoFooterLinks, {
   SeoOtherOccupationsInCity,
 } from '@/components/seo/SeoFooterLinks';
@@ -41,7 +41,8 @@ const JobbCity = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
-  }, []);
+    window.scrollTo(0, 0);
+  }, [citySlug]);
 
   useEffect(() => {
     if (!city) return;
@@ -136,7 +137,7 @@ const JobbCity = () => {
 
 
   return (
-    <div data-seo-scroll-root className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+    <div data-seo-scroll-root className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -157,7 +158,8 @@ const JobbCity = () => {
       <LandingNav onLoginClick={() => navigate('/auth')} />
 
       {/* Hero */}
-      <section className="relative px-5 pt-32 pb-16 sm:px-8 sm:pt-40 sm:pb-24 md:px-12">
+      <section className="relative overflow-hidden px-5 pt-32 pb-16 sm:px-8 sm:pt-40 sm:pb-24 md:px-12">
+        <SeoBubbles />
         <div className="mx-auto max-w-5xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -222,12 +224,9 @@ const JobbCity = () => {
       {jobs.length > 0 && (
         <section id="alla-jobb" className="scroll-mt-24 px-5 pb-12 sm:px-8 md:px-12">
           <div className="mx-auto max-w-5xl">
-            <div className="mb-5 flex items-end justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">Lediga jobb {city.inForm}</h2>
-                <p className="mt-2 text-sm text-white">Riktiga annonser som går att öppna direkt.</p>
-              </div>
-              <Link to="/annonser" className="hidden text-sm font-medium text-white underline-offset-4 hover:underline sm:inline-flex">Visa senaste jobb</Link>
+            <div className="mb-5">
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">Lediga jobb {city.inForm}</h2>
+              <p className="mt-2 text-sm text-white">Riktiga annonser som går att öppna direkt.</p>
             </div>
             <ul className="grid gap-3 md:grid-cols-3">
               {displayedJobs.map((job) => (
@@ -364,7 +363,7 @@ const JobbCity = () => {
           </div>
         </div>
       </section>
-      <MobileStickyCTA />
+      
     </div>
   );
 };

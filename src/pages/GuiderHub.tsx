@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
-import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Clock } from 'lucide-react';
 import { GUIDES } from '@/data/guides';
@@ -14,6 +13,7 @@ const GuiderHub = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
+    window.scrollTo(0, 0);
   }, []);
 
   const canonical = `${BASE}/guider`;
@@ -47,7 +47,7 @@ const GuiderHub = () => {
         <script type="application/ld+json">{JSON.stringify(itemListLd)}</script>
       </Helmet>
 
-      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
+      <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         <section className="relative overflow-hidden px-5 pt-28 pb-12 sm:px-8 md:px-12">
@@ -92,7 +92,6 @@ const GuiderHub = () => {
             ))}
           </ul>
         </section>
-        <MobileStickyCTA />
       </div>
     </>
   );

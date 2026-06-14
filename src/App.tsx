@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
 import { initConnectivityManager } from "@/lib/connectivityManager";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate as RRNavigate } from "react-router-dom";
 
 // 🚀 CRITICAL: Keep auth + main app shell synchronous to avoid production chunk-mismatch
 // lockouts after deploys when an old cached bundle still points to stale lazy chunks.
@@ -16,7 +16,7 @@ import YrkenHub from "./pages/YrkenHub";
 import YrkePage from "./pages/YrkePage";
 import JobbCityYrke from "./pages/JobbCityYrke";
 import PublicJobPage from "./pages/PublicJobPage";
-import AnnonserHub from "./pages/AnnonserHub";
+
 import GuiderHub from "./pages/GuiderHub";
 import GuidePage from "./pages/GuidePage";
 import Auth from "./pages/Auth";
@@ -176,7 +176,7 @@ const AnimatedRoutes = () => {
           <Route path="/jobb/:citySlug/:occupationSlug" element={<JobbCityYrke />} />
           <Route path="/yrken" element={<YrkenHub />} />
           <Route path="/annons/:jobId" element={<PublicJobPage />} />
-          <Route path="/annonser" element={<AnnonserHub />} />
+          <Route path="/annonser" element={<RRNavigate to="/jobb" replace />} />
           <Route path="/yrke/:occupationSlug" element={<YrkePage />} />
           <Route path="/guider" element={<GuiderHub />} />
           <Route path="/guider/:slug" element={<GuidePage />} />
