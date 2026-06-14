@@ -133,7 +133,7 @@ const BouncyFooter = ({ audience, onCta }: Props) => {
                 delay={0.55}
                 className="landing-h2 landing-h2--single-line text-background"
               />
-            <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-7 text-background/80 sm:text-lg">
+            <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-7 text-white sm:text-lg">
               {sub}
             </p>
             <MagneticButton
