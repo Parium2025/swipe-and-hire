@@ -287,8 +287,6 @@ const JobbCityYrke = () => {
             </div>
           </div>
         </section>
-
-        <MobileStickyCTA />
       </div>
     </>
   );
