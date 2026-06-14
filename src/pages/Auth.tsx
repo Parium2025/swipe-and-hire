@@ -645,11 +645,26 @@ const Auth = () => {
             return <Navigate to={returnTo} replace />;
           }
         }
-      } catch { /* fortsätt till /home */ }
+      } catch { /* fortsätt */ }
+
+      // Om användaren kom hit från en jobbannons (utloggad → klickade "Ansök"):
+      // Slussa direkt vidare till ansökan — MEN ENDAST om välkomsttunneln
+      // redan är klar. Är den inte klar låter vi tunneln konsumera intent
+      // i sin onComplete (se Index.tsx) så hela onboardingen körs först.
+      try {
+        const onboardingDone = (profile as any)?.onboarding_completed === true;
+        if (role === 'job_seeker' && onboardingDone) {
+          const { consumePendingJobPath } = require('@/lib/pendingJobIntent');
+          const path: string | null = consumePendingJobPath();
+          if (path) return <Navigate to={path} replace />;
+        }
+      } catch { /* fortsätt */ }
+
       // Alla roller landar på /home efter inloggning
       return <Navigate to="/home" replace />;
     }
   }
+
 
   // Använd rätt komponent baserat på skärmstorlek
   const authBackdropStyle = {
