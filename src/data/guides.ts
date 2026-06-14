@@ -17,40 +17,6 @@ export type GuideData = {
 
 export const GUIDES: GuideData[] = [
   {
-    slug: 'cv-mall-2026',
-    title: 'CV-mall 2026 – så skriver du ett CV som faktiskt får svar',
-    metaTitle: 'CV-mall 2026: gratis exempel & tips för svenskt CV | Parium',
-    description: 'Komplett guide till svenskt CV 2026. Gratis CV-mall, exempel, tips och vanliga misstag att undvika. Skriv ett CV som arbetsgivare faktiskt läser.',
-    excerpt: 'Ditt CV är 30 sekunder från att hamna i skräpkorgen eller på "ja-högen". Här är vad svenska rekryterare letar efter 2026 – och en mall du kan kopiera direkt.',
-    category: 'Jobbsökning',
-    readingMinutes: 8,
-    updated: '2026-06-01',
-    sections: [
-      {
-        heading: 'Vad ska ett CV innehålla?',
-        body: 'Ett svenskt CV ska vara 1–2 sidor och innehålla kontaktuppgifter, en kort personlig profil (3–4 meningar), arbetslivserfarenhet i omvänd kronologisk ordning, utbildning, kompetenser och språk. Skippa personnummer, civilstånd och bild om jobbannonsen inte ber om det – GDPR och svensk standard är att inte inkludera känsliga uppgifter.',
-      },
-      {
-        heading: 'CV-mall – kopiera direkt',
-        body: 'Namn · Telefon · E-post · Stad · LinkedIn\n\nProfil: 3–4 meningar om vem du är, vad du gjort, vad du vill.\n\nArbetslivserfarenhet:\n• Titel – Företag (mån/år – mån/år)\n  → 2–4 punkter med resultat, inte arbetsuppgifter. "Ökade försäljningen 23%" slår "ansvarig för försäljning".\n\nUtbildning:\n• Program – Skola (år)\n\nKompetenser: 5–10 konkreta (Excel, kassa, truckkort A+B, svenska & engelska).',
-      },
-      {
-        heading: 'De 5 vanligaste misstagen',
-        body: '1. CV längre än 2 sidor.\n2. Generisk profil ("driven lagspelare") – konkretisera istället.\n3. Arbetsuppgifter istället för resultat.\n4. Stavfel – läs igenom 3 gånger och be någon annan.\n5. Samma CV till alla jobb – anpassa profil och kompetenser per ansökan.',
-      },
-      {
-        heading: 'Behövs personligt brev 2026?',
-        body: 'Allt färre arbetsgivare kräver personligt brev. Många moderna jobbappar (som Parium) hoppar över det helt och låter arbetsgivaren se din profil direkt. Om annonsen ber om personligt brev – håll det på max 300 ord och fokusera på "varför just det här jobbet, varför just du".',
-      },
-    ],
-    faqs: [
-      { q: 'Hur långt ska ett CV vara?', a: 'Max 2 sidor. För juniora roller räcker oftast 1 sida.' },
-      { q: 'Ska jag ha bild på CV:t?', a: 'Inte krav i Sverige. Lägg bara med om annonsen ber om det eller om du söker en kundnära roll där utseende har relevans (modell, säljare i butik m.m.).' },
-      { q: 'Hur anpassar jag CV till varje jobb?', a: 'Läs jobbannonsen och plocka ut 3–5 nyckelord (kompetenser, system, branschord). Få med dessa naturligt i profil och kompetenslista.' },
-      { q: 'Vilket filformat ska CV:t vara i?', a: 'PDF. Word-filer kan se olika ut hos olika mottagare och bryta layouten.' },
-    ],
-  },
-  {
     slug: 'genomsnittslon-sverige-2026',
     title: 'Genomsnittslön Sverige 2026 – yrke för yrke',
     metaTitle: 'Genomsnittslön Sverige 2026: lönestatistik per yrke | Parium',
