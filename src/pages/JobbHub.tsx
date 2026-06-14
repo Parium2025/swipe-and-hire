@@ -105,7 +105,7 @@ const JobbHub = () => {
                       <h3 className="text-lg font-semibold text-white">
                         Lediga jobb {c.inForm}
                       </h3>
-                      <p className="mt-1 text-sm text-white/65">{c.county}</p>
+                      <p className="mt-1 text-sm text-white">{c.county}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all mt-3" aria-hidden="true" />
                   </div>
