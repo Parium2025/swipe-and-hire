@@ -15,6 +15,8 @@ interface SeoCTAButtonProps
   size?: 'md' | 'lg';
   /** Variant. primary = ljusblå pill (Pariums standard), ghost = outline */
   variant?: 'primary' | 'ghost';
+  /** React Router state att skicka med (t.ex. { mode: 'signup' }) */
+  navState?: Record<string, unknown>;
 }
 
 /**
