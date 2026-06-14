@@ -103,6 +103,22 @@
       // (Theme-color + chrome-klasser sätts redan i första <script>-blocket ovan.
       // Ingen dubblering här — det orsakade kapplöpningar mot Safari.)
 
+      // 🚨 CANONICAL DOMAIN REDIRECT
+      // Tvingar all trafik från parium-ab.lovable.app → parium.se så att Google
+      // av-indexerar lovable.app-versionen över tid och endast parium.se rankar.
+      (function() {
+        try {
+          var h = window.location.hostname;
+          if (h === 'parium-ab.lovable.app' || h.endsWith('.lovable.app') && h.indexOf('parium-ab') === 0) {
+            var target = 'https://parium.se' + window.location.pathname + window.location.search + window.location.hash;
+            window.location.replace(target);
+            return;
+          }
+        } catch (e) { /* noop */ }
+      })();
+
+
+
 
       // 🚨 PUBLIC DOMAIN HARD-LOAD / CACHE KILL-SWITCH
       // Runs before React on every public route. It does NOT trust old
