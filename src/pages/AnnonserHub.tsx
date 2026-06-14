@@ -101,7 +101,10 @@ const AnnonserHub = () => {
         {loading ? (
           <div className="py-20 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-white" /></div>
         ) : jobs.length === 0 ? (
-          <p className="text-white">Inga aktiva annonser just nu – kom tillbaka snart.</p>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 mb-12">
+            <p className="text-white font-medium">Nya jobb publiceras löpande – bläddra per stad eller yrke nedan.</p>
+            <p className="mt-2 text-white/80 text-sm">Skapa din profil idag så får du notis så fort en matchning dyker upp.</p>
+          </div>
         ) : (
           <ul className="grid gap-3 mb-16">
             {jobs.map(j => (
