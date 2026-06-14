@@ -448,7 +448,12 @@ const PublicJobPage = () => {
           </div>
         </section>
       </main>
-      <MobileStickyCTA label="Skicka ansökan" to={`/job-application/${job.id}`} />
+      <MobileStickyCTA
+        label={user ? 'Skicka ansökan' : 'Skapa profil & ansök'}
+        to={user ? `/job-application/${job.id}` : '/auth'}
+        onBeforeNavigate={() => { if (!user) setPendingJob({ jobId: job.id, action: 'apply' }); }}
+      />
+
     </div>
   );
 };
