@@ -53,6 +53,8 @@ const YrkenHub = () => {
 
       <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
+        <SeoBackButton fallback="/jobb" />
+
 
         <section className="relative overflow-hidden px-5 pt-28 pb-12 sm:px-8 md:px-12">
           <SeoBubbles />
