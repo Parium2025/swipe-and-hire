@@ -257,6 +257,7 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
         </div>
       </UnsavedChangesProvider>
       <PremiumLimitListener />
+      <CookieBanner />
     </>
   );
 };
