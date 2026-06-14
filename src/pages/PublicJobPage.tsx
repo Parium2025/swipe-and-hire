@@ -85,22 +85,58 @@ const PublicJobPage = () => {
   }
 
   if (notFound || !job) {
+    const fallbackCities = CITIES.slice(0, 8);
     return (
       <div className="seo-scroll-page bg-[hsl(215_100%_12%)] text-white">
         {/* Signalerar till Google: avindexera URL men följ länkar vidare. */}
         <Helmet>
-          <title>Annonsen är inte längre tillgänglig | Parium</title>
+          <title>Tyvärr har annonsen utgått | Parium</title>
+          <meta name="description" content="Den här jobbannonsen har gått ut. Upptäck nya lediga jobb i hela Sverige på Parium." />
           <meta name="robots" content="noindex,follow" />
           <link rel="canonical" href={`${BASE}/jobb`} />
         </Helmet>
         <LandingNav onLoginClick={() => navigate("/auth")} />
-        <div className="max-w-2xl mx-auto px-6 py-32 text-center">
-          <h1 className="text-3xl font-semibold mb-4 text-white">Annonsen är inte längre tillgänglig</h1>
-          <p className="text-white mb-8">Den här jobbannonsen kan ha avslutats eller tagits bort. Hitta liknande lediga jobb nedan.</p>
-          <Button asChild className="bg-secondary text-white hover:bg-secondary/90 rounded-full h-12 px-8">
-            <Link to="/jobb">Bläddra lediga jobb</Link>
-          </Button>
-        </div>
+        <main className="max-w-2xl mx-auto px-6 pt-32 pb-24 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/10 mb-6">
+              <Clock className="w-7 h-7 text-white" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4 text-white">
+              Tyvärr har annonsen utgått
+            </h1>
+            <p className="text-white text-base sm:text-lg mb-10 leading-relaxed">
+              Den här jobbannonsen är inte längre aktiv. Men det finns massor av nya möjligheter — utforska lediga jobb nedan eller skapa en profil så matchar vi dig automatiskt.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-14">
+              <Button asChild className="bg-secondary text-white hover:bg-secondary/90 rounded-full h-12 px-8 text-base font-medium">
+                <Link to="/jobb">Bläddra lediga jobb</Link>
+              </Button>
+              <Button asChild variant="outline" className="border-white/15 bg-white/5 text-white hover:bg-white/10 rounded-full h-12 px-8 text-base">
+                <Link to="/auth" state={{ mode: 'signup' }}>Skapa min profil idag</Link>
+              </Button>
+            </div>
+            <section className="border-t border-white/10 pt-8 text-left">
+              <h2 className="text-sm font-semibold text-white mb-4 text-center uppercase tracking-wider">
+                Hitta jobb i en stad nära dig
+              </h2>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {fallbackCities.map(c => (
+                  <Link
+                    key={c.slug}
+                    to={`/jobb/${c.slug}`}
+                    className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 transition"
+                  >
+                    Jobb i {c.name}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </motion.div>
+        </main>
       </div>
     );
   }
