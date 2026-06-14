@@ -124,7 +124,7 @@ const YrkePage = () => {
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Lediga jobb <span className="text-white/90">{occ.asForm}</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 sm:text-xl">{occ.intro}</p>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">{occ.intro}</p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button
                 size="lg"
@@ -155,8 +155,8 @@ const YrkePage = () => {
               </h2>
               <ul className="mt-5 space-y-3">
                 {occ.tasks.map((task) => (
-                  <li key={task} className="flex items-start gap-3 text-white/85">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-white/70" />
+                  <li key={task} className="flex items-start gap-3 text-white">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-white" />
                     <span>{task}</span>
                   </li>
                 ))}
@@ -168,15 +168,15 @@ const YrkePage = () => {
               </h2>
               <ul className="mt-5 space-y-3">
                 {occ.skills.map((skill) => (
-                  <li key={skill} className="flex items-start gap-3 text-white/85">
-                    <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-white/70" />
+                  <li key={skill} className="flex items-start gap-3 text-white">
+                    <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-white" />
                     <span>{skill}</span>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-          <div className="mx-auto mt-6 max-w-5xl rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-white/80 backdrop-blur-md">
+          <div className="mx-auto mt-6 max-w-5xl rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-white backdrop-blur-md">
             <strong className="text-white">Lön: </strong>
             {occ.salary}
           </div>
@@ -188,7 +188,7 @@ const YrkePage = () => {
             <h2 className="text-center text-3xl font-semibold tracking-tight sm:text-4xl">
               Lediga jobb {occ.asForm} per stad
             </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-center text-white/70">
+            <p className="mx-auto mt-3 max-w-2xl text-center text-white">
               Sök jobb {occ.asForm} där du bor – Parium finns i hela Sverige.
             </p>
             <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
@@ -204,7 +204,7 @@ const YrkePage = () => {
                 </li>
               ))}
             </ul>
-            <p className="mt-6 text-center text-white/60 text-sm">
+            <p className="mt-6 text-center text-white text-sm">
               <Link to="/jobb" className="underline-offset-4 hover:underline">
                 Se alla städer →
               </Link>
@@ -227,7 +227,7 @@ const YrkePage = () => {
                   <summary className="cursor-pointer list-none text-lg font-medium text-white">
                     {f.q}
                   </summary>
-                  <p className="mt-3 text-white/80">{f.a}</p>
+                  <p className="mt-3 text-white">{f.a}</p>
                 </details>
               ))}
             </div>
@@ -240,7 +240,7 @@ const YrkePage = () => {
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               Sök ditt nästa jobb {occ.asForm} idag
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-white/80">
+            <p className="mx-auto mt-4 max-w-xl text-white">
               Skapa min profil idag. Inga oändliga ansökningar – bara jobb som passar dig.
             </p>
             <Button
