@@ -25,7 +25,7 @@ const JobbCityYrke = () => {
 
   const canonical = `${BASE}/jobb/${city.slug}/${occ.slug}`;
   const title = `Lediga jobb ${occ.asForm} ${city.inForm} – sök ${occ.plural}jobb | Parium`;
-  const description = `Hitta lediga jobb ${occ.asForm} ${city.inForm}. Se vanliga arbetsuppgifter, krav och lön. Skapa profil gratis i Parium och matcha med arbetsgivare ${city.inForm} på sekunder.`;
+  const description = `Hitta lediga jobb ${occ.asForm} ${city.inForm}. Se vanliga arbetsuppgifter, krav och lön. Skapa min profil idag i Parium och matcha med arbetsgivare ${city.inForm} på sekunder.`;
 
   // Andra yrken i samma stad (cross-link)
   const otherOccs = OCCUPATIONS.filter((o) => o.slug !== occ.slug).slice(0, 6);
@@ -137,9 +137,9 @@ const JobbCityYrke = () => {
               <Button
                 size="lg"
                 onClick={() => navigate('/auth')}
-                className="min-h-12 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-8 text-base font-semibold"
+                className="min-h-12 rounded-full bg-secondary text-white hover:bg-secondary/90 px-8 text-base font-semibold"
               >
-                Skapa en profil gratis
+                Skapa min profil idag
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
               <Button
@@ -282,14 +282,14 @@ const JobbCityYrke = () => {
               Sök jobb {occ.asForm} {city.inForm} idag
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/80">
-              Skapa en profil gratis. Matcha med arbetsgivare {city.inForm} på sekunder.
+              Skapa min profil idag. Matcha med arbetsgivare {city.inForm} på sekunder.
             </p>
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
-              className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
+              className="mt-8 min-h-11 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7"
             >
-              Skapa en profil gratis
+              Skapa min profil idag
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>

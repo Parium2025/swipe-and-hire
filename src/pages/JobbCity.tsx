@@ -63,7 +63,7 @@ const JobbCity = () => {
 
   const canonical = `${BASE}/jobb/${city.slug}`;
   const title = `Lediga jobb ${city.inForm} – sök jobb snabbt med Parium`;
-  const description = `Hitta lediga jobb ${city.inForm} som passar dig. Skapa profil gratis, matcha med arbetsgivare ${city.inForm} och chatta direkt i jobbappen Parium.`;
+  const description = `Hitta lediga jobb ${city.inForm} som passar dig. Skapa min profil idag, matcha med arbetsgivare ${city.inForm} och chatta direkt i jobbappen Parium.`;
 
   const faqs = [
     {
@@ -178,7 +178,7 @@ const JobbCity = () => {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl"
           >
-            {city.intro} Skapa en profil gratis och matcha med arbetsgivare {city.inForm} direkt i appen.
+            {city.intro} Skapa min profil idag och matcha med arbetsgivare {city.inForm} direkt i appen.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -189,9 +189,9 @@ const JobbCity = () => {
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
-              className="min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
+              className="min-h-11 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7"
             >
-              Skapa en profil gratis
+              Skapa min profil idag
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
             <Link
@@ -366,14 +366,14 @@ const JobbCity = () => {
             Redo att hitta ditt nästa jobb {city.inForm}?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white/80">
-            Skapa en profil gratis och börja matcha med arbetsgivare {city.inForm} idag.
+            Skapa min profil idag och börja matcha med arbetsgivare {city.inForm} idag.
           </p>
           <Button
             size="lg"
             onClick={() => navigate('/auth')}
-            className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
+            className="mt-8 min-h-11 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7"
           >
-            Skapa en profil gratis
+            Skapa min profil idag
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </div>

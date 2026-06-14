@@ -65,7 +65,7 @@ const YrkenHub = () => {
               Lediga jobb per yrke
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 sm:text-xl">
-              Hitta lediga jobb inom Sveriges mest efterfrågade yrken. Skapa en profil gratis och
+              Hitta lediga jobb inom Sveriges mest efterfrågade yrken. Skapa min profil idag och
               matcha med arbetsgivare över hela landet.
             </p>
           </div>
@@ -101,14 +101,14 @@ const YrkenHub = () => {
               Hitta ditt nästa jobb idag
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/80">
-              Skapa en profil gratis – matcha med arbetsgivare i hela Sverige.
+              Skapa min profil idag – matcha med arbetsgivare i hela Sverige.
             </p>
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
-              className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
+              className="mt-8 min-h-11 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7"
             >
-              Skapa en profil gratis
+              Skapa min profil idag
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
