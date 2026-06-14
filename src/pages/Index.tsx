@@ -457,11 +457,30 @@ const Index = () => {
         .from('profiles')
         .update({ onboarding_completed: true })
         .eq('id', user.id);
-      
-      // Navigate to search jobs page
+
+      // 1) Jobb-intent (kom från /annons/:id som utloggad → "Ansök") går först
+      try {
+        const { consumePendingJobPath } = await import('@/lib/pendingJobIntent');
+        const jobPath = consumePendingJobPath();
+        if (jobPath) { navigate(jobPath); return; }
+      } catch { /* fortsätt */ }
+
+      // 2) Sök-intent från SEO-sidor (yrke/stad) → skapa saved_search + gå till returnTo
+      try {
+        const { readIntent, consumeIntent } = await import('@/lib/savedSearchIntent');
+        const intent = readIntent();
+        if (intent?.returnTo && intent.returnTo.startsWith('/')) {
+          consumeIntent(user.id).catch(() => {});
+          navigate(intent.returnTo);
+          return;
+        }
+      } catch { /* fortsätt */ }
+
+      // 3) Standard: gå till sök
       navigate('/search-jobs');
     }} />;
   }
+
 
   // For employers, show EmployerWelcomeTunnel if onboarding not completed
   if (needsOnboarding && (profile as any)?.role === 'employer') {
