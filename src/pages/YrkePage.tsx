@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, CheckCircle2, MapPin, Zap } from 'lucide-react';
 import { OCCUPATION_BY_SLUG } from '@/data/jobOccupations';
 import { CITIES } from '@/data/jobCities';
+import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
+
 
 const BASE = 'https://parium.se';
 
