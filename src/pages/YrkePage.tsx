@@ -103,7 +103,7 @@ const YrkePage = () => {
         <script type="application/ld+json">{JSON.stringify(occupationLd)}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-[hsl(215_100%_12%)] text-white">
+      <div className="min-h-[100dvh] w-full pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         {/* Hero */}
@@ -128,7 +128,7 @@ const YrkePage = () => {
               <Button
                 size="lg"
                 onClick={() => navigate('/auth')}
-                className="min-h-12 rounded-full bg-white text-[hsl(215_100%_12%)] hover:bg-white/90 px-8 text-base font-semibold"
+                className="min-h-12 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-8 text-base font-semibold"
               >
                 Skapa profil gratis
                 <ArrowRight className="ml-1 h-4 w-4" />
@@ -245,7 +245,7 @@ const YrkePage = () => {
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
-              className="mt-8 min-h-11 rounded-full bg-white text-[hsl(215_100%_12%)] hover:bg-white/90 px-7"
+              className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
             >
               Skapa profil gratis
               <ArrowRight className="ml-1 h-4 w-4" />

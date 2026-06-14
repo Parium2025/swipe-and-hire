@@ -67,7 +67,7 @@ const AnnonserHub = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-[100dvh] w-full pb-28 md:pb-0 bg-[#0a0a0a] text-white">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -163,7 +163,7 @@ const AnnonserHub = () => {
         <div className="mt-16 p-6 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/10">
           <h2 className="text-xl font-semibold mb-2">Ladda ner Parium-appen</h2>
           <p className="text-white/70 mb-4">Få notiser om nya jobb som matchar din profil. Ansök på 30 sekunder.</p>
-          <Button asChild className="bg-white text-black hover:bg-white/90">
+          <Button asChild className="bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90">
             <Link to="/jobbsokare">Kom igång gratis <ArrowRight className="w-4 h-4 ml-2" /></Link>
           </Button>
         </div>
