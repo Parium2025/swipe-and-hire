@@ -234,9 +234,6 @@ const JobbCityYrke = () => {
                 Lön {city.inForm}
               </h2>
               <p className="mt-4 text-sm text-white leading-relaxed">{occ.salary}</p>
-              <p className="mt-3 text-xs text-white/80">
-                Områden: {city.areas.slice(0, 3).join(', ')}
-              </p>
             </div>
           </div>
         </section>
