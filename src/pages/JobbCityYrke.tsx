@@ -166,12 +166,30 @@ const JobbCityYrke = () => {
             </p>
 
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <SeoCTAButton label="Skapa min profil idag" to="/auth" />
+              <SeoCTAButton
+                label="Skapa min profil idag"
+                to="/auth"
+                navState={{ mode: 'signup' }}
+              />
               <SeoCTAButton
                 variant="ghost"
                 showArrow={false}
                 label={secondaryLabel}
                 to={hasJobs ? `/jobb/${city.slug}` : '/auth'}
+                navState={
+                  hasJobs
+                    ? undefined
+                    : {
+                        mode: 'signup',
+                        savedSearchIntent: {
+                          city: city.name,
+                          citySlug: city.slug,
+                          occupation: occ.name,
+                          occupationSlug: occ.slug,
+                          returnTo: `/jobb/${city.slug}/${occ.slug}`,
+                        },
+                      }
+                }
               />
             </div>
           </div>
