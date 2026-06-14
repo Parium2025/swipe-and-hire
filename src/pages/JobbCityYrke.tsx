@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
+import FaqAccordion from '@/components/seo/FaqAccordion';
 import {
   SeoOtherOccupationsInCity,
   SeoOccupationInOtherCities,
