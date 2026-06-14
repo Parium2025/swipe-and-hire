@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
+import SiteFooter from '@/components/landing/SiteFooter';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 
