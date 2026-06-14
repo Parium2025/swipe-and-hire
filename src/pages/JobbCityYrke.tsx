@@ -287,7 +287,7 @@ const JobbCityYrke = () => {
               Skapa en profil gratis. Matcha med arbetsgivare {city.inForm} på sekunder.
             </p>
             <div className="mt-7 flex justify-center">
-              <SeoCTAButton label="Skapa min profil idag" to="/auth" />
+              <SeoCTAButton label="Skapa min profil idag" to="/auth" navState={{ mode: 'signup' }} />
             </div>
           </div>
         </section>
