@@ -68,25 +68,33 @@ const YrkenHub = () => {
 
         <section className="px-5 py-12 sm:px-8 md:px-12">
           <ul className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {OCCUPATIONS.map((o) => (
-              <li key={o.slug}>
-                <Link
-                  to={`/yrke/${o.slug}`}
-                  className="block rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-6 hover:bg-white/[0.10] transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <Briefcase className="h-5 w-5 text-white" />
-                    <span className="text-xs uppercase tracking-wider text-white">
-                      {o.category}
-                    </span>
-                  </div>
-                  <h2 className="mt-3 text-xl font-semibold text-white">
-                    Lediga jobb {o.asForm}
-                  </h2>
-                  <p className="mt-2 text-sm text-white line-clamp-2">{o.intro}</p>
-                </Link>
-              </li>
-            ))}
+            {OCCUPATIONS.map((o) => {
+              const title = `Lediga jobb ${o.asForm}`;
+              return (
+                <li key={o.slug}>
+                  <Link
+                    to={`/yrke/${o.slug}`}
+                    className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-6 hover:bg-white/[0.10] transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Briefcase className="h-5 w-5 shrink-0 text-white" />
+                      <span className="truncate text-xs uppercase tracking-wider text-white/80">
+                        {o.category}
+                      </span>
+                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <h2 className="mt-3 truncate text-xl font-semibold text-white">
+                          {title}
+                        </h2>
+                      </TooltipTrigger>
+                      <TooltipContent>{title}</TooltipContent>
+                    </Tooltip>
+                    <p className="mt-2 line-clamp-2 text-sm text-white/80">{o.intro}</p>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </section>
 
