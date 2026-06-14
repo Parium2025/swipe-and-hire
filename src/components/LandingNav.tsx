@@ -184,7 +184,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                 draggable={false}
                 loading="eager"
                 decoding="sync"
-                fetchpriority="high"
+                {...({ fetchpriority: 'high' } as any)}
                 className="h-auto w-36 sm:w-32 md:w-36 lg:w-40 pointer-events-none"
               />
             </a>
