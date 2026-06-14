@@ -10,7 +10,7 @@ import {
 } from '@/components/seo/SeoFooterLinks';
 import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import { CheckCircle2, MapPin, Zap } from 'lucide-react';
+import { CheckCircle2, MapPin, Zap, ChevronRight } from 'lucide-react';
 import { CITY_BY_SLUG, CITIES } from '@/data/jobCities';
 import { OCCUPATION_BY_SLUG, OCCUPATIONS } from '@/data/jobOccupations';
 
@@ -21,6 +21,7 @@ const JobbCityYrke = () => {
   const navigate = useNavigate();
   const city = citySlug ? CITY_BY_SLUG[citySlug] : null;
   const occ = occupationSlug ? OCCUPATION_BY_SLUG[occupationSlug] : null;
+  const { data: counts } = useJobCounts();
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
@@ -30,12 +31,15 @@ const JobbCityYrke = () => {
 
   const canonical = `${BASE}/jobb/${city.slug}/${occ.slug}`;
   const title = `Lediga jobb ${occ.asForm} ${city.inForm} – sök ${occ.plural}jobb | Parium`;
-  const description = `Hitta lediga jobb ${occ.asForm} ${city.inForm}. Se vanliga arbetsuppgifter, krav och lön. Skapa min profil idag i Parium och matcha med arbetsgivare ${city.inForm} på sekunder.`;
+  const description = `Hitta lediga jobb ${occ.asForm} ${city.inForm}. Se vanliga arbetsuppgifter, krav och lön. Skapa profil gratis i Parium och matcha med arbetsgivare ${city.inForm} på sekunder.`;
 
-  // Andra yrken i samma stad (cross-link)
-  const otherOccs = OCCUPATIONS.filter((o) => o.slug !== occ.slug).slice(0, 6);
-  // Samma yrke i andra städer
-  const otherCities = CITIES.filter((c) => c.slug !== city.slug).slice(0, 6);
+  const jobCount = getJobCount(counts, { citySlug: city.slug, occupationSlug: occ.slug });
+  const hasJobs = jobCount > 0;
+  const secondaryLabel = hasJobs
+    ? jobCount === 1
+      ? 'Se 1 jobb'
+      : `Se ${jobCount} jobb`
+    : 'Bevaka denna sökning';
 
   const faqs = [
     {
@@ -85,8 +89,22 @@ const JobbCityYrke = () => {
     '@context': 'https://schema.org',
     '@type': 'Occupation',
     name: `${occ.name} ${city.inForm}`,
-    occupationLocation: { '@type': 'City', name: city.name, address: { '@type': 'PostalAddress', addressCountry: 'SE', addressLocality: city.name, addressRegion: city.county } },
-    estimatedSalary: { '@type': 'MonetaryAmountDistribution', name: 'baseSalary', currency: 'SEK', duration: 'P1M' },
+    occupationLocation: {
+      '@type': 'City',
+      name: city.name,
+      address: {
+        '@type': 'PostalAddress',
+        addressCountry: 'SE',
+        addressLocality: city.name,
+        addressRegion: city.county,
+      },
+    },
+    estimatedSalary: {
+      '@type': 'MonetaryAmountDistribution',
+      name: 'baseSalary',
+      currency: 'SEK',
+      duration: 'P1M',
+    },
     responsibilities: occ.tasks.join('. '),
     skills: occ.skills.join('. '),
   };
@@ -111,8 +129,8 @@ const JobbCityYrke = () => {
       <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
-        {/* Hero */}
-        <section className="relative overflow-hidden px-5 pt-28 pb-16 sm:px-8 md:px-12">
+        {/* ─── HERO ─── */}
+        <section className="relative overflow-hidden px-5 pt-28 pb-14 sm:px-8 md:px-12">
           <div
             aria-hidden
             className="absolute inset-0 -z-10 opacity-60"
@@ -129,176 +147,132 @@ const JobbCityYrke = () => {
               <span className="mx-1.5">/</span>
               <span className="text-white/80">{occ.name}</span>
             </nav>
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white/80 backdrop-blur">
-              <MapPin className="h-3.5 w-3.5" /> {city.name} · {occ.category}
+
+            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white/80 backdrop-blur">
+              <MapPin className="h-3.5 w-3.5" />
+              {city.name} · {occ.category}
+              {hasJobs && (
+                <span className="ml-1 rounded-full bg-secondary/20 text-secondary px-2 py-0.5 text-[11px] font-semibold">
+                  {jobCount} aktiva
+                </span>
+              )}
             </p>
+
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Lediga jobb {occ.asForm} {city.inForm}
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 sm:text-xl">
+            <p className="mx-auto mt-5 max-w-2xl text-base text-white/80 sm:text-lg">
               {occ.intro} I {city.name} matchar Parium dig direkt med arbetsgivare som söker {occ.plural}.
             </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button
-                size="lg"
-                onClick={() => navigate('/auth')}
-                className="min-h-12 rounded-full bg-secondary text-white hover:bg-secondary/90 px-8 text-base font-semibold"
-              >
-                Skapa min profil idag
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => navigate(`/jobb/${city.slug}`)}
-                className="min-h-12 rounded-full border-white/30 bg-white/5 text-white hover:bg-white/10 px-7"
-              >
-                Alla jobb {city.inForm}
-              </Button>
+
+            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <SeoCTAButton label="Skapa min profil idag" to="/auth" />
+              <SeoCTAButton
+                variant="ghost"
+                showArrow={false}
+                label={secondaryLabel}
+                to={hasJobs ? `/jobb/${city.slug}` : '/auth'}
+              />
             </div>
           </div>
         </section>
 
-        {/* Arbetsuppgifter + krav */}
-        <section className="px-5 py-16 sm:px-8 md:px-12">
-          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-7 backdrop-blur-md">
-              <h2 className="text-2xl font-semibold tracking-tight">
-                Arbetsuppgifter {occ.asForm} {city.inForm}
+        {/* ─── KOMPAKT INFO: Arbetsuppgifter | Krav | Lön ─── */}
+        <section className="px-5 py-10 sm:px-8 md:px-12">
+          <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
+              <h2 className="text-base font-semibold tracking-tight text-white/90">
+                Arbetsuppgifter
               </h2>
-              <ul className="mt-5 space-y-3">
-                {occ.tasks.map((task) => (
-                  <li key={task} className="flex items-start gap-3 text-white/85">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-white/70" />
+              <ul className="mt-4 space-y-2.5">
+                {occ.tasks.slice(0, 5).map((task) => (
+                  <li key={task} className="flex items-start gap-2.5 text-sm text-white/80">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/50" />
                     <span>{task}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-7 backdrop-blur-md">
-              <h2 className="text-2xl font-semibold tracking-tight">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
+              <h2 className="text-base font-semibold tracking-tight text-white/90">
                 Krav & kompetens
               </h2>
-              <ul className="mt-5 space-y-3">
-                {occ.skills.map((skill) => (
-                  <li key={skill} className="flex items-start gap-3 text-white/85">
-                    <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-white/70" />
+              <ul className="mt-4 space-y-2.5">
+                {occ.skills.slice(0, 5).map((skill) => (
+                  <li key={skill} className="flex items-start gap-2.5 text-sm text-white/80">
+                    <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/50" />
                     <span>{skill}</span>
                   </li>
                 ))}
               </ul>
             </div>
-          </div>
-          <div className="mx-auto mt-6 max-w-5xl rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-white/80 backdrop-blur-md">
-            <strong className="text-white">Lön {city.inForm}: </strong>
-            {occ.salary}
-          </div>
-        </section>
-
-        {/* Områden i staden */}
-        <section className="px-5 py-12 sm:px-8 md:px-12">
-          <div className="mx-auto max-w-5xl">
-            <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-              Populära områden för jobb {occ.asForm} {city.inForm}
-            </h2>
-            <ul className="mt-8 flex flex-wrap justify-center gap-2">
-              {city.areas.map((area) => (
-                <li
-                  key={area}
-                  className="rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-sm text-white/85 backdrop-blur-md"
-                >
-                  {area}
-                </li>
-              ))}
-            </ul>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
+              <h2 className="text-base font-semibold tracking-tight text-white/90">
+                Lön {city.inForm}
+              </h2>
+              <p className="mt-4 text-sm text-white/80 leading-relaxed">{occ.salary}</p>
+              <p className="mt-3 text-xs text-white/50">
+                Områden: {city.areas.slice(0, 3).join(', ')}
+              </p>
+            </div>
           </div>
         </section>
 
-        {/* Andra yrken i staden */}
-        <section className="px-5 py-12 sm:px-8 md:px-12">
-          <div className="mx-auto max-w-5xl">
-            <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-              Andra lediga jobb {city.inForm}
-            </h2>
-            <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {otherOccs.map((o) => (
-                <li key={o.slug}>
-                  <Link
-                    to={`/jobb/${city.slug}/${o.slug}`}
-                    className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-sm font-medium text-white/90 hover:bg-white/10 transition"
-                  >
-                    <Briefcase className="h-4 w-4 text-white/60" />
-                    {o.name} {city.inForm}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* Samma yrke i andra städer */}
-        <section className="px-5 py-12 sm:px-8 md:px-12">
-          <div className="mx-auto max-w-5xl">
-            <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-              {occ.name}jobb i andra städer
-            </h2>
-            <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {otherCities.map((c) => (
-                <li key={c.slug}>
-                  <Link
-                    to={`/jobb/${c.slug}/${occ.slug}`}
-                    className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-sm font-medium text-white/90 hover:bg-white/10 transition"
-                  >
-                    <MapPin className="h-4 w-4 text-white/60" />
-                    {occ.name} i {c.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="px-5 py-16 sm:px-8 md:px-12">
+        {/* ─── FAQ (kompakt accordion, stängd by default) ─── */}
+        <section className="px-5 py-10 sm:px-8 md:px-12">
           <div className="mx-auto max-w-3xl">
-            <h2 className="text-center text-3xl font-semibold tracking-tight sm:text-4xl">
-              Vanliga frågor – jobb {occ.asForm} {city.inForm}
+            <h2 className="text-center text-xl font-semibold tracking-tight sm:text-2xl text-white/90">
+              Vanliga frågor
             </h2>
-            <div className="mt-10 space-y-4">
+            <div className="mt-6 space-y-2">
               {faqs.map((f) => (
                 <details
                   key={f.q}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-md"
+                  className="group rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-md transition-colors hover:bg-white/[0.06]"
                 >
-                  <summary className="cursor-pointer list-none text-lg font-medium text-white">
-                    {f.q}
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-medium text-white/90">
+                    <span>{f.q}</span>
+                    <ChevronRight className="h-4 w-4 text-white/50 transition-transform group-open:rotate-90" />
                   </summary>
-                  <p className="mt-3 text-white/80">{f.a}</p>
+                  <p className="px-5 pb-5 pt-0 text-sm text-white/70 leading-relaxed">{f.a}</p>
                 </details>
               ))}
             </div>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="px-5 py-20 sm:px-8 md:px-12">
-          <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-10 text-center">
+        {/* ─── Intern länk-footer: andra yrken i staden ─── */}
+        <SeoOtherOccupationsInCity
+          citySlug={city.slug}
+          cityName={city.name}
+          cityInForm={city.inForm}
+          currentOccupationSlug={occ.slug}
+          occupations={OCCUPATIONS}
+        />
+
+        {/* ─── Intern länk-footer: samma yrke i andra städer ─── */}
+        <SeoOccupationInOtherCities
+          occupationSlug={occ.slug}
+          occupationName={occ.name}
+          currentCitySlug={city.slug}
+          cities={CITIES}
+        />
+
+        {/* ─── Slut-CTA ─── */}
+        <section className="px-5 py-16 sm:px-8 md:px-12">
+          <div className="mx-auto max-w-2xl rounded-3xl border border-white/15 bg-white/[0.05] backdrop-blur-md p-8 sm:p-10 text-center">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               Sök jobb {occ.asForm} {city.inForm} idag
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-white/80">
-              Skapa min profil idag. Matcha med arbetsgivare {city.inForm} på sekunder.
+            <p className="mx-auto mt-3 max-w-lg text-white/75">
+              Skapa en profil gratis. Matcha med arbetsgivare {city.inForm} på sekunder.
             </p>
-            <Button
-              size="lg"
-              onClick={() => navigate('/auth')}
-              className="mt-8 min-h-11 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7"
-            >
-              Skapa min profil idag
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+            <div className="mt-7 flex justify-center">
+              <SeoCTAButton label="Skapa min profil idag" to="/auth" />
+            </div>
           </div>
         </section>
+
         <MobileStickyCTA />
       </div>
     </>
