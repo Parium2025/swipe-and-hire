@@ -14,6 +14,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { MapPin, Zap, MessageSquare, Search, Briefcase, Building2 } from 'lucide-react';
 import { CITIES, CITY_BY_SLUG, POPULAR_ROLES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
+import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
+
 
 type PublicJobRow = {
   id: string;
