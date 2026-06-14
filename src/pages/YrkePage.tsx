@@ -255,12 +255,20 @@ const YrkePage = () => {
             </p>
             <Button
               size="lg"
-              onClick={() => navigate('/auth')}
+              onClick={() => {
+                persistSavedSearchIntent({
+                  occupation: occ.name,
+                  occupationSlug: occ.slug,
+                  returnTo: `/yrke/${occ.slug}`,
+                });
+                navigate('/auth', { state: { mode: 'signup' } });
+              }}
               className="mt-8 min-h-11 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7"
             >
               Skapa min profil idag
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
+
           </div>
         </section>
         <MobileStickyCTA />
