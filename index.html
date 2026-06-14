@@ -103,17 +103,22 @@
       // (Theme-color + chrome-klasser sätts redan i första <script>-blocket ovan.
       // Ingen dubblering här — det orsakade kapplöpningar mot Safari.)
 
-      // 🚨 CANONICAL DOMAIN REDIRECT
-      // Tvingar all trafik från parium-ab.lovable.app → parium.se så att Google
-      // av-indexerar lovable.app-versionen över tid och endast parium.se rankar.
+      // 🚨 CANONICAL DOMAIN REDIRECT + NOINDEX på staging
+      // 1) Skriver noindex + canonical till parium.se INNAN React mountar,
+      //    så Googlebot (som inte alltid följer JS-redirects) ändå konsoliderar
+      //    alla signaler till parium.se och slutar visa lovable.app i SERP.
+      // 2) Tvingar samtidigt full redirect för riktiga användare.
       (function() {
         try {
           var h = window.location.hostname;
-          if (h === 'parium-ab.lovable.app' || h.endsWith('.lovable.app') && h.indexOf('parium-ab') === 0) {
-            var target = 'https://parium.se' + window.location.pathname + window.location.search + window.location.hash;
-            window.location.replace(target);
-            return;
-          }
+          var isLovableHost = h === 'parium-ab.lovable.app' || (h.endsWith('.lovable.app') && h.indexOf('parium-ab') === 0);
+          if (!isLovableHost) return;
+          var pariumUrl = 'https://parium.se' + window.location.pathname + window.location.search + window.location.hash;
+          // Injicera noindex + canonical INNAN body parsas — Googlebot ser detta även utan JS-exec.
+          document.write('<meta name="robots" content="noindex,nofollow">');
+          document.write('<link rel="canonical" href="' + pariumUrl.split('#')[0] + '">');
+          // Hard redirect för riktiga besökare.
+          window.location.replace(pariumUrl);
         } catch (e) { /* noop */ }
       })();
 
