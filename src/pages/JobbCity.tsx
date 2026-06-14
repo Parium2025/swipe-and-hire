@@ -315,16 +315,14 @@ const JobbCity = () => {
         title="Lediga jobb i andra städer"
         icon="city"
         items={CITIES.filter((c) => c.slug !== city.slug)
-          .slice(0, 9)
           .map((c) => ({
             slug: c.slug,
             label: `Jobb ${c.inForm}`,
             to: `/jobb/${c.slug}`,
+            count: getJobCount(counts, { citySlug: c.slug }),
           }))
-          .map((it) => ({
-            ...it,
-            count: 0,
-          }))}
+          .sort((a, b) => (b.count || 0) - (a.count || 0))
+          .slice(0, 9)}
       />
 
       {/* CTA */}
