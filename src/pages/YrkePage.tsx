@@ -126,8 +126,8 @@ const YrkePage = () => {
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white backdrop-blur">
               <Briefcase className="h-3.5 w-3.5" /> {occ.category}
             </p>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-              Lediga jobb <span className="text-white/90">{occ.asForm}</span>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
+              Lediga jobb <span className="text-white">{occ.asForm}</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">{occ.intro}</p>
             <div className="mt-10 flex justify-center">
