@@ -179,6 +179,7 @@ const AnimatedRoutes = () => {
           <Route path="/annonser" element={<RRNavigate to="/jobb" replace />} />
           <Route path="/yrke/:occupationSlug" element={<YrkePage />} />
           <Route path="/guider" element={<GuiderHub />} />
+          <Route path="/guider/cv-mall-2026" element={<RRNavigate to="/guider" replace />} />
           <Route path="/guider/:slug" element={<GuidePage />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/checkout" element={<Checkout />} />
