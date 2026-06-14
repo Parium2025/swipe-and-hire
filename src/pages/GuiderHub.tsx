@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
+import SeoBubbles from '@/components/seo/SeoBubbles';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Clock } from 'lucide-react';
 import { GUIDES } from '@/data/guides';
@@ -51,16 +52,9 @@ const GuiderHub = () => {
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         <section className="relative overflow-hidden px-5 pt-28 pb-12 sm:px-8 md:px-12">
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10 opacity-60"
-            style={{
-              background:
-                'radial-gradient(70% 60% at 50% 0%, rgba(70,130,255,0.30) 0%, rgba(70,130,255,0) 70%)',
-            }}
-          />
+          <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
               Karriärguider & jobbtips
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">

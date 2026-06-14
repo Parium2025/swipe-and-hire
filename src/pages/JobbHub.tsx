@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
+import SeoBubbles from '@/components/seo/SeoBubbles';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin } from 'lucide-react';
@@ -63,13 +64,14 @@ const JobbHub = () => {
       <LandingNav onLoginClick={() => navigate('/auth')} />
 
       {/* Hero */}
-      <section className="relative px-5 pt-32 pb-12 sm:px-8 sm:pt-40 sm:pb-16 md:px-12">
+      <section className="relative overflow-hidden px-5 pt-32 pb-12 sm:px-8 sm:pt-40 sm:pb-16 md:px-12">
+        <SeoBubbles />
         <div className="mx-auto max-w-4xl text-center">
           <motion.h1
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl"
+            className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl text-white"
           >
             Lediga jobb i hela Sverige
           </motion.h1>
@@ -77,7 +79,7 @@ const JobbHub = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl"
+            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white sm:text-xl"
           >
             Välj din stad och hitta lediga jobb som matchar dig. Skapa min profil idag och börja matcha med arbetsgivare direkt.
           </motion.p>
@@ -103,7 +105,7 @@ const JobbHub = () => {
                       <h3 className="text-lg font-semibold text-white">
                         Lediga jobb {c.inForm}
                       </h3>
-                      <p className="mt-1 text-sm text-white/65">{c.county}</p>
+                      <p className="mt-1 text-sm text-white">{c.county}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all mt-3" aria-hidden="true" />
                   </div>
@@ -117,10 +119,10 @@ const JobbHub = () => {
       {/* Yrken */}
       <section className="px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl">
-          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl text-white">
             Populära yrken på Parium
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-white/70">
+          <p className="mx-auto mt-3 max-w-2xl text-center text-white">
             Klicka på ett yrke för att se lediga jobb, lön och vad som krävs.
           </p>
           <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
@@ -128,14 +130,14 @@ const JobbHub = () => {
               <li key={o.slug}>
                 <Link
                   to={`/yrke/${o.slug}`}
-                  className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white/90 hover:bg-white/[0.10] transition"
+                  className="block rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.10] transition"
                 >
                   Lediga jobb {o.asForm}
                 </Link>
               </li>
             ))}
           </ul>
-          <p className="mt-6 text-center text-white/60 text-sm">
+          <p className="mt-6 text-center text-white text-sm">
             <Link to="/yrken" className="underline-offset-4 hover:underline">
               Se alla yrken →
             </Link>
@@ -146,15 +148,15 @@ const JobbHub = () => {
       {/* Guider */}
       <section className="px-5 py-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl text-center">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
             Guider för dig som söker jobb
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-white/70">
-            CV-mall, lönerapport, intervjutips och checklista för jobbyte – uppdaterat för 2026.
+          <p className="mx-auto mt-3 max-w-2xl text-white">
+            Lönerapport, intervjutips och checklista för jobbyte – uppdaterat för 2026.
           </p>
           <Link
             to="/guider"
-            className="mt-6 inline-flex items-center gap-1.5 text-white/80 hover:text-white underline-offset-4 hover:underline"
+            className="mt-6 inline-flex items-center gap-1.5 text-white hover:opacity-80 underline-offset-4 hover:underline"
           >
             Läs alla guider →
           </Link>
@@ -164,10 +166,10 @@ const JobbHub = () => {
 
       <section className="px-5 py-20 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-10 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
             Hitta ditt nästa jobb idag
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-white/80">
+          <p className="mx-auto mt-4 max-w-xl text-white">
             Skapa min profil idag. Inga oändliga listor – bara jobb som passar dig.
           </p>
           <Button

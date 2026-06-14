@@ -114,23 +114,15 @@ const YrkePage = () => {
         {/* Hero */}
         <section className="relative overflow-hidden px-5 pt-28 pb-16 sm:px-8 md:px-12">
           <SeoBubbles />
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10 opacity-60"
-            style={{
-              background:
-                'radial-gradient(70% 60% at 50% 0%, rgba(70,130,255,0.30) 0%, rgba(70,130,255,0) 70%)',
-            }}
-          />
           <div className="mx-auto max-w-4xl text-center">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white/80 backdrop-blur">
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white backdrop-blur">
               <Briefcase className="h-3.5 w-3.5" /> {occ.category}
             </p>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-              Lediga jobb <span className="text-white/90">{occ.asForm}</span>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
+              Lediga jobb <span className="text-white">{occ.asForm}</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">{occ.intro}</p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-10 flex justify-center">
               <Button
                 size="lg"
                 onClick={() => {
@@ -145,14 +137,6 @@ const YrkePage = () => {
               >
                 Skapa min profil idag
                 <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => navigate('/jobbsokare')}
-                className="min-h-12 rounded-full border-white/30 bg-white/5 text-white hover:bg-white/10 px-7"
-              >
-                Så funkar Parium
               </Button>
             </div>
 

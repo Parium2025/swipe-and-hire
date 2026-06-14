@@ -136,14 +136,6 @@ const JobbCityYrke = () => {
         {/* ─── HERO ─── */}
         <section className="relative overflow-hidden px-5 pt-28 pb-14 sm:px-8 md:px-12">
           <SeoBubbles />
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10 opacity-60"
-            style={{
-              background:
-                'radial-gradient(70% 60% at 50% 0%, rgba(70,130,255,0.30) 0%, rgba(70,130,255,0) 70%)',
-            }}
-          />
           <div className="mx-auto max-w-4xl text-center">
             <nav aria-label="Brödsmulor" className="mb-4 text-xs text-white">
               <Link to="/jobb" className="text-white hover:opacity-80">Jobb</Link>
@@ -234,9 +226,6 @@ const JobbCityYrke = () => {
                 Lön {city.inForm}
               </h2>
               <p className="mt-4 text-sm text-white leading-relaxed">{occ.salary}</p>
-              <p className="mt-3 text-xs text-white/80">
-                Områden: {city.areas.slice(0, 3).join(', ')}
-              </p>
             </div>
           </div>
         </section>
