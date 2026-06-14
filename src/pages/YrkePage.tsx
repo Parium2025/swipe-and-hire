@@ -266,7 +266,7 @@ const YrkePage = () => {
 
           </div>
         </section>
-        <MobileStickyCTA />
+        
       </div>
     </>
   );
