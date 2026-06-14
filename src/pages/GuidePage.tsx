@@ -1,14 +1,55 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
-import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Clock, Calendar } from 'lucide-react';
 import { GUIDE_BY_SLUG, GUIDES } from '@/data/guides';
 
 const BASE = 'https://parium.se';
+const ease = [0.16, 1, 0.3, 1] as const;
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md overflow-hidden">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full min-h-[56px] cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left text-lg font-medium text-white"
+      >
+        <span>{q}</span>
+        <motion.span
+          className="text-secondary text-2xl leading-none flex-shrink-0"
+          animate={{ rotate: open ? 45 : 0 }}
+          transition={{ duration: 0.35, ease }}
+        >
+          +
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: { duration: 0.45, ease },
+              opacity: { duration: 0.3, ease, delay: open ? 0.08 : 0 },
+            }}
+            className="overflow-hidden"
+          >
+            <p className="px-6 pb-6 text-white leading-relaxed">{a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 const GuidePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -79,7 +120,7 @@ const GuidePage = () => {
         <script type="application/ld+json">{JSON.stringify(faqLd)}</script>
       </Helmet>
 
-      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
+      <div className="seo-scroll-page bg-[hsl(215_100%_12%)] text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         {/* Header */}
@@ -126,15 +167,7 @@ const GuidePage = () => {
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Vanliga frågor</h2>
             <div className="mt-6 space-y-4">
               {guide.faqs.map((f) => (
-                <details
-                  key={f.q}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-md"
-                >
-                  <summary className="cursor-pointer list-none text-lg font-medium text-white">
-                    {f.q}
-                  </summary>
-                  <p className="mt-3 text-white">{f.a}</p>
-                </details>
+                <FaqItem key={f.q} q={f.q} a={f.a} />
               ))}
             </div>
           </div>
@@ -167,7 +200,7 @@ const GuidePage = () => {
                     to={`/guider/${g.slug}`}
                     className="block rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-6 hover:bg-white/[0.10] transition"
                   >
-                    <span className="text-xs uppercase tracking-wider text-white/60">
+                    <span className="text-xs uppercase tracking-wider text-white">
                       {g.category}
                     </span>
                     <h3 className="mt-2 text-base font-semibold text-white">{g.title}</h3>
@@ -177,7 +210,6 @@ const GuidePage = () => {
             </ul>
           </div>
         </article>
-        <MobileStickyCTA />
       </div>
     </>
   );
