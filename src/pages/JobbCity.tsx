@@ -158,7 +158,8 @@ const JobbCity = () => {
       <LandingNav onLoginClick={() => navigate('/auth')} />
 
       {/* Hero */}
-      <section className="relative px-5 pt-32 pb-16 sm:px-8 sm:pt-40 sm:pb-24 md:px-12">
+      <section className="relative overflow-hidden px-5 pt-32 pb-16 sm:px-8 sm:pt-40 sm:pb-24 md:px-12">
+        <SeoBubbles />
         <div className="mx-auto max-w-5xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 8 }}
