@@ -92,27 +92,33 @@ const JobbHub = () => {
         <div className="mx-auto max-w-5xl">
           <h2 className="sr-only">Välj stad</h2>
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {CITIES.map((c) => (
-              <li key={c.slug}>
-                <Link
-                  to={`/jobb/${c.slug}`}
-                  className="group block rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-5 hover:bg-white/10 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10">
+            {CITIES.map((c) => {
+              const title = `Lediga jobb ${c.inForm}`;
+              return (
+                <li key={c.slug}>
+                  <Link
+                    to={`/jobb/${c.slug}`}
+                    className="group flex h-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-5 hover:bg-white/10 transition-colors"
+                  >
+                    <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10">
                       <MapPin className="h-4 w-4" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-lg font-semibold text-white">
-                        Lediga jobb {c.inForm}
-                      </h3>
-                      <p className="mt-1 text-sm text-white">{c.county}</p>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <h3 className="truncate text-lg font-semibold text-white">
+                            {title}
+                          </h3>
+                        </TooltipTrigger>
+                        <TooltipContent>{title}</TooltipContent>
+                      </Tooltip>
+                      <p className="mt-1 truncate text-sm text-white/80">{c.county}</p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all mt-3" aria-hidden="true" />
-                  </div>
-                </Link>
-              </li>
-            ))}
+                    <ArrowRight className="h-4 w-4 shrink-0 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </section>
