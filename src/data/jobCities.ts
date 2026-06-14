@@ -340,6 +340,14 @@ export const CITIES: CityData[] = [
     areas: ['Tumba', 'Tullinge', 'Hallunda', 'Norsborg', 'Fittja', 'Alby'],
     intro: 'Botkyrka är en stor Stockholmskommun med jobb inom logistik, vård, handel och offentlig sektor.',
   },
+  {
+    slug: 'trelleborg',
+    name: 'Trelleborg',
+    inForm: 'i Trelleborg',
+    county: 'Skåne län',
+    areas: ['Centrum', 'Västervång', 'Hamnen', 'Anderslöv', 'Smygehamn', 'Skegrie'],
+    intro: 'Trelleborg är Sveriges sydligaste stad med stor hamn och jobb inom logistik, transport, industri och handel.',
+  },
 ];
 
 export const CITY_BY_SLUG = Object.fromEntries(CITIES.map((c) => [c.slug, c]));
