@@ -53,9 +53,12 @@ const slugify = (s: string) =>
 const PublicJobPage = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // Vid utgången annons: titel + yrke från arkiverad rad (utan is_active-filter).
+  const [expiredCtx, setExpiredCtx] = useState<{ title?: string; occupation?: string } | null>(null);
 
   useEffect(() => { syncBrowserChrome(window.location.pathname); }, []);
 
@@ -72,12 +75,36 @@ const PublicJobPage = () => {
         .is('deleted_at', null)
         .maybeSingle();
       if (cancelled) return;
-      if (error || !data) { setNotFound(true); setLoading(false); return; }
+      if (error || !data) {
+        // Sekundär hämtning utan is_active för att ge kontext om jobbet är tillsatt.
+        const { data: expired } = await supabase
+          .from('job_postings')
+          .select('title,occupation')
+          .eq('id', jobId)
+          .maybeSingle();
+        if (!cancelled && expired) {
+          setExpiredCtx({ title: expired.title || undefined, occupation: expired.occupation || undefined });
+        }
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
       setJob(data as Job);
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [jobId]);
+
+  // Slussar till Ansök — om utloggad: parkera intent och gå via /auth.
+  const goApply = (id: string) => {
+    if (!user) {
+      setPendingJob({ jobId: id, action: 'apply' });
+      navigate('/auth', { state: { mode: 'signup' } });
+      return;
+    }
+    navigate(`/job-application/${id}`);
+  };
+
 
   if (!jobId) return <Navigate to="/jobb" replace />;
 
