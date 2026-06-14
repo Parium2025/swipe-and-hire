@@ -16,7 +16,7 @@ import YrkenHub from "./pages/YrkenHub";
 import YrkePage from "./pages/YrkePage";
 import JobbCityYrke from "./pages/JobbCityYrke";
 import PublicJobPage from "./pages/PublicJobPage";
-import { Navigate as RRNavigate } from "react-router-dom";
+
 import GuiderHub from "./pages/GuiderHub";
 import GuidePage from "./pages/GuidePage";
 import Auth from "./pages/Auth";
