@@ -114,14 +114,6 @@ const YrkePage = () => {
         {/* Hero */}
         <section className="relative overflow-hidden px-5 pt-28 pb-16 sm:px-8 md:px-12">
           <SeoBubbles />
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10 opacity-60"
-            style={{
-              background:
-                'radial-gradient(70% 60% at 50% 0%, rgba(70,130,255,0.30) 0%, rgba(70,130,255,0) 70%)',
-            }}
-          />
           <div className="mx-auto max-w-4xl text-center">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white backdrop-blur">
               <Briefcase className="h-3.5 w-3.5" /> {occ.category}
