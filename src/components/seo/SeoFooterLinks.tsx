@@ -85,7 +85,12 @@ const SeoFooterLinks = ({
                 >
                   <span className="flex min-w-0 flex-1 items-center gap-2">
                     <Icon className="h-4 w-4 text-white shrink-0" />
-                    <span className="truncate">{item.label}</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="truncate">{item.label}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{item.label}</TooltipContent>
+                    </Tooltip>
                   </span>
                   <span className="shrink-0 rounded-full bg-secondary/20 text-white px-2 py-0.5 text-[11px] font-semibold">
                     {countLabel}
