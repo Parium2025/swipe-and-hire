@@ -1111,6 +1111,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     { label: 'Funktioner', href: '#funktioner' },
     { label: 'Priser', href: '#priser' },
     { label: 'Vanliga frågor', href: '#faq' },
+    { label: 'Om oss', href: '/om-oss' },
     { label: 'Kontakt', href: '#kontakt' },
   ];
 
