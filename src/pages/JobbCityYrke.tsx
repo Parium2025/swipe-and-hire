@@ -135,6 +135,7 @@ const JobbCityYrke = () => {
 
         {/* ─── HERO ─── */}
         <section className="relative overflow-hidden px-5 pt-28 pb-14 sm:px-8 md:px-12">
+          <SeoBubbles />
           <div
             aria-hidden
             className="absolute inset-0 -z-10 opacity-60"
