@@ -201,12 +201,19 @@ const JobbCity = () => {
               }}
             />
 
-            <Link
-              to="/annonser"
-              className="min-h-11 inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 backdrop-blur-md px-7 text-sm font-medium hover:bg-white/15 transition-colors"
-            >
-              Alla jobb {city.inForm}
-            </Link>
+            <SeoCTAButton
+              variant="ghost"
+              showArrow={false}
+              label="Bevaka denna sökning"
+              onClick={() => {
+                persistSavedSearchIntent({
+                  city: city.name,
+                  citySlug: city.slug,
+                  returnTo: `/jobb/${city.slug}`,
+                });
+                navigate('/auth', { state: { mode: 'signup' } });
+              }}
+            />
           </motion.div>
         </div>
       </section>
