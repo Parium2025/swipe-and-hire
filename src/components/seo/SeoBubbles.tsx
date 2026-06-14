@@ -1,5 +1,5 @@
 const SeoBubbles = () => (
-  <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+  <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
     <div className="absolute top-20 left-10 h-4 w-4 rounded-full bg-secondary/30" />
     <div className="absolute top-32 left-16 h-2 w-2 rounded-full bg-accent/40 animate-soft-bounce" style={{ animationDuration: '2.5s', animationDelay: '-1.2s', animationFillMode: 'backwards' }} />
     <div className="absolute top-24 left-20 h-3 w-3 rounded-full bg-secondary/20 animate-soft-bounce" style={{ animationDuration: '3s', animationDelay: '-0.7s', animationFillMode: 'backwards' }} />
