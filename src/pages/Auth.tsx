@@ -635,19 +635,29 @@ const Auth = () => {
       // Om användaren kom hit via "Bevaka denna sökning" på en SEO-sida:
       // skapa saved_search + slussa till returnTo. Fire-and-forget för att
       // inte blockera renderingen – Navigate sker direkt till returnTo.
+      // VIKTIGT: hoppa över returnTo om jobbsökaren ännu inte har gjort klart
+      // välkomsttunneln — då skickas användaren till /home, tunneln triggas,
+      // och Index.tsx konsumerar intent i onComplete (rätt tunneltråd).
       try {
         const raw = typeof window !== 'undefined' ? sessionStorage.getItem('parium-saved-search-intent') : null;
         if (raw) {
           const parsed = JSON.parse(raw);
           const returnTo = parsed?.returnTo;
-          import('@/lib/savedSearchIntent').then(({ consumeIntent }) => {
-            consumeIntent(user.id).catch(() => {});
-          });
-          if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('/')) {
-            return <Navigate to={returnTo} replace />;
+          const onboardingDone = (profile as any)?.onboarding_completed === true;
+          const isJobSeeker = role === 'job_seeker';
+          if (!isJobSeeker || onboardingDone) {
+            import('@/lib/savedSearchIntent').then(({ consumeIntent }) => {
+              consumeIntent(user.id).catch(() => {});
+            });
+            if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('/')) {
+              return <Navigate to={returnTo} replace />;
+            }
           }
+          // Annars: lämna intent kvar — WelcomeTunnel.onComplete i Index.tsx
+          // konsumerar den och slussar dit efter att tunneln är klar.
         }
       } catch { /* fortsätt */ }
+
 
       // Om användaren kom hit från en jobbannons (utloggad → klickade "Ansök"):
       // Slussa direkt vidare till ansökan — MEN ENDAST om välkomsttunneln
