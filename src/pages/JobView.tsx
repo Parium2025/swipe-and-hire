@@ -235,12 +235,16 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       // 🚇 SINGLE TUNNEL: workplace_name + company_logo_url come straight from job_postings
       // (kept in sync via DB trigger sync_company_name_to_jobs).
       const [jobResult, questionsResult, applicationResult] = await Promise.all([
+        // 🚇 Vi filtrerar INTE på deleted_at här — RLS styr åtkomst.
+        // Det gör att sparade jobb som blivit inaktiva/utgångna fortfarande
+        // renderar i den vanliga jobbvyn (med "Utgången"-badge), istället för
+        // att kasta användaren till en generisk "Jobbet hittades inte"-sida.
         supabase
           .from('job_postings')
           .select('*')
           .eq('id', jobId)
-          .is('deleted_at', null)
           .maybeSingle(),
+
         supabase
           .from('job_questions')
           .select('*')
