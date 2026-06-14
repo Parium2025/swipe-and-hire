@@ -348,7 +348,18 @@ const JobbCity = () => {
             Skapa min profil idag och börja matcha med arbetsgivare {city.inForm} idag.
           </p>
           <div className="mt-7 flex justify-center">
-            <SeoCTAButton label="Skapa min profil idag" to="/auth" />
+            <SeoCTAButton
+              label="Skapa min profil idag"
+              onClick={() => {
+                persistSavedSearchIntent({
+                  city: city.name,
+                  citySlug: city.slug,
+                  returnTo: `/jobb/${city.slug}`,
+                });
+                navigate('/auth', { state: { mode: 'signup' } });
+              }}
+            />
+
           </div>
         </div>
       </section>
