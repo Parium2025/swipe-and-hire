@@ -3,9 +3,14 @@ import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
+import {
+  SeoOtherOccupationsInCity,
+  SeoOccupationInOtherCities,
+} from '@/components/seo/SeoFooterLinks';
+import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Briefcase, CheckCircle2, MapPin, Zap } from 'lucide-react';
+import { CheckCircle2, MapPin, Zap } from 'lucide-react';
 import { CITY_BY_SLUG, CITIES } from '@/data/jobCities';
 import { OCCUPATION_BY_SLUG, OCCUPATIONS } from '@/data/jobOccupations';
 
