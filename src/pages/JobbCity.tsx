@@ -1,19 +1,28 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { syncBrowserChrome } from '@/lib/browserChrome';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin, Zap, MessageSquare, Search, Briefcase, Building2 } from 'lucide-react';
 import { CITIES, CITY_BY_SLUG, POPULAR_ROLES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 
+type PublicJobRow = {
+  id: string;
+  title: string;
+  workplace_city: string | null;
+  workplace_name: string | null;
+  employment_type: string | null;
+};
+
 const sampleJobsForCity = (cityName: string) => [
-  { title: 'Butiksmedarbetare', company: 'Retail & Service', type: 'Deltid', location: cityName },
-  { title: 'Lagerarbetare', company: 'Logistikpartner', type: 'Heltid', location: cityName },
-  { title: 'Restaurangpersonal', company: 'Restauranggrupp', type: 'Extra', location: cityName },
+  { id: 'profile', title: 'Butiksmedarbetare', company: 'Retail & Service', type: 'Deltid', location: cityName },
+  { id: 'profile-2', title: 'Lagerarbetare', company: 'Logistikpartner', type: 'Heltid', location: cityName },
+  { id: 'profile-3', title: 'Restaurangpersonal', company: 'Restauranggrupp', type: 'Extra', location: cityName },
 ];
 
 const BASE = 'https://parium.se';
@@ -22,10 +31,33 @@ const JobbCity = () => {
   const { citySlug } = useParams<{ citySlug: string }>();
   const navigate = useNavigate();
   const city = citySlug ? CITY_BY_SLUG[citySlug] : null;
+  const [jobs, setJobs] = useState<PublicJobRow[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
   }, []);
+
+  useEffect(() => {
+    if (!city) return;
+    let cancelled = false;
+    setJobsLoading(true);
+    (async () => {
+      const { data } = await supabase
+        .from('job_postings')
+        .select('id,title,workplace_city,workplace_name,employment_type')
+        .eq('is_active', true)
+        .is('deleted_at', null)
+        .ilike('workplace_city', `%${city.name}%`)
+        .order('created_at', { ascending: false })
+        .limit(6);
+      if (!cancelled) {
+        setJobs((data as PublicJobRow[]) || []);
+        setJobsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [city]);
 
   if (!city) return <Navigate to="/jobb" replace />;
 
@@ -89,6 +121,15 @@ const JobbCity = () => {
 
   // Länka till 4 andra städer (intern länkning)
   const otherCities = CITIES.filter((c) => c.slug !== city.slug).slice(0, 6);
+  const displayedJobs = jobs.length > 0
+    ? jobs.map((job) => ({
+        id: job.id,
+        title: job.title,
+        company: job.workplace_name || 'Arbetsgivare',
+        type: job.employment_type || 'Jobb',
+        location: job.workplace_city || city.name,
+      }))
+    : sampleJobsForCity(city.name);
 
   return (
     <div data-seo-scroll-root className="fixed inset-0 h-[100dvh] w-full overflow-y-auto overflow-x-hidden overscroll-contain pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white [-webkit-overflow-scrolling:touch] [touch-action:pan-y_pinch-zoom]">
@@ -163,21 +204,21 @@ const JobbCity = () => {
         </div>
       </section>
 
-      <section className="px-5 pb-12 sm:px-8 md:px-12">
+      <section id="alla-jobb" className="scroll-mt-24 px-5 pb-12 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Alla jobb {city.inForm}</h2>
-              <p className="mt-2 text-sm text-white/70">Exempel på jobbflödet i Parium. Skapa profil för att se och matcha med riktiga annonser.</p>
+              <p className="mt-2 text-sm text-white/70">{jobsLoading ? 'Hämtar aktiva annonser…' : jobs.length > 0 ? 'Riktiga annonser som går att öppna direkt.' : 'Skapa profil för att se fler matchande jobb i appen.'}</p>
             </div>
             <Link to="/annonser" className="hidden text-sm font-medium text-white/80 underline-offset-4 hover:underline sm:inline-flex">Visa senaste jobb</Link>
           </div>
           <ul className="grid gap-3 md:grid-cols-3">
-            {sampleJobsForCity(city.name).map((job) => (
+            {displayedJobs.map((job) => (
               <li key={job.title}>
                 <button
                   type="button"
-                  onPointerDown={() => navigate('/auth')}
+                  onPointerDown={() => navigate(jobs.length > 0 ? `/annons/${job.id}` : '/auth')}
                   className="group flex min-h-[150px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.10]"
                 >
                   <div>
