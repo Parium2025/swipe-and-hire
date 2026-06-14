@@ -193,7 +193,18 @@ const JobbCity = () => {
             transition={{ duration: 0.7, delay: 0.25 }}
             className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
-            <SeoCTAButton label="Skapa min profil idag" to="/auth" />
+            <SeoCTAButton
+              label="Skapa min profil idag"
+              onClick={() => {
+                persistSavedSearchIntent({
+                  city: city.name,
+                  citySlug: city.slug,
+                  returnTo: `/jobb/${city.slug}`,
+                });
+                navigate('/auth', { state: { mode: 'signup' } });
+              }}
+            />
+
             <Link
               to="/annonser"
               className="min-h-11 inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 backdrop-blur-md px-7 text-sm font-medium hover:bg-white/15 transition-colors"
