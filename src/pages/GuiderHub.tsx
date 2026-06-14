@@ -63,7 +63,7 @@ const GuiderHub = () => {
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Karriärguider & jobbtips
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 sm:text-xl">
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">
               Allt du behöver för att söka, byta eller förhandla jobb 2026 – skrivet för
               den svenska arbetsmarknaden.
             </p>
@@ -78,12 +78,12 @@ const GuiderHub = () => {
                   to={`/guider/${g.slug}`}
                   className="block h-full rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-7 hover:bg-white/[0.10] transition"
                 >
-                  <span className="text-xs uppercase tracking-wider text-white/60">
+                  <span className="text-xs uppercase tracking-wider text-white">
                     {g.category}
                   </span>
                   <h2 className="mt-3 text-xl font-semibold text-white">{g.title}</h2>
-                  <p className="mt-3 text-sm text-white/75">{g.excerpt}</p>
-                  <p className="mt-4 inline-flex items-center gap-1.5 text-xs text-white/50">
+                  <p className="mt-3 text-sm text-white">{g.excerpt}</p>
+                  <p className="mt-4 inline-flex items-center gap-1.5 text-xs text-white">
                     <Clock className="h-3.5 w-3.5" />
                     {g.readingMinutes} min · Uppdaterad {g.updated}
                   </p>

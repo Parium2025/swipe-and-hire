@@ -96,7 +96,7 @@ const GuidePage = () => {
             <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
               {guide.title}
             </h1>
-            <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white/60">
+            <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white">
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="h-4 w-4" /> {guide.readingMinutes} min läsning
               </span>
@@ -104,7 +104,7 @@ const GuidePage = () => {
                 <Calendar className="h-4 w-4" /> Uppdaterad {guide.updated}
               </span>
             </div>
-            <p className="mt-6 text-lg text-white/85">{guide.excerpt}</p>
+            <p className="mt-6 text-lg text-white">{guide.excerpt}</p>
           </div>
 
           {/* Sections */}
@@ -114,7 +114,7 @@ const GuidePage = () => {
                 <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                   {s.heading}
                 </h2>
-                <p className="mt-4 whitespace-pre-line text-white/80 leading-relaxed">
+                <p className="mt-4 whitespace-pre-line text-white leading-relaxed">
                   {s.body}
                 </p>
               </section>
@@ -133,7 +133,7 @@ const GuidePage = () => {
                   <summary className="cursor-pointer list-none text-lg font-medium text-white">
                     {f.q}
                   </summary>
-                  <p className="mt-3 text-white/80">{f.a}</p>
+                  <p className="mt-3 text-white">{f.a}</p>
                 </details>
               ))}
             </div>
@@ -144,7 +144,7 @@ const GuidePage = () => {
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               Klar att ta nästa steg?
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-white/80">
+            <p className="mx-auto mt-4 max-w-xl text-white">
               Skapa min profil idag i Parium – matcha med arbetsgivare direkt.
             </p>
             <Button
