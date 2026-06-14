@@ -26,6 +26,8 @@ import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
 import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
+import OmOss from "./pages/OmOss";
+import CookieBanner from "./components/CookieBanner";
 
 // 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
 // imported module" errors from freezing the app on a dark Suspense fallback.
