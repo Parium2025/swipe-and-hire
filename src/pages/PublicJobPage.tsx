@@ -1,14 +1,19 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate, Navigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
-import { supabase } from '@/integrations/supabase/client';
-import LandingNav from '@/components/LandingNav';
-import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
-import { Button } from '@/components/ui/button';
-import { syncBrowserChrome } from '@/lib/browserChrome';
-import { ArrowRight, MapPin, Briefcase, Clock, Building2, Loader2 } from 'lucide-react';
-import { CITIES } from '@/data/jobCities';
+ import { useEffect, useState } from 'react';
+ import { Link, useParams, useNavigate, Navigate } from 'react-router-dom';
+ import { Helmet } from 'react-helmet-async';
+ import { motion } from 'framer-motion';
+ import { supabase } from '@/integrations/supabase/client';
+ import LandingNav from '@/components/LandingNav';
+ import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
+ import { Button } from '@/components/ui/button';
+ import { syncBrowserChrome } from '@/lib/browserChrome';
+ import { ArrowRight, MapPin, Briefcase, Clock, Building2, Loader2 } from 'lucide-react';
+ import { CITIES } from '@/data/jobCities';
+ import { useAuth } from '@/hooks/useAuth';
+ import { setPendingJob } from '@/lib/pendingJobIntent';
+ import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
+ import { OCCUPATIONS } from '@/data/jobOccupations';
+ 
 
 const BASE = 'https://parium.se';
 
@@ -48,9 +53,12 @@ const slugify = (s: string) =>
 const PublicJobPage = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // Vid utgången annons: titel + yrke från arkiverad rad (utan is_active-filter).
+  const [expiredCtx, setExpiredCtx] = useState<{ title?: string; occupation?: string } | null>(null);
 
   useEffect(() => { syncBrowserChrome(window.location.pathname); }, []);
 
@@ -67,12 +75,36 @@ const PublicJobPage = () => {
         .is('deleted_at', null)
         .maybeSingle();
       if (cancelled) return;
-      if (error || !data) { setNotFound(true); setLoading(false); return; }
+      if (error || !data) {
+        // Sekundär hämtning utan is_active för att ge kontext om jobbet är tillsatt.
+        const { data: expired } = await supabase
+          .from('job_postings')
+          .select('title,occupation')
+          .eq('id', jobId)
+          .maybeSingle();
+        if (!cancelled && expired) {
+          setExpiredCtx({ title: expired.title || undefined, occupation: expired.occupation || undefined });
+        }
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
       setJob(data as Job);
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [jobId]);
+
+  // Slussar till Ansök — om utloggad: parkera intent och gå via /auth.
+  const goApply = (id: string) => {
+    if (!user) {
+      setPendingJob({ jobId: id, action: 'apply' });
+      navigate('/auth', { state: { mode: 'signup' } });
+      return;
+    }
+    navigate(`/job-application/${id}`);
+  };
+
 
   if (!jobId) return <Navigate to="/jobb" replace />;
 
@@ -86,14 +118,56 @@ const PublicJobPage = () => {
 
   if (notFound || !job) {
     const fallbackCities = CITIES.slice(0, 8);
+    // Försök matcha utgånget jobb till ett yrke i vår taxonomi.
+    const occMatch = (() => {
+      if (!expiredCtx?.occupation && !expiredCtx?.title) return null;
+      const needle = (expiredCtx.occupation || expiredCtx.title || '').toLowerCase();
+      return (
+        OCCUPATIONS.find(o =>
+          needle.includes(o.name.toLowerCase()) ||
+          needle.includes(o.slug.toLowerCase())
+        ) || null
+      );
+    })();
+    const ctxOccName = occMatch?.name || expiredCtx?.occupation || null;
+    const ctxOccSlug = occMatch?.slug || null;
+
+    const headline = ctxOccName
+      ? `Tyvärr — det här ${ctxOccName.toLowerCase()}-jobbet är tillsatt`
+      : 'Tyvärr har annonsen utgått';
+    const subline = ctxOccName
+      ? `Den här annonsen är inte längre aktiv. Men det finns fler ${ctxOccName.toLowerCase()}-jobb runt om i Sverige — välj en stad nedan så börjar vi söka.`
+      : 'Den här jobbannonsen är inte längre aktiv. Men det finns massor av nya möjligheter — utforska lediga jobb nedan eller skapa en profil så matchar vi dig automatiskt.';
+
+    const goSearchInCity = (cityName: string, citySlug: string) => {
+      // Parkera sök-intent så app-läget öppnar med yrket + staden förifyllt
+      // efter login + ev. välkomsttunnel.
+      if (ctxOccName) {
+        persistSavedSearchIntent({
+          city: cityName,
+          citySlug,
+          occupation: ctxOccName,
+          occupationSlug: ctxOccSlug || undefined,
+          returnTo: ctxOccSlug ? `/jobb/${citySlug}/${ctxOccSlug}` : `/jobb/${citySlug}`,
+        });
+      }
+      if (ctxOccSlug) {
+        navigate(`/jobb/${citySlug}/${ctxOccSlug}`);
+      } else {
+        navigate(`/jobb/${citySlug}`);
+      }
+    };
+
     return (
       <div className="seo-scroll-page bg-[hsl(215_100%_12%)] text-white">
         {/* Signalerar till Google: avindexera URL men följ länkar vidare. */}
         <Helmet>
-          <title>Tyvärr har annonsen utgått | Parium</title>
-          <meta name="description" content="Den här jobbannonsen har gått ut. Upptäck nya lediga jobb i hela Sverige på Parium." />
+          <title>{ctxOccName ? `${ctxOccName}-jobb tillsatt | Parium` : 'Tyvärr har annonsen utgått | Parium'}</title>
+          <meta name="description" content={ctxOccName
+            ? `Det här ${ctxOccName.toLowerCase()}-jobbet är tillsatt. Hitta fler ${ctxOccName.toLowerCase()}-jobb i din stad på Parium.`
+            : 'Den här jobbannonsen har gått ut. Upptäck nya lediga jobb i hela Sverige på Parium.'} />
           <meta name="robots" content="noindex,follow" />
-          <link rel="canonical" href={`${BASE}/jobb`} />
+          <link rel="canonical" href={ctxOccSlug ? `${BASE}/yrke/${ctxOccSlug}` : `${BASE}/jobb`} />
         </Helmet>
         <LandingNav onLoginClick={() => navigate("/auth")} />
         <main className="max-w-2xl mx-auto px-6 pt-32 pb-24 text-center">
@@ -106,32 +180,51 @@ const PublicJobPage = () => {
               <Clock className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4 text-white">
-              Tyvärr har annonsen utgått
+              {headline}
             </h1>
             <p className="text-white text-base sm:text-lg mb-10 leading-relaxed">
-              Den här jobbannonsen är inte längre aktiv. Men det finns massor av nya möjligheter — utforska lediga jobb nedan eller skapa en profil så matchar vi dig automatiskt.
+              {subline}
             </p>
+            {ctxOccName && (
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 backdrop-blur-md px-4 py-2 mb-8 text-sm text-white">
+                <Briefcase className="w-4 h-4" />
+                Söker just nu: <strong className="font-semibold">{ctxOccName}</strong>
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-14">
-              <Button asChild className="bg-secondary text-white hover:bg-secondary/90 rounded-full h-12 px-8 text-base font-medium">
-                <Link to="/jobb">Bläddra lediga jobb</Link>
+              <Button
+                asChild
+                className="bg-secondary text-white hover:bg-secondary/90 rounded-full min-h-12 px-7 text-base font-medium"
+              >
+                <Link to={ctxOccSlug ? `/yrke/${ctxOccSlug}` : '/jobb'}>
+                  {ctxOccName ? `Se alla ${ctxOccName.toLowerCase()}-jobb` : 'Bläddra lediga jobb'}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
               </Button>
-              <Button asChild variant="outline" className="border-white/15 bg-white/5 text-white hover:bg-white/10 rounded-full h-12 px-8 text-base">
+              <Button
+                asChild
+                variant="outline"
+                className="border-white/25 bg-white/5 text-white hover:bg-white/10 rounded-full min-h-12 px-7 text-base"
+              >
                 <Link to="/auth" state={{ mode: 'signup' }}>Skapa min profil idag</Link>
               </Button>
             </div>
             <section className="border-t border-white/10 pt-8 text-left">
               <h2 className="text-sm font-semibold text-white mb-4 text-center uppercase tracking-wider">
-                Hitta jobb i en stad nära dig
+                {ctxOccName ? `Välj stad för ${ctxOccName.toLowerCase()}-jobb` : 'Hitta jobb i en stad nära dig'}
               </h2>
               <div className="flex flex-wrap gap-2 justify-center">
                 {fallbackCities.map(c => (
-                  <Link
+                  <button
                     key={c.slug}
-                    to={`/jobb/${c.slug}`}
-                    className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 transition"
+                    type="button"
+                    onPointerDown={(e) => { e.preventDefault(); goSearchInCity(c.name, c.slug); }}
+                    onClick={(e) => e.preventDefault()}
+                    className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 transition min-h-[36px]"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
-                    Jobb i {c.name}
-                  </Link>
+                    {ctxOccName ? `${ctxOccName} ${c.inForm || 'i ' + c.name}` : `Jobb i ${c.name}`}
+                  </button>
                 ))}
               </div>
             </section>
@@ -140,6 +233,7 @@ const PublicJobPage = () => {
       </div>
     );
   }
+
 
   const city = job.workplace_city || job.location || 'Sverige';
   const company = job.workplace_name || 'Arbetsgivare';
@@ -268,8 +362,8 @@ const PublicJobPage = () => {
 
         <div className="flex flex-col sm:flex-row gap-3 mb-12">
           <Button
-            onClick={() => navigate(`/job-application/${job.id}`)}
-            className="bg-secondary text-white hover:bg-secondary/90 h-12 px-6 text-base font-medium"
+            onClick={() => goApply(job.id)}
+            className="bg-secondary text-white hover:bg-secondary/90 rounded-full min-h-12 px-7 text-base font-medium"
           >
             Ansök nu
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -277,11 +371,12 @@ const PublicJobPage = () => {
           <Button
             variant="outline"
             asChild
-            className="border-white/15 bg-white/5 text-white hover:bg-white/10 h-12 px-6"
+            className="border-white/15 bg-white/5 text-white hover:bg-white/10 rounded-full min-h-12 px-7"
           >
             <Link to="/jobb">Se fler jobb</Link>
           </Button>
         </div>
+
 
         {job.description && (
           <section className="mb-12">
@@ -330,11 +425,12 @@ const PublicJobPage = () => {
           <h2 className="text-xl font-semibold mb-2">Ansök direkt i Parium</h2>
           <p className="text-white/70 mb-4">Skapa profil på under en minut. Chatta direkt med arbetsgivaren och få snabbare svar.</p>
           <Button
-            onClick={() => navigate(`/job-application/${job.id}`)}
-            className="bg-secondary text-white hover:bg-secondary/90"
+            onClick={() => goApply(job.id)}
+            className="bg-secondary text-white hover:bg-secondary/90 rounded-full min-h-12 px-7"
           >
             Skicka ansökan <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
+
         </section>
 
         <section className="border-t border-white/10 pt-10">
@@ -352,7 +448,12 @@ const PublicJobPage = () => {
           </div>
         </section>
       </main>
-      <MobileStickyCTA label="Skicka ansökan" to={`/job-application/${job.id}`} />
+      <MobileStickyCTA
+        label={user ? 'Skicka ansökan' : 'Skapa profil & ansök'}
+        to={user ? `/job-application/${job.id}` : '/auth'}
+        onBeforeNavigate={() => { if (!user) setPendingJob({ jobId: job.id, action: 'apply' }); }}
+      />
+
     </div>
   );
 };

@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, CheckCircle2, MapPin, Zap } from 'lucide-react';
 import { OCCUPATION_BY_SLUG } from '@/data/jobOccupations';
 import { CITIES } from '@/data/jobCities';
+import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
+
 
 const BASE = 'https://parium.se';
 
@@ -128,7 +130,14 @@ const YrkePage = () => {
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button
                 size="lg"
-                onClick={() => navigate('/auth')}
+                onClick={() => {
+                  persistSavedSearchIntent({
+                    occupation: occ.name,
+                    occupationSlug: occ.slug,
+                    returnTo: `/yrke/${occ.slug}`,
+                  });
+                  navigate('/auth', { state: { mode: 'signup' } });
+                }}
                 className="min-h-12 rounded-full bg-secondary text-white hover:bg-secondary/90 px-8 text-base font-semibold"
               >
                 Skapa min profil idag
@@ -143,6 +152,7 @@ const YrkePage = () => {
                 Så funkar Parium
               </Button>
             </div>
+
           </div>
         </section>
 
@@ -245,12 +255,20 @@ const YrkePage = () => {
             </p>
             <Button
               size="lg"
-              onClick={() => navigate('/auth')}
+              onClick={() => {
+                persistSavedSearchIntent({
+                  occupation: occ.name,
+                  occupationSlug: occ.slug,
+                  returnTo: `/yrke/${occ.slug}`,
+                });
+                navigate('/auth', { state: { mode: 'signup' } });
+              }}
               className="mt-8 min-h-11 rounded-full bg-secondary text-white hover:bg-secondary/90 px-7"
             >
               Skapa min profil idag
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
+
           </div>
         </section>
         <MobileStickyCTA />

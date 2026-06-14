@@ -13,6 +13,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { consumePendingJobPath } from '@/lib/pendingJobIntent';
+
 
 // Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
@@ -633,23 +635,48 @@ const Auth = () => {
       // Om användaren kom hit via "Bevaka denna sökning" på en SEO-sida:
       // skapa saved_search + slussa till returnTo. Fire-and-forget för att
       // inte blockera renderingen – Navigate sker direkt till returnTo.
+      // VIKTIGT: hoppa över returnTo om jobbsökaren ännu inte har gjort klart
+      // välkomsttunneln — då skickas användaren till /home, tunneln triggas,
+      // och Index.tsx konsumerar intent i onComplete (rätt tunneltråd).
       try {
         const raw = typeof window !== 'undefined' ? sessionStorage.getItem('parium-saved-search-intent') : null;
         if (raw) {
           const parsed = JSON.parse(raw);
           const returnTo = parsed?.returnTo;
-          import('@/lib/savedSearchIntent').then(({ consumeIntent }) => {
-            consumeIntent(user.id).catch(() => {});
-          });
-          if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('/')) {
-            return <Navigate to={returnTo} replace />;
+          const onboardingDone = (profile as any)?.onboarding_completed === true;
+          const isJobSeeker = role === 'job_seeker';
+          if (!isJobSeeker || onboardingDone) {
+            import('@/lib/savedSearchIntent').then(({ consumeIntent }) => {
+              consumeIntent(user.id).catch(() => {});
+            });
+            if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('/')) {
+              return <Navigate to={returnTo} replace />;
+            }
           }
+          // Annars: lämna intent kvar — WelcomeTunnel.onComplete i Index.tsx
+          // konsumerar den och slussar dit efter att tunneln är klar.
         }
-      } catch { /* fortsätt till /home */ }
+      } catch { /* fortsätt */ }
+
+
+      // Om användaren kom hit från en jobbannons (utloggad → klickade "Ansök"):
+      // Slussa direkt vidare till ansökan — MEN ENDAST om välkomsttunneln
+      // redan är klar. Är den inte klar låter vi tunneln konsumera intent
+      // i sin onComplete (se Index.tsx) så hela onboardingen körs först.
+      try {
+        const onboardingDone = (profile as any)?.onboarding_completed === true;
+        if (role === 'job_seeker' && onboardingDone) {
+          const path = consumePendingJobPath();
+          if (path) return <Navigate to={path} replace />;
+        }
+      } catch { /* fortsätt */ }
+
+
       // Alla roller landar på /home efter inloggning
       return <Navigate to="/home" replace />;
     }
   }
+
 
   // Använd rätt komponent baserat på skärmstorlek
   const authBackdropStyle = {
