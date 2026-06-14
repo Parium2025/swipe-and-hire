@@ -236,8 +236,6 @@ const JobbCity = () => {
         </div>
       </section>
 
-      {/* Populära yrken */}
-      <section className="px-5 py-16 sm:px-8 md:px-12">
       {/* Populära yrken (intern länkning med äkta siffror) */}
       {city && (
         <SeoOtherOccupationsInCity
