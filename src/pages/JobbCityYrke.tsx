@@ -244,18 +244,9 @@ const JobbCityYrke = () => {
             <h2 className="text-center text-xl font-semibold tracking-tight sm:text-2xl text-white">
               Vanliga frågor
             </h2>
-            <div className="mt-6 space-y-2">
+            <div className="mt-6 space-y-3">
               {faqs.map((f) => (
-                <details
-                  key={f.q}
-                  className="group rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-md transition-colors hover:bg-white/[0.06]"
-                >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-medium text-white">
-                    <span>{f.q}</span>
-                    <ChevronRight className="h-4 w-4 text-white transition-transform group-open:rotate-90" />
-                  </summary>
-                  <p className="px-5 pb-5 pt-0 text-sm text-white leading-relaxed">{f.a}</p>
-                </details>
+                <FaqAccordion key={f.q} q={f.q} a={f.a} />
               ))}
             </div>
           </div>
