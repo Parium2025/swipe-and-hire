@@ -148,20 +148,20 @@ const JobbCityYrke = () => {
               <span className="text-white/80">{occ.name}</span>
             </nav>
 
-            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white/80 backdrop-blur">
+            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white backdrop-blur">
               <MapPin className="h-3.5 w-3.5" />
               {city.name} · {occ.category}
               {hasJobs && (
-                <span className="ml-1 rounded-full bg-secondary/20 text-secondary px-2 py-0.5 text-[11px] font-semibold">
+                <span className="ml-1 rounded-full bg-secondary/25 text-white px-2 py-0.5 text-[11px] font-semibold">
                   {jobCount} aktiva
                 </span>
               )}
             </p>
 
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
               Lediga jobb {occ.asForm} {city.inForm}
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base text-white/80 sm:text-lg">
+            <p className="mx-auto mt-5 max-w-2xl text-base text-white sm:text-lg">
               {occ.intro} I {city.name} matchar Parium dig direkt med arbetsgivare som söker {occ.plural}.
             </p>
 
@@ -181,47 +181,48 @@ const JobbCityYrke = () => {
         <section className="px-5 py-10 sm:px-8 md:px-12">
           <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
-              <h2 className="text-base font-semibold tracking-tight text-white/90">
+              <h2 className="text-base font-semibold tracking-tight text-white">
                 Arbetsuppgifter
               </h2>
               <ul className="mt-4 space-y-2.5">
                 {occ.tasks.slice(0, 5).map((task) => (
-                  <li key={task} className="flex items-start gap-2.5 text-sm text-white/80">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/50" />
+                  <li key={task} className="flex items-start gap-2.5 text-sm text-white">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-white" />
                     <span>{task}</span>
                   </li>
                 ))}
               </ul>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
-              <h2 className="text-base font-semibold tracking-tight text-white/90">
+              <h2 className="text-base font-semibold tracking-tight text-white">
                 Krav & kompetens
               </h2>
               <ul className="mt-4 space-y-2.5">
                 {occ.skills.slice(0, 5).map((skill) => (
-                  <li key={skill} className="flex items-start gap-2.5 text-sm text-white/80">
-                    <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/50" />
+                  <li key={skill} className="flex items-start gap-2.5 text-sm text-white">
+                    <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-white" />
                     <span>{skill}</span>
                   </li>
                 ))}
               </ul>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
-              <h2 className="text-base font-semibold tracking-tight text-white/90">
+              <h2 className="text-base font-semibold tracking-tight text-white">
                 Lön {city.inForm}
               </h2>
-              <p className="mt-4 text-sm text-white/80 leading-relaxed">{occ.salary}</p>
-              <p className="mt-3 text-xs text-white/50">
+              <p className="mt-4 text-sm text-white leading-relaxed">{occ.salary}</p>
+              <p className="mt-3 text-xs text-white/80">
                 Områden: {city.areas.slice(0, 3).join(', ')}
               </p>
             </div>
           </div>
         </section>
 
+
         {/* ─── FAQ (kompakt accordion, stängd by default) ─── */}
         <section className="px-5 py-10 sm:px-8 md:px-12">
           <div className="mx-auto max-w-3xl">
-            <h2 className="text-center text-xl font-semibold tracking-tight sm:text-2xl text-white/90">
+            <h2 className="text-center text-xl font-semibold tracking-tight sm:text-2xl text-white">
               Vanliga frågor
             </h2>
             <div className="mt-6 space-y-2">
@@ -230,11 +231,11 @@ const JobbCityYrke = () => {
                   key={f.q}
                   className="group rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-md transition-colors hover:bg-white/[0.06]"
                 >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-medium text-white/90">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-medium text-white">
                     <span>{f.q}</span>
-                    <ChevronRight className="h-4 w-4 text-white/50 transition-transform group-open:rotate-90" />
+                    <ChevronRight className="h-4 w-4 text-white transition-transform group-open:rotate-90" />
                   </summary>
-                  <p className="px-5 pb-5 pt-0 text-sm text-white/70 leading-relaxed">{f.a}</p>
+                  <p className="px-5 pb-5 pt-0 text-sm text-white leading-relaxed">{f.a}</p>
                 </details>
               ))}
             </div>
@@ -261,10 +262,10 @@ const JobbCityYrke = () => {
         {/* ─── Slut-CTA ─── */}
         <section className="px-5 py-16 sm:px-8 md:px-12">
           <div className="mx-auto max-w-2xl rounded-3xl border border-white/15 bg-white/[0.05] backdrop-blur-md p-8 sm:p-10 text-center">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
               Sök jobb {occ.asForm} {city.inForm} idag
             </h2>
-            <p className="mx-auto mt-3 max-w-lg text-white/75">
+            <p className="mx-auto mt-3 max-w-lg text-white">
               Skapa en profil gratis. Matcha med arbetsgivare {city.inForm} på sekunder.
             </p>
             <div className="mt-7 flex justify-center">
