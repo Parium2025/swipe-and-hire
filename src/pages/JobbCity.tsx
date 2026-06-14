@@ -224,12 +224,9 @@ const JobbCity = () => {
       {jobs.length > 0 && (
         <section id="alla-jobb" className="scroll-mt-24 px-5 pb-12 sm:px-8 md:px-12">
           <div className="mx-auto max-w-5xl">
-            <div className="mb-5 flex items-end justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">Lediga jobb {city.inForm}</h2>
-                <p className="mt-2 text-sm text-white">Riktiga annonser som går att öppna direkt.</p>
-              </div>
-              <Link to="/annonser" className="hidden text-sm font-medium text-white underline-offset-4 hover:underline sm:inline-flex">Visa senaste jobb</Link>
+            <div className="mb-5">
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">Lediga jobb {city.inForm}</h2>
+              <p className="mt-2 text-sm text-white">Riktiga annonser som går att öppna direkt.</p>
             </div>
             <ul className="grid gap-3 md:grid-cols-3">
               {displayedJobs.map((job) => (
