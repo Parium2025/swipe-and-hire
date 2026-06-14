@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
+import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Clock, Calendar } from 'lucide-react';
@@ -78,7 +79,7 @@ const GuidePage = () => {
         <script type="application/ld+json">{JSON.stringify(faqLd)}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-[hsl(215_100%_12%)] text-white">
+      <div className="min-h-[100dvh] w-full pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         {/* Header */}
@@ -149,7 +150,7 @@ const GuidePage = () => {
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
-              className="mt-8 min-h-11 rounded-full bg-white text-[hsl(215_100%_12%)] hover:bg-white/90 px-7"
+              className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
             >
               Skapa profil gratis
               <ArrowRight className="ml-1 h-4 w-4" />
@@ -176,6 +177,7 @@ const GuidePage = () => {
             </ul>
           </div>
         </article>
+        <MobileStickyCTA />
       </div>
     </>
   );

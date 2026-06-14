@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
+import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin, Zap, MessageSquare, Search } from 'lucide-react';
@@ -84,7 +85,7 @@ const JobbCity = () => {
   const otherCities = CITIES.filter((c) => c.slug !== city.slug).slice(0, 6);
 
   return (
-    <div className="min-h-[100dvh] w-full bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+    <div className="min-h-[100dvh] w-full pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -141,7 +142,7 @@ const JobbCity = () => {
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
-              className="min-h-11 rounded-full bg-white text-[hsl(215_100%_12%)] hover:bg-white/90 px-7"
+              className="min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
             >
               Skapa profil gratis
               <ArrowRight className="ml-1 h-4 w-4" />
@@ -289,13 +290,14 @@ const JobbCity = () => {
           <Button
             size="lg"
             onClick={() => navigate('/auth')}
-            className="mt-8 min-h-11 rounded-full bg-white text-[hsl(215_100%_12%)] hover:bg-white/90 px-7"
+            className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
           >
             Skapa profil gratis
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
       </section>
+      <MobileStickyCTA />
     </div>
   );
 };
