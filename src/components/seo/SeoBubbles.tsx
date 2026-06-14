@@ -1,7 +1,7 @@
 /**
- * SeoBubbles — diskreta, lugna bubbel-prickar à la landningssidan.
- * Pure dekoration, pointer-events: none, ingen layout-påverkan.
- * Använd som första barn inuti hero-sektionen (relative-container).
+ * SeoBubbles — bakgrund identisk med landningssidan (jobbsökare/AudienceLanding).
+ * Två mjuka glow-orbs + diskreta vita prickar. Pointer-events: none, helt dekorativt.
+ * Placeras som första barn inuti en `relative` hero-sektion.
  */
 const dots = [
   { top: '8%', left: '6%', size: 6, opacity: 0.35 },
@@ -17,6 +17,23 @@ const dots = [
 
 const SeoBubbles = () => (
   <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+    {/* Stor mjuk glow uppe till höger – matchar AudienceLanding hero */}
+    <div
+      className="absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.10] blur-[180px]"
+    />
+    {/* Mjuk glow uppe i mitten */}
+    <div
+      className="absolute -top-24 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full opacity-70"
+      style={{
+        background:
+          'radial-gradient(60% 60% at 50% 50%, rgba(70,130,255,0.22) 0%, rgba(70,130,255,0) 70%)',
+      }}
+    />
+    {/* Subtil glow nere till vänster */}
+    <div
+      className="absolute -bottom-40 left-[-20%] h-[520px] w-[520px] rounded-full bg-secondary/[0.07] blur-[160px]"
+    />
+    {/* Diskreta vita prickar */}
     {dots.map((d, i) => (
       <span
         key={i}
