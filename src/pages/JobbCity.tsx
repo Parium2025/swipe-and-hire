@@ -6,9 +6,15 @@ import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MapPin, Zap, MessageSquare, Search } from 'lucide-react';
+import { ArrowRight, MapPin, Zap, MessageSquare, Search, Briefcase, Building2 } from 'lucide-react';
 import { CITIES, CITY_BY_SLUG, POPULAR_ROLES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
+
+const sampleJobsForCity = (cityName: string) => [
+  { title: 'Butiksmedarbetare', company: 'Retail & Service', type: 'Deltid', location: cityName },
+  { title: 'Lagerarbetare', company: 'Logistikpartner', type: 'Heltid', location: cityName },
+  { title: 'Restaurangpersonal', company: 'Restauranggrupp', type: 'Extra', location: cityName },
+];
 
 const BASE = 'https://parium.se';
 
@@ -85,7 +91,7 @@ const JobbCity = () => {
   const otherCities = CITIES.filter((c) => c.slug !== city.slug).slice(0, 6);
 
   return (
-    <div className="min-h-[100dvh] w-full pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+    <div data-seo-scroll-root className="fixed inset-0 h-[100dvh] w-full overflow-y-auto overflow-x-hidden overscroll-contain pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white [-webkit-overflow-scrolling:touch] [touch-action:pan-y_pinch-zoom]">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -107,7 +113,7 @@ const JobbCity = () => {
 
       {/* Hero */}
       <section className="relative px-5 pt-32 pb-16 sm:px-8 sm:pt-40 sm:pb-24 md:px-12">
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="mx-auto max-w-5xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -144,16 +150,50 @@ const JobbCity = () => {
               onClick={() => navigate('/auth')}
               className="min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
             >
-              Skapa profil gratis
+              Skapa en profil gratis
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
             <Link
-              to="/jobbsokare"
+              to="/annonser"
               className="min-h-11 inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 backdrop-blur-md px-7 text-sm font-medium hover:bg-white/15 transition-colors"
             >
-              Läs mer om Parium
+              Alla jobb {city.inForm}
             </Link>
           </motion.div>
+        </div>
+      </section>
+
+      <section className="px-5 pb-12 sm:px-8 md:px-12">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Alla jobb {city.inForm}</h2>
+              <p className="mt-2 text-sm text-white/70">Exempel på jobbflödet i Parium. Skapa profil för att se och matcha med riktiga annonser.</p>
+            </div>
+            <Link to="/annonser" className="hidden text-sm font-medium text-white/80 underline-offset-4 hover:underline sm:inline-flex">Visa senaste jobb</Link>
+          </div>
+          <ul className="grid gap-3 md:grid-cols-3">
+            {sampleJobsForCity(city.name).map((job) => (
+              <li key={job.title}>
+                <button
+                  type="button"
+                  onPointerDown={() => navigate('/auth')}
+                  className="group flex min-h-[150px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.10]"
+                >
+                  <div>
+                    <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                      <Briefcase className="h-5 w-5" aria-hidden="true" />
+                    </div>
+                    <h3 className="text-lg font-semibold leading-snug text-white">{job.title}</h3>
+                  </div>
+                  <div className="mt-5 space-y-2 text-sm text-white/75">
+                    <p className="flex items-center gap-2"><Building2 className="h-4 w-4" aria-hidden="true" />{job.company}</p>
+                    <p className="flex items-center gap-2"><MapPin className="h-4 w-4" aria-hidden="true" />{job.location} · {job.type}</p>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -161,7 +201,7 @@ const JobbCity = () => {
       <section className="px-5 py-16 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-            Populära yrken med lediga jobb {city.inForm}
+            Populära yrken {city.inForm}
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-center text-white/70">
             Här är yrken där det ofta finns lediga jobb {city.inForm} just nu.
