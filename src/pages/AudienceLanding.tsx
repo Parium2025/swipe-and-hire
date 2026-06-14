@@ -1450,23 +1450,17 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                       },
                     ]
                 ).map(({ q, a }) => (
-                  <motion.details
+                  <motion.div
                     key={q}
                     variants={{
                       hidden: { opacity: 0, x: 60 },
                       visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
                     }}
-                    className="group rounded-2xl border border-white/15 bg-white/5 px-6 py-5 backdrop-blur-xl transition-colors hover:border-secondary/25"
                   >
-                    <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-white">
-                      {q}
-                      <span className="ml-4 text-secondary transition-transform duration-300 group-open:rotate-45">+</span>
-                    </summary>
-                    <p className="mt-4 text-sm leading-7 text-white">
-                      <span className="font-semibold text-secondary">Svar: </span>{a}
-                    </p>
-                  </motion.details>
+                    <FaqAccordion q={q} a={a} />
+                  </motion.div>
                 ))}
+
 
               </motion.div>
             </div>
