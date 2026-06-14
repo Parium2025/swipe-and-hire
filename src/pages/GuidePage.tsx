@@ -120,7 +120,7 @@ const GuidePage = () => {
         <script type="application/ld+json">{JSON.stringify(faqLd)}</script>
       </Helmet>
 
-      <div className="seo-scroll-page bg-[hsl(215_100%_12%)] text-white">
+      <div className="seo-scroll-page bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         {/* Header */}
