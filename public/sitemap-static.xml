@@ -206,22 +206,12 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://parium.se/guider/uppsagning-rattigheter</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://parium.se/guider/extrajobb-student-2026</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://parium.se/guider/sommarjobb-2026</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://parium.se/guider/a-kassa-guide-2026</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2846,32 +2836,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://parium.se/guider/semesterlagen-2026</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://parium.se/guider/sjuklon-karens-2026</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://parium.se/guider/provanstallning-las-2026</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://parium.se/guider/tjanstledig-guide</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://parium.se/guider/jobbintervju-fragor-svar</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://parium.se/guider/arbetsgivarintyg-guide</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
