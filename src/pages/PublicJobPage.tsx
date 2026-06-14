@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import LandingNav from '@/components/LandingNav';
+import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { Button } from '@/components/ui/button';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { ArrowRight, MapPin, Briefcase, Clock, Building2, Loader2 } from 'lucide-react';
@@ -77,7 +78,7 @@ const PublicJobPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
+      <div className="seo-scroll-page bg-[hsl(215_100%_12%)] text-white flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin opacity-60" />
       </div>
     );
@@ -85,12 +86,12 @@ const PublicJobPage = () => {
 
   if (notFound || !job) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <div className="seo-scroll-page bg-[hsl(215_100%_12%)] text-white">
         <LandingNav onLoginClick={() => navigate("/auth")} />
         <div className="max-w-2xl mx-auto px-6 py-32 text-center">
           <h1 className="text-3xl font-semibold mb-4">Annonsen är inte längre tillgänglig</h1>
           <p className="text-white/60 mb-8">Den här jobbannonsen kan ha avslutats eller tagits bort.</p>
-          <Button asChild className="bg-white text-black hover:bg-white/90">
+          <Button asChild className="bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90">
             <Link to="/jobb">Bläddra lediga jobb</Link>
           </Button>
         </div>
@@ -176,7 +177,7 @@ const PublicJobPage = () => {
   const similarCities = CITIES.filter(c => c.slug !== slugify(city)).slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] text-white">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -226,7 +227,7 @@ const PublicJobPage = () => {
         <div className="flex flex-col sm:flex-row gap-3 mb-12">
           <Button
             onClick={() => navigate(`/job-application/${job.id}`)}
-            className="bg-white text-black hover:bg-white/90 h-12 px-6 text-base font-medium"
+            className="bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 h-12 px-6 text-base font-medium"
           >
             Ansök nu
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -288,7 +289,7 @@ const PublicJobPage = () => {
           <p className="text-white/70 mb-4">Skapa profil på under en minut. Chatta direkt med arbetsgivaren och få snabbare svar.</p>
           <Button
             onClick={() => navigate(`/job-application/${job.id}`)}
-            className="bg-white text-black hover:bg-white/90"
+            className="bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90"
           >
             Skicka ansökan <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
@@ -309,6 +310,7 @@ const PublicJobPage = () => {
           </div>
         </section>
       </main>
+      <MobileStickyCTA label="Skicka ansökan" to={`/job-application/${job.id}`} />
     </div>
   );
 };
