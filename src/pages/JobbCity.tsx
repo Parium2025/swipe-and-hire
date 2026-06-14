@@ -132,7 +132,7 @@ const JobbCity = () => {
     : sampleJobsForCity(city.name);
 
   return (
-    <div data-seo-scroll-root className="fixed inset-0 h-[100dvh] w-full overflow-y-auto overflow-x-hidden overscroll-contain pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white [-webkit-overflow-scrolling:touch] [touch-action:pan-y_pinch-zoom]">
+    <div data-seo-scroll-root className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -178,7 +178,7 @@ const JobbCity = () => {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl"
           >
-            {city.intro} Skapa profil gratis och matcha med arbetsgivare {city.inForm} direkt i appen.
+            {city.intro} Skapa en profil gratis och matcha med arbetsgivare {city.inForm} direkt i appen.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -366,14 +366,14 @@ const JobbCity = () => {
             Redo att hitta ditt nästa jobb {city.inForm}?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white/80">
-            Skapa profil gratis och börja matcha med arbetsgivare {city.inForm} idag.
+            Skapa en profil gratis och börja matcha med arbetsgivare {city.inForm} idag.
           </p>
           <Button
             size="lg"
             onClick={() => navigate('/auth')}
             className="mt-8 min-h-11 rounded-full bg-chalk text-[hsl(215_100%_12%)] hover:bg-chalk/90 px-7"
           >
-            Skapa profil gratis
+            Skapa en profil gratis
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
