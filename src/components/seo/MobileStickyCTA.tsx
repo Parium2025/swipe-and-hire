@@ -6,6 +6,8 @@ interface MobileStickyCTAProps {
   label?: string;
   /** Vart användaren ska — default /auth */
   to?: string;
+  /** Körs precis innan navigation (t.ex. för att parkera intent i sessionStorage). */
+  onBeforeNavigate?: () => void;
 }
 
 /**
@@ -16,6 +18,7 @@ interface MobileStickyCTAProps {
 const MobileStickyCTA = ({
   label = 'Skapa min profil idag',
   to = '/auth',
+  onBeforeNavigate,
 }: MobileStickyCTAProps) => {
   const navigate = useNavigate();
   return (
@@ -29,8 +32,10 @@ const MobileStickyCTA = ({
             type="button"
             onPointerDown={(e) => {
               e.preventDefault();
+              try { onBeforeNavigate?.(); } catch {}
               navigate(to);
             }}
+
             onClick={(e) => e.preventDefault()}
             className="flex w-full min-h-[52px] items-center justify-center gap-2 rounded-xl bg-secondary text-white px-6 text-[16px] font-semibold tracking-tight transition-colors active:bg-secondary/85"
             style={{ WebkitTapHighlightColor: 'transparent' }}
