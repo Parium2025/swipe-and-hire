@@ -181,11 +181,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://parium.se/guider/cv-mall-2026</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://parium.se/guider/genomsnittslon-sverige-2026</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -201,7 +196,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-  <url>
     <loc>https://parium.se/guider/extrajobb-student-2026</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -215,12 +209,6 @@
     <loc>https://parium.se/guider/lonesamtal-tips</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-  </url>
-  <url>
-  <url>
-    <loc>https://parium.se/annonser</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://parium.se/jobb/stockholm/snickare</loc>
