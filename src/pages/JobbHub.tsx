@@ -166,10 +166,10 @@ const JobbHub = () => {
 
       <section className="px-5 py-20 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-10 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
             Hitta ditt nästa jobb idag
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-white/80">
+          <p className="mx-auto mt-4 max-w-xl text-white">
             Skapa min profil idag. Inga oändliga listor – bara jobb som passar dig.
           </p>
           <Button
