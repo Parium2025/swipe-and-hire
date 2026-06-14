@@ -106,7 +106,7 @@ export const JobViewHero = memo(function JobViewHero({
     <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 py-4 sm:px-6 sm:py-6">
       <TruncatedText
         text={title}
-        className="text-white text-[15px] sm:text-xl md:text-2xl lg:text-3xl font-bold leading-snug sm:leading-tight max-w-4xl w-full text-center line-clamp-2 sm:line-clamp-3"
+        className="text-white text-[15px] sm:text-xl md:text-2xl lg:text-3xl font-bold leading-snug sm:leading-tight max-w-4xl w-full text-center line-clamp-2 sm:line-clamp-3 break-words"
         tooltipSide="bottom"
         style={overlayTextStyle}
       />
