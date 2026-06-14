@@ -363,7 +363,7 @@ const JobbCity = () => {
           </div>
         </div>
       </section>
-      <MobileStickyCTA />
+      
     </div>
   );
 };
