@@ -203,23 +203,7 @@ export const JobViewHero = memo(function JobViewHero({
   if (!imageUrl) {
     return (
       <div className="relative w-full h-80 md:h-96 overflow-hidden rounded-lg">
-      <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-start gap-2 pt-8 pb-32`}>
-          {hasLogo ? (
-            <>
-              <div className="w-20 h-20 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                <ResilientImage src={companyLogoUrl!} alt={companyName} className="w-full h-full object-cover" draggable={false} fallbackClassName="w-full h-full" />
-              </div>
-              <Badge variant="glass" className="text-xs px-2.5 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[80%] overflow-hidden text-white [text-shadow:0_0_1px_rgba(255,255,255,0.6)]">
-                <Building2 className="h-3.5 w-3.5 mr-1 flex-shrink-0 text-white drop-shadow-[0_0_1px_rgba(255,255,255,0.5)]" />
-                <span className="leading-snug truncate font-semibold text-white">{companyName}</span>
-              </Badge>
-            </>
-          ) : (
-            <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-              <span className="text-3xl font-bold text-white/50 tracking-wide">{initials}</span>
-            </div>
-          )}
-        </div>
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         {overlayContent}
       </div>
