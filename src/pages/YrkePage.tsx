@@ -21,7 +21,8 @@ const YrkePage = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
-  }, []);
+    window.scrollTo(0, 0);
+  }, [occupationSlug]);
 
   if (!occ) return <Navigate to="/yrken" replace />;
 
