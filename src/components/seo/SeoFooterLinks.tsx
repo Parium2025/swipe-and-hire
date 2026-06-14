@@ -1,16 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Briefcase, MapPin, BellRing } from 'lucide-react';
+import { Briefcase, MapPin, Search } from 'lucide-react';
 import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
 import { cn } from '@/lib/utils';
 
 type Item = {
-  /** Stabilt id */
   slug: string;
-  /** Visningstext */
   label: string;
-  /** Vart länken ska om det finns jobb */
   to: string;
-  /** Antalet jobb (om känt) */
   count?: number;
 };
 
@@ -18,7 +14,6 @@ interface SeoFooterLinksProps {
   title: string;
   items: Item[];
   icon?: 'occupation' | 'city';
-  /** Vart "Bevaka"-CTA ska om count = 0. Default: /auth */
   fallbackTo?: string;
 }
 
@@ -26,8 +21,9 @@ interface SeoFooterLinksProps {
  * Diskret länk-footer på SEO-sidor.
  *
  * - Aktiv länk visar antal jobb och leder till matchande SEO-sida.
- * - 0 jobb → inaktiverad chip + "Bevaka"-CTA till /auth.
- * - Syfte: intern länkning för Google + ärlig info till användaren.
+ * - 0 jobb → inaktiverad chip + "Sök"-CTA till /auth.
+ * - Kritvit text överallt. Tooltip på trunkerad label.
+ * - Knappen ligger alltid på samma rad oavsett labellängd.
  */
 const SeoFooterLinks = ({
   title,
@@ -40,15 +36,14 @@ const SeoFooterLinks = ({
   return (
     <section className="px-5 py-12 sm:px-8 md:px-12">
       <div className="mx-auto max-w-5xl">
-        <h2 className="text-center text-xl font-semibold tracking-tight sm:text-2xl text-white/90">
+        <h2 className="text-center text-xl font-semibold tracking-tight sm:text-2xl text-white">
           {title}
         </h2>
         <ul className="mt-8 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => {
             const count = item.count ?? 0;
             const hasJobs = count > 0;
-            const countLabel =
-              count === 1 ? '1 jobb' : `${count} jobb`;
+            const countLabel = count === 1 ? '1 jobb' : `${count} jobb`;
 
             if (!hasJobs) {
               return (
@@ -58,16 +53,19 @@ const SeoFooterLinks = ({
                       'flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.03] backdrop-blur-md px-4 py-3 text-sm'
                     )}
                   >
-                    <span className="flex items-center gap-2 text-white/40">
-                      <Icon className="h-4 w-4" />
-                      <span className="truncate">{item.label}</span>
+                    <span className="flex min-w-0 flex-1 items-center gap-2 text-white">
+                      <Icon className="h-4 w-4 shrink-0 text-white" />
+                      <span className="truncate" title={item.label}>
+                        {item.label}
+                      </span>
                     </span>
                     <Link
                       to={fallbackTo}
-                      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white/70 hover:bg-white/10 transition"
-                      aria-label={`Bevaka ${item.label}`}
+                      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white hover:bg-white/20 transition"
+                      aria-label={`Sök ${item.label}`}
+                      title={`Sök ${item.label}`}
                     >
-                      <BellRing className="h-3 w-3" /> Bevaka
+                      <Search className="h-3 w-3" /> Sök
                     </Link>
                   </div>
                 </li>
@@ -78,13 +76,14 @@ const SeoFooterLinks = ({
               <li key={item.slug}>
                 <Link
                   to={item.to}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-3 text-sm text-white/90 hover:bg-white/10 hover:border-white/20 transition"
+                  title={item.label}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-3 text-sm text-white hover:bg-white/10 hover:border-white/20 transition"
                 >
-                  <span className="flex items-center gap-2 min-w-0">
-                    <Icon className="h-4 w-4 text-white/60 shrink-0" />
+                  <span className="flex min-w-0 flex-1 items-center gap-2">
+                    <Icon className="h-4 w-4 text-white shrink-0" />
                     <span className="truncate">{item.label}</span>
                   </span>
-                  <span className="shrink-0 rounded-full bg-secondary/15 text-secondary px-2 py-0.5 text-[11px] font-semibold">
+                  <span className="shrink-0 rounded-full bg-secondary/20 text-white px-2 py-0.5 text-[11px] font-semibold">
                     {countLabel}
                   </span>
                 </Link>
