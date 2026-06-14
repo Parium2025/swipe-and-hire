@@ -5,6 +5,7 @@ import LandingNav from '@/components/LandingNav';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import FaqAccordion from '@/components/seo/FaqAccordion';
 import SeoBubbles from '@/components/seo/SeoBubbles';
+import SeoBackButton from '@/components/seo/SeoBackButton';
 import {
   SeoOtherOccupationsInCity,
   SeoOccupationInOtherCities,
