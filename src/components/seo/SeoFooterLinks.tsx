@@ -56,9 +56,12 @@ const SeoFooterLinks = ({
                   >
                     <span className="flex min-w-0 flex-1 items-center gap-2 text-white">
                       <Icon className="h-4 w-4 shrink-0 text-white" />
-                      <span className="truncate" title={item.label}>
-                        {item.label}
-                      </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="truncate">{item.label}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>{item.label}</TooltipContent>
+                      </Tooltip>
                     </span>
                     <Link
                       to={fallbackTo}
