@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Briefcase, MapPin, Search } from 'lucide-react';
 import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 type Item = {
