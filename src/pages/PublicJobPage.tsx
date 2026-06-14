@@ -362,8 +362,8 @@ const PublicJobPage = () => {
 
         <div className="flex flex-col sm:flex-row gap-3 mb-12">
           <Button
-            onClick={() => navigate(`/job-application/${job.id}`)}
-            className="bg-secondary text-white hover:bg-secondary/90 h-12 px-6 text-base font-medium"
+            onClick={() => goApply(job.id)}
+            className="bg-secondary text-white hover:bg-secondary/90 rounded-full min-h-12 px-7 text-base font-medium"
           >
             Ansök nu
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -371,11 +371,12 @@ const PublicJobPage = () => {
           <Button
             variant="outline"
             asChild
-            className="border-white/15 bg-white/5 text-white hover:bg-white/10 h-12 px-6"
+            className="border-white/15 bg-white/5 text-white hover:bg-white/10 rounded-full min-h-12 px-7"
           >
             <Link to="/jobb">Se fler jobb</Link>
           </Button>
         </div>
+
 
         {job.description && (
           <section className="mb-12">
