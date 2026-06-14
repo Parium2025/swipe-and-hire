@@ -137,7 +137,7 @@ const JobbCity = () => {
 
 
   return (
-    <div data-seo-scroll-root className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+    <div data-seo-scroll-root className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
