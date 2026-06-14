@@ -15,6 +15,8 @@ interface SeoCTAButtonProps
   size?: 'md' | 'lg';
   /** Variant. primary = ljusblå pill (Pariums standard), ghost = outline */
   variant?: 'primary' | 'ghost';
+  /** React Router state att skicka med (t.ex. { mode: 'signup' }) */
+  navState?: Record<string, unknown>;
 }
 
 /**
@@ -30,6 +32,7 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
       showArrow = true,
       size = 'lg',
       variant = 'primary',
+      navState,
       className,
       onClick,
       ...rest
@@ -56,7 +59,7 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
           if (rest.disabled) return;
           e.preventDefault();
           if (onClick) onClick(e as unknown as React.MouseEvent<HTMLButtonElement>);
-          else navigate(to);
+          else navigate(to, navState ? { state: navState } : undefined);
         }}
         onClick={(e) => e.preventDefault()}
         className={cn(
