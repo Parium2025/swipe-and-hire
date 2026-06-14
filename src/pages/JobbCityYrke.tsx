@@ -26,7 +26,8 @@ const JobbCityYrke = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
-  }, []);
+    window.scrollTo(0, 0);
+  }, [citySlug, occupationSlug]);
 
   if (!city || !occ) return <Navigate to="/jobb" replace />;
 
