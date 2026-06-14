@@ -425,11 +425,12 @@ const PublicJobPage = () => {
           <h2 className="text-xl font-semibold mb-2">Ansök direkt i Parium</h2>
           <p className="text-white/70 mb-4">Skapa profil på under en minut. Chatta direkt med arbetsgivaren och få snabbare svar.</p>
           <Button
-            onClick={() => navigate(`/job-application/${job.id}`)}
-            className="bg-secondary text-white hover:bg-secondary/90"
+            onClick={() => goApply(job.id)}
+            className="bg-secondary text-white hover:bg-secondary/90 rounded-full min-h-12 px-7"
           >
             Skicka ansökan <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
+
         </section>
 
         <section className="border-t border-white/10 pt-10">
