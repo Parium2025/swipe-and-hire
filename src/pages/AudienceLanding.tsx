@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
+import SiteFooter from '@/components/landing/SiteFooter';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 
@@ -1111,6 +1112,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
     { label: 'Funktioner', href: '#funktioner' },
     { label: 'Priser', href: '#priser' },
     { label: 'Vanliga frågor', href: '#faq' },
+    { label: 'Om oss', href: '/om-oss' },
     { label: 'Kontakt', href: '#kontakt' },
   ];
 
@@ -1507,6 +1509,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </div>
             {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
             <BouncyFooter audience={audience} onCta={handleStart} />
+
+            {/* ──────────────── 5. CLASSIC SITE FOOTER ──────────────── */}
+            <SiteFooter />
+
 
         </main>
       </div>
