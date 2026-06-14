@@ -26,8 +26,6 @@ import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
 import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
-import OmOss from "./pages/OmOss";
-import CookieBanner from "./components/CookieBanner";
 
 // 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
 // imported module" errors from freezing the app on a dark Suspense fallback.
@@ -173,7 +171,6 @@ const AnimatedRoutes = () => {
           <Route path="/" element={<Landing />} />
           <Route path="/jobbsokare" element={<AudienceLanding audience="job_seeker" />} />
           <Route path="/arbetsgivare" element={<AudienceLanding audience="employer" />} />
-          <Route path="/om-oss" element={<OmOss />} />
           <Route path="/jobb" element={<JobbHub />} />
           <Route path="/jobb/:citySlug" element={<JobbCity />} />
           <Route path="/jobb/:citySlug/:occupationSlug" element={<JobbCityYrke />} />
@@ -257,7 +254,6 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
         </div>
       </UnsavedChangesProvider>
       <PremiumLimitListener />
-      <CookieBanner />
     </>
   );
 };
