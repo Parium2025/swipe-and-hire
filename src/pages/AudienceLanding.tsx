@@ -1509,6 +1509,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
             <BouncyFooter audience={audience} onCta={handleStart} />
 
+            {/* ──────────────── 5. CLASSIC SITE FOOTER ──────────────── */}
+            <SiteFooter />
+
+
         </main>
       </div>
     </div>
