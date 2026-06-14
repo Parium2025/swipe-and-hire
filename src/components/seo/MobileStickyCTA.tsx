@@ -16,7 +16,7 @@ interface MobileStickyCTAProps {
  * enbart hero-CTA eftersom action alltid är inom räckhåll.
  */
 const MobileStickyCTA = ({
-  label = 'Skapa profil gratis',
+  label = 'Skapa en profil gratis',
   to = '/auth',
 }: MobileStickyCTAProps) => {
   const navigate = useNavigate();
