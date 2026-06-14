@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
+import FaqAccordion from '@/components/seo/FaqAccordion';
 import SeoFooterLinks, {
   SeoOtherOccupationsInCity,
 } from '@/components/seo/SeoFooterLinks';
