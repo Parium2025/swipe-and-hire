@@ -135,12 +135,9 @@ const JobbHub = () => {
               </li>
             ))}
           </ul>
-          <p className="mt-6 text-center text-white/60 text-sm flex flex-wrap justify-center gap-x-4 gap-y-2">
+          <p className="mt-6 text-center text-white/60 text-sm">
             <Link to="/yrken" className="underline-offset-4 hover:underline">
               Se alla yrken →
-            </Link>
-            <Link to="/annonser" className="underline-offset-4 hover:underline">
-              Se senaste annonser →
             </Link>
           </p>
         </div>
