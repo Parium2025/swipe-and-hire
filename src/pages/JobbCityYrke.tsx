@@ -11,7 +11,7 @@ import {
 } from '@/components/seo/SeoFooterLinks';
 import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import { CheckCircle2, MapPin, Zap, ChevronRight } from 'lucide-react';
+import { CheckCircle2, MapPin, Zap } from 'lucide-react';
 import { CITY_BY_SLUG, CITIES } from '@/data/jobCities';
 import { OCCUPATION_BY_SLUG, OCCUPATIONS } from '@/data/jobOccupations';
 
