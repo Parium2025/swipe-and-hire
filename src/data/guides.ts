@@ -161,44 +161,6 @@ export const GUIDES: GuideData[] = [
     ],
   },
   {
-    slug: 'tjanstepension-forklarat',
-    title: 'Tjänstepension förklarat 2026 – så funkar det och så maxar du den',
-    metaTitle: 'Tjänstepension 2026: ITP, SAF-LO & vad du bör veta | Parium',
-    description: 'Allt om tjänstepension 2026: ITP, SAF-LO, KAP-KL och PA16. Så väljer du fonder, så flyttar du och så maxar du din pension. Enkel guide.',
-    excerpt: 'Tjänstepensionen är ofta värd lika mycket som lönen över ett arbetsliv. Här är det viktigaste att förstå – och de val som faktiskt gör skillnad.',
-    category: 'Pension & lön',
-    readingMinutes: 7,
-    updated: '2026-06-01',
-    sections: [
-      {
-        heading: 'Vad är tjänstepension?',
-        body: 'Tjänstepension är den pension din arbetsgivare betalar in utöver din lön – ovanpå den allmänna pensionen från Pensionsmyndigheten. Cirka 9 av 10 anställda i Sverige har tjänstepension via kollektivavtal. Saknar du det kan du själv begära att arbetsgivaren tecknar en, eller välja en arbetsgivare som har avtal.',
-      },
-      {
-        heading: 'De fyra stora avtalen',
-        body: 'ITP (tjänstemän i privat sektor – Alecta/Collectum). SAF-LO (LO-anställda i privat sektor – Fora). KAP-KL/AKAP-KR (kommun och region). PA16 (statligt anställda). Vilket du har bestäms av arbetsgivarens kollektivavtal, inte av dig.',
-      },
-      {
-        heading: 'Så väljer du fonder',
-        body: 'Är du under 50 → välj global indexfond med låg avgift (helst <0,4%). Är du över 55 → börja gradvis flytta till räntefonder för att skydda kapitalet. Avstå alltid från fonder med över 1% avgift – över 30 år äter avgifter upp hundratusentals kronor.',
-      },
-      {
-        heading: 'Ska du flytta din tjänstepension?',
-        body: 'Att samla flera tjänstepensioner hos en aktör (t.ex. Avanza, Lysa, SPP) ger bättre överblick och oftast lägre avgifter. Kolla först om du har "fri flytträtt" – ITP har det sedan 2018, KAP-KL har det inte alltid. Flyttavgiften är max 600 kr enligt lag.',
-      },
-      {
-        heading: 'Vad ska du som jobbsökare fråga om?',
-        body: 'Fråga alltid vid anställningsintervjun: "Har ni kollektivavtal?" och "Hur stor procent av lönen sätts av till tjänstepension?". Standard är 4,5% upp till 7,5 inkomstbasbelopp, 30% därutöver. Ingen tjänstepension = lägre total ersättning, även om grundlönen ser bra ut.',
-      },
-    ],
-    faqs: [
-      { q: 'Hur mycket är tjänstepensionen värd?', a: 'För en genomsnittlig svensk är tjänstepensionen ungefär 25–35% av den totala pensionen. Saknar du den kan du tappa flera miljoner i livsinkomst.' },
-      { q: 'Kan jag ta ut tjänstepensionen tidigare?', a: 'Tidigast vid 55 år, men då blir månadsbeloppet betydligt lägre. De flesta tar ut den från 65 år.' },
-      { q: 'Vad händer med tjänstepensionen om jag byter jobb?', a: 'Den följer med dig – kapitalet är ditt. Nya arbetsgivaren börjar bara betala in på ett nytt avtal.' },
-      { q: 'Behöver jag pensionsspara själv om jag har tjänstepension?', a: 'För de flesta räcker tjänstepension + allmän pension till 60–70% av slutlönen. Vill du gå tidigare eller leva mer flexibelt – ja, ISK eller IPS är vanliga val.' },
-    ],
-  },
-  {
     slug: 'extrajobb-student-2026',
     title: 'Extrajobb för studenter 2026 – så hittar du jobb vid sidan av studierna',
     metaTitle: 'Extrajobb student 2026: bästa jobben & så hittar du dem | Parium',
@@ -302,44 +264,6 @@ export const GUIDES: GuideData[] = [
       { q: 'Hur mycket kan jag begära?', a: 'Vid årlig översyn: 5–10% om du presterat bra. Vid ny roll eller jobbyte: 10–20%.' },
       { q: 'Ska jag visa konkurrerande erbjudande?', a: 'Bara om du är beredd att faktiskt byta. Annars är det bluff och du tappar trovärdighet långsiktigt.' },
       { q: 'Vad gör jag om jag får nej?', a: 'Be om skriftliga kriterier för vad som krävs för höjning, och ett uppföljningsmöte om 3–6 månader. Annars: börja söka externt.' },
-    ],
-  },
-  {
-    slug: 'foraldraledighet-guide',
-    title: 'Föräldraledighet 2026 – dagar, ersättning & jobbet',
-    metaTitle: 'Föräldraledighet 2026: dagar, föräldrapenning & rättigheter | Parium',
-    description: 'Allt om föräldraledighet 2026. Antal dagar, ersättningsnivåer, hur du anmäler, vad arbetsgivaren får och inte får göra, samt vab.',
-    excerpt: '480 dagar per barn – men hur många är på sjukpenningnivå, hur funkar reserverade dagar, och vad händer med jobbet? Här är reglerna 2026 utan krångel.',
-    category: 'Familj',
-    readingMinutes: 7,
-    updated: '2026-06-01',
-    sections: [
-      {
-        heading: 'Hur många dagar får jag?',
-        body: '480 dagar per barn totalt, delas mellan föräldrarna. 390 dagar på sjukpenningnivå (cirka 80% av SGI, max 1 250 kr/dag 2026), 90 dagar på lägstanivå (250 kr/dag). 90 dagar är reserverade till vardera föräldern och kan inte överlåtas. För tvillingar/flerbarn: extra dagar.',
-      },
-      {
-        heading: 'Hur mycket pengar får jag?',
-        body: 'Föräldrapenning på sjukpenningnivå: 80% av din SGI (sjukpenninggrundande inkomst), max cirka 1 250 kr/dag före skatt 2026 (motsvarar lön på cirka 47 750 kr/mån). Tjänar du mer kompletterar många kollektivavtal upp till 90% under 6 månader. Lägstanivå: 250 kr/dag oavsett tidigare inkomst.',
-      },
-      {
-        heading: 'Så anmäler du',
-        body: '1. Anmäl till arbetsgivaren MINST 2 månader innan ledigheten börjar.\n2. Ansök om föräldrapenning hos Försäkringskassan (forsakringskassan.se eller appen) – tidigast 1 månad innan ledigheten.\n3. Bestäm uttagsnivå: hel, 3/4, halv, 1/4 eller 1/8 dag.\n4. Du kan jobba deltid och ta ut partiell föräldrapenning samtidigt.',
-      },
-      {
-        heading: 'Dina rättigheter på jobbet',
-        body: 'Du har rätt att komma tillbaka till samma eller likvärdig tjänst, samma lön (med löneutveckling) och samma villkor. Arbetsgivaren får inte säga upp dig på grund av föräldraledighet – det är diskriminering. Du har rätt att förkorta arbetstiden 25% tills barnet fyller 8 år. Du har rätt att vara hemma vid sjukdom hos barn (vab) upp till 120 dagar/år och barn.',
-      },
-      {
-        heading: 'Smarta drag de flesta missar',
-        body: '1. Skjut upp dagar – 96 dagar kan sparas tills barnet fyller 12 år.\n2. Dubbeldagar – båda föräldrarna kan ta ut samtidigt under barnets första år (30 dagar var).\n3. Anmäl SGI även om du är arbetslös – annars riskerar du lägre ersättning.\n4. Kolla kollektivavtalet – många ger 10% extra (90% lön) i 6 månader.\n5. Vid byte av jobb under föräldraledigheten – behåll SGI genom att vara sjukskriven/föräldraledig utan avbrott.',
-      },
-    ],
-    faqs: [
-      { q: 'Måste jag ta ut alla 480 dagar innan barnet börjar skolan?', a: 'Nej. 96 dagar kan sparas till efter att barnet fyllt 4 år, och kan tas ut ända tills barnet fyller 12.' },
-      { q: 'Kan arbetsgivaren neka mig föräldraledighet?', a: 'Nej. Du har lagstadgad rätt att vara ledig, men måste anmäla minst 2 månader innan.' },
-      { q: 'Hur funkar vab?', a: 'Vid sjukt barn under 12 år får du tillfällig föräldrapenning, cirka 80% av SGI. Anmäl till Försäkringskassan senast 90 dagar efter.' },
-      { q: 'Påverkar föräldraledighet pensionen?', a: 'Marginellt. Staten ger pensionsrätt även under föräldraledighet, och de fyra första åren räknas extra förmånligt.' },
     ],
   },
   {

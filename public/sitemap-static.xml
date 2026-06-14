@@ -201,10 +201,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://parium.se/guider/tjanstepension-forklarat</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
   <url>
     <loc>https://parium.se/guider/extrajobb-student-2026</loc>
     <changefreq>monthly</changefreq>
@@ -221,10 +217,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://parium.se/guider/foraldraledighet-guide</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
   <url>
     <loc>https://parium.se/annonser</loc>
     <changefreq>daily</changefreq>
