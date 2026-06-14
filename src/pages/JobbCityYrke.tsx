@@ -140,12 +140,12 @@ const JobbCityYrke = () => {
             }}
           />
           <div className="mx-auto max-w-4xl text-center">
-            <nav aria-label="Brödsmulor" className="mb-4 text-xs text-white/60">
-              <Link to="/jobb" className="hover:text-white/90">Jobb</Link>
-              <span className="mx-1.5">/</span>
-              <Link to={`/jobb/${city.slug}`} className="hover:text-white/90">{city.name}</Link>
-              <span className="mx-1.5">/</span>
-              <span className="text-white/80">{occ.name}</span>
+            <nav aria-label="Brödsmulor" className="mb-4 text-xs text-white">
+              <Link to="/jobb" className="text-white hover:opacity-80">Jobb</Link>
+              <span className="mx-1.5 text-white">/</span>
+              <Link to={`/jobb/${city.slug}`} className="text-white hover:opacity-80">{city.name}</Link>
+              <span className="mx-1.5 text-white">/</span>
+              <span className="text-white">{occ.name}</span>
             </nav>
 
             <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white backdrop-blur">
