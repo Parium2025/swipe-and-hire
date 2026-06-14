@@ -108,11 +108,12 @@ const YrkePage = () => {
         <script type="application/ld+json">{JSON.stringify(occupationLd)}</script>
       </Helmet>
 
-      <div className="seo-scroll-page pb-28 md:pb-0 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+      <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         <LandingNav onLoginClick={() => navigate('/auth')} />
 
         {/* Hero */}
         <section className="relative overflow-hidden px-5 pt-28 pb-16 sm:px-8 md:px-12">
+          <SeoBubbles />
           <div
             aria-hidden
             className="absolute inset-0 -z-10 opacity-60"
