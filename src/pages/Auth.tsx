@@ -647,6 +647,8 @@ const Auth = () => {
           const onboardingDone = (profile as any)?.onboarding_completed === true;
           const isJobSeeker = role === 'job_seeker';
           if (!isJobSeeker || onboardingDone) {
+            // Applicera filter SYNKRONT så /search-jobs har dem redan vid mount.
+            applyIntentToSearchFilters(parsed);
             import('@/lib/savedSearchIntent').then(({ consumeIntent }) => {
               consumeIntent(user.id).catch(() => {});
             });
