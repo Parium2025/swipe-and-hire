@@ -467,9 +467,11 @@ const Index = () => {
 
       // 2) Sök-intent från SEO-sidor (yrke/stad) → skapa saved_search + gå till returnTo
       try {
-        const { readIntent, consumeIntent } = await import('@/lib/savedSearchIntent');
+        const { readIntent, consumeIntent, applyIntentToSearchFilters } = await import('@/lib/savedSearchIntent');
         const intent = readIntent();
         if (intent?.returnTo && intent.returnTo.startsWith('/')) {
+          // Applicera filter SYNKRONT så /search-jobs ser dem direkt.
+          applyIntentToSearchFilters(intent);
           consumeIntent(user.id).catch(() => {});
           navigate(intent.returnTo);
           return;
