@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
@@ -6,19 +6,38 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Briefcase } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ArrowRight, Briefcase, Search } from 'lucide-react';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 
 const BASE = 'https://parium.se';
 
+const normalize = (s: string) =>
+  s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 const YrkenHub = () => {
   const navigate = useNavigate();
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
     window.scrollTo(0, 0);
   }, []);
+
+  const filtered = useMemo(() => {
+    const q = normalize(query.trim());
+    if (!q) return OCCUPATIONS;
+    return OCCUPATIONS.filter((o) =>
+      [o.name, o.plural, o.asForm, o.category].some((v) => normalize(v).includes(q)),
+    );
+  }, [query]);
+
+  // Desktop (md:grid-cols-3): trimma så vi aldrig har 1–2 ensamma kort.
+  // Vid full lista är längden 30 (multipel av 3), men sökresultat kan ge orphans.
+  const desktopList = useMemo(() => {
+    const len = filtered.length;
+    const trimmed = len - (len % 3);
+    return trimmed > 0 ? filtered.slice(0, trimmed) : filtered; // visa allt om < 3 träffar
+  }, [filtered]);
 
   const canonical = `${BASE}/yrken`;
   const title = 'Lediga jobb per yrke – sök jobb i hela Sverige | Parium';
@@ -55,54 +74,109 @@ const YrkenHub = () => {
         <LandingNav onLoginClick={() => navigate('/auth')} />
         <SeoBackButton fallback="/jobb" />
 
-
-        <section className="relative overflow-hidden px-5 pt-28 pb-12 sm:px-8 md:px-12">
+        <section className="relative overflow-hidden px-5 pt-28 pb-8 sm:px-8 sm:pb-12 md:px-12">
           <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
               Lediga jobb per yrke
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">
+            <p className="mx-auto mt-5 max-w-2xl text-base text-white sm:mt-6 sm:text-xl">
               Hitta lediga jobb inom Sveriges mest efterfrågade yrken. Skapa min profil idag och
               matcha med arbetsgivare över hela landet.
             </p>
           </div>
         </section>
 
-        <section className="px-5 py-12 sm:px-8 md:px-12">
-          <ul className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {OCCUPATIONS.map((o) => {
-              const title = `Lediga jobb ${o.asForm}`;
-              return (
-                <li key={o.slug}>
-                  <Link
-                    to={`/yrke/${o.slug}`}
-                    className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-6 hover:bg-white/[0.10] transition"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Briefcase className="h-5 w-5 shrink-0 text-white" />
-                      <span className="truncate text-xs uppercase tracking-wider text-white/80">
-                        {o.category}
-                      </span>
-                    </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <h2 className="mt-3 truncate text-xl font-semibold text-white">
-                          {title}
-                        </h2>
-                      </TooltipTrigger>
-                      <TooltipContent>{title}</TooltipContent>
-                    </Tooltip>
-                    <p className="mt-2 line-clamp-2 text-sm text-white/80">{o.intro}</p>
-                  </Link>
+        <section className="px-5 pb-12 sm:px-8 md:px-12">
+          <div className="mx-auto max-w-5xl">
+            {/* Sökruta */}
+            <div className="mb-5 md:mb-8">
+              <label className="relative block mx-auto max-w-xl">
+                <span className="sr-only">Sök yrke</span>
+                <Search
+                  className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60"
+                  aria-hidden="true"
+                />
+                <input
+                  type="search"
+                  inputMode="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Sök yrke, t.ex. elektriker, kock, lärare"
+                  className="w-full min-h-11 rounded-full border border-white/15 bg-white/[0.07] pl-11 pr-4 text-base text-white placeholder:text-white/50 outline-none focus:border-white/30 focus:bg-white/[0.10]"
+                  style={{ fontSize: '16px' }}
+                />
+              </label>
+            </div>
+
+            {/* Mobil: stackad lista med hela titlar */}
+            <ul className="grid grid-cols-1 gap-3 md:hidden">
+              {filtered.map((o) => {
+                const label = `Lediga jobb ${o.asForm}`;
+                return (
+                  <li key={o.slug}>
+                    <Link
+                      to={`/yrke/${o.slug}`}
+                      className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-4 active:bg-white/[0.12] transition-colors"
+                    >
+                      <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                        <Briefcase className="h-4 w-4 text-white" aria-hidden="true" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] uppercase tracking-wider text-white/70">
+                          {o.category}
+                        </p>
+                        <p className="text-base font-semibold text-white break-words leading-snug">
+                          {label}
+                        </p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-white/50" aria-hidden="true" />
+                    </Link>
+                  </li>
+                );
+              })}
+              {filtered.length === 0 && (
+                <li className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-center text-sm text-white/80">
+                  Inga yrken matchar "{query}".
                 </li>
-              );
-            })}
-          </ul>
+              )}
+            </ul>
+
+            {/* Desktop/tablet: 3-kolumners grid utan ensamma kort */}
+            <ul className="hidden md:grid gap-4 grid-cols-2 md:grid-cols-3">
+              {desktopList.map((o) => {
+                const label = `Lediga jobb ${o.asForm}`;
+                return (
+                  <li key={o.slug}>
+                    <Link
+                      to={`/yrke/${o.slug}`}
+                      className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.07] p-6 hover:bg-white/[0.11] hover:border-white/20 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Briefcase className="h-5 w-5 shrink-0 text-white" aria-hidden="true" />
+                        <span className="truncate text-xs uppercase tracking-wider text-white">
+                          {o.category}
+                        </span>
+                      </div>
+                      <h2 className="mt-3 text-xl font-semibold text-white leading-snug">
+                        {label}
+                      </h2>
+                      <p className="mt-2 line-clamp-2 text-sm text-white/85">{o.intro}</p>
+                    </Link>
+                  </li>
+                );
+              })}
+              {desktopList.length === 0 && (
+                <li className="col-span-full rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center text-white/80">
+                  Inga yrken matchar "{query}".
+                </li>
+              )}
+            </ul>
+          </div>
         </section>
 
-        <section className="px-5 py-20 sm:px-8 md:px-12">
-          <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-10 text-center">
+        <section className="px-5 py-16 sm:px-8 md:px-12">
+          <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-8 sm:p-10 text-center">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
               Hitta ditt nästa jobb idag
             </h2>
