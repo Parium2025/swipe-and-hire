@@ -224,11 +224,6 @@ const YrkenHub = () => {
                   </SeoTruncateLink>
                 </li>
               ))}
-              {/* Padding så raden alltid är 3 av 3 (aldrig 1–2 ensamma) */}
-              {desktopList.length > 0 &&
-                Array.from({ length: desktopPad }).map((_, i) => (
-                  <li key={`pad-${i}`} aria-hidden="true" className="h-16 invisible" />
-                ))}
               {desktopList.length === 0 && (
                 <li className="col-span-full rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center text-white">
                   Inga yrken matchar "{query}".
