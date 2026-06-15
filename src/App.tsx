@@ -15,6 +15,8 @@ import JobbCity from "./pages/JobbCity";
 import YrkenHub from "./pages/YrkenHub";
 import YrkePage from "./pages/YrkePage";
 import JobbCityYrke from "./pages/JobbCityYrke";
+import KommunHub from "./pages/KommunHub";
+import JobbKommun from "./pages/JobbKommun";
 import PublicJobPage from "./pages/PublicJobPage";
 
 import GuiderHub from "./pages/GuiderHub";
@@ -148,6 +150,8 @@ const isPublicLightweightPath = (pathname: string) =>
   pathname.startsWith('/jobb/') ||
   pathname === '/yrken' ||
   pathname.startsWith('/yrke/') ||
+  pathname === '/kommuner' ||
+  pathname.startsWith('/kommun/') ||
   pathname === '/annonser' ||
   pathname.startsWith('/annons/') ||
   pathname === '/guider' ||
@@ -178,6 +182,8 @@ const AnimatedRoutes = () => {
           <Route path="/annons/:jobId" element={<PublicJobPage />} />
           <Route path="/annonser" element={<RRNavigate to="/jobb" replace />} />
           <Route path="/yrke/:occupationSlug" element={<YrkePage />} />
+          <Route path="/kommuner" element={<KommunHub />} />
+          <Route path="/kommun/:kommunSlug" element={<JobbKommun />} />
           <Route path="/guider" element={<GuiderHub />} />
           <Route path="/guider/cv-mall-2026" element={<RRNavigate to="/guider" replace />} />
           <Route path="/guider/:slug" element={<GuidePage />} />
