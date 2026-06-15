@@ -93,12 +93,9 @@ const YrkenHub = () => {
     return DIRECTORY.filter((o) => normalize(o.search).includes(q));
   }, [query]);
 
-  // Desktop (md:grid-cols-3): trimma så vi aldrig har 1–2 ensamma kort.
-  const desktopList = useMemo(() => {
-    const len = filtered.length;
-    const trimmed = len - (len % 3);
-    return trimmed > 0 ? filtered.slice(0, trimmed) : filtered;
-  }, [filtered]);
+  // Desktop (md:grid-cols-3): visa ALLA yrken — padda sista raden så den alltid är komplett (3 av 3).
+  const desktopList = filtered;
+  const desktopPad = (3 - (filtered.length % 3)) % 3;
 
   const canonical = `${BASE}/yrken`;
   const title = 'Lediga jobb per yrke – sök jobb i hela Sverige | Parium';
