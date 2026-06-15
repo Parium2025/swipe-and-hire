@@ -163,7 +163,7 @@ const JobbHub = () => {
                       >
                         {title}
                       </TruncatedTitle>
-                      <p className="mt-1 truncate text-sm text-white/80">{c.county}</p>
+                      <p className="mt-1 truncate text-sm text-white">{c.county}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
                   </Link>
