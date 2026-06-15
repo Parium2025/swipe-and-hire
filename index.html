@@ -2,8 +2,34 @@
 <html lang="sv-SE">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Konsolidera SEO till parium.se: redirecta alla besök på lovable.app-domänen
+      // till motsvarande URL på parium.se. Säkerställer att Google bara indexerar
+      // den officiella domänen och att lovable-titel/favicon försvinner från sökresultaten.
+      (function() {
+        try {
+          var h = window.location.hostname;
+          if (h.endsWith('.lovable.app') && h.indexOf('id-preview') === -1) {
+            var target = 'https://parium.se' + window.location.pathname + window.location.search + window.location.hash;
+            window.location.replace(target);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script>
+      // Skicka noindex-signal till crawlers när de är på lovable.app-domänen.
+      // På parium.se är denna tag frånvarande, så indexering fungerar normalt där.
+      (function() {
+        try {
+          if (window.location.hostname.endsWith('.lovable.app')) {
+            document.write('<meta name="robots" content="noindex, nofollow">');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta name="google-site-verification" content="BmLp4Z31QrCWzPg_3lxUkSRFOCryhQCg2mqfCcRqvoE" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
     <!-- PWA / iOS status bar full-bleed -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
