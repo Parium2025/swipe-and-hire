@@ -1,130 +1,17 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
+import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin, Search, Briefcase } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { CITIES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
-
-const detectEnv = () => {
-  if (typeof window === 'undefined') return { isTouch: false, supportsHover: true };
-  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  const supportsHover =
-    'matchMedia' in window
-      ? window.matchMedia('(hover: hover)').matches || window.matchMedia('(pointer: fine)').matches
-      : true;
-  return { isTouch, supportsHover };
-};
-const ENV = detectEnv();
-
-/**
- * Trunkerings-tooltip för desktop-grid:
- * - Mäter eagerly via rAF + ResizeObserver så tooltipen alltid finns när texten är klippt.
- * - På touch: första tap = öppna tooltip, andra tap = följ länken.
- * - På hover-enheter: standard hover-beteende.
- */
-function SmartTruncateLink({
-  to,
-  fullText,
-  className,
-  children,
-}: {
-  to: string;
-  fullText: string;
-  className: string;
-  children: ReactNode;
-}) {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const navigate = useNavigate();
-  const [isTruncated, setIsTruncated] = useState(false);
-  const [open, setOpen] = useState(false);
-  const tappedOnceRef = useRef(false);
-  const { isTouch, supportsHover } = ENV;
-
-  const measure = useCallback(() => {
-    const el = ref.current;
-    if (!el) return;
-    const t =
-      Math.ceil(el.scrollWidth) > Math.ceil(el.clientWidth) ||
-      Math.ceil(el.scrollHeight) > Math.ceil(el.clientHeight);
-    // Look inside for the actual text node span if needed
-    const inner = el.querySelector<HTMLElement>('[data-trunc]');
-    let t2 = t;
-    if (inner) {
-      t2 =
-        t ||
-        Math.ceil(inner.scrollWidth) > Math.ceil(inner.clientWidth) ||
-        Math.ceil(inner.scrollHeight) > Math.ceil(inner.clientHeight);
-    }
-    setIsTruncated(t2);
-  }, []);
-
-  useLayoutEffect(() => {
-    const id = requestAnimationFrame(measure);
-    const el = ref.current;
-    let ro: ResizeObserver | undefined;
-    if (el && typeof ResizeObserver !== 'undefined') {
-      ro = new ResizeObserver(() => measure());
-      ro.observe(el);
-    }
-    return () => {
-      cancelAnimationFrame(id);
-      ro?.disconnect();
-    };
-  }, [measure, fullText]);
-
-  // Reset "tapped once" when tooltip closes
-  useEffect(() => {
-    if (!open) tappedOnceRef.current = false;
-  }, [open]);
-
-  const handleClick = (e: React.MouseEvent) => {
-    if (!supportsHover && isTouch && isTruncated) {
-      if (!tappedOnceRef.current) {
-        e.preventDefault();
-        tappedOnceRef.current = true;
-        setOpen(true);
-      }
-      // second tap: allow navigation
-    }
-  };
-
-  const linkEl = (
-    <Link
-      ref={ref}
-      to={to}
-      onClick={handleClick}
-      className={className}
-    >
-      {children}
-    </Link>
-  );
-
-  if (!isTruncated) return linkEl;
-
-  return (
-    <Tooltip
-      open={!supportsHover ? open : undefined}
-      onOpenChange={!supportsHover ? setOpen : undefined}
-      delayDuration={150}
-    >
-      <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
-      <TooltipContent
-        side="top"
-        sideOffset={6}
-        className="z-[999999] bg-slate-900/95 border border-white/20 text-white"
-      >
-        {fullText}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
 
 const CANONICAL = 'https://parium.se/jobb';
 const TITLE = 'Lediga jobb i hela Sverige – jobbapp & matchning | Parium';
@@ -367,18 +254,18 @@ const JobbHub = () => {
           </ul>
 
           {/* Desktop/tablet: grid med smart tooltip */}
-          <ul className="mt-10 hidden md:grid grid-cols-3 gap-3 md:grid-cols-4">
+          <ul className="mt-10 hidden md:grid grid-cols-3 gap-3">
             {OCCUPATIONS.map((o) => {
               const label = `Lediga jobb ${o.asForm}`;
               return (
                 <li key={o.slug}>
-                  <SmartTruncateLink
+                  <SeoTruncateLink
                     to={`/yrke/${o.slug}`}
                     fullText={label}
-                    className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.07] px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.11] transition-colors"
+                    className="flex h-14 items-center justify-center rounded-xl border border-white/10 bg-white/[0.07] px-4 py-3 text-center text-sm font-medium text-white hover:bg-white/[0.11] transition-colors"
                   >
-                    <span data-trunc className="block w-full truncate">{label}</span>
-                  </SmartTruncateLink>
+                    <span data-truncate-text className="block w-full truncate text-white">{label}</span>
+                  </SeoTruncateLink>
                 </li>
               );
             })}
@@ -386,7 +273,7 @@ const JobbHub = () => {
           <div className="mt-8 flex justify-center">
             <Link
               to="/yrken"
-              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white/[0.14] hover:border-white/30"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/[0.14] hover:border-white/30"
             >
               Utforska alla yrken
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -407,7 +294,7 @@ const JobbHub = () => {
           <div className="mt-8 flex justify-center">
             <Link
               to="/guider"
-              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white/[0.14] hover:border-white/30"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/[0.14] hover:border-white/30"
             >
               Läs alla guider
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -418,7 +305,7 @@ const JobbHub = () => {
 
 
       <section className="px-5 py-20 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-10 text-center">
+        <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] p-10 text-center">
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
             Hitta ditt nästa jobb idag
           </h2>
