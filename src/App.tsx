@@ -150,6 +150,8 @@ const isPublicLightweightPath = (pathname: string) =>
   pathname.startsWith('/jobb/') ||
   pathname === '/yrken' ||
   pathname.startsWith('/yrke/') ||
+  pathname === '/kommuner' ||
+  pathname.startsWith('/kommun/') ||
   pathname === '/annonser' ||
   pathname.startsWith('/annons/') ||
   pathname === '/guider' ||
