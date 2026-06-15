@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState, useCallback, ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
@@ -7,9 +7,62 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { CITIES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
+
+/**
+ * Renders children inline and only wraps them in a tooltip when the
+ * underlying text is actually visually truncated. Mätning sker lazy
+ * vid hover/touch — ingen reflow för icke-trunkerade element.
+ */
+function TruncateOnlyTooltip({
+  fullText,
+  children,
+}: {
+  fullText: string;
+  children: (ref: React.RefObject<HTMLElement>) => ReactNode;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+  const [measured, setMeasured] = useState(false);
+
+  const measure = useCallback(() => {
+    if (measured) return;
+    const el = ref.current;
+    if (!el) return;
+    const truncated =
+      Math.ceil(el.scrollWidth) > Math.ceil(el.clientWidth) ||
+      Math.ceil(el.scrollHeight) > Math.ceil(el.clientHeight);
+    setIsTruncated(truncated);
+    setMeasured(true);
+  }, [measured]);
+
+  if (!measured || !isTruncated) {
+    return (
+      <span
+        onMouseEnter={measure}
+        onTouchStart={measure}
+        onFocus={measure}
+        className="block h-full"
+      >
+        {children(ref)}
+      </span>
+    );
+  }
+
+  return (
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>{children(ref) as any}</TooltipTrigger>
+        <TooltipContent className="bg-slate-900/95 border border-white/20 text-white">
+          {fullText}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 const CANONICAL = 'https://parium.se/jobb';
 const TITLE = 'Lediga jobb i hela Sverige – jobbapp & matchning | Parium';
@@ -104,15 +157,13 @@ const JobbHub = () => {
                       <MapPin className="h-4 w-4" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <h3 className="truncate text-lg font-semibold text-white">
-                            {title}
-                          </h3>
-                        </TooltipTrigger>
-                        <TooltipContent>{title}</TooltipContent>
-                      </Tooltip>
-                      <p className="mt-1 truncate text-sm text-white/80">{c.county}</p>
+                      <TruncatedTitle
+                        fullText={title}
+                        className="truncate text-lg font-semibold text-white"
+                      >
+                        {title}
+                      </TruncatedTitle>
+                      <p className="mt-1 truncate text-sm text-white/55">{c.county}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
                   </Link>
@@ -137,17 +188,17 @@ const JobbHub = () => {
               const label = `Lediga jobb ${o.asForm}`;
               return (
                 <li key={o.slug}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+                  <TruncateOnlyTooltip fullText={label}>
+                    {(ref) => (
                       <Link
+                        ref={ref as React.RefObject<HTMLAnchorElement>}
                         to={`/yrke/${o.slug}`}
                         className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.10] transition"
                       >
                         <span className="block w-full truncate">{label}</span>
                       </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>{label}</TooltipContent>
-                  </Tooltip>
+                    )}
+                  </TruncateOnlyTooltip>
                 </li>
               );
             })}
