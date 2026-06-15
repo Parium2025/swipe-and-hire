@@ -269,9 +269,9 @@ const JobbHub = () => {
             )}
           </ul>
 
-          {/* Desktop/tablet: grid med smart tooltip — alltid hela rader (3 eller 0) */}
+          {/* Desktop/tablet: grid med smart tooltip — endast hela rader (3/3) */}
           <ul className="mt-10 hidden md:grid grid-cols-3 gap-3">
-            {filteredOccupations.map((o) => {
+            {desktopOccupations.map((o) => {
               const label = `Lediga jobb ${o.asForm}`;
               return (
                 <li key={o.slug}>
@@ -285,10 +285,6 @@ const JobbHub = () => {
                 </li>
               );
             })}
-            {/* Fyll ut sista raden så den alltid är komplett (3 av 3) */}
-            {Array.from({ length: (3 - (filteredOccupations.length % 3)) % 3 }).map((_, i) => (
-              <li key={`pad-${i}`} aria-hidden="true" className="h-14 invisible" />
-            ))}
           </ul>
           <div className="mt-8 flex justify-center">
             <Link
