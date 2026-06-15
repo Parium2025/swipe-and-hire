@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { consumePendingJobPath } from '@/lib/pendingJobIntent';
+import { applyIntentToSearchFilters } from '@/lib/savedSearchIntent';
 
 
 // Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
