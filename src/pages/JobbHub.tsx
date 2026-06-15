@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
@@ -6,61 +6,123 @@ import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MapPin } from 'lucide-react';
+import { ArrowRight, MapPin, Search, Briefcase } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { CITIES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 
+const detectEnv = () => {
+  if (typeof window === 'undefined') return { isTouch: false, supportsHover: true };
+  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const supportsHover =
+    'matchMedia' in window
+      ? window.matchMedia('(hover: hover)').matches || window.matchMedia('(pointer: fine)').matches
+      : true;
+  return { isTouch, supportsHover };
+};
+const ENV = detectEnv();
+
 /**
- * Renders children inline and only wraps them in a tooltip when the
- * underlying text is actually visually truncated. Mätning sker lazy
- * vid hover/touch — ingen reflow för icke-trunkerade element.
+ * Trunkerings-tooltip för desktop-grid:
+ * - Mäter eagerly via rAF + ResizeObserver så tooltipen alltid finns när texten är klippt.
+ * - På touch: första tap = öppna tooltip, andra tap = följ länken.
+ * - På hover-enheter: standard hover-beteende.
  */
-function TruncateOnlyTooltip({
+function SmartTruncateLink({
+  to,
   fullText,
+  className,
   children,
 }: {
+  to: string;
   fullText: string;
-  children: (ref: React.RefObject<HTMLElement>) => ReactNode;
+  className: string;
+  children: ReactNode;
 }) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLAnchorElement>(null);
+  const navigate = useNavigate();
   const [isTruncated, setIsTruncated] = useState(false);
-  const [measured, setMeasured] = useState(false);
+  const [open, setOpen] = useState(false);
+  const tappedOnceRef = useRef(false);
+  const { isTouch, supportsHover } = ENV;
 
   const measure = useCallback(() => {
-    if (measured) return;
     const el = ref.current;
     if (!el) return;
-    const truncated =
+    const t =
       Math.ceil(el.scrollWidth) > Math.ceil(el.clientWidth) ||
       Math.ceil(el.scrollHeight) > Math.ceil(el.clientHeight);
-    setIsTruncated(truncated);
-    setMeasured(true);
-  }, [measured]);
+    // Look inside for the actual text node span if needed
+    const inner = el.querySelector<HTMLElement>('[data-trunc]');
+    let t2 = t;
+    if (inner) {
+      t2 =
+        t ||
+        Math.ceil(inner.scrollWidth) > Math.ceil(inner.clientWidth) ||
+        Math.ceil(inner.scrollHeight) > Math.ceil(inner.clientHeight);
+    }
+    setIsTruncated(t2);
+  }, []);
 
-  if (!measured || !isTruncated) {
-    return (
-      <span
-        onMouseEnter={measure}
-        onTouchStart={measure}
-        onFocus={measure}
-        className="block h-full"
-      >
-        {children(ref)}
-      </span>
-    );
-  }
+  useLayoutEffect(() => {
+    const id = requestAnimationFrame(measure);
+    const el = ref.current;
+    let ro: ResizeObserver | undefined;
+    if (el && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => measure());
+      ro.observe(el);
+    }
+    return () => {
+      cancelAnimationFrame(id);
+      ro?.disconnect();
+    };
+  }, [measure, fullText]);
+
+  // Reset "tapped once" when tooltip closes
+  useEffect(() => {
+    if (!open) tappedOnceRef.current = false;
+  }, [open]);
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!supportsHover && isTouch && isTruncated) {
+      if (!tappedOnceRef.current) {
+        e.preventDefault();
+        tappedOnceRef.current = true;
+        setOpen(true);
+      }
+      // second tap: allow navigation
+    }
+  };
+
+  const linkEl = (
+    <Link
+      ref={ref}
+      to={to}
+      onClick={handleClick}
+      className={className}
+    >
+      {children}
+    </Link>
+  );
+
+  if (!isTruncated) return linkEl;
 
   return (
-    <TooltipProvider delayDuration={200}>
-      <Tooltip>
-        <TooltipTrigger asChild>{children(ref) as any}</TooltipTrigger>
-        <TooltipContent className="bg-slate-900/95 border border-white/20 text-white">
-          {fullText}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip
+      open={!supportsHover ? open : undefined}
+      onOpenChange={!supportsHover ? setOpen : undefined}
+      delayDuration={150}
+    >
+      <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
+      <TooltipContent
+        side="top"
+        sideOffset={6}
+        className="z-[999999] bg-slate-900/95 border border-white/20 text-white"
+      >
+        {fullText}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -68,13 +130,35 @@ const CANONICAL = 'https://parium.se/jobb';
 const TITLE = 'Lediga jobb i hela Sverige – jobbapp & matchning | Parium';
 const DESCRIPTION = 'Hitta lediga jobb i hela Sverige. Stockholm, Göteborg, Malmö, Uppsala och fler – matcha med arbetsgivare och chatta direkt i jobbappen Parium.';
 
+const normalize = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
 const JobbHub = () => {
   const navigate = useNavigate();
+  const [cityQuery, setCityQuery] = useState('');
+  const [occQuery, setOccQuery] = useState('');
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
     window.scrollTo(0, 0);
   }, []);
+
+  const filteredCities = useMemo(() => {
+    const q = normalize(cityQuery.trim());
+    if (!q) return CITIES;
+    return CITIES.filter(
+      (c) => normalize(c.name).includes(q) || normalize(c.county).includes(q),
+    );
+  }, [cityQuery]);
+
+  const filteredOccupations = useMemo(() => {
+    const q = normalize(occQuery.trim());
+    if (!q) return OCCUPATIONS;
+    return OCCUPATIONS.filter((o) => normalize(o.asForm).includes(q));
+  }, [occQuery]);
 
   const itemListLd = {
     '@context': 'https://schema.org',
@@ -98,6 +182,7 @@ const JobbHub = () => {
   };
 
   return (
+    <TooltipProvider delayDuration={150} skipDelayDuration={100}>
     <div className="seo-scroll-page pb-16 bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
       <Helmet>
         <title>{TITLE}</title>
@@ -144,7 +229,58 @@ const JobbHub = () => {
       <section className="px-5 pb-16 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl">
           <h2 className="sr-only">Välj stad</h2>
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+
+          {/* Sökruta – endast mobil */}
+          <div className="mb-4 md:hidden">
+            <label className="relative block">
+              <span className="sr-only">Sök stad</span>
+              <Search
+                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                inputMode="search"
+                value={cityQuery}
+                onChange={(e) => setCityQuery(e.target.value)}
+                placeholder="Sök stad eller län"
+                className="w-full min-h-11 rounded-full border border-white/15 bg-white/[0.07] pl-11 pr-4 text-base text-white placeholder:text-white/50 outline-none focus:border-white/30 focus:bg-white/[0.10]"
+                style={{ fontSize: '16px' }}
+              />
+            </label>
+          </div>
+
+          {/* Mobil: stackad lista med hela titlar */}
+          <ul className="grid grid-cols-1 gap-3 md:hidden">
+            {filteredCities.map((c) => {
+              const title = `Lediga jobb ${c.inForm}`;
+              return (
+                <li key={c.slug}>
+                  <Link
+                    to={`/jobb/${c.slug}`}
+                    className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-4 active:bg-white/[0.12] transition-colors"
+                  >
+                    <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10">
+                      <MapPin className="h-4 w-4" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-base font-semibold text-white break-words">{title}</p>
+                      <p className="mt-0.5 text-sm text-white/85 break-words">{c.county}</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-white/50" aria-hidden="true" />
+                  </Link>
+                </li>
+              );
+            })}
+            {filteredCities.length === 0 && (
+              <li className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center text-sm text-white/70">
+                Inga städer matchar "{cityQuery}".
+              </li>
+            )}
+          </ul>
+
+          {/* Desktop/tablet: grid */}
+          <ul className="hidden md:grid grid-cols-2 gap-3 lg:grid-cols-3">
             {CITIES.map((c) => {
               const title = `Lediga jobb ${c.inForm}`;
               return (
@@ -183,22 +319,66 @@ const JobbHub = () => {
           <p className="mx-auto mt-3 max-w-2xl text-center text-white">
             Klicka på ett yrke för att se lediga jobb, lön och vad som krävs.
           </p>
-          <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+
+          {/* Sökruta – endast mobil */}
+          <div className="mt-6 mb-4 md:hidden">
+            <label className="relative block">
+              <span className="sr-only">Sök yrke</span>
+              <Search
+                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                inputMode="search"
+                value={occQuery}
+                onChange={(e) => setOccQuery(e.target.value)}
+                placeholder="Sök yrke"
+                className="w-full min-h-11 rounded-full border border-white/15 bg-white/[0.07] pl-11 pr-4 text-base text-white placeholder:text-white/50 outline-none focus:border-white/30 focus:bg-white/[0.10]"
+                style={{ fontSize: '16px' }}
+              />
+            </label>
+          </div>
+
+          {/* Mobil: stackad lista med hela titlar */}
+          <ul className="grid grid-cols-1 gap-3 md:hidden">
+            {filteredOccupations.map((o) => {
+              const label = `Lediga jobb ${o.asForm}`;
+              return (
+                <li key={o.slug}>
+                  <Link
+                    to={`/yrke/${o.slug}`}
+                    className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-4 active:bg-white/[0.12] transition-colors"
+                  >
+                    <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10">
+                      <Briefcase className="h-4 w-4" aria-hidden="true" />
+                    </div>
+                    <p className="min-w-0 flex-1 text-base font-medium text-white break-words">{label}</p>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-white/50" aria-hidden="true" />
+                  </Link>
+                </li>
+              );
+            })}
+            {filteredOccupations.length === 0 && (
+              <li className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center text-sm text-white/70">
+                Inga yrken matchar "{occQuery}".
+              </li>
+            )}
+          </ul>
+
+          {/* Desktop/tablet: grid med smart tooltip */}
+          <ul className="mt-10 hidden md:grid grid-cols-3 gap-3 md:grid-cols-4">
             {OCCUPATIONS.map((o) => {
               const label = `Lediga jobb ${o.asForm}`;
               return (
                 <li key={o.slug}>
-                  <TruncateOnlyTooltip fullText={label}>
-                    {(ref) => (
-                      <Link
-                        ref={ref as React.RefObject<HTMLAnchorElement>}
-                        to={`/yrke/${o.slug}`}
-                        className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.07] px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.11] transition-colors"
-                      >
-                        <span className="block w-full truncate">{label}</span>
-                      </Link>
-                    )}
-                  </TruncateOnlyTooltip>
+                  <SmartTruncateLink
+                    to={`/yrke/${o.slug}`}
+                    fullText={label}
+                    className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.07] px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.11] transition-colors"
+                  >
+                    <span data-trunc className="block w-full truncate">{label}</span>
+                  </SmartTruncateLink>
                 </li>
               );
             })}
@@ -256,6 +436,7 @@ const JobbHub = () => {
         </div>
       </section>
     </div>
+    </TooltipProvider>
   );
 };
 
