@@ -47,11 +47,21 @@ const JobbHub = () => {
 
   const filteredOccupations = useMemo(() => {
     const q = normalize(occQuery.trim());
-    if (!q) return SORTED_OCCUPATIONS;
-    return SORTED_OCCUPATIONS.filter((o) =>
-      normalize(`${o.asForm} ${o.name} ${o.plural} ${o.category}`).includes(q),
-    );
+    const base = q
+      ? SORTED_OCCUPATIONS.filter((o) =>
+          normalize(`${o.asForm} ${o.name} ${o.plural} ${o.category}`).includes(q),
+        )
+      : SORTED_OCCUPATIONS;
+    // Desktop visar 3 kolumner — trimma så raden ALLTID är komplett (aldrig 1–2 ensamma).
+    return base;
   }, [occQuery]);
+
+  // Desktop-listan: trimmad till multipel av 3 (aldrig ensamma kort)
+  const desktopOccupations = useMemo(() => {
+    const len = filteredOccupations.length;
+    const trimmed = len - (len % 3);
+    return filteredOccupations.slice(0, trimmed);
+  }, [filteredOccupations]);
 
   const itemListLd = {
     '@context': 'https://schema.org',
