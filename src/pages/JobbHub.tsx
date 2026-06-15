@@ -254,7 +254,7 @@ const JobbHub = () => {
           </ul>
 
           {/* Desktop/tablet: grid med smart tooltip */}
-          <ul className="mt-10 hidden md:grid grid-cols-3 gap-3 md:grid-cols-4">
+          <ul className="mt-10 hidden md:grid grid-cols-3 gap-3">
             {OCCUPATIONS.map((o) => {
               const label = `Lediga jobb ${o.asForm}`;
               return (
@@ -262,7 +262,7 @@ const JobbHub = () => {
                   <SeoTruncateLink
                     to={`/yrke/${o.slug}`}
                     fullText={label}
-                    className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.07] px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.11] transition-colors"
+                    className="flex h-14 items-center justify-center rounded-xl border border-white/10 bg-white/[0.07] px-4 py-3 text-center text-sm font-medium text-white hover:bg-white/[0.11] transition-colors"
                   >
                     <span data-truncate-text className="block w-full truncate text-white">{label}</span>
                   </SeoTruncateLink>
@@ -273,7 +273,7 @@ const JobbHub = () => {
           <div className="mt-8 flex justify-center">
             <Link
               to="/yrken"
-              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white/[0.14] hover:border-white/30"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/[0.14] hover:border-white/30"
             >
               Utforska alla yrken
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -294,7 +294,7 @@ const JobbHub = () => {
           <div className="mt-8 flex justify-center">
             <Link
               to="/guider"
-              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white/[0.14] hover:border-white/30"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/[0.14] hover:border-white/30"
             >
               Läs alla guider
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -305,7 +305,7 @@ const JobbHub = () => {
 
 
       <section className="px-5 py-20 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-10 text-center">
+        <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] p-10 text-center">
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
             Hitta ditt nästa jobb idag
           </h2>
