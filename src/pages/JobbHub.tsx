@@ -188,17 +188,17 @@ const JobbHub = () => {
               const label = `Lediga jobb ${o.asForm}`;
               return (
                 <li key={o.slug}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+                  <TruncateOnlyTooltip fullText={label}>
+                    {(ref) => (
                       <Link
+                        ref={ref as React.RefObject<HTMLAnchorElement>}
                         to={`/yrke/${o.slug}`}
                         className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.10] transition"
                       >
                         <span className="block w-full truncate">{label}</span>
                       </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>{label}</TooltipContent>
-                  </Tooltip>
+                    )}
+                  </TruncateOnlyTooltip>
                 </li>
               );
             })}
