@@ -1,130 +1,17 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
+import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin, Search, Briefcase } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { CITIES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
-
-const detectEnv = () => {
-  if (typeof window === 'undefined') return { isTouch: false, supportsHover: true };
-  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  const supportsHover =
-    'matchMedia' in window
-      ? window.matchMedia('(hover: hover)').matches || window.matchMedia('(pointer: fine)').matches
-      : true;
-  return { isTouch, supportsHover };
-};
-const ENV = detectEnv();
-
-/**
- * Trunkerings-tooltip för desktop-grid:
- * - Mäter eagerly via rAF + ResizeObserver så tooltipen alltid finns när texten är klippt.
- * - På touch: första tap = öppna tooltip, andra tap = följ länken.
- * - På hover-enheter: standard hover-beteende.
- */
-function SmartTruncateLink({
-  to,
-  fullText,
-  className,
-  children,
-}: {
-  to: string;
-  fullText: string;
-  className: string;
-  children: ReactNode;
-}) {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const navigate = useNavigate();
-  const [isTruncated, setIsTruncated] = useState(false);
-  const [open, setOpen] = useState(false);
-  const tappedOnceRef = useRef(false);
-  const { isTouch, supportsHover } = ENV;
-
-  const measure = useCallback(() => {
-    const el = ref.current;
-    if (!el) return;
-    const t =
-      Math.ceil(el.scrollWidth) > Math.ceil(el.clientWidth) ||
-      Math.ceil(el.scrollHeight) > Math.ceil(el.clientHeight);
-    // Look inside for the actual text node span if needed
-    const inner = el.querySelector<HTMLElement>('[data-trunc]');
-    let t2 = t;
-    if (inner) {
-      t2 =
-        t ||
-        Math.ceil(inner.scrollWidth) > Math.ceil(inner.clientWidth) ||
-        Math.ceil(inner.scrollHeight) > Math.ceil(inner.clientHeight);
-    }
-    setIsTruncated(t2);
-  }, []);
-
-  useLayoutEffect(() => {
-    const id = requestAnimationFrame(measure);
-    const el = ref.current;
-    let ro: ResizeObserver | undefined;
-    if (el && typeof ResizeObserver !== 'undefined') {
-      ro = new ResizeObserver(() => measure());
-      ro.observe(el);
-    }
-    return () => {
-      cancelAnimationFrame(id);
-      ro?.disconnect();
-    };
-  }, [measure, fullText]);
-
-  // Reset "tapped once" when tooltip closes
-  useEffect(() => {
-    if (!open) tappedOnceRef.current = false;
-  }, [open]);
-
-  const handleClick = (e: React.MouseEvent) => {
-    if (!supportsHover && isTouch && isTruncated) {
-      if (!tappedOnceRef.current) {
-        e.preventDefault();
-        tappedOnceRef.current = true;
-        setOpen(true);
-      }
-      // second tap: allow navigation
-    }
-  };
-
-  const linkEl = (
-    <Link
-      ref={ref}
-      to={to}
-      onClick={handleClick}
-      className={className}
-    >
-      {children}
-    </Link>
-  );
-
-  if (!isTruncated) return linkEl;
-
-  return (
-    <Tooltip
-      open={!supportsHover ? open : undefined}
-      onOpenChange={!supportsHover ? setOpen : undefined}
-      delayDuration={150}
-    >
-      <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
-      <TooltipContent
-        side="top"
-        sideOffset={6}
-        className="z-[999999] bg-slate-900/95 border border-white/20 text-white"
-      >
-        {fullText}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
 
 const CANONICAL = 'https://parium.se/jobb';
 const TITLE = 'Lediga jobb i hela Sverige – jobbapp & matchning | Parium';
