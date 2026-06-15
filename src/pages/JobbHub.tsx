@@ -388,7 +388,7 @@ const JobbHub = () => {
               to="/yrken"
               className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-2.5 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white/[0.14] hover:border-white/30"
             >
-              Se alla yrken
+              Utforska alla yrken
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
