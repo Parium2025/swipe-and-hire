@@ -135,7 +135,7 @@ const YrkePage = () => {
                   persistSavedSearchIntent({
                     occupation: occ.name,
                     occupationSlug: occ.slug,
-                    returnTo: `/yrke/${occ.slug}`,
+                    returnTo: '/search-jobs',
                   });
                   navigate('/auth', { state: { mode: 'signup' } });
                 }}
