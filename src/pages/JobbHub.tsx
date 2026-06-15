@@ -157,15 +157,13 @@ const JobbHub = () => {
                       <MapPin className="h-4 w-4" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <h3 className="truncate text-lg font-semibold text-white">
-                            {title}
-                          </h3>
-                        </TooltipTrigger>
-                        <TooltipContent>{title}</TooltipContent>
-                      </Tooltip>
-                      <p className="mt-1 truncate text-sm text-white/80">{c.county}</p>
+                      <TruncatedTitle
+                        fullText={title}
+                        className="truncate text-lg font-semibold text-white"
+                      >
+                        {title}
+                      </TruncatedTitle>
+                      <p className="mt-1 truncate text-sm text-white/55">{c.county}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
                   </Link>
