@@ -259,13 +259,13 @@ const JobbHub = () => {
               const label = `Lediga jobb ${o.asForm}`;
               return (
                 <li key={o.slug}>
-                  <SmartTruncateLink
+                  <SeoTruncateLink
                     to={`/yrke/${o.slug}`}
                     fullText={label}
                     className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.07] px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.11] transition-colors"
                   >
-                    <span data-trunc className="block w-full truncate">{label}</span>
-                  </SmartTruncateLink>
+                    <span data-truncate-text className="block w-full truncate text-white">{label}</span>
+                  </SeoTruncateLink>
                 </li>
               );
             })}
