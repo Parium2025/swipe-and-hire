@@ -167,12 +167,12 @@ const KommunHub = () => {
         </div>
       </section>
 
-      {/* Footer-länk */}
+      {/* Footer-länk — leder till yrkes-hubben (mer relevant än städer-listan) */}
       <section className="px-5 pb-16 sm:px-8 md:px-12">
         <div className="mx-auto max-w-3xl text-center text-sm text-white/70">
-          Letar du efter en specifik stad istället?{' '}
-          <Link to="/jobb" className="underline-offset-4 hover:underline text-white">
-            Se alla städer →
+          Söker du efter ett specifikt yrke istället?{' '}
+          <Link to="/yrken" className="underline-offset-4 hover:underline text-white">
+            Se alla yrken →
           </Link>
         </div>
       </section>
