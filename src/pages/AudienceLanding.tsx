@@ -908,10 +908,12 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
         data-hero-intro-stage
         className={`relative min-h-[100svh] w-full ${isMobileLikeHeroLayout ? 'overflow-visible' : 'overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden'}`}
       >
-        {/* Mobile hero */}
+        {/* Mobile hero — renderas endast i mobil-layout så att enbart EN <h1>
+            existerar i DOM samtidigt (SEO: undvik duplicate h1). */}
+        {isMobileLikeHeroLayout && (
         <section
           data-mobile-hero-section
-          className={`relative min-h-[100svh] w-screen overflow-hidden ${isMobileLikeHeroLayout ? 'block' : 'md:hidden'}`}
+          className="relative min-h-[100svh] w-screen overflow-hidden block"
           style={{
             marginLeft: 'calc(50% - 50vw)',
             marginRight: 'calc(50% - 50vw)',
@@ -937,9 +939,11 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
           </motion.div>
           <InlineHeroPhone placement="mobile" className="mt-2" />
         </section>
+        )}
 
-        {/* Desktop / tablet hero */}
-        <section className={`relative h-full items-center justify-center overflow-hidden pb-16 pt-28 ${isMobileLikeHeroLayout ? 'hidden' : 'hidden md:flex md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28'}`}>
+        {/* Desktop / tablet hero — renderas endast i desktop-layout (samma anledning). */}
+        {!isMobileLikeHeroLayout && (
+        <section className="relative h-full items-center justify-center overflow-hidden pb-16 pt-28 hidden md:flex md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28">
           <motion.div
             aria-hidden
             className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
@@ -962,6 +966,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             </div>
           </div>
         </section>
+        )}
       </section>
 
       {/* ─────────── INTRO ─────────── */}
