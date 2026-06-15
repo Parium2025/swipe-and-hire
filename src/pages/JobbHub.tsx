@@ -151,7 +151,7 @@ const JobbHub = () => {
                 <li key={c.slug}>
                   <Link
                     to={`/jobb/${c.slug}`}
-                    className="group flex h-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-5 hover:bg-white/10 transition-colors"
+                    className="group flex h-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-5 hover:bg-white/[0.11] transition-colors will-change-transform"
                   >
                     <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10">
                       <MapPin className="h-4 w-4" aria-hidden="true" />
@@ -163,7 +163,7 @@ const JobbHub = () => {
                       >
                         {title}
                       </TruncatedTitle>
-                      <p className="mt-1 truncate text-sm text-white/55">{c.county}</p>
+                      <p className="mt-1 truncate text-sm text-white/80">{c.county}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
                   </Link>
@@ -193,7 +193,7 @@ const JobbHub = () => {
                       <Link
                         ref={ref as React.RefObject<HTMLAnchorElement>}
                         to={`/yrke/${o.slug}`}
-                        className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.10] transition"
+                        className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.07] px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.11] transition-colors"
                       >
                         <span className="block w-full truncate">{label}</span>
                       </Link>
