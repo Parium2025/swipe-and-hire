@@ -174,7 +174,7 @@ const JobbCityYrke = () => {
                     citySlug: city.slug,
                     occupation: occ.name,
                     occupationSlug: occ.slug,
-                    returnTo: `/jobb/${city.slug}/${occ.slug}`,
+                    returnTo: '/search-jobs',
                   });
                   navigate('/auth', { state: { mode: 'signup' } });
                 }}
@@ -193,7 +193,7 @@ const JobbCityYrke = () => {
                     citySlug: city.slug,
                     occupation: occ.name,
                     occupationSlug: occ.slug,
-                    returnTo: `/jobb/${city.slug}/${occ.slug}`,
+                    returnTo: '/search-jobs',
                   });
                   navigate('/auth', { state: { mode: 'signup' } });
                 }}
