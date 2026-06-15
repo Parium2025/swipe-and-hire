@@ -148,7 +148,7 @@ const JobbCityYrke = () => {
               <span className="text-white">{occ.name}</span>
             </nav>
 
-            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white backdrop-blur">
+            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white">
               <MapPin className="h-3.5 w-3.5" />
               {city.name} · {occ.category}
               {hasJobs && (
@@ -205,7 +205,7 @@ const JobbCityYrke = () => {
         {/* ─── KOMPAKT INFO: Arbetsuppgifter | Krav | Lön ─── */}
         <section className="px-5 py-10 sm:px-8 md:px-12">
           <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6">
               <h2 className="text-base font-semibold tracking-tight text-white">
                 Arbetsuppgifter
               </h2>
@@ -218,7 +218,7 @@ const JobbCityYrke = () => {
                 ))}
               </ul>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6">
               <h2 className="text-base font-semibold tracking-tight text-white">
                 Krav & kompetens
               </h2>
@@ -231,7 +231,7 @@ const JobbCityYrke = () => {
                 ))}
               </ul>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6">
               <h2 className="text-base font-semibold tracking-tight text-white">
                 Lön {city.inForm}
               </h2>
@@ -274,7 +274,7 @@ const JobbCityYrke = () => {
 
         {/* ─── Slut-CTA ─── */}
         <section className="px-5 py-16 sm:px-8 md:px-12">
-          <div className="mx-auto max-w-2xl rounded-3xl border border-white/15 bg-white/[0.05] backdrop-blur-md p-8 sm:p-10 text-center">
+          <div className="mx-auto max-w-2xl rounded-3xl border border-white/15 bg-white/[0.05] p-8 sm:p-10 text-center">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
               Sök jobb {occ.asForm} {city.inForm} idag
             </h2>
