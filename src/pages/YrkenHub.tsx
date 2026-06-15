@@ -5,6 +5,7 @@ import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
 import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, Search } from 'lucide-react';
@@ -37,14 +38,23 @@ const SEO_BY_NORMALIZED_NAME = new Map(
   ] as const),
 );
 
-const DIRECTORY_OCCUPATIONS = [
+type DirectoryEntry = {
+  key: string;
+  title: string;
+  category: string;
+  to: string;
+  search: string;
+  isSeo: boolean;
+};
+
+const DIRECTORY: DirectoryEntry[] = [
   ...OCCUPATIONS.map((o) => ({
     key: `seo-${o.slug}`,
     title: `Lediga jobb ${o.asForm}`,
     category: o.category,
-    intro: o.intro,
     to: `/yrke/${o.slug}`,
     search: [o.name, o.plural, o.asForm, o.category, o.intro].join(' '),
+    isSeo: true,
   })),
   ...getAllOccupations()
     .filter((name) => !SEO_BY_NORMALIZED_NAME.has(normalize(name)))
@@ -52,9 +62,9 @@ const DIRECTORY_OCCUPATIONS = [
       key: `occupation-${slugify(name)}`,
       title: `Lediga jobb inom ${name}`,
       category: categoryByOccupation.get(normalize(name)) || 'Yrke',
-      intro: 'Sök efter arbetsgivare och roller som matchar din profil i Parium.',
       to: '/auth',
       search: name,
+      isSeo: false,
     })),
 ];
 
@@ -69,18 +79,15 @@ const YrkenHub = () => {
 
   const filtered = useMemo(() => {
     const q = normalize(query.trim());
-    if (!q) return OCCUPATIONS;
-    return OCCUPATIONS.filter((o) =>
-      [o.name, o.plural, o.asForm, o.category].some((v) => normalize(v).includes(q)),
-    );
+    if (!q) return DIRECTORY;
+    return DIRECTORY.filter((o) => normalize(o.search).includes(q));
   }, [query]);
 
   // Desktop (md:grid-cols-3): trimma så vi aldrig har 1–2 ensamma kort.
-  // Vid full lista är längden 30 (multipel av 3), men sökresultat kan ge orphans.
   const desktopList = useMemo(() => {
     const len = filtered.length;
     const trimmed = len - (len % 3);
-    return trimmed > 0 ? filtered.slice(0, trimmed) : filtered; // visa allt om < 3 träffar
+    return trimmed > 0 ? filtered.slice(0, trimmed) : filtered;
   }, [filtered]);
 
   const canonical = `${BASE}/yrken`;
@@ -101,7 +108,7 @@ const YrkenHub = () => {
   };
 
   return (
-    <>
+    <TooltipProvider delayDuration={150} skipDelayDuration={100}>
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -133,7 +140,7 @@ const YrkenHub = () => {
 
         <section className="px-5 pb-12 sm:px-8 md:px-12">
           <div className="mx-auto max-w-5xl">
-            {/* Sökruta */}
+            {/* Sökruta (alla skärmar) */}
             <div className="mb-5 md:mb-8">
               <label className="relative block mx-auto max-w-xl">
                 <span className="sr-only">Sök yrke</span>
@@ -153,65 +160,62 @@ const YrkenHub = () => {
               </label>
             </div>
 
-            {/* Mobil: stackad lista med hela titlar */}
+            {/* Mobil: stackad lista – hela titlar, ingen trunkering */}
             <ul className="grid grid-cols-1 gap-3 md:hidden">
-              {filtered.map((o) => {
-                const label = `Lediga jobb ${o.asForm}`;
-                return (
-                  <li key={o.slug}>
-                    <Link
-                      to={`/yrke/${o.slug}`}
-                      className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-4 active:bg-white/[0.12] transition-colors"
-                    >
-                      <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-                        <Briefcase className="h-4 w-4 text-white" aria-hidden="true" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[11px] uppercase tracking-wider text-white/70">
-                          {o.category}
-                        </p>
-                        <p className="text-base font-semibold text-white break-words leading-snug">
-                          {label}
-                        </p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 shrink-0 text-white/50" aria-hidden="true" />
-                    </Link>
-                  </li>
-                );
-              })}
+              {filtered.map((o) => (
+                <li key={o.key}>
+                  <Link
+                    to={o.to}
+                    className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-4 active:bg-white/[0.12] transition-colors"
+                  >
+                    <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                      <Briefcase className="h-4 w-4 text-white" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] uppercase tracking-wider text-white">
+                        {o.category}
+                      </p>
+                      <p className="text-base font-semibold text-white break-words leading-snug">
+                        {o.title}
+                      </p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-white/60" aria-hidden="true" />
+                  </Link>
+                </li>
+              ))}
               {filtered.length === 0 && (
-                <li className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-center text-sm text-white/80">
+                <li className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-center text-sm text-white">
                   Inga yrken matchar "{query}".
                 </li>
               )}
             </ul>
 
-            {/* Desktop/tablet: 3-kolumners grid utan ensamma kort */}
-            <ul className="hidden md:grid gap-4 grid-cols-2 md:grid-cols-3">
-              {desktopList.map((o) => {
-                const label = `Lediga jobb ${o.asForm}`;
-                return (
-                  <li key={o.slug}>
-                    <Link
-                      to={`/yrke/${o.slug}`}
-                      className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.07] p-6 hover:bg-white/[0.11] hover:border-white/20 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Briefcase className="h-5 w-5 shrink-0 text-white" aria-hidden="true" />
-                        <span className="truncate text-xs uppercase tracking-wider text-white">
-                          {o.category}
-                        </span>
-                      </div>
-                      <h2 className="mt-3 text-xl font-semibold text-white leading-snug">
-                        {label}
-                      </h2>
-                      <p className="mt-2 line-clamp-2 text-sm text-white/85">{o.intro}</p>
-                    </Link>
-                  </li>
-                );
-              })}
+            {/* Desktop/tablet: 3-kolumners kompakt grid med tooltip vid trunkering */}
+            <ul className="hidden md:grid gap-3 grid-cols-2 md:grid-cols-3">
+              {desktopList.map((o) => (
+                <li key={o.key}>
+                  <SeoTruncateLink
+                    to={o.to}
+                    fullText={o.title}
+                    className="flex h-16 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.07] px-4 hover:bg-white/[0.11] hover:border-white/20 transition-colors"
+                  >
+                    <Briefcase className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] uppercase tracking-wider text-white truncate">
+                        {o.category}
+                      </p>
+                      <span
+                        data-truncate-text
+                        className="block w-full truncate text-sm font-semibold text-white"
+                      >
+                        {o.title}
+                      </span>
+                    </div>
+                  </SeoTruncateLink>
+                </li>
+              ))}
               {desktopList.length === 0 && (
-                <li className="col-span-full rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center text-white/80">
+                <li className="col-span-full rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center text-white">
                   Inga yrken matchar "{query}".
                 </li>
               )}
@@ -220,7 +224,7 @@ const YrkenHub = () => {
         </section>
 
         <section className="px-5 py-16 sm:px-8 md:px-12">
-          <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-8 sm:p-10 text-center">
+          <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] p-8 sm:p-10 text-center">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-white">
               Hitta ditt nästa jobb idag
             </h2>
@@ -238,7 +242,7 @@ const YrkenHub = () => {
           </div>
         </section>
       </div>
-    </>
+    </TooltipProvider>
   );
 };
 
