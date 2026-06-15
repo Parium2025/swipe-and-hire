@@ -167,7 +167,7 @@ const JobbCity = () => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md px-4 py-1.5 text-sm font-medium border border-white/15"
+            className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium border border-white/15"
           >
             <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
             {city.county}
@@ -280,7 +280,7 @@ const JobbCity = () => {
               { icon: Zap, title: 'Ansök smart', body: `Parium visar lediga jobb ${city.inForm} som passar din profil.` },
               { icon: MessageSquare, title: 'Chatta direkt', body: `När du har matchat med en arbetsgivare ${city.inForm} och de väljer att kontakta dig kan ni börja chatta direkt i appen.` },
             ].map(({ icon: Icon, title: t, body }) => (
-              <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-6">
+              <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.06] p-6">
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 mb-4">
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </div>
@@ -303,7 +303,7 @@ const JobbCity = () => {
           </p>
           <ul className="mt-8 flex flex-wrap justify-center gap-2">
             {city.areas.map((area) => (
-              <li key={area} className="rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-md px-4 py-2 text-sm text-white">
+              <li key={area} className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-sm text-white">
                 {area}
               </li>
             ))}
@@ -342,7 +342,7 @@ const JobbCity = () => {
 
       {/* CTA */}
       <section className="px-5 py-20 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-10 text-center">
+        <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] p-10 text-center">
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             Redo att hitta ditt nästa jobb {city.inForm}?
           </h2>

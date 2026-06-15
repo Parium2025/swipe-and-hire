@@ -121,7 +121,7 @@ const YrkePage = () => {
         <section className="relative overflow-hidden px-5 pt-28 pb-16 sm:px-8 md:px-12">
           <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white backdrop-blur">
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white">
               <Briefcase className="h-3.5 w-3.5" /> {occ.category}
             </p>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
@@ -152,7 +152,7 @@ const YrkePage = () => {
         {/* Arbetsuppgifter + krav */}
         <section className="px-5 py-16 sm:px-8 md:px-12">
           <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-7 backdrop-blur-md">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-7">
               <h2 className="text-2xl font-semibold tracking-tight">
                 Vanliga arbetsuppgifter {occ.asForm}
               </h2>
@@ -165,7 +165,7 @@ const YrkePage = () => {
                 ))}
               </ul>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-7 backdrop-blur-md">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-7">
               <h2 className="text-2xl font-semibold tracking-tight">
                 Vad krävs för att jobba {occ.asForm}?
               </h2>
@@ -179,7 +179,7 @@ const YrkePage = () => {
               </ul>
             </div>
           </div>
-          <div className="mx-auto mt-6 max-w-5xl rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-white backdrop-blur-md">
+          <div className="mx-auto mt-6 max-w-5xl rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-white">
             <strong className="text-white">Lön: </strong>
             {occ.salary}
           </div>
@@ -199,7 +199,7 @@ const YrkePage = () => {
                 <li key={c.slug}>
                   <Link
                     to={`/jobb/${c.slug}`}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/10 transition"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/10 transition"
                   >
                     <MapPin className="h-4 w-4 text-white" />
                     Jobb i {c.name}
@@ -231,7 +231,7 @@ const YrkePage = () => {
 
         {/* CTA */}
         <section className="px-5 py-20 sm:px-8 md:px-12">
-          <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] backdrop-blur-md p-10 text-center">
+          <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-white/[0.08] p-10 text-center">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               Sök ditt nästa jobb {occ.asForm} idag
             </h2>
