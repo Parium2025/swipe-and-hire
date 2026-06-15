@@ -23,6 +23,10 @@ const normalize = (s: string) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 
+// Bokstavsordning (svenska) — städer & yrken
+const SORTED_CITIES = [...CITIES].sort((a, b) => a.name.localeCompare(b.name, 'sv'));
+const SORTED_OCCUPATIONS = [...OCCUPATIONS].sort((a, b) => a.name.localeCompare(b.name, 'sv'));
+
 const JobbHub = () => {
   const navigate = useNavigate();
   const [cityQuery, setCityQuery] = useState('');
@@ -35,16 +39,18 @@ const JobbHub = () => {
 
   const filteredCities = useMemo(() => {
     const q = normalize(cityQuery.trim());
-    if (!q) return CITIES;
-    return CITIES.filter(
+    if (!q) return SORTED_CITIES;
+    return SORTED_CITIES.filter(
       (c) => normalize(c.name).includes(q) || normalize(c.county).includes(q),
     );
   }, [cityQuery]);
 
   const filteredOccupations = useMemo(() => {
     const q = normalize(occQuery.trim());
-    if (!q) return OCCUPATIONS;
-    return OCCUPATIONS.filter((o) => normalize(o.asForm).includes(q));
+    if (!q) return SORTED_OCCUPATIONS;
+    return SORTED_OCCUPATIONS.filter((o) =>
+      normalize(`${o.asForm} ${o.name} ${o.plural} ${o.category}`).includes(q),
+    );
   }, [occQuery]);
 
   const itemListLd = {
@@ -168,7 +174,7 @@ const JobbHub = () => {
 
           {/* Desktop/tablet: grid */}
           <ul className="hidden md:grid grid-cols-2 gap-3 lg:grid-cols-3">
-            {CITIES.map((c) => {
+            {filteredCities.map((c) => {
               const title = `Lediga jobb ${c.inForm}`;
               return (
                 <li key={c.slug}>
@@ -255,7 +261,7 @@ const JobbHub = () => {
 
           {/* Desktop/tablet: grid med smart tooltip */}
           <ul className="mt-10 hidden md:grid grid-cols-3 gap-3">
-            {OCCUPATIONS.map((o) => {
+            {filteredOccupations.map((o) => {
               const label = `Lediga jobb ${o.asForm}`;
               return (
                 <li key={o.slug}>
