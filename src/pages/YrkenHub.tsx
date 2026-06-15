@@ -11,19 +11,12 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, Search } from 'lucide-react';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 import { getAllOccupations, OCCUPATION_CATEGORIES } from '@/lib/occupations';
+import { slugifyOccupation } from '@/lib/genericOccupation';
 
 const BASE = 'https://parium.se';
 
 const normalize = (s: string) =>
   s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-const slugify = (s: string) =>
-  normalize(s)
-    .replace(/å/g, 'a')
-    .replace(/ä/g, 'a')
-    .replace(/ö/g, 'o')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
 
 const categoryByOccupation = new Map(
   OCCUPATION_CATEGORIES.flatMap((category) =>
@@ -44,29 +37,46 @@ type DirectoryEntry = {
   category: string;
   to: string;
   search: string;
-  isSeo: boolean;
+  sortKey: string;
 };
 
-const DIRECTORY: DirectoryEntry[] = [
-  ...OCCUPATIONS.map((o) => ({
+// Bygg deduperad katalog: SEO-sidor + alla övriga yrken som auto-genereras.
+// Alla får en riktig /yrke/{slug}-länk (ingen /auth).
+const seenSlugs = new Set<string>();
+const rawDirectory: DirectoryEntry[] = [];
+
+for (const o of OCCUPATIONS) {
+  if (seenSlugs.has(o.slug)) continue;
+  seenSlugs.add(o.slug);
+  rawDirectory.push({
     key: `seo-${o.slug}`,
     title: `Lediga jobb ${o.asForm}`,
     category: o.category,
     to: `/yrke/${o.slug}`,
     search: [o.name, o.plural, o.asForm, o.category, o.intro].join(' '),
-    isSeo: true,
-  })),
-  ...getAllOccupations()
-    .filter((name) => !SEO_BY_NORMALIZED_NAME.has(normalize(name)))
-    .map((name) => ({
-      key: `occupation-${slugify(name)}`,
-      title: `Lediga jobb inom ${name}`,
-      category: categoryByOccupation.get(normalize(name)) || 'Yrke',
-      to: '/auth',
-      search: name,
-      isSeo: false,
-    })),
-];
+    sortKey: o.name,
+  });
+}
+
+for (const name of getAllOccupations()) {
+  if (SEO_BY_NORMALIZED_NAME.has(normalize(name))) continue;
+  const slug = slugifyOccupation(name);
+  if (!slug || seenSlugs.has(slug)) continue;
+  seenSlugs.add(slug);
+  rawDirectory.push({
+    key: `occ-${slug}`,
+    title: `Lediga jobb som ${name.toLowerCase()}`,
+    category: categoryByOccupation.get(normalize(name)) || 'Yrke',
+    to: `/yrke/${slug}`,
+    search: name,
+    sortKey: name,
+  });
+}
+
+// Bokstavsordning (svenska)
+const DIRECTORY: DirectoryEntry[] = rawDirectory.sort((a, b) =>
+  a.sortKey.localeCompare(b.sortKey, 'sv'),
+);
 
 const YrkenHub = () => {
   const navigate = useNavigate();
