@@ -47,11 +47,21 @@ const JobbHub = () => {
 
   const filteredOccupations = useMemo(() => {
     const q = normalize(occQuery.trim());
-    if (!q) return SORTED_OCCUPATIONS;
-    return SORTED_OCCUPATIONS.filter((o) =>
-      normalize(`${o.asForm} ${o.name} ${o.plural} ${o.category}`).includes(q),
-    );
+    const base = q
+      ? SORTED_OCCUPATIONS.filter((o) =>
+          normalize(`${o.asForm} ${o.name} ${o.plural} ${o.category}`).includes(q),
+        )
+      : SORTED_OCCUPATIONS;
+    // Desktop visar 3 kolumner — trimma så raden ALLTID är komplett (aldrig 1–2 ensamma).
+    return base;
   }, [occQuery]);
+
+  // Desktop-listan: trimmad till multipel av 3 (aldrig ensamma kort)
+  const desktopOccupations = useMemo(() => {
+    const len = filteredOccupations.length;
+    const trimmed = len - (len % 3);
+    return filteredOccupations.slice(0, trimmed);
+  }, [filteredOccupations]);
 
   const itemListLd = {
     '@context': 'https://schema.org',
@@ -259,9 +269,9 @@ const JobbHub = () => {
             )}
           </ul>
 
-          {/* Desktop/tablet: grid med smart tooltip — alltid hela rader (3 eller 0) */}
+          {/* Desktop/tablet: grid med smart tooltip — endast hela rader (3/3) */}
           <ul className="mt-10 hidden md:grid grid-cols-3 gap-3">
-            {filteredOccupations.map((o) => {
+            {desktopOccupations.map((o) => {
               const label = `Lediga jobb ${o.asForm}`;
               return (
                 <li key={o.slug}>
@@ -275,10 +285,6 @@ const JobbHub = () => {
                 </li>
               );
             })}
-            {/* Fyll ut sista raden så den alltid är komplett (3 av 3) */}
-            {Array.from({ length: (3 - (filteredOccupations.length % 3)) % 3 }).map((_, i) => (
-              <li key={`pad-${i}`} aria-hidden="true" className="h-14 invisible" />
-            ))}
           </ul>
           <div className="mt-8 flex justify-center">
             <Link
