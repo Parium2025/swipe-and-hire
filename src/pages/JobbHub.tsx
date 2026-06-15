@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState, useCallback, ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
@@ -7,9 +7,62 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { CITIES } from '@/data/jobCities';
 import { OCCUPATIONS } from '@/data/jobOccupations';
+
+/**
+ * Renders children inline and only wraps them in a tooltip when the
+ * underlying text is actually visually truncated. Mätning sker lazy
+ * vid hover/touch — ingen reflow för icke-trunkerade element.
+ */
+function TruncateOnlyTooltip({
+  fullText,
+  children,
+}: {
+  fullText: string;
+  children: (ref: React.RefObject<HTMLElement>) => ReactNode;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+  const [measured, setMeasured] = useState(false);
+
+  const measure = useCallback(() => {
+    if (measured) return;
+    const el = ref.current;
+    if (!el) return;
+    const truncated =
+      Math.ceil(el.scrollWidth) > Math.ceil(el.clientWidth) ||
+      Math.ceil(el.scrollHeight) > Math.ceil(el.clientHeight);
+    setIsTruncated(truncated);
+    setMeasured(true);
+  }, [measured]);
+
+  if (!measured || !isTruncated) {
+    return (
+      <span
+        onMouseEnter={measure}
+        onTouchStart={measure}
+        onFocus={measure}
+        className="contents"
+      >
+        {children(ref)}
+      </span>
+    );
+  }
+
+  return (
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>{children(ref) as any}</TooltipTrigger>
+        <TooltipContent className="bg-slate-900/95 border border-white/20 text-white">
+          {fullText}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 const CANONICAL = 'https://parium.se/jobb';
 const TITLE = 'Lediga jobb i hela Sverige – jobbapp & matchning | Parium';
