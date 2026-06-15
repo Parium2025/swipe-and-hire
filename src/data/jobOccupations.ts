@@ -323,6 +323,17 @@ export const OCCUPATIONS: OccupationData[] = [
     skills: ['Utbildning inom bageri/konditori eller motsvarande erfarenhet', 'Hantverksskicklighet', 'Tidig morgon (start ofta 04–05)', 'Noggrann med hygien'],
     salary: 'Genomsnittlig lön för bagare är cirka 27 000–32 000 kr/månad.',
   },
+  {
+    slug: 'it-tekniker',
+    name: 'IT-tekniker',
+    plural: 'IT-tekniker',
+    asForm: 'som IT-tekniker',
+    category: 'IT & teknik',
+    intro: 'IT-tekniker söks av företag i hela Sverige – support, drift och on-site. Hitta lediga IT-jobb här.',
+    tasks: ['Användarsupport (1st/2nd line)', 'Installation av klienter och nätverk', 'Felsökning av hård- och mjukvara', 'AD/M365-administration', 'Dokumentation av ärenden i ServiceNow/Jira'],
+    skills: ['Erfarenhet av Windows/macOS och Microsoft 365', 'Goda kunskaper i svenska och engelska', 'B-körkort meriterande vid on-site', 'ITIL eller motsvarande meriterande'],
+    salary: 'Genomsnittlig lön för IT-tekniker är cirka 32 000–40 000 kr/månad.',
+  },
 ];
 
 export const OCCUPATION_BY_SLUG: Record<string, OccupationData> = OCCUPATIONS.reduce(
