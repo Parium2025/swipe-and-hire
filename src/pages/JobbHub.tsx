@@ -193,7 +193,7 @@ const JobbHub = () => {
                       <Link
                         ref={ref as React.RefObject<HTMLAnchorElement>}
                         to={`/yrke/${o.slug}`}
-                        className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.10] transition"
+                        className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.07] px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/[0.11] transition-colors"
                       >
                         <span className="block w-full truncate">{label}</span>
                       </Link>
