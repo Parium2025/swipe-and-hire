@@ -356,7 +356,7 @@ const JobbCity = () => {
                 persistSavedSearchIntent({
                   city: city.name,
                   citySlug: city.slug,
-                  returnTo: `/jobb/${city.slug}`,
+                  returnTo: '/search-jobs',
                 });
                 navigate('/auth', { state: { mode: 'signup' } });
               }}
