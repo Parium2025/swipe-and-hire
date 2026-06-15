@@ -11,6 +11,7 @@ import { ArrowRight, Briefcase, CheckCircle2, MapPin, Zap } from 'lucide-react';
 import { OCCUPATION_BY_SLUG } from '@/data/jobOccupations';
 import { CITIES } from '@/data/jobCities';
 import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
+import { buildGenericOccupation } from '@/lib/genericOccupation';
 
 
 const BASE = 'https://parium.se';
@@ -18,7 +19,9 @@ const BASE = 'https://parium.se';
 const YrkePage = () => {
   const { occupationSlug } = useParams<{ occupationSlug: string }>();
   const navigate = useNavigate();
-  const occ = occupationSlug ? OCCUPATION_BY_SLUG[occupationSlug] : null;
+  const occ = occupationSlug
+    ? OCCUPATION_BY_SLUG[occupationSlug] || buildGenericOccupation(occupationSlug)
+    : null;
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
