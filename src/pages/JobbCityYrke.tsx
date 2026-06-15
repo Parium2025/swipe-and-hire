@@ -174,7 +174,7 @@ const JobbCityYrke = () => {
                     citySlug: city.slug,
                     occupation: occ.name,
                     occupationSlug: occ.slug,
-                    returnTo: `/jobb/${city.slug}/${occ.slug}`,
+                    returnTo: '/search-jobs',
                   });
                   navigate('/auth', { state: { mode: 'signup' } });
                 }}
@@ -193,7 +193,7 @@ const JobbCityYrke = () => {
                     citySlug: city.slug,
                     occupation: occ.name,
                     occupationSlug: occ.slug,
-                    returnTo: `/jobb/${city.slug}/${occ.slug}`,
+                    returnTo: '/search-jobs',
                   });
                   navigate('/auth', { state: { mode: 'signup' } });
                 }}
@@ -282,7 +282,19 @@ const JobbCityYrke = () => {
               Skapa en profil gratis. Matcha med arbetsgivare {city.inForm} på sekunder.
             </p>
             <div className="mt-7 flex justify-center">
-              <SeoCTAButton label="Skapa min profil idag" to="/auth" navState={{ mode: 'signup' }} />
+              <SeoCTAButton
+                label="Skapa min profil idag"
+                onClick={() => {
+                  persistSavedSearchIntent({
+                    city: city.name,
+                    citySlug: city.slug,
+                    occupation: occ.name,
+                    occupationSlug: occ.slug,
+                    returnTo: '/search-jobs',
+                  });
+                  navigate('/auth', { state: { mode: 'signup' } });
+                }}
+              />
             </div>
           </div>
         </section>

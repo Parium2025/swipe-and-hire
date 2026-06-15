@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { consumePendingJobPath } from '@/lib/pendingJobIntent';
+import { applyIntentToSearchFilters } from '@/lib/savedSearchIntent';
 
 
 // Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
@@ -646,6 +647,8 @@ const Auth = () => {
           const onboardingDone = (profile as any)?.onboarding_completed === true;
           const isJobSeeker = role === 'job_seeker';
           if (!isJobSeeker || onboardingDone) {
+            // Applicera filter SYNKRONT så /search-jobs har dem redan vid mount.
+            applyIntentToSearchFilters(parsed);
             import('@/lib/savedSearchIntent').then(({ consumeIntent }) => {
               consumeIntent(user.id).catch(() => {});
             });
