@@ -45,7 +45,7 @@ function TruncateOnlyTooltip({
         onMouseEnter={measure}
         onTouchStart={measure}
         onFocus={measure}
-        className="contents"
+        className="block h-full"
       >
         {children(ref)}
       </span>
