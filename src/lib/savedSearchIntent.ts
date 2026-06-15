@@ -1,9 +1,15 @@
 // Hanterar "Bevaka denna sökning"-intent som skickas från SEO-sidor till /auth.
-// När användaren loggar in/registrerar sig: skapa saved_search + slussa till returnTo.
+// När användaren loggar in/registrerar sig:
+//   1) skriv intent → /search-jobs sessionStorage-filter (sync, så filtrerade
+//      jobben dyker upp direkt när /search-jobs mountas)
+//   2) skapa saved_search i databasen (async, fire-and-forget)
+//   3) slussa till intent.returnTo (oftast /search-jobs)
 
 import { supabase } from '@/integrations/supabase/client';
 
 const KEY = 'parium-saved-search-intent';
+// Måste matcha SS_KEY i src/pages/SearchJobs.tsx
+const SEARCH_FILTERS_KEY = 'parium-search-filters';
 
 export interface SavedSearchIntent {
   city?: string;
@@ -50,12 +56,42 @@ export function clearIntent() {
 }
 
 /**
+ * Synkront: applicerar intent (stad + yrke) som aktivt filter i
+ * /search-jobs via sessionStorage. Måste köras INNAN navigate('/search-jobs')
+ * eftersom SearchJobs läser filtret i sitt initial state.
+ */
+export function applyIntentToSearchFilters(
+  intent: SavedSearchIntent | null | undefined
+) {
+  if (!intent || typeof window === 'undefined') return;
+  const city = (intent.city || '').trim();
+  const occupation = (intent.occupation || '').trim();
+  if (!city && !occupation) return;
+  try {
+    const current = JSON.parse(sessionStorage.getItem(SEARCH_FILTERS_KEY) || '{}');
+    sessionStorage.setItem(
+      SEARCH_FILTERS_KEY,
+      JSON.stringify({
+        ...current,
+        ...(city ? { city } : {}),
+        ...(occupation ? { q: occupation } : {}),
+      })
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
  * Skapar saved_search för intent om den inte redan finns för användaren.
  * Idempotent: dubblerar inte om samma stad+yrke redan finns.
+ * Applicerar också filter synkront till /search-jobs (om callern navigerar dit).
  */
 export async function consumeIntent(userId: string): Promise<string | null> {
   const intent = readIntent();
   if (!intent) return null;
+  // Synkron filter-applicering FÖRE await — gör att /search-jobs ser filtret direkt.
+  applyIntentToSearchFilters(intent);
   clearIntent();
 
   const city = intent.city || null;
