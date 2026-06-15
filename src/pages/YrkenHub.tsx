@@ -4,15 +4,59 @@ import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
+import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, Search } from 'lucide-react';
 import { OCCUPATIONS } from '@/data/jobOccupations';
+import { getAllOccupations, OCCUPATION_CATEGORIES } from '@/lib/occupations';
 
 const BASE = 'https://parium.se';
 
 const normalize = (s: string) =>
   s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+const slugify = (s: string) =>
+  normalize(s)
+    .replace(/å/g, 'a')
+    .replace(/ä/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+const categoryByOccupation = new Map(
+  OCCUPATION_CATEGORIES.flatMap((category) =>
+    category.subcategories.map((name) => [normalize(name), category.label] as const),
+  ),
+);
+
+const SEO_BY_NORMALIZED_NAME = new Map(
+  OCCUPATIONS.flatMap((o) => [
+    [normalize(o.name), o],
+    [normalize(o.plural), o],
+  ] as const),
+);
+
+const DIRECTORY_OCCUPATIONS = [
+  ...OCCUPATIONS.map((o) => ({
+    key: `seo-${o.slug}`,
+    title: `Lediga jobb ${o.asForm}`,
+    category: o.category,
+    intro: o.intro,
+    to: `/yrke/${o.slug}`,
+    search: [o.name, o.plural, o.asForm, o.category, o.intro].join(' '),
+  })),
+  ...getAllOccupations()
+    .filter((name) => !SEO_BY_NORMALIZED_NAME.has(normalize(name)))
+    .map((name) => ({
+      key: `occupation-${slugify(name)}`,
+      title: `Lediga jobb inom ${name}`,
+      category: categoryByOccupation.get(normalize(name)) || 'Yrke',
+      intro: 'Sök efter arbetsgivare och roller som matchar din profil i Parium.',
+      to: '/auth',
+      search: name,
+    })),
+];
 
 const YrkenHub = () => {
   const navigate = useNavigate();
