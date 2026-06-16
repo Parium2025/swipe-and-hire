@@ -277,8 +277,8 @@ const JobbCity = () => {
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
               { icon: Search, title: 'Skapa profil', body: `Ange ${city.name} som plats och vilka yrken du är intresserad av. Gratis och tar någon minut.` },
-              { icon: Zap, title: 'Ansök smart', body: `Parium visar lediga jobb ${city.inForm} som passar din profil.` },
-              { icon: MessageSquare, title: 'Chatta direkt', body: `När du har matchat med en arbetsgivare ${city.inForm} och de väljer att kontakta dig kan ni börja chatta direkt i appen.` },
+              { icon: Zap, title: 'Ansök smart', body: `Parium visar lediga jobb i de områden som du har valt.` },
+              { icon: MessageSquare, title: 'Chatta', body: `När du har matchat med en arbetsgivare ${city.inForm} och de väljer att kontakta dig kan ni börja chatta direkt i appen.` },
             ].map(({ icon: Icon, title: t, body }) => (
               <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.06] p-6">
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 mb-4">
