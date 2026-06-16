@@ -8,6 +8,7 @@ import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { ArrowRight, Briefcase, Search } from 'lucide-react';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 import { getAllOccupations, OCCUPATION_CATEGORIES } from '@/lib/occupations';
