@@ -238,21 +238,18 @@ const YrkePage = () => {
             <p className="mx-auto mt-4 max-w-xl text-white">
               Skapa min profil idag. Inga oändliga ansökningar – bara jobb som passar dig.
             </p>
-            <Button
-              size="lg"
-              onClick={() => {
-                persistSavedSearchIntent({
-                  occupation: occ.name,
-                  occupationSlug: occ.slug,
-                  returnTo: '/search-jobs',
-                });
-                navigate('/auth', { state: { mode: 'signup' } });
-              }}
-              className="mt-8 min-h-11 rounded-full bg-secondary text-white md:hover:bg-secondary px-7"
-            >
-              Skapa min profil idag
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+            <div className="mt-8 flex justify-center">
+              <SeoCTAButton
+                onClick={() => {
+                  persistSavedSearchIntent({
+                    occupation: occ.name,
+                    occupationSlug: occ.slug,
+                    returnTo: '/search-jobs',
+                  });
+                  navigate('/auth', { state: { mode: 'signup' } });
+                }}
+              />
+            </div>
 
           </div>
         </section>
