@@ -79,7 +79,7 @@ const JobbCity = () => {
     },
     {
       q: `Är Parium gratis för jobbsökare ${city.inForm}?`,
-      a: `Ja. Att skapa profil, matcha med arbetsgivare ${city.inForm} och chatta direkt är helt gratis.`,
+      a: `Ja. Att skapa profil, söka till olika arbetsgivare ${city.inForm} och chatta är helt gratis.`,
     },
     {
       q: `Vilka typer av jobb finns ${city.inForm} på Parium?`,
