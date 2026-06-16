@@ -7,6 +7,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { ArrowRight, Briefcase, CheckCircle2, MapPin, Zap } from 'lucide-react';
 import { OCCUPATION_BY_SLUG } from '@/data/jobOccupations';
 import { CITIES } from '@/data/jobCities';
@@ -133,8 +134,7 @@ const YrkePage = () => {
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">{occ.intro}</p>
             <div className="mt-10 flex justify-center">
-              <Button
-                size="lg"
+              <SeoCTAButton
                 onClick={() => {
                   persistSavedSearchIntent({
                     occupation: occ.name,
@@ -143,11 +143,7 @@ const YrkePage = () => {
                   });
                   navigate('/auth', { state: { mode: 'signup' } });
                 }}
-                className="min-h-12 rounded-full bg-secondary text-white md:hover:bg-secondary px-8 text-base font-semibold"
-              >
-                Skapa min profil idag
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
+              />
             </div>
 
           </div>
@@ -242,21 +238,18 @@ const YrkePage = () => {
             <p className="mx-auto mt-4 max-w-xl text-white">
               Skapa min profil idag. Inga oändliga ansökningar – bara jobb som passar dig.
             </p>
-            <Button
-              size="lg"
-              onClick={() => {
-                persistSavedSearchIntent({
-                  occupation: occ.name,
-                  occupationSlug: occ.slug,
-                  returnTo: '/search-jobs',
-                });
-                navigate('/auth', { state: { mode: 'signup' } });
-              }}
-              className="mt-8 min-h-11 rounded-full bg-secondary text-white md:hover:bg-secondary px-7"
-            >
-              Skapa min profil idag
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+            <div className="mt-8 flex justify-center">
+              <SeoCTAButton
+                onClick={() => {
+                  persistSavedSearchIntent({
+                    occupation: occ.name,
+                    occupationSlug: occ.slug,
+                    returnTo: '/search-jobs',
+                  });
+                  navigate('/auth', { state: { mode: 'signup' } });
+                }}
+              />
+            </div>
 
           </div>
         </section>

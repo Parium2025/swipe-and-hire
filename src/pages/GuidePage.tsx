@@ -7,6 +7,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { ArrowRight, Clock, Calendar } from 'lucide-react';
 import { GUIDE_BY_SLUG, GUIDES } from '@/data/guides';
 
@@ -185,14 +186,9 @@ const GuidePage = () => {
             <p className="mx-auto mt-4 max-w-xl text-white">
               Skapa min profil idag i Parium – matcha med arbetsgivare direkt.
             </p>
-            <Button
-              size="lg"
-              onClick={() => navigate('/auth')}
-              className="mt-8 min-h-11 rounded-full bg-secondary text-white md:hover:bg-secondary px-7"
-            >
-              Skapa min profil idag
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+            <div className="mt-8 flex justify-center">
+              <SeoCTAButton onClick={() => navigate('/auth')} />
+            </div>
           </div>
 
           {/* Andra guider */}

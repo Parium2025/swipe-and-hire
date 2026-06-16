@@ -8,6 +8,7 @@ import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { ArrowRight, Briefcase, Search } from 'lucide-react';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 import { getAllOccupations, OCCUPATION_CATEGORIES } from '@/lib/occupations';
@@ -241,14 +242,9 @@ const YrkenHub = () => {
             <p className="mx-auto mt-4 max-w-xl text-white">
               Skapa min profil idag – matcha med arbetsgivare i hela Sverige.
             </p>
-            <Button
-              size="lg"
-              onClick={() => navigate('/auth')}
-              className="mt-8 min-h-11 rounded-full bg-secondary text-white md:hover:bg-secondary px-7"
-            >
-              Skapa min profil idag
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+            <div className="mt-8 flex justify-center">
+              <SeoCTAButton onClick={() => navigate('/auth')} />
+            </div>
           </div>
         </section>
       </div>
