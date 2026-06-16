@@ -134,8 +134,7 @@ const YrkePage = () => {
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">{occ.intro}</p>
             <div className="mt-10 flex justify-center">
-              <Button
-                size="lg"
+              <SeoCTAButton
                 onClick={() => {
                   persistSavedSearchIntent({
                     occupation: occ.name,
@@ -144,11 +143,7 @@ const YrkePage = () => {
                   });
                   navigate('/auth', { state: { mode: 'signup' } });
                 }}
-                className="min-h-12 rounded-full bg-secondary text-white md:hover:bg-secondary px-8 text-base font-semibold"
-              >
-                Skapa min profil idag
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
+              />
             </div>
 
           </div>
