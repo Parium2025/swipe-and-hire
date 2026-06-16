@@ -118,6 +118,16 @@ const YrkenHub = () => {
     })),
   };
 
+  // Hem → Yrken — så Google visar fina breadcrumbs i sökresultatet.
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Parium', item: `${BASE}/` },
+      { '@type': 'ListItem', position: 2, name: 'Yrken', item: canonical },
+    ],
+  };
+
   return (
     <TooltipProvider delayDuration={150} skipDelayDuration={100}>
       <Helmet>
@@ -129,6 +139,7 @@ const YrkenHub = () => {
         <meta property="og:url" content={canonical} />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="sv_SE" />
+        <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
         <script type="application/ld+json">{JSON.stringify(itemListLd)}</script>
       </Helmet>
 
