@@ -143,7 +143,7 @@ const YrkePage = () => {
                   });
                   navigate('/auth', { state: { mode: 'signup' } });
                 }}
-                className="min-h-12 rounded-full bg-secondary text-white px-8 text-base font-semibold"
+                className="min-h-12 rounded-full bg-secondary text-white md:hover:bg-secondary px-8 text-base font-semibold"
               >
                 Skapa min profil idag
                 <ArrowRight className="ml-1 h-4 w-4" />
