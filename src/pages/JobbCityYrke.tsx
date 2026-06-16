@@ -48,7 +48,7 @@ const JobbCityYrke = () => {
   const faqs = [
     {
       q: `Hur hittar jag lediga jobb ${occ.asForm} ${city.inForm}?`,
-      a: `Skapa en gratis profil i Parium, välj ${occ.name} som yrke och ${city.name} som plats. Matchningen visar lediga jobb ${occ.asForm} ${city.inForm} direkt – och du kan chatta med arbetsgivare på en gång.`,
+      a: `Skapa en kostnadsfri profil i Parium, välj ${occ.name} som yrke och ${city.name} som plats. Lediga jobb ${occ.asForm} ${city.inForm} visas.`,
     },
     {
       q: `Vad tjänar en ${occ.name.toLowerCase()} ${city.inForm}?`,
@@ -63,8 +63,12 @@ const JobbCityYrke = () => {
       a: occ.skills.slice(0, 3).join(' '),
     },
     {
-      q: `Är Parium gratis?`,
-      a: `Ja, helt gratis för dig som söker jobb. Skapa profil, matcha och chatta utan kostnad.`,
+      q: `Hur snabbt kan jag få svar från arbetsgivare ${city.inForm}?`,
+      a: `När en arbetsgivare visar ett intresse för din profil kan arbetsgivaren öppna en chatt mellan er. Många kandidater ${city.inForm} får återkoppling inom 24 timmar.`,
+    },
+    {
+      q: `Är Parium gratis ${city.inForm}?`,
+      a: `Ja. Att skapa profil, söka till olika arbetsgivare ${city.inForm} och chatta är helt gratis.`,
     },
   ];
 

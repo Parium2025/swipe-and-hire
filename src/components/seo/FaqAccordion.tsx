@@ -45,8 +45,8 @@ const FaqAccordion = ({ q, a }: FaqAccordionProps) => {
             }}
             className="overflow-hidden"
           >
-            <p className="px-6 pb-6 text-sm leading-7 text-white/85 sm:text-base">
-              <span className="font-semibold text-white">Svar: </span>
+            <p className="px-6 pb-6 text-sm leading-7 text-white sm:text-base">
+              <span className="font-semibold text-secondary">Svar: </span>
               {a}
             </p>
           </motion.div>

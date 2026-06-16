@@ -71,15 +71,23 @@ const JobbKommun = () => {
   const faqs = [
     {
       q: `Hur hittar jag lediga jobb i ${kommun.name} kommun?`,
-      a: `Skapa en gratis profil i Parium, ange ${kommun.name} som plats och vilka yrken du är intresserad av. Vår matchning visar lediga jobb i ${kommun.name} kommun direkt i appen.`,
+      a: `Skapa en kostnadsfri profil i Parium, ange ${kommun.name} som plats och vilka yrken du är intresserad av. Lediga jobb i ${kommun.name} kommun visas.`,
     },
     {
       q: `Är Parium gratis för jobbsökare i ${kommun.name}?`,
-      a: `Ja. Profil, matchning och chatt med arbetsgivare i ${kommun.name} kommun är helt gratis för dig som söker jobb.`,
+      a: `Ja. Att skapa profil, söka till olika arbetsgivare i ${kommun.name} kommun och chatta är helt gratis.`,
     },
     {
       q: `Vilka typer av jobb finns i ${kommun.name} kommun?`,
-      a: `Det finns lediga jobb i ${kommun.name} kommun inom vård, handel, restaurang, lager, bygg, transport, kontor och offentlig sektor – heltid, deltid och extrajobb.`,
+      a: `Det finns lediga jobb i ${kommun.name} kommun inom vård, handel, restaurang, lager, bygg, transport, kontor och offentlig sektor – både heltid, deltid och extrajobb.`,
+    },
+    {
+      q: `Hur snabbt kan jag få svar från arbetsgivare i ${kommun.name}?`,
+      a: `När en arbetsgivare visar ett intresse för din profil kan arbetsgivaren öppna en chatt mellan er. Många kandidater i ${kommun.name} kommun får återkoppling inom 24 timmar.`,
+    },
+    {
+      q: `Kan jag söka extrajobb i ${kommun.name}?`,
+      a: `Absolut. Du kan filtrera på anställningsform – heltid, deltid, timanställning, extrajobb eller Lärande i praktik (LIA) i ${kommun.name} kommun.`,
     },
     {
       q: `Vad ingår i ${kommun.county}?`,
