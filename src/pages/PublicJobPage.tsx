@@ -172,7 +172,8 @@ const PublicJobPage = () => {
           <link rel="canonical" href={ctxOccSlug ? `${BASE}/yrke/${ctxOccSlug}` : `${BASE}/jobb`} />
         </Helmet>
         <LandingNav onLoginClick={() => navigate("/auth")} />
-        <main className="max-w-2xl mx-auto px-6 pt-32 pb-24 text-center">
+        <main className="relative overflow-hidden max-w-2xl mx-auto px-6 pt-32 pb-24 text-center">
+          <SeoBubbles />
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
