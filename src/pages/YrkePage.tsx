@@ -52,11 +52,15 @@ const YrkePage = () => {
     },
     {
       q: `Hur hittar jag lediga jobb ${occ.asForm}?`,
-      a: `Skapa en gratis profil i Parium, välj ${occ.name} som yrke och din ort. Vår matchning visar relevanta jobb direkt – och du kan chatta med arbetsgivare på en gång.`,
+      a: `Skapa en kostnadsfri profil i Parium, välj ${occ.name} som yrke och din ort. Lediga jobb ${occ.asForm} visas.`,
+    },
+    {
+      q: `Hur snabbt kan jag få svar från arbetsgivare?`,
+      a: `När en arbetsgivare visar ett intresse för din profil kan arbetsgivaren öppna en chatt mellan er. Många kandidater får återkoppling inom 24 timmar.`,
     },
     {
       q: `Är Parium gratis att använda?`,
-      a: `Ja, helt gratis för dig som söker jobb. Skapa profil, matcha och chatta utan kostnad.`,
+      a: `Ja. Att skapa profil, söka till olika arbetsgivare och chatta är helt gratis.`,
     },
   ];
 
