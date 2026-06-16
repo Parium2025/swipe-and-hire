@@ -209,7 +209,7 @@ const PublicJobPage = () => {
               <h2 className="text-sm font-semibold text-white mb-4 text-center uppercase tracking-wider">
                 {ctxOccName ? `Välj stad för ${ctxOccName.toLowerCase()}-jobb` : 'Hitta jobb i en stad nära dig'}
               </h2>
-              <div className="flex flex-wrap gap-2 justify-center">
+              <div className="flex flex-wrap gap-2 justify-start">
                 {fallbackCities.map(c => (
                   <button
                     key={c.slug}
