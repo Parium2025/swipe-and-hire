@@ -115,6 +115,19 @@ const JobbKommun = () => {
     })),
   };
 
+  // ItemList över jobb i kommunen — matchar JobbCity för konsekvent SEO.
+  const itemListLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: `Lediga jobb i ${kommun.name} kommun`,
+    itemListElement: jobs.slice(0, 25).map((j, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${BASE}/annons/${j.id}`,
+      name: j.title,
+    })),
+  };
+
   const displayedJobs = jobs.map((job) => ({
     id: job.id,
     title: job.title,
@@ -144,6 +157,7 @@ const JobbKommun = () => {
         <meta name="twitter:description" content={description} />
         <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
         <script type="application/ld+json">{JSON.stringify(faqLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(itemListLd)}</script>
       </Helmet>
 
       <LandingNav onLoginClick={() => navigate('/auth')} />
