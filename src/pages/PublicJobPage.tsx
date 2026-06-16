@@ -137,8 +137,8 @@ const PublicJobPage = () => {
       ? `Tyvärr — det här ${ctxOccName.toLowerCase()}-jobbet är tillsatt`
       : 'Tyvärr har annonsen utgått';
     const subline = ctxOccName
-      ? `Den här annonsen är inte längre aktiv. Men det finns fler ${ctxOccName.toLowerCase()}-jobb runt om i Sverige — välj en stad nedan så börjar vi söka.`
-      : 'Den här jobbannonsen är inte längre aktiv. Men det finns massor av nya möjligheter — utforska lediga jobb nedan eller skapa en profil så matchar vi dig automatiskt.';
+      ? `Den här annonsen är inte längre aktiv. Men det finns fler ${ctxOccName.toLowerCase()}-jobb runt om i Sverige.`
+      : 'Den här jobbannonsen är inte längre aktiv.';
 
     const goSearchInCity = (cityName: string, citySlug: string) => {
       // Parkera sök-intent så app-läget öppnar med yrket + staden förifyllt
