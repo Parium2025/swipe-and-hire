@@ -123,7 +123,7 @@ const YrkePage = () => {
 
 
         {/* Hero */}
-        <section className="relative overflow-hidden px-5 pt-28 pb-16 sm:px-8 md:px-12">
+        <section className="relative overflow-hidden px-5 pt-6 pb-16 sm:px-8 md:px-12">
           <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white">
