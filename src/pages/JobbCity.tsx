@@ -91,7 +91,7 @@ const JobbCity = () => {
     },
     {
       q: `Kan jag söka extrajobb ${city.inForm}?`,
-      a: `Absolut. I Parium kan du filtrera på anställningsform – heltid, deltid, timanställning eller extrajobb ${city.inForm}.`,
+      a: `Absolut. Du kan filtrera på anställningsform – heltid, deltid, timanställning, extrajobb eller Lärande i praktik (LIA) ${city.inForm}.`,
     },
   ];
 
