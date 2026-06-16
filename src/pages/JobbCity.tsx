@@ -87,7 +87,7 @@ const JobbCity = () => {
     },
     {
       q: `Hur snabbt kan jag få svar från arbetsgivare ${city.inForm}?`,
-      a: `När en arbetsgivare matchar med dig kan ni chatta direkt i appen. Många kandidater ${city.inForm} får sina första matchningar inom 24 timmar.`,
+      a: `När en arbetsgivare visar ett intresse för din profil kan arbetsgivaren öppna en chatt mellan er. Många kandidater ${city.inForm} får återkoppling inom 24 timmar.`,
     },
     {
       q: `Kan jag söka extrajobb ${city.inForm}?`,
