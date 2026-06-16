@@ -299,7 +299,7 @@ const JobbCity = () => {
             Jobb {city.inForm}s stadsdelar och kringkommuner
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-center text-white">
-            Oavsett var i {city.name}-området du vill jobba – Parium matchar dig med arbetsgivare nära dig.
+            Oavsett var i {city.name}-området du vill jobba – Parium visar arbetsgivare nära dig.
           </p>
           <ul className="mt-8 flex flex-wrap justify-center gap-2">
             {city.areas.map((area) => (
