@@ -129,7 +129,7 @@ const GuidePage = () => {
 
 
         {/* Header */}
-        <article className="relative overflow-hidden px-5 pt-28 pb-12 sm:px-8 md:px-12">
+        <article className="relative overflow-hidden px-5 pt-6 pb-12 sm:px-8 md:px-12">
           <SeoBubbles />
           <div className="relative z-10 mx-auto max-w-3xl">
             <nav aria-label="Brödsmulor" className="mb-6 text-xs text-white">

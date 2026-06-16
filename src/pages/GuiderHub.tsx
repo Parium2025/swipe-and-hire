@@ -65,7 +65,7 @@ const GuiderHub = () => {
         <SeoBackButton fallback="/jobb" />
 
 
-        <section className="relative overflow-hidden px-5 pt-28 pb-12 sm:px-8 md:px-12">
+        <section className="relative overflow-hidden px-5 pt-6 pb-12 sm:px-8 md:px-12">
           <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
