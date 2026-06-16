@@ -340,7 +340,7 @@ const JobbHub = () => {
           <Button
             size="lg"
             onClick={() => navigate('/auth')}
-            className="mt-8 min-h-11 rounded-full bg-secondary text-white px-7"
+            className="mt-8 min-h-11 rounded-full bg-secondary text-white md:hover:bg-secondary px-7"
           >
             Skapa min profil idag
             <ArrowRight className="ml-1 h-4 w-4" />
