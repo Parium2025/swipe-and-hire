@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Briefcase, MapPin, Search } from 'lucide-react';
 import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { SeoTruncatedText } from '@/components/seo/SeoTruncateLink';
 import { cn } from '@/lib/utils';
 
 type Item = {
@@ -35,6 +36,7 @@ const SeoFooterLinks = ({
   const Icon = icon === 'city' ? MapPin : Briefcase;
 
   return (
+    <TooltipProvider delayDuration={150} skipDelayDuration={100}>
     <section className="px-5 py-12 sm:px-8 md:px-12">
       <div className="mx-auto max-w-5xl">
         <h2 className="text-center text-xl font-semibold tracking-tight sm:text-2xl text-white">
@@ -56,18 +58,14 @@ const SeoFooterLinks = ({
                   >
                     <span className="flex min-w-0 flex-1 items-center gap-2 text-white">
                       <Icon className="h-4 w-4 shrink-0 text-white" />
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="truncate">{item.label}</span>
-                        </TooltipTrigger>
-                        <TooltipContent>{item.label}</TooltipContent>
-                      </Tooltip>
+                      <SeoTruncatedText fullText={item.label} className="text-white">
+                        {item.label}
+                      </SeoTruncatedText>
                     </span>
                     <Link
                       to={fallbackTo}
                       className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white hover:bg-white/20 transition"
                       aria-label={`Sök ${item.label}`}
-                      title={`Sök ${item.label}`}
                     >
                       <Search className="h-3 w-3" /> Sök
                     </Link>
@@ -80,17 +78,14 @@ const SeoFooterLinks = ({
               <li key={item.slug}>
                 <Link
                   to={item.to}
-                  title={item.label}
+                  aria-label={item.label}
                   className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur-md px-4 py-3 text-sm text-white hover:bg-white/10 hover:border-white/20 transition"
                 >
                   <span className="flex min-w-0 flex-1 items-center gap-2">
                     <Icon className="h-4 w-4 text-white shrink-0" />
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="truncate">{item.label}</span>
-                      </TooltipTrigger>
-                      <TooltipContent>{item.label}</TooltipContent>
-                    </Tooltip>
+                    <SeoTruncatedText fullText={item.label} className="text-white">
+                      {item.label}
+                    </SeoTruncatedText>
                   </span>
                   <span className="shrink-0 rounded-full bg-secondary/20 text-white px-2 py-0.5 text-[11px] font-semibold">
                     {countLabel}
@@ -102,6 +97,7 @@ const SeoFooterLinks = ({
         </ul>
       </div>
     </section>
+    </TooltipProvider>
   );
 };
 
