@@ -7,6 +7,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { ArrowRight, MapPin, Search, Briefcase } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
