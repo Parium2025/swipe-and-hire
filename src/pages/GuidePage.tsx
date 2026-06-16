@@ -7,6 +7,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
 import { ArrowRight, Clock, Calendar } from 'lucide-react';
 import { GUIDE_BY_SLUG, GUIDES } from '@/data/guides';
 
