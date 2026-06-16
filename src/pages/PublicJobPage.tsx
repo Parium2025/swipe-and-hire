@@ -7,6 +7,7 @@
  import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { Button } from '@/components/ui/button';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
+import SeoBubbles from '@/components/seo/SeoBubbles';
  import { syncBrowserChrome } from '@/lib/browserChrome';
  import { ArrowRight, MapPin, Briefcase, Clock, Building2, Loader2 } from 'lucide-react';
  import { CITIES } from '@/data/jobCities';
@@ -171,7 +172,8 @@ const PublicJobPage = () => {
           <link rel="canonical" href={ctxOccSlug ? `${BASE}/yrke/${ctxOccSlug}` : `${BASE}/jobb`} />
         </Helmet>
         <LandingNav onLoginClick={() => navigate("/auth")} />
-        <main className="max-w-2xl mx-auto px-6 pt-32 pb-24 text-center">
+        <main className="relative overflow-hidden max-w-2xl mx-auto px-6 pt-32 pb-24 text-center">
+          <SeoBubbles />
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
