@@ -5,7 +5,8 @@
  import { supabase } from '@/integrations/supabase/client';
  import LandingNav from '@/components/LandingNav';
  import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
- import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
  import { syncBrowserChrome } from '@/lib/browserChrome';
  import { ArrowRight, MapPin, Briefcase, Clock, Building2, Loader2 } from 'lucide-react';
  import { CITIES } from '@/data/jobCities';
@@ -136,8 +137,8 @@ const PublicJobPage = () => {
       ? `Tyvärr — det här ${ctxOccName.toLowerCase()}-jobbet är tillsatt`
       : 'Tyvärr har annonsen utgått';
     const subline = ctxOccName
-      ? `Den här annonsen är inte längre aktiv. Men det finns fler ${ctxOccName.toLowerCase()}-jobb runt om i Sverige — välj en stad nedan så börjar vi söka.`
-      : 'Den här jobbannonsen är inte längre aktiv. Men det finns massor av nya möjligheter — utforska lediga jobb nedan eller skapa en profil så matchar vi dig automatiskt.';
+      ? `Den här annonsen är inte längre aktiv. Men det finns fler ${ctxOccName.toLowerCase()}-jobb runt om i Sverige.`
+      : 'Den här jobbannonsen är inte längre aktiv.';
 
     const goSearchInCity = (cityName: string, citySlug: string) => {
       // Parkera sök-intent så app-läget öppnar med yrket + staden förifyllt
@@ -192,22 +193,17 @@ const PublicJobPage = () => {
               </div>
             )}
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-14">
-              <Button
-                asChild
-                className="bg-secondary text-white hover:bg-secondary/90 rounded-full min-h-12 px-7 text-base font-medium"
-              >
-                <Link to={ctxOccSlug ? `/yrke/${ctxOccSlug}` : '/jobb'}>
-                  {ctxOccName ? `Se alla ${ctxOccName.toLowerCase()}-jobb` : 'Bläddra lediga jobb'}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="border-white/25 bg-white/5 text-white hover:bg-white/10 rounded-full min-h-12 px-7 text-base"
-              >
-                <Link to="/auth" state={{ mode: 'signup' }}>Skapa min profil idag</Link>
-              </Button>
+              <SeoCTAButton
+                label={ctxOccName ? `Se alla ${ctxOccName.toLowerCase()}-jobb` : 'Bläddra lediga jobb'}
+                to={ctxOccSlug ? `/yrke/${ctxOccSlug}` : '/jobb'}
+                variant="primary"
+              />
+              <SeoCTAButton
+                label="Skapa min profil idag"
+                to="/auth"
+                navState={{ mode: 'signup' }}
+                variant="ghost"
+              />
             </div>
             <section className="border-t border-white/10 pt-8 text-left">
               <h2 className="text-sm font-semibold text-white mb-4 text-center uppercase tracking-wider">
