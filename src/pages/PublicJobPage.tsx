@@ -161,7 +161,7 @@ const PublicJobPage = () => {
     };
 
     return (
-      <div className="seo-scroll-page bg-[hsl(215_100%_12%)] text-white">
+      <div className="seo-scroll-page bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
         {/* Signalerar till Google: avindexera URL men följ länkar vidare. */}
         <Helmet>
           <title>{ctxOccName ? `${ctxOccName}-jobb tillsatt | Parium` : 'Tyvärr har annonsen utgått | Parium'}</title>
