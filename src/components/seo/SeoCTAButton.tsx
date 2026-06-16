@@ -47,8 +47,8 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
 
     const variantClasses =
       variant === 'primary'
-        ? 'bg-secondary text-white hover:bg-secondary/90 focus-visible:ring-secondary'
-        : 'border border-white/25 bg-white/5 text-white hover:bg-white/10 focus-visible:ring-white/40';
+        ? 'bg-secondary text-white focus-visible:ring-secondary'
+        : 'border border-white/25 bg-white/5 text-white focus-visible:ring-white/40';
 
     return (
       <button
