@@ -211,19 +211,24 @@ const PublicJobPage = () => {
               <h2 className="text-sm font-semibold text-white mb-4 text-center uppercase tracking-wider">
                 {ctxOccName ? `Välj stad för ${ctxOccName.toLowerCase()}-jobb` : 'Hitta jobb i en stad nära dig'}
               </h2>
-              <div className="flex flex-wrap gap-2 justify-start">
-                {fallbackCities.map(c => (
-                  <button
-                    key={c.slug}
-                    type="button"
-                    onPointerDown={(e) => { e.preventDefault(); goSearchInCity(c.name, c.slug); }}
-                    onClick={(e) => e.preventDefault()}
-                    className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 transition min-h-[36px]"
-                    style={{ WebkitTapHighlightColor: 'transparent' }}
-                  >
-                    {ctxOccName ? `${ctxOccName} ${c.inForm || 'i ' + c.name}` : `Jobb i ${c.name}`}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                {fallbackCities.map(c => {
+                  const label = ctxOccName ? `${ctxOccName} ${c.inForm || 'i ' + c.name}` : `Jobb i ${c.name}`;
+                  return (
+                    <button
+                      key={c.slug}
+                      type="button"
+                      title={label}
+                      aria-label={label}
+                      onPointerDown={(e) => { e.preventDefault(); goSearchInCity(c.name, c.slug); }}
+                      onClick={(e) => e.preventDefault()}
+                      className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 transition min-h-[36px] max-w-full truncate"
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </section>
           </motion.div>
