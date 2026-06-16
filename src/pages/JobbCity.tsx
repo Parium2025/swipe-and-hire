@@ -75,7 +75,7 @@ const JobbCity = () => {
   const faqs = [
     {
       q: `Hur hittar jag lediga jobb ${city.inForm} med Parium?`,
-      a: `Skapa en kostnadsfri profil i Parium, ange ${city.name} som plats och vilka yrken du är intresserad av. Parium visar lediga jobb ${city.inForm}.`,
+      a: `Skapa en kostnadsfri profil i Parium, ange ${city.name} som plats och vilka yrken du är intresserad av. Lediga jobb ${city.inForm} visas.`,
     },
     {
       q: `Är Parium gratis för jobbsökare ${city.inForm}?`,
