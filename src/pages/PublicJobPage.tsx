@@ -7,6 +7,7 @@
  import MobileStickyCTA from '@/components/seo/MobileStickyCTA';
 import { Button } from '@/components/ui/button';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
+import SeoBubbles from '@/components/seo/SeoBubbles';
  import { syncBrowserChrome } from '@/lib/browserChrome';
  import { ArrowRight, MapPin, Briefcase, Clock, Building2, Loader2 } from 'lucide-react';
  import { CITIES } from '@/data/jobCities';
