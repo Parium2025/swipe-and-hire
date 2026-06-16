@@ -193,22 +193,17 @@ const PublicJobPage = () => {
               </div>
             )}
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-14">
-              <Button
-                asChild
-                className="bg-secondary text-white hover:bg-secondary/90 rounded-full min-h-12 px-7 text-base font-medium"
-              >
-                <Link to={ctxOccSlug ? `/yrke/${ctxOccSlug}` : '/jobb'}>
-                  {ctxOccName ? `Se alla ${ctxOccName.toLowerCase()}-jobb` : 'Bläddra lediga jobb'}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="border-white/25 bg-white/5 text-white hover:bg-white/10 rounded-full min-h-12 px-7 text-base"
-              >
-                <Link to="/auth" state={{ mode: 'signup' }}>Skapa min profil idag</Link>
-              </Button>
+              <SeoCTAButton
+                label={ctxOccName ? `Se alla ${ctxOccName.toLowerCase()}-jobb` : 'Bläddra lediga jobb'}
+                to={ctxOccSlug ? `/yrke/${ctxOccSlug}` : '/jobb'}
+                variant="primary"
+              />
+              <SeoCTAButton
+                label="Skapa min profil idag"
+                to="/auth"
+                navState={{ mode: 'signup' }}
+                variant="ghost"
+              />
             </div>
             <section className="border-t border-white/10 pt-8 text-left">
               <h2 className="text-sm font-semibold text-white mb-4 text-center uppercase tracking-wider">
