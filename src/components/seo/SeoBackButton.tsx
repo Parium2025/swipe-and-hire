@@ -32,7 +32,7 @@ const SeoBackButton = ({ fallback = '/jobb', label = 'Tillbaka' }: SeoBackButton
         type="button"
         onPointerDown={handleBack}
         aria-label={label}
-        className="group inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-white/80 transition hover:text-white"
+        className="group ml-[22px] inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-white/80 transition hover:text-white sm:ml-[19px] md:ml-[22px] lg:ml-[25px]"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
         <span className="hidden sm:inline">{label}</span>
