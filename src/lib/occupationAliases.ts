@@ -135,11 +135,11 @@ export const OCCUPATION_ALIASES: OccupationAlias[] = [
   { alias: 'paketerare', canonical: 'Lagerarbetare' },
 
   // ─── Säkerhet ───────────────────────────────────────────
-  { alias: 'väktare', canonical: 'Väktare' },
-  { alias: 'ordningsvakt', canonical: 'Ordningsvakt' },
-  { alias: 'dörrvakt', canonical: 'Ordningsvakt' },
+  { alias: 'väktare', canonical: 'Väktare och ordningsvakter' },
+  { alias: 'ordningsvakt', canonical: 'Väktare och ordningsvakter' },
+  { alias: 'dörrvakt', canonical: 'Väktare och ordningsvakter' },
   { alias: 'polis', canonical: 'Polis' },
-  { alias: 'brandman', canonical: 'Brandman' },
+  { alias: 'brandman', canonical: 'Brandmän' },
 
   // ─── Pedagogik ──────────────────────────────────────────
   { alias: 'lärare', canonical: 'Grundskollärare' },
