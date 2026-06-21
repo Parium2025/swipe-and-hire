@@ -60,7 +60,7 @@ const JobbKommun = () => {
 
   const canonical = `${BASE}/kommun/${kommun.slug}`;
   const title = `Lediga jobb i ${kommun.name} kommun – sök jobb med Parium`;
-  const description = `Hitta lediga jobb i ${kommun.name} kommun (${kommun.county}). Matcha med arbetsgivare i ${kommun.name} och chatta direkt i jobbappen Parium.`;
+  const description = `Hitta lediga jobb i ${kommun.name} kommun (${kommun.county}). Skapa en gratis profil i Parium och bli matchad med arbetsgivare i ${kommun.name}.`;
 
   const intentBase = {
     city: kommun.name,
