@@ -5,16 +5,30 @@ import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
 import SeoEmptyResultCTA from '@/components/seo/SeoEmptyResultCTA';
+import SeoSearchBox from '@/components/seo/SeoSearchBox';
 import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
-import { ArrowRight, Briefcase, Search } from 'lucide-react';
+import { ArrowRight, Briefcase } from 'lucide-react';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 import { getAllOccupations, OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { slugifyOccupation } from '@/lib/genericOccupation';
 import { smartMatchScore } from '@/lib/seoSearch';
+
+const POPULAR_OCCUPATIONS = [
+  'Undersköterska',
+  'Lagerarbetare',
+  'Chaufför',
+  'Snickare',
+  'Elektriker',
+  'Lärare',
+  'Servitör',
+  'Kock',
+  'Sjuksköterska',
+  'Truckförare',
+];
 
 const BASE = 'https://parium.se';
 
@@ -173,24 +187,22 @@ const YrkenHub = () => {
 
         <section className="px-5 pb-12 sm:px-8 md:px-12">
           <div className="mx-auto max-w-5xl">
-            {/* Sökruta (alla skärmar) */}
+            {/* Sökruta (alla skärmar) — med autocomplete, senast sökta & populära */}
             <div className="mb-5 md:mb-8">
-              <label className="relative block mx-auto max-w-xl">
-                <span className="sr-only">Sök yrke</span>
-                <Search
-                  className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60"
-                  aria-hidden="true"
-                />
-                <input
-                  type="search"
-                  inputMode="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Sök yrke, t.ex. elektriker, kock, lärare"
-                  className="w-full min-h-11 rounded-full border border-white/15 bg-white/[0.07] pl-11 pr-4 text-base text-white placeholder:text-white/50 outline-none focus:border-white/30 focus:bg-white/[0.10]"
-                  style={{ fontSize: '16px' }}
-                />
-              </label>
+              <SeoSearchBox
+                value={query}
+                onChange={setQuery}
+                placeholder="Sök yrke, t.ex. elektriker, kock, lärare"
+                ariaLabel="Sök yrke"
+                storageKey="parium:recent-yrken"
+                popular={POPULAR_OCCUPATIONS}
+                suggestions={filtered.slice(0, 8).map((o) => ({
+                  label: o.title,
+                  sub: o.category,
+                  to: o.to,
+                  term: o.sortKey,
+                }))}
+              />
             </div>
 
             {/* Mobil: stackad lista – hela titlar, ingen trunkering */}
