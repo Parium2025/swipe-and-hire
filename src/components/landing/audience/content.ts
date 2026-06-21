@@ -5,6 +5,7 @@ export type AudienceRole = 'job_seeker' | 'employer';
 type AudienceContent = {
   eyebrow: string;
   hero: { headline: string[]; subtitle: string; cta: string };
+  intro: { title: string; paragraphs: string[] };
   statement: { kicker: string; title: string; body: string };
   steps: { title: string; description: string }[];
   featuresIntro: string;
@@ -20,6 +21,15 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
       headline: ['Hitta jobb', 'som faktiskt', 'passar dig!'],
       subtitle: 'Söka jobb ska vara enkelt och smidigt. Här får du allt i en plattform. Vi finns både på webben och som en nedladdningsbar app.',
       cta: 'Skapa jobbsökarprofil',
+    },
+    intro: {
+      title: 'Vi har gjort det enkelt för alla!',
+      paragraphs: [
+        'Med Parium hittar du jobbannonser från hela Sverige. Sök och ansök snabbt — i appen eller på webben.',
+        'Samla erfarenhet, utbildning och personlighet. Ditt CV och din profil — på ett och samma ställe. Lägg upp din grund en gång.',
+        'Skapa sedan olika presentationer med rätt bild, video och budskap för varje roll du vill söka. Rätt intryck till rätt arbetsgivare — varje gång.',
+        'I nästa sektion ser du exempel på yrken som tar Sverige framåt.',
+      ],
     },
     statement: {
       kicker: 'Tänk större om karriären',
@@ -58,6 +68,15 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
       headline: ['Hitta rätt', 'människor', 'snabbare!'],
       subtitle: 'Möt kandidater som vill prata med just er. Annonsera, nå rätt och kom till samtal — utan onödiga mellansteg.',
       cta: 'Skapa arbetsgivarkonto',
+    },
+    intro: {
+      title: 'Vi har gjort det enkelt för er!',
+      paragraphs: [
+        'Med Parium når ni kandidater i hela Sverige — och hanterar hela rekryteringen från mobil eller dator.',
+        'Skapa annonsen på minuter, presentera rollen med bild, video och tydligt budskap, och bjud in hela teamet att fatta beslut tillsammans.',
+        'Granska kandidaternas profiler, video och erfarenhet i ett samlat flöde. När intresset är ömsesidigt öppnas dialogen direkt — utan långa mellansteg.',
+        'I nästa sektion ser ni exempel på yrken som tar Sverige framåt.',
+      ],
     },
     statement: {
       kicker: 'Rekrytering, omtänkt',

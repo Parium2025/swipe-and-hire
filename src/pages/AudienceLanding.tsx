@@ -989,7 +989,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             transition={{ duration: 1.1, ease, delay: 0.05 }}
             className="landing-h2 wave-text mb-5 sm:mb-8 max-w-[min(92vw,52rem)]"
           >
-            Vi har gjort det enkelt för alla!
+            {c.intro.title}
           </motion.h2>
           <motion.div
             initial="hidden"
@@ -997,14 +997,7 @@ const HeroIntroStage = ({ c, onIntroCta, introCtaLabel }: HeroIntroStageProps) =
             viewport={{ once: true, amount: 0.01, margin: "0px 0px 100% 0px" }}
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } } }}
           >
-            <IntroText
-              paragraphs={[
-                'Med Parium hittar du jobbannonser från hela Sverige. Sök och ansök snabbt — i appen eller på webben.',
-                'Samla erfarenhet, utbildning och personlighet. Ditt CV och din profil — på ett och samma ställe. Lägg upp din grund en gång.',
-                'Skapa sedan olika presentationer med rätt bild, video och budskap för varje roll du vill söka. Rätt intryck till rätt arbetsgivare — varje gång.',
-                'I nästa sektion ser du exempel på yrken som tar Sverige framåt.',
-              ]}
-            />
+            <IntroText paragraphs={c.intro.paragraphs} />
           </motion.div>
           {onIntroCta && (
             <motion.button
@@ -1192,7 +1185,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
         <main>
-          <HeroIntroStage c={c} onIntroCta={handleStart} introCtaLabel="Skapa min profil idag" />
+          <HeroIntroStage c={c} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
