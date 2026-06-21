@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import FaqAccordion from '@/components/seo/FaqAccordion';
 import SeoBubbles from '@/components/seo/SeoBubbles';
@@ -126,14 +127,36 @@ const YrkePage = () => {
         <section className="relative overflow-hidden px-5 pt-6 pb-16 sm:px-8 md:px-12">
           <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white">
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white"
+            >
               <Briefcase className="h-3.5 w-3.5" /> {occ.category}
-            </p>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
+            </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.05 }}
+              className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white"
+            >
               Lediga jobb <span className="text-white">{occ.asForm}</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">{occ.intro}</p>
-            <div className="mt-10 flex justify-center">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl"
+            >
+              {occ.intro}
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.25 }}
+              className="mt-10 flex justify-center"
+            >
               <SeoCTAButton
                 onClick={() => {
                   persistSavedSearchIntent({
@@ -144,7 +167,7 @@ const YrkePage = () => {
                   navigate('/auth', { state: { mode: 'signup' } });
                 }}
               />
-            </div>
+            </motion.div>
 
           </div>
         </section>
