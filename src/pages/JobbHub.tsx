@@ -301,6 +301,11 @@ const JobbHub = () => {
                 </li>
               );
             })}
+            {desktopOccupations.length === 0 && (
+              <li className="col-span-full">
+                <SeoEmptyResultCTA query={occQuery} kind="yrke" />
+              </li>
+            )}
           </ul>
           <div className="mt-8 flex justify-center">
             <Link
