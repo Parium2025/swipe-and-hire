@@ -8,6 +8,7 @@ import { syncBrowserChrome } from '@/lib/browserChrome';
 import PinnedHorizontalGallery from '@/components/landing/audience/PinnedHorizontalGallery';
 import WaveDivider from '@/components/landing/WaveDivider';
 import BouncyFooter from '@/components/landing/audience/BouncyFooter';
+import SiteFooter from '@/components/landing/SiteFooter';
 import SplitHeadline from '@/components/landing/audience/SplitHeadline';
 import { audienceContent, type AudienceRole } from '@/components/landing/audience/content';
 import { SplinePhone } from '@/components/landing/SplinePhone';
@@ -1548,6 +1549,10 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
           </div>
             {/* ──────────────── 4. BOUNCY FOOTER CTA ──────────────── */}
             <BouncyFooter audience={audience} onCta={handleStart} />
+
+            {/* ──────────────── 5. SITE FOOTER (SEO + navigation) ──────────────── */}
+            <SiteFooter />
+
 
         </main>
       </div>
