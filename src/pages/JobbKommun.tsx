@@ -274,17 +274,19 @@ const JobbKommun = () => {
                   <button
                     type="button"
                     onPointerDown={() => navigate(`/annons/${job.id}`)}
-                    className="group flex min-h-[150px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.10]"
+                    className="group relative flex min-h-[160px] w-full flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.06] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.10]"
                   >
+                    <ArrowUpRight
+                      className="absolute right-4 top-4 h-4 w-4 text-white/40 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white"
+                      aria-hidden="true"
+                    />
                     <div>
-                      <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                        <Briefcase className="h-5 w-5 text-white" aria-hidden="true" />
-                      </div>
-                      <h3 className="text-lg font-semibold leading-snug text-white">{job.title}</h3>
+                      <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-white/60">{job.type}</p>
+                      <h3 className="mt-2 text-[17px] font-semibold leading-snug text-white pr-6">{job.title}</h3>
                     </div>
-                    <div className="mt-5 space-y-2 text-sm text-white">
-                      <p className="flex items-center gap-2"><Building2 className="h-4 w-4 text-white" aria-hidden="true" />{job.company}</p>
-                      <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-white" aria-hidden="true" />{job.location} · {job.type}</p>
+                    <div className="mt-5 flex flex-col gap-1.5 text-[13px] text-white">
+                      <p className="flex items-center gap-2"><Building2 className="h-3.5 w-3.5 text-white/70" aria-hidden="true" />{job.company}</p>
+                      <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-white/70" aria-hidden="true" />{job.location}</p>
                     </div>
                   </button>
                 </li>
