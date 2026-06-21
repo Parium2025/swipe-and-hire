@@ -69,13 +69,23 @@ const GuiderHub = () => {
         <section className="relative overflow-hidden px-5 pt-6 pb-12 sm:px-8 md:px-12">
           <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
+            <motion.h1
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.05 }}
+              className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white"
+            >
               Karriärguider & jobbtips
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="mx-auto mt-6 max-w-2xl text-lg text-white sm:text-xl"
+            >
               Allt du behöver för att söka, byta eller förhandla jobb 2026 – skrivet för
               den svenska arbetsmarknaden.
-            </p>
+            </motion.p>
           </div>
         </section>
 
