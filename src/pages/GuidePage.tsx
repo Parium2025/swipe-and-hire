@@ -65,15 +65,26 @@ const GuidePage = () => {
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
     // Den faktiska scroll-containern är .seo-scroll-page (position:fixed) — inte window.
-    // Vi måste scrolla den synkront till toppen innan entrance-animationen spelas upp.
-    const scrollToTop = () => {
-      const el = document.querySelector('.seo-scroll-page') as HTMLElement | null;
-      if (el) el.scrollTop = 0;
-      window.scrollTo(0, 0);
+    // Vi animerar smooth scroll till toppen så det känns som en mjuk övergång,
+    // inte ett hårt "blixt"-hopp.
+    const el = document.querySelector('.seo-scroll-page') as HTMLElement | null;
+    const start = el ? el.scrollTop : window.scrollY;
+    if (start <= 0) return;
+
+    const duration = 650; // ms — lugn, premium känsla
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3); // easeOutCubic
+    const t0 = performance.now();
+    let raf = 0;
+
+    const step = (now: number) => {
+      const p = Math.min(1, (now - t0) / duration);
+      const y = Math.round(start * (1 - ease(p)));
+      if (el) el.scrollTop = y;
+      else window.scrollTo(0, y);
+      if (p < 1) raf = requestAnimationFrame(step);
     };
-    scrollToTop();
-    // En extra tick efter mount så vi vinner ev. race mot rendering
-    requestAnimationFrame(scrollToTop);
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
   }, [slug]);
 
   if (!guide) return <Navigate to="/guider" replace />;
