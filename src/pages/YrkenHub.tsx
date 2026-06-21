@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
