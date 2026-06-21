@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
 import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
+import SeoEmptyResultCTA from '@/components/seo/SeoEmptyResultCTA';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
