@@ -103,10 +103,12 @@ const YrkenHub = () => {
     return scored.map((x) => x.o);
   }, [query]);
 
-  // Desktop (md:grid-cols-3): TRIMMA till multipel av 3 så raden alltid är komplett.
-  // Inga osynliga "tomma rutor" — antingen 3/3 eller helt borta.
+  // Desktop (md:grid-cols-3): Trimma till multipel av 3 så raden alltid är
+  // komplett — MEN bara när vi har minst 3 träffar. Vid 1–2 träffar (typ
+  // sökresultat) visar vi alla, hellre 1–2 kort än ett "0 träffar"-sken.
   const desktopList = useMemo(() => {
     const len = filtered.length;
+    if (len < 3) return filtered;
     return filtered.slice(0, len - (len % 3));
   }, [filtered]);
 
