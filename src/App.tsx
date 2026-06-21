@@ -258,6 +258,7 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
             <main className={showHeader ? "pt-16" : ""}>
               <AuthTokenBridge />
               <AnimatedRoutes />
+              <RouteTransitionOverlay />
             </main>
           </div>
         </div>
