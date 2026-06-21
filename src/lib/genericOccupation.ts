@@ -92,7 +92,7 @@ export const buildGenericOccupation = (slug: string): OccupationData | null => {
     plural: toPlural(name),
     asForm: toAsForm(name),
     category,
-    intro: `Letar du efter lediga jobb ${toAsForm(name)}? Skapa en profil i Parium och matcha direkt med arbetsgivare i hela Sverige som söker ${toPlural(name)}.`,
+    intro: `Letar du efter lediga jobb ${toAsForm(name)}? Skapa en profil i Parium och sök jobb i hela Sverige hos arbetsgivare som söker ${toPlural(name)}.`,
     tasks: genericTasks(name),
     skills: genericSkills(),
     salary: buildSalaryText(name, category),
