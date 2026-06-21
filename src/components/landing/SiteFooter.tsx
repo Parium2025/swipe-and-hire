@@ -57,6 +57,7 @@ function Column({ title, links }: { title: string; links: ColLink[] }) {
           <li key={l.to}>
             <Link
               to={l.to}
+              state={typeof window !== 'undefined' ? { footerOriginPath: window.location.pathname } : undefined}
               onPointerDown={() => rememberFooterOrigin(l.to)}
               onClick={() => rememberFooterOrigin(l.to)}
               className="inline-block min-h-touch text-[15px] font-medium leading-6 text-white transition-colors hover:text-secondary"
