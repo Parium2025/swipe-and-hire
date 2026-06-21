@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
+import SeoCTAButton from '@/components/seo/SeoCTAButton';
 
 interface SeoEmptyResultCTAProps {
   query: string;
@@ -13,7 +13,8 @@ interface SeoEmptyResultCTAProps {
  *
  * Vi tappar aldrig leadet: även när användaren söker på något vi inte
  * har en sida för, fångar vi dem med "Skapa profil → vi matchar dig
- * när jobbet dyker upp". Routar till /auth.
+ * när jobbet dyker upp". Routar till /auth via Pariums standard-CTA
+ * (samma turkosblåa pill som "Skapa min profil idag").
  */
 const SeoEmptyResultCTA = ({
   query,
@@ -39,13 +40,9 @@ const SeoEmptyResultCTA = ({
           : 'Vi har förmodligen jobbet ändå.'}{' '}
         Skapa din profil så matchar vi dig direkt när rätt arbetsgivare lägger ut sitt nästa jobb.
       </p>
-      <Link
-        to="/auth"
-        className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[hsl(215_100%_12%)] hover:bg-white/90 transition-colors"
-      >
-        Skapa profil gratis
-        <ArrowRight className="h-4 w-4" aria-hidden="true" />
-      </Link>
+      <div className="mt-5 flex justify-center">
+        <SeoCTAButton label="Skapa profil gratis" size="md" />
+      </div>
     </div>
   );
 };

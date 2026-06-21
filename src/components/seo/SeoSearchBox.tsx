@@ -117,7 +117,7 @@ export default function SeoSearchBox({
       <label className="relative block">
         <span className="sr-only">{ariaLabel}</span>
         <Search
-          className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60"
+          className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white"
           aria-hidden="true"
         />
         <input
@@ -135,12 +135,13 @@ export default function SeoSearchBox({
           onBlur={onBlur}
           onKeyDown={onKeyDown}
           placeholder={placeholder}
-          className="w-full min-h-11 rounded-full border border-white/15 bg-white/[0.07] pl-11 pr-10 text-base text-white placeholder:text-white/50 outline-none focus:border-white/30 focus:bg-white/[0.10]"
+          className="w-full min-h-11 rounded-full border border-white/15 bg-white/[0.07] pl-11 pr-10 text-base text-white placeholder:text-white/50 outline-none focus:border-white/30 focus:bg-white/[0.10] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none [&::-webkit-search-results-button]:appearance-none [&::-webkit-search-results-decoration]:appearance-none"
           style={{ fontSize: '16px' }}
           aria-expanded={open}
           aria-autocomplete="list"
           aria-controls="seo-search-listbox"
         />
+
         {value && (
           <button
             type="button"
@@ -150,12 +151,13 @@ export default function SeoSearchBox({
               setActiveIdx(-1);
               inputRef.current?.focus();
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-white/70 hover:bg-white/10 hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-white hover:bg-white/10"
             aria-label="Rensa sökning"
           >
             <X className="h-4 w-4" />
           </button>
         )}
+
       </label>
 
       {open && (hasQuery ? visibleSuggestions.length > 0 : showEmptyState) && (
@@ -181,14 +183,15 @@ export default function SeoSearchBox({
                       i === activeIdx ? 'bg-white/10' : 'hover:bg-white/[0.07]'
                     }`}
                   >
-                    <Search className="h-4 w-4 shrink-0 text-white/50" aria-hidden="true" />
+                    <Search className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium text-white">{s.label}</span>
                       {s.sub && (
-                        <span className="block truncate text-xs text-white/60">{s.sub}</span>
+                        <span className="block truncate text-xs text-white">{s.sub}</span>
                       )}
                     </span>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-white/40" aria-hidden="true" />
+                    <ArrowRight className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
+
                   </button>
                 </li>
               ))}
@@ -198,7 +201,7 @@ export default function SeoSearchBox({
               {recent.length > 0 && (
                 <div className="pb-2">
                   <div className="flex items-center justify-between px-4 pt-1 pb-2">
-                    <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-white/60">
+                    <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-white">
                       <Clock className="h-3 w-3" aria-hidden="true" /> Senast sökta
                     </div>
                     <button
@@ -207,11 +210,12 @@ export default function SeoSearchBox({
                         e.preventDefault();
                         clearRecent();
                       }}
-                      className="text-[11px] text-white/60 hover:text-white"
+                      className="text-[11px] text-white hover:text-white"
                     >
                       Rensa
                     </button>
                   </div>
+
                   <ul>
                     {recent.map((term) => (
                       <li key={`r-${term}`}>
@@ -223,7 +227,7 @@ export default function SeoSearchBox({
                           }}
                           className="flex w-full min-h-11 items-center gap-3 px-4 py-2 text-left text-sm text-white hover:bg-white/[0.07]"
                         >
-                          <Clock className="h-4 w-4 shrink-0 text-white/40" aria-hidden="true" />
+                          <Clock className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
                           <span className="truncate">{term}</span>
                         </button>
                       </li>
@@ -233,7 +237,7 @@ export default function SeoSearchBox({
               )}
               {popular.length > 0 && (
                 <div className="pt-1">
-                  <div className="flex items-center gap-2 px-4 pt-1 pb-2 text-[11px] uppercase tracking-wider text-white/60">
+                  <div className="flex items-center gap-2 px-4 pt-1 pb-2 text-[11px] uppercase tracking-wider text-white">
                     <TrendingUp className="h-3 w-3" aria-hidden="true" /> Populära sökningar
                   </div>
                   <div className="flex flex-wrap gap-2 px-3 pb-3">
