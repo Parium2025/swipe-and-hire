@@ -111,12 +111,12 @@ export const OCCUPATION_ALIASES: OccupationAlias[] = [
   { alias: 'grävmaskinist', canonical: 'Anläggningsmaskinförare' },
 
   // ─── IT ──────────────────────────────────────────────────
-  { alias: 'programmerare', canonical: 'Utvecklare' },
-  { alias: 'utvecklare', canonical: 'Utvecklare' },
-  { alias: 'webbutvecklare', canonical: 'Utvecklare' },
-  { alias: 'frontendutvecklare', canonical: 'Utvecklare' },
-  { alias: 'backendutvecklare', canonical: 'Utvecklare' },
-  { alias: 'systemutvecklare', canonical: 'Utvecklare' },
+  { alias: 'programmerare', canonical: 'Mjukvaru- och systemutvecklare' },
+  { alias: 'utvecklare', canonical: 'Mjukvaru- och systemutvecklare' },
+  { alias: 'webbutvecklare', canonical: 'Mjukvaru- och systemutvecklare' },
+  { alias: 'frontendutvecklare', canonical: 'Mjukvaru- och systemutvecklare' },
+  { alias: 'backendutvecklare', canonical: 'Mjukvaru- och systemutvecklare' },
+  { alias: 'systemutvecklare', canonical: 'Mjukvaru- och systemutvecklare' },
   { alias: 'it-tekniker', canonical: 'IT-tekniker' },
   { alias: 'support', canonical: 'IT-tekniker' },
 
