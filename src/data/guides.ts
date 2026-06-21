@@ -150,7 +150,7 @@ export const GUIDES: GuideData[] = [
       },
       {
         heading: 'Så söker du smart',
-        body: 'Använd en jobbapp där du kan filtrera på "deltid" och "din stad". Ha CV redo med "tillgänglig kvällar/helger" tydligt. Sök på fredagar – många arbetsgivare lägger ut nya pass inför veckan. Svara inom 24h när du blir kontaktad – studentjobb går extremt snabbt.',
+        body: 'Sök via Parium – filtrera direkt på "deltid" och din stad, och få nya extrajobb pushade så fort de läggs upp. Ha din profil komplett med video och "tillgänglig kvällar/helger" tydligt angivet. Sök gärna på fredagar – många arbetsgivare lägger ut nya pass inför veckan. Svara inom 24h när du blir kontaktad – studentjobb går extremt snabbt.',
       },
     ],
     faqs: [
@@ -234,9 +234,9 @@ export const GUIDES: GuideData[] = [
   },
   {
     slug: 'jobbintervju-fragor-svar',
-    title: '50 vanliga intervjufrågor 2026 – med svar som funkar',
-    metaTitle: '50 vanliga intervjufrågor 2026: svar & exempel | Parium',
-    description: 'De 50 vanligaste intervjufrågorna 2026 med konkreta svar, exempel och vad rekryterare egentligen letar efter. Plus de svåra "varför ska vi anställa dig?".',
+    title: 'De vanligaste intervjufrågorna 2026 – med svar som funkar',
+    metaTitle: 'Vanliga intervjufrågor 2026: svar & exempel | Parium',
+    description: 'De vanligaste intervjufrågorna 2026 med konkreta svar, exempel och vad rekryterare egentligen letar efter. Plus de svåra "varför ska vi anställa dig?".',
     excerpt: 'Det är samma frågor på 90% av alla intervjuer. Lär dig svaren som faktiskt landar – med exempel direkt från riktiga rekryterare.',
     category: 'Jobbsökning',
     readingMinutes: 9,
