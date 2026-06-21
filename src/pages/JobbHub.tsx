@@ -155,7 +155,7 @@ const JobbHub = () => {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white sm:text-xl"
           >
-            Välj din stad och hitta lediga jobb som matchar dig. Skapa min profil idag och börja matcha med arbetsgivare direkt.
+            Välj din stad nedan för att se lediga jobb där. Skapa en gratis profil för att matcha med arbetsgivare – eller utforska jobben efter yrke.
           </motion.p>
         </div>
       </section>
