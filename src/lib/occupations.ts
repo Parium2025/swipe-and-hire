@@ -81,6 +81,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Kyl- och värmepumpstekniker',
       'Murare',
       'Målare',
+      'Plattsättare',
       'Stallningsbyggare',
       'Takmontör',
       'Träarbetare, snickare',
