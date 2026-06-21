@@ -9,7 +9,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { supabase } from '@/integrations/supabase/client';
-import { MapPin, Briefcase, Building2, Search, Zap, MessageSquare } from 'lucide-react';
+import { MapPin, Briefcase, Building2, Search, Zap, MessageSquare, ArrowUpRight } from 'lucide-react';
 import { KOMMUNER, KOMMUN_BY_SLUG } from '@/data/jobMunicipalities';
 import { CITY_BY_SLUG } from '@/data/jobCities';
 import { persistIntent as persistSavedSearchIntent } from '@/lib/savedSearchIntent';
@@ -29,6 +29,7 @@ const JobbKommun = () => {
   const navigate = useNavigate();
   const kommun = kommunSlug ? KOMMUN_BY_SLUG[kommunSlug] : null;
   const [jobs, setJobs] = useState<PublicJobRow[]>([]);
+  const [totalJobs, setTotalJobs] = useState<number | null>(null);
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
@@ -39,15 +40,26 @@ const JobbKommun = () => {
     if (!kommun) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from('job_postings')
-        .select('id,title,workplace_city,workplace_name,employment_type')
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .ilike('workplace_city', `%${kommun.name}%`)
-        .order('created_at', { ascending: false })
-        .limit(6);
-      if (!cancelled) setJobs((data as PublicJobRow[]) || []);
+      const [list, count] = await Promise.all([
+        supabase
+          .from('job_postings')
+          .select('id,title,workplace_city,workplace_name,employment_type')
+          .eq('is_active', true)
+          .is('deleted_at', null)
+          .ilike('workplace_city', `%${kommun.name}%`)
+          .order('created_at', { ascending: false })
+          .limit(6),
+        supabase
+          .from('job_postings')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .is('deleted_at', null)
+          .ilike('workplace_city', `%${kommun.name}%`),
+      ]);
+      if (!cancelled) {
+        setJobs((list.data as PublicJobRow[]) || []);
+        setTotalJobs(count.count ?? 0);
+      }
     })();
     return () => { cancelled = true; };
   }, [kommun]);
@@ -184,6 +196,20 @@ const JobbKommun = () => {
           >
             Lediga jobb i {kommun.name} kommun
           </motion.h1>
+          {totalJobs !== null && totalJobs > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-200 border border-emerald-400/25"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+              </span>
+              {totalJobs} {totalJobs === 1 ? 'ledigt jobb' : 'lediga jobb'} just nu
+            </motion.div>
+          )}
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -248,17 +274,19 @@ const JobbKommun = () => {
                   <button
                     type="button"
                     onPointerDown={() => navigate(`/annons/${job.id}`)}
-                    className="group flex min-h-[150px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.10]"
+                    className="group relative flex min-h-[160px] w-full flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.06] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.10]"
                   >
+                    <ArrowUpRight
+                      className="absolute right-4 top-4 h-4 w-4 text-white/40 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white"
+                      aria-hidden="true"
+                    />
                     <div>
-                      <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                        <Briefcase className="h-5 w-5 text-white" aria-hidden="true" />
-                      </div>
-                      <h3 className="text-lg font-semibold leading-snug text-white">{job.title}</h3>
+                      <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-white/60">{job.type}</p>
+                      <h3 className="mt-2 text-[17px] font-semibold leading-snug text-white pr-6">{job.title}</h3>
                     </div>
-                    <div className="mt-5 space-y-2 text-sm text-white">
-                      <p className="flex items-center gap-2"><Building2 className="h-4 w-4 text-white" aria-hidden="true" />{job.company}</p>
-                      <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-white" aria-hidden="true" />{job.location} · {job.type}</p>
+                    <div className="mt-5 flex flex-col gap-1.5 text-[13px] text-white">
+                      <p className="flex items-center gap-2"><Building2 className="h-3.5 w-3.5 text-white/70" aria-hidden="true" />{job.company}</p>
+                      <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-white/70" aria-hidden="true" />{job.location}</p>
                     </div>
                   </button>
                 </li>
@@ -276,13 +304,16 @@ const JobbKommun = () => {
           </h2>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
-              { icon: Search, title: 'Skapa profil', body: `Ange ${kommun.name} som plats och vilka yrken du vill jobba inom. Gratis och tar någon minut.` },
-              { icon: Zap, title: 'Bli matchad', body: `Parium visar lediga jobb i ${kommun.name} kommun som passar din profil – ingen ansökningshets.` },
-              { icon: MessageSquare, title: 'Chatta i appen', body: `När en arbetsgivare i ${kommun.name} matchar med dig kan ni chatta i appen.` },
-            ].map(({ icon: Icon, title: t, body }) => (
-              <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.06] p-6">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 mb-4">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
+              { num: '01', icon: Search, title: 'Skapa profil', body: `Ange ${kommun.name} som plats och vilka yrken du vill jobba inom. Gratis och tar någon minut.` },
+              { num: '02', icon: Zap, title: 'Bli matchad', body: `Parium visar lediga jobb i ${kommun.name} kommun som passar din profil – ingen ansökningshets.` },
+              { num: '03', icon: MessageSquare, title: 'Chatta i appen', body: `När en arbetsgivare i ${kommun.name} matchar med dig kan ni chatta i appen.` },
+            ].map(({ num, icon: Icon, title: t, body }) => (
+              <div key={t} className="group relative rounded-2xl border border-white/10 bg-white/[0.06] p-6 transition-colors hover:bg-white/[0.08]">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50">{num}</span>
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                  </div>
                 </div>
                 <h3 className="text-lg font-semibold">{t}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white">{body}</p>
