@@ -63,7 +63,7 @@ export const OCCUPATION_ALIASES: OccupationAlias[] = [
   { alias: 'servitör', canonical: 'Servitör' },
   { alias: 'servitris', canonical: 'Servitör' },
   { alias: 'bartender', canonical: 'Bartender' },
-  { alias: 'diskare', canonical: 'Köks- och restaurangbiträde' },
+  { alias: 'diskare', canonical: 'Kock' },
 
   // ─── Butik / försäljning ────────────────────────────────
   { alias: 'butiksbiträde', canonical: 'Butikssäljare' },
