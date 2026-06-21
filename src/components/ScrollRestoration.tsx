@@ -1,11 +1,14 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 import {
-  getManagedScrollContainer,
+  getRestorableScrollContainer,
   readPositions,
   writePositions,
   getAnchorSnapshot,
   getAnchorDelta,
+  clearFooterRestoreForTarget,
+  clearLatestFooterNavigationIfLeavingTarget,
+  consumePendingFooterRestore,
   RESTORE_TOLERANCE_PX,
   SCROLL_HEIGHT_TOLERANCE_PX,
   MAX_WAIT_MS,
@@ -17,6 +20,16 @@ export function ScrollRestoration() {
   const isRestoringRef = useRef(false);
   const pendingSaveFrameRef = useRef<number | null>(null);
   const isJobViewOverlayPath = location.pathname.startsWith('/job-view/') || location.pathname.startsWith('/job/');
+  const previousPathRef = useRef(location.pathname);
+
+  useEffect(() => {
+    const previousPath = previousPathRef.current;
+    if (navigationType === 'PUSH' && previousPath !== location.pathname) {
+      clearFooterRestoreForTarget(previousPath);
+      clearLatestFooterNavigationIfLeavingTarget(previousPath);
+    }
+    previousPathRef.current = location.pathname;
+  }, [location.pathname, navigationType]);
 
   // -----------------------------------------------------------------------
   // Save scroll position on user scroll
@@ -27,7 +40,7 @@ export function ScrollRestoration() {
     // toppen medan detaljsidan ligger ovanpå, vilket skapar blink/hack vid back.
     if (isJobViewOverlayPath) return;
 
-    let scrollContainer = getManagedScrollContainer();
+    let scrollContainer = getRestorableScrollContainer();
 
     // If the container isn't in the DOM yet (e.g. layout still mounting),
     // poll briefly so we don't silently skip binding.
@@ -35,7 +48,7 @@ export function ScrollRestoration() {
       let retries = 0;
       const maxRetries = 10;
       const intervalId = setInterval(() => {
-        scrollContainer = getManagedScrollContainer();
+        scrollContainer = getRestorableScrollContainer();
         retries += 1;
         if (scrollContainer || retries >= maxRetries) {
           clearInterval(intervalId);
@@ -89,7 +102,8 @@ export function ScrollRestoration() {
     if (isJobViewOverlayPath) return;
 
     const positions = readPositions();
-    const storedPosition = navigationType === 'POP' ? positions[location.pathname] : undefined;
+    const shouldRestore = navigationType === 'POP' || consumePendingFooterRestore(location.pathname);
+    const storedPosition = shouldRestore ? positions[location.pathname] : undefined;
     const targetTop = storedPosition?.top ?? 0;
     let cancelled = false;
     let rafId = 0;
@@ -108,7 +122,7 @@ export function ScrollRestoration() {
 
     // For scroll-to-top (targetTop === 0) we can apply immediately
     if (targetTop === 0) {
-      const scrollContainer = getManagedScrollContainer();
+      const scrollContainer = getRestorableScrollContainer();
       if (scrollContainer) {
         scrollContainer.scrollTo({ top: 0, behavior: 'auto' });
       }
@@ -164,7 +178,7 @@ export function ScrollRestoration() {
     const attemptRestore = (): boolean => {
       if (cancelled || userInterrupted || restored) return restored;
 
-      const scrollContainer = getManagedScrollContainer();
+      const scrollContainer = getRestorableScrollContainer();
       if (!scrollContainer) return false;
 
       attachGestureListeners(scrollContainer);

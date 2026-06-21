@@ -38,6 +38,15 @@ const companyLinks: ColLink[] = [
 ];
 
 function Column({ title, links }: { title: string; links: ColLink[] }) {
+  const rememberFooterOrigin = (to: string) => {
+    try {
+      saveScrollNow(window.location.pathname, {
+        restoreSource: 'footer',
+        restoreTargetPath: to,
+      });
+    } catch { /* ignore */ }
+  };
+
   return (
     <div>
       <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
@@ -48,7 +57,9 @@ function Column({ title, links }: { title: string; links: ColLink[] }) {
           <li key={l.to}>
             <Link
               to={l.to}
-              onPointerDown={() => { try { saveScrollNow(window.location.pathname); } catch {} }}
+              state={typeof window !== 'undefined' ? { footerOriginPath: window.location.pathname } : undefined}
+              onPointerDown={() => rememberFooterOrigin(l.to)}
+              onClick={() => rememberFooterOrigin(l.to)}
               className="inline-block min-h-touch text-[15px] font-medium leading-6 text-white transition-colors hover:text-secondary"
             >
               {l.label}
