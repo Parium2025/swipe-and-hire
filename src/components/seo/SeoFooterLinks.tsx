@@ -1,9 +1,33 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Briefcase, MapPin, Search } from 'lucide-react';
 import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { SeoTruncatedText } from '@/components/seo/SeoTruncateLink';
 import { cn } from '@/lib/utils';
+
+/**
+ * Returnerar antal kolumner i griden enligt Tailwind-breakpoints
+ * (sm = 640px → 2 kol, lg = 1024px → 3 kol, annars 1).
+ * Används för att trimma item-listan så sista raden alltid är full
+ * och vi aldrig får en ensam "hängande" länk på höger sida.
+ */
+const useGridColumns = (): number => {
+  const [cols, setCols] = useState(1);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const compute = () => {
+      const w = window.innerWidth;
+      if (w >= 1024) setCols(3);
+      else if (w >= 640) setCols(2);
+      else setCols(1);
+    };
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, []);
+  return cols;
+};
 
 type Item = {
   slug: string;
