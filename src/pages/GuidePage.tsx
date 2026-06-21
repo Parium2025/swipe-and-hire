@@ -136,6 +136,11 @@ const GuidePage = () => {
       </Helmet>
 
       <div className="seo-scroll-page bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+        {/* Bakgrundsbubblor + glow renderas UTANFÖR motion-elementet.
+            En transform på en parent skapar en ny "containing block" som bryter
+            position:fixed och får bubblorna att fade:as in med innehållet.
+            Genom att rendera dem som syskon är de förladdade direkt vid mount. */}
+        <SeoBubbles />
         <LandingNav onLoginClick={() => navigate('/auth')} />
         <SeoBackButton fallback="/guider" />
 
@@ -146,9 +151,8 @@ const GuidePage = () => {
           initial={{ opacity: 0, y: 64 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease }}
-          className="relative overflow-hidden px-5 pt-6 pb-12 sm:px-8 md:px-12"
+          className="relative px-5 pt-6 pb-12 sm:px-8 md:px-12"
         >
-          <SeoBubbles />
           <div className="relative z-10 mx-auto max-w-3xl">
             <nav aria-label="Brödsmulor" className="mb-6 text-xs text-white">
               <Link to="/guider" className="hover:opacity-80">Guider</Link>
