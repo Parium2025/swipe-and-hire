@@ -64,10 +64,16 @@ const GuidePage = () => {
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
-    // Hoppa direkt upp utan smooth — entrance-animationen ger känslan av att sidan flyger in
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    // Den faktiska scroll-containern är .seo-scroll-page (position:fixed) — inte window.
+    // Vi måste scrolla den synkront till toppen innan entrance-animationen spelas upp.
+    const scrollToTop = () => {
+      const el = document.querySelector('.seo-scroll-page') as HTMLElement | null;
+      if (el) el.scrollTop = 0;
+      window.scrollTo(0, 0);
+    };
+    scrollToTop();
+    // En extra tick efter mount så vi vinner ev. race mot rendering
+    requestAnimationFrame(scrollToTop);
   }, [slug]);
 
   if (!guide) return <Navigate to="/guider" replace />;
