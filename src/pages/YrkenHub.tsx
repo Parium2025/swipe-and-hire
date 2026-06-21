@@ -215,8 +215,8 @@ const YrkenHub = () => {
                 </li>
               ))}
               {filtered.length === 0 && (
-                <li className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-center text-sm text-white">
-                  Inga yrken matchar "{query}".
+                <li>
+                  <SeoEmptyResultCTA query={query} kind="yrke" />
                 </li>
               )}
             </ul>
