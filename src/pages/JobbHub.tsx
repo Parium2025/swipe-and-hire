@@ -63,9 +63,11 @@ const JobbHub = () => {
     return scored.map((x) => x.o);
   }, [occQuery]);
 
-  // Desktop-listan: trimmad till multipel av 3 (aldrig ensamma kort)
+  // Desktop-listan: trimmad till multipel av 3 (aldrig ensamma kort) —
+  // men vid 1–2 träffar visar vi alla istället för att gömma dem.
   const desktopOccupations = useMemo(() => {
     const len = filteredOccupations.length;
+    if (len < 3) return filteredOccupations;
     const trimmed = len - (len % 3);
     return filteredOccupations.slice(0, trimmed);
   }, [filteredOccupations]);
