@@ -190,7 +190,7 @@ const JobbKommun = () => {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white sm:text-xl"
           >
-            Matcha med arbetsgivare i {kommun.name} och chatta direkt i appen. Parium finns i hela {kommun.county} – från storstad till mindre orter.
+            Skapa en gratis profil och se lediga jobb i {kommun.name}. Parium finns i hela {kommun.county} – från storstad till mindre orter.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
