@@ -304,13 +304,16 @@ const JobbKommun = () => {
           </h2>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
-              { icon: Search, title: 'Skapa profil', body: `Ange ${kommun.name} som plats och vilka yrken du vill jobba inom. Gratis och tar någon minut.` },
-              { icon: Zap, title: 'Bli matchad', body: `Parium visar lediga jobb i ${kommun.name} kommun som passar din profil – ingen ansökningshets.` },
-              { icon: MessageSquare, title: 'Chatta i appen', body: `När en arbetsgivare i ${kommun.name} matchar med dig kan ni chatta i appen.` },
-            ].map(({ icon: Icon, title: t, body }) => (
-              <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.06] p-6">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 mb-4">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
+              { num: '01', icon: Search, title: 'Skapa profil', body: `Ange ${kommun.name} som plats och vilka yrken du vill jobba inom. Gratis och tar någon minut.` },
+              { num: '02', icon: Zap, title: 'Bli matchad', body: `Parium visar lediga jobb i ${kommun.name} kommun som passar din profil – ingen ansökningshets.` },
+              { num: '03', icon: MessageSquare, title: 'Chatta i appen', body: `När en arbetsgivare i ${kommun.name} matchar med dig kan ni chatta i appen.` },
+            ].map(({ num, icon: Icon, title: t, body }) => (
+              <div key={t} className="group relative rounded-2xl border border-white/10 bg-white/[0.06] p-6 transition-colors hover:bg-white/[0.08]">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50">{num}</span>
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                  </div>
                 </div>
                 <h3 className="text-lg font-semibold">{t}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white">{body}</p>
