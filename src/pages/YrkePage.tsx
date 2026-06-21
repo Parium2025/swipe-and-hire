@@ -194,15 +194,22 @@ const YrkePage = () => {
             <p className="mx-auto mt-3 max-w-2xl text-center text-white">
               Sök jobb {occ.asForm} där du bor – Parium finns i hela Sverige.
             </p>
-            <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-              {topCities.map((c) => (
-                <li key={c.slug}>
+            {/* Responsivt antal städer per radbredd – alla knappar på EN rad, samma höjd */}
+            <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {topCities.map((c, i) => (
+                <li
+                  key={c.slug}
+                  className={
+                    // Dölj städer som inte får plats på respektive breakpoint
+                    i >= 3 ? "hidden sm:hidden lg:block" : ""
+                  }
+                >
                   <Link
                     to={`/jobb/${c.slug}`}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-4 text-center text-sm font-medium text-white hover:bg-white/10 transition"
+                    className="flex h-14 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-white/10 bg-white/[0.06] px-3 text-center text-sm font-medium text-white hover:bg-white/10 transition"
                   >
-                    <MapPin className="h-4 w-4 text-white" />
-                    Jobb i {c.name}
+                    <MapPin className="h-4 w-4 shrink-0 text-white" />
+                    <span className="truncate">Jobb i {c.name}</span>
                   </Link>
                 </li>
               ))}
