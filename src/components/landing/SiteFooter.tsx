@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
 type ColLink = { label: string; to: string };
 
@@ -40,7 +39,7 @@ const companyLinks: ColLink[] = [
 function Column({ title, links }: { title: string; links: ColLink[] }) {
   return (
     <div>
-      <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
+      <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
         {title}
       </h3>
       <ul className="space-y-2.5">
@@ -66,29 +65,7 @@ const SiteFooter = () => {
       <div className="h-px w-full bg-white/10" />
 
       <div className="mx-auto w-full max-w-7xl px-6 pb-10 pt-14 sm:px-8 sm:pt-16">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-5">
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="inline-flex items-center gap-2.5">
-              <img
-                src={pariumLogoRings}
-                alt="Parium"
-                className="h-8 w-8 object-contain"
-                loading="lazy"
-              />
-              <span className="text-xl font-bold tracking-tight text-white">Parium</span>
-            </Link>
-            <p className="mt-5 max-w-xs text-[15px] font-medium leading-6 text-white">
-              Jobbappen där rätt match händer på riktigt – för dig som söker och för dig som rekryterar.
-            </p>
-            <a
-              href="mailto:hej@parium.se"
-              className="mt-6 inline-flex min-h-touch items-center text-[15px] font-semibold text-secondary underline-offset-4 hover:underline"
-            >
-              hej@parium.se
-            </a>
-          </div>
-
+        <div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
           <Column title="Hitta jobb" links={cityLinks} />
           <Column title="Yrken" links={occupationLinks} />
           <Column title="Guider" links={guideLinks} />
@@ -96,9 +73,8 @@ const SiteFooter = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 text-[13px] text-white/70 sm:flex-row sm:items-center">
+        <div className="mt-14 border-t border-white/10 pt-6 text-center text-[13px] font-medium text-white">
           <p>© {new Date().getFullYear()} Parium AB. Alla rättigheter förbehållna.</p>
-          <p>Byggt i Sverige.</p>
         </div>
       </div>
     </footer>
