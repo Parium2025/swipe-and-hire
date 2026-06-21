@@ -150,7 +150,13 @@ export const smartMatchScore = (query: string, fields: string[]): number => {
   const tokens = q.split(/\s+/).filter((t) => t.length > 0);
   if (!tokens.length) return 1;
 
-  const haystack = fields.map((f) => normalizeText(f || '')).join('  ');
+  // Expandera haystack med canonical-yrken från aliassystemet så att
+  // "ambulansförare" hittar "Ambulanssjukvårdare", "städa" → "Städare" osv.
+  const aliasCanonicals = findOccupationAliases(q);
+  const haystack = [
+    ...fields.map((f) => normalizeText(f || '')),
+    ...aliasCanonicals.map((c) => normalizeText(c)),
+  ].join('  ');
 
   let total = 0;
   for (const token of tokens) {
@@ -165,3 +171,4 @@ export const smartMatchScore = (query: string, fields: string[]): number => {
 /** Bekvämlighet: ren boolean-filter. */
 export const smartMatches = (query: string, fields: string[]): boolean =>
   smartMatchScore(query, fields) > 0;
+
