@@ -277,7 +277,7 @@ const JobbKommun = () => {
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
               { icon: Search, title: 'Skapa profil', body: `Ange ${kommun.name} som plats och vilka yrken du vill jobba inom. Gratis och tar någon minut.` },
-              { icon: Zap, title: 'Bli matchad', body: `Parium visar lediga jobb i ${kommun.name} kommun som passar din profil – ingen ansökningshets.` },
+              { icon: Zap, title: 'Sök jobb', body: `Parium visar lediga jobb i ${kommun.name} kommun som passar din profil.` },
               { icon: MessageSquare, title: 'Chatta i appen', body: `När en arbetsgivare i ${kommun.name} matchar med dig kan ni chatta i appen.` },
             ].map(({ icon: Icon, title: t, body }) => (
               <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.06] p-6">
