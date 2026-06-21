@@ -21,6 +21,7 @@ import PublicJobPage from "./pages/PublicJobPage";
 
 import GuiderHub from "./pages/GuiderHub";
 import GuidePage from "./pages/GuidePage";
+import AboutPage from "./pages/AboutPage";
 import Auth from "./pages/Auth";
 import Checkout from "./pages/Checkout";
 import EmailConfirm from "./pages/EmailConfirm";
@@ -187,6 +188,7 @@ const AnimatedRoutes = () => {
           <Route path="/guider" element={<GuiderHub />} />
           <Route path="/guider/cv-mall-2026" element={<RRNavigate to="/guider" replace />} />
           <Route path="/guider/:slug" element={<GuidePage />} />
+          <Route path="/om-oss" element={<AboutPage />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/home" element={<Index />} />
