@@ -176,13 +176,23 @@ const YrkenHub = () => {
         <section className="relative overflow-hidden px-5 pt-6 pb-8 sm:px-8 sm:pb-12 md:px-12">
           <SeoBubbles />
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
+            <motion.h1
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.05 }}
+              className="text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white"
+            >
               Lediga jobb per yrke
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base text-white sm:mt-6 sm:text-xl">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="mx-auto mt-5 max-w-2xl text-base text-white sm:mt-6 sm:text-xl"
+            >
               Hitta lediga jobb inom Sveriges mest efterfrågade yrken. Skapa min profil idag och
               sök jobb över hela landet.
-            </p>
+            </motion.p>
           </div>
         </section>
 
