@@ -184,7 +184,7 @@ export const GUIDES: GuideData[] = [
       },
       {
         heading: 'Tips som faktiskt funkar',
-        body: '1. Sök BREDT – minst 10–20 ansökningar.\n2. Ring efter ansökan – visar engagemang och snabbar på processen.\n3. Säg "ja" till uppgifter ingen annan vill ha (nätter, midsommar, semestervecka) – du sticker ut direkt.\n4. Använd en app där du kan ansöka på 30 sekunder istället för långa formulär.\n5. Saknar du erfarenhet? Lyft fram skola, föreningsliv, ideellt arbete – det räknas.',
+        body: '1. Sök brett – minst 10–20 ansökningar ökar dina chanser markant.\n2. Följ gärna upp med ett kort samtal eller mejl efter ansökan – det visar engagemang.\n3. Var öppen för pass som ligger udda (kvällar, helger, midsommarvecka) – där finns ofta lediga platser kvar.\n4. Använd en app där du kan ansöka snabbt istället för långa formulär.\n5. Saknar du erfarenhet? Lyft fram skola, föreningsliv och ideellt arbete – det räknas.',
       },
     ],
     faqs: [
@@ -209,20 +209,20 @@ export const GUIDES: GuideData[] = [
         body: 'Samla 3–5 konkreta exempel på resultat du levererat senaste året: siffror, projekt, kunder, sparade kostnader. Kolla upp marknadslönen för din roll (SCB, fackets lönesök, lönekoll.se). Bestäm tre nivåer: drömnivå, målnivå, lägstanivå. Skriv ner. Aldrig gå in oförberedd.',
       },
       {
-        heading: 'Vad du ska säga (manus)',
-        body: '"Tack för året. Jag vill prata om lönen. Senaste året har jag [konkret resultat 1], [resultat 2] och tagit ansvar för [område]. Marknadslönen för min roll ligger på X–Y kr. Jag tycker en rimlig nivå är Z kr." → Sedan: TYST. Den första som pratar förlorar. Låt chefen reagera.',
+        heading: 'Vad du kan säga (exempel)',
+        body: '"Tack för året. Jag vill gärna prata om lönen. Det senaste året har jag [konkret resultat 1], [resultat 2] och tagit ansvar för [område]. Marknadslönen för min roll ligger på X–Y kr, och jag skulle vilja landa runt Z kr." Ge sedan chefen utrymme att svara i lugn och ro – det är en dialog, inte en förhandlingsmatch.',
       },
       {
         heading: 'Siffror som funkar 2026',
-        body: 'Normal årlig löneökning: 2,5–4%. Bra prestation: 5–8%. Ny roll eller ansvar: 8–15%. Byter jobb externt: ofta 10–20% mer. Be om mer än du vill ha – chefen kommer förhandla ner.',
+        body: 'Normal årlig löneökning: 2,5–4%. Bra prestation: 5–8%. Ny roll eller utökat ansvar: 8–15%. Vid jobbyte externt: ofta 10–20% mer. Lägg dig i den övre delen av ditt önskade intervall – då finns utrymme för en konstruktiv dialog.',
       },
       {
-        heading: 'Om de säger nej till lönehöjning',
-        body: 'Förhandla andra förmåner: extra semesterdagar, kompetensutveckling, hemarbete, bonus, bättre tjänstebil, högre pensionsavsättning. Be om ett konkret datum för nästa lönesamtal med tydliga kriterier. Om chefen säger "det finns inga pengar" – fråga vad som krävs för att det ska finnas pengar om 6 månader.',
+        heading: 'Om svaret blir nej till lönehöjning',
+        body: 'Det går ofta att hitta andra värden: extra semesterdagar, kompetensutveckling, mer flexibilitet kring hemarbete, bonusmodell, högre pensionsavsättning. Be om ett uppföljande samtal inom 3–6 månader med tydliga kriterier för vad som behövs för en höjning – då vet du vad du ska sikta på.',
       },
       {
-        heading: '5 misstag som sänker dig',
-        body: '1. Säger en exakt siffra först (bind dig inte).\n2. Argumenterar med privata behov ("jag behöver pengarna").\n3. Hotar med uppsägning utan att mena det.\n4. Jämför med kollegor.\n5. Tackar ja direkt – be alltid att få fundera till nästa dag.',
+        heading: '5 saker att undvika',
+        body: '1. Att nämna en exakt siffra först utan något intervall.\n2. Argumentera utifrån privata behov istället för din insats.\n3. Antyda uppsägning som påtryckning.\n4. Jämföra dig med specifika kollegor.\n5. Tacka ja på direkten – be alltid att få fundera till nästa dag.',
       },
     ],
     faqs: [
