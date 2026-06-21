@@ -194,14 +194,13 @@ const YrkePage = () => {
             <p className="mx-auto mt-3 max-w-2xl text-center text-white">
               Sök jobb {occ.asForm} där du bor – Parium finns i hela Sverige.
             </p>
-            {/* Responsivt antal städer per radbredd – alla knappar på EN rad, samma höjd */}
+            {/* Alla knappar på EN rad med samma höjd – antal städer anpassas efter skärmstorlek */}
             <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {topCities.map((c, i) => (
                 <li
                   key={c.slug}
                   className={
-                    // Dölj städer som inte får plats på respektive breakpoint
-                    i >= 3 ? "hidden sm:hidden lg:block" : ""
+                    i >= 3 ? "hidden lg:block" : i >= 2 ? "hidden sm:block" : ""
                   }
                 >
                   <Link
