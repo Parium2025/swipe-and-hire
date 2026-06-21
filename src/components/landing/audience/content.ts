@@ -70,7 +70,7 @@ export const audienceContent: Record<AudienceRole, AudienceContent> = {
       cta: 'Skapa arbetsgivarkonto',
     },
     intro: {
-      title: 'Vi har gjort det enkelt för er!',
+      title: 'Vi gör det tillsammans',
       paragraphs: [
         'Med Parium når ni kandidater i hela Sverige — och hanterar hela rekryteringen från mobil eller dator.',
         'Skapa annonsen på minuter med bild och ett tydligt budskap. Lägg upp den direkt och nå rätt kandidater utan krångel.',
