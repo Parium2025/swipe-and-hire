@@ -48,6 +48,7 @@ function Column({ title, links }: { title: string; links: ColLink[] }) {
           <li key={l.to}>
             <Link
               to={l.to}
+              onPointerDown={() => { try { saveScrollNow(window.location.pathname); } catch {} }}
               className="inline-block min-h-touch text-[15px] font-medium leading-6 text-white transition-colors hover:text-secondary"
             >
               {l.label}
