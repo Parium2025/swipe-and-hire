@@ -155,17 +155,67 @@ const GuidePage = () => {
           </div>
 
           {/* Sections */}
-          <div className="mx-auto mt-12 max-w-3xl space-y-10">
-            {guide.sections.map((s) => (
-              <section key={s.heading}>
-                <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  {s.heading}
-                </h2>
-                <p className="mt-4 whitespace-pre-line text-white leading-relaxed">
-                  {s.body}
-                </p>
-              </section>
-            ))}
+          <div className="mx-auto mt-12 max-w-3xl space-y-6">
+            {guide.sections.map((s) => {
+              const lines = s.body.split('\n').map((l) => l.trim()).filter(Boolean);
+              const isNumberedList =
+                lines.length >= 2 && lines.every((l) => /^\d+\.\s+/.test(l));
+              const isBulletList =
+                !isNumberedList &&
+                lines.length >= 2 &&
+                lines.every((l) => /^[-•]\s+/.test(l));
+
+              return (
+                <section
+                  key={s.heading}
+                  className="rounded-3xl border border-white/10 bg-white/[0.06] backdrop-blur-md p-6 sm:p-8 shadow-[0_18px_50px_rgba(0,0,0,0.18)]"
+                >
+                  <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                    {s.heading}
+                  </h2>
+
+                  {isNumberedList ? (
+                    <ol className="mt-6 space-y-3">
+                      {lines.map((l) => {
+                        const match = l.match(/^(\d+)\.\s+(.*)$/);
+                        const num = match?.[1] ?? '';
+                        const text = match?.[2] ?? l;
+                        return (
+                          <li
+                            key={l}
+                            className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3.5 transition-colors hover:bg-white/[0.09]"
+                          >
+                            <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
+                              {num}
+                            </span>
+                            <span className="text-white leading-relaxed">{text}</span>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  ) : isBulletList ? (
+                    <ul className="mt-6 space-y-3">
+                      {lines.map((l) => {
+                        const text = l.replace(/^[-•]\s+/, '');
+                        return (
+                          <li
+                            key={l}
+                            className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3.5"
+                          >
+                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white/70" aria-hidden="true" />
+                            <span className="text-white leading-relaxed">{text}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <p className="mt-4 whitespace-pre-line text-white leading-relaxed">
+                      {s.body}
+                    </p>
+                  )}
+                </section>
+              );
+            })}
           </div>
 
           {/* FAQ */}
