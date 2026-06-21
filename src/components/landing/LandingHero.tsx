@@ -204,7 +204,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       >
         {/* Heading must sit below the chin in the hero image on all devices */}
         <div
-          className="absolute left-1/2 flex w-full max-w-[min(92vw,80rem)] -translate-x-1/2 flex-col items-center px-5 sm:px-6 md:px-12 lg:px-24 top-[max(14rem,min(66svh,calc(100svh-16rem)))] md:top-[max(12rem,min(60svh,calc(100svh-19rem)))]"
+          className="absolute left-1/2 flex w-full max-w-[min(92vw,80rem)] -translate-x-1/2 flex-col items-center px-5 sm:px-6 md:px-12 lg:px-24 top-[max(11rem,min(52svh,calc(100svh-21rem)))] md:top-[max(12rem,min(60svh,calc(100svh-19rem)))]"
         >
           <div className="flex w-full flex-col items-center gap-1.5 sm:gap-2">
             <motion.h1
