@@ -196,18 +196,26 @@ const JobbKommun = () => {
           >
             Lediga jobb i {kommun.name} kommun
           </motion.h1>
-          {totalJobs !== null && totalJobs > 0 && (
+          {totalJobs !== null && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-200 border border-emerald-400/25"
+              className={`mt-5 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border ${
+                totalJobs > 0
+                  ? 'bg-emerald-500/15 text-emerald-200 border-emerald-400/25'
+                  : 'bg-white/5 text-white/80 border-white/15'
+              }`}
             >
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                {totalJobs > 0 && (
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                )}
+                <span className={`relative inline-flex h-2 w-2 rounded-full ${totalJobs > 0 ? 'bg-emerald-400' : 'bg-white/50'}`} />
               </span>
-              {totalJobs} {totalJobs === 1 ? 'ledigt jobb' : 'lediga jobb'} just nu
+              {totalJobs > 0
+                ? `${totalJobs} ${totalJobs === 1 ? 'ledigt jobb' : 'lediga jobb'} just nu`
+                : 'Inga lediga jobb just nu – bevaka och få notis direkt'}
             </motion.div>
           )}
           <motion.p
