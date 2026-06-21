@@ -246,8 +246,8 @@ const YrkenHub = () => {
                 </li>
               ))}
               {desktopList.length === 0 && (
-                <li className="col-span-full rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center text-white">
-                  Inga yrken matchar "{query}".
+                <li className="col-span-full">
+                  <SeoEmptyResultCTA query={query} kind="yrke" />
                 </li>
               )}
             </ul>
