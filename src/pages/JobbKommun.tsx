@@ -216,12 +216,12 @@ const JobbKommun = () => {
             />
           </motion.div>
 
-          {cityCounterpart && (
+          {cityCounterpart && cityCounterpart.name.toLowerCase() !== kommun.name.toLowerCase() && (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.7, delay: 0.35 }}
-              className="mt-8 text-sm text-white/80"
+              className="mt-8 text-sm text-white"
             >
               Söker du jobb mer specifikt i centralorten?{' '}
               <Link to={`/jobb/${cityCounterpart.slug}`} className="underline underline-offset-4 hover:text-white">
@@ -302,12 +302,15 @@ const JobbKommun = () => {
             <p className="mx-auto mt-3 max-w-2xl text-center text-white">
               Sök jobb i grannkommunerna – Parium täcker hela länet.
             </p>
-            <ul className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+            <ul className="mt-8 flex flex-wrap justify-center gap-2">
               {sameCounty.map((k) => (
-                <li key={k.slug}>
+                <li
+                  key={k.slug}
+                  className="basis-[calc(50%-0.25rem)] sm:basis-[calc(33.333%-0.333rem)] md:basis-[calc(25%-0.375rem)]"
+                >
                   <Link
                     to={`/kommun/${k.slug}`}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-center text-sm font-medium text-white hover:bg-white/10 transition"
+                    className="flex h-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-center text-sm font-medium text-white hover:bg-white/10 transition"
                   >
                     <MapPin className="h-4 w-4 text-white" aria-hidden="true" />
                     {k.name}

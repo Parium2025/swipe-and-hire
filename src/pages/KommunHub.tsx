@@ -169,7 +169,7 @@ const KommunHub = () => {
 
       {/* Footer-länk — leder till yrkes-hubben (mer relevant än städer-listan) */}
       <section className="px-5 pb-16 sm:px-8 md:px-12">
-        <div className="mx-auto max-w-3xl text-center text-sm text-white/70">
+        <div className="mx-auto max-w-3xl text-center text-sm text-white">
           Söker du efter ett specifikt yrke istället?{' '}
           <Link to="/yrken" className="underline-offset-4 hover:underline text-white">
             Se alla yrken →
