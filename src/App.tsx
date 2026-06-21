@@ -87,6 +87,7 @@ import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 import { PushNotificationProvider } from "@/components/PushNotificationProvider";
 import { cleanupOldDrafts } from "@/lib/draftUtils";
 import { ScrollRestoration } from "@/components/ScrollRestoration";
+import RouteTransitionOverlay from "@/components/RouteTransitionOverlay";
 import { CriticalAssetPreloads } from "@/components/CriticalAssetPreloads";
 import { AuthSplashScreen } from "@/components/AuthSplashScreen";
 import { RealtimeKeepAlive } from "@/components/RealtimeKeepAlive";
