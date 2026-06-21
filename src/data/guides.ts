@@ -150,7 +150,7 @@ export const GUIDES: GuideData[] = [
       },
       {
         heading: 'Så söker du smart',
-        body: 'Sök via Parium – filtrera direkt på "deltid" och din stad, och få nya extrajobb pushade så fort de läggs upp. Ha din profil komplett med video och "tillgänglig kvällar/helger" tydligt angivet. Sök gärna på fredagar – många arbetsgivare lägger ut nya pass inför veckan. Svara inom 24h när du blir kontaktad – studentjobb går extremt snabbt.',
+        body: 'Sök via Parium – filtrera direkt på "deltid" och din stad, och få nya extrajobb pushade så fort de läggs upp. Ha din profil komplett med video och "tillgänglig kvällar/helger" tydligt angivet. Sök gärna på fredagar – många arbetsgivare lägger ut nya pass inför veckan.',
       },
     ],
     faqs: [
