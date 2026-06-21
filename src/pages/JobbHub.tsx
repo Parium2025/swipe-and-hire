@@ -40,22 +40,26 @@ const JobbHub = () => {
   }, []);
 
   const filteredCities = useMemo(() => {
-    const q = normalize(cityQuery.trim());
+    const q = cityQuery.trim();
     if (!q) return SORTED_CITIES;
-    return SORTED_CITIES.filter(
-      (c) => normalize(c.name).includes(q) || normalize(c.county).includes(q),
-    );
+    // Smart sökning: synonymer (län/stadsdelar), fuzzy, multi-ord.
+    const scored = SORTED_CITIES.map((c) => ({
+      c,
+      score: smartMatchScore(q, [c.name, c.county]),
+    })).filter((x) => x.score > 0);
+    scored.sort((a, b) => b.score - a.score);
+    return scored.map((x) => x.c);
   }, [cityQuery]);
 
   const filteredOccupations = useMemo(() => {
-    const q = normalize(occQuery.trim());
-    const base = q
-      ? SORTED_OCCUPATIONS.filter((o) =>
-          normalize(`${o.asForm} ${o.name} ${o.plural} ${o.category}`).includes(q),
-        )
-      : SORTED_OCCUPATIONS;
-    // Desktop visar 3 kolumner — trimma så raden ALLTID är komplett (aldrig 1–2 ensamma).
-    return base;
+    const q = occQuery.trim();
+    if (!q) return SORTED_OCCUPATIONS;
+    const scored = SORTED_OCCUPATIONS.map((o) => ({
+      o,
+      score: smartMatchScore(q, [o.name, o.plural, o.asForm, o.category, o.intro || '']),
+    })).filter((x) => x.score > 0);
+    scored.sort((a, b) => b.score - a.score);
+    return scored.map((x) => x.o);
   }, [occQuery]);
 
   // Desktop-listan: trimmad till multipel av 3 (aldrig ensamma kort)
