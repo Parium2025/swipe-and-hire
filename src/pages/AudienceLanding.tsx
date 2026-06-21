@@ -1185,7 +1185,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
         <main>
-          <HeroIntroStage c={c} onIntroCta={handleStart} introCtaLabel="Skapa min profil idag" />
+          <HeroIntroStage c={c} onIntroCta={handleStart} introCtaLabel={c.hero.cta} />
 
 
           {/* ──────────────── 2. SÅ FUNKAR DET (pinned headline → horisontell mediestrip) ──────────────── */}
