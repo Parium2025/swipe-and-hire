@@ -153,7 +153,12 @@ const JobbCityYrke = () => {
               <span className="text-white">{occ.name}</span>
             </nav>
 
-            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white">
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-wide text-white"
+            >
               <MapPin className="h-3.5 w-3.5" />
               {city.name} · {occ.category}
               {hasJobs && (
@@ -161,16 +166,31 @@ const JobbCityYrke = () => {
                   {jobCount} aktiva
                 </span>
               )}
-            </p>
+            </motion.p>
 
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
+            <motion.h1
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.05 }}
+              className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white"
+            >
               Lediga jobb {occ.asForm} {city.inForm}
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base text-white sm:text-lg">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="mx-auto mt-5 max-w-2xl text-base text-white sm:text-lg"
+            >
               {occ.intro} I {city.name} matchar Parium dig direkt med arbetsgivare som söker {occ.plural}.
-            </p>
+            </motion.p>
 
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.25 }}
+              className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
+            >
               <SeoCTAButton
                 label="Skapa min profil idag"
                 onClick={() => {
@@ -203,7 +223,7 @@ const JobbCityYrke = () => {
                   navigate('/auth', { state: { mode: 'signup' } });
                 }}
               />
-            </div>
+            </motion.div>
           </div>
         </section>
 
