@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
 import SeoBackButton from '@/components/seo/SeoBackButton';
+import SeoEmptyResultCTA from '@/components/seo/SeoEmptyResultCTA';
 import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { syncBrowserChrome } from '@/lib/browserChrome';
@@ -102,10 +103,12 @@ const YrkenHub = () => {
     return scored.map((x) => x.o);
   }, [query]);
 
-  // Desktop (md:grid-cols-3): TRIMMA till multipel av 3 så raden alltid är komplett.
-  // Inga osynliga "tomma rutor" — antingen 3/3 eller helt borta.
+  // Desktop (md:grid-cols-3): Trimma till multipel av 3 så raden alltid är
+  // komplett — MEN bara när vi har minst 3 träffar. Vid 1–2 träffar (typ
+  // sökresultat) visar vi alla, hellre 1–2 kort än ett "0 träffar"-sken.
   const desktopList = useMemo(() => {
     const len = filtered.length;
+    if (len < 3) return filtered;
     return filtered.slice(0, len - (len % 3));
   }, [filtered]);
 
@@ -214,8 +217,8 @@ const YrkenHub = () => {
                 </li>
               ))}
               {filtered.length === 0 && (
-                <li className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-center text-sm text-white">
-                  Inga yrken matchar "{query}".
+                <li>
+                  <SeoEmptyResultCTA query={query} kind="yrke" />
                 </li>
               )}
             </ul>
@@ -245,8 +248,8 @@ const YrkenHub = () => {
                 </li>
               ))}
               {desktopList.length === 0 && (
-                <li className="col-span-full rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center text-white">
-                  Inga yrken matchar "{query}".
+                <li className="col-span-full">
+                  <SeoEmptyResultCTA query={query} kind="yrke" />
                 </li>
               )}
             </ul>

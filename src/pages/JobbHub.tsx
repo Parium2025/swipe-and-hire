@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import LandingNav from '@/components/LandingNav';
 import SeoBubbles from '@/components/seo/SeoBubbles';
 import { SeoTruncateLink } from '@/components/seo/SeoTruncateLink';
+import SeoEmptyResultCTA from '@/components/seo/SeoEmptyResultCTA';
 import { syncBrowserChrome } from '@/lib/browserChrome';
 import { Button } from '@/components/ui/button';
 import SeoCTAButton from '@/components/seo/SeoCTAButton';
@@ -62,9 +63,11 @@ const JobbHub = () => {
     return scored.map((x) => x.o);
   }, [occQuery]);
 
-  // Desktop-listan: trimmad till multipel av 3 (aldrig ensamma kort)
+  // Desktop-listan: trimmad till multipel av 3 (aldrig ensamma kort) —
+  // men vid 1–2 träffar visar vi alla istället för att gömma dem.
   const desktopOccupations = useMemo(() => {
     const len = filteredOccupations.length;
+    if (len < 3) return filteredOccupations;
     const trimmed = len - (len % 3);
     return filteredOccupations.slice(0, trimmed);
   }, [filteredOccupations]);
@@ -182,8 +185,8 @@ const JobbHub = () => {
               );
             })}
             {filteredCities.length === 0 && (
-              <li className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center text-sm text-white/70">
-                Inga städer matchar "{cityQuery}".
+              <li>
+                <SeoEmptyResultCTA query={cityQuery} kind="stad" />
               </li>
             )}
           </ul>
@@ -278,8 +281,8 @@ const JobbHub = () => {
               );
             })}
             {filteredOccupations.length === 0 && (
-              <li className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center text-sm text-white/70">
-                Inga yrken matchar "{occQuery}".
+              <li>
+                <SeoEmptyResultCTA query={occQuery} kind="yrke" />
               </li>
             )}
           </ul>
@@ -300,6 +303,11 @@ const JobbHub = () => {
                 </li>
               );
             })}
+            {desktopOccupations.length === 0 && (
+              <li className="col-span-full">
+                <SeoEmptyResultCTA query={occQuery} kind="yrke" />
+              </li>
+            )}
           </ul>
           <div className="mt-8 flex justify-center">
             <Link
