@@ -184,7 +184,7 @@ const GuidePage = () => {
               Klar att ta nästa steg?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white">
-              Skapa min profil idag i Parium – matcha med arbetsgivare direkt.
+              Skapa min profil idag i Parium och sök jobb på sekunder.
             </p>
             <div className="mt-8 flex justify-center">
               <SeoCTAButton onClick={() => navigate('/auth')} />

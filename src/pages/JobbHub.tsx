@@ -41,7 +41,7 @@ const POPULAR_OCCUPATIONS = [
 
 const CANONICAL = 'https://parium.se/jobb';
 const TITLE = 'Lediga jobb i hela Sverige – jobbapp & matchning | Parium';
-const DESCRIPTION = 'Hitta lediga jobb i hela Sverige. Stockholm, Göteborg, Malmö, Uppsala och fler – matcha med arbetsgivare och chatta direkt i jobbappen Parium.';
+const DESCRIPTION = 'Hitta lediga jobb i hela Sverige. Stockholm, Göteborg, Malmö, Uppsala och fler – sök jobb i jobbappen Parium.';
 
 const normalize = (s: string) =>
   s
@@ -155,7 +155,7 @@ const JobbHub = () => {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white sm:text-xl"
           >
-            Välj din stad nedan för att se lediga jobb där. Skapa en gratis profil för att matcha med arbetsgivare – eller utforska jobben efter yrke.
+            Välj din stad nedan för att se lediga jobb där. Skapa en gratis profil för att söka jobb – eller utforska jobben efter yrke.
           </motion.p>
         </div>
       </section>

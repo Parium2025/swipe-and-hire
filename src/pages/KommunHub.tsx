@@ -11,7 +11,7 @@ import { KOMMUNER } from '@/data/jobMunicipalities';
 
 const CANONICAL = 'https://parium.se/kommuner';
 const TITLE = 'Lediga jobb i Sveriges kommuner – sök på din kommun | Parium';
-const DESCRIPTION = 'Hitta lediga jobb i alla 290 svenska kommuner. Från Stockholm och Göteborg till Kiruna och Trelleborg – matcha med arbetsgivare direkt i jobbappen Parium.';
+const DESCRIPTION = 'Hitta lediga jobb i alla 290 svenska kommuner. Från Stockholm och Göteborg till Kiruna och Trelleborg – sök jobb i jobbappen Parium.';
 
 const normalize = (s: string) =>
   s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
