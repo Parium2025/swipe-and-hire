@@ -44,7 +44,7 @@ const SeoBackButton = ({ fallback = '/jobb', label = 'Stäng' }: SeoBackButtonPr
       type="button"
       onPointerDown={handleBack}
       aria-label={label}
-      className="fixed right-3 top-[max(env(safe-area-inset-top),0.75rem)] z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/8 text-white backdrop-blur-md ring-1 ring-white/15 transition-all duration-200 hover:bg-white/14 hover:ring-white/25 active:scale-95 sm:right-5 sm:top-[max(env(safe-area-inset-top),1rem)] md:right-6 md:top-[max(env(safe-area-inset-top),1.25rem)] lg:right-10"
+      className="fixed right-3 top-20 z-[60] inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md ring-1 ring-white/15 transition-all duration-200 hover:bg-white/[0.18] hover:ring-white/25 active:scale-95 sm:right-5 sm:top-24 md:right-6 md:top-24 lg:right-10"
     >
       <X className="h-5 w-5" strokeWidth={2.25} aria-hidden="true" />
     </button>
