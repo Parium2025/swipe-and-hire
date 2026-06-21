@@ -46,6 +46,40 @@ const genericSkills = (): string[] => [
   'Vilja att lära och utvecklas',
 ];
 
+// Ungefärliga månadslönespann (kr/månad) per kategori – baserade på SCB:s
+// lönestrukturstatistik. Används som SEO-fallback för yrken utan handskriven data.
+const SALARY_BY_CATEGORY: Record<string, [number, number]> = {
+  'Administration, Ekonomi, Juridik': [28000, 45000],
+  'Bygg och Anläggning': [28000, 40000],
+  'Chefer och Verksamhetsledare': [45000, 80000],
+  'Data/IT': [38000, 65000],
+  'Försäljning, Inköp, Marknadsföring': [28000, 50000],
+  Hantverkyrken: [26000, 38000],
+  'Hotell, Restaurang, Storhushåll': [24000, 32000],
+  'Hälso- och Sjukvård': [27000, 45000],
+  'Industriell Tillverkning': [26000, 38000],
+  'Installation, Drift, Underhåll': [28000, 42000],
+  Transport: [26000, 38000],
+  'Kropps- och Skönhetsvård': [24000, 34000],
+  'Kultur, Media, Design': [26000, 42000],
+  'Militärt Arbete': [25000, 40000],
+  Naturbruk: [24000, 34000],
+  'Naturvetenskapligt Arbete': [32000, 50000],
+  'Pedagogiskt Arbete': [28000, 42000],
+  'Sanering och Renhållning': [24000, 32000],
+  'Säkerhet och Skydd': [26000, 38000],
+  'Socialt Arbete': [26000, 38000],
+  'Tekniskt Arbete': [32000, 52000],
+};
+
+const fmtKr = (n: number) => n.toLocaleString('sv-SE').replace(/\u00a0/g, ' ');
+
+const buildSalaryText = (name: string, category: string): string => {
+  const range = SALARY_BY_CATEGORY[category] ?? [25000, 38000];
+  const [low, high] = range;
+  return `Genomsnittlig lön ${toAsForm(name)} ligger ungefär mellan ${fmtKr(low)}–${fmtKr(high)} kr/månad beroende på erfarenhet, ort och arbetsgivare. Skapa en profil i Parium för att se aktuella jobb och löneintervall.`;
+};
+
 export const buildGenericOccupation = (slug: string): OccupationData | null => {
   const name = SLUG_TO_NAME.get(slug);
   if (!name) return null;
@@ -61,6 +95,6 @@ export const buildGenericOccupation = (slug: string): OccupationData | null => {
     intro: `Letar du efter lediga jobb ${toAsForm(name)}? Skapa en profil i Parium och matcha direkt med arbetsgivare i hela Sverige som söker ${toPlural(name)}.`,
     tasks: genericTasks(name),
     skills: genericSkills(),
-    salary: `Lönen ${toAsForm(name)} varierar med erfarenhet, ort och arbetsgivare. Skapa en profil i Parium för att se aktuella jobb och löneintervall.`,
+    salary: buildSalaryText(name, category),
   };
 };
