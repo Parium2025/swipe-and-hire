@@ -13,6 +13,7 @@ import { ArrowRight, Briefcase, Search } from 'lucide-react';
 import { OCCUPATIONS } from '@/data/jobOccupations';
 import { getAllOccupations, OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { slugifyOccupation } from '@/lib/genericOccupation';
+import { smartMatchScore } from '@/lib/seoSearch';
 
 const BASE = 'https://parium.se';
 
