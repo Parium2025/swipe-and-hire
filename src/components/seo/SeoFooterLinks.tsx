@@ -1,9 +1,33 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Briefcase, MapPin, Search } from 'lucide-react';
 import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { SeoTruncatedText } from '@/components/seo/SeoTruncateLink';
 import { cn } from '@/lib/utils';
+
+/**
+ * Returnerar antal kolumner i griden enligt Tailwind-breakpoints
+ * (sm = 640px → 2 kol, lg = 1024px → 3 kol, annars 1).
+ * Används för att trimma item-listan så sista raden alltid är full
+ * och vi aldrig får en ensam "hängande" länk på höger sida.
+ */
+const useGridColumns = (): number => {
+  const [cols, setCols] = useState(1);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const compute = () => {
+      const w = window.innerWidth;
+      if (w >= 1024) setCols(3);
+      else if (w >= 640) setCols(2);
+      else setCols(1);
+    };
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, []);
+  return cols;
+};
 
 type Item = {
   slug: string;
@@ -34,6 +58,14 @@ const SeoFooterLinks = ({
   fallbackTo = '/auth',
 }: SeoFooterLinksProps) => {
   const Icon = icon === 'city' ? MapPin : Briefcase;
+  const cols = useGridColumns();
+  // Trimma till en jämn multipel av antal kolumner så vi aldrig får
+  // en ensam "hängare" på sista raden. Behåll allt om vi har färre
+  // items än kolumner.
+  const visibleItems =
+    items.length >= cols
+      ? items.slice(0, Math.floor(items.length / cols) * cols)
+      : items;
 
   return (
     <TooltipProvider delayDuration={150} skipDelayDuration={100}>
@@ -43,7 +75,7 @@ const SeoFooterLinks = ({
           {title}
         </h2>
         <ul className="mt-8 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => {
+          {visibleItems.map((item) => {
             const count = item.count ?? 0;
             const hasJobs = count > 0;
             const countLabel = count === 1 ? '1 jobb' : `${count} jobb`;
