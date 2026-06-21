@@ -29,6 +29,7 @@ const JobbKommun = () => {
   const navigate = useNavigate();
   const kommun = kommunSlug ? KOMMUN_BY_SLUG[kommunSlug] : null;
   const [jobs, setJobs] = useState<PublicJobRow[]>([]);
+  const [totalJobs, setTotalJobs] = useState<number | null>(null);
 
   useEffect(() => {
     syncBrowserChrome(window.location.pathname);
@@ -39,15 +40,26 @@ const JobbKommun = () => {
     if (!kommun) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from('job_postings')
-        .select('id,title,workplace_city,workplace_name,employment_type')
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .ilike('workplace_city', `%${kommun.name}%`)
-        .order('created_at', { ascending: false })
-        .limit(6);
-      if (!cancelled) setJobs((data as PublicJobRow[]) || []);
+      const [list, count] = await Promise.all([
+        supabase
+          .from('job_postings')
+          .select('id,title,workplace_city,workplace_name,employment_type')
+          .eq('is_active', true)
+          .is('deleted_at', null)
+          .ilike('workplace_city', `%${kommun.name}%`)
+          .order('created_at', { ascending: false })
+          .limit(6),
+        supabase
+          .from('job_postings')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .is('deleted_at', null)
+          .ilike('workplace_city', `%${kommun.name}%`),
+      ]);
+      if (!cancelled) {
+        setJobs((list.data as PublicJobRow[]) || []);
+        setTotalJobs(count.count ?? 0);
+      }
     })();
     return () => { cancelled = true; };
   }, [kommun]);
