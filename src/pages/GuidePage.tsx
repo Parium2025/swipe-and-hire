@@ -277,7 +277,7 @@ const GuidePage = () => {
               ))}
             </ul>
           </div>
-        </motion.article>
+        </article>
       </div>
     </>
   );
