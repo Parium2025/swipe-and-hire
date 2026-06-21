@@ -456,6 +456,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Djurpassare',
       'Fiskare',
       'Fiskodlare',
+      'Florist',
       'Förare av jordbruks- och skogsmaskin',
       'Hundvakt',
       'Odlare av jordbruksväxter, frukt och bär',
