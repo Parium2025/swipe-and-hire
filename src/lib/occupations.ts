@@ -160,6 +160,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Apotekstekniker',
       'Banktjänstemän',
       'Bensinstationspersonal',
+      'Bilförsäljare',
       'Butikschef',
       'Butikssäljare, dagligvaror',
       'Butikssäljare, fackhandel',
