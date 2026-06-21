@@ -144,7 +144,7 @@ const KommunHub = () => {
       <section className="px-5 pb-16 sm:px-8 md:px-12">
         <div className="mx-auto max-w-5xl space-y-10">
           {filtered.length === 0 && (
-            <p className="text-center text-white/70">Inga kommuner matchar din sökning.</p>
+            <p className="text-center text-white">Inga kommuner matchar din sökning.</p>
           )}
           {filtered.map(({ county, kommuner }) => (
             <div key={county}>
