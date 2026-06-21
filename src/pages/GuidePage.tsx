@@ -143,9 +143,9 @@ const GuidePage = () => {
         {/* Header */}
         <motion.article
           key={guide.slug}
-          initial={{ opacity: 0, y: 32 }}
+          initial={{ opacity: 0, y: 64 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease }}
+          transition={{ duration: 0.7, ease }}
           className="relative overflow-hidden px-5 pt-6 pb-12 sm:px-8 md:px-12"
         >
           <SeoBubbles />
